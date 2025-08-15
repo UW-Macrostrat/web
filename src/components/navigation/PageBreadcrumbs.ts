@@ -183,6 +183,10 @@ export const sitemap: Routes = {
             {
               slug: "extractions",
               name: "Extractions",
+            }, 
+            {
+              slug: "sources",
+              name: "Sources"
             }
           ]
         },

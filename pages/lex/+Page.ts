@@ -7,6 +7,7 @@ import { Footer } from "~/components/general";
 import { SearchBar } from "~/components/general";
 import { useState } from "react";
 import { ExpansionPanel } from "~/components/lex/tag";
+import { title } from "#/dev/map/rockd-strabospot/+title";
 
 export function Page() {
   const { res } = useData();
@@ -46,7 +47,7 @@ export function Page() {
         ", and other sources. The lexicon is continually updated in partnership with researchers and data providers.",
       ]),
       h("div.stats-table", [
-        h("p.stat", `${formatNumber(columns)} columns`),
+        h('a', { href: "/columns" }, h("p.stat", `${formatNumber(columns)} columns`)),
         h("p.stat", `${formatNumber(packages)} packages`),
         h("p.stat", `${formatNumber(units)} units`),
         h("p.stat", `${formatNumber(measurements)} measurements`),
@@ -70,12 +71,12 @@ export function Page() {
         h(
           LinkCard,
           { href: "/lex/timescales", title: "Timescales" },
-          "Continuous representations of relative geologic time"
+          "Groups of intervals used together to span intervals of time"
         ),
         h(
           LinkCard,
           { href: "/lex/lithologies", title: "Lithologies" },
-          "Names of geologic materials"
+          "Names and hierarchies for geological materials"
         ),
         h(
           LinkCard,
@@ -105,12 +106,12 @@ export function Page() {
         h(
           LinkCard,
           { href: "/lex/units", title: "Units" },
-          "Names and descriptions of geologic units"
+          "Lithologically and chronologically defined building blocks for columns, often representing a strat name"
         ),
         h(
           LinkCard,
           { href: "/lex/fossils", title: "Fossils" },
-          "Fossil names and descriptions (via the Paleobiology Database)"
+          "Fossil taxonomic occurrences from the Paleobiology Database linked to Macrostrat units"
         ),
         h("p", [
           h("strong", h("a", { href: "/sift" }, "Sift")),
@@ -137,9 +138,15 @@ const groups = [
   { value: "lithology_attributes", label: "Lithology attributes", href: '/lex/lith-atts' },
   { value: "projects", label: "Projects", href: '/projects' },
   { value: "strat_name_concepts", label: "Strat name concepts", href: '/lex/strat-concepts' },
+  { value: "strat_name", label: "Strat names", href: '/lex/strat-names' },
   { value: "structures", label: "Structures", href: '/lex/structures' },
   { value: "minerals", label: "Minerals", href: '/lex/minerals' },
 ]
+
+function OpenPanel(props) {
+  const { title, children } = props;
+  return h(ExpansionPanel, { title, expanded: true }, children);
+}
 
 function SearchContainer({ setShowBody }) {
   return h(PostgRESTInfiniteScrollView, {
@@ -154,7 +161,7 @@ function SearchContainer({ setShowBody }) {
     groups,
     itemComponent: LexCard,
     SearchBarComponent: SearchBar,
-    GroupingComponent: ExpansionPanel,
+    GroupingComponent: OpenPanel,
     filter_threshold: 2,
   })
 }

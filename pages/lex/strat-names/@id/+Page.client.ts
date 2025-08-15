@@ -10,7 +10,7 @@ import {
   Units,
   Fossils,
   Maps,
-  Matches
+  TextExtractions
 } from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
 import { StratTag } from "~/components/general";
@@ -38,8 +38,9 @@ export function Page() {
     h.if(unitsData.length > 0)(Units, { href: "strat_name_id=" + id + "&name=" + resData?.strat_name }),
     h.if(fossilsData.features.length > 0)(Fossils, { href: "strat_name_id=" + id + "&name=" + resData?.name }),
     h(Maps, { mapsData }),
-    h(Matches, {
+    h(TextExtractions, {
       strat_name_id: id,
+      href: "autoselect=" + resData?.strat_name_long + "&strat_name_id=" + id,
     }),
     h(StratNameHierarchy, { id }),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),

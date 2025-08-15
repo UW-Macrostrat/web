@@ -72,8 +72,8 @@ export function Page() {
         "Macrostrat stores both regional columns that represent a unified chronostratigraphic framework and measured sections and drill core logs that provide detailed information about specific locations."
       ),
 
-      h(LinkCard, { title: "Geologic Lexicon", href: "/lex" }, [
-        h("p", "Geologic units and data dictionaries"),
+      h(LinkCard, { title: "Macrostrat Lexicon", href: "/lex" }, [
+        h("p", "Comprehensive searchable list of stratigraphic names, lithologies, environments and more"),
       ]),
       h(LinkCard, { title: "Projects", href: "/projects" }, [
         h("p", "Projects for specific regions or geological problems"),
