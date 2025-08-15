@@ -31,6 +31,7 @@ import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
 import { postgrestPrefix } from "@macrostrat-web/settings";
+import { useEffect } from "react"
 
 /**
  * Get a single text window for feedback purposes
@@ -40,10 +41,20 @@ export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
   const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
   const [customFeedback, setCustomFeedback] = useState("");
+  const [title, setTitle] = useState("Loading title...");
 
   const currentID = usePageContext().urlPathname.split("/").pop();
   const nextID = getNextID();
   const previousFeedback = getPreviousFeedback();
+
+  useEffect(() => {
+    if (paper_id) {
+      fetchPGData("kg_publication_entities", { paper_id: "eq." + paper_id })
+        .then((paper) => {
+          setTitle(paper[0]?.citation?.title);
+        });
+    }
+  }, [paper_id]);
 
   return h(
     OverlaysProvider,
@@ -63,7 +74,11 @@ export function Page() {
               } 
             }, "Next"),
           ]),
-          h(FlexRow,  { flexDirection: "column", gap: ".5em" }, [
+          h(AuthStatus)
+        ]),
+        h(FlexRow, { className: "feedback-index", justifyContent: "space-between" }, [
+          h(Feedback, { selectedFeedbackType, setSelectedFeedbackType, setCustomFeedback }),
+          h(FlexRow, { className: "buttons", flexDirection: "column", gap: ".5em" }, [
             h.if(paper_id)(
               Button, 
               { 
@@ -92,10 +107,7 @@ export function Page() {
             ),
           ]),
         ]),
-        h(FlexRow, { className: "feedback-index", justifyContent: "space-between" }, [
-          h(Feedback, { selectedFeedbackType, setSelectedFeedbackType, setCustomFeedback }),
-          h(AuthStatus)
-        ]),
+        h("h1", title),
         h(ExtractionIndex, { setPaperID, customFeedback, selectedFeedbackType }),
       ]),
     ])
