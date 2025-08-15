@@ -16,8 +16,9 @@ import {
   FlexRow,
   Pagination,
 } from "@macrostrat/ui-components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
+import { fetchPGData } from "~/_utils";
 
 /**
  * Get a single text window for feedback purposes
@@ -25,14 +26,24 @@ import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 
 export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
+  const [title, setTitle] = useState("Loading title...");
+
+  useEffect(() => {
+    if (paper_id) {
+      fetchPGData("kg_publication_entities", { paper_id: "eq." + paper_id })
+        .then((paper) => {
+          setTitle(paper[0]?.citation?.title);
+        });
+    }
+  }, [paper_id]);
+  
 
   return h(
     OverlaysProvider,
     [
       h(ContentPage, [
         h("div.feedback-main", [
-          h(PageBreadcrumbs, { title: "Human Feedback" }),
-          h(ExtractionIndex, { setPaperID }),
+          h(ExtractionIndex, { setPaperID, title }),
         ]),
       ]),
       h(Footer)
@@ -40,9 +51,10 @@ export function Page() {
   );
 }
 
-function ExtractionIndex({setPaperID}) {
+function ExtractionIndex({setPaperID, title}) {
   const { routeParams } = usePageContext();
   const { sourceTextID } = routeParams;
+  const [ix, setIX] = useState(0);
 
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
@@ -52,42 +64,48 @@ function ExtractionIndex({setPaperID}) {
     version_id: "is.null"
   });
 
+  const count = data?.length || 0;
+  const extra = data?.length ? " #" + (ix + 1) + " of " + count : "";
+
+  const HeaderComponent = h(FlexRow, { alignItems: "center", justifyContent: "space-between" }, [
+      h(PageBreadcrumbs, { title: "Human Feedback" + extra }),
+      h.if(data?.length > 1)('div.pagination', [
+        h(Pagination, {
+          currentPage: ix,
+          setPage: setIX,
+          nextDisabled: ix >= count - 1,
+        }),
+      ])
+    ]);
+
   if (data == null || models == null || entityTypes == null) {
-    return h(Spinner);
+    return h('div', [
+      HeaderComponent,
+      h(Spinner)
+    ]);
   }
 
   setPaperID(data[0]?.paper_id || null);
 
-  return h(
-    ErrorBoundary,
-    h(MultiFeedbackInterface, { data, models, entityTypes })
-  );
+  return h('div', [
+    HeaderComponent,
+    h(
+      ErrorBoundary,
+      h(MultiFeedbackInterface, { data, models, entityTypes, title, ix, setIX })
+    )
+  ])
 }
 
-function MultiFeedbackInterface({ data, models, entityTypes }) {
-  const [ix, setIX] = useState(0);
+function MultiFeedbackInterface({ data, models, entityTypes, title, ix, setIX }) {
   const currentData = data[ix];
-  const count = data.length;
 
   const { feedback_id } = currentData;
 
   const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
 
   return h("div.feedback-interface", [
-    h.if(data.length > 1)(NonIdealState, {
-      title: "Feedback from multiple users",
-      description: `Showing entities from feedback #${
-        ix + 1
-      } of ${count} feedback entries`,
-    }),
-    h(FlexRow, { justifyContent: "space-between" },  [
-      h(FeedbackNotes, { feedback_id }),
-      h.if(data.length > 1)(Pagination, {
-        currentPage: ix,
-        setPage: setIX,
-        nextDisabled: ix >= count - 1,
-      }),
-    ]),
+    h('h1', title),
+    h(FeedbackNotes, { feedback_id }),
     h(Divider),
     h(FeedbackInterface, {
       data: currentData,
@@ -132,7 +150,7 @@ function FeedbackNotes({ feedback_id }) {
   }
 
   if (feedback.length === 0) {
-    return null
+    return h('div')
   }
 
   const { date, note, types } = feedback[0];
