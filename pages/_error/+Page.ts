@@ -6,6 +6,7 @@ import { ClientOnly } from "vike-react/ClientOnly";
 import { Spinner, Button, Card } from "@blueprintjs/core";
 import { BlankImage } from "~/components/general";
 import { LinkCard } from "~/components";
+import { webAssetsPrefix } from "@macrostrat-web/settings";
 
 export function Page() {
   const ctx = usePageContext();
@@ -13,7 +14,7 @@ export function Page() {
   if (is404) {
     return h("div.error404", [
       h(BlankImage, {
-        src: "https://storage.macrostrat.org/assets/web/earth-crust.jpg",
+        src: webAssetsPrefix + "/earth-crust.jpg",
         className: "error-image",
         width: "100%",
         height: "100%",
