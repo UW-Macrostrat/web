@@ -10,13 +10,13 @@ import {
   useEntityTypeIndex,
   useModelIndex,
 } from "../../../extractions/data-service";
-import { NonIdealState, OverlaysProvider, Spinner, Button } from "@blueprintjs/core";
+import { NonIdealState, OverlaysProvider, Spinner, Button, Divider } from "@blueprintjs/core";
 import {
   ErrorBoundary,
   FlexRow,
   Pagination,
 } from "@macrostrat/ui-components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { fetchPGData } from "~/_utils";
 
@@ -26,30 +26,24 @@ import { fetchPGData } from "~/_utils";
 
 export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
-  const nextID = getNextID();
+  const [title, setTitle] = useState("Loading title...");
+
+  useEffect(() => {
+    if (paper_id) {
+      fetchPGData("kg_publication_entities", { paper_id: "eq." + paper_id })
+        .then((paper) => {
+          setTitle(paper[0]?.citation?.title);
+        });
+    }
+  }, [paper_id]);
+  
 
   return h(
     OverlaysProvider,
     [
       h(ContentPage, [
         h("div.feedback-main", [
-          h(PageBreadcrumbs, { title: "Human Feedback" }),
-          h('div.buttons', [
-            h.if(paper_id)(
-              Button, 
-              { 
-                className: "paper btn",
-                onClick: () => {
-                  window.open(
-                    `/integrations/xdd/extractions/${paper_id}`,
-                    "_self"
-                  ); 
-                } 
-              }, 
-              "View papers extraction"
-            ),
-          ]),
-          h(ExtractionIndex, { setPaperID }),
+          h(ExtractionIndex, { setPaperID, title }),
         ]),
       ]),
       h(Footer)
@@ -57,9 +51,10 @@ export function Page() {
   );
 }
 
-function ExtractionIndex({setPaperID}) {
+function ExtractionIndex({setPaperID, title}) {
   const { routeParams } = usePageContext();
   const { sourceTextID } = routeParams;
+  const [ix, setIX] = useState(0);
 
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
@@ -69,40 +64,48 @@ function ExtractionIndex({setPaperID}) {
     version_id: "is.null"
   });
 
+  const count = data?.length || 0;
+  const extra = data?.length ? " #" + (ix + 1) + " of " + count : "";
+
+  const HeaderComponent = h(FlexRow, { alignItems: "center", justifyContent: "space-between" }, [
+      h(PageBreadcrumbs, { title: "Human Feedback" + extra }),
+      h.if(data?.length > 1)('div.pagination', [
+        h(Pagination, {
+          currentPage: ix,
+          setPage: setIX,
+          nextDisabled: ix >= count - 1,
+        }),
+      ])
+    ]);
+
   if (data == null || models == null || entityTypes == null) {
-    return h(Spinner);
+    return h('div', [
+      HeaderComponent,
+      h(Spinner)
+    ]);
   }
 
   setPaperID(data[0]?.paper_id || null);
 
-  return h(
-    ErrorBoundary,
-    h(MultiFeedbackInterface, { data, models, entityTypes })
-  );
+  return h('div', [
+    HeaderComponent,
+    h(
+      ErrorBoundary,
+      h(MultiFeedbackInterface, { data, models, entityTypes, title, ix, setIX })
+    )
+  ])
 }
 
-function MultiFeedbackInterface({ data, models, entityTypes }) {
-  const [ix, setIX] = useState(0);
+function MultiFeedbackInterface({ data, models, entityTypes, title, ix, setIX }) {
   const currentData = data[ix];
-  const count = data.length;
+
+  const { feedback_id } = currentData;
 
   const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
 
   return h("div.feedback-interface", [
-    h.if(data.length > 1)([
-      h(NonIdealState, {
-        icon: "warning-sign",
-        title: "Multiple model runs for feedback",
-        description: `Showing entities from ${
-          ix + 1
-        } of ${count} model runs. Merging runs is not yet supported.`,
-      }),
-      h(Pagination, {
-        currentPage: ix,
-        setPage: setIX,
-        nextDisabled: ix >= count - 1,
-      }),
-    ]),
+    h('h1', title),
+    h(FeedbackNotes, { feedback_id }),
     h(FeedbackInterface, {
       data: currentData,
       models,
@@ -134,48 +137,30 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   });
 }
 
-// We will extend this in the future, probably,
-// to handle ages and other things
-type MatchInfo = { type: "lith" | "lith_att" | "strat_name"; id: number };
-
-function normalizeMatch(match: any): MatchInfo | null {
-  if (match == null) return null;
-  if (match.lith_id) return { type: "lith", id: match.lith_id };
-  if (match.lith_att_id) {
-    return { type: "lith_att", id: match.lith_att_id };
-  }
-  if (match.strat_name_id) {
-    return { type: "strat_name", id: match.strat_name_id };
-  }
-  return null;
-}
-
-// function FeedbackDevTool() {
-//   const entities = useStore((state) => state.entities);
-//   if (entities == null)
-//     return h(NonIdealState, { icon: h(Spinner), title: "Loading..." });
-//
-//   return h(JSONView, { data: entities, showRoot: false, keyPath: 0 });
-// }
-//
-// FeedbackDevTool.title = "Feedback";
-//
-// export const devTools = [FeedbackDevTool];
-
-function getNextID() {
-  const currentID = usePageContext().urlPathname.split("/").pop();
-  const [nextID, setNextID] = useState<number | null>(null);
-
-  const res = fetchPGData(
-    "/kg_source_text",
-    {
-      order: "id",
-      limit: 1,
-      id: "gt." + currentID
-    }
-  ).then((data) => {
-    setNextID(data?.[0]?.id || 18131); // Default to 18131 if no next ID found
+function FeedbackNotes({ feedback_id }) {
+  const feedback = getPGData("/extraction_feedback_combined", {
+    feedback_id: "eq." + feedback_id,
   });
 
-  return nextID;
+  console.log("feedback", feedback)
+
+  if (feedback == null) {
+    return h("div", "Loading feedback notes...");
+  }
+
+  if (feedback.length === 0) {
+    return h('div')
+  }
+
+  const { date, note, types } = feedback[0];
+
+  const formattedTypes = types.map(e => e.type)
+
+  return h("div.feedback-notes", [
+    h("h3", "Feedback Notes"),
+    h("p", "From " + new Date(date).toLocaleDateString()),
+    h.if(note.length > 0)("p", "Note: " + note || "No notes provided."),
+    h.if(types.length > 0)("p", "Types: " + (formattedTypes.join(", "))),
+    h(Divider)
+  ]);
 }
