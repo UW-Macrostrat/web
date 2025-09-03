@@ -118,11 +118,11 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Quinn, D.P., S.E. Peters, J.M. Husson, R.R. Gaines. 2024. The Macrostrat data system: a platform for Earth crust research and education. Geochemistry, Geophysics, Geosystems 10.1029/2023GC013098."
+            "Quinn, D.P., C.R. Idzikowski, and S.E. Peters, 2024. Building a multi-scale, collaborative, and time-integrated digital crust: The next stage of the Macrostrat data system. Geoscience Data Journal 10.1002/gdj3.189."
           ),
           h(
             "a",
-            { href: "https://doi.org/10.1029/2023GC013098", target: "_blank" },
+            { href: "https://doi.org/10.1002/gdj3.189", target: "_blank" },
             "[link]"
           ),
         ]),

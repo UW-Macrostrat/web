@@ -33,3 +33,14 @@ export function ExpansionPanel(props) {
     (component) => h(component, props)
   );
 }
+
+export function DataField(props) {
+  return h(
+    ClientOnly,
+    {
+      load: () => import("~/components/lex/load.client").then((d) => d.DataFieldInner),
+      deps: [props],
+    },
+    (component) => h(component, props)
+  );
+}
