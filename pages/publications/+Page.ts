@@ -15,6 +15,39 @@ export function Page() {
         h("li", [
           h(
             "span",
+            "Dean, C.D. et al. 2025. The structure of the end-Cretaceous dinosaur fossil record in North America. Current Biology. 35(9)P1973-1988.E6. 10.1016/j.cub.2025.03.025."
+          ),
+          h(
+            "a",
+            { href: "https://linkinghub.elsevier.com/retrieve/pii/S0960982225003100", target: "_blank" },
+            "[link]"
+          ),
+        ]),
+        h("li", [
+          h(
+            "span",
+            "Lovelace, D. M., Kufner, A.M., et al. 2025. Rethinking dinosaur origins: oldest known equatorial dinosaur-bearing assemblage (mid-late Carnian Popo Agie FM, Wyoming, USA). Zoological Journal of the Linnean Society, 203(1),zlae153"
+          ),
+          h(
+            "a",
+            { href: "https://apps.crossref.org/pendingpub/pendingpub.html?doi=10.1093%2Fzoolinnean%2Fzlae153", target: "_blank" },
+            "[link]"
+          ),
+        ]),
+        h("li", [
+          h(
+            "span",
+            "Walton, C.R. and O. Shorttle. 2024. Phanerozoic biological reworking of the continental carbonate rock reservoir. Earth and Planetary Science Letters, 632,118640. 10.1016/j.epsl.2024.118640"
+          ),
+          h(
+            "a",
+            { href: "https://linkinghub.elsevier.com/retrieve/pii/S0012821X24000736", target: "_blank" },
+            "[link]"
+          ),
+        ]),
+        h("li", [
+          h(
+            "span",
             "Jones, L.A., C.D. Dean, W. Gearty, B.J. Allen. 2024. rmacrostrat : An R package for accessing and retrieving data from the Macrostrat geological database. Geosphere, 20(6):1456–1467. 10.1130/GES02815.1."
           ),
           h(
