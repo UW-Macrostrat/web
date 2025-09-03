@@ -2,7 +2,7 @@ import { Image, Navbar, Footer, SiteTitle } from "~/components/general";
 import h from "./+Page.module.sass";
 import { LinkCard } from "~/components/cards";
 import { useData } from "vike-react/useData";
-import { isDev } from "@macrostrat-web/settings";
+import { isDev, webAssetsPrefix } from "@macrostrat-web/settings";
 
 export function Page() {
   return h("div.page-main", [
@@ -13,7 +13,12 @@ export function Page() {
     ]),
     h(Navbar, { className: "site-navbar" }),
     h("div.hero", [
-      h("div.hero-backdrop"),
+      h("div.hero-backdrop", {
+        style: {
+          // Put the background image here to allow us to dynamically change the prefix
+          backgroundImage: `url('${webAssetsPrefix}/main-page/cover_large.jpg')`,
+        },
+      }),
       h("div.hero-content", [
         h("p.hero-text", [
           "Macrostrat integrates geologic maps and stratigraphic columns " +

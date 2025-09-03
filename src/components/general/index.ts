@@ -3,11 +3,10 @@ import { MacrostratIcon, StickyHeader } from "~/components";
 import { Spinner, Icon, Card, Popover, Tag } from "@blueprintjs/core";
 import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
-import { postgrestPrefix } from "@macrostrat-web/settings";
+import { postgrestPrefix, webAssetsPrefix } from "@macrostrat-web/settings";
 
 export function Image({ src, className, width, height }) {
-  const srcWithAddedPrefix =
-    "https://storage.macrostrat.org/assets/web/main-page/" + src;
+  const srcWithAddedPrefix = webAssetsPrefix + "/main-page/" + src;
   return h("img", { src: srcWithAddedPrefix, className, width, height });
 }
 
@@ -37,7 +36,7 @@ export function MacrostratIcon({ iconStyle, className, small = false }) {
       : "macrostrat-icon.svg";
   return h("img.macrostrat-logo" + (small ? ".small" : ""), {
     className,
-    src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${iconFile}`,
+    src: `${webAssetsPrefix}/macrostrat-icons/${iconFile}`,
   });
 }
 
@@ -115,7 +114,7 @@ export function Footer() {
           h("span", { className: "nav-text" }, "Home"),
         ]),
         navItems.map(({ href, text, icon }) =>
-          h("a", { className: "nav-link", href }, [
+          h("a", { className: "nav-link", href, key: href }, [
             h(Icon, { icon }),
             h("span", { className: "nav-text" }, text),
           ])
@@ -144,7 +143,12 @@ export function Loading() {
   return h("div.loading", h(Spinner));
 }
 
-export function SearchBar({ onChange, placeholder = "Search...", className, value }) {
+export function SearchBar({
+  onChange,
+  placeholder = "Search...",
+  className,
+  value,
+}) {
   return h(Card, { className: "search-bar " + className }, [
     h(Icon, { icon: "search" }),
     h("input", {

@@ -3,11 +3,7 @@ import styles from "./main.module.sass";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 
 import { ContentPage } from "~/layouts";
-import {
-  Link,
-  DevLinkButton,
-  PageBreadcrumbs,
-} from "~/components";
+import { Link, DevLinkButton, PageBreadcrumbs } from "~/components";
 import { FlexRow, LithologyTag } from "~/components/lex/tag";
 import { Footer, SearchBar } from "~/components/general";
 import { getGroupedColumns } from "./grouped-cols";
@@ -20,7 +16,10 @@ import { navigate } from "vike/client/router";
 
 import { LexSelection } from "@macrostrat/form-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-import { useAPIResult, PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
+import {
+  useAPIResult,
+  PostgRESTInfiniteScrollView,
+} from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -42,9 +41,9 @@ function ColumnMapContainer(props) {
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { allColumnGroups, project } = useData();
-  
+
   const [columnGroups, setColumnGroups] = useState(null);
-  const [loading, setLoading] = useState(false);  
+  const [loading, setLoading] = useState(false);
   const [extraParams, setExtraParams] = useState({});
 
   const [columnInput, setColumnInput] = useState("");
@@ -60,7 +59,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const isEmpty = Object.keys(extraParams).length === 0;
   const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
 
-  const selectedItems = selectedLiths || selectedUnits || selectedStratNames || selectedIntervals;
+  const selectedItems =
+    selectedLiths || selectedUnits || selectedStratNames || selectedIntervals;
 
   useEffect(() => {
     const params: any = {};
@@ -72,7 +72,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
       params.empty = `is.false`;
     }
     if (!showInProcess) {
-      params.status_code = 'eq.active';
+      params.status_code = "eq.active";
     }
     if (selectedLiths) {
       params.liths = `cs.[${selectedLiths.lex_id}]`;
@@ -88,13 +88,20 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     }
 
     setExtraParams(params);
-  }, [filteredInput, showEmpty, showInProcess, selectedLiths, selectedUnits, selectedStratNames, selectedIntervals]);
-
+  }, [
+    filteredInput,
+    showEmpty,
+    showInProcess,
+    selectedLiths,
+    selectedUnits,
+    selectedStratNames,
+    selectedIntervals,
+  ]);
 
   // set filtered input
   useEffect(() => {
     const prevLength = prevInputLengthRef.current;
-    
+
     if (columnInput.length >= 3) {
       setFilteredInput(columnInput);
     } else if (prevLength >= 3 && columnInput.length === 2) {
@@ -115,7 +122,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     }
   }, [project?.project_id, extraParams]);
 
-
   const columnIDs = useMemo(() => {
     return filteredGroups?.flatMap((item) =>
       item.columns.map((col) => col.col_id)
@@ -127,48 +133,63 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   };
 
   const handleLexclick = (data) => {
-    if(data.type == "strat name") setSelectedLiths(data)
-    if(data.type == "unit") setSelectedUnits(data)
-    if(data.type == "lithology") setSelectedLiths(data)
-    if(data.type == "interval") setSelectedIntervals(data)
-    setColumnInput("")
-    setFilteredInput("")
+    if (data.type == "strat name") setSelectedLiths(data);
+    if (data.type == "unit") setSelectedUnits(data);
+    if (data.type == "lithology") setSelectedLiths(data);
+    if (data.type == "interval") setSelectedIntervals(data);
+    setColumnInput("");
+    setFilteredInput("");
   };
 
-  function LexCard({data}) {
-    return h(FlexRow, { alignItems: "center", width: "fit-content", gap: ".5em", className: "lith-tag", onClick: () => handleLexclick(data)}, [
-      h(LithologyTag, { data: { name: data.name, color: data.color } }),
-      h('p.label', data.type),
-    ]);
+  function LexCard({ data }) {
+    return h(
+      FlexRow,
+      {
+        alignItems: "center",
+        width: "fit-content",
+        gap: ".5em",
+        className: "lith-tag",
+        onClick: () => handleLexclick(data),
+      },
+      [
+        h(LithologyTag, { data: { name: data.name, color: data.color } }),
+        h("p.label", data.type),
+      ]
+    );
   }
 
-  const res = useAPIResult(postgrestPrefix + "/col_filter?name=ilike.*" + filteredInput + "*" )
+  const res = useAPIResult(
+    postgrestPrefix + "/col_filter?name=ilike.*" + filteredInput + "*"
+  );
 
-  const suggestData = res?.slice(0,5)
+  const suggestData = res?.slice(0, 5);
 
   return h("div.column-list-page", [
     h(ContentPage, [
       h("div.flex-row", [
         h("div.main", [
-          h('div', [
+          h("div", [
             h(PageBreadcrumbs, { showLogo: true }),
-            h('div.filters', [
+            h("div.filters", [
               h(SearchBar, {
                 placeholder: "Search columns...",
                 onChange: handleInputChange,
                 className: "search-bar",
-                value: columnInput
+                value: columnInput,
               }),
               h(
                 Popover,
                 {
-                  content: h.if(!selectedItems && suggestData?.length > 0)("div.suggested-items", suggestData?.map(item => h(LexCard, { data: item }))),
+                  content: h.if(!selectedItems && suggestData?.length > 0)(
+                    "div.suggested-items",
+                    suggestData?.map((item) => h(LexCard, { data: item }))
+                  ),
                   isOpen: filteredInput.length >= 3,
                   position: "right",
                 },
-                h('div')
+                h("div")
               ),
-              h('div.switches', [
+              h("div.switches", [
                 h(Switch, {
                   checked: showEmpty,
                   label: "Show empty",
@@ -190,7 +211,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
               setSelectedStratNames,
               selectedIntervals,
               setSelectedIntervals,
-            })
+            }),
           ]),
           h.if(!loading)(
             "div.column-groups",
@@ -203,7 +224,10 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
               })
             )
           ),
-          h.if(columnGroups?.length == 0 && !loading)("div.empty", "No columns found"),
+          h.if(columnGroups?.length == 0 && !loading)(
+            "div.empty",
+            "No columns found"
+          ),
           h.if(loading)("div.loading", "Loading columns..."),
         ]),
         h("div.sidebar", [
@@ -218,20 +242,20 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
             ]),
             h(ColumnMapContainer, {
               columnIDs,
-              projectID: project?.project_id, 
+              projectID: project?.project_id,
               className: "column-map-container",
             }),
           ]),
         ]),
       ]),
     ]),
-    h(Footer)
+    h(Footer),
   ]);
 }
 
 function ColumnGroup({ data, linkPrefix }) {
   const [isOpen, setIsOpen] = useState(false);
-  const filteredColumns = data.columns
+  const filteredColumns = data.columns;
 
   if (filteredColumns?.length === 0) return null;
 
@@ -315,23 +339,61 @@ const ColumnItem = React.memo(
   }
 );
 
-function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelectedUnits, selectedStratNames, setSelectedStratNames, selectedIntervals, setSelectedIntervals }) {
-  const show = selectedLiths ||  selectedStratNames || selectedUnits || selectedIntervals;
+function LexFilters({
+  selectedLiths,
+  setSelectedLiths,
+  selectedUnits,
+  setSelectedUnits,
+  selectedStratNames,
+  setSelectedStratNames,
+  selectedIntervals,
+  setSelectedIntervals,
+}) {
+  const show =
+    selectedLiths || selectedStratNames || selectedUnits || selectedIntervals;
 
-  if(!show) return null;
+  if (!show) return null;
 
-  const { type, lex_id } = selectedLiths ?? selectedStratNames ?? selectedUnits ?? selectedIntervals;
+  const { type, lex_id } =
+    selectedLiths ?? selectedStratNames ?? selectedUnits ?? selectedIntervals;
 
-  const route = type === "lithology" ? "lithologies" : type === "strat name" ? "strat-names" : type === "interval" ? "intervals" : "units";
+  const route =
+    type === "lithology"
+      ? "lithologies"
+      : type === "strat name"
+      ? "strat-names"
+      : type === "interval"
+      ? "intervals"
+      : "units";
 
-  return h('div.lex-filters', [
-    h(FlexRow, {
-      align: "center",
-      gap: ".5em",
-    }, [
-      h('p.filter', "Filtering columns by "),
-      h(LithologyTag, { href: `/lex/${route}/${lex_id}`, data: selectedLiths ?? selectedStratNames ?? selectedUnits ?? selectedIntervals }),
-      h(Icon, { className: 'close-btn', icon: "cross", onClick: () => { setSelectedLiths(null); setSelectedStratNames(null); setSelectedUnits(null); setSelectedIntervals(null); } })
-    ]),
+  return h("div.lex-filters", [
+    h(
+      FlexRow,
+      {
+        align: "center",
+        gap: ".5em",
+      },
+      [
+        h("p.filter", "Filtering columns by "),
+        h(LithologyTag, {
+          href: `/lex/${route}/${lex_id}`,
+          data:
+            selectedLiths ??
+            selectedStratNames ??
+            selectedUnits ??
+            selectedIntervals,
+        }),
+        h(Icon, {
+          className: "close-btn",
+          icon: "cross",
+          onClick: () => {
+            setSelectedLiths(null);
+            setSelectedStratNames(null);
+            setSelectedUnits(null);
+            setSelectedIntervals(null);
+          },
+        }),
+      ]
+    ),
   ]);
 }
