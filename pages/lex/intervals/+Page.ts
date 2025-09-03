@@ -16,7 +16,7 @@ export function Page() {
     setInput(e.toLowerCase());
   };
 
-  const filtered = input.length < 3 ? res : res.filter((d) => {
+  const filtered = input.length < 3 && (age[0] == 0 && age[1] == 4600) ? res : res.filter((d) => {
     const name = d.name?.toLowerCase() || "";
     const intType = d.int_type?.toLowerCase() || "";
     const abbrev = d.abbrev?.toLowerCase() || "";
