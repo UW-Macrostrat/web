@@ -15,6 +15,61 @@ export function Page() {
         h("li", [
           h(
             "span",
+            "Segessenman, D.C. and S.E. Peters. 2025. Continental-scale carbonate sedimentation and environmental correlates of the Shuram-Wonoka excursion. Precambrian Research 427:107875."
+          ),
+          h(
+            "a",
+            { href: "https://www.sciencedirect.com/science/article/abs/pii/S0301926825002013?via%3Dihub", target: "_blank" },
+            "[link]"
+          ),
+        ]),
+        h("li", [
+          h(
+            "span",
+            "Thompson J.R., C.D. Dean, M. Ford, T.A. Ewin. 2025. Taphonomic controls on a multi‐element marine skeletal fossil record. Palaeontology 68(3):e70008."
+          ),
+          h(
+            "a",
+            { href: "https://onlinelibrary.wiley.com/doi/10.1111/pala.70008", target: "_blank" },
+            "[link]"
+          ),
+        ]),
+        h("li", [
+          h(
+            "span",
+            "Jeon, J., Q. Li, and J. Lee. 2025. Preservation bias obscures gradual Ordovician reef evolution. Proc. Nat. Acad. of Sci. USA 122(27):e2511406122."
+          ),
+          h(
+            "a",
+            { href: "https://www.pnas.org/doi/10.1073/pnas.2511406122", target: "_blank" },
+            "[link]"
+          ),
+        ]),
+        h("li", [
+          h(
+            "span",
+            "Boulila, S., S.E. Peters, R.D. Müeller, A. Zaffos, J. Farkas, B.U. Haq. 2025. A tectonically driven 60 million-year biogeochemical redox cycle paces marine biodiversity. Communications Earth & Environment 6(440)."
+          ),
+          h(
+            "a",
+            { href: "https://www.nature.com/articles/s43247-025-02370-6", target: "_blank" },
+            "[link]"
+          ),
+        ]),
+        h("li", [
+          h(
+            "span",
+            "Hammarlund, E. et al. 2025. Benthic diel oxygen variability and stress as potential drivers for animal diversification in the Neoproterozoic-Palaeozoic. Nature Communications 16:2223."
+          ),
+          h(
+            "a",
+            { href: "https://www.nature.com/articles/s41467-025-57345-0", target: "_blank" },
+            "[link]"
+          ),
+        ]),
+        h("li", [
+          h(
+            "span",
             "Dean, C.D. et al. 2025. The structure of the end-Cretaceous dinosaur fossil record in North America. Current Biology. 35(9)P1973-1988.E6. 10.1016/j.cub.2025.03.025."
           ),
           h(
