@@ -386,7 +386,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Keating-Bitonti, C.R., and S.E. Peters. 2019. Influence of increasing carbonate saturation in Atlantic bottom water during the late Miocene. Palaeogeography, Palaeoclimatology, Palaeoecology 518:134-142."
+            "Keating-Bitonti, C.R., and S.E. Peters. 2019. Influence of increasing carbonate saturation in Atlantic bottom water during the late Miocene. Palaeogeography, Palaeoclimatology, Palaeoecology 518:134-142. doi:10.1016/j.palaeo.2019.01.006"
           ),
           h(
             "a",
@@ -400,7 +400,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Cohen, P.A., R. Lockwood, S.E. Peters. 2018. Integrating Macrostrat and Rockd into undergraduate Earth Science Teaching. Elements of Paleontology."
+            "Cohen, P.A., R. Lockwood, S.E. Peters. 2018. Integrating Macrostrat and Rockd into undergraduate Earth Science Teaching. Elements of Paleontology. doi:10.1017/9781108681445"
           ),
           h(
             "a",
@@ -411,7 +411,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Isson, T.T., and N.J. Planavsky. 2018. Reverse weathering as a long-term stabilizer of marine pH and planetary climate. Nature 560:571-475."
+            "Isson, T.T., and N.J. Planavsky. 2018. Reverse weathering as a long-term stabilizer of marine pH and planetary climate. Nature 560:571-475. doi:10.1038/s41586-018-0408-4"
           ),
           h(
             "a",
@@ -425,7 +425,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Husson, J.M. and S.E. Peters. 2018. Nature of the sedimentary rock record and its implications for Earth system evolution. Emerging Topics in Life Sciences."
+            "Husson, J.M. and S.E. Peters. 2018. Nature of the sedimentary rock record and its implications for Earth system evolution. Emerging Topics in Life Sciences. doi:10.1042/ETLS20170152"
           ),
           h(
             "a",
@@ -436,7 +436,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Peters, S.E., J.M. Husson. 2018. We need a global comprehensive stratigraphic database: here’s a start. The Sedimentary Record 16(1)."
+            "Peters, S.E., J.M. Husson. 2018. We need a global comprehensive stratigraphic database: here’s a start. The Sedimentary Record 16(1). doi:10.2110/sedred.2018.1"
           ),
           h(
             "a",
@@ -469,17 +469,6 @@ export function Page() {
               href: "http://dx.doi.org/10.1098/rspb.2017.2631",
               target: "_blank",
             },
-            "[link]"
-          ),
-        ]),
-        h("li", [
-          h(
-            "span",
-            "Husson, J.M., S.E. Peters. 2017. The sedimentary rock record of the Ediacaran-Cambrian transition in North America. Geological Society of America Bulletin."
-          ),
-          h(
-            "a",
-            { href: "https://doi.org/10.1130/B31670.1", target: "_blank" },
             "[link]"
           ),
         ]),
@@ -525,7 +514,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Husson, J.M., S.E. Peters. 2017. Atmospheric oxygenation driven by unsteady growth of the continental sedimentary reservoir. Earth and Planetary Science Letters."
+            "Husson, J.M., S.E. Peters. 2017. Atmospheric oxygenation driven by unsteady growth of the continental sedimentary reservoir. Earth and Planetary Science Letters. 460:68-75"
           ),
           h(
             "a",
@@ -581,7 +570,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Heavens, N.G. 2016. The role of climate in the evolution of the terrestrial biosphere: a review of the evidence from the fossil record. Earth-Science Reviews 159:1-27."
+            "Heavens, N.G. 2015. Injecting climate modeling into deep time studies: ideas for nearly every project. The Sedimentary Record 13:(4)4-10."
           ),
           h(
             "a",
@@ -595,7 +584,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Carroll, A.R. 2016. Geofuels: energy and the Earth. Cambridge University Press."
+            "Carroll, A.R. 2015. Geofuels: energy and the Earth. Cambridge University Press."
           ),
           h(
             "a",
@@ -609,7 +598,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Thomson, T.J. and M.L. Droser. 2015. Swimming reptiles make their mark in the Early Triassic: delayed ecologic recovery increased the preservation potential of vertebrate swim tracks. Geology 44:215-218."
+            "Thomson, T.J. and M.L. Droser. 2015. Swimming reptiles make their mark in the Early Triassic: delayed ecologic recovery increased the preservation potential of vertebrate swim tracks. Geology 43:215-218."
           ),
           h(
             "a",
@@ -637,7 +626,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Fan, Y., S. Richard, R.S. Bristol, S.E. Peters, et al. 2015. DigitalCrust: A 4D data system of material properties for transforming research on crustal fluid flow. Geofluids 15:372-379."
+            "Fan, Y., S. Richard, R.S. Bristol, S.E. Peters, et al.. 2015. DigitalCrust: A 4D data system of material properties for transforming research on crustal fluid flow. Geofluids 15:372-379"
           ),
           h(
             "a",
@@ -676,7 +665,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Rook, D.L., N.A. Heim, and J. Marcot. 2012. Contrasting patterns and connections of rock and biotic diversity in the marine and non-marine fossil records of North America. Palaeogeography, Palaeoclimatology, Palaeoecology. 372:123-129."
+            "Rook, D.L., N.A. Heim, and J. Marcot. 2012.Contrasting patterns and connections of rock and biotic diversity in the marine and non-marine fossil records of North America. Palaeogeography, Palaeoclimatology, Palaeoecology. 372:123-129."
           ),
           h(
             "a",
@@ -690,7 +679,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Halevy, I, S.E. Peters, and W.W. Fischer. 2012. Sulfate burial constraints on the Phanerozoic sulfur cycle. Science 337:331-334."
+            "Halevy, I, S.E. Peters, and W.W. Fischer. 2012. Sulfate burial constraints on the Phanerozoic sulfur cycle. Science 337:331-334. doi:10.1126/science.1220224"
           ),
           h(
             "a",
@@ -704,7 +693,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Peters, S.E. and R.R. Gaines. 2012. Formation of the ‘Great Unconformity’ as a trigger for the Cambrian explosion. Nature 484:363-366."
+            "Peters, S.E. and R.R. Gaines. 2012. Formation of the ‘Great Unconformity’ as a trigger for the Cambrian explosion. Nature 484:363-366. doi:10.1038/nature10969"
           ),
           h(
             "a",
@@ -718,7 +707,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Finnegan, S., N.A. Heim, S.E. Peters and W.W. Fischer. 2012. Climate change and the selective signature of the late Ordovician mass extinction. PNAS."
+            "Finnegan, S., N.A. Heim, S.E. Peters and W.W. Fischer. 2012. Climate change and the selective signature of the late Ordovician mass extinction. PNAS doi:10.1073/pnas.1117039109"
           ),
           h(
             "a",
@@ -746,7 +735,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Butler, R.J. et al. 2011. Sea level, dinosaur diversity and sampling biases: investigating the ‘common cause’ hypothesis in the terrestrial realm. Proc. Roy. Soc. London B 278:1165-1170."
+            "Butler, R.J. et al. 2011. Sea level, dinosaur diversity and sampling biases: investigating the ‘common cause’ hypothesis in the terrestrial realm. Proc. Roy. Soc. London B 278:1165-1170. "
           ),
           h(
             "a",
@@ -760,7 +749,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Melott, A.L. and R.K. Bambach 2011. A ubiquitous ~62-Myr periodic fluctuation superimposed on general trends in fossil biodiversity II. Evolutionary dynamics associated with period fluctuation in marine diversity. Paleobiology 37:369-382."
+            "Melott, A.L. and R.K. Bambach 2011. A ubquitous ~62-Myr periodic fluctuation superimposed on general trends in fossil biodiversity II. Evolutionary dynamics associated with period fluctuation in marine diversity. Paleobiology 37:369-382."
           ),
           h(
             "a",
@@ -774,7 +763,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Heim, N.A. and S.E. Peters. 2011. Regional environmental breadth predicts geographic range and longevity in fossil taxa. Geology 39:1079-1082."
+            "Heim, N.A. and S.E. Peters. 2011. Regional environmental breadth predicts geographic range and longevity in fossil marine genera. PLoS One 6:(5) e18946; doi:10.1371/journal.pone.0018946"
           ),
           h(
             "a",
@@ -928,7 +917,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Peters, S.E. 2008. Macrostratigraphy and its promise for paleobiology. Pp. 205-232 In P.H. Kelley and R.K. Bambach, eds. From evolution to geobiology: research questions driving paleontology at the start of a new century. The Paleontological Society Papers, Vol. 14."
+            "Peters, S.E. 2008. Macrostratigraphy and its promise for paleobiology. Pp. 205-232 In P.H. Kelley and R.K. Bambach, eds. From evolution to geobiology: research questions driving paleontology at the start of a new century. The Paleontological Society Papers, Vol. 14. 9"
           ),
           h(
             "a",
