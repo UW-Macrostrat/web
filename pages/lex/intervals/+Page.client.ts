@@ -1,6 +1,6 @@
 import h from "./main.module.scss";
 import { PageBreadcrumbs, StickyHeader } from "~/components";
-import { LithologyTag } from "~/components/lex/tag";
+import { LithologyTag } from "@macrostrat/data-components";
 import { Card, RangeSlider } from "@blueprintjs/core";
 import { useState, memo } from "react";
 import { ContentPage } from "~/layouts";
