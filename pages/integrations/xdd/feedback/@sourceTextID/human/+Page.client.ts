@@ -106,7 +106,6 @@ function MultiFeedbackInterface({ data, models, entityTypes, title, ix, setIX })
   return h("div.feedback-interface", [
     h('h1', title),
     h(FeedbackNotes, { feedback_id }),
-    h(Divider),
     h(FeedbackInterface, {
       data: currentData,
       models,
@@ -162,5 +161,6 @@ function FeedbackNotes({ feedback_id }) {
     h("p", "From " + new Date(date).toLocaleDateString()),
     h.if(note.length > 0)("p", "Note: " + note || "No notes provided."),
     h.if(types.length > 0)("p", "Types: " + (formattedTypes.join(", "))),
+    h(Divider)
   ]);
 }
