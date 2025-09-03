@@ -15,34 +15,6 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Hammarlund, E. et al. 2025. Benthic diel oxygen variability and stress as potential drivers for animal diversification in the Neoproterozoic-Palaeozoic. Nature Communications 16:2223."
-          ),
-          h(
-            "a",
-            {
-              href: "https://doi.org/10.1038/s41467-025-57345-0",
-              target: "_blank",
-            },
-            "[link]"
-          ),
-        ]),
-        h("li", [
-          h(
-            "span",
-            "Lovelace, D. M., Kufner, A.M., et al. 2025. Rethinking dinosaur origins: oldest known equatorial dinosaur-bearing assemblage (mid-late Carnian Popo Agie FM, Wyoming, USA). Zoological Journal of the Linnean Society, 203(1),zlae153."
-          ),
-          h(
-            "a",
-            {
-              href: "https://doi.org/10.1093/zoolinnean/zlae153",
-              target: "_blank",
-            },
-            "[link]"
-          ),
-        ]),
-        h("li", [
-          h(
-            "span",
             "Jones, L.A., C.D. Dean, W. Gearty, B.J. Allen. 2024. rmacrostrat : An R package for accessing and retrieving data from the Macrostrat geological database. Geosphere, 20(6):1456–1467. 10.1130/GES02815.1."
           ),
           h(
@@ -96,7 +68,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Gazdewich, S., T. Hauck, J. Husson. 2024. Authigenic carbonate burial within the Late Devonian western Canada sedimentary bsain and its impact on the global carbon cycle. Geochemistry, Geophysics, Geosystems 10.1029/2023GC011376."
+            "Gazdewich, S., T. Hauck, J. Husson. 2024. Authigenic carbonate burial within the Late Devonian western Canada sedimentary basin and its impact on the global carbon cycle. Geochemistry, Geophysics, Geosystems 10.1029/2023GC011376"
           ),
           h(
             "a",
@@ -118,7 +90,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Quinn, D.P., C.R. Idzikowski, and S.E. Peters, 2024. Building a multi-scale, collaborative, and time-integrated digital crust: The next stage of the Macrostrat data system. Geoscience Data Journal 10.1002/gdj3.189."
+            "Quinn, D.P., C.R. Idzikowski, S.E. Peters. 2024. Building a multi-scale, collaborative, and time-integrated digital crust: The next stage of the Macrostrat data system. Geoscience Data Journal 10.1002/gdj3.189"
           ),
           h(
             "a",
@@ -126,11 +98,21 @@ export function Page() {
             "[link]"
           ),
         ]),
-
         h("li", [
           h(
             "span",
-            "Husson, J.M., S.E. Peters, D.C. Segessenman, R.R. Gaines. 2024. The sedimentary rock record of the Ediacaran-Cambrian transition in North America. Geological Society of America Bulletin 10.1130/B37058.1."
+            "Tasistro-Hart, A.R. and F.A. Macdonald. 2023. Phanerozoic flooding of North America and the Great Unconformity. Proceedings of the National Academy of Sciences 120(37):e2309084120."
+          ),
+          h(
+            "a",
+            { href: "https://www.pnas.org/doi/abs/10.1073/pnas.2309084120", target: "_blank" },
+            "[link]"
+          ),
+        ]),
+        h("li", [
+          h(
+            "span",
+            "Husson, J.M. and L.A. Coogan. 2023. River chemistry reveals a large decrease in dolomite abundance across the Phanerozoic. Geochemical Perspective Letters 26:1-6."
           ),
           h(
             "a",
@@ -361,7 +343,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Balseiro, D. and M.G. Powell. 2019. Carbonate collapse and the Late Paleozoic Ice Age marine biodiversity crisis. Geology doi:10.1130/G46858.1."
+            "Balseiro, D. and Powell, M.G. 2019. Carbonate collapse and the Late Paleozoic Ice Age marine biodiversity crisis. Geology doi:10.1130/G46858.1"
           ),
           h(
             "a",
@@ -372,7 +354,7 @@ export function Page() {
         h("li", [
           h(
             "span",
-            "Keller, C.B., J.M. Husson, R.N. Mitchell, W.F. Bottke, T.M. Gernon, P. Boehnke, E.A. Bell, N.L. Swanson-Hysell, S.E. Peters. 2019. Neoproterozoic glacial origin of the Great Unconformity. Proc. Nat. Acad. of Sci. USA. 116(4):1136-1145."
+            "Keller, C.B., J.M. Husson, R.N. Mitchell, W.F. Bottke, T.M. Gernon, P. Boehnke, E.A. Bell, N.L. Swanson-Hysell, S.E. Peters. 2019. Neoproterozoic glacial origin of the Great Unconformity. Proc. Nat. Acad. of Sci. USA. 116(4):1136-1145. doi:10.1073/pnas.1804350116"
           ),
           h(
             "a",
