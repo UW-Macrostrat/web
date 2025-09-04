@@ -6,9 +6,9 @@ import {
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
 import { Link, LithologyTag, PageBreadcrumbs } from "~/components";
-import { Card, Divider } from "@blueprintjs/core";
+import { Card, Divider, Popover } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
+import { AlphaTag, BetaTag, BlankImage, Footer, Loading, StratTag } from "~/components/general";
 import { useState, useMemo, useEffect } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
@@ -385,10 +385,10 @@ export function ConceptInfo({ concept_id, showHeader }) {
     data;
 
   return h("div.concept-info", [
-    h.if(showHeader)(
-      "a.concept-header",
-      { href: "/lex/strat-concepts/" + concept_id },
-      [h("h3", "Part of " + name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
+    h.if(showHeader)('div.concept-head-container', [
+        h('h2.head', "Part of "),
+        h("a.concept-header", { href: "/lex/strat-concepts/" + concept_id }, [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })])
+      ]
     ),
     h("div.author", [
       h("span.title", "Author: "),
@@ -882,8 +882,24 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
 function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   const hovered = activeIndex?.label === data.label;
 
+  const hasColon = data.label.includes(":");
+  const label = hasColon ? data.label.split(": ")[1] : data.label;
+  const group = hasColon ? data.label.split(": ")[0] : null;
+
+  const finalLabel = label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
+
   return h("div.legend-item", [
-    h("div.box", { style: { backgroundColor: data.color } }),
+    group ? 
+      h(
+        Popover,
+        {
+          content: h('p.group', "Group: " + group),
+          isOpen: hovered,
+          position: 'left'
+        },
+        h("div.box", { style: { backgroundColor: data.color } })
+      ) 
+      : h("div.box", { style: { backgroundColor: data.color } }),
     h(
       "a",
       {
@@ -906,13 +922,20 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
           fontWeight: hovered ? "600" : "300",
         },
       },
-      data.label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
-    ),
+      finalLabel
+    )
   ]);
 }
 
 export function Units({ href }) {
-  return h(LinkCard, { title: "View linked units", href: '/lex/units?' + href, className: "units-card" });
+  return h(LinkCard, { 
+    title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
+      h('h4', "Columns"),
+      h(BetaTag)
+    ]), 
+    href: '/lex/units?' + href, 
+    className: "units-card" 
+  });
 }
 
 export function Maps({ mapsData }) {
@@ -951,17 +974,27 @@ export function Maps({ mapsData }) {
 }
 
 export function Fossils({ href }) {
-  return h(LinkCard, { title: "View linked fossils", href: '/lex/fossils?' + href, className: "fossils-card" });
+  return h(LinkCard, { 
+    title: h(FlexRow, { justifyContent: "space-between" }, [
+      h(FlexRow, { alignItems: "center", gap: ".5em"}, [
+        h('h4', "Fossils"),
+        h(BetaTag),
+      ]), 
+      h('p.via', "via PBDB")
+    ]), 
+    href: '/lex/fossils?' + href,  
+    className: "fossils-card" 
+  });
 }
 
-export function MatchesPanel({ fossilsData }) {
+export function MatchesPanel({ fossilsData, href }) {
   const ITEMS_PER_PAGE = 20;
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const data = useMemo(() => {
     return fossilsData.slice(0, visibleCount);
   }, [fossilsData, visibleCount]);
 
-  const visibleItems = data.map((item) => h(Match, { data: item }));
+  const visibleItems = data.map((item) => h(Match, { data: item, href }));
 
   const handleLoadMore = () => {
     setVisibleCount((prev) =>
@@ -973,8 +1006,8 @@ export function MatchesPanel({ fossilsData }) {
 
   return h.if(fossilsData?.length > 0)("div.fossils-container", [
     h(ExpansionPanel, { title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
-      h('h4', "Matches"),
-      h(LithologyTag, { data: { name: "Alpha" }})
+      h('h4', "Text Extractions"),
+      h(AlphaTag)
     ]), className: "fossils-panel" }, [
       h("div.fossils-list", [...visibleItems]),
       h.if(showLoadMore)(
@@ -985,7 +1018,7 @@ export function MatchesPanel({ fossilsData }) {
   ]);
 }
 
-export function Matches({ lith_id, lith_att_id, strat_name_id, concept_id }) {
+export function TextExtractions({ lith_id, lith_att_id, strat_name_id, concept_id, href }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -1007,10 +1040,10 @@ export function Matches({ lith_id, lith_att_id, strat_name_id, concept_id }) {
     fetchPGData("/kg_matches", filter).then(setData);
   }, [lith_id, lith_att_id]);
 
-  return h(MatchesPanel, { fossilsData: data });
+  return h(MatchesPanel, { fossilsData: data, href });
 }
 
-function Match({ data }) {
+function Match({ data, href }) {
   const { source, context_text, name, match, indices } = data;
 
   const beginning = context_text.slice(
@@ -1023,19 +1056,11 @@ function Match({ data }) {
   );
 
   return h("div", { class: "match-item" }, [
-    h.if(isDev)("a", { href: "/integrations/xdd/feedback/" + source + "?autoselect=" + name }, "View source"),
+    h.if(isDev)("a", { href: "/integrations/xdd/sources/" + source + "?" + href }, "View source"),
     h(FlexRow, { className: "match-text", alignItems: "center" }, [
-      h("p", beginning),
-      h(
-        "p.match-name",
-        {
-          style: {
-            "background-color": match.color ?? "black",
-          },
-        },
-        name
-      ),
-      h("p", end),
+      h("p.text", beginning),
+      h(LithologyTag, { data: match, className: 'match-tag' }),
+      h("p.text", end),
     ]),
   ]);
 }

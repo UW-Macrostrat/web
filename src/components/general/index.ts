@@ -1,6 +1,6 @@
 import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
-import { Spinner, Icon, Card } from "@blueprintjs/core";
+import { Spinner, Icon, Card, Popover, Tag } from "@blueprintjs/core";
 import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { postgrestPrefix, webAssetsPrefix } from "@macrostrat-web/settings";
@@ -169,6 +169,28 @@ export function StratTag({ isConcept, fontSize = ".75em" }) {
 
 export function IDTag({ id }) {
   return h("div.id-tag", "ID: #" + id);
+}
+
+export function BetaTag({ content = "This page is in beta and may be incomplete."} ) {
+  return h(
+    Popover,
+    {
+      content: h("div.tag-content", content),
+      interactionKind: "hover"
+    },
+    [h(Tag, { intent: "warning" }, "Beta")]
+  );
+}
+
+export function AlphaTag({ content = "This page is in alpha and highly experimental." }) {
+  return h(
+    Popover,
+    {
+      content: h("div.tag-content", content),
+      interactionKind: "hover"
+    },
+    [h(Tag, { intent: "danger" }, "Alpha")]
+  );
 }
 
 export function getPGData(url, filters) {

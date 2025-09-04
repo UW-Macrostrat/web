@@ -88,6 +88,7 @@ function ColumnsMapInner({
               }, 0);
           },
           mapStyle: showSatellite ? satelliteMapURL : null,
+          columnColor: showSatellite ? "#000" : null
         }, 
         [
           fossilsExist ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }) : null,

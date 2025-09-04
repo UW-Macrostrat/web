@@ -1,6 +1,6 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
-import { LexItemPage, Matches } from "~/components/lex";
+import { LexItemPage, TextExtractions } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
@@ -10,7 +10,7 @@ export function Page() {
 
   const children = [
     h(LithologyAttributeDetails, { resData }),
-    h(Matches, { lith_att_id: id})
+    h(TextExtractions, { lith_att_id: id, href: "autoselect=" + resData?.name + "&lith_att_id=" + id }),
   ];
 
   return LexItemPage({ children, id, refs: [], resData, siftLink: "lithology-attribute" });
