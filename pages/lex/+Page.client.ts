@@ -13,7 +13,7 @@ import { DocsVideo } from "#/map/map-interface/components/docs";
 export function Page() {
   const { res } = useData();
   const [showBody, setShowBody] = useState(true);
-  const [updateOpen, setUpdateOpen] = useState(true);
+  const [updateOpen, setUpdateOpen] = useState(false);
 
   const seen = new Set();
   const stats = res.filter((project) => {
