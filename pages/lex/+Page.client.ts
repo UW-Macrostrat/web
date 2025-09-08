@@ -1,4 +1,4 @@
-import { LinkCard, PageHeader } from "~/components";
+import { LinkCard, PageHeader, StickyHeader } from "~/components";
 import { ContentPage } from "~/layouts";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
@@ -13,7 +13,7 @@ import { DocsVideo } from "#/map/map-interface/components/docs";
 export function Page() {
   const { res } = useData();
   const [showBody, setShowBody] = useState(true);
-  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updateOpen, setUpdateOpen] = useState(true);
 
   const seen = new Set();
   const stats = res.filter((project) => {
@@ -190,23 +190,27 @@ function Updates({ setUpdateOpen}) {
       description: "Added new lexicon dictionaries for lithology attributes, environments, economic uses, minerals, and structures.",
       slug: "version-4.1.0/save-location",
       version: "2.0.0"
-    }
+    },
   ]
 
-  return h('div.updates', [
-    h('div.update-title', [ 
-      h('h2', 'Recent Updates'),
-      h(Icon, { className: "close-btn", icon: "cross", onClick: () => setUpdateOpen(false) })
-    ]),
-    updates.map(update => h('div.update', [
+  return h('div.update-container', [
+    h(StickyHeader, 
       h('div.update-title', [ 
-        h('h3.title', update.title),
-        h(Tag, { intent: "success" }, `v${update.version}`)
+        h('h2', 'Recent Updates'),
+        h(Icon, { className: "close-btn", icon: "cross", onClick: () => setUpdateOpen(false) })
       ]),
-      h('div.description', [
-        h(DocsVideo, { slug: update.slug }),
-        h('p', update.description),
-      ]),
-    ]))
+    ),
+    h('div.update-list', [
+      updates.map(update => h('div.update', [
+        h('div.update-title', [ 
+          h('h3.title', update.title),
+          h(Tag, { intent: "success" }, `v${update.version}`)
+        ]),
+        h('div.description', [
+          h(DocsVideo, { slug: update.slug }),
+          h('p', update.description),
+        ]),
+      ]))
+    ])
   ])
 }
