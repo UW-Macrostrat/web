@@ -7,11 +7,13 @@ import { Footer } from "~/components/general";
 import { SearchBar } from "~/components/general";
 import { useState } from "react";
 import { ExpansionPanel } from "~/components/lex/tag";
-import { title } from "#/dev/map/rockd-strabospot/+title";
+import { Tag, Dialog, Icon } from "@blueprintjs/core";
+import { DocsVideo } from "#/map/map-interface/components/docs";
 
 export function Page() {
   const { res } = useData();
   const [showBody, setShowBody] = useState(true);
+  const [updateOpen, setUpdateOpen] = useState(false);
 
   const seen = new Set();
   const stats = res.filter((project) => {
@@ -34,7 +36,15 @@ export function Page() {
 
   return h("div", [
     h(ContentPage, { className: "content-page" }, [
-      h(PageHeader, { title: "Lexicon" }),
+      h('div.header', [
+        h(PageHeader, { title: "Lexicon" }),
+        h(Tag, { intent: "PRIMARY", active: updateOpen, onClick: () => setUpdateOpen(true) }, "Updates"),
+        h(Dialog, {
+          isOpen: updateOpen,
+          },
+          h(Updates, { setUpdateOpen })
+        ),
+      ]),
       h("p", [
         "This is the homepage of Macrostrat's geological lexicons, which are assembled from many data sources including Canada's ",
         h(
@@ -171,4 +181,32 @@ function LexCard({data}) {
   const href = groups.find(group => group.value === type)?.href + "/" + data.id;
 
   return h('div', h('a', { href }, data.name));
+}
+
+function Updates({ setUpdateOpen}) {
+  const updates = [
+    {
+      title: "Added dictionaries",
+      description: "Added new lexicon dictionaries for lithology attributes, environments, economic uses, minerals, and structures.",
+      slug: "version-4.1.0/save-location",
+      version: "2.0.0"
+    }
+  ]
+
+  return h('div.updates', [
+    h('div.update-title', [ 
+      h('h2', 'Recent Updates'),
+      h(Icon, { className: "close-btn", icon: "cross", onClick: () => setUpdateOpen(false) })
+    ]),
+    updates.map(update => h('div.update', [
+      h('div.update-title', [ 
+        h('h3.title', update.title),
+        h(Tag, { intent: "success" }, `v${update.version}`)
+      ]),
+      h('div.description', [
+        h(DocsVideo, { slug: update.slug }),
+        h('p', update.description),
+      ]),
+    ]))
+  ])
 }
