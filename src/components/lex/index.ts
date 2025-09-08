@@ -946,7 +946,7 @@ export function Maps({ href }) {
         h(BetaTag),
       ]), 
     ]), 
-    href: '/lex/maps?' + href,  
+    href: '/maps?' + href,  
     className: "maps-card" 
   });
 }

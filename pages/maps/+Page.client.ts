@@ -8,11 +8,12 @@ import {
   StickyHeader,
 } from "~/components";
 import { useState } from "react";
-import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
+import { PostgRESTInfiniteScrollView, useAPIResult } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
+import { usePageContext } from "vike-react/usePageContext";
 
 const PAGE_SIZE = 20;
 
@@ -25,6 +26,10 @@ export function Page() {
   const key = "" + activeOnly + recentOrder; // should be able to remove on next release (4.3.7)
 
   const initialItems = recentOrder && activeOnly ? sources : undefined;
+
+  // check if filtering by lith or strat name
+  const href = usePageContext().urlParsed.href;
+  const lexFilter = href.includes("name")
 
   return h("div.maps-list-page", [
     h(ContentPage, [
@@ -58,7 +63,8 @@ export function Page() {
               ]),
             ]),
           ]),
-          h(PostgRESTInfiniteScrollView, {
+          lexFilter ? h(FilterData)
+           : h(PostgRESTInfiniteScrollView, {
             route: `${apiDomain}/api/pg/sources_metadata`,
             id_key: "source_id",
             order_key: recentOrder ? "ref_year" : undefined,
@@ -119,4 +125,8 @@ function SourceItem({ data }) {
       ]),
     ]
   );
+}
+
+function FilterData({filterData}) {
+  return null
 }
