@@ -938,40 +938,19 @@ export function Units({ href }) {
   });
 }
 
-export function Maps({ mapsData }) {
-  const ITEMS_PER_PAGE = 20;
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const data = useMemo(() => {
-    return mapsData.slice(0, visibleCount);
-  }, [mapsData, visibleCount]);
-
-  const visibleItems = data.map((item) =>
-    h(
-      "a.maps-item",
-      {
-        key: item.map_unit_name,
-        href: "/maps/" + item.source_id + "?legend=" + item.legend_id,
-      },
-      `Map #${item.source_id}: ${item.map_unit_name} (#${item.legend_id})`
-    )
-  );
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, mapsData.length));
-  };
-
-  const showLoadMore = visibleCount < mapsData.length;
-
-  return h.if(mapsData?.length > 0)("div.maps-container", [
-    h(ExpansionPanel, { title: "Maps", className: "maps-panel" }, [
-      h("div.maps-list", [...visibleItems]),
-      h.if(showLoadMore)(
-        "div.load-more-wrapper",
-        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
-      ),
-    ]),
-  ]);
+export function Maps({ href }) {
+  return h(LinkCard, { 
+    title: h(FlexRow, { justifyContent: "space-between" }, [
+      h(FlexRow, { alignItems: "center", gap: ".5em"}, [
+        h('h4', "Maps"),
+        h(BetaTag),
+      ]), 
+    ]), 
+    href: '/lex/maps?' + href,  
+    className: "maps-card" 
+  });
 }
+
 
 export function Fossils({ href }) {
   return h(LinkCard, { 
