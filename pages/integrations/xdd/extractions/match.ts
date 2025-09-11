@@ -20,7 +20,7 @@ function buildHref(match) {
   if (match == null) return null;
 
   if (match.strat_name_id != null) {
-    return `/lex/strat-name/${match.strat_name_id}`;
+    return `/lex/strat-names/${match.strat_name_id}`;
   }
 
   if (match.lith_id != null) {

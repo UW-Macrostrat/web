@@ -1,11 +1,10 @@
 import h from "./main.module.scss";
-import { PageBreadcrumbs, StickyHeader, Link } from "~/components";
-import { Card, Popover, RangeSlider } from "@blueprintjs/core";
+import { PageBreadcrumbs, StickyHeader } from "~/components";
+import { LithologyTag } from "@macrostrat/data-components";
+import { Card, RangeSlider } from "@blueprintjs/core";
 import { useState, memo } from "react";
 import { ContentPage } from "~/layouts";
-import { asChromaColor } from "@macrostrat/color-utils";
 import { SearchBar } from "~/components/general";
-import { LithologyTag } from "@macrostrat/data-components";
 import { useData } from "vike-react/useData";
 
 export function Page() {
@@ -17,7 +16,7 @@ export function Page() {
     setInput(e.toLowerCase());
   };
 
-  const filtered = input.length < 3 ? res : res.filter((d) => {
+  const filtered = input.length < 3 && (age[0] == 0 && age[1] == 4600) ? res : res.filter((d) => {
     const name = d.name?.toLowerCase() || "";
     const intType = d.int_type?.toLowerCase() || "";
     const abbrev = d.abbrev?.toLowerCase() || "";
@@ -72,9 +71,7 @@ export function Page() {
                     name: d.name,
                     color: d.color || "#000000",
                   },
-                  onClick: (e, d) => {
-                      window.open(`/lex/interval/${d.id}`, "_blank");
-                  },
+                  href: "/lex/intervals/" + d.int_id
               })),
             ),
           ])
@@ -104,8 +101,8 @@ function UpperCase(str) {
 
 
 const MemoLithologyTag = memo(
-  function MemoLithologyTag({ data, onClick }) {
-    return h(LithologyTag, { data, onClick });
+  function MemoLithologyTag({ data, href }) {
+    return h(LithologyTag, { data, href });
   },
   (prevProps, nextProps) => {
     return (

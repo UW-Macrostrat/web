@@ -1,4 +1,4 @@
-import h from "@macrostrat/hyper";
+import h from "./styles.module.styl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef, useState } from "react";
 import {

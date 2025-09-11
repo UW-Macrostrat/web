@@ -41,7 +41,7 @@ function ProjectItem({ data, pictures }) {
         h("p.col_stats", [
           h(KeyValue, { name: "Columns", value: data.t_cols }),
           ", ",
-          h(KeyValue, { name: "in process", value: data.in_proccess_cols }),
+          h(KeyValue, { name: "in process", value: data.in_process_cols }),
           ", ",
           h(KeyValue, { name: "obsolete", value: data.obsolete_cols }),
           "; ",

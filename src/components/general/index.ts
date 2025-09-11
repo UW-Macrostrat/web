@@ -1,12 +1,12 @@
 import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
-import { Spinner, Icon, Card } from "@blueprintjs/core";
-import { useDarkMode } from "@macrostrat/ui-components";
+import { Spinner, Icon, Card, Popover, Tag } from "@blueprintjs/core";
+import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
+import { postgrestPrefix, webAssetsPrefix } from "@macrostrat-web/settings";
 
 export function Image({ src, className, width, height }) {
-  const srcWithAddedPrefix =
-    "https://storage.macrostrat.org/assets/web/main-page/" + src;
+  const srcWithAddedPrefix = webAssetsPrefix + "/main-page/" + src;
   return h("img", { src: srcWithAddedPrefix, className, width, height });
 }
 
@@ -17,27 +17,32 @@ export function NavListItem({ href, children }) {
   );
 }
 
-export function MacrostatLogoLink({
+export function MacrostratLogoLink({
   href = "/",
   className,
   logoStyle,
   children,
 }) {
-  const logoFile =
-    logoStyle != null
-      ? `macrostrat-icon-${logoStyle}.svg`
-      : "macrostrat-icon.svg";
   return h("a.macrostrat-logo-link", { href, className }, [
-    h("img.macrostrat-logo", {
-      src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${logoFile}`,
-    }),
+    h(MacrostratIcon, { iconStyle: logoStyle }),
     children,
   ]);
 }
 
+export function MacrostratIcon({ iconStyle, className, small = false }) {
+  const iconFile =
+    iconStyle != null
+      ? `macrostrat-icon-${iconStyle}.svg`
+      : "macrostrat-icon.svg";
+  return h("img.macrostrat-logo" + (small ? ".small" : ""), {
+    className,
+    src: `${webAssetsPrefix}/macrostrat-icons/${iconFile}`,
+  });
+}
+
 export function SiteTitle({ logoStyle, className, children }) {
   return h(
-    MacrostatLogoLink,
+    MacrostratLogoLink,
     { logoStyle, className: classNames("site-title", className) },
     h("div.site-title-content", [h("h1", "Macrostrat"), children])
   );
@@ -63,8 +68,6 @@ export function Navbar({ className, children, showSiteTitle = true }) {
 }
 
 export function Footer() {
-  const isDarkMode = useDarkMode()?.isEnabled;
-
   const navItems = [
     { href: "/about", text: "About", icon: "info-sign" },
     { href: "/publications", text: "Publications", icon: "book" },
@@ -84,7 +87,7 @@ export function Footer() {
     h("div", { className: "footer-container" }, [
       h("div", { className: "footer-text-container" }, [
         h(Image, {
-          className: "logo_white " + (isDarkMode ? "img-dark" : "img-light"),
+          className: "logo_white",
           src: "logo_white.png",
           width: "100px",
         }),
@@ -99,7 +102,7 @@ export function Footer() {
             "a",
             { href: "https://github.com/UW-Macrostrat", target: "_blank" },
             h(Image, {
-              className: "git_logo " + (isDarkMode ? "img-light" : "img-dark"),
+              className: "git_logo",
               src: "git-logo.png",
               width: "18px",
             })
@@ -108,11 +111,11 @@ export function Footer() {
       ]),
       h("div", { className: "footer-nav" }, [
         h("a", { className: "nav-link", href: "/" }, [
-          h(MacrostratIcon),
+          h(MacrostratIcon, { iconStyle: "simple", small: true }),
           h("span", { className: "nav-text" }, "Home"),
         ]),
         navItems.map(({ href, text, icon }) =>
-          h("a", { className: "nav-link", href }, [
+          h("a", { className: "nav-link", href, key: href }, [
             h(Icon, { icon }),
             h("span", { className: "nav-text" }, text),
           ])
@@ -120,7 +123,7 @@ export function Footer() {
       ]),
       h("div", { className: "footer-text-container" }, [
         h(Image, {
-          className: "funding-logo " + (isDarkMode ? "img-dark" : "img-light"),
+          className: "funding-logo",
           src: "nsf.png",
           width: "100px",
         }),
@@ -141,7 +144,12 @@ export function Loading() {
   return h("div.loading", h(Spinner));
 }
 
-export function SearchBar({ onChange, placeholder = "Search...", className }) {
+export function SearchBar({
+  onChange,
+  placeholder = "Search...",
+  className,
+  value,
+}) {
   return h(Card, { className: "search-bar " + className }, [
     h(Icon, { icon: "search" }),
     h("input", {
@@ -162,4 +170,30 @@ export function StratTag({ isConcept, fontSize = ".75em" }) {
 
 export function IDTag({ id }) {
   return h("div.id-tag", "ID: #" + id);
+}
+
+export function BetaTag({ content = "This page is in beta and may be incomplete."} ) {
+  return h(
+    Popover,
+    {
+      content: h("div.tag-content", content),
+      interactionKind: "hover"
+    },
+    [h(Tag, { intent: "warning" }, "Beta")]
+  );
+}
+
+export function AlphaTag({ content = "This page is in alpha and highly experimental." }) {
+  return h(
+    Popover,
+    {
+      content: h("div.tag-content", content),
+      interactionKind: "hover"
+    },
+    [h(Tag, { intent: "danger" }, "Alpha")]
+  );
+}
+
+export function getPGData(url, filters) {
+  return useAPIResult(postgrestPrefix + url, filters);
 }

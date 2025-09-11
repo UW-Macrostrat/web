@@ -1,4 +1,3 @@
-export * from "./macrostrat-icon";
 export * from "./page-header";
 export * from "./cards";
 export * from "./tags";
@@ -7,4 +6,5 @@ export * from "./lithology";
 export * from "./buttons";
 export * from "./navigation";
 export * from "./map-controls";
+export * from "./general";
 export { buildCrossSectionLayers } from "~/_utils/map-layers";

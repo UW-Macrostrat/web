@@ -94,8 +94,6 @@ export async function handleXDDQuery(
 
   let url = `${basev1}/snippets`;
 
-  console.log("Fetching XDD data for strat names:", stratNames);
-
   const res = await axios.get(url, {
     params: {
       article_limit: 20,

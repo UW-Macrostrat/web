@@ -1,6 +1,6 @@
 import h from "./+Page.client.module.sass";
 import { ContentPage, FullscreenPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/components";
+import { getPGData, PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import {
   enhanceData,
@@ -20,14 +20,18 @@ import {
   FlexRow,
   Pagination,
   Spacer,
-  useAPIResult,
+  SaveButton,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
-import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
 import { Toaster } from "@blueprintjs/core";
 import { fetchPGData } from "~/_utils";
+import { AuthStatus, useAuth } from "@macrostrat/form-components";
+import { MultiSelect } from "@blueprintjs/select"
+import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
+import { postgrestPrefix } from "@macrostrat-web/settings";
+import { useEffect } from "react"
 
 /**
  * Get a single text window for feedback purposes
@@ -35,15 +39,29 @@ import { fetchPGData } from "~/_utils";
 
 export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
+  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
+  const [customFeedback, setCustomFeedback] = useState("");
+  const [title, setTitle] = useState("Loading title...");
+
+  const currentID = usePageContext().urlPathname.split("/").pop();
   const nextID = getNextID();
-  console.log("Next ID:", nextID);
+  const previousFeedback = getPreviousFeedback();
+
+  useEffect(() => {
+    if (paper_id) {
+      fetchPGData("kg_publication_entities", { paper_id: "eq." + paper_id })
+        .then((paper) => {
+          setTitle(paper[0]?.citation?.title);
+        });
+    }
+  }, [paper_id]);
 
   return h(
     OverlaysProvider,
     h(ContentPage, [
       h("div.feedback-main", [
         h(PageBreadcrumbs),
-        h(FlexRow, { alignItems: "center" }, [
+        h(FlexRow, { alignItems: "center", justifyContent: "space-between" }, [
           h(FlexRow, [
             h("h1", "Feedback"),
             h.if(nextID)(Button, { 
@@ -56,56 +74,76 @@ export function Page() {
               } 
             }, "Next"),
           ]),
-          h(Spacer),
-          h('div', [
-            h(AuthStatus),
-            h.if(paper_id)(Button, { 
-              className: "paper btn",
-              onClick: () => {
-                window.open(
-                  `/integrations/xdd/extractions/${paper_id}`,
-                  "_self"
-                ); 
-              } 
-            }, "View papers extraction"),
-          ])
+          h(AuthStatus)
         ]),
-        h(ExtractionIndex, { setPaperID }),
+        h(FlexRow, { className: "feedback-index", justifyContent: "space-between" }, [
+          h(Feedback, { selectedFeedbackType, setSelectedFeedbackType, setCustomFeedback }),
+          h(FlexRow, { className: "buttons", flexDirection: "column", gap: ".5em" }, [
+            h.if(paper_id)(
+              Button, 
+              { 
+                className: "paper btn",
+                onClick: () => {
+                  window.open(
+                    `/integrations/xdd/extractions/${paper_id}`,
+                    "_self"
+                  ); 
+                } 
+              }, 
+              "View papers extraction"
+            ),
+            h.if(previousFeedback?.length > 0)(
+              Button, 
+              { 
+                className: "previous btn",
+                onClick: () => {
+                  window.open(
+                    `/integrations/xdd/feedback/${currentID}/human`,
+                    "_self"
+                  ); 
+                }
+              },
+              "View human feedback"
+            ),
+          ]),
+        ]),
+        h("h1", title),
+        h(ExtractionIndex, { setPaperID, customFeedback, selectedFeedbackType }),
       ]),
     ])
   );
 }
 
-function ExtractionIndex({setPaperID}) {
+function ExtractionIndex({setPaperID, customFeedback, selectedFeedbackType}) {
   const { routeParams } = usePageContext();
   const { sourceTextID } = routeParams;
 
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
 
-  const data = usePostgresQuery("kg_context_entities", {
-    subject: "source_text",
-    predicate: sourceTextID,
+  const data = getPGData("/kg_context_entities", {
+    source_text: "eq." + sourceTextID,
+    user_id: "is.null"
   });
 
   if (data == null || models == null || entityTypes == null) {
     return h(Spinner);
   }
 
-  console.log(data);
-
   setPaperID(data[0]?.paper_id || null);
 
   return h(
     ErrorBoundary,
-    h(MultiFeedbackInterface, { data, models, entityTypes })
+    h(MultiFeedbackInterface, { data, models, entityTypes, customFeedback, selectedFeedbackType })
   );
 }
 
-function MultiFeedbackInterface({ data, models, entityTypes }) {
+function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, selectedFeedbackType }) {
   const [ix, setIX] = useState(0);
   const currentData = data[ix];
   const count = data.length;
+
+  const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
 
   return h("div.feedback-interface", [
     h.if(data.length > 1)([
@@ -117,8 +155,7 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
         } of ${count} model runs. Merging runs is not yet supported.`,
       }),
       h(Pagination, {
-        count,
-        page: ix,
+        currentPage: ix,
         setPage: setIX,
         nextDisabled: ix >= count - 1,
       }),
@@ -127,13 +164,16 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
       data: currentData,
       models,
       entityTypes,
+      autoSelect,
+      customFeedback,
+      selectedFeedbackType
     }),
   ]);
 }
 
 const AppToaster = Toaster.create();
 
-function FeedbackInterface({ data, models, entityTypes }) {
+function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedback, selectedFeedbackType }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
   const { user } = useAuth();
@@ -148,19 +188,20 @@ function FeedbackInterface({ data, models, entityTypes }) {
     entityTypes,
     matchComponent: MatchedEntityLink,
     matchLinks: {
-      lithology: "/lex/lithology",
+      lithology: "/lex/lithologies",
       lith_att: "/lex/lith-atts",
       strat_name: "/lex/strat-names",
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
-    view: user === null,
+    // view: user === null,
+    autoSelect,
     onSave: wrapWithToaster(
       async (tree) => {
         const data = prepareDataForServer(tree, window.source_text, [
           window.model_run,
         ]);
-        await postDataToServer(data);
+        await postDataToServer(data, customFeedback, selectedFeedbackType);
       },
       AppToaster,
       {
@@ -171,16 +212,75 @@ function FeedbackInterface({ data, models, entityTypes }) {
   });
 }
 
-async function postDataToServer(data: ServerResults) {
-  const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
+async function postDataToServer(data: ServerResults, customFeedback: string, selectedFeedbackType: string[]) {
+ console.log("Posting data to server:", data);
+
+  const response = await fetch("http://localhost:9543/record_run", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
+
   if (!response.ok) {
     throw new Error(response.statusText);
+  }
+
+  const result = await response.json();
+  const { table_id } = result.data;
+
+  console.log("xDD Server response:", result.data);
+
+  // Step 2: Post feedback
+  const feedbackBody = {
+    feedback_id: table_id,
+    custom_note: customFeedback
+  };
+
+  console.log("Sending feedback:", feedbackBody);
+
+  const feedbackResponse = await fetch(postgrestPrefix + `/extraction_feedback`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Prefer": "return=representation",
+    },
+    body: new URLSearchParams(feedbackBody).toString(),
+  });
+
+  if (!feedbackResponse.ok) {
+    throw new Error("Failed to post feedback");
+  }
+
+  const feedbackData = await feedbackResponse.json();
+  console.log("Feedback response:", feedbackData);
+
+  // Step 3: Associate types with note_id from response
+  const note_id = feedbackData[0]?.note_id;
+
+  if (!note_id) {
+    throw new Error("No note_id returned from feedback post");
+  }
+
+  // Assume `selectedFeedbackType` is an array of type_id values from user input
+  for (const type of selectedFeedbackType) {
+    const linkBody = {
+      note_id,
+      type_id: type.type_id 
+    };
+
+    const linkResponse = await fetch(postgrestPrefix + `/lookup_extraction_type`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Prefer": "return=representation",
+      },
+      body: new URLSearchParams(linkBody).toString(),
+    });
+
+    const linkResult = await linkResponse.json();
+    console.log(`Linked type_id ${type.type_id}:`, linkResult);
   }
 }
 
@@ -282,4 +382,75 @@ function getNextID() {
   });
 
   return nextID;
+}
+
+function getPreviousFeedback() {
+  const currentID = usePageContext().urlPathname.split("/").pop();
+
+  return getPGData(
+    "/kg_context_entities",
+    {
+      select: "model_run",
+      source_text: "eq." + currentID,
+      version_id: "is.null"
+    }
+  )
+}
+
+function Feedback({ selectedFeedbackType, setSelectedFeedbackType, setCustomFeedback }) {
+  const feedback = usePostgresQuery("extraction_feedback_type");
+
+  if (feedback == null) {
+    return h("div", "Loading feedback types...");
+  }
+
+  const isItemSelected = (item) => selectedFeedbackType.includes(item);
+
+  const handleItemSelect = (item) => {
+    if (!isItemSelected(item)) {
+      setSelectedFeedbackType([...selectedFeedbackType, item]);
+    }
+  };
+
+  const handleItemDelete = (itemToDelete) => {
+    const next = selectedFeedbackType.filter((item) => item.id !== itemToDelete.id);
+    setSelectedFeedbackType(next);
+  };
+
+  const itemPredicate = (query, item) =>
+    item.type.toLowerCase().includes(query.toLowerCase());
+
+  const itemRenderer = (item, { handleClick, modifiers }) => {
+    if (!modifiers.matchesPredicate) return null;
+
+    return h(MenuItem, {
+      key: item.id,
+      text: item.type,
+      onClick: handleClick,
+      active: modifiers.active,
+      shouldDismissPopover: false,
+    });
+  };
+
+  return h(FlexRow, { className: "feedback-flexbox" }, [
+    h('div.inputs', [
+      h(MultiSelect, {
+        items: feedback.filter((f) => !isItemSelected(f)),
+        itemRenderer,
+        itemPredicate,
+        selectedItems: selectedFeedbackType,
+        onItemSelect: handleItemSelect,
+        onRemove: handleItemDelete,
+        tagRenderer: (item) => item.type,
+        popoverProps: { minimal: true },
+        fill: true,
+      }),
+      h(TextArea, {
+        onChange: (e) => setCustomFeedback(e.target.value),
+        placeholder: "Enter custom feedback here...",
+        autoResize: true,
+        className: 'input'
+      })
+    ]),
+  ])
 }

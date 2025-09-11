@@ -1,18 +1,27 @@
-import React, { useState } from "react";
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.sass";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+
 import { ContentPage } from "~/layouts";
-import {
-  Link,
-  DevLinkButton,
-  PageBreadcrumbs,
-  StickyHeader,
-} from "~/components";
-import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
-import { Tag } from "@macrostrat/data-components";
-import h from "./main.module.sass";
+import { Link, DevLinkButton, PageBreadcrumbs } from "~/components";
+import { FlexRow, LithologyTag } from "~/components/lex/tag";
+import { Footer, SearchBar } from "~/components/general";
+import { getGroupedColumns } from "./grouped-cols";
+
+import { AnchorButton, ButtonGroup, Switch, Popover } from "@blueprintjs/core";
+import { Tag, Icon } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
-import { SearchBar } from "~/components/general";
+
+import { LexSelection } from "@macrostrat/form-components";
+import { postgrestPrefix } from "@macrostrat-web/settings";
+import {
+  useAPIResult,
+  PostgRESTInfiniteScrollView,
+} from "@macrostrat/ui-components";
+
+const h = hyper.styled(styles);
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -31,69 +40,195 @@ function ColumnMapContainer(props) {
 }
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  const { columnGroups, project } = useData();
+  const { allColumnGroups, project } = useData();
+
+  const [columnGroups, setColumnGroups] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [extraParams, setExtraParams] = useState({});
 
   const [columnInput, setColumnInput] = useState("");
-  const shouldFilter = columnInput.length >= 3;
+  const [showEmpty, setShowEmpty] = useState(true);
+  const [filteredInput, setFilteredInput] = useState("");
+  const [showInProcess, setShowInProcess] = useState(true);
 
-  const filteredGroups = shouldFilter
-    ? columnGroups?.filter((group) => {
-        const filteredColumns = group.columns.filter((col) => {
-          const name = col.col_name.toLowerCase();
-          const input = columnInput.toLowerCase();
-          return name.includes(input);
-        });
+  const [selectedLiths, setSelectedLiths] = useState(null);
+  const [selectedUnits, setSelectedUnits] = useState(null);
+  const [selectedStratNames, setSelectedStratNames] = useState(null);
+  const [selectedIntervals, setSelectedIntervals] = useState(null);
 
-        if (
-          filteredColumns.length > 0 ||
-          group.name.toLowerCase().includes(columnInput.toLowerCase())
-        ) {
-          return { ...group, columns: filteredColumns };
-        }
+  const isEmpty = Object.keys(extraParams).length === 0;
+  const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
 
-        return false;
-      })
-    : null;
+  const selectedItems =
+    selectedLiths || selectedUnits || selectedStratNames || selectedIntervals;
 
-  const columnIDs = filteredGroups?.flatMap((item) =>
-    item.columns
-      .filter((col) =>
-        col.col_name.toLowerCase().includes(columnInput.toLowerCase())
-      )
-      .map((col) => col.col_id)
-  );
+  useEffect(() => {
+    const params: any = {};
 
-  const hideColumns = columnIDs?.length === 0 && columnInput.length >= 3;
+    if (filteredInput.length >= 3) {
+      params.name = `ilike.%${filteredInput}%`;
+    }
+    if (!showEmpty) {
+      params.empty = `is.false`;
+    }
+    if (!showInProcess) {
+      params.status_code = "eq.active";
+    }
+    if (selectedLiths) {
+      params.liths = `cs.[${selectedLiths.lex_id}]`;
+    }
+    if (selectedUnits) {
+      params.units = `cs.[${selectedUnits.lex_id}]`;
+    }
+    if (selectedStratNames) {
+      params.strat_names = `cs.[${selectedStratNames.lex_id}]`;
+    }
+    if (selectedIntervals) {
+      params.intervals = `cs.[${selectedIntervals.lex_id}]`;
+    }
+
+    setExtraParams(params);
+  }, [
+    filteredInput,
+    showEmpty,
+    showInProcess,
+    selectedLiths,
+    selectedUnits,
+    selectedStratNames,
+    selectedIntervals,
+  ]);
+
+  // set filtered input
+  useEffect(() => {
+    const prevLength = prevInputLengthRef.current;
+
+    if (columnInput.length >= 3) {
+      setFilteredInput(columnInput);
+    } else if (prevLength >= 3 && columnInput.length === 2) {
+      setFilteredInput("");
+    }
+
+    prevInputLengthRef.current = columnInput.length;
+  }, [columnInput, showEmpty, showInProcess]);
+
+  const prevInputLengthRef = useRef(columnInput.length);
+
+  useEffect(() => {
+    if (!isEmpty) {
+      setLoading(true);
+      getGroupedColumns(project?.project_id, extraParams)
+        .then((groups) => setColumnGroups(groups))
+        .finally(() => setLoading(false));
+    }
+  }, [project?.project_id, extraParams]);
+
+  const columnIDs = useMemo(() => {
+    return filteredGroups?.flatMap((item) =>
+      item.columns.map((col) => col.col_id)
+    );
+  }, [filteredGroups]);
 
   const handleInputChange = (value, target) => {
     setColumnInput(value.toLowerCase());
   };
 
-  const allGroups = filteredGroups ?? columnGroups ?? [];
+  const handleLexclick = (data) => {
+    if (data.type == "strat name") setSelectedLiths(data);
+    if (data.type == "unit") setSelectedUnits(data);
+    if (data.type == "lithology") setSelectedLiths(data);
+    if (data.type == "interval") setSelectedIntervals(data);
+    setColumnInput("");
+    setFilteredInput("");
+  };
+
+  function LexCard({ data }) {
+    return h(
+      FlexRow,
+      {
+        alignItems: "center",
+        width: "fit-content",
+        gap: ".5em",
+        className: "lith-tag",
+        onClick: () => handleLexclick(data),
+      },
+      [
+        h(LithologyTag, { data: { name: data.name, color: data.color } }),
+        h("p.label", data.type),
+      ]
+    );
+  }
+
+  const res = useAPIResult(
+    postgrestPrefix + "/col_filter?name=ilike.*" + filteredInput + "*"
+  );
+
+  const suggestData = res?.slice(0, 5);
 
   return h("div.column-list-page", [
     h(ContentPage, [
       h("div.flex-row", [
         h("div.main", [
-          h(StickyHeader, [
+          h("div", [
             h(PageBreadcrumbs, { showLogo: true }),
-            h(SearchBar, {
-              placeholder: "Search columns...",
-              onChange: handleInputChange,
+            h("div.filters", [
+              h(SearchBar, {
+                placeholder: "Search columns...",
+                onChange: handleInputChange,
+                className: "search-bar",
+                value: columnInput,
+              }),
+              h(
+                Popover,
+                {
+                  content: h.if(!selectedItems && suggestData?.length > 0)(
+                    "div.suggested-items",
+                    suggestData?.map((item) => h(LexCard, { data: item }))
+                  ),
+                  isOpen: filteredInput.length >= 3,
+                  position: "right",
+                },
+                h("div")
+              ),
+              h("div.switches", [
+                h(Switch, {
+                  checked: showEmpty,
+                  label: "Show empty",
+                  onChange: () => setShowEmpty(!showEmpty),
+                }),
+                h(Switch, {
+                  checked: showInProcess,
+                  label: "Show in process",
+                  onChange: () => setShowInProcess(!showInProcess),
+                }),
+              ]),
+            ]),
+            h(LexFilters, {
+              selectedLiths,
+              setSelectedLiths,
+              selectedUnits,
+              setSelectedUnits,
+              selectedStratNames,
+              setSelectedStratNames,
+              selectedIntervals,
+              setSelectedIntervals,
             }),
           ]),
-          h(
+          h.if(!loading)(
             "div.column-groups",
-            allGroups.map((d) =>
+            filteredGroups?.map((d) =>
               h(ColumnGroup, {
                 data: d,
                 key: d.id,
                 linkPrefix,
-                columnInput,
-                shouldFilter,
+                showEmpty,
               })
             )
           ),
+          h.if(columnGroups?.length == 0 && !loading)(
+            "div.empty",
+            "No columns found"
+          ),
+          h.if(loading)("div.loading", "Loading columns..."),
         ]),
         h("div.sidebar", [
           h("div.sidebar-content", [
@@ -109,24 +244,18 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
               columnIDs,
               projectID: project?.project_id,
               className: "column-map-container",
-              hideColumns,
             }),
           ]),
         ]),
       ]),
     ]),
+    h(Footer),
   ]);
 }
 
-function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
+function ColumnGroup({ data, linkPrefix }) {
   const [isOpen, setIsOpen] = useState(false);
-  const filteredColumns = shouldFilter
-    ? data.columns.filter((col) => {
-        const name = col.col_name.toLowerCase();
-        const input = columnInput.toLowerCase();
-        return name.includes(input);
-      })
-    : data.columns;
+  const filteredColumns = data.columns;
 
   if (filteredColumns?.length === 0) return null;
 
@@ -136,7 +265,7 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
     { className: "column-group", onClick: () => setIsOpen(!isOpen) },
     [
       h("div.column-group-header", [
-        h(Link, { href: `/columns/groups/${data.id}`, target: "_blank" }, [
+        h(Link, { href: `/columns/groups/${data.id}`, target: "_self" }, [
           h(
             "h2.column-group-name",
             name + " (Group #" + filteredColumns[0].col_group_id + ")"
@@ -163,16 +292,9 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
 
 const ColumnItem = React.memo(
   function ColumnItem({ data, linkPrefix = "/" }) {
-    const { col_id, col_name } = data;
+    const { col_id, name, units } = data;
 
-    let nUnits = 0;
-    try {
-      nUnits = parseInt(data.t_units);
-    } catch (e) {
-      console.warn("Invalid number of units for column", col_id, data.t_units);
-    }
-
-    const unitsText = nUnits > 0 ? `${nUnits} units` : "empty";
+    const unitsText = units?.length > 0 ? `${units?.length} units` : "empty";
 
     const href = linkPrefix + `columns/${col_id}`;
     return h(
@@ -184,9 +306,9 @@ const ColumnItem = React.memo(
       },
       [
         h("td.col-id", h("code.bp5-code", col_id)),
-        h("td.col-name", h("a", { href }, col_name)),
+        h("td.col-name", h("a", { href }, name)),
         h("td.col-status", [
-          data.status === "in process" &&
+          data.status_code === "in process" &&
             h(
               Tag,
               { minimal: true, color: "lightgreen", size: "small" },
@@ -198,7 +320,7 @@ const ColumnItem = React.memo(
             {
               minimal: true,
               size: "small",
-              color: nUnits === 0 ? "orange" : "dodgerblue",
+              color: units?.length === 0 ? "orange" : "dodgerblue",
             },
             unitsText
           ),
@@ -216,3 +338,62 @@ const ColumnItem = React.memo(
     );
   }
 );
+
+function LexFilters({
+  selectedLiths,
+  setSelectedLiths,
+  selectedUnits,
+  setSelectedUnits,
+  selectedStratNames,
+  setSelectedStratNames,
+  selectedIntervals,
+  setSelectedIntervals,
+}) {
+  const show =
+    selectedLiths || selectedStratNames || selectedUnits || selectedIntervals;
+
+  if (!show) return null;
+
+  const { type, lex_id } =
+    selectedLiths ?? selectedStratNames ?? selectedUnits ?? selectedIntervals;
+
+  const route =
+    type === "lithology"
+      ? "lithologies"
+      : type === "strat name"
+      ? "strat-names"
+      : type === "interval"
+      ? "intervals"
+      : "units";
+
+  return h("div.lex-filters", [
+    h(
+      FlexRow,
+      {
+        align: "center",
+        gap: ".5em",
+      },
+      [
+        h("p.filter", "Filtering columns by "),
+        h(LithologyTag, {
+          href: `/lex/${route}/${lex_id}`,
+          data:
+            selectedLiths ??
+            selectedStratNames ??
+            selectedUnits ??
+            selectedIntervals,
+        }),
+        h(Icon, {
+          className: "close-btn",
+          icon: "cross",
+          onClick: () => {
+            setSelectedLiths(null);
+            setSelectedStratNames(null);
+            setSelectedUnits(null);
+            setSelectedIntervals(null);
+          },
+        }),
+      ]
+    ),
+  ]);
+}

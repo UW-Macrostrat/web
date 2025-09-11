@@ -2,13 +2,13 @@ import h from "./main.module.scss";
 import { PageBreadcrumbs, StickyHeader } from "~/components";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
-import { asChromaColor } from "@macrostrat/color-utils";
 import { useData } from "vike-react/useData";
 import { SearchBar } from "~/components/general";
+import { LithologyTag } from "~/components/lex/tag";
 
 export function Page() {
   const { res } = useData();  
-  return h(LexListPage, { res, title: "Economics", route: "economic", id: "econ_id" });
+  return h(LexListPage, { res, title: "Economics", route: "economics", id: "econ_id" });
 }
 
 export function LexListPage({ res, title, route, id }) {
@@ -47,7 +47,7 @@ export function LexListPage({ res, title, route, id }) {
               h("h3", UpperCase(type)),
               h(
                 "div.econ-items",
-                group.map((d) => h(LexItem, { data: d, route, id }))
+                group.map((d) => h(LithologyTag, { data: d, href: `/lex/${route}/${d[id]}` }))
               ),
             ])
           ),
@@ -55,28 +55,6 @@ export function LexListPage({ res, title, route, id }) {
       )
     ),
   ]);
-}
-
-function LexItem({ data, route, id }) {
-  const { name, color } = data;
-  const luminance = 0.9;
-  const chromaColor = asChromaColor(color);
-
-  return h("div.econ-item", [
-      h(
-        "div.econ-name",
-        {
-          style: {
-            color: chromaColor?.luminance(luminance).hex(),
-            backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
-          },
-          onClick: (e) => {
-            window.open(`/lex/${route}/${data[id]}`, "_blank");
-          },
-        },
-        name
-      ),
-    ])
 }
 
 function groupByClassThenType(items) {

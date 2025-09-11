@@ -1,0 +1,422 @@
+.nohighlight
+  color: white
+
+.site-header
+  z-index: 1000
+  position: relative
+
+.main-title
+  --macrostrat-logo-size: 100px
+  --macrostrat-wordmark-size: 3.5rem
+  justify-content: center
+
+  .subtitle
+    font-size: 1.2rem
+    margin-top: 0.25rem
+    color: var(--secondary-color)
+    margin-bottom: 0.5rem
+
+  gap: 1rem !important
+
+.site-navbar
+  :global(.navbar-title)
+    transition: opacity 0.3s ease-in-out
+
+  &:global(.transition-enter)
+    :global(.navbar-title)
+      opacity: 1
+
+  &:global(.transition-leave)
+    :global(.navbar-title)
+      opacity: 0
+
+
+.subtitle
+  text-align: center
+  font-weight: 500
+
+//
+.hero
+  height: 300px
+  border-radius: 1em
+  position: relative
+  display: flex
+  justify-content: center
+  align-items: center
+  color: white
+  padding-top: 5em
+  padding-bottom: 5em
+  height: 500px
+
+  font-size: 1.5em
+
+  text-shadow: var(--dark-background) 0px 2px 8px
+
+
+  .hero-backdrop
+    position: absolute
+    top: 0
+    left: 50%
+    bottom: 0
+    margin-left: -50vw
+    width: 100vw
+    height: 100%
+    z-index: -1
+    object-fit: cover
+    overflow: hidden
+    background-position: 50% 50%
+    background-size: cover
+
+  .hero-content
+    text-align: center
+    display: flex
+    flex-direction: column
+    gap: 1em
+
+.cover-image
+  object-fit: cover
+  width: 100vw
+  overflow: hidden
+
+
+.sea-image
+  position: absolute
+  z-index: 6
+  height: 100vh
+  width: 30%
+  object-fit: cover
+
+.parent
+  display: inline-flex
+  width: 100%
+
+
+.top-stat, .top-stat-label
+  display: grid
+  margin: auto
+  color: white
+
+  a
+    color: white !important
+
+
+.stats
+  font-size: 1.5em
+
+.top-stat
+  font-weight: 600
+
+
+.stats
+  display: flex
+  gap: 50px
+  text-shadow: black 1px 0 10px
+  align-items: center
+  justify-content: center
+
+  .stat
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+
+  a
+    color: white
+
+.buttons
+  display: flex
+  flex-direction: column
+
+.country_container
+  height: 100vh
+
+.country
+  height: 100%
+  display: flex
+  justify-content: center
+  align-items: center
+  text-align: center
+  color: white
+
+.img
+  width: 50%
+  object-fit: cover
+
+.country-image
+  height: 50vh
+  width: 50%
+
+.rock-border
+  width: 100%
+  margin: 0
+  padding: 0
+
+.map-info
+  padding: 0 10vh
+  margin: 0
+
+#about
+  height: 100vh
+  background-color: white
+  color: black
+  margin: 0
+
+#apps
+  height: 100vh
+  color: black
+  background-color: white
+
+#api
+  height: 100vh
+
+:root
+  --donate-height: 40vh
+
+.donate-container
+  height: var(--donate-height)
+  display: flex
+  justify-content: center
+  align-items: center
+
+.donate-title
+  flex: 0 0 50%
+  width: 100%
+  text-decoration: none
+
+  color: white
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6)
+  font-family: "Maven Pro", sans-serif
+  padding: 0
+
+
+.donate-info
+  flex: 0 0 50%
+  background: rgba(255, 255, 255, 0.6)
+  padding: 25px
+  color: black
+  font-size: 18px
+
+  a
+    color: black !important
+    font-weight: bold
+    text-decoration: none
+
+.donate-img
+  position: absolute
+  z-index: 5
+  height: var(--donate-height)
+  width: 100%
+  object-fit: cover
+
+.app-header
+  margin: 0
+  padding: 0
+
+.app-box
+  height: 15vh
+  display: flex
+  width: 60%
+  margin: 0 20%
+  position: relative
+  color: black
+
+.app-background-text
+  margin: auto
+  padding-right: 20px
+  margin-right: 0
+  text-align: right
+  max-width: 55%
+  font-size: 72px
+
+.blurb
+  font-size: 15px
+
+.app-img
+  height: 80%
+  margin: auto
+  margin-left: 6%
+
+#api
+  position: relative
+  height: 30vh
+  background-color: white
+
+#api-circle-text
+  display: table-cell
+  vertical-align: middle
+  color: #6bbe98
+  font-size: 72px
+  font-weight: 500
+
+.api-circle
+  float: left
+  margin-left: 15%
+  margin-right: 50px
+  background-color: #fff
+  height: 200px
+  width: 200px
+  border-radius: 50%
+  text-align: center
+  display: table
+  border: 11px solid #6bbe98
+  color: #4BABBf
+
+#api-text
+  padding-top: 50px
+  margin-right: 15%
+  color: #4bab7f
+  font-size: 20px
+  line-height: 28px
+  font-weight: 400
+
+#publications
+  margin: 100px 10%
+
+#pub-title
+  text-align: left
+  color: #E0E1E6
+  position: relative
+  padding-bottom: 0
+  margin-bottom: 0
+
+.pub-list
+  padding-top: 10px
+  margin-left: 20px
+  counter-reset: pub-counter 70
+  color: black
+
+  li
+    counter-increment: pub-counter -1
+
+    &::marker
+      font-size: 35px
+      color: #babdc8
+      content: counter(pub-counter) " "
+      counter-increment: pub-counter
+
+#about
+  margin: 0 10%
+
+.about-row
+  margin: 4%
+  font-size: 18px
+  line-height: 28px
+  font-weight: 200
+
+.about-body-subtitle
+  float: left
+  font-size: 22px
+  font-weight: 200
+
+.about-body
+  margin-left: 30%
+
+#about-title
+  text-align: left
+  color: #E0E1E6
+  position: relative
+  padding-bottom: 0
+
+.line
+  width: 100%
+  border-bottom: 1px solid #E0E1E6
+  position: absolute
+
+.geology-img
+  position: absolute
+  z-index: 0
+  height: 100vh
+  width: 100%
+  object-fit: cover
+
+.map-info
+  position: absolute
+  z-index: 1
+  color: white
+  font-size: 20px
+  margin: 40vh 10%
+  padding: 20px
+  background-color: rgba(0, 0, 0, .4)
+
+.map-title
+  position: absolute
+  z-index: 1
+  color: white
+  width: 50%
+  margin: 0 25%
+
+.pub-line
+  width: 80%
+  border-bottom: 1px solid #E0E1E6
+  position: absolute
+
+.text-donate
+  position: absolute
+  z-index: 100
+  padding: 0 20px
+  display: flex
+  width: 100%
+  justify-content: center
+  align-items: center
+  gap: 30px
+
+.locations
+  display: flex
+  width: 100%
+  flex-wrap: wrap
+
+  .location-img
+    width: 25%
+    height: 40vh
+    object-fit: cover
+    flex: 0 0 25%
+
+  .location-text
+    width: 25%
+    color: black
+    background-color: white
+    display: flex
+    flex-direction: column
+    justify-content: center
+    align-items: center
+    flex: 0 0 25%
+
+    h1
+      font-size: 45px
+      font-weight: 600
+      margin: 0
+
+
+.caption
+  font-size: 15px
+  font-weight: 600
+
+.temp-class
+  display: grid
+  grid-template-columns: 40% 60%
+  grid-template-rows: 30vh
+
+  .link-title
+    display: grid
+    margin: auto
+    margin-left: 20%
+    font-size: 35px
+
+    a
+      color: black
+
+  p
+    display: grid
+    margin: auto
+    margin-left: 10%
+    margin-right: 10%
+    color: black
+    font-size: 16px
+
+.hide
+  display: none
+
+.rock-info
+  display: flex
+  align-items: center
+  gap: .5em
