@@ -43,3 +43,35 @@
     display: flex
     flex-direction: column
     gap: 1em
+
+.header, .update-title
+  display: flex
+  justify-content: space-between
+  align-items: flex-start
+
+.title
+  margin: 0
+
+.update-title
+  display: flex
+  justify-content: space-between
+  position: relative
+
+.update-container
+  padding: 0 1em
+  max-height: 80vh
+  overflow-y: auto
+
+  .update-list
+    padding-top: .5em
+
+  .update
+    height: 250px
+
+
+.close-btn
+  position: absolute
+  z-index: 100
+  top: 1em
+  right: 0
+  cursor: pointer
