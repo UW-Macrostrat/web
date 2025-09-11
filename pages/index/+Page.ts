@@ -96,6 +96,11 @@ export function Page() {
       ]),
       h(
         LinkCard,
+        { title: "Usage Map", href: "/usage-map" },
+        h("p", "Macrostrat usage map")
+      ),
+      h(
+        LinkCard,
         { title: "Documentation", href: "/docs" },
         h("p", "Macrostrat documentation")
       ),

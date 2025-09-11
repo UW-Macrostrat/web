@@ -80,6 +80,7 @@ export function Footer() {
     { href: "/projects", text: "Projects", icon: "briefcase" },
     { href: "/docs", text: "Documentation", icon: "manual" },
     { href: "https://rockd.org", text: "Rockd", icon: "phone-search" },
+    { href: "/heatmap", text: "Heatmap", icon: "geosearch" },
   ];
 
   return h("div", { className: "footer" }, [
