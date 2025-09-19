@@ -1,5 +1,6 @@
 import { apiDomain, pbdbDomain } from "@macrostrat-web/settings";
 import { fetchAPIData, fetchAPIRefs } from "~/_utils";
+import { getPrevalentTaxa } from "~/components/lex/data-helper";
 
 export async function data(pageContext) {
   const concept_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
@@ -21,17 +22,7 @@ export async function data(pageContext) {
   const refValues2 = refs2 ? Object.values(refs2) : [];
   const refs = [...refValues1, ...refValues2];
 
-  const cols = colData?.features
-    ?.map((feature) => feature.properties.col_id)
-    ?.join(",");
-
-  let taxaData = null;
-  if (cols) {
-    const response = await fetch(
-      `${pbdbDomain}/data1.2/occs/prevalence.json?limit=5&coll_id=${cols}`
-    );
-    taxaData = await response.json();
-  }
+  const taxaData = await getPrevalentTaxa(fossilsData);
 
   return { resData: resData[0], refs, fossilsData, colData, taxaData, unitsData };
 }

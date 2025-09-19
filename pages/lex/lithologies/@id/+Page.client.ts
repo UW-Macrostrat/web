@@ -21,7 +21,7 @@ export function Page() {
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
-  console.log("resData:", resData);
+  console.log("fossil Data:", fossilsData);
 
   const children = [
     h(ColumnsTable, {
