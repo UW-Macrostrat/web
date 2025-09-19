@@ -44,15 +44,14 @@ export async function data(pageContext) {
   const refs = [...refValues1, ...refValues2];
 
   // Extract column IDs to fetch taxa data (PBDB)
-  const cols = colData?.features
-    ?.map((feature) => feature.properties.col_id)
-    ?.join(",");
+  const collectionIds = fossilsData?.features
+    ?.map((feature) => feature.properties.cltn_id)
 
   let taxaData = null;
-  if (cols) {
+  if (collectionIds && collectionIds.length > 0) {
     try {
       const response = await fetch(
-        `${pbdbDomain}/data1.2/occs/prevalence.json?limit=5&coll_id=${cols}`
+        `${pbdbDomain}/data1.2/occs/prevalence.json?limit=5&coll_id=${collectionIds.join(",")}`
       );
       if (response.ok) {
         taxaData = await response.json();
