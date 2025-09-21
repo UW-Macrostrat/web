@@ -942,11 +942,11 @@ export function Maps({ href }) {
   return h(LinkCard, { 
     title: h(FlexRow, { justifyContent: "space-between" }, [
       h(FlexRow, { alignItems: "center", gap: ".5em"}, [
-        h('h4', "Maps"),
+        h('h4', "Map Legends"),
         h(BetaTag),
       ]), 
     ]), 
-    href: '/maps?' + href,  
+    href: '/lex/legends?' + href,  
     className: "maps-card" 
   });
 }

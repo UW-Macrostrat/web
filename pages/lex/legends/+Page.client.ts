@@ -92,7 +92,7 @@ function FilterData() {
     route: postgrestPrefix + `/legend_liths`,
     id_key: "legend_id",
     limit: 20,
-    defaultParams: {
+    extraParams: {
       lith_ids: `cs.{${id}}`,
     },
     filterable: true,
@@ -105,7 +105,7 @@ function LegendItem({ data }) {
   const { map_unit_name, legend_id, source_id } = data;
 
   return h(LinkCard, {
-    href: `/maps/${source_id}`,
+    href: `/maps/${source_id}?legend_id=${legend_id}`,
     title: h("div.title", map_unit_name),
   });
 }
