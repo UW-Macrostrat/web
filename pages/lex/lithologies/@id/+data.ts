@@ -31,7 +31,7 @@ export async function data(pageContext) {
           }),
         "colData"
       ),
-      safeFetch(() => fetchAPIData("/geologic_units/map/legend", { lith_id }), "mapsData"),
+      safeFetch(() => fetchAPIData("/geologic_units/map/legend", { lith_id, sample: "true" }), "mapsData"),
       safeFetch(() => fetchAPIData("/fossils", { lith_id, format: "geojson" }), "fossilsData"),
       safeFetch(() => fetchAPIRefs("/fossils", { lith_id }), "refs1"),
       safeFetch(() => fetchAPIRefs("/columns", { lith_id }), "refs2"),
