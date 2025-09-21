@@ -14,8 +14,7 @@ import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
-import { apiV2Prefix } from "@macrostrat-web/settings";
-import { title } from "#/dev/map/rockd-strabospot/+title";
+import { LithologyTag } from "~/components/lex/tag";
 
 const PAGE_SIZE = 20;
 
@@ -32,6 +31,50 @@ export function Page() {
   // check if filtering by lith or strat name
   const href = usePageContext().urlParsed.href;
   const lexFilter = href.includes("name")
+  const params = usePageContext().urlParsed.href.split("?")[1].split("=")
+  const name = params[3]
+  const color = params[2].split("&")[0]
+
+  if (lexFilter) {
+    return h("div.maps-list-page", [
+      h(ContentPage, [
+        h("div.flex-row", [
+          h("div.main", [
+            h(StickyHeader, { className: "header-container" }, [
+              h("div.header", [
+                h('div.top-row', [
+                  h(PageBreadcrumbs, {
+                    title: "Maps for ",
+                    showLogo: true,
+                  }),
+                  h(LithologyTag, { data: { name, color }, href: `` }),
+                ]),
+              ]),
+            ]),
+            h(FilterData)
+          ]),
+          h(
+            "div.sidebar",
+            h("div.sidebar-content", [
+              h(AssistantLinks, { className: "assistant-links" }, [
+                h(
+                  AnchorButton,
+                  { icon: "flows", href: "/maps/ingestion" },
+                  "Ingestion system"
+                ),
+                h(
+                  AnchorButton,
+                  { icon: "map", href: "/map/sources" },
+                  "Show on map"
+                ),
+                h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+              ]),
+            ])
+          ),
+        ]),
+      ]),
+    ]);
+  }
 
   return h("div.maps-list-page", [
     h(ContentPage, [
@@ -39,10 +82,13 @@ export function Page() {
         h("div.main", [
           h(StickyHeader, { className: "header-container" }, [
             h("div.header", [
-              h(PageBreadcrumbs, {
-                title: "Maps",
-                showLogo: true,
-              }),
+              h('div.top-row', [
+                h(PageBreadcrumbs, {
+                  title: "Maps",
+                  showLogo: true,
+                }),
+                h('div')
+              ]),
               h("div.search", [
                 h("div.switches", [
                   h(Switch, {
@@ -65,8 +111,7 @@ export function Page() {
               ]),
             ]),
           ]),
-          lexFilter ? h(FilterData)
-           : h(PostgRESTInfiniteScrollView, {
+          h(PostgRESTInfiniteScrollView, {
             route: `${apiDomain}/api/pg/sources_metadata`,
             id_key: "source_id",
             order_key: recentOrder ? "ref_year" : undefined,

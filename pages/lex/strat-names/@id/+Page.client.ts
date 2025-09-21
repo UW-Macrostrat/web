@@ -40,7 +40,7 @@ export function Page() {
       href: "autoselect=" + resData?.strat_name_long + "&strat_name_id=" + id,
     }),
     h.if(unitsData.length > 0)(Units, { href: "strat_name_id=" + id + "&name=" + resData?.strat_name }),
-    h.if(mapsData?.length > 0)(Maps, { href: "strat_name_id=" + id + "&name=" + resData?.name }),
+    // h.if(mapsData?.length > 0)(Maps, { href: "strat_name_id=" + id + "&name=" + resData?.name }), (add strat names to legends view first)
     h.if(fossilsData.features.length > 0)(Fossils, { href: "strat_name_id=" + id + "&name=" + resData?.name }),
     h(StratNameHierarchy, { id }),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
