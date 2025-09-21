@@ -8,12 +8,13 @@ import {
   StickyHeader,
 } from "~/components";
 import { useState } from "react";
-import { PostgRESTInfiniteScrollView, useAPIResult } from "@macrostrat/ui-components";
+import { PostgRESTInfiniteScrollView, InfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 
 const PAGE_SIZE = 20;
 
@@ -127,6 +128,16 @@ function SourceItem({ data }) {
   );
 }
 
-function FilterData({filterData}) {
-  return null
+function FilterData() {
+  const params = usePageContext().urlParsed.href.split("?")[1].split("=")
+  const filter = params[0]
+  const id = params[1].split("&")[0]
+  return h(InfiniteScrollView, {
+    route: `${apiV2Prefix}/geologic_units/map/legend`,
+    params: {
+      [filter]: id,
+      page: 1
+    },
+    limit: PAGE_SIZE,
+  });
 }
