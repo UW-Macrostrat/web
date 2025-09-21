@@ -8,13 +8,14 @@ import {
   StickyHeader,
 } from "~/components";
 import { useState } from "react";
-import { PostgRESTInfiniteScrollView, InfiniteScrollView } from "@macrostrat/ui-components";
+import { PostgRESTInfiniteScrollView, useAPIResult } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import { apiV2Prefix } from "@macrostrat-web/settings";
+import { title } from "#/dev/map/rockd-strabospot/+title";
 
 const PAGE_SIZE = 20;
 
@@ -130,14 +131,26 @@ function SourceItem({ data }) {
 
 function FilterData() {
   const params = usePageContext().urlParsed.href.split("?")[1].split("=")
-  const filter = params[0]
   const id = params[1].split("&")[0]
-  return h(InfiniteScrollView, {
-    route: `${apiV2Prefix}/geologic_units/map/legend`,
-    params: {
-      [filter]: id,
-      page: 1
-    },
+
+  return h(PostgRESTInfiniteScrollView, {
+    route: `${apiDomain}/api/pg/legend_liths`,
+    id_key: "legend_id",
     limit: PAGE_SIZE,
+    defaultParams: {
+      lith_ids: `cs.{${id}}`,
+    },
+    filterable: true,
+    searchColumns: [{value: "map_unit_name", label: "Map unit name"}],
+    itemComponent: LegendItem,
+  });
+}
+
+function LegendItem({ data }) {
+  const { map_unit_name, legend_id, source_id } = data;
+
+  return h(LinkCard, {
+    href: `/maps/${source_id}`,
+    title: h("div.title", map_unit_name),
   });
 }
