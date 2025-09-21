@@ -28,54 +28,6 @@ export function Page() {
 
   const initialItems = recentOrder && activeOnly ? sources : undefined;
 
-  // check if filtering by lith or strat name
-  const href = usePageContext().urlParsed.href;
-  const lexFilter = href.includes("name")
-  const params = usePageContext().urlParsed.href.split("?")[1].split("=")
-  const name = params[3]
-  const color = params[2].split("&")[0]
-
-  if (lexFilter) {
-    return h("div.maps-list-page", [
-      h(ContentPage, [
-        h("div.flex-row", [
-          h("div.main", [
-            h(StickyHeader, { className: "header-container" }, [
-              h("div.header", [
-                h('div.top-row', [
-                  h(PageBreadcrumbs, {
-                    title: "Maps for ",
-                    showLogo: true,
-                  }),
-                  h(LithologyTag, { data: { name, color }, href: `` }),
-                ]),
-              ]),
-            ]),
-            h(FilterData)
-          ]),
-          h(
-            "div.sidebar",
-            h("div.sidebar-content", [
-              h(AssistantLinks, { className: "assistant-links" }, [
-                h(
-                  AnchorButton,
-                  { icon: "flows", href: "/maps/ingestion" },
-                  "Ingestion system"
-                ),
-                h(
-                  AnchorButton,
-                  { icon: "map", href: "/map/sources" },
-                  "Show on map"
-                ),
-                h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-              ]),
-            ])
-          ),
-        ]),
-      ]),
-    ]);
-  }
-
   return h("div.maps-list-page", [
     h(ContentPage, [
       h("div.flex-row", [
@@ -172,30 +124,4 @@ function SourceItem({ data }) {
       ]),
     ]
   );
-}
-
-function FilterData() {
-  const params = usePageContext().urlParsed.href.split("?")[1].split("=")
-  const id = params[1].split("&")[0]
-
-  return h(PostgRESTInfiniteScrollView, {
-    route: `${apiDomain}/api/pg/legend_liths`,
-    id_key: "legend_id",
-    limit: PAGE_SIZE,
-    defaultParams: {
-      lith_ids: `cs.{${id}}`,
-    },
-    filterable: true,
-    searchColumns: [{value: "map_unit_name", label: "Map unit name"}],
-    itemComponent: LegendItem,
-  });
-}
-
-function LegendItem({ data }) {
-  const { map_unit_name, legend_id, source_id } = data;
-
-  return h(LinkCard, {
-    href: `/maps/${source_id}`,
-    title: h("div.title", map_unit_name),
-  });
 }
