@@ -15,9 +15,6 @@ export function ColumnsMapContainer(props) {
 function ColumnsMapInner({ columnIDs = null, projectID = null, className, hideColumns }) {
   const columnData = useMacrostratColumns(projectID, projectID != null);
 
-  console.log("projectID:", projectID);
-  console.log("columnData:", columnData);
-
   if(!columnData) {
     return h("div", { className }, "Loading map...");
   }
@@ -35,6 +32,7 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className, hideCo
           }
         },
         columnIDs,
+        projectID,
       },
       h(FitBounds, { columnData, projectID })
     ),
