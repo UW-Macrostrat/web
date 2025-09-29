@@ -92,14 +92,14 @@ function TagFilterManager({ tags, setIngestFilter, ingestFilter }) {
     h("h3", ["Filter by tag"]),
     h(Tag, {
       value: "pending",
-      active: ingestFilter?.getAll("state").includes("eq.pending"),
+      active: (ingestFilter?.getAll("state") ?? []).includes("eq.pending"),
       onClick: async () => {
         updateUrl("state", "eq.pending", setIngestFilter);
       },
     }),
     h(Tag, {
       value: "ingested",
-      active: ingestFilter?.getAll("state").includes("eq.ingested"),
+      active: (ingestFilter?.getAll("state") ?? []).includes("eq.ingested"),
       onClick: async () => {
         updateUrl("state", "eq.ingested", setIngestFilter);
       },
@@ -108,7 +108,7 @@ function TagFilterManager({ tags, setIngestFilter, ingestFilter }) {
       return h(Tag, {
         key: tag,
         value: tag,
-        active: ingestFilter?.getAll("tags").includes(`eq.${tag}`),
+        active: (ingestFilter?.getAll("tags")  ?? []).includes(`eq.${tag}`),
         onClick: async () => {
           updateUrl("tags", `eq.${tag}`, setIngestFilter);
         },
@@ -130,19 +130,12 @@ function AddMapButton({ user }) {
   );
 }
 
-const toggleUrlParam = (
-  urlSearchParam: URLSearchParams,
-  key: string,
-  value: string
-) => {
+const toggleUrlParam = (urlSearchParam: URLSearchParams | undefined, key: string, value: string) => {
   // Check if this key value pair is already in the search params iteratively
-  if (urlSearchParam.getAll(key).includes(value)) {
-    urlSearchParam.delete(key, value);
-  } else {
-    urlSearchParam.append(key, value);
-  }
-
-  return new URLSearchParams(urlSearchParam.toString());
+  const sp = urlSearchParam ? new URLSearchParams(urlSearchParam) : new URLSearchParams()
+  if (sp.getAll(key).includes(value)) sp.delete(key, value)
+  else sp.append(key, value)
+  return sp
 };
 
 const updateUrl = (
