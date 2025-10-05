@@ -12,7 +12,7 @@ import { useMapStyleOperator } from "@macrostrat/mapbox-react"
 import { satelliteMapURL } from "@macrostrat-web/settings";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
 import mapboxgl from "mapbox-gl"
-import { pbdbDomain } from "@macrostrat-web/settings";
+import { pbdbDomain, tileserverDomain } from "@macrostrat-web/settings";
 
 export function ColumnsMapContainer(props) {
   /* TODO: integrate this with shared web components */
@@ -54,7 +54,7 @@ function ColumnsMapInner({
 
     return h('div.lex-controls', [
       h.if(fossilsExist)('div.btn', { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
-      // h('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
+      h('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
       h('div.btn', { onClick: handleSatellite }, h(Icon, { icon: "satellite", className: 'icon' })),
     ])
   }
@@ -93,12 +93,52 @@ function ColumnsMapInner({
         [
           fossilsExist ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }) : null,
           h(LexControls),
-          !hasFitted.current ? h(FitBounds, { columnData: columns, hasFitted }) : null
+          !hasFitted.current ? h(FitBounds, { columnData: columns, hasFitted }) : null,
+          showOutcrop ? h(OutcropLayer) : null
         ]
       ),
     ]
   );
 }
+
+function OutcropLayer() {
+  console.log("Render outcrop layer")
+  useMapStyleOperator((map) => {
+    if (!map) return;
+
+    if (!map.getLayer("outcrop-layer")) {
+      if (!map.getSource("macrostrat-outcrops")) {
+        map.addSource("macrostrat-outcrops", {
+          type: "vector",
+          tiles: [tileserverDomain + "/carto-slim/{z}/{x}/{y}"],
+        });
+      }
+
+      map.addLayer({
+        id: "outcrop-layer",
+        type: "fill",
+        source: "macrostrat-outcrops",
+        "source-layer": "default",
+        paint: {
+          "fill-color": "#888888",
+          "fill-opacity": 0.4,
+        },
+      });
+    }
+
+    return () => {
+      if (map.getLayer("outcrop-layer")) {
+        map.removeLayer("outcrop-layer");
+      }
+      if (map.getSource("macrostrat-outcrops")) {
+        map.removeSource("macrostrat-outcrops");
+      }
+    };
+  }, []);
+
+  return null;
+}
+
 
 function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   useMapStyleOperator(

@@ -83,7 +83,7 @@ export function VectorMapInspectorPage({
         url.startsWith(burwellTileDomain)
       ) {
         return {
-          url: url + "?cache=bypass",
+          url: url + "?int_id=10",
         };
       }
       return { url };

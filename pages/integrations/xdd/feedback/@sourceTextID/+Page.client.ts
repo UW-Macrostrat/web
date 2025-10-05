@@ -194,7 +194,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
-    // view: user === null,
+    // view: user === null,    TODO: Enable view mode for non-logged in users
     autoSelect,
     onSave: wrapWithToaster(
       async (tree) => {
