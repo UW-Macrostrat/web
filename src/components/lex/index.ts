@@ -104,8 +104,6 @@ export function ColumnsTable({ resData, colData, fossilsData }) {
   if (!colData || !colData.features || colData.features.length === 0) return;
   const summary = summarize(colData.features || []);
 
-  console.log("resData:", resData);
-
   let filters = []
 
   if (resData?.lith_id) {
@@ -116,6 +114,20 @@ export function ColumnsTable({ resData, colData, fossilsData }) {
         category: "lithology",
         type: "lithologies",
         id: resData.lith_id,
+        name: resData.name,
+        legend_ids
+      })
+    }
+  }
+
+  if (resData?.concept_id) {
+    const legend_ids = useAPIResult(apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id)
+
+    if (legend_ids) {
+      filters.push({
+        category: "strat_name",
+        type: "strat_name_concepts",
+        id: resData.concept_id,
         name: resData.name,
         legend_ids
       })
@@ -133,6 +145,8 @@ export function ColumnsTable({ resData, colData, fossilsData }) {
       }
     )
   }
+
+  console.log("Filters in ColumnsTable:", filters)
 
   const { b_age, t_age } = resData;
 
