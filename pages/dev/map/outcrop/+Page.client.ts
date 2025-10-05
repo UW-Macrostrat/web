@@ -16,6 +16,7 @@ import { fetchAPIData, fetchPGData } from "~/_utils";
 import { Measurement } from "./measurement";
 import { usePageContext } from "vike-react/usePageContext";
 import { Loading } from "~/components";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 
 export function Page() {
     return  h(FullscreenPage, h(Map))
@@ -25,7 +26,11 @@ function Map() {
 
 
 
-    const style = useMapStyle();
+    const style = buildMacrostratStyle({
+    tileserverDomain,
+    fillOpacity: 0.3,
+    strokeOpacity: 0.1,
+  }) as mapboxgl.Style;
 
     if(style == null) return null;
 
@@ -58,57 +63,3 @@ function Map() {
         ]
     );
 }
-
-function useMapStyle() {
-  const dark = useDarkMode();
-  const isEnabled = dark?.isEnabled;
-
-  const baseStyle = isEnabled
-    ? "mapbox://styles/mapbox/dark-v10"
-    : "mapbox://styles/mapbox/light-v10";
-
-  const [actualStyle, setActualStyle] = useState(null);
-
-  const url = tileserverDomain + "/carto-slim/{z}/{x}/{y}";
-
-  const overlayStyle = {
-    sources: {
-      cartoSlim: {
-        type: "vector",
-        tiles: [url],
-      },
-    },
-    layers: [
-      {
-        id: "carto-slim-fill",
-        type: "fill",
-        source: "cartoSlim",
-        "source-layer": "default", // Ensure this matches your vector tile layer name
-        paint: {
-          "fill-color": "#377eb8",
-          "fill-opacity": 0.5,
-        },
-      },
-      {
-        id: "carto-slim-outline",
-        type: "line",
-        source: "cartoSlim",
-        "source-layer": "carto-slim", // Same layer name
-        paint: {
-          "line-color": "#1f78b4",
-          "line-width": 1,
-        },
-      },
-    ],
-  };
-
-  useEffect(() => {
-    buildInspectorStyle(baseStyle, overlayStyle, {
-      mapboxToken: mapboxAccessToken,
-      inDarkMode: isEnabled,
-    }).then(setActualStyle);
-  }, [baseStyle, overlayStyle, mapboxAccessToken, isEnabled]);
-
-  return actualStyle;
-}
-

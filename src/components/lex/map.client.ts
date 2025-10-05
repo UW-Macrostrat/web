@@ -4,15 +4,22 @@ import {
 } from "@macrostrat/column-views";
 import h from "./map.module.sass";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
-import { ErrorBoundary } from "@macrostrat/ui-components";
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ErrorBoundary, useDarkMode } from "@macrostrat/ui-components";
+import { ExpansionPanel, buildInspectorStyle } from "@macrostrat/map-interface";
 import { Icon } from "@blueprintjs/core"
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMapStyleOperator } from "@macrostrat/mapbox-react"
 import { satelliteMapURL } from "@macrostrat-web/settings";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
 import mapboxgl from "mapbox-gl"
 import { pbdbDomain, tileserverDomain } from "@macrostrat-web/settings";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
+
+  const _macrostratStyle = buildMacrostratStyle({
+    tileserverDomain,
+    fillOpacity: 0.3,
+    strokeOpacity: 0.1,
+  }) as mapboxgl.Style;
 
 export function ColumnsMapContainer(props) {
   /* TODO: integrate this with shared web components */
@@ -35,7 +42,6 @@ function ColumnsMapInner({
   const [showOutcrop, setShowOutcrop] = useState(true);
   const fossilClickRef = useRef(false);
   const hasFitted = useRef(false);
-
   const fossilsExist = fossilsData?.features?.length > 0;
 
   function LexControls() {
@@ -75,7 +81,7 @@ function ColumnsMapInner({
         {
           columns,
           accessToken: mapboxAccessToken,
-          style: {height: "100%"},
+          style: {  ..._macrostratStyle, height: "100%" },
           onSelectColumn: (id) => {
               setTimeout(() => {
                 console.log("fossilClicked", fossilClickRef.current)
@@ -94,47 +100,45 @@ function ColumnsMapInner({
           fossilsExist ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }) : null,
           h(LexControls),
           !hasFitted.current ? h(FitBounds, { columnData: columns, hasFitted }) : null,
-          showOutcrop ? h(OutcropLayer) : null
+          h(OutcropLayer, {showOutcrop})
         ]
       ),
     ]
   );
 }
 
-function OutcropLayer() {
-  console.log("Render outcrop layer")
+function OutcropLayer({showOutcrop}) {
   useMapStyleOperator((map) => {
-    if (!map) return;
+    if (map == null) return;
 
-    if (!map.getLayer("outcrop-layer")) {
-      if (!map.getSource("macrostrat-outcrops")) {
-        map.addSource("macrostrat-outcrops", {
-          type: "vector",
-          tiles: [tileserverDomain + "/carto-slim/{z}/{x}/{y}"],
-        });
-      }
+    const macrostratLayers = _macrostratStyle.layers
+    const macrostratSources = _macrostratStyle.sources
 
-      map.addLayer({
-        id: "outcrop-layer",
-        type: "fill",
-        source: "macrostrat-outcrops",
-        "source-layer": "default",
-        paint: {
-          "fill-color": "#888888",
-          "fill-opacity": 0.4,
-        },
+    if(!showOutcrop) {
+      macrostratLayers?.forEach((lyr) => {
+        if (map.getLayer(lyr.id)) {
+          map.removeLayer(lyr.id);
+        }
       });
+      return;
     }
 
-    return () => {
-      if (map.getLayer("outcrop-layer")) {
-        map.removeLayer("outcrop-layer");
+    macrostratLayers?.forEach((lyr) => {
+      if (!map.getLayer(lyr.id) && lyr.source) {
+        if (!map.getSource(lyr.source)) {
+          map.addSource(lyr.source, (_macrostratStyle.sources as any)[lyr.source]);
+        }
+        map.addLayer(lyr);
       }
-      if (map.getSource("macrostrat-outcrops")) {
-        map.removeSource("macrostrat-outcrops");
+    });
+
+    Object.keys(macrostratSources).forEach((src) => {
+      if (!map.getSource(src)) {
+        map.addSource(src, (macrostratSources as any)[src]);
       }
-    };
-  }, []);
+    });
+
+  }, [showOutcrop]);
 
   return null;
 }
@@ -267,4 +271,28 @@ function FitBounds({ columnData, hasFitted }) {
   }, []);
 
   return null;
+}
+
+function useMapStyle(mapboxToken) {
+  const dark = useDarkMode();
+  const isEnabled = dark?.isEnabled;
+
+  const baseStyle = isEnabled
+    ? "mapbox://styles/mapbox/dark-v10"
+    : "mapbox://styles/mapbox/light-v10";
+
+  const [actualStyle, setActualStyle] = useState(baseStyle);
+
+  console.log("macrostrat style", _macrostratStyle)
+
+  useEffect(() => {
+    const overlayStyle = _macrostratStyle
+    buildInspectorStyle(baseStyle, overlayStyle, {
+      mapboxToken,
+      inDarkMode: isEnabled,
+    }).then((s) => {
+      setActualStyle(s);
+    });
+  }, [baseStyle, mapboxToken, isEnabled]);
+  return actualStyle;
 }
