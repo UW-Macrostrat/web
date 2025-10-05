@@ -36,7 +36,7 @@ function ColumnMapContainer(props) {
     {
       load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
       fallback: h("div.loading", "Loading map..."),
-      deps: [props.columns, props.projectID, props.fossilData],
+      deps: [props.columns, props.projectID, props.fossilData, props.filters],
     },
     (component) => h(component, props)
   );
@@ -104,6 +104,36 @@ export function ColumnsTable({ resData, colData, fossilsData }) {
   if (!colData || !colData.features || colData.features.length === 0) return;
   const summary = summarize(colData.features || []);
 
+  console.log("resData:", resData);
+
+  let filters = []
+
+  if (resData?.lith_id) {
+    const legend_ids = useAPIResult(apiV2Prefix + "/mobile/map_filter?lith_id=" + resData.lith_id) 
+
+    if (legend_ids) {
+      filters.push({
+        category: "lithology",
+        type: "lithologies",
+        id: resData.lith_id,
+        name: resData.name,
+        legend_ids
+      })
+    }
+  }
+
+  if (resData?.int_id) {
+    filters.push(
+      {
+        ...resData,
+        category: "interval",
+        type: "intervals",
+        id: resData.int_id,
+        name: resData.name,
+      }
+    )
+  }
+
   const { b_age, t_age } = resData;
 
   const {
@@ -153,6 +183,7 @@ export function ColumnsTable({ resData, colData, fossilsData }) {
       h("div.collections", pbdb_collections.toLocaleString() + " collections"),
     ]),
     h(ColumnMapContainer, {
+      filters,
       columns: colData,
       className: "column-map-container",
       fossilsData,
