@@ -8,13 +8,11 @@ import {
   StickyHeader,
 } from "~/components";
 import { useState } from "react";
-import { PostgRESTInfiniteScrollView, useAPIResult } from "@macrostrat/ui-components";
+import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
-import { usePageContext } from "vike-react/usePageContext";
-import { LithologyTag } from "~/components/lex/tag";
 
 const PAGE_SIZE = 20;
 
@@ -34,13 +32,10 @@ export function Page() {
         h("div.main", [
           h(StickyHeader, { className: "header-container" }, [
             h("div.header", [
-              h('div.top-row', [
-                h(PageBreadcrumbs, {
-                  title: "Maps",
-                  showLogo: true,
-                }),
-                h('div')
-              ]),
+              h(PageBreadcrumbs, {
+                title: "Maps",
+                showLogo: true,
+              }),
               h("div.search", [
                 h("div.switches", [
                   h(Switch, {

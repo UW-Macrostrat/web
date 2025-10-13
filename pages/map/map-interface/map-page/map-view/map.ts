@@ -295,8 +295,6 @@ function useStyleReloader(pbdbPoints) {
   const filters = useAppState((s) => s.core.filters);
   const mapLayers = useAppState((s) => s.core.mapLayers);
 
-  console.log("map layers changed", mapLayers);
-
   return useMapStyleOperator(
     (map) => {
       const style = map.getStyle();
