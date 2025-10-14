@@ -25,7 +25,8 @@ export function Page() {
     h(ColumnsTable, {
       resData,
       colData,
-      fossilsData
+      fossilsData,
+      mapUrl: "intervals=" + id
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),

@@ -33,7 +33,8 @@ export function Page() {
     h(ColumnsTable, {
       resData,
       colData,
-      fossilsData
+      fossilsData,
+      mapUrl: "strat_name_concept=" + id 
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
