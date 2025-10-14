@@ -36,7 +36,7 @@ function ColumnMapContainer(props) {
     {
       load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
       fallback: h("div.loading", "Loading map..."),
-      deps: [props.columns, props.projectID, props.fossilData, props.filters],
+      deps: [props.columns, props.projectID, props.fossilData, props.filters, props.mapUrl],
     },
     (component) => h(component, props)
   );
@@ -100,7 +100,7 @@ function LexItemPageInner(props: LexItemPageProps) {
   ]);
 }
 
-export function ColumnsTable({ resData, colData, fossilsData }) {
+export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
   if (!colData || !colData.features || colData.features.length === 0) return;
   const summary = summarize(colData.features || []);
 
@@ -201,7 +201,7 @@ export function ColumnsTable({ resData, colData, fossilsData }) {
       columns: colData,
       className: "column-map-container",
       fossilsData,
-      lex: true
+      mapUrl,
     }),
   ]);
 }

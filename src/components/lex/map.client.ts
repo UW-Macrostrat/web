@@ -15,6 +15,7 @@ import mapboxgl from "mapbox-gl"
 import { pbdbDomain, tileserverDomain } from "@macrostrat-web/settings";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { getExpressionForFilters } from "./filter-helper";
+import { navigate } from "vike/client/router";
 
 const _macrostratStyle = buildMacrostratStyle({
   tileserverDomain,
@@ -35,9 +36,9 @@ function ColumnsMapInner({
   columnIDs = null,
   className = "map-container",
   columns = null,
-  lex = false,
   fossilsData = [],
   filters = [],
+  mapUrl = ""
 }) {
   const [showSatellite, setShowSatellite] = useState(true);
   const [showFossils, setShowFossils] = useState(false);
@@ -59,8 +60,10 @@ function ColumnsMapInner({
       setShowOutcrop(!showOutcrop);
     }
 
+    const map = "/map/layers#" + mapUrl
 
     return h('div.lex-controls', [
+      h.if(mapUrl !== "")('div.btn', { onClick: () => navigate(map) }, h(Icon, { icon: "map", className: 'icon' })),
       h.if(fossilsExist)('div.btn', { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
       h.if(filters.length > 0)('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
       h('div.btn', { onClick: handleSatellite }, h(Icon, { icon: "satellite", className: 'icon' })),
