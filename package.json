@@ -1,7 +1,7 @@
 {
   "name": "@macrostrat/web",
   "private": true,
-  "version": "5.2.1-beta.1",
+  "version": "5.2.1",
   "description": "Macrostrat map interface",
   "type": "module",
   "scripts": {
