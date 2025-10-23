@@ -5,6 +5,7 @@ import {
 } from "@macrostrat/form-components";
 import h from "@macrostrat/hyper";
 import { ingestPrefix } from "../../packages/settings";
+import { isLocalTesting, mockUser } from "./localTestingAuth";
 
 async function authTransformer(
   action: AuthAction | AsyncAuthAction
@@ -12,6 +13,9 @@ async function authTransformer(
   /** This transformer is taken directly from Sparrow */
   switch (action.type) {
     case "get-status":
+      if (isLocalTesting()) {
+        return { type: "update-user", user: mockUser };
+      }
       try {
         const user = await fetchUser();
         return { type: "update-user", user };
@@ -54,6 +58,7 @@ export function AuthProvider(props) {
 }
 
 export async function fetchUser() {
+  if (isLocalTesting()) return mockUser;
   const response = await fetch(`${ingestPrefix}/security/me`, {
     method: "GET",
     credentials: "include",

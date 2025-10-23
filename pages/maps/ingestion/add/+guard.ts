@@ -1,21 +1,30 @@
 import { redirect, render } from "vike/abort";
-import { ingestPrefix } from "@macrostrat-web/settings";
+import { isLocalTesting } from "~/_providers/localTestingAuth";
 
-export const guard = (pageContext) => {
-  const { user } = pageContext;
+export default function guard(pageContext: any) {
+  if (isLocalTesting()) return;
 
-  if (user === undefined) {
-    // Render the login page while preserving the URL. (This is novel technique
-    // which we explain down below.)
-    throw redirect(
-      ingestPrefix + `/security/login?return_url=${pageContext.url}`
-    );
-    /* The more traditional way, redirect the user:
-    throw redirect('/login')
-    */
-  }
-  if (!user.groups.includes(1)) {
-    // Render the error page and show message to the user
+  const path = pageContext?.urlPathname;
+  const user = pageContext?.user ?? null;
+  const roles: string[] = Array.isArray(user?.roles)
+    ? user.roles
+    : user?.role
+    ? [user.role]
+    : [];
+  const effectiveRoles = roles.length ? roles : ["web_anon"];
+  const groupNames: string[] = Array.isArray(user?.groups)
+    ? user.groups
+        .map((g: any) => (typeof g === "string" ? g : g?.name))
+        .filter(Boolean)
+    : [];
+
+  const allowed =
+    effectiveRoles.includes("web_anon") ||
+    effectiveRoles.includes("admin") ||
+    effectiveRoles.includes("web_admin") ||
+    groupNames.includes("web_admin");
+
+  if (!allowed) {
     throw render(403, "Only admins are allowed to access this page.");
   }
-};
+}
