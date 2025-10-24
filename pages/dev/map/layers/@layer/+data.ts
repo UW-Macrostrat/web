@@ -51,6 +51,12 @@ const layerIndex: LayerInfo[] = [
     type: "vector",
   },
   {
+    slug: "carto-raster",
+    tileset: tileserverDomain + "/carto/{z}/{x}/{y}.png",
+    type: "raster",
+    title: "Carto (raster)",
+  },
+  {
     slug: "carto-v1",
     tileset: "https://tiles.macrostrat.org/carto/{z}/{x}/{y}.mvt",
     type: "vector",
@@ -64,18 +70,6 @@ const layerIndex: LayerInfo[] = [
     slug: "all-maps",
     tileset: MacrostratVectorTileset.AllMaps,
     type: "vector",
-  },
-  {
-    slug: "carto-raster",
-    tileset: tileserverDomain + "/legacy/carto/{z}/{x}/{y}.png", //?cache=bypass",
-    type: "raster",
-    title: "Carto (raster)",
-  },
-  {
-    slug: "carto-raster-v1",
-    tileset: "https://tiles.macrostrat.org/carto/{z}/{x}/{y}.png",
-    type: "raster",
-    title: "Carto (raster, v1)",
   },
   {
     slug: "emphasized",
