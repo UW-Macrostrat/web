@@ -5,7 +5,7 @@ import {
   MapView,
   buildInspectorStyle
 } from "@macrostrat/map-interface";
-import { mapboxAccessToken, matomoToken, matomoApiURL, tileserverDomain } from "@macrostrat-web/settings";
+import { mapboxAccessToken, matomoToken, postgrestPrefix, tileserverDomain } from "@macrostrat-web/settings";
 import { Footer } from "~/components/general";
 import { Divider, Spinner, Tabs, Tab } from "@blueprintjs/core";
 import { useEffect, useState } from "react";
@@ -24,12 +24,22 @@ export function Page() {
 }
 
 function PageHeader() {
+    const stats = useAPIResult(`${postgrestPrefix}/macrostrat_stats`)?.[0];
+    if (stats == null) return null;
+    const { rows_last_24_hours, total_rows } = stats;
+
     return h('div.page-header', [
         h('h1', 'Heatmap'),
         h(Divider),
-        h('p', 'This is a heatmap of all the locations where Macrostrat has been accessed from.'),
-        h('p', 'The blue markers indicate today\'s accesses, while the grey markers indicate accesses from other days.'),
-    ]);
+        h('p', `This is a heatmap of all the locations where Macrostrat has been accessed from.`),
+        h('p', [
+          "The blue markers indicate today's ",
+          h('strong', rows_last_24_hours.toLocaleString()),
+          " accesses, while the grey markers indicate the total ",
+          h('strong', total_rows.toLocaleString()),
+          " accesses from all days."
+        ])    
+      ]);
 }
 
 function todayStyle() {
