@@ -14,18 +14,11 @@ import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 
-import { LexSelection } from "@macrostrat/form-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-import {
-  useAPIResult,
-  PostgRESTInfiniteScrollView,
-} from "@macrostrat/ui-components";
+import { useAPIResult } from "@macrostrat/ui-components";
+import { atom, useAtomValue, useSetAtom } from "jotai";
 
 const h = hyper.styled(styles);
-
-export function Page(props) {
-  return h(ColumnListPage, props);
-}
 
 function ColumnMapContainer(props) {
   return h(
@@ -39,7 +32,12 @@ function ColumnMapContainer(props) {
   );
 }
 
-function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
+type ColumnFilterKey = "liths" | "stratNames" | "intervals";
+type ColumnFilterState = Record<ColumnFilterKey, number[] | null>;
+
+const columnFilterAtom = atom<ColumnFilterState | null>();
+
+export function Page({ title = "Columns", linkPrefix = "/" }) {
   const { allColumnGroups, project } = useData();
 
   const [columnGroups, setColumnGroups] = useState(null);
@@ -202,16 +200,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                 }),
               ]),
             ]),
-            h(LexFilters, {
-              selectedLiths,
-              setSelectedLiths,
-              selectedUnits,
-              setSelectedUnits,
-              selectedStratNames,
-              setSelectedStratNames,
-              selectedIntervals,
-              setSelectedIntervals,
-            }),
+            h(LexFilters),
           ]),
           h.if(!loading)(
             "div.column-groups",
@@ -339,33 +328,10 @@ const ColumnItem = React.memo(
   }
 );
 
-function LexFilters({
-  selectedLiths,
-  setSelectedLiths,
-  selectedUnits,
-  setSelectedUnits,
-  selectedStratNames,
-  setSelectedStratNames,
-  selectedIntervals,
-  setSelectedIntervals,
-}) {
-  const show =
-    selectedLiths || selectedStratNames || selectedUnits || selectedIntervals;
-
-  if (!show) return null;
-
-  const { type, lex_id } =
-    selectedLiths ?? selectedStratNames ?? selectedUnits ?? selectedIntervals;
-
-  const route =
-    type === "lithology"
-      ? "lithologies"
-      : type === "strat name"
-      ? "strat-names"
-      : type === "interval"
-      ? "intervals"
-      : "units";
-
+function LexFilters() {
+  const filterState = useAtomValue(columnFilterAtom);
+  const filters = buildFilters(filterState);
+  if (filters.length == 0) return null;
   return h("div.lex-filters", [
     h(
       FlexRow,
@@ -375,25 +341,66 @@ function LexFilters({
       },
       [
         h("p.filter", "Filtering columns by "),
-        h(LithologyTag, {
-          href: `/lex/${route}/${lex_id}`,
-          data:
-            selectedLiths ??
-            selectedStratNames ??
-            selectedUnits ??
-            selectedIntervals,
-        }),
-        h(Icon, {
-          className: "close-btn",
-          icon: "cross",
-          onClick: () => {
-            setSelectedLiths(null);
-            setSelectedStratNames(null);
-            setSelectedUnits(null);
-            setSelectedIntervals(null);
-          },
-        }),
+        ...filters.map((filter) =>
+          h(ColumnFilterItem, {
+            data: filter,
+            key: filter.type + filter.identifier,
+          })
+        ),
       ]
     ),
   ]);
+}
+
+const clearAllFiltersAtom = atom(null, (get, set) => {
+  set(columnFilterAtom, null);
+});
+
+interface ColumnFilterDefinition {
+  type: ColumnFilterKey;
+  identifier: number;
+}
+
+function buildFilters(
+  filters: ColumnFilterState | null
+): ColumnFilterDefinition[] {
+  const filterItems: ColumnFilterDefinition[] = [];
+  if (filters == null) return filterItems;
+  for (const key of Object.keys(filters) as ColumnFilterKey[]) {
+    const ids = filters[key];
+    if (ids != null) {
+      for (const id of ids) {
+        filterItems.push({ type: key, identifier: id });
+      }
+    }
+  }
+  return filterItems;
+}
+
+function ColumnFilterItem({ data }: { data: ColumnFilterDefinition }) {
+  const { type, identifier } = data;
+  const route = routeForFilterKey(type);
+  const clearAllFilters = useSetAtom(clearAllFiltersAtom);
+  return h("div.lex-filter-item", [
+    h(LithologyTag, {
+      href: `/lex/${route}/${identifier}`,
+      data: { lex_id: identifier, type: type },
+    }),
+    h(Icon, {
+      className: "close-btn",
+      icon: "cross",
+      onClick: clearAllFilters,
+    }),
+  ]);
+}
+
+function routeForFilterKey(key: ColumnFilterKey): string {
+  switch (key) {
+    case "liths":
+      return "lithologies";
+    case "stratNames":
+      return "strat-names";
+    case "intervals":
+      return "intervals";
+  }
 }
