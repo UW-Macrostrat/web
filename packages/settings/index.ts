@@ -28,10 +28,34 @@ export const apiV2Prefix = getRuntimeConfig(
   apiDomain + "/api/v2"
 );
 
-export const ingestPrefix = getRuntimeConfig(
-  "MACROSTRAT_INGEST_API",
+export const apiV3Prefix = getRuntimeConfig(
+  "MACROSTRAT_API_V3",
   apiDomain + "/api/v3"
 );
+
+// If MACROSTRAT_INGEST_API is set, warn about deprecation
+if (getRuntimeConfig("MACROSTRAT_INGEST_API") != null) {
+  console.warn(
+    "MACROSTRAT_INGEST_API is deprecated. Use MACROSTRAT_API_V3 instead."
+  );
+}
+export const ingestPrefix = getRuntimeConfig(
+  "MACROSTRAT_INGEST_API",
+  apiV3Prefix
+);
+
+export const webAssetsPrefix = getRuntimeConfig(
+  "MACROSTRAT_WEB_ASSETS_PREFIX",
+  "https://storage.macrostrat.org/assets/web"
+);
+
+// Set a root CSS variable for web assets prefix
+if (typeof document !== "undefined") {
+  document.documentElement.style.setProperty(
+    "--web-assets-prefix",
+    webAssetsPrefix
+  );
+}
 
 export const cdrPrefix = getRuntimeConfig("CDR_API_URL");
 export const cdrAPIKey = getRuntimeConfig("CDR_API_KEY");

@@ -9,7 +9,7 @@ import {
   Units,
   Fossils,
   Maps,
-  Matches
+  TextExtractions
 } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
 
@@ -21,23 +21,22 @@ export function Page() {
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
-  console.log("resData:", resData);
+  console.log("fossil Data:", fossilsData);
 
   const children = [
     h(ColumnsTable, {
       resData,
       colData,
-      fossilsData
+      fossilsData,
+      mapUrl: "lithologies=" + id
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(Maps, { mapsData }),
-    h(Matches, {
-      lith_id: id,
-    }),
-    h.if(fossilsData.features.length > 0)(Fossils, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
-    h.if(unitsData.length > 0)(Units, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h(TextExtractions, { lith_id: id, href: "autoselect=" + resData?.name + "&lith_id=" + id + "&color=" + resData?.color }),
+    h.if(unitsData?.length > 0)(Units, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h.if(mapsData?.length > 0)(Maps, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h.if(fossilsData?.features.length > 0)(Fossils, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "lithology" });

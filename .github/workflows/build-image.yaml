@@ -1,7 +1,5 @@
 name: Build image
-
 permissions: read-all
-
 on:
   push:
     branches: ["main"]
@@ -11,9 +9,52 @@ on:
     branches: [main]
 
 jobs:
-  call-build-image:
-    uses: UW-Macrostrat/build-push/.github/workflows/build-push.yaml@main
-    secrets: inherit
-    with:
-      context: .
-      image: "hub.opensciencegrid.org/macrostrat/web"
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: hub.opensciencegrid.org/macrostrat/web
+          # New: apply the 'latest' tag only to non-prerelease semver tags
+          tags: |
+            type=raw,value=sha-{{sha}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')}}
+            type=ref,event=pr,suffix=-{{date 'YYYYMMDDHHmmss'}}
+            type=ref,event=branch,suffix=-{{date 'YYYYMMDDHHmmss'}}
+            type=ref,event=tag,suffix=-{{date 'YYYYMMDDHHmmss'}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{version}},suffix=-{{date 'YYYYMMDDHHmmss'}}
+            
+            # When a PRODUCTION tag (vX.Y.Z) is pushed → also tag staging and dev
+            type=raw,value=main-{{date 'YYYYMMDDHHmmss'}},enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-') }}
+            type=semver,pattern={{version}},suffix=-beta.{{date 'YYYYMMDDHHmmss'}},enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-') }}
+            type=semver,pattern={{version}},suffix=-beta,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-') }}
+
+            # When a STAGING prerelease tag (vX.Y.Z-*) is pushed → also tag dev
+            type=raw,value=main-{{date 'YYYYMMDDHHmmss'}},enable=${{ startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-') }}
+          flavor: |
+            latest=false
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to OSG DockerHub
+        uses: docker/login-action@v2
+        with:
+          registry: hub.opensciencegrid.org
+          username: ${{ vars.HARBOR_CLI_NAME }}
+          password: ${{ secrets.HARBOR_CLI_SECRET }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

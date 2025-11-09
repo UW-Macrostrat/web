@@ -2,7 +2,7 @@ import { Image, Navbar, Footer, SiteTitle } from "~/components/general";
 import h from "./+Page.module.sass";
 import { LinkCard } from "~/components/cards";
 import { useData } from "vike-react/useData";
-import { isDev } from "@macrostrat-web/settings";
+import { isDev, webAssetsPrefix } from "@macrostrat-web/settings";
 
 export function Page() {
   return h("div.page-main", [
@@ -13,7 +13,12 @@ export function Page() {
     ]),
     h(Navbar, { className: "site-navbar" }),
     h("div.hero", [
-      h("div.hero-backdrop"),
+      h("div.hero-backdrop", {
+        style: {
+          // Put the background image here to allow us to dynamically change the prefix
+          backgroundImage: `url('${webAssetsPrefix}/main-page/cover_large.jpg')`,
+        },
+      }),
       h("div.hero-content", [
         h("p.hero-text", [
           "Macrostrat integrates geologic maps and stratigraphic columns " +
@@ -72,8 +77,8 @@ export function Page() {
         "Macrostrat stores both regional columns that represent a unified chronostratigraphic framework and measured sections and drill core logs that provide detailed information about specific locations."
       ),
 
-      h(LinkCard, { title: "Geologic Lexicon", href: "/lex" }, [
-        h("p", "Geologic units and data dictionaries"),
+      h(LinkCard, { title: "Macrostrat Lexicon", href: "/lex" }, [
+        h("p", "Comprehensive searchable list of stratigraphic names, lithologies, environments and more"),
       ]),
       h(LinkCard, { title: "Projects", href: "/projects" }, [
         h("p", "Projects for specific regions or geological problems"),
@@ -89,6 +94,11 @@ export function Page() {
           " Go mobile!",
         ]),
       ]),
+      h(
+        LinkCard,
+        { title: "Usage Map", href: "/usage-map" },
+        h("p", "Macrostrat usage map")
+      ),
       h(
         LinkCard,
         { title: "Documentation", href: "/docs" },

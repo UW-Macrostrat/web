@@ -32,13 +32,17 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className, hideCo
           }
         },
         columnIDs,
+        projectID,
       },
-      h(FitBounds, { columnData })
+      h(FitBounds, { columnData, projectID })
     ),
   );
 }
 
-function FitBounds({ columnData }) {
+function FitBounds({ columnData, projectID }) {
+  if (projectID == 3) {
+    return
+  }
   useMapStyleOperator((map) => {
     if (!map || columnData.length === 0) return;
 

@@ -1,12 +1,12 @@
 import h from "./main.module.sass";
-import { StickyHeader, LinkCard, PageBreadcrumbs, Footer } from "~/components";
+import { StickyHeader, LinkCard, PageBreadcrumbs, Footer, BetaTag } from "~/components";
 import { ContentPage } from "~/layouts";
 import { useState, useEffect } from "react";
 import { fetchAPIData } from "~/_utils";
 import { usePageContext } from "vike-react/usePageContext";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-import { LithologyTag, FlexRow } from "~/components/lex/tag";
+import { LithologyTag, FlexRow, ExpansionPanel } from "~/components/lex/tag";
 
 export function Page() {
   const url = usePageContext().urlOriginal.split("?")[1];
@@ -16,6 +16,8 @@ export function Page() {
   } 
 
   const [data, setData] = useState(null);
+
+  console.log(data)
 
   const params = getUrlParams(url);
   const idType = params.idType;
@@ -32,11 +34,36 @@ export function Page() {
 
   return h(ContentPage, [
     h(Header, { name, color, idType, id }),
-    h('div.units', [
-      data?.map((d) => h(UnitItem, { key: d.id, data: d })),
-    ]),
+    h(GroupUnits, { data }),
     h(Footer)
   ]);
+}
+
+function GroupUnits({ data }) {
+  if (!data) return h('div.units', 'No data available');
+
+  // Group by unit_name
+  const grouped = data.reduce((acc, item) => {
+    const key = item.unit_name || 'Unknown';
+    acc[key] = acc[key] || [];
+    acc[key].push(item);
+    return acc;
+  }, {});
+
+  // Render grouped units
+  return h('div.units', 
+    Object.entries(grouped).map(([unitName, items]) =>
+      h(ExpansionPanel, { 
+        key: unitName, 
+        title: h('div.unit-title', [
+          h('h3', unitName),
+          h('p.count', `(${items.length})`)
+        ]), 
+      }, [
+        ...items.map((d) => h(UnitItem, { key: d.id, data: d })),
+      ])
+    )
+  );
 }
 
 function UnitItem({ data }) {
@@ -64,7 +91,8 @@ function Header({ name, color, idType, id }) {
         h('p.title', 'Units for '),
         h(LithologyTag, { data: { name, color }, href: `/lex/${map[idType]}/${id}` }),
       ]),
-    })
+    }),
+    h(BetaTag)
   ]);
 }
 

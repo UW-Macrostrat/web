@@ -10,7 +10,7 @@ import {
   Units,
   Fossils,
   Maps,
-  Matches
+  TextExtractions
 } from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
 import { StratTag } from "~/components/general";
@@ -30,17 +30,14 @@ export function Page() {
     h(ColumnsTable, {
       resData,
       colData,
-      fossilsData
+      fossilsData,
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h.if(unitsData.length > 0)(Units, { href: "strat_name_id=" + id + "&name=" + resData?.strat_name }),
+    // h.if(mapsData?.length > 0)(Maps, { href: "strat_name_id=" + id + "&name=" + resData?.name }), (add strat names to legends view first)
     h.if(fossilsData.features.length > 0)(Fossils, { href: "strat_name_id=" + id + "&name=" + resData?.name }),
-    h(Maps, { mapsData }),
-    h(Matches, {
-      strat_name_id: id,
-    }),
     h(StratNameHierarchy, { id }),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
   ];

@@ -1,12 +1,12 @@
 import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
-import { Spinner, Icon, Card } from "@blueprintjs/core";
-import { useDarkMode } from "@macrostrat/ui-components";
+import { Spinner, Icon, Card, Popover, Tag } from "@blueprintjs/core";
+import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
+import { postgrestPrefix, webAssetsPrefix } from "@macrostrat-web/settings";
 
 export function Image({ src, className, width, height }) {
-  const srcWithAddedPrefix =
-    "https://storage.macrostrat.org/assets/web/main-page/" + src;
+  const srcWithAddedPrefix = webAssetsPrefix + "/main-page/" + src;
   return h("img", { src: srcWithAddedPrefix, className, width, height });
 }
 
@@ -36,7 +36,7 @@ export function MacrostratIcon({ iconStyle, className, small = false }) {
       : "macrostrat-icon.svg";
   return h("img.macrostrat-logo" + (small ? ".small" : ""), {
     className,
-    src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${iconFile}`,
+    src: `${webAssetsPrefix}/macrostrat-icons/${iconFile}`,
   });
 }
 
@@ -80,6 +80,7 @@ export function Footer() {
     { href: "/projects", text: "Projects", icon: "briefcase" },
     { href: "/docs", text: "Documentation", icon: "manual" },
     { href: "https://rockd.org", text: "Rockd", icon: "phone-search" },
+    { href: "/heatmap", text: "Heatmap", icon: "geosearch" },
   ];
 
   return h("div", { className: "footer" }, [
@@ -114,7 +115,7 @@ export function Footer() {
           h("span", { className: "nav-text" }, "Home"),
         ]),
         navItems.map(({ href, text, icon }) =>
-          h("a", { className: "nav-link", href }, [
+          h("a", { className: "nav-link", href, key: href }, [
             h(Icon, { icon }),
             h("span", { className: "nav-text" }, text),
           ])
@@ -143,7 +144,12 @@ export function Loading() {
   return h("div.loading", h(Spinner));
 }
 
-export function SearchBar({ onChange, placeholder = "Search...", className, value }) {
+export function SearchBar({
+  onChange,
+  placeholder = "Search...",
+  className,
+  value,
+}) {
   return h(Card, { className: "search-bar " + className }, [
     h(Icon, { icon: "search" }),
     h("input", {
@@ -164,4 +170,30 @@ export function StratTag({ isConcept, fontSize = ".75em" }) {
 
 export function IDTag({ id }) {
   return h("div.id-tag", "ID: #" + id);
+}
+
+export function BetaTag({ content = "This page is in beta and may be incomplete."} ) {
+  return h(
+    Popover,
+    {
+      content: h("div.tag-content", content),
+      interactionKind: "hover"
+    },
+    [h(Tag, { intent: "warning" }, "Beta")]
+  );
+}
+
+export function AlphaTag({ content = "This page is in alpha and highly experimental." }) {
+  return h(
+    Popover,
+    {
+      content: h("div.tag-content", content),
+      interactionKind: "hover"
+    },
+    [h(Tag, { intent: "danger" }, "Alpha")]
+  );
+}
+
+export function getPGData(url, filters) {
+  return useAPIResult(postgrestPrefix + url, filters);
 }

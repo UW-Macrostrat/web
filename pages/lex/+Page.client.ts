@@ -1,4 +1,4 @@
-import { LinkCard, PageHeader } from "~/components";
+import { LinkCard, PageHeader, StickyHeader } from "~/components";
 import { ContentPage } from "~/layouts";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
@@ -7,10 +7,13 @@ import { Footer } from "~/components/general";
 import { SearchBar } from "~/components/general";
 import { useState } from "react";
 import { ExpansionPanel } from "~/components/lex/tag";
+import { Tag, Dialog, Icon } from "@blueprintjs/core";
+import { DocsVideo } from "#/map/map-interface/components/docs";
 
 export function Page() {
   const { res } = useData();
   const [showBody, setShowBody] = useState(true);
+  const [updateOpen, setUpdateOpen] = useState(false);
 
   const seen = new Set();
   const stats = res.filter((project) => {
@@ -33,7 +36,15 @@ export function Page() {
 
   return h("div", [
     h(ContentPage, { className: "content-page" }, [
-      h(PageHeader, { title: "Lexicon" }),
+      h('div.header', [
+        h(PageHeader, { title: "Lexicon" }),
+        h(Tag, { intent: "PRIMARY", active: updateOpen, onClick: () => setUpdateOpen(true) }, "Updates"),
+        h(Dialog, {
+          isOpen: updateOpen,
+          },
+          h(Updates, { setUpdateOpen })
+        ),
+      ]),
       h("p", [
         "This is the homepage of Macrostrat's geological lexicons, which are assembled from many data sources including Canada's ",
         h(
@@ -46,7 +57,7 @@ export function Page() {
         ", and other sources. The lexicon is continually updated in partnership with researchers and data providers.",
       ]),
       h("div.stats-table", [
-        h("p.stat", `${formatNumber(columns)} columns`),
+        h('a', { href: "/columns" }, h("p.stat", `${formatNumber(columns)} columns`)),
         h("p.stat", `${formatNumber(packages)} packages`),
         h("p.stat", `${formatNumber(units)} units`),
         h("p.stat", `${formatNumber(measurements)} measurements`),
@@ -70,12 +81,12 @@ export function Page() {
         h(
           LinkCard,
           { href: "/lex/timescales", title: "Timescales" },
-          "Continuous representations of relative geologic time"
+          "Groups of intervals used together to span intervals of time"
         ),
         h(
           LinkCard,
           { href: "/lex/lithologies", title: "Lithologies" },
-          "Names of geologic materials"
+          "Names and hierarchies for geological materials"
         ),
         h(
           LinkCard,
@@ -105,12 +116,12 @@ export function Page() {
         h(
           LinkCard,
           { href: "/lex/units", title: "Units" },
-          "Names and descriptions of geologic units"
+          "Lithologically and chronologically defined building blocks for columns, often representing a strat name"
         ),
         h(
           LinkCard,
           { href: "/lex/fossils", title: "Fossils" },
-          "Fossil names and descriptions (via the Paleobiology Database)"
+          "Fossil taxonomic occurrences from the Paleobiology Database linked to Macrostrat units"
         ),
         h(
           LinkCard,
@@ -142,9 +153,15 @@ const groups = [
   { value: "lithology_attributes", label: "Lithology attributes", href: '/lex/lith-atts' },
   { value: "projects", label: "Projects", href: '/projects' },
   { value: "strat_name_concepts", label: "Strat name concepts", href: '/lex/strat-concepts' },
+  { value: "strat_name", label: "Strat names", href: '/lex/strat-names' },
   { value: "structures", label: "Structures", href: '/lex/structures' },
   { value: "minerals", label: "Minerals", href: '/lex/minerals' },
 ]
+
+function OpenPanel(props) {
+  const { title, children } = props;
+  return h(ExpansionPanel, { title, expanded: true }, children);
+}
 
 function SearchContainer({ setShowBody }) {
   return h(PostgRESTInfiniteScrollView, {
@@ -159,7 +176,7 @@ function SearchContainer({ setShowBody }) {
     groups,
     itemComponent: LexCard,
     SearchBarComponent: SearchBar,
-    GroupingComponent: ExpansionPanel,
+    GroupingComponent: OpenPanel,
     filter_threshold: 2,
   })
 }
@@ -169,4 +186,36 @@ function LexCard({data}) {
   const href = groups.find(group => group.value === type)?.href + "/" + data.id;
 
   return h('div', h('a', { href }, data.name));
+}
+
+function Updates({ setUpdateOpen}) {
+  const updates = [
+    {
+      title: "Added dictionaries",
+      description: "Added new lexicon dictionaries for lithology attributes, environments, economic uses, minerals, and structures.",
+      slug: "version-4.1.0/save-location",
+      version: "2.0.0"
+    },
+  ]
+
+  return h('div.update-container', [
+    h(StickyHeader, 
+      h('div.update-title', [ 
+        h('h2', 'Recent Updates'),
+        h(Icon, { className: "close-btn", icon: "cross", onClick: () => setUpdateOpen(false) })
+      ]),
+    ),
+    h('div.update-list', [
+      updates.map(update => h('div.update', [
+        h('div.update-title', [ 
+          h('h3.title', update.title),
+          h(Tag, { intent: "success" }, `v${update.version}`)
+        ]),
+        h('div.description', [
+          h(DocsVideo, { slug: update.slug }),
+          h('p', update.description),
+        ]),
+      ]))
+    ])
+  ])
 }

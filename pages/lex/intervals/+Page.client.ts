@@ -1,6 +1,6 @@
 import h from "./main.module.scss";
 import { PageBreadcrumbs, StickyHeader } from "~/components";
-import { LithologyTag } from "~/components/lex/tag";
+import { LithologyTag } from "@macrostrat/data-components";
 import { Card, RangeSlider } from "@blueprintjs/core";
 import { useState, memo } from "react";
 import { ContentPage } from "~/layouts";
@@ -16,7 +16,7 @@ export function Page() {
     setInput(e.toLowerCase());
   };
 
-  const filtered = input.length < 3 ? res : res.filter((d) => {
+  const filtered = input.length < 3 && (age[0] == 0 && age[1] == 4600) ? res : res.filter((d) => {
     const name = d.name?.toLowerCase() || "";
     const intType = d.int_type?.toLowerCase() || "";
     const abbrev = d.abbrev?.toLowerCase() || "";

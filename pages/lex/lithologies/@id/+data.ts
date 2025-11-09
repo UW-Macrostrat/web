@@ -1,5 +1,6 @@
 import { pbdbDomain } from "@macrostrat-web/settings";
 import { fetchAPIData, fetchAPIRefs } from "~/_utils";
+import { getPrevalentTaxa } from "~/components/lex/data-helper";
 
 export async function data(pageContext) {
   const lith_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
@@ -31,7 +32,7 @@ export async function data(pageContext) {
           }),
         "colData"
       ),
-      safeFetch(() => fetchAPIData("/geologic_units/map/legend", { lith_id }), "mapsData"),
+      safeFetch(() => fetchAPIData("/geologic_units/map/legend", { lith_id, sample: "true" }), "mapsData"),
       safeFetch(() => fetchAPIData("/fossils", { lith_id, format: "geojson" }), "fossilsData"),
       safeFetch(() => fetchAPIRefs("/fossils", { lith_id }), "refs1"),
       safeFetch(() => fetchAPIRefs("/columns", { lith_id }), "refs2"),
@@ -43,26 +44,7 @@ export async function data(pageContext) {
   const refValues2 = refs2 ? Object.values(refs2) : [];
   const refs = [...refValues1, ...refValues2];
 
-  // Extract column IDs to fetch taxa data (PBDB)
-  const cols = colData?.features
-    ?.map((feature) => feature.properties.col_id)
-    ?.join(",");
-
-  let taxaData = null;
-  if (cols) {
-    try {
-      const response = await fetch(
-        `${pbdbDomain}/data1.2/occs/prevalence.json?limit=5&coll_id=${cols}`
-      );
-      if (response.ok) {
-        taxaData = await response.json();
-      } else {
-        console.warn("PBDB taxa fetch failed with status", response.status);
-      }
-    } catch (err) {
-      console.warn("Error fetching taxa data from PBDB:", err);
-    }
-  }
+  const taxaData = await getPrevalentTaxa(fossilsData);
 
   return {
     resData: resData?.[0] ?? null,

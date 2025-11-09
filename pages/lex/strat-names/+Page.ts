@@ -20,6 +20,31 @@ export function Page() {
       }),
       
     ]),
+     h("div.header-description", [
+      h(
+        Card,
+        {
+          className: "strat-name-card",
+        },
+        [
+          h("strong", "Strat Names: "),
+          h("span", "names of rock units, organized hierarchically."),
+        ]
+      ),
+      h(
+        Card,
+        {
+          className: "strat-concept-card",
+        },
+        [
+          h("strong", "Strat Concepts: "),
+          h(
+            "span",
+            "groupings and associated metadata for strat names and/or hierarchies that are applied to the same set of rocks."
+          ),
+        ]
+      ),
+      ]),
     h(PostgRESTInfiniteScrollView, {
       route: `${apiDomain}/api/pg/strat_combined`,
       initialItems: res,
@@ -32,31 +57,6 @@ export function Page() {
       searchColumns: [
         { label: "Name", value: "all_names" },
       ],
-      toggles: h("div.header-description", [
-        h(
-          Card,
-          {
-            className: "strat-name-card",
-          },
-          [
-            h("strong", "Strat Names: "),
-            h("span", "names of rock units, organized hierarchically"),
-          ]
-        ),
-        h(
-          Card,
-          {
-            className: "strat-concept-card",
-          },
-          [
-            h("strong", "Strat Concepts: "),
-            h(
-              "span",
-              "capture relationships between differently-named rock units"
-            ),
-          ]
-        ),
-      ]),
     })
   ]);
 }

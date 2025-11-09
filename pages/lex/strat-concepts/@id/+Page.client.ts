@@ -10,7 +10,7 @@ import {
   Units,
   Fossils,
   Maps,
-  Matches
+  TextExtractions
 } from "~/components/lex";
 import { StratTag } from "~/components/general";
 import { LinkCard } from "~/components/cards";
@@ -33,7 +33,8 @@ export function Page() {
     h(ColumnsTable, {
       resData,
       colData,
-      fossilsData
+      fossilsData,
+      mapUrl: "strat_name_concept=" + id 
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
@@ -41,9 +42,6 @@ export function Page() {
     h(ConceptBody, { concept_id: id }),
     h.if(unitsData.length > 0)(Units, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
     h.if(fossilsData.length > 0)(Fossils, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
-    h(Matches, {
-      concept_id: id,
-    }),
   ];
 
   return LexItemPage({
