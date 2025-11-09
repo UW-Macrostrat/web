@@ -123,6 +123,11 @@ export function Page() {
           { href: "/lex/fossils", title: "Fossils" },
           "Fossil taxonomic occurrences from the Paleobiology Database linked to Macrostrat units"
         ),
+        h(
+          LinkCard,
+          { href: "/lex/measurements", title: "Measurements" },
+          "Measurement names and descriptions"
+        ),
         h("p", [
           h("strong", h("a", { href: "/sift" }, "Sift")),
           ", Macrostrat's legacy lexicon app, is still available for use as it is gradually brought into this new framework.",

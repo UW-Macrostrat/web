@@ -72,7 +72,7 @@ export function LexItemPage(props: LexItemPageProps) {
 }
 
 function LexItemPageInner(props: LexItemPageProps) {
-  const { children, siftLink, id, resData, refs, header } = props;
+  const { children, siftLink, id, resData, refs = [], header } = props;
 
   const { name, strat_name_long } = resData;
 
