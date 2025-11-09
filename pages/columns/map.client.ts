@@ -12,18 +12,24 @@ export function ColumnsMapContainer(props) {
   return h(ErrorBoundary, h(ColumnsMapInner, props));
 }
 
-function ColumnsMapInner({ columnIDs = null, projectID = null, className, hideColumns }) {
+function ColumnsMapInner({
+  columnIDs = null,
+  projectID = null,
+  className,
+  hideColumns,
+}) {
   const columnData = useMacrostratColumns(projectID, projectID != null);
 
-  if(!columnData) {
+  if (!columnData) {
     return h("div", { className }, "Loading map...");
   }
 
   return h(
     "div",
     { className },
-    h(ColumnNavigationMap, 
-      { 
+    h(
+      ColumnNavigationMap,
+      {
         style: { height: "100%" },
         accessToken: mapboxAccessToken,
         onSelectColumn: (col) => {
@@ -35,20 +41,16 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className, hideCo
         projectID,
       },
       h(FitBounds, { columnData, projectID })
-    ),
+    )
   );
 }
 
 function FitBounds({ columnData, projectID }) {
-  if (projectID == 3) {
-    return
-  }
   useMapStyleOperator((map) => {
     if (!map || columnData.length === 0) return;
 
     // Extract coordinates
-    const coords = columnData
-      .map(col => col.geometry.coordinates[0][0]);
+    const coords = columnData.map((col) => col.geometry.coordinates[0][0]);
     if (coords.length === 0) return;
 
     // Build bounds using the first coordinate
@@ -62,6 +64,10 @@ function FitBounds({ columnData, projectID }) {
       duration: 0,
     });
   });
+
+  if (projectID == 3) {
+    return;
+  }
 
   return null;
 }

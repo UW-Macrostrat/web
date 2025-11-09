@@ -33,12 +33,42 @@ function ColumnMapContainer(props) {
 }
 
 type ColumnFilterKey = "liths" | "stratNames" | "intervals";
-type ColumnFilterState = Record<ColumnFilterKey, number[] | null>;
+type ColumnFilterState = Record<ColumnFilterKey, number[] | null | undefined>;
 
 const columnFilterAtom = atom<ColumnFilterState | null>();
 
+const addFilterAtom = atom(
+  null,
+  (_, set, type: ColumnFilterKey, identifier: number) => {
+    set(columnFilterAtom, (value) => {
+      const existing = value?.[type] ?? [];
+      const newSet = new Set(existing);
+      newSet.add(identifier);
+      const updated = value || ({} as ColumnFilterState);
+      updated[type] = Array.from(newSet);
+      return updated;
+    });
+  }
+);
+
+function buildParamsFromFilters(
+  filters: ColumnFilterState | null
+): Record<string, string> {
+  const params: Record<string, string> = {};
+  if (filters == null) return params;
+  for (const key of Object.keys(filters) as ColumnFilterKey[]) {
+    const ids = filters[key];
+    if (ids != null && ids.length > 0) {
+      params[key] = `cs.[${ids.join(",")}]`;
+    }
+  }
+  return params;
+}
+
 export function Page({ title = "Columns", linkPrefix = "/" }) {
   const { allColumnGroups, project } = useData();
+
+  const filters = useAtomValue(columnFilterAtom);
 
   const [columnGroups, setColumnGroups] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -49,19 +79,13 @@ export function Page({ title = "Columns", linkPrefix = "/" }) {
   const [filteredInput, setFilteredInput] = useState("");
   const [showInProcess, setShowInProcess] = useState(true);
 
-  const [selectedLiths, setSelectedLiths] = useState(null);
-  const [selectedUnits, setSelectedUnits] = useState(null);
-  const [selectedStratNames, setSelectedStratNames] = useState(null);
-  const [selectedIntervals, setSelectedIntervals] = useState(null);
-
   const isEmpty = Object.keys(extraParams).length === 0;
   const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
 
-  const selectedItems =
-    selectedLiths || selectedUnits || selectedStratNames || selectedIntervals;
+  const hasSelectedItems = buildFilters(filters).length > 0;
 
   useEffect(() => {
-    const params: any = {};
+    const params: any = buildParamsFromFilters(filters);
 
     if (filteredInput.length >= 3) {
       params.name = `ilike.%${filteredInput}%`;
@@ -72,29 +96,9 @@ export function Page({ title = "Columns", linkPrefix = "/" }) {
     if (!showInProcess) {
       params.status_code = "eq.active";
     }
-    if (selectedLiths) {
-      params.liths = `cs.[${selectedLiths.lex_id}]`;
-    }
-    if (selectedUnits) {
-      params.units = `cs.[${selectedUnits.lex_id}]`;
-    }
-    if (selectedStratNames) {
-      params.strat_names = `cs.[${selectedStratNames.lex_id}]`;
-    }
-    if (selectedIntervals) {
-      params.intervals = `cs.[${selectedIntervals.lex_id}]`;
-    }
 
     setExtraParams(params);
-  }, [
-    filteredInput,
-    showEmpty,
-    showInProcess,
-    selectedLiths,
-    selectedUnits,
-    selectedStratNames,
-    selectedIntervals,
-  ]);
+  }, [filters, filteredInput, showEmpty, showInProcess]);
 
   // set filtered input
   useEffect(() => {
@@ -130,11 +134,11 @@ export function Page({ title = "Columns", linkPrefix = "/" }) {
     setColumnInput(value.toLowerCase());
   };
 
-  const handleLexclick = (data) => {
-    if (data.type == "strat name") setSelectedLiths(data);
-    if (data.type == "unit") setSelectedUnits(data);
-    if (data.type == "lithology") setSelectedLiths(data);
-    if (data.type == "interval") setSelectedIntervals(data);
+  const addFilter = useSetAtom(addFilterAtom);
+
+  const handleLexClick = (data: { type: string; lex_id: number }) => {
+    const filterKey = filterKeyFromType(data.type);
+    addFilter(filterKey, data.lex_id);
     setColumnInput("");
     setFilteredInput("");
   };
@@ -147,7 +151,7 @@ export function Page({ title = "Columns", linkPrefix = "/" }) {
         width: "fit-content",
         gap: ".5em",
         className: "lith-tag",
-        onClick: () => handleLexclick(data),
+        onClick: () => handleLexClick(data),
       },
       [
         h(LithologyTag, { data: { name: data.name, color: data.color } }),
@@ -178,7 +182,7 @@ export function Page({ title = "Columns", linkPrefix = "/" }) {
               h(
                 Popover,
                 {
-                  content: h.if(!selectedItems && suggestData?.length > 0)(
+                  content: h.if(!hasSelectedItems && suggestData?.length > 0)(
                     "div.suggested-items",
                     suggestData?.map((item) => h(LexCard, { data: item }))
                   ),
@@ -343,7 +347,10 @@ function LexFilters() {
         h("p.filter", "Filtering columns by "),
         ...filters.map((filter) =>
           h(ColumnFilterItem, {
-            data: filter,
+            data: {
+              type: typeFromFilterKey(filter.type),
+              lex_id: filter.identifier,
+            },
             key: filter.type + filter.identifier,
           })
         ),
@@ -402,5 +409,29 @@ function routeForFilterKey(key: ColumnFilterKey): string {
       return "strat-names";
     case "intervals":
       return "intervals";
+  }
+}
+
+function filterKeyFromType(type: string): ColumnFilterKey | null {
+  switch (type) {
+    case "lithology":
+      return "liths";
+    case "strat name":
+      return "stratNames";
+    case "interval":
+      return "intervals";
+    default:
+      return null;
+  }
+}
+
+function typeFromFilterKey(key: ColumnFilterKey): string {
+  switch (key) {
+    case "liths":
+      return "lithology";
+    case "stratNames":
+      return "strat name";
+    case "intervals":
+      return "interval";
   }
 }
