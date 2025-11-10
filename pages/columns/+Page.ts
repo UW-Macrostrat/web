@@ -23,6 +23,7 @@ import { postgrest } from "~/_providers";
  */
 
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { unwrap } from "jotai/utils";
 import { debounce } from "underscore";
 
 const h = hyper.styled(styles);
@@ -41,6 +42,7 @@ function ColumnMapContainer(props) {
 
 type ColumnFilterKey = "liths" | "stratNames" | "intervals";
 type ColumnFilterState = Record<ColumnFilterKey, number[] | null | undefined>;
+
 
 const columnFilterAtom = atom<ColumnFilterState | null>();
 
@@ -66,8 +68,9 @@ function buildParamsFromFilters(
   if (filters == null) return params;
   for (const key of Object.keys(filters) as ColumnFilterKey[]) {
     const ids = filters[key];
+    const paramName = paramNameForFilterKey(key);
     if (ids != null && ids.length > 0) {
-      params[key] = `cs.[${ids.join(",")}]`;
+      params[paramName] = `cs.[${ids.join(",")}]`;
     }
   }
   return params;
@@ -78,17 +81,26 @@ const showInProcessAtom = atom(false);
 
 const inputTextAtom = atom("");
 
-const suggestedFiltersAtom = atom(async (get) => {
+const suggestedFiltersFetchAtom = atom(async (get) => {
   const inputText = get(inputTextAtom);
   return await fetchFilterItems(inputText);
+});
+
+const suggestedFiltersAtom = unwrap(suggestedFiltersFetchAtom, (prev) => {
+  return prev ?? [];
 });
 
 const filterParamsAtom = atom((get) => {
   const filters = get(columnFilterAtom);
   const showEmpty = get(showEmptyAtom);
   const showInProcess = get(showInProcessAtom);
+  const inputText = get(inputTextAtom);
 
   const params: Record<string, string> = buildParamsFromFilters(filters);
+
+  if (inputText.length >= 3) {
+    params.name = `ilike.*${inputText}*`;
+  }
 
   if (!showEmpty) {
     params.empty = `is.false`;
@@ -106,12 +118,16 @@ const filterParamsAtom = atom((get) => {
 
 const projectIDAtom = atom<number | null>();
 
-const filteredGroupsAtom = atom(async (get) => {
+const fetchDataAtom = atom(async (get) => {
   const filterParams = get(filterParamsAtom);
   const project = get(projectIDAtom);
   if (filterParams == null) return null;
   const groups = await getGroupedColumns(project, filterParams);
   return groups;
+});
+
+const filteredGroupsAtom = unwrap(fetchDataAtom, (prev) => {
+  return prev;
 });
 
 export function Page({ title = "Columns", linkPrefix = "/" }) {
@@ -210,9 +226,7 @@ function FilterManager() {
   return h("div.filters", [
     h(SearchBar, {
       placeholder: "Search columns...",
-      onChange(value) {
-        setColumnInput(value.toLowerCase());
-      },
+      onChange: setColumnInput,
       className: "search-bar",
       value: columnInput,
     }),
@@ -250,7 +264,7 @@ function LexCard({ data }) {
 
   const handleLexClick = (data: { type: string; lex_id: number }) => {
     const filterKey = filterKeyFromType(data.type);
-    addFilter(filterKey, data.lex_id);
+    addFilter(filterKey, data);
   };
 
   return h(
@@ -465,5 +479,16 @@ function typeFromFilterKey(key: ColumnFilterKey): string {
       return "strat name";
     case "intervals":
       return "interval";
+  }
+}
+
+function paramNameForFilterKey(key: ColumnFilterKey): string {
+  switch (key) {
+    case "liths":
+      return "liths";
+    case "stratNames":
+      return "strat_names";
+    case "intervals":
+      return "intervals";
   }
 }
