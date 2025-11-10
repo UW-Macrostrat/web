@@ -1,12 +1,13 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 
 import { ContentPage } from "~/layouts";
 import { Link, DevLinkButton, PageBreadcrumbs } from "~/components";
-import { FlexRow, LithologyTag } from "~/components/lex/tag";
+import { LithologyTag } from "~/components/lex/tag";
 import { Footer, SearchBar } from "~/components/general";
 import { getGroupedColumns } from "./grouped-cols";
+import { FlexRow } from "@macrostrat/ui-components";
 
 import { AnchorButton, ButtonGroup, Switch, Popover } from "@blueprintjs/core";
 import { Tag, Icon } from "@blueprintjs/core";
@@ -14,8 +15,7 @@ import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 
-import { postgrestPrefix } from "@macrostrat-web/settings";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { postgrest } from "~/_providers";
 
 /**
  * Jotai provides a composable approach to state management
@@ -23,6 +23,7 @@ import { useAPIResult } from "@macrostrat/ui-components";
  */
 
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { debounce } from "underscore";
 
 const h = hyper.styled(styles);
 
@@ -54,6 +55,7 @@ const addFilterAtom = atom(
       updated[type] = Array.from(newSet);
       return updated;
     });
+    set(inputTextAtom, ""); // Clear input text when adding a filter
   }
 );
 
@@ -74,171 +76,197 @@ function buildParamsFromFilters(
 const showEmptyAtom = atom(true);
 const showInProcessAtom = atom(false);
 
+const inputTextAtom = atom("");
+
+const suggestedFiltersAtom = atom(async (get) => {
+  const inputText = get(inputTextAtom);
+  return await fetchFilterItems(inputText);
+});
+
+const filterParamsAtom = atom((get) => {
+  const filters = get(columnFilterAtom);
+  const showEmpty = get(showEmptyAtom);
+  const showInProcess = get(showInProcessAtom);
+
+  const params: Record<string, string> = buildParamsFromFilters(filters);
+
+  if (!showEmpty) {
+    params.empty = `is.false`;
+  }
+  if (!showInProcess) {
+    params.status_code = "eq.active";
+  }
+
+  if (Object.keys(params).length === 0) {
+    return null;
+  }
+
+  return params;
+});
+
+const projectIDAtom = atom<number | null>();
+
+const filteredGroupsAtom = atom(async (get) => {
+  const filterParams = get(filterParamsAtom);
+  const project = get(projectIDAtom);
+  if (filterParams == null) return null;
+  const groups = await getGroupedColumns(project, filterParams);
+  return groups;
+});
+
 export function Page({ title = "Columns", linkPrefix = "/" }) {
-  const { allColumnGroups, project } = useData();
+  const { project } = useData();
 
-  const filters = useAtomValue(columnFilterAtom);
-
-  const [columnGroups, setColumnGroups] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [extraParams, setExtraParams] = useState({});
-
-  const [showEmpty, setShowEmpty] = useAtom(showEmptyAtom);
-  const [showInProcess, setShowInProcess] = useAtom(showInProcessAtom);
-
-  const [columnInput, setColumnInput] = useState("");
-  // No need for separate filtered input...can just use columnInput
-  const filteredInput = columnInput;
-
-  const isEmpty = Object.keys(extraParams).length === 0;
-  const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
-
-  const hasSelectedItems = buildFilters(filters).length > 0;
+  const setProjectID = useSetAtom(projectIDAtom);
 
   useEffect(() => {
-    const params: any = buildParamsFromFilters(filters);
+    if (project) {
+      setProjectID(project.project_id);
+    }
+  }, [project, setProjectID]);
 
-    if (filteredInput.length >= 3) {
-      params.name = `ilike.%${filteredInput}%`;
-    }
-    if (!showEmpty) {
-      params.empty = `is.false`;
-    }
-    if (!showInProcess) {
-      params.status_code = "eq.active";
-    }
+  return h("div.column-list-page", [
+    h(Suspense, [
+      h(ContentPage, [
+        h("div.flex-row", [
+          h("div.main", [
+            h("div", [
+              h(PageBreadcrumbs, { showLogo: true }),
+              h(FilterManager),
+              h(LexFilters),
+            ]),
+            h(ColumnDataArea, { linkPrefix }),
+          ]),
+          h("div.sidebar", [
+            h("div.sidebar-content", [
+              h(ButtonGroup, { vertical: true, large: true }, [
+                h(
+                  AnchorButton,
+                  { href: "/projects", minimal: true },
+                  "Projects"
+                ),
+                h(
+                  DevLinkButton,
+                  { href: "/columns/correlation" },
+                  "Correlation chart"
+                ),
+              ]),
+              h(ColumnMapOuter, {
+                projectID: project?.project_id,
+              }),
+            ]),
+          ]),
+        ]),
+      ]),
+      h(Footer),
+    ]),
+  ]);
+}
 
-    setExtraParams(params);
-  }, [filters, filteredInput, showEmpty, showInProcess]);
-
-  useEffect(() => {
-    if (!isEmpty) {
-      setLoading(true);
-      getGroupedColumns(project?.project_id, extraParams)
-        .then((groups) => setColumnGroups(groups))
-        .finally(() => setLoading(false));
-    }
-  }, [project?.project_id, extraParams]);
+function ColumnMapOuter({ projectID }) {
+  const filteredGroups = useAtomValue(filteredGroupsAtom);
 
   const columnIDs = useMemo(() => {
-    return filteredGroups?.flatMap((item) =>
+    if (filteredGroups == null) return null;
+    return filteredGroups.flatMap((item) =>
       item.columns.map((col) => col.col_id)
     );
   }, [filteredGroups]);
 
-  const handleInputChange = (value, target) => {
-    setColumnInput(value.toLowerCase());
-  };
+  return h(ColumnMapContainer, {
+    columnIDs,
+    projectID,
+    className: "column-map-container",
+  });
+}
 
+function ColumnDataArea({ linkPrefix }) {
+  const showEmpty = useAtomValue(showEmptyAtom);
+  const filteredGroups = useAtomValue(filteredGroupsAtom);
+
+  const { allColumnGroups } = useData();
+
+  const data = filteredGroups ?? allColumnGroups;
+  return h(
+    "div.column-groups",
+    data.map((d) =>
+      h(ColumnGroup, {
+        data: d,
+        key: d.id,
+        linkPrefix,
+        showEmpty,
+      })
+    )
+  );
+}
+
+function FilterManager() {
+  const [showEmpty, setShowEmpty] = useAtom(showEmptyAtom);
+  const [showInProcess, setShowInProcess] = useAtom(showInProcessAtom);
+  const [columnInput, setColumnInput] = useAtom(inputTextAtom);
+
+  const suggestedFilters = useAtomValue(suggestedFiltersAtom) ?? [];
+
+  return h("div.filters", [
+    h(SearchBar, {
+      placeholder: "Search columns...",
+      onChange(value) {
+        setColumnInput(value.toLowerCase());
+      },
+      className: "search-bar",
+      value: columnInput,
+    }),
+    h(
+      Popover,
+      {
+        content: h(
+          "div.suggested-items",
+          suggestedFilters.map((d) =>
+            h(LexCard, { data: d, key: d.type + d.lex_id })
+          )
+        ),
+        isOpen: suggestedFilters.length > 0,
+        position: "right",
+      },
+      h("div")
+    ),
+    h("div.switches", [
+      h(Switch, {
+        checked: showEmpty,
+        label: "Show empty",
+        onChange: () => setShowEmpty(!showEmpty),
+      }),
+      h(Switch, {
+        checked: showInProcess,
+        label: "Show in process",
+        onChange: () => setShowInProcess(!showInProcess),
+      }),
+    ]),
+  ]);
+}
+
+function LexCard({ data }) {
   const addFilter = useSetAtom(addFilterAtom);
 
   const handleLexClick = (data: { type: string; lex_id: number }) => {
     const filterKey = filterKeyFromType(data.type);
     addFilter(filterKey, data.lex_id);
-    setColumnInput("");
   };
 
-  function LexCard({ data }) {
-    return h(
-      FlexRow,
-      {
-        alignItems: "center",
-        width: "fit-content",
-        gap: ".5em",
-        className: "lith-tag",
-        onClick: () => handleLexClick(data),
-      },
-      [
-        h(LithologyTag, { data: { name: data.name, color: data.color } }),
-        h("p.label", data.type),
-      ]
-    );
-  }
-
-  const res = useAPIResult(
-    postgrestPrefix + "/col_filter?name=ilike.*" + filteredInput + "*"
+  return h(
+    FlexRow,
+    {
+      alignItems: "center",
+      width: "fit-content",
+      gap: ".5em",
+      className: "lith-tag",
+      onClick: () => handleLexClick(data),
+    },
+    [
+      h(LithologyTag, { data: { name: data.name, color: data.color } }),
+      h("p.label", data.type),
+    ]
   );
-
-  const suggestData = res?.slice(0, 5);
-
-  return h("div.column-list-page", [
-    h(ContentPage, [
-      h("div.flex-row", [
-        h("div.main", [
-          h("div", [
-            h(PageBreadcrumbs, { showLogo: true }),
-            h("div.filters", [
-              h(SearchBar, {
-                placeholder: "Search columns...",
-                onChange: handleInputChange,
-                className: "search-bar",
-                value: columnInput,
-              }),
-              h(
-                Popover,
-                {
-                  content: h.if(!hasSelectedItems && suggestData?.length > 0)(
-                    "div.suggested-items",
-                    suggestData?.map((item) => h(LexCard, { data: item }))
-                  ),
-                  isOpen: filteredInput.length >= 3,
-                  position: "right",
-                },
-                h("div")
-              ),
-              h("div.switches", [
-                h(Switch, {
-                  checked: showEmpty,
-                  label: "Show empty",
-                  onChange: () => setShowEmpty(!showEmpty),
-                }),
-                h(Switch, {
-                  checked: showInProcess,
-                  label: "Show in process",
-                  onChange: () => setShowInProcess(!showInProcess),
-                }),
-              ]),
-            ]),
-            h(LexFilters),
-          ]),
-          h.if(!loading)(
-            "div.column-groups",
-            filteredGroups?.map((d) =>
-              h(ColumnGroup, {
-                data: d,
-                key: d.id,
-                linkPrefix,
-                showEmpty,
-              })
-            )
-          ),
-          h.if(columnGroups?.length == 0 && !loading)(
-            "div.empty",
-            "No columns found"
-          ),
-          h.if(loading)("div.loading", "Loading columns..."),
-        ]),
-        h("div.sidebar", [
-          h("div.sidebar-content", [
-            h(ButtonGroup, { vertical: true, large: true }, [
-              h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
-              h(
-                DevLinkButton,
-                { href: "/columns/correlation" },
-                "Correlation chart"
-              ),
-            ]),
-            h(ColumnMapContainer, {
-              columnIDs,
-              projectID: project?.project_id,
-              className: "column-map-container",
-            }),
-          ]),
-        ]),
-      ]),
-    ]),
-    h(Footer),
-  ]);
 }
 
 function ColumnGroup({ data, linkPrefix }) {
@@ -342,6 +370,23 @@ function LexFilters() {
     ),
   ]);
 }
+
+async function _fetchFilterItems(inputText: string) {
+  // Fetch filter items from the API based on input text, using the PostgREST client API
+  if (inputText.length < 3) return Promise.resolve([]);
+
+  const res = postgrest
+    .from("col_filter")
+    .select("*")
+    .ilike("name", `%${inputText}%`)
+    .limit(5);
+
+  // Todo: add error handling
+  const { data, error } = await res;
+  return data ?? [];
+}
+
+const fetchFilterItems = debounce(_fetchFilterItems, 300);
 
 const clearAllFiltersAtom = atom(null, (get, set) => {
   set(columnFilterAtom, null);
