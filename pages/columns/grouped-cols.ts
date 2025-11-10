@@ -1,9 +1,8 @@
 import { fetchAPIData, fetchPGData } from "~/_utils";
 import { postgrest } from "~/_providers";
+import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
-export async function getGroupedColumns(
-  params: ColumnFilterOptions
-) {
+export async function getGroupedColumns(params: ColumnFilterOptions) {
   const [columnResponse, groups] = await Promise.all([
     fetchColumns(params),
     fetchAPIData(`/defs/groups`, { all: true }),
@@ -77,15 +76,15 @@ async function fetchColumns(opts: ColumnFilterOptions) {
   }
 
   if (opts.strat_names && opts.strat_names.length > 0) {
-    req.in("strat_names", opts.strat_names);
+    containsFilter(req, "strat_names", opts.strat_names);
   }
 
   if (opts.intervals && opts.intervals.length > 0) {
-    req.in("intervals", opts.intervals);
+    containsFilter(req, "intervals", opts.intervals);
   }
 
   if (opts.liths && opts.liths.length > 0) {
-    req.in("liths", opts.liths);
+    containsFilter(req, "liths", opts.liths);
   }
 
   if (opts.nameFuzzyMatch) {
@@ -93,4 +92,17 @@ async function fetchColumns(opts: ColumnFilterOptions) {
   }
 
   return req;
+}
+
+function containsFilter(
+  req: PostgrestFilterBuilder<any>,
+  field: string,
+  values: any[]
+) {
+  // For some reason we get the wrong brackets style
+  return req.filter(field, "cs", `[${stringifyArray(values).join(",")}]`);
+}
+
+function stringifyArray(arr: any[]): string[] {
+  return arr.map((i) => `${i}`);
 }

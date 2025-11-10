@@ -132,15 +132,15 @@ const filteredGroupsAtom = unwrap(fetchDataAtom, (prev) => {
 });
 
 export function Page({ title = "Columns", linkPrefix = "/" }) {
-  const { project } = useData();
+  const { project_id } = useData();
 
   const setProjectID = useSetAtom(projectIDAtom);
 
   useEffect(() => {
-    if (project) {
-      setProjectID(project.project_id);
+    if (project_id) {
+      setProjectID(project_id);
     }
-  }, [project, setProjectID]);
+  }, [project_id, setProjectID]);
 
   return h("div.column-list-page", [
     h(Suspense, [
@@ -169,7 +169,7 @@ export function Page({ title = "Columns", linkPrefix = "/" }) {
                 ),
               ]),
               h(ColumnMapOuter, {
-                projectID: project?.project_id,
+                projectID: project_id,
               }),
             ]),
           ]),
