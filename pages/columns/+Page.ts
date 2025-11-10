@@ -6,7 +6,7 @@ import { ContentPage } from "~/layouts";
 import { Link, DevLinkButton, PageBreadcrumbs } from "~/components";
 import { LithologyTag } from "~/components/lex/tag";
 import { Footer, SearchBar } from "~/components/general";
-import { getGroupedColumns } from "./grouped-cols";
+import { ColumnFilterOptions, getGroupedColumns } from "./grouped-cols";
 import { FlexRow } from "@macrostrat/ui-components";
 
 import { AnchorButton, ButtonGroup, Switch, Popover } from "@blueprintjs/core";
@@ -41,39 +41,35 @@ function ColumnMapContainer(props) {
 }
 
 type ColumnFilterKey = "liths" | "stratNames" | "intervals";
-type ColumnFilterState = Record<ColumnFilterKey, number[] | null | undefined>;
 
+type ColumnFilterDef = {
+  type: ColumnFilterKey;
+  identifier: number;
+  name: string;
+  color: string;
+};
 
-const columnFilterAtom = atom<ColumnFilterState | null>();
+const columnFilterAtom = atom<ColumnFilterDef[]>([]);
 
-const addFilterAtom = atom(
-  null,
-  (_, set, type: ColumnFilterKey, identifier: number) => {
-    set(columnFilterAtom, (value) => {
-      const existing = value?.[type] ?? [];
-      const newSet = new Set(existing);
-      newSet.add(identifier);
-      const updated = value || ({} as ColumnFilterState);
-      updated[type] = Array.from(newSet);
-      return updated;
-    });
-    set(inputTextAtom, ""); // Clear input text when adding a filter
-  }
-);
+const addFilterAtom = atom(null, (_, set, data: ColumnFilterDef) => {
+  set(columnFilterAtom, (value) => {
+    return [...value, data];
+  });
+  set(inputTextAtom, ""); // Clear input text when adding a filter
+});
 
 function buildParamsFromFilters(
-  filters: ColumnFilterState | null
-): Record<string, string> {
+  filters: ColumnFilterDef[]
+): Partial<ColumnFilterOptions> {
   const params: Record<string, string> = {};
   if (filters == null) return params;
-  for (const key of Object.keys(filters) as ColumnFilterKey[]) {
-    const ids = filters[key];
-    const paramName = paramNameForFilterKey(key);
-    if (ids != null && ids.length > 0) {
-      params[paramName] = `cs.[${ids.join(",")}]`;
-    }
+  let filterData: Partial<ColumnFilterOptions> = {};
+  for (const filter of filters) {
+    const key = paramNameForFilterKey(filter.type);
+    filterData[key] ??= [];
+    filterData[key].push(filter.identifier);
   }
-  return params;
+  return filterData;
 }
 
 const showEmptyAtom = atom(true);
@@ -83,6 +79,7 @@ const inputTextAtom = atom("");
 
 const suggestedFiltersFetchAtom = atom(async (get) => {
   const inputText = get(inputTextAtom);
+  if (inputText.length < 3) return [];
   return await fetchFilterItems(inputText);
 });
 
@@ -95,34 +92,38 @@ const filterParamsAtom = atom((get) => {
   const showEmpty = get(showEmptyAtom);
   const showInProcess = get(showInProcessAtom);
   const inputText = get(inputTextAtom);
+  const projectID = get(projectIDAtom);
 
-  const params: Record<string, string> = buildParamsFromFilters(filters);
+  const params = buildParamsFromFilters(filters);
+
+  if (projectID == null) return null;
+
+  params.project_id = projectID;
 
   if (inputText.length >= 3) {
-    params.name = `ilike.*${inputText}*`;
+    params.nameFuzzyMatch = inputText;
   }
 
   if (!showEmpty) {
-    params.empty = `is.false`;
+    params.empty = false;
   }
   if (!showInProcess) {
-    params.status_code = "eq.active";
+    params.status_code = "active";
   }
 
   if (Object.keys(params).length === 0) {
     return null;
   }
 
-  return params;
+  return params as ColumnFilterOptions;
 });
 
 const projectIDAtom = atom<number | null>();
 
 const fetchDataAtom = atom(async (get) => {
   const filterParams = get(filterParamsAtom);
-  const project = get(projectIDAtom);
   if (filterParams == null) return null;
-  const groups = await getGroupedColumns(project, filterParams);
+  const groups = await getGroupedColumns(filterParams);
   return groups;
 });
 
@@ -241,6 +242,8 @@ function FilterManager() {
         ),
         isOpen: suggestedFilters.length > 0,
         position: "right",
+        usePortal: false,
+        autoFocus: false,
       },
       h("div")
     ),
@@ -264,7 +267,13 @@ function LexCard({ data }) {
 
   const handleLexClick = (data: { type: string; lex_id: number }) => {
     const filterKey = filterKeyFromType(data.type);
-    addFilter(filterKey, data);
+    const obj = {
+      type: filterKey,
+      identifier: data.lex_id,
+      name: data.name,
+      color: data.color,
+    };
+    addFilter(obj);
   };
 
   return h(
@@ -359,8 +368,7 @@ function ColumnItem({ data, linkPrefix = "/" }) {
 }
 
 function LexFilters() {
-  const filterState = useAtomValue(columnFilterAtom);
-  const filters = buildFilters(filterState);
+  const filters = useAtomValue(columnFilterAtom);
   if (filters.length == 0) return null;
   return h("div.lex-filters", [
     h(
@@ -374,7 +382,7 @@ function LexFilters() {
         ...filters.map((filter) =>
           h(ColumnFilterItem, {
             data: {
-              type: typeFromFilterKey(filter.type),
+              ...filter,
               lex_id: filter.identifier,
             },
             key: filter.type + filter.identifier,
@@ -387,8 +395,6 @@ function LexFilters() {
 
 async function _fetchFilterItems(inputText: string) {
   // Fetch filter items from the API based on input text, using the PostgREST client API
-  if (inputText.length < 3) return Promise.resolve([]);
-
   const res = postgrest
     .from("col_filter")
     .select("*")
@@ -403,7 +409,7 @@ async function _fetchFilterItems(inputText: string) {
 const fetchFilterItems = debounce(_fetchFilterItems, 300);
 
 const clearAllFiltersAtom = atom(null, (get, set) => {
-  set(columnFilterAtom, null);
+  set(columnFilterAtom, []);
 });
 
 interface ColumnFilterDefinition {
@@ -411,33 +417,14 @@ interface ColumnFilterDefinition {
   identifier: number;
 }
 
-function buildFilters(
-  filters: ColumnFilterState | null
-): ColumnFilterDefinition[] {
-  /** Get an interface-friendly list of filters from the filter state, for displaying
-   * applied filters in the UI
-   */
-  const filterItems: ColumnFilterDefinition[] = [];
-  if (filters == null) return filterItems;
-  for (const key of Object.keys(filters) as ColumnFilterKey[]) {
-    const ids = filters[key];
-    if (ids != null) {
-      for (const id of ids) {
-        filterItems.push({ type: key, identifier: id });
-      }
-    }
-  }
-  return filterItems;
-}
-
-function ColumnFilterItem({ data }: { data: ColumnFilterDefinition }) {
+function ColumnFilterItem({ data }: { data: ColumnFilterDef }) {
   const { type, identifier } = data;
   const route = routeForFilterKey(type);
   const clearAllFilters = useSetAtom(clearAllFiltersAtom);
   return h("div.lex-filter-item", [
     h(LithologyTag, {
       href: `/lex/${route}/${identifier}`,
-      data: { lex_id: identifier, type: type },
+      data,
     }),
     h(Icon, {
       className: "close-btn",

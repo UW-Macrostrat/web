@@ -1,20 +1,18 @@
 import { fetchAPIData, fetchPGData } from "~/_utils";
+import { postgrest } from "~/_providers";
 
-export async function getGroupedColumns(project_id: number | null, params?: any) {
-  // lex filter
-  const useBase = !params?.liths && !params?.units && !params?.strat_names && !params?.intervals;
-
-  const columnURL = useBase ? "/col_base" : "/col_data";
-
-  const pgParams = project_id != null ? { ...params, project_id: `eq.${project_id}` } : params;
-
-  const [columns, groups] = await Promise.all([
-    fetchPGData(columnURL, pgParams),
+export async function getGroupedColumns(
+  params: ColumnFilterOptions
+) {
+  const [columnResponse, groups] = await Promise.all([
+    fetchColumns(params),
     fetchAPIData(`/defs/groups`, { all: true }),
   ]);
 
-  if(!columns) {
-    return null
+  const { data: columns, error } = columnResponse;
+
+  if (!columns || error) {
+    return null;
   }
 
   columns.sort((a, b) => a.col_id - b.col_id);
@@ -50,4 +48,49 @@ export async function getGroupedColumns(project_id: number | null, params?: any)
   });
 
   return groupsArray;
+}
+
+export interface ColumnFilterOptions {
+  project_id: number;
+  status_code?: string;
+  empty?: boolean;
+  strat_names?: number[];
+  intervals?: number[];
+  liths?: number[];
+  nameFuzzyMatch?: string;
+}
+
+async function fetchColumns(opts: ColumnFilterOptions) {
+  const { project_id } = opts;
+
+  const req = postgrest
+    .from("col_data")
+    .select("col_id,col_group_id,project_id,name,status_code,empty")
+    .eq("project_id", project_id);
+
+  if (opts.status_code) {
+    req.eq("status_code", opts.status_code);
+  }
+
+  if (opts.empty !== undefined) {
+    req.eq("empty", opts.empty);
+  }
+
+  if (opts.strat_names && opts.strat_names.length > 0) {
+    req.in("strat_names", opts.strat_names);
+  }
+
+  if (opts.intervals && opts.intervals.length > 0) {
+    req.in("intervals", opts.intervals);
+  }
+
+  if (opts.liths && opts.liths.length > 0) {
+    req.in("liths", opts.liths);
+  }
+
+  if (opts.nameFuzzyMatch) {
+    req.ilike("name", `%${opts.nameFuzzyMatch}%`);
+  }
+
+  return req;
 }
