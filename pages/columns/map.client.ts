@@ -6,10 +6,10 @@ import {
 import h from "@macrostrat/hyper";
 import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import { useMapRef, useMapStyleOperator } from "@macrostrat/mapbox-react";
+import { useMapStyleOperator } from "@macrostrat/mapbox-react";
 import mapboxgl from "mapbox-gl";
 
-export function ColumnsMapContainer(props) {
+export function ColumnMapContainer(props) {
   return h(
     ErrorBoundary,
     h(
@@ -20,12 +20,17 @@ export function ColumnsMapContainer(props) {
   );
 }
 
-function ColumnsMapInner({ columnIDs = null, projectID = null, className }) {
-  const columnData = useMacrostratColumns(projectID, projectID != null);
+function ColumnsMapInner({
+  columnIDs = null,
+  projectID = null,
+  className,
+  inProcess = false,
+}) {
+  const columnBaseData = useMacrostratColumns(projectID, inProcess) ?? [];
 
-  if (!columnData) {
-    return h("div", { className }, "Loading map...");
-  }
+  const columnData = columnBaseData.filter((col) =>
+    columnIDs?.includes(col.id)
+  );
 
   return h(
     "div",
@@ -40,15 +45,15 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className }) {
             window.open(`/columns/${col}`, "_self");
           }
         },
-        columnIDs,
+        columns: columnData,
         projectID,
       },
-      h(FitBounds, { columnData, projectID })
+      h(FitBounds, { columnData })
     )
   );
 }
 
-function FitBounds({ columnData, projectID }) {
+function FitBounds({ columnData }) {
   useMapStyleOperator((map) => {
     if (!map || columnData.length === 0) return;
 
@@ -66,11 +71,7 @@ function FitBounds({ columnData, projectID }) {
       padding: 50,
       duration: 0,
     });
-  });
-
-  if (projectID == 3) {
-    return;
-  }
+  }, [columnData]);
 
   return null;
 }

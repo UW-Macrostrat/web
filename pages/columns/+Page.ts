@@ -42,9 +42,9 @@ function ColumnMapContainer(props) {
   return h(
     ClientOnly,
     {
-      load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
+      load: () => import("./map.client").then((d) => d.ColumnMapContainer),
       fallback: h(Spinner),
-      deps: [props.columnIDs, props.projectID, props.hideColumns],
+      deps: [props.columnIDs, props.projectID],
     },
     (component) => h(component, props)
   );
