@@ -142,7 +142,7 @@
   background-color: var(--background-color)
   width: 100%
 
-.search 
+.search
   width: 80%
   position: relative
 
@@ -159,3 +159,24 @@
 
 .suggested-items
   padding: .5em
+
+.content-area
+  position: relative
+
+.loading-overlay
+  position: absolute
+  top: 0
+  left: 0
+  width: 100%
+  height: 100%
+  background-color: var(--background-color)
+  opacity: 0.5
+  display: flex
+  justify-content: center
+  align-items: center
+  z-index: 10
+
+.loading-spinner
+  position: sticky
+  top: 50%
+  bottom: 50%

@@ -1,47 +1,56 @@
-import { fetchAPIData, fetchPGData } from "~/_utils";
+import { fetchAPIV2Result } from "~/_utils";
 
-export async function getGroupedColumns(project_id: number | null, params?: any) {
-  // lex filter
-  const useBase = !params?.liths && !params?.units && !params?.strat_names && !params?.intervals;
+interface ColumnResponseShort {
+  col_id: number;
+  col_name: string;
+  col_group: string;
+  col_group_id: number | null;
+  project_id: number;
+  status_code: string;
+  lat: number;
+  lng: number;
+  col_area: number;
+  col_type: "column" | "section";
+  refs: number[];
+}
 
-  const columnURL = useBase ? "/col_base" : "/col_data";
+export interface ColumnGroup {
+  id: number;
+  name: string;
+  columns: ColumnResponseShort[];
+}
 
-  const pgParams = project_id != null ? { ...params, project_id: `eq.${project_id}` } : params;
-
-  const [columns, groups] = await Promise.all([
-    fetchPGData(columnURL, pgParams),
-    fetchAPIData(`/defs/groups`, { all: true }),
-  ]);
-
-  if(!columns) {
-    return null
-  }
+export async function getGroupedColumns(params: ColumnFilterOptions) {
+  const { data: columns, refs } = await fetchColumns(params);
 
   columns.sort((a, b) => a.col_id - b.col_id);
 
-  // Group by col_group
-  // Create a map of column groups
-  const groupMap = new Map<number, ColumnGroup>(
-    groups.map((g) => [
-      g.col_group_id,
-      { name: g.name, id: g.col_group_id, columns: [] },
-    ])
-  );
-  groupMap.set(-1, {
-    id: -1,
-    name: "Ungrouped",
-    columns: [],
-  });
+  const groupMap = new Map<number, ColumnGroup>();
 
   for (const col of columns) {
-    const col_group_id = col.col_group_id ?? -1;
-    const group = groupMap.get(col_group_id);
-    group.columns.push(col);
+    // If the column is not part of a group, put it in an "Ungrouped" group
+    if (col.col_group_id == null) {
+      if (!groupMap.has(-1)) {
+        groupMap.set(-1, {
+          id: -1,
+          name: "Ungrouped",
+          columns: [],
+        });
+      }
+      groupMap.get(-1).columns.push(col);
+      continue;
+    }
+    if (!groupMap.has(col.col_group_id)) {
+      groupMap.set(col.col_group_id, {
+        id: col.col_group_id,
+        name: col.col_group,
+        columns: [],
+      });
+    }
+    groupMap.get(col.col_group_id).columns.push(col);
   }
 
-  const groupsArray = Array.from(groupMap.values()).filter(
-    (g) => g.columns.length > 0
-  );
+  const groupsArray = Array.from(groupMap.values());
 
   // Sort the groups by id
   groupsArray.sort((a, b) => {
@@ -50,4 +59,50 @@ export async function getGroupedColumns(project_id: number | null, params?: any)
   });
 
   return groupsArray;
+}
+
+export interface ColumnFilterOptions {
+  project_id: number;
+  status_code?: string;
+  empty?: boolean;
+  strat_names?: number[];
+  intervals?: number[];
+  liths?: number[];
+  nameFuzzyMatch?: string;
+}
+
+async function fetchColumns(opts: ColumnFilterOptions) {
+  const params = new URLSearchParams();
+
+  const { project_id } = opts;
+
+  params.append("project_id", project_id.toString());
+
+  if (opts.status_code) {
+    params.append("status_code", opts.status_code);
+  }
+
+  // Empty and name fuzzy match are not supported yet
+  if (opts.strat_names) {
+    for (const sn of opts.strat_names) {
+      params.append("strat_name_id", sn.toString());
+    }
+  }
+
+  if (opts.intervals) {
+    for (const iv of opts.intervals) {
+      params.append("int_id", iv.toString());
+    }
+  }
+
+  if (opts.liths) {
+    for (const lz of opts.liths) {
+      params.append("lith_id", lz.toString());
+    }
+  }
+
+  return (await fetchAPIV2Result("/columns", params)) as Promise<{
+    data: ColumnResponseShort[];
+    refs: { [key: number]: string };
+  }>;
 }
