@@ -1,24 +1,32 @@
 import { apiV2Prefix, postgrestPrefix } from "@macrostrat-web/settings";
 import fetch from "cross-fetch";
 
-export async function fetchAPIData(apiURL: string, params: any) {
+export async function fetchAPIV2Result(apiURL: string, params: any) {
   let url = new URL(apiV2Prefix + apiURL);
   if (params != null) {
-    url.search = new URLSearchParams(params).toString();
+    let p1 = params;
+    // If we already have a URLSearchParams object, just use it directly
+    if (!(p1 instanceof URLSearchParams)) {
+      p1 = new URLSearchParams(params);
+    }
+    url.search = p1.toString();
   }
   const res = await fetchWrapper(url.toString());
   const res1 = await res?.json();
-  return res1?.success?.data || [];
+  if (res1.error != null) {
+    throw new Error(res1.error);
+  }
+  return res1?.success;
+}
+
+export async function fetchAPIData(apiURL: string, params: any) {
+  const res = fetchAPIV2Result(apiURL, params);
+  return res?.data || [];
 }
 
 export async function fetchAPIRefs(apiURL: string, params: any) {
-  let url = new URL(apiV2Prefix + apiURL);
-  if (params != null) {
-    url.search = new URLSearchParams(params).toString();
-  }
-  const res = await fetchWrapper(url.toString());
-  const res1 = await res?.json();
-  return res1?.success?.refs || [];
+  const res = await fetchAPIV2Result(apiURL, params);
+  return res?.refs || [];
 }
 
 export async function fetchPGData(apiURL: string, params: any) {
@@ -34,7 +42,7 @@ export async function fetchPGData(apiURL: string, params: any) {
 function isServer() {
   return (
     typeof window === "undefined" ||
-    typeof process !== "undefined" && process.release?.name === "node"
+    (typeof process !== "undefined" && process.release?.name === "node")
   );
 }
 
@@ -46,7 +54,9 @@ function fetchWrapper(url: string): Promise<Response> {
       const endTime = performance.now();
       const duration = endTime - startTime;
       console.log(
-        `Fetching ${url} - status ${response.status} - ${duration.toFixed(2)} ms`
+        `Fetching ${url} - status ${response.status} - ${duration.toFixed(
+          2
+        )} ms`
       );
     }
     return response;

@@ -123,8 +123,7 @@ const projectIDAtom = atom<number | null>();
 const fetchDataAtom = atom(async (get) => {
   const filterParams = get(filterParamsAtom);
   if (filterParams == null) return null;
-  const groups = await getGroupedColumns(filterParams);
-  return groups;
+  return await getGroupedColumns(filterParams);
 });
 
 const filteredGroupsAtom = unwrap(fetchDataAtom, (prev) => {
@@ -330,7 +329,7 @@ function ColumnGroup({ data, linkPrefix }) {
 }
 
 function ColumnItem({ data, linkPrefix = "/" }) {
-  const { col_id, name, units } = data;
+  const { col_id, col_name, units } = data;
 
   const unitsText = units?.length > 0 ? `${units?.length} units` : "empty";
 
@@ -344,7 +343,7 @@ function ColumnItem({ data, linkPrefix = "/" }) {
     },
     [
       h("td.col-id", h("code.bp5-code", col_id)),
-      h("td.col-name", h("a", { href }, name)),
+      h("td.col-name", h("a", { href }, col_name)),
       h("td.col-status", [
         data.status_code === "in process" &&
           h(

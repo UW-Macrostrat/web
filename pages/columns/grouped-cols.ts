@@ -1,44 +1,56 @@
-import { fetchAPIData, fetchPGData } from "~/_utils";
-import { postgrest } from "~/_providers";
-import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
+import { fetchAPIV2Result } from "~/_utils";
+
+interface ColumnResponseShort {
+  col_id: number;
+  col_name: string;
+  col_group: string;
+  col_group_id: number | null;
+  project_id: number;
+  status_code: string;
+  lat: number;
+  lng: number;
+  col_area: number;
+  col_type: "column" | "section";
+  refs: number[];
+}
+
+interface ColumnGroup {
+  id: number;
+  name: string;
+  columns: ColumnResponseShort[];
+}
 
 export async function getGroupedColumns(params: ColumnFilterOptions) {
-  const [columnResponse, groups] = await Promise.all([
-    fetchColumns(params),
-    fetchAPIData(`/defs/groups`, { all: true }),
-  ]);
-
-  const { data: columns, error } = columnResponse;
-
-  if (!columns || error) {
-    return null;
-  }
+  const { data: columns, refs } = await fetchColumns(params);
 
   columns.sort((a, b) => a.col_id - b.col_id);
 
-  // Group by col_group
-  // Create a map of column groups
-  const groupMap = new Map<number, ColumnGroup>(
-    groups.map((g) => [
-      g.col_group_id,
-      { name: g.name, id: g.col_group_id, columns: [] },
-    ])
-  );
-  groupMap.set(-1, {
-    id: -1,
-    name: "Ungrouped",
-    columns: [],
-  });
+  const groupMap = new Map<number, ColumnGroup>();
 
   for (const col of columns) {
-    const col_group_id = col.col_group_id ?? -1;
-    const group = groupMap.get(col_group_id);
-    group.columns.push(col);
+    // If the column is not part of a group, put it in an "Ungrouped" group
+    if (col.col_group_id == null) {
+      if (!groupMap.has(-1)) {
+        groupMap.set(-1, {
+          id: -1,
+          name: "Ungrouped",
+          columns: [],
+        });
+      }
+      groupMap.get(-1).columns.push(col);
+      continue;
+    }
+    if (!groupMap.has(col.col_group_id)) {
+      groupMap.set(col.col_group_id, {
+        id: col.col_group_id,
+        name: col.col_group,
+        columns: [],
+      });
+    }
+    groupMap.get(col.col_group_id).columns.push(col);
   }
 
-  const groupsArray = Array.from(groupMap.values()).filter(
-    (g) => g.columns.length > 0
-  );
+  const groupsArray = Array.from(groupMap.values());
 
   // Sort the groups by id
   groupsArray.sort((a, b) => {
@@ -60,49 +72,37 @@ export interface ColumnFilterOptions {
 }
 
 async function fetchColumns(opts: ColumnFilterOptions) {
+  const params = new URLSearchParams();
+
   const { project_id } = opts;
 
-  const req = postgrest
-    .from("col_data")
-    .select("col_id,col_group_id,project_id,name,status_code,empty")
-    .eq("project_id", project_id);
+  params.append("project_id", project_id.toString());
 
   if (opts.status_code) {
-    req.eq("status_code", opts.status_code);
+    params.append("status_code", opts.status_code);
   }
 
-  if (opts.empty !== undefined) {
-    req.eq("empty", opts.empty);
+  // Empty and name fuzzy match are not supported yet
+  if (opts.strat_names) {
+    for (const sn of opts.strat_names) {
+      params.append("strat_name_id", sn.toString());
+    }
   }
 
-  if (opts.strat_names && opts.strat_names.length > 0) {
-    containsFilter(req, "strat_names", opts.strat_names);
+  if (opts.intervals) {
+    for (const iv of opts.intervals) {
+      params.append("int_id", iv.toString());
+    }
   }
 
-  if (opts.intervals && opts.intervals.length > 0) {
-    containsFilter(req, "intervals", opts.intervals);
+  if (opts.liths) {
+    for (const lz of opts.liths) {
+      params.append("lith_id", lz.toString());
+    }
   }
 
-  if (opts.liths && opts.liths.length > 0) {
-    containsFilter(req, "liths", opts.liths);
-  }
-
-  if (opts.nameFuzzyMatch) {
-    req.ilike("name", `%${opts.nameFuzzyMatch}%`);
-  }
-
-  return req;
-}
-
-function containsFilter(
-  req: PostgrestFilterBuilder<any>,
-  field: string,
-  values: any[]
-) {
-  // For some reason we get the wrong brackets style
-  return req.filter(field, "cs", `[${stringifyArray(values).join(",")}]`);
-}
-
-function stringifyArray(arr: any[]): string[] {
-  return arr.map((i) => `${i}`);
+  return (await fetchAPIV2Result("/columns", params)) as Promise<{
+    data: ColumnResponseShort[];
+    refs: { [key: number]: string };
+  }>;
 }
