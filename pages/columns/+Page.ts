@@ -1,15 +1,25 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { useState, useEffect, useRef, useMemo, Suspense } from "react";
+import { useMemo, Suspense } from "react";
 
 import { ContentPage } from "~/layouts";
 import { Link, DevLinkButton, PageBreadcrumbs } from "~/components";
 import { LithologyTag } from "~/components/lex/tag";
 import { Footer, SearchBar } from "~/components/general";
-import { ColumnFilterOptions, getGroupedColumns } from "./grouped-cols";
-import { FlexRow } from "@macrostrat/ui-components";
+import {
+  ColumnFilterOptions,
+  ColumnGroup,
+  getGroupedColumns,
+} from "./grouped-cols";
+import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
 
-import { AnchorButton, ButtonGroup, Switch, Popover } from "@blueprintjs/core";
+import {
+  AnchorButton,
+  ButtonGroup,
+  Switch,
+  Popover,
+  Spinner,
+} from "@blueprintjs/core";
 import { Tag, Icon } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
@@ -22,8 +32,8 @@ import { postgrest } from "~/_providers";
  * that can be used to add behaviors iteratively
  */
 
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { unwrap } from "jotai/utils";
+import { atom, useAtom, useAtomValue, useSetAtom, Provider } from "jotai";
+import { unwrap, useHydrateAtoms } from "jotai/utils";
 import { debounce } from "underscore";
 
 const h = hyper.styled(styles);
@@ -33,7 +43,7 @@ function ColumnMapContainer(props) {
     ClientOnly,
     {
       load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
-      fallback: h("div.loading", "Loading map..."),
+      fallback: h(Spinner),
       deps: [props.columnIDs, props.projectID, props.hideColumns],
     },
     (component) => h(component, props)
@@ -58,20 +68,6 @@ const addFilterAtom = atom(null, (_, set, data: ColumnFilterDef) => {
   set(inputTextAtom, ""); // Clear input text when adding a filter
 });
 
-function buildParamsFromFilters(
-  filters: ColumnFilterDef[]
-): Partial<ColumnFilterOptions> {
-  const params: Record<string, string> = {};
-  if (filters == null) return params;
-  let filterData: Partial<ColumnFilterOptions> = {};
-  for (const filter of filters) {
-    const key = paramNameForFilterKey(filter.type);
-    filterData[key] ??= [];
-    filterData[key].push(filter.identifier);
-  }
-  return filterData;
-}
-
 const showEmptyAtom = atom(true);
 const showInProcessAtom = atom(false);
 
@@ -91,7 +87,6 @@ const filterParamsAtom = atom((get) => {
   const filters = get(columnFilterAtom);
   const showEmpty = get(showEmptyAtom);
   const showInProcess = get(showInProcessAtom);
-  const inputText = get(inputTextAtom);
   const projectID = get(projectIDAtom);
 
   const params = buildParamsFromFilters(filters);
@@ -99,10 +94,6 @@ const filterParamsAtom = atom((get) => {
   if (projectID == null) return null;
 
   params.project_id = projectID;
-
-  if (inputText.length >= 3) {
-    params.nameFuzzyMatch = inputText;
-  }
 
   if (!showEmpty) {
     params.empty = false;
@@ -122,61 +113,100 @@ const projectIDAtom = atom<number | null>();
 
 const fetchDataAtom = atom(async (get) => {
   const filterParams = get(filterParamsAtom);
-  if (filterParams == null) return null;
-  return await getGroupedColumns(filterParams);
+  return await instrumentResult(getGroupedColumns(filterParams));
 });
 
-const filteredGroupsAtom = unwrap(fetchDataAtom, (prev) => {
-  return prev;
+const initialDataAtom = atom<ColumnGroup[]>();
+
+const downloadedGroupsAtom = unwrap(fetchDataAtom, (prev) => {
+  return {
+    data: prev?.data ?? null,
+    error: prev?.error ?? null,
+    loading: true,
+  };
 });
+
+const isLoadingAtom = atom((get) => {
+  const downloaded = get(downloadedGroupsAtom);
+  return downloaded.loading;
+});
+
+const filteredGroupsAtom = atom((get) => {
+  /** Apply client-side text filtering to column names */
+  const result = get(downloadedGroupsAtom).data ?? get(initialDataAtom) ?? [];
+  const inputText = get(inputTextAtom).toLowerCase();
+  if (inputText.length < 3) return result;
+
+  return result
+    .map((group) => {
+      const matchingColumns = group.columns.filter((col) =>
+        col.col_name.toLowerCase().includes(inputText)
+      );
+      return {
+        ...group,
+        columns: matchingColumns,
+      };
+    })
+    .filter((group) => group.columns.length > 0);
+});
+
+function ColumnPageProvider({ children, projectID, initialData }) {
+  return h(
+    ErrorBoundary,
+    h(Provider, h(InitialStateProvider, { projectID, initialData }, children))
+  );
+}
+
+function InitialStateProvider({ children, projectID, initialData }) {
+  useHydrateAtoms([
+    [projectIDAtom, projectID],
+    [initialDataAtom, initialData],
+  ]);
+  return children;
+}
 
 export function Page({ title = "Columns", linkPrefix = "/" }) {
-  const { project_id } = useData();
-
-  const setProjectID = useSetAtom(projectIDAtom);
-
-  useEffect(() => {
-    if (project_id) {
-      setProjectID(project_id);
-    }
-  }, [project_id, setProjectID]);
-
-  return h("div.column-list-page", [
-    h(Suspense, [
-      h(ContentPage, [
-        h("div.flex-row", [
-          h("div.main", [
-            h("div", [
-              h(PageBreadcrumbs, { showLogo: true }),
-              h(FilterManager),
-              h(LexFilters),
-            ]),
-            h(ColumnDataArea, { linkPrefix }),
-          ]),
-          h("div.sidebar", [
-            h("div.sidebar-content", [
-              h(ButtonGroup, { vertical: true, large: true }, [
-                h(
-                  AnchorButton,
-                  { href: "/projects", minimal: true },
-                  "Projects"
-                ),
-                h(
-                  DevLinkButton,
-                  { href: "/columns/correlation" },
-                  "Correlation chart"
-                ),
+  const { project_id, allColumnGroups } = useData();
+  return h(
+    ColumnPageProvider,
+    { projectID: project_id, initialData: allColumnGroups },
+    h("div.column-list-page", [
+      h(Suspense, [
+        h(ContentPage, [
+          h("div.flex-row", [
+            h("div.main", [
+              h("div", [
+                h(PageBreadcrumbs, { showLogo: true }),
+                h(FilterManager),
+                h(LexFilters),
               ]),
-              h(ColumnMapOuter, {
-                projectID: project_id,
-              }),
+              h(ColumnDataArea, { linkPrefix }),
+            ]),
+            h("div.sidebar", [
+              h("div.sidebar-content", [
+                h(ButtonGroup, { vertical: true, large: true }, [
+                  h(
+                    AnchorButton,
+                    { href: "/projects", minimal: true },
+                    "Projects"
+                  ),
+                  h(
+                    DevLinkButton,
+                    { href: "/columns/correlation" },
+                    "Correlation chart"
+                  ),
+                ]),
+                h(ColumnMapOuter, {
+                  projectID: project_id,
+                }),
+              ]),
             ]),
           ]),
         ]),
+        h(Footer),
       ]),
-      h(Footer),
-    ]),
-  ]);
+    ])
+  );
 }
 
 function ColumnMapOuter({ projectID }) {
@@ -198,22 +228,34 @@ function ColumnMapOuter({ projectID }) {
 
 function ColumnDataArea({ linkPrefix }) {
   const showEmpty = useAtomValue(showEmptyAtom);
-  const filteredGroups = useAtomValue(filteredGroupsAtom);
+  const data = useAtomValue(filteredGroupsAtom);
+  const isLoading = useAtomValue(isLoadingAtom);
 
-  const { allColumnGroups } = useData();
-
-  const data = filteredGroups ?? allColumnGroups;
   return h(
-    "div.column-groups",
-    data.map((d) =>
-      h(ColumnGroup, {
-        data: d,
-        key: d.id,
-        linkPrefix,
-        showEmpty,
-      })
+    ContentArea,
+    { isLoading },
+    h(
+      "div.column-groups",
+      data.map((d) =>
+        h(ColumnGroup, {
+          data: d,
+          key: d.id,
+          linkPrefix,
+          showEmpty,
+        })
+      )
     )
   );
+}
+
+function ContentArea({ isLoading, children }) {
+  return h("div.content-area", [
+    children,
+    isLoading &&
+      h("div.loading-overlay", [
+        h(Spinner, { className: "loading-spinner", size: 50 }),
+      ]),
+  ]);
 }
 
 function FilterManager() {
@@ -292,40 +334,35 @@ function LexCard({ data }) {
 }
 
 function ColumnGroup({ data, linkPrefix }) {
-  const [isOpen, setIsOpen] = useState(false);
   const filteredColumns = data.columns;
 
   if (filteredColumns?.length === 0) return null;
 
   const { name } = data;
-  return h(
-    "div",
-    { className: "column-group", onClick: () => setIsOpen(!isOpen) },
-    [
-      h("div.column-group-header", [
-        h(Link, { href: `/columns/groups/${data.id}`, target: "_self" }, [
-          h(
-            "h2.column-group-name",
-            name + " (Group #" + filteredColumns[0].col_group_id + ")"
-          ),
-        ]),
+  return h("div.column-group", [
+    h("div.column-group-header", [
+      h(Link, { href: `/columns/groups/${data.id}`, target: "_self" }, [
+        h(
+          "h2.column-group-name",
+          name + " (Group #" + filteredColumns[0].col_group_id + ")"
+        ),
       ]),
-      h("div.column-list", [
-        h("table.column-table", [
-          h("thead.column-row.column-header", [
-            h("tr", [
-              h("th.col-id", "ID"),
-              h("th.col-name", "Name"),
-              h("th.col-status", "Status"),
-            ]),
-          ]),
-          h("tbody", [
-            filteredColumns.map((data) => h(ColumnItem, { data, linkPrefix })),
+    ]),
+    h("div.column-list", [
+      h("table.column-table", [
+        h("thead.column-row.column-header", [
+          h("tr", [
+            h("th.col-id", "ID"),
+            h("th.col-name", "Name"),
+            h("th.col-status", "Status"),
           ]),
         ]),
+        h("tbody", [
+          filteredColumns.map((data) => h(ColumnItem, { data, linkPrefix })),
+        ]),
       ]),
-    ]
-  );
+    ]),
+  ]);
 }
 
 function ColumnItem({ data, linkPrefix = "/" }) {
@@ -411,11 +448,6 @@ const clearAllFiltersAtom = atom(null, (get, set) => {
   set(columnFilterAtom, []);
 });
 
-interface ColumnFilterDefinition {
-  type: ColumnFilterKey;
-  identifier: number;
-}
-
 function ColumnFilterItem({ data }: { data: ColumnFilterDef }) {
   const { type, identifier } = data;
   const route = routeForFilterKey(type);
@@ -457,17 +489,6 @@ function filterKeyFromType(type: string): ColumnFilterKey | null {
   }
 }
 
-function typeFromFilterKey(key: ColumnFilterKey): string {
-  switch (key) {
-    case "liths":
-      return "lithology";
-    case "stratNames":
-      return "strat name";
-    case "intervals":
-      return "interval";
-  }
-}
-
 function paramNameForFilterKey(key: ColumnFilterKey): string {
   switch (key) {
     case "liths":
@@ -476,5 +497,43 @@ function paramNameForFilterKey(key: ColumnFilterKey): string {
       return "strat_names";
     case "intervals":
       return "intervals";
+  }
+}
+
+function buildParamsFromFilters(
+  filters: ColumnFilterDef[],
+  // Allow multiple filters per category (not supported in API v2)
+  allowMultiple = false
+): Partial<ColumnFilterOptions> {
+  const params: Record<string, string> = {};
+  if (filters == null) return params;
+  let filterData: Partial<ColumnFilterOptions> = {};
+  for (const filter of filters) {
+    const key = paramNameForFilterKey(filter.type);
+    if (allowMultiple) {
+      filterData[key] ??= [];
+    } else {
+      filterData[key] = [];
+    }
+    filterData[key].push(filter.identifier);
+  }
+  return filterData;
+}
+
+async function instrumentResult<T>(
+  promise: Promise<T>
+): Promise<{ data: T | null; error: any | null; loading: boolean }> {
+  try {
+    return {
+      data: await promise,
+      error: null,
+      loading: false,
+    };
+  } catch (e) {
+    return {
+      data: null,
+      error: e,
+      loading: false,
+    };
   }
 }

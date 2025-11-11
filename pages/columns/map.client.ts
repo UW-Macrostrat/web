@@ -1,23 +1,26 @@
 import {
   ColumnNavigationMap,
+  MacrostratDataProvider,
   useMacrostratColumns,
 } from "@macrostrat/column-views";
 import h from "@macrostrat/hyper";
-import { mapboxAccessToken } from "@macrostrat-web/settings";
+import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useMapRef, useMapStyleOperator } from "@macrostrat/mapbox-react";
 import mapboxgl from "mapbox-gl";
 
 export function ColumnsMapContainer(props) {
-  return h(ErrorBoundary, h(ColumnsMapInner, props));
+  return h(
+    ErrorBoundary,
+    h(
+      MacrostratDataProvider,
+      { baseURL: apiV2Prefix },
+      h(ColumnsMapInner, props)
+    )
+  );
 }
 
-function ColumnsMapInner({
-  columnIDs = null,
-  projectID = null,
-  className,
-  hideColumns,
-}) {
+function ColumnsMapInner({ columnIDs = null, projectID = null, className }) {
   const columnData = useMacrostratColumns(projectID, projectID != null);
 
   if (!columnData) {

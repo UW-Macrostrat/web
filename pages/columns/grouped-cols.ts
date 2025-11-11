@@ -14,7 +14,7 @@ interface ColumnResponseShort {
   refs: number[];
 }
 
-interface ColumnGroup {
+export interface ColumnGroup {
   id: number;
   name: string;
   columns: ColumnResponseShort[];
