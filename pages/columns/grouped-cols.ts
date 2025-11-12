@@ -12,6 +12,8 @@ interface ColumnResponseShort {
   col_area: number;
   col_type: "column" | "section";
   refs: number[];
+  t_units: number;
+  t_sections: number;
 }
 
 export interface ColumnGroup {

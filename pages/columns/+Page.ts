@@ -371,9 +371,18 @@ function ColumnGroup({ data, linkPrefix }) {
 }
 
 function ColumnItem({ data, linkPrefix = "/" }) {
-  const { col_id, col_name, units } = data;
+  const { col_id, col_name, t_units, t_sections } = data;
 
-  const unitsText = units?.length > 0 ? `${units?.length} units` : "empty";
+  const unitsText = t_units > 0 ? `${t_units} units` : "no units";
+
+  let gbpTag = null;
+  if (t_sections > 0) {
+    gbpTag = h(
+      Tag,
+      { minimal: true, color: "goldenrod", size: "small" },
+      `${t_sections} packages`
+    );
+  }
 
   const href = linkPrefix + `columns/${col_id}`;
   return h(
@@ -393,13 +402,13 @@ function ColumnItem({ data, linkPrefix = "/" }) {
             { minimal: true, color: "lightgreen", size: "small" },
             "in process"
           ),
-        " ",
+        gbpTag,
         h(
           Tag,
           {
             minimal: true,
             size: "small",
-            color: units?.length === 0 ? "orange" : "dodgerblue",
+            color: t_units == 0 ? "orange" : "dodgerblue",
           },
           unitsText
         ),
