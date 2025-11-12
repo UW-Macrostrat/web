@@ -1,12 +1,12 @@
+import express from "express";
+import { apply } from "vike-server/express";
+import { serve } from "vike-server/express/serve";
+
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import compression from "compression";
 
-import { createDevMiddleware } from "vike/server";
-import { vikeHandler } from "./vike-handler";
-import { createMiddleware } from "@universal-middleware/express";
 import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
-import express from "express";
 import sirv from "sirv";
 import chalk from "chalk";
 
@@ -18,67 +18,25 @@ const root = resolve(join(__dirname, ".."));
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // Set HMR variables
-if (process.env.HMR_DOMAIN) {
-  const hmrDomain = new URL(process.env.HMR_DOMAIN);
-  process.env.HMR_HOST = hmrDomain.hostname;
-  process.env.HMR_PROTOCOL = hmrDomain.protocol.replace(":", "");
-}
+// if (process.env.HMR_DOMAIN) {
+//   const hmrDomain = new URL(process.env.HMR_DOMAIN);
+//   process.env.HMR_HOST = hmrDomain.hostname;
+//   process.env.HMR_PROTOCOL = hmrDomain.protocol.replace(":", "");
+// }
+//
+// const hmrPort = process.env.HMR_PORT
+//   ? parseInt(process.env.HMR_PORT, 10)
+//   : 24678;
+// const hmrHost = process.env.HMR_HOST ?? "localhost";
+// const hmrProtocol = process.env.HMR_PROTOCOL ?? "ws";
+//
+// const hmr = {
+//   host: hmrHost,
+//   port: hmrPort,
+//   protocol: hmrProtocol,
+// };
 
-const hmrPort = process.env.HMR_PORT
-  ? parseInt(process.env.HMR_PORT, 10)
-  : 24678;
-const hmrHost = process.env.HMR_HOST ?? "localhost";
-const hmrProtocol = process.env.HMR_PROTOCOL ?? "ws";
-
-const hmr = {
-  host: hmrHost,
-  port: hmrPort,
-  protocol: hmrProtocol,
-};
-
-console.log(hmr);
-
-interface Middleware<
-  Context extends Record<string | number | symbol, unknown>
-> {
-  (request: Request, context: Context):
-    | Response
-    | void
-    | Promise<Response>
-    | Promise<void>;
-}
-
-export function handlerAdapter<
-  Context extends Record<string | number | symbol, unknown>
->(handler: Middleware<Context>) {
-  return createMiddleware(
-    async (context) => {
-      const rawRequest = context.platform.request as unknown as Record<
-        string,
-        unknown
-      >;
-      rawRequest.context ??= {};
-      const response = await handler(
-        context.request,
-        rawRequest.context as Context
-      );
-
-      if (!response) {
-        context.passThrough();
-        return new Response("", {
-          status: 404,
-        });
-      }
-
-      return response;
-    },
-    {
-      alwaysCallNext: false,
-    }
-  );
-}
-
-startServer();
+export default startServer();
 
 async function startServer() {
   const app = express();
@@ -137,13 +95,13 @@ async function startServer() {
     // Instantiate Vite's development server and integrate its middleware to our server.
     // ⚠️ We should instantiate it *only* in development. (It isn't needed in production
     // and would unnecessarily bloat our server in production.)
-    const { devMiddleware } = await createDevMiddleware({
-      root,
-      viteConfig: {
-        server: { hmr },
-      },
-    });
-    app.use(devMiddleware);
+    // const { devMiddleware } = await createDevMiddleware({
+    //   root,
+    //   viteConfig: {
+    //     server: { hmr },
+    //   },
+    // });
+    // app.use(devMiddleware);
   }
 
   // API layer handler: should restructure this as a middleware
@@ -154,14 +112,6 @@ async function startServer() {
     process.env.VITE_MACROSTRAT_INSTANCE
   );
 
-  /**
-   * Vike route
-   *
-   * @link {@see https://vike.dev}
-   **/
-  app.all("*", handlerAdapter(vikeHandler));
-
-  app.listen(port, () => {
-    console.log(`Server listening on http://localhost:${port}`);
-  });
+  apply(app);
+  return serve(app, { port });
 }
