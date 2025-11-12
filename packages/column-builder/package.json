@@ -16,7 +16,7 @@
     "@supabase/postgrest-js": "^1.18.1",
     "@types/mapbox__mapbox-gl-draw": "^1.2.3",
     "axios": "^1.13.2",
-    "cross-fetch": "^4.0.0",
+    "cross-fetch": "^4.1.0",
     "mapbox-gl": "^3.0.0",
     "react": "^18",
     "react-beautiful-dnd": "^13.1.0",

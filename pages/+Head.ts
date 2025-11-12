@@ -3,7 +3,8 @@ import { usePageContext } from "vike-react/usePageContext";
 
 export default function Head() {
   const ctx = usePageContext();
-  const { environment } = ctx;
+  const environment = ctx.globalContext.environment;
+
   const { scripts = [] } = ctx.config;
 
   return h([

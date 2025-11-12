@@ -11,7 +11,7 @@ export function Page() {
       h("h1.pub-title", "Publications"),
       h("p.blurb", "literature utilizing Macrostrat"),
       h(Divider, { className: "divider" }),
-      h("ol", { class: "pub-list", reversed: true }, [
+      h("ol", { className: "pub-list", reversed: true }, [
         h("li", [
           h(
             "span",

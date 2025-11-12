@@ -5,6 +5,8 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "jsx": "react",
+    "moduleResolution": "nodenext",
+    "module": "ESNext",
     "paths": {
       // Workspace code
       "@macrostrat-web/*": [

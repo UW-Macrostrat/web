@@ -80,12 +80,12 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    patchCssModules(),
+    //patchCssModules(),
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
-    cjsInterop({
-      dependencies: ["react-images", "labella", "react-color", "mapbox-gl"],
-    }),
+    // cjsInterop({
+    //   dependencies: ["react-images", "labella", "react-color", "mapbox-gl"],
+    // }),
     // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
@@ -95,10 +95,10 @@ export default defineConfig({
     with dots (e.g., locations) are not rewritten to index
     to allow for client-side routing */
     //rewriteAll(),
-    cesium({
-      cesiumBuildPath,
-      cesiumBuildRootPath: cesiumRoot,
-    }),
+    // cesium({
+    //   cesiumBuildPath,
+    //   cesiumBuildRootPath: cesiumRoot,
+    // }),
     hyperStyles(),
     ssr(),
   ],
@@ -143,7 +143,7 @@ export default defineConfig({
       },
     },
   },
-  optimizeDeps: {
-    exclude,
-  },
+  // optimizeDeps: {
+  //   exclude,
+  // },
 });
