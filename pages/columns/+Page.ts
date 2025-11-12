@@ -50,7 +50,12 @@ function ColumnMapContainer(props) {
   );
 }
 
-type ColumnFilterKey = "liths" | "stratNames" | "intervals";
+type ColumnFilterKey =
+  | "liths"
+  | "stratNames"
+  | "intervals"
+  | "concepts"
+  | "environments";
 
 type ColumnFilterDef = {
   type: ColumnFilterKey;
@@ -366,9 +371,18 @@ function ColumnGroup({ data, linkPrefix }) {
 }
 
 function ColumnItem({ data, linkPrefix = "/" }) {
-  const { col_id, col_name, units } = data;
+  const { col_id, col_name, t_units, t_sections } = data;
 
-  const unitsText = units?.length > 0 ? `${units?.length} units` : "empty";
+  const unitsText = t_units > 0 ? `${t_units} units` : "no units";
+
+  let gbpTag = null;
+  if (t_sections > 0) {
+    gbpTag = h(
+      Tag,
+      { minimal: true, color: "goldenrod", size: "small" },
+      `${t_sections} packages`
+    );
+  }
 
   const href = linkPrefix + `columns/${col_id}`;
   return h(
@@ -388,13 +402,13 @@ function ColumnItem({ data, linkPrefix = "/" }) {
             { minimal: true, color: "lightgreen", size: "small" },
             "in process"
           ),
-        " ",
+        gbpTag,
         h(
           Tag,
           {
             minimal: true,
             size: "small",
-            color: units?.length === 0 ? "orange" : "dodgerblue",
+            color: t_units == 0 ? "orange" : "dodgerblue",
           },
           unitsText
         ),
@@ -432,7 +446,7 @@ function LexFilters() {
 async function _fetchFilterItems(inputText: string) {
   // Fetch filter items from the API based on input text, using the PostgREST client API
   const res = postgrest
-    .from("col_filter")
+    .from("col_filters")
     .select("*")
     .ilike("name", `%${inputText}%`)
     .limit(5);
@@ -473,6 +487,10 @@ function routeForFilterKey(key: ColumnFilterKey): string {
       return "strat-names";
     case "intervals":
       return "intervals";
+    case "concepts":
+      return "concepts";
+    case "environments":
+      return "environments";
   }
 }
 
@@ -484,12 +502,18 @@ function filterKeyFromType(type: string): ColumnFilterKey | null {
       return "stratNames";
     case "interval":
       return "intervals";
+    case "concept":
+      return "concepts";
+    case "environment":
+      return "environments";
     default:
       return null;
   }
 }
 
-function paramNameForFilterKey(key: ColumnFilterKey): string {
+function paramNameForFilterKey(
+  key: ColumnFilterKey
+): keyof ColumnFilterOptions {
   switch (key) {
     case "liths":
       return "liths";
@@ -497,20 +521,23 @@ function paramNameForFilterKey(key: ColumnFilterKey): string {
       return "strat_names";
     case "intervals":
       return "intervals";
+    case "concepts":
+      return "strat_name_concepts";
+    case "environments":
+      return "environments";
   }
 }
 
 function buildParamsFromFilters(
-  filters: ColumnFilterDef[],
-  // Allow multiple filters per category (not supported in API v2)
-  allowMultiple = false
+  filters: ColumnFilterDef[]
 ): Partial<ColumnFilterOptions> {
   const params: Record<string, string> = {};
   if (filters == null) return params;
   let filterData: Partial<ColumnFilterOptions> = {};
   for (const filter of filters) {
     const key = paramNameForFilterKey(filter.type);
-    if (allowMultiple) {
+    if (key == "strat_names" || key == "strat_name_concepts") {
+      // We can add multiple parameters of each type
       filterData[key] ??= [];
     } else {
       filterData[key] = [];

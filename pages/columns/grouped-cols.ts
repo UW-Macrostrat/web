@@ -12,6 +12,8 @@ interface ColumnResponseShort {
   col_area: number;
   col_type: "column" | "section";
   refs: number[];
+  t_units: number;
+  t_sections: number;
 }
 
 export interface ColumnGroup {
@@ -66,6 +68,8 @@ export interface ColumnFilterOptions {
   status_code?: string;
   empty?: boolean;
   strat_names?: number[];
+  strat_name_concepts?: number[];
+  environments?: number[];
   intervals?: number[];
   liths?: number[];
   nameFuzzyMatch?: string;
@@ -84,8 +88,19 @@ async function fetchColumns(opts: ColumnFilterOptions) {
 
   // Empty and name fuzzy match are not supported yet
   if (opts.strat_names) {
-    for (const sn of opts.strat_names) {
-      params.append("strat_name_id", sn.toString());
+    params.append("strat_name_id", buildQueryArg(opts.strat_names));
+  }
+
+  if (opts.strat_name_concepts) {
+    params.append(
+      "strat_name_concept_id",
+      buildQueryArg(opts.strat_name_concepts)
+    );
+  }
+
+  if (opts.environments) {
+    for (const env of opts.environments) {
+      params.append("env_id", env.toString());
     }
   }
 
@@ -99,6 +114,11 @@ async function fetchColumns(opts: ColumnFilterOptions) {
     for (const lz of opts.liths) {
       params.append("lith_id", lz.toString());
     }
+  }
+
+  function buildQueryArg(values: number[]) {
+    d;
+    return values.map((v) => v.toString()).join(",");
   }
 
   return (await fetchAPIV2Result("/columns", params)) as Promise<{
