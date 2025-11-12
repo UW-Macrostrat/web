@@ -13,8 +13,7 @@
     "format": "prettier --write .",
     "server:prod": "NODE_NO_WARNINGS=1 NODE_ENV=production yarn run server",
     "start": "yarn run build && yarn run server",
-    "test:runtime": "tsx tests/test-urls.ts",
-    "test": "vitest"
+    "test:runtime": "tsx tests/test-urls.ts"
   },
   "workspaces": [
     "packages/*"
@@ -42,8 +41,7 @@
     "prettier": "^2.7.1",
     "sass-embedded": "^1.79.1",
     "stylus": "^0.55.0",
-    "typescript": "^5.1.6",
-    "vitest": "^1.6.0"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@blueprintjs/core": "^5.10.2",
@@ -155,7 +153,6 @@
     "vite-css-modules": "^1.11.1",
     "vite-plugin-cesium": "^1.2.23",
     "vite-plugin-cjs-interop": "^2.3.0",
-    "vite-plugin-inspect": "^0.8.4",
     "zustand": "^5.0.8"
   },
   "prettier": {
