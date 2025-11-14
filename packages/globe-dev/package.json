@@ -9,9 +9,9 @@
   "devDependencies": {
     "react": "^18",
     "react-dom": "^18",
-    "typescript": "^5.0.0",
-    "vite": "5.4.11",
-    "vite-plugin-cesium": "^1.2.22"
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2",
+    "vite-plugin-cesium": "^1.2.23"
   },
   "dependencies": {
     "@macrostrat/cesium-martini": "^1.5.3",
@@ -20,7 +20,7 @@
     "@macrostrat/hyper": "^3.0.6",
     "@macrostrat/mapbox-react": "^2.6.0",
     "@macrostrat/mapbox-utils": "^1.5.0",
-    "cesium": "^1.123.1",
-    "resium": "^1.18.0"
+    "cesium": "^1.135.0",
+    "resium": "^1.19.0"
   }
 }

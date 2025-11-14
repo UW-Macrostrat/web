@@ -24,7 +24,7 @@
     "turf-centroid": "^1.1.2",
     "turf-convex": "^1.0.1",
     "turf-explode": "^1.0.1",
-    "underscore": "^1.8.3",
+    "underscore": "^1.13.7",
     "wellknown": "^0.3.2",
     "xhr": "^2.0.3"
   },
@@ -32,6 +32,6 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@vitejs/plugin-react": "^4.2.1",
-    "vite": "5.4.11"
+    "vite": "^7.2.2"
   }
 }
