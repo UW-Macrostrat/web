@@ -8,8 +8,12 @@ import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useMapStyleOperator } from "@macrostrat/mapbox-react";
 import mapboxgl from "mapbox-gl";
+import { navigate as vikeNavigate } from "vike/client/router";
 
-export function ColumnMapContainer(props) {
+export function ColumnMapContainer(props: {
+  columnIDs?: number[] | null;
+  projectID?: number | null;
+}) {
   return h(
     ErrorBoundary,
     h(
@@ -41,9 +45,13 @@ function ColumnsMapInner({
         style: { height: "100%" },
         accessToken: mapboxAccessToken,
         onSelectColumn: (col) => {
-          if (col) {
-            window.open(`/columns/${col}`, "_self");
+          console.log(col, projectID);
+          if (col == null) return;
+          let url = `/columns/${col}`;
+          if (projectID != null) {
+            url = `/projects/${projectID}` + url;
           }
+          vikeNavigate(url);
         },
         columns: columnData,
         projectID,
