@@ -116,7 +116,7 @@ async function fetchColumns(opts: ColumnFilterOptions) {
     }
   }
 
-  await fetchAPIV2Result("/columns", params);
+  const res = await fetchAPIV2Result("/columns", params);
 
   return res as Promise<{
     data: ColumnResponseShort[];

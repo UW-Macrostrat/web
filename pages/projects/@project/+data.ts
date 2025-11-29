@@ -3,7 +3,9 @@ import { fetchAPIData } from "~/_utils/fetch-helpers";
 
 export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
-  const project_id = pageContext.routeParams.project;
+  const _project_id = pageContext.routeParams.project;
+
+  const project_id = Number(_project_id);
 
   const projects = await fetchAPIData(`/defs/projects`, {
     project_id,
@@ -11,7 +13,7 @@ export async function data(pageContext) {
   });
   const project = projects[0];
 
-  const allColumnGroups = await getGroupedColumns(project_id);
+  const allColumnGroups = await getGroupedColumns({ project_id });
 
   return {
     allColumnGroups,

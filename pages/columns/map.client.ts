@@ -54,24 +54,41 @@ function ColumnsMapInner({
 }
 
 function FitBounds({ columnData }) {
-  useMapStyleOperator((map) => {
-    if (!map || columnData.length === 0) return;
+  useMapStyleOperator(
+    (map) => {
+      if (!map || columnData.length === 0) return;
 
-    // Extract coordinates
-    const coords = columnData.map((col) => col.geometry.coordinates[0][0]);
-    if (coords.length === 0) return;
+      console.log(columnData);
 
-    // Build bounds using the first coordinate
-    const bounds = coords.reduce(
-      (b, coord) => b.extend(coord),
-      new mapboxgl.LngLatBounds(coords[0], coords[0])
-    );
+      // Extract coordinates
+      const coords = columnData
+        .map(getRepresentativeCoordinate)
+        .filter(Boolean);
+      if (coords.length === 0) return;
 
-    map.fitBounds(bounds, {
-      padding: 50,
-      duration: 0,
-    });
-  }, [columnData]);
+      // Build bounds using the first coordinate
+      const bounds = coords.reduce(
+        (b, coord) => b.extend(coord),
+        new mapboxgl.LngLatBounds(coords[0], coords[0])
+      );
 
+      map.fitBounds(bounds, {
+        padding: 50,
+        duration: 0,
+      });
+    },
+    [columnData]
+  );
+
+  return null;
+}
+function getRepresentativeCoordinate(column) {
+  const geom = column.geometry;
+  if (geom.type === "Point") {
+    return geom.coordinates;
+  }
+  if (geom.type === "Polygon") {
+    return geom.coordinates[0][0];
+  }
   return null;
 }
