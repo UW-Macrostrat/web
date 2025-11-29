@@ -2904,7 +2904,7 @@ __metadata:
     "@types/react": "npm:^17"
     "@types/react-beautiful-dnd": "npm:^13.1.2"
     axios: "npm:^1.13.2"
-    cross-fetch: "npm:^3.1.5"
+    cross-fetch: "npm:^4.0.0"
     eslint: "npm:^8.7.0"
     eslint-config-next: "npm:^12.0.8"
     mapbox-gl: "npm:^3.0.0"
@@ -3803,7 +3803,7 @@ __metadata:
     classnames: "npm:^2.2.6"
     compression: "npm:^1.7.4"
     cookie-parser: "npm:^1.4.6"
-    cross-fetch: "npm:^4.0.0"
+    cross-fetch: "npm:^4.1.0"
     d3-array: "npm:^3.1.1"
     d3-axis: "npm:^3.0.0"
     d3-format: "npm:^3.1.0"
@@ -8939,15 +8939,6 @@ __metadata:
     cross-env: src/bin/cross-env.js
     cross-env-shell: src/bin/cross-env-shell.js
   checksum: 10/e99911f0d31c20e990fd92d6fd001f4b01668a303221227cc5cb42ed155f086351b1b3bd2699b200e527ab13011b032801f8ce638e6f09f854bdf744095e604c
-  languageName: node
-  linkType: hard
-
-"cross-fetch@npm:^3.1.5":
-  version: 3.1.8
-  resolution: "cross-fetch@npm:3.1.8"
-  dependencies:
-    node-fetch: "npm:^2.6.12"
-  checksum: 10/ac8c4ca87d2ac0e17a19b6a293a67ee8934881aee5ec9a5a8323c30e9a9a60a0f5291d3c0d633ec2a2f970cbc60978d628804dfaf03add92d7e720b6d37f392c
   languageName: node
   linkType: hard
 
@@ -15068,7 +15059,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.12, node-fetch@npm:^2.7.0":
+"node-fetch@npm:^2.7.0":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
   dependencies:

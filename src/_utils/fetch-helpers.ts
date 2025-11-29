@@ -20,7 +20,7 @@ export async function fetchAPIV2Result(apiURL: string, params: any) {
 }
 
 export async function fetchAPIData(apiURL: string, params: any) {
-  const res = fetchAPIV2Result(apiURL, params);
+  const res = await fetchAPIV2Result(apiURL, params);
   return res?.data || [];
 }
 
@@ -46,19 +46,21 @@ function isServer() {
   );
 }
 
-function fetchWrapper(url: string): Promise<Response> {
+async function fetchWrapper(url: string): Promise<Response> {
   const startTime = performance.now();
-
-  return fetch(url).then((response) => {
+  try {
+    const res = await fetch(url);
     if (isServer()) {
       const endTime = performance.now();
       const duration = endTime - startTime;
       console.log(
-        `Fetching ${url} - status ${response.status} - ${duration.toFixed(
-          2
-        )} ms`
+        `Fetching ${url} - status ${res.status} - ${duration.toFixed(2)} ms`
       );
     }
-    return response;
-  });
+    return res;
+  } catch (error) {
+    // Not really sure why we have to catch and re-throw here, but if we don't,
+    // the app crashes.
+    throw new Error(`Network error while fetching ${url}: ${error}`);
+  }
 }
