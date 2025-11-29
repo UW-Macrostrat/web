@@ -3196,9 +3196,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@macrostrat/column-views@npm:2.2.0"
+"@macrostrat/column-views@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "@macrostrat/column-views@npm:2.2.1"
   dependencies:
     "@macrostrat/api-types": "npm:^1.1.3"
     "@macrostrat/color-utils": "npm:^1.1.2"
@@ -3210,7 +3210,7 @@ __metadata:
     "@macrostrat/mapbox-react": "npm:^2.6.4"
     "@macrostrat/mapbox-utils": "npm:^1.6.1"
     "@macrostrat/stratigraphy-utils": "npm:^1.0.2"
-    "@macrostrat/svg-map-components": "npm:^1.0.6"
+    "@macrostrat/svg-map-components": "npm:^1.0.7"
     "@macrostrat/timescale": "npm:^2.3.0"
     "@macrostrat/ui-components": "npm:^4.5.2"
     "@turf/buffer": "npm:^7.2.0"
@@ -3234,6 +3234,8 @@ __metadata:
     d3-path: "npm:^3.1.0"
     d3-scale: "npm:^4.0.2"
     d3-shape: "npm:^3.2.0"
+    jotai: "npm:^2.15.1"
+    jotai-scope: "npm:^0.9.7"
     mapbox-gl: "npm:^2.15.0||^3.0.0"
     react-spring: "npm:^9.7.5"
     topojson-client: "npm:^3.1.0"
@@ -3242,7 +3244,7 @@ __metadata:
   peerDependencies:
     "@blueprintjs/core": ^5.0.0
     react: ^16.13.1||^17||^18||^19
-  checksum: 10/fba0d5e7d5eb56e256ec9db2374116310229b3be307014c14a8ece2576f36b3bcdd02450f2323bc3e6335aa3318c3879cd234e563edf1298b26cfbdd604ff44f
+  checksum: 10/cbc3154e5624e3d28573512407d75e235351e6a983ab6de8e662cdcbc264adaf0f3e27c2a098e0908711998771ba96b6d3c3f5385b55d312b43819615d4550e9
   languageName: node
   linkType: hard
 
@@ -3627,6 +3629,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat/svg-map-components@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "@macrostrat/svg-map-components@npm:1.0.7"
+  dependencies:
+    "@macrostrat/hyper": "npm:^3.0.6"
+    "@macrostrat/ui-components": "npm:^4.5.2"
+    "@types/d3-array": "npm:^3.2.1"
+    "@types/d3-drag": "npm:^3.0.7"
+    "@types/d3-geo": "npm:^3.1.0"
+    "@types/d3-selection": "npm:^3.0.11"
+    "@types/d3-zoom": "npm:^3.0.8"
+    "@types/geojson": "npm:^7946.0.16"
+    "@types/react-dom": "npm:^18"
+    axios: "npm:^1.7.9"
+    d3-array: "npm:^3.2.4"
+    d3-drag: "npm:^3.0.0"
+    d3-geo: "npm:^3.1.1"
+    d3-selection: "npm:^3.0.0"
+    d3-zoom: "npm:^3.0.0"
+    kld-intersections: "npm:^0.7.0"
+    kld-path-parser: "npm:^0.2.1"
+    topojson-client: "npm:^3.1.0"
+  peerDependencies:
+    react: ^16.13.1||^17||^18||^19
+    react-dom: ^16.13.1||^17||^18||^19
+  checksum: 10/2ab07592941bab4939fa0fcc94d70c7e1d37cf3dc3f5b07406ebd0070952f8ad9f359b3e2d7f1376b552bdac5283a2794f90a1066dc040653034dd10ef23b25d
+  languageName: node
+  linkType: hard
+
 "@macrostrat/timescale@npm:^2.2.0":
   version: 2.2.1
   resolution: "@macrostrat/timescale@npm:2.2.1"
@@ -3758,7 +3789,7 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.1.3"
     "@macrostrat/color-utils": "npm:^1.1.2"
     "@macrostrat/column-components": "npm:^1.3.1"
-    "@macrostrat/column-views": "npm:^2.2.0"
+    "@macrostrat/column-views": "npm:^2.2.1"
     "@macrostrat/data-components": "npm:^0.2.2"
     "@macrostrat/data-sheet": "npm:^2.2.1"
     "@macrostrat/feedback-components": "npm:^1.1.10"
@@ -13272,6 +13303,16 @@ __metadata:
   version: 5.1.3
   resolution: "jose@npm:5.1.3"
   checksum: 10/b8ea7fa0f27709dc1762db1697f18f19af868c3cdf2a00ab796b4cfc9e73a1e9ec9fb35c8785740b412391e99dc0da2aecf899d0fa71a01d9c30a2c6afcc176d
+  languageName: node
+  linkType: hard
+
+"jotai-scope@npm:^0.9.7":
+  version: 0.9.7
+  resolution: "jotai-scope@npm:0.9.7"
+  peerDependencies:
+    jotai: ">=2.15.0"
+    react: ">=16.0.0"
+  checksum: 10/1fb6e34fd56adafa6dc5a448d9faa1ef40ccb16fe28542538d9d7b8e8ee7a5302bdce7c7049c848641529ad4f69876f969246a7e8fd01a747c691cfe09149293
   languageName: node
   linkType: hard
 

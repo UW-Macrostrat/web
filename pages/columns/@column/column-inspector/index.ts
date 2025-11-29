@@ -2,6 +2,7 @@ import {
   ColoredUnitComponent,
   MacrostratDataProvider,
   Column,
+  MacrostratColumnStateProvider,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -14,6 +15,7 @@ import { ModalUnitPanel } from "./modal-panel";
 
 import { PageBreadcrumbs } from "~/components";
 import { onDemand } from "~/_utils";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 
 const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
@@ -28,7 +30,6 @@ export function ColumnPage(props) {
 }
 
 function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
-  console.log(columnInfo);
   const { units } = columnInfo;
 
   const [selectedUnitID, setSelectedUnitID] = useState<number>(
@@ -66,7 +67,11 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
       h("span.col-name", columnInfo.col_name),
       h.if(columnInfo.col_group != null)("span.subtitle", [
         h("span.separator", " – "),
-        h('a', { href: `/columns/groups/${columnInfo.col_group_id}` }, h("span.col-group", `${columnInfo.col_group}`)),
+        h(
+          "a",
+          { href: `/columns/groups/${columnInfo.col_group_id}` },
+          h("span.col-group", `${columnInfo.col_group}`)
+        ),
       ]),
     ]),
     h("p.column-details", [
@@ -96,35 +101,43 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 
   return h("div.page-container", [
     h("div.main", [
-      h("div.left-column", [
-        h("div.column-header", [
-          h("nav", [
-            h(PageBreadcrumbs, { showLogo: true, title: columnInfo.col_name }),
+      // This is probably too high in the page hierarchy
+      h(ErrorBoundary, [
+        h(MacrostratColumnStateProvider, { units }, [
+          h("div.left-column", [
+            h("div.column-header", [
+              h("nav", [
+                h(PageBreadcrumbs, {
+                  showLogo: true,
+                  title: columnInfo.col_name,
+                }),
+              ]),
+            ]),
+            h("div.column-view", [
+              h(Column, {
+                units,
+                unitComponent: ColoredUnitComponent,
+                unconformityLabels: true,
+                collapseSmallUnconformities: true,
+                columnWidth: 300,
+                width: 450,
+                onUnitSelected: setSelectedUnitID,
+                selectedUnit: selectedUnitID,
+              }),
+            ]),
           ]),
-        ]),
-        h("div.column-view", [
-          h(Column, {
-            units,
-            unitComponent: ColoredUnitComponent,
-            unconformityLabels: true,
-            collapseSmallUnconformities: true,
-            columnWidth: 300,
-            width: 450,
-            onUnitSelected: setSelectedUnitID,
-            selectedUnit: selectedUnitID,
-          }),
-        ]),
-      ]),
-      h("div.right-column", [
-        h("div.right-column-boxes", [
-          h(ColumnMap, {
-            className: "column-map",
-            inProcess: true,
-            projectID,
-            selectedColumn: columnInfo.col_id,
-            onSelectColumn,
-          }),
-          assistantContent,
+          h("div.right-column", [
+            h("div.right-column-boxes", [
+              h(ColumnMap, {
+                className: "column-map",
+                inProcess: true,
+                projectID,
+                selectedColumn: columnInfo.col_id,
+                onSelectColumn,
+              }),
+              assistantContent,
+            ]),
+          ]),
         ]),
       ]),
     ]),
