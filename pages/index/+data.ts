@@ -9,6 +9,7 @@ interface PageStats {
 
 export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
+
   const data = await fetchAPIData("/stats", { all: true });
 
   let columns = 0;

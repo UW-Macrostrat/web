@@ -116,13 +116,14 @@ async function fetchColumns(opts: ColumnFilterOptions) {
     }
   }
 
-  function buildQueryArg(values: number[]) {
-    d;
-    return values.map((v) => v.toString()).join(",");
-  }
+  const res = await fetchAPIV2Result("/columns", params);
 
-  return (await fetchAPIV2Result("/columns", params)) as Promise<{
+  return res as Promise<{
     data: ColumnResponseShort[];
     refs: { [key: number]: string };
   }>;
+}
+
+function buildQueryArg(values: number[]) {
+  return values.map((v) => v.toString()).join(",");
 }

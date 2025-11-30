@@ -1,7 +1,6 @@
 // https://vike.dev/onBeforeRender
 
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { preprocessUnits } from "@macrostrat/column-views";
 import fetch from "cross-fetch";
 
 import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
@@ -34,6 +33,8 @@ export async function data(pageContext) {
       {
         project_id,
         col_id,
+        show_position: true,
+        response: "long",
       },
       (res) => res
     ),
@@ -75,19 +76,13 @@ async function getData(
    * gets around the current limitation that there's no way to request any column data
    * without knowing the status_code.
    */
-  let res = await getAndUnwrap(
-    assembleURL(entity, { ...args, status_code: "active" })
-  );
-  let data = unwrapResponse(res);
+  const url = assembleURL(entity, {
+    ...args,
+    status_code: "active,in process",
+  });
 
-  if (data.length > 0) {
-    return data;
-  }
-
-  let res2 = await getAndUnwrap(
-    assembleURL(entity, { ...args, status_code: "in process" })
-  );
-  return unwrapResponse(res2);
+  const res = await getAndUnwrap(url);
+  return unwrapResponse(res);
 }
 
 function assembleURL(
@@ -100,7 +95,7 @@ function assembleURL(
   }: {
     col_id: number;
     project_id: number;
-    status_code?: "active" | "in process";
+    status_code?: string;
     [key: string]: string | number;
   }
 ) {

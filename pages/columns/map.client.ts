@@ -8,8 +8,12 @@ import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useMapStyleOperator } from "@macrostrat/mapbox-react";
 import mapboxgl from "mapbox-gl";
+import { navigate as vikeNavigate } from "vike/client/router";
 
-export function ColumnMapContainer(props) {
+export function ColumnMapContainer(props: {
+  columnIDs?: number[] | null;
+  projectID?: number | null;
+}) {
   return h(
     ErrorBoundary,
     h(
@@ -41,9 +45,13 @@ function ColumnsMapInner({
         style: { height: "100%" },
         accessToken: mapboxAccessToken,
         onSelectColumn: (col) => {
-          if (col) {
-            window.open(`/columns/${col}`, "_self");
+          console.log(col, projectID);
+          if (col == null) return;
+          let url = `/columns/${col}`;
+          if (projectID != null) {
+            url = `/projects/${projectID}` + url;
           }
+          vikeNavigate(url);
         },
         columns: columnData,
         projectID,
@@ -54,24 +62,41 @@ function ColumnsMapInner({
 }
 
 function FitBounds({ columnData }) {
-  useMapStyleOperator((map) => {
-    if (!map || columnData.length === 0) return;
+  useMapStyleOperator(
+    (map) => {
+      if (!map || columnData.length === 0) return;
 
-    // Extract coordinates
-    const coords = columnData.map((col) => col.geometry.coordinates[0][0]);
-    if (coords.length === 0) return;
+      console.log(columnData);
 
-    // Build bounds using the first coordinate
-    const bounds = coords.reduce(
-      (b, coord) => b.extend(coord),
-      new mapboxgl.LngLatBounds(coords[0], coords[0])
-    );
+      // Extract coordinates
+      const coords = columnData
+        .map(getRepresentativeCoordinate)
+        .filter(Boolean);
+      if (coords.length === 0) return;
 
-    map.fitBounds(bounds, {
-      padding: 50,
-      duration: 0,
-    });
-  }, [columnData]);
+      // Build bounds using the first coordinate
+      const bounds = coords.reduce(
+        (b, coord) => b.extend(coord),
+        new mapboxgl.LngLatBounds(coords[0], coords[0])
+      );
 
+      map.fitBounds(bounds, {
+        padding: 50,
+        duration: 0,
+      });
+    },
+    [columnData]
+  );
+
+  return null;
+}
+function getRepresentativeCoordinate(column) {
+  const geom = column.geometry;
+  if (geom.type === "Point") {
+    return geom.coordinates;
+  }
+  if (geom.type === "Polygon") {
+    return geom.coordinates[0][0];
+  }
   return null;
 }
