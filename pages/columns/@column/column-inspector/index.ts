@@ -3,11 +3,10 @@ import {
   Column,
   DetritalColumn,
   FossilDataType,
+  HybridScaleType,
   Identifier,
-  IsotopesColumn,
   MacrostratColumnStateProvider,
   MacrostratDataProvider,
-  MeasurementDataProvider,
   PBDBFossilsColumn,
   ReferencesField,
 } from "@macrostrat/column-views";
@@ -18,7 +17,7 @@ import { PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
 import { navigate } from "vike/client/router";
 
-import { SGPMeasurementsColumn } from "./facets";
+import { SGPMeasurementsColumn, StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
 
 import { PageBreadcrumbs } from "~/components";
@@ -26,7 +25,7 @@ import { onDemand } from "~/_utils";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { DataField } from "@macrostrat/data-components";
 import { ColumnAxisType } from "@macrostrat/column-components";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { Button, FormGroup, HTMLSelect } from "@blueprintjs/core";
 
 const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
@@ -45,7 +44,7 @@ const heightAxisTypeAtom = atom<ColumnAxisType>();
 const facetAtom = atom<string | null>();
 
 function inferHeightAxisType(axisType: ColumnAxisType, units): ColumnAxisType {
-  if (axisType == ColumnAxisType.AGE) {
+  if (axisType !== ColumnAxisType.HEIGHT && axisType !== ColumnAxisType.DEPTH) {
     return axisType;
   }
   // Infer axis type from units
@@ -85,6 +84,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 
   // Set subsidiary options
 
+  let hybridScale = null;
   let maxInternalColumns = undefined;
   let unconformityLabels = true;
   let showTimescale = true;
@@ -95,6 +95,22 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
       unconformityLabels = false;
       showTimescale = false;
     }
+  } else if (
+    axisType == ColumnAxisType.HEIGHT ||
+    axisType == ColumnAxisType.DEPTH
+  ) {
+    // Set up for approximate height column
+    hybridScale = { type: HybridScaleType.ApproximateHeight };
+    // Show ages on secondary axis
+    axisType = ColumnAxisType.HEIGHT;
+  }
+
+  if (axisType == ColumnAxisType.ORDINAL) {
+    // For ordinal columns, use the fancier "equidistant-surfaces" scale
+    axisType = ColumnAxisType.AGE;
+    hybridScale = { type: HybridScaleType.EquidistantSurfaces };
+
+    maxInternalColumns = undefined;
   }
 
   const [selectedUnitID, setSelectedUnitID] = useState<number>(
@@ -169,6 +185,8 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
                   selectedUnit: selectedUnitID,
                   maxInternalColumns,
                   showLabelColumn,
+                  hybridScale,
+                  pixelScale: 20,
                 },
                 children
               ),
@@ -225,29 +243,13 @@ function ColumnBasicInfo({ data, showColumnID = true }) {
 let ageAxisOptions = {
   Height: ColumnAxisType.HEIGHT,
   Age: ColumnAxisType.AGE,
+  Ordinal: ColumnAxisType.ORDINAL,
 };
 
 function facetElements(facet: string | null, columnID: number) {
   switch (facet) {
     case "stable-isotopes":
-      return h(MeasurementDataProvider, { col_id: columnID }, [
-        h(IsotopesColumn, {
-          parameter: "D13C",
-          label: "δ¹³C",
-          color: "dodgeblue",
-          domain: [-14, 6],
-          width: 100,
-          nTicks: 4,
-        }),
-        h(IsotopesColumn, {
-          parameter: "D18O",
-          label: "δ¹⁸O",
-          color: "red",
-          domain: [-40, 0],
-          width: 100,
-          nTicks: 4,
-        }),
-      ]);
+      return h(StableIsotopesColumn, { columnID });
     case "sgp-samples":
       return h(SGPMeasurementsColumn, { columnID });
     case "fossil-taxa":
