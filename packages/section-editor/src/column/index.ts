@@ -9,8 +9,6 @@ import {
   FaciesProvider,
   AssetPathContext,
   GrainsizeLayoutProvider,
-  GeologicPatternProvider,
-  SymbolColumn,
   DivisionEditOverlay,
   ColumnImage,
   LithologyColumn,
@@ -175,7 +173,6 @@ class StratColumn extends Component {
                     h(CoveredOverlay),
                     h(LithologyBoxes),
                   ]),
-                  h(SymbolColumn, { left: 90, symbols: [] }),
                   h(ColumnAxis),
                   h(GrainsizeAxis),
                   // Notes column
