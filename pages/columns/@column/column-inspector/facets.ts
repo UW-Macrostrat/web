@@ -1,6 +1,9 @@
 import h from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { BaseMeasurementsColumn, TruncatedList } from "@macrostrat/column-views";
+import {
+  BaseMeasurementsColumn,
+  TruncatedList,
+} from "@macrostrat/column-views";
 import { apiDomain } from "@macrostrat-web/settings";
 
 function useSGPData({ col_id }) {

@@ -18,7 +18,7 @@ import { PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
 import { navigate } from "vike/client/router";
 
-import {SGPMeasurementsColumn} from "./facets"
+import { SGPMeasurementsColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
 
 import { PageBreadcrumbs } from "~/components";
