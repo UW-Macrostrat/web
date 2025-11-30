@@ -1,9 +1,14 @@
 import {
   ColoredUnitComponent,
   Column,
+  DetritalColumn,
+  FossilDataType,
   Identifier,
+  IsotopesColumn,
   MacrostratColumnStateProvider,
   MacrostratDataProvider,
+  MeasurementDataProvider,
+  PBDBFossilsColumn,
   ReferencesField,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
@@ -13,6 +18,7 @@ import { PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
 import { navigate } from "vike/client/router";
 
+import {SGPMeasurementsColumn} from "./facets"
 import { ModalUnitPanel } from "./modal-panel";
 
 import { PageBreadcrumbs } from "~/components";
@@ -36,6 +42,7 @@ export function ColumnPage(props) {
 }
 
 const heightAxisTypeAtom = atom<ColumnAxisType>();
+const facetAtom = atom<string | null>();
 
 function inferHeightAxisType(axisType: ColumnAxisType, units): ColumnAxisType {
   if (axisType == ColumnAxisType.AGE) {
@@ -70,6 +77,11 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 
   let axisType = userSetAxisType ?? defaultAxisType;
   axisType = inferHeightAxisType(axisType, units);
+
+  let facetType = useAtomValue(facetAtom);
+  const facetElement = useMemo(() => {
+    return facetElements(facetType, columnInfo.col_id);
+  }, [facetType, columnInfo.col_id]);
 
   // Set subsidiary options
 
@@ -120,6 +132,13 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     });
   }
 
+  let children = null;
+  let showLabelColumn = true;
+  if (facetElement != null) {
+    showLabelColumn = false;
+    children = h("div.facet-container", [facetElement]);
+  }
+
   return h("div.page-container", [
     h("div.main", [
       // This is probably too high in the page hierarchy
@@ -135,19 +154,24 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
               ]),
             ]),
             h("div.column-view", [
-              h(Column, {
-                units,
-                unitComponent: ColoredUnitComponent,
-                unconformityLabels,
-                collapseSmallUnconformities: true,
-                showTimescale,
-                axisType,
-                columnWidth: 300,
-                width: 450,
-                onUnitSelected: setSelectedUnitID,
-                selectedUnit: selectedUnitID,
-                maxInternalColumns,
-              }),
+              h(
+                Column,
+                {
+                  units,
+                  unitComponent: ColoredUnitComponent,
+                  unconformityLabels,
+                  collapseSmallUnconformities: true,
+                  showTimescale,
+                  axisType,
+                  columnWidth: 300,
+                  width: 450,
+                  onUnitSelected: setSelectedUnitID,
+                  selectedUnit: selectedUnitID,
+                  maxInternalColumns,
+                  showLabelColumn,
+                },
+                children
+              ),
             ]),
           ]),
           h("div.right-column", [
@@ -203,8 +227,48 @@ let ageAxisOptions = {
   Age: ColumnAxisType.AGE,
 };
 
+function facetElements(facet: string | null, columnID: number) {
+  switch (facet) {
+    case "stable-isotopes":
+      return h(MeasurementDataProvider, { col_id: columnID }, [
+        h(IsotopesColumn, {
+          parameter: "D13C",
+          label: "δ¹³C",
+          color: "dodgeblue",
+          domain: [-14, 6],
+          width: 100,
+          nTicks: 4,
+        }),
+        h(IsotopesColumn, {
+          parameter: "D18O",
+          label: "δ¹⁸O",
+          color: "red",
+          domain: [-40, 0],
+          width: 100,
+          nTicks: 4,
+        }),
+      ]);
+    case "sgp-samples":
+      return h(SGPMeasurementsColumn, { columnID });
+    case "fossil-taxa":
+      return h(PBDBFossilsColumn, {
+        columnID,
+        type: FossilDataType.Occurrences,
+      });
+    case "fossil-collections":
+      return h(PBDBFossilsColumn, {
+        columnID,
+        type: FossilDataType.Collections,
+      });
+    case "detrital-zircons":
+      return h(DetritalColumn, { columnID, color: "magenta" });
+    default:
+      return null;
+  }
+}
+
 function ColumnSettingsPanel() {
-  return h("div.column-settings-panel", [h(AxisTypeControl)]);
+  return h("div.column-settings-panel", [h(AxisTypeControl), h(FacetControl)]);
 }
 
 function AxisTypeControl() {
@@ -235,6 +299,33 @@ function AxisTypeControl() {
       }),
     ])
   );
+}
+
+const facets = [
+  { label: "None", value: null },
+  { label: "Carbon/oxygen isotopes", value: "stable-isotopes" },
+  { label: "SGP", value: "sgp-samples" },
+  { label: "Fossils (taxa)", value: "fossil-taxa" },
+  { label: "Fossils (collections)", value: "fossil-collections" },
+  { label: "Detrital zircons", value: "detrital-zircons" },
+];
+
+function FacetControl() {
+  const [facet, setFacet] = useAtom(facetAtom);
+  return h("div.facet-control", [
+    h(
+      FormGroup,
+      { label: "Facet", inline: true },
+      h(HTMLSelect, {
+        options: facets,
+        value: facet,
+        onChange: (evt) => {
+          const value = evt.target.value;
+          setFacet(value);
+        },
+      })
+    ),
+  ]);
 }
 
 function getHashParams() {
