@@ -186,7 +186,6 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
                   maxInternalColumns,
                   showLabelColumn,
                   hybridScale,
-                  pixelScale: 20,
                 },
                 children
               ),
