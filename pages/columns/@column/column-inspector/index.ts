@@ -25,8 +25,9 @@ import { onDemand } from "~/_utils";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { DataField } from "@macrostrat/data-components";
 import { ColumnAxisType } from "@macrostrat/column-components";
-import { atom, useAtom, useAtomValue } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Button, FormGroup, HTMLSelect } from "@blueprintjs/core";
+import { useHydrateAtoms } from "jotai/utils";
 
 const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
@@ -62,20 +63,28 @@ function inferHeightAxisType(axisType: ColumnAxisType, units): ColumnAxisType {
   return null;
 }
 
-function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
-  const { units } = columnInfo;
+const columnTypeAtom = atom<"section" | "column" | null>();
 
-  const userSetAxisType = useAtomValue(heightAxisTypeAtom);
-  const isSection = columnInfo.col_type == "section";
-
-  console.log(userSetAxisType);
-
+const inferredAxisTypeAtom = atom((get) => {
+  /** Column axis type, inferred from column type if not set by user */
+  const columnType = get(columnTypeAtom);
+  const heightAxisType = get(heightAxisTypeAtom);
+  const isSection = columnType === "section";
   const defaultAxisType = isSection
     ? ColumnAxisType.HEIGHT
     : ColumnAxisType.AGE;
+  return heightAxisType ?? defaultAxisType;
+});
 
-  let axisType = userSetAxisType ?? defaultAxisType;
-  axisType = inferHeightAxisType(axisType, units);
+function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
+  const { units } = columnInfo;
+
+  const isSection = columnInfo.col_type == "section";
+
+  useHydrateAtoms([[columnTypeAtom, columnInfo.col_type]]);
+
+  const a0 = useAtomValue(inferredAxisTypeAtom);
+  let axisType = inferHeightAxisType(a0, units);
 
   let facetType = useAtomValue(facetAtom);
   const facetElement = useMemo(() => {
@@ -276,7 +285,8 @@ function AxisTypeControl() {
   const optionsValues = Object.entries(ageAxisOptions).map(([k, v]) => {
     return { label: k, value: v };
   });
-  const [axisType, setAxisType] = useAtom(heightAxisTypeAtom);
+  const axisType = useAtomValue(inferredAxisTypeAtom);
+  const setAxisType = useSetAtom(heightAxisTypeAtom);
   return h(
     FormGroup,
     { label: "Axis type", inline: true },
@@ -287,7 +297,6 @@ function AxisTypeControl() {
         onChange: (evt) => {
           const value = evt.target.value as ColumnAxisType;
           // set axis type
-          console.log("Selected axis type:", value);
           setAxisType(value);
         },
       }),
