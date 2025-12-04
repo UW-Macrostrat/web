@@ -122,6 +122,7 @@
     "immutability-helper": "^3.1.1",
     "jose": "^5.1.2",
     "jotai": "^2.15.1",
+    "jotai-location": "^0.6.2",
     "mapbox-gl": "^3.13.0",
     "new-github-issue-url": "^1.0.0",
     "part-regex": "^0.1.2",

@@ -2,6 +2,7 @@ import {
   ColoredUnitComponent,
   Column,
   DetritalColumn,
+  ExtUnit,
   FossilDataType,
   HybridScaleType,
   Identifier,
@@ -27,7 +28,19 @@ import { DataField } from "@macrostrat/data-components";
 import { ColumnAxisType } from "@macrostrat/column-components";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Button, FormGroup, HTMLSelect } from "@blueprintjs/core";
-import { useHydrateAtoms } from "jotai/utils";
+import { useHydrateAtoms, RESET } from "jotai/utils";
+
+interface HashParams {
+  unit?: string;
+  t_age?: string;
+  b_age?: string;
+  t_pos?: string;
+  b_pos?: string;
+  axis?: string;
+  facet?: string;
+}
+
+const selectedUnitIDAtom = atom<number | null>(getInitialSelectedUnitID());
 
 const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
@@ -65,6 +78,17 @@ function inferHeightAxisType(axisType: ColumnAxisType, units): ColumnAxisType {
 
 const columnTypeAtom = atom<"section" | "column" | null>();
 
+const unitsAtom = atom<ExtUnit[]>();
+
+//const selectedUnitIDAtom = atom<number | null>(getInitialSelectedUnitID());
+
+const selectedUnitAtom = atom((get) => {
+  const units = get(unitsAtom);
+  const selectedUnitID = get(selectedUnitIDAtom);
+  if (selectedUnitID == null) return null;
+  return units.find((d) => d.unit_id == selectedUnitID) ?? null;
+});
+
 const inferredAxisTypeAtom = atom((get) => {
   /** Column axis type, inferred from column type if not set by user */
   const columnType = get(columnTypeAtom);
@@ -81,7 +105,10 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 
   const isSection = columnInfo.col_type == "section";
 
-  useHydrateAtoms([[columnTypeAtom, columnInfo.col_type]]);
+  useHydrateAtoms([
+    [columnTypeAtom, columnInfo.col_type],
+    [unitsAtom, units],
+  ]);
 
   const a0 = useAtomValue(inferredAxisTypeAtom);
   let axisType = inferHeightAxisType(a0, units);
@@ -122,14 +149,10 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     maxInternalColumns = undefined;
   }
 
-  const [selectedUnitID, setSelectedUnitID] = useState<number>(
-    getInitialSelectedUnitID
-  );
+  const [selectedUnitID, setSelectedUnitID] =
+    useAtom<number>(selectedUnitIDAtom);
 
-  const selectedUnit = useMemo(() => {
-    if (selectedUnitID == null) return null;
-    return units.find((d) => d.unit_id == selectedUnitID);
-  }, [selectedUnitID]);
+  const selectedUnit = useAtomValue(selectedUnitAtom);
 
   useEffect(() => {
     setHashString(selectedUnitID);
@@ -361,7 +384,6 @@ function setHashString(selectedUnitID: number) {
   if (selectedUnitID != null) {
     params.set("unit", selectedUnitID.toString());
   }
-  console.log(selectedUnitID, params);
   const newHash = params.toString();
   if (newHash !== document.location.hash) {
     document.location.hash = newHash;
