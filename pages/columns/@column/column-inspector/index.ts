@@ -28,19 +28,117 @@ import { DataField } from "@macrostrat/data-components";
 import { ColumnAxisType } from "@macrostrat/column-components";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Button, FormGroup, HTMLSelect } from "@blueprintjs/core";
-import { useHydrateAtoms, RESET } from "jotai/utils";
+import { useHydrateAtoms } from "jotai/utils";
 
-interface HashParams {
-  unit?: string;
-  t_age?: string;
-  b_age?: string;
-  t_pos?: string;
-  b_pos?: string;
+interface ColumnHashState {
+  unit?: number;
+  t_age?: number;
+  b_age?: number;
+  t_pos?: number;
+  b_pos?: number;
   axis?: string;
   facet?: string;
 }
 
-const selectedUnitIDAtom = atom<number | null>(getInitialSelectedUnitID());
+function validateInt(value: string | null): number | undefined {
+  if (value == null) return undefined;
+  const id = parseInt(value);
+  if (isNaN(id)) return undefined;
+  return id;
+}
+
+function validateNumber(value: string | null): number | undefined {
+  if (value == null) return undefined;
+  const num = parseFloat(value);
+  if (isNaN(num)) return undefined;
+  return num;
+}
+
+function validateValues<T>(
+  value: string | null,
+  options: string[]
+): T | undefined {
+  if (value == null) return undefined;
+  if (options.includes(value)) {
+    return value as T;
+  }
+  return undefined;
+}
+
+function validateAxis(value: string | null): ColumnAxisType | undefined {
+  const validAxes = Object.values(ColumnAxisType);
+  return validateValues(value, validAxes);
+}
+
+const facets = [
+  { label: "None", value: null },
+  { label: "Carbon/oxygen isotopes", value: "stable-isotopes" },
+  { label: "SGP", value: "sgp-samples" },
+  { label: "Fossils (taxa)", value: "fossil-taxa" },
+  { label: "Fossils (collections)", value: "fossil-collections" },
+  { label: "Detrital zircons", value: "detrital-zircons" },
+];
+
+const validFacets = facets.map((d) => d.value).filter((d) => d != null);
+
+function getStateFromHash(): ColumnHashState {
+  const hash = document.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  const state: ColumnHashState = {};
+
+  state.unit = validateInt(params.get("unit"));
+  for (const key in ["t_age", "b_age", "t_pos", "b_pos"]) {
+    state[key] = validateNumber(params.get(key));
+  }
+  state.axis = validateAxis(params.get("axis"));
+  state.facet = validateValues<string>(
+    params.get("facet"),
+    validFacets as string[]
+  );
+  return state;
+}
+
+function setHashFromState(state: ColumnHashState) {
+  if (window == null) return;
+  let params = new URLSearchParams();
+  for (const key in state) {
+    const value = state[key];
+    if (value == null) {
+      params.delete(key);
+    } else {
+      params.set(key, value.toString());
+    }
+  }
+  let newHash = params.toString();
+  let newURL = document.location.pathname;
+  if (newHash !== "") {
+    newURL += `#${newHash}`;
+  }
+  newURL += document.location.search;
+
+  if (newHash !== document.location.hash) {
+    history.replaceState(null, document.title, newURL);
+  }
+}
+
+const hashStateAtom = atom<ColumnHashState>(getStateFromHash());
+
+const selectedUnitIDAtom = atom(
+  (get) => {
+    const hashState = get(hashStateAtom);
+    return hashState.unit;
+  },
+  (get, set, newValue: number | null) => {
+    set(hashStateAtom, (prev) => {
+      return { ...prev, unit: newValue };
+    });
+  }
+);
+
+const ageRangeAtom = atom<{ t_age: number | null; b_age: number | null }>({
+  t_age: null,
+  b_age: null,
+});
 
 const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
@@ -79,8 +177,6 @@ function inferHeightAxisType(axisType: ColumnAxisType, units): ColumnAxisType {
 const columnTypeAtom = atom<"section" | "column" | null>();
 
 const unitsAtom = atom<ExtUnit[]>();
-
-//const selectedUnitIDAtom = atom<number | null>(getInitialSelectedUnitID());
 
 const selectedUnitAtom = atom((get) => {
   const units = get(unitsAtom);
@@ -154,9 +250,11 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 
   const selectedUnit = useAtomValue(selectedUnitAtom);
 
+  const hashParams = useAtomValue(hashStateAtom);
+
   useEffect(() => {
-    setHashString(selectedUnitID);
-  }, [selectedUnitID]);
+    setHashFromState(hashParams);
+  }, [hashParams]);
 
   const onSelectColumn = useCallback(
     (col_id: number) => {
@@ -300,6 +398,14 @@ function facetElements(facet: string | null, columnID: number) {
   }
 }
 
+function isValidFacet(facet: string | null) {
+  if (facet == null) return false;
+  for (const d of facets) {
+    if (d.value === facet) return true;
+  }
+  return false;
+}
+
 function ColumnSettingsPanel() {
   return h("div.column-settings-panel", [h(AxisTypeControl), h(FacetControl)]);
 }
@@ -334,15 +440,6 @@ function AxisTypeControl() {
   );
 }
 
-const facets = [
-  { label: "None", value: null },
-  { label: "Carbon/oxygen isotopes", value: "stable-isotopes" },
-  { label: "SGP", value: "sgp-samples" },
-  { label: "Fossils (taxa)", value: "fossil-taxa" },
-  { label: "Fossils (collections)", value: "fossil-collections" },
-  { label: "Detrital zircons", value: "detrital-zircons" },
-];
-
 function FacetControl() {
   const [facet, setFacet] = useAtom(facetAtom);
   return h("div.facet-control", [
@@ -359,33 +456,4 @@ function FacetControl() {
       })
     ),
   ]);
-}
-
-function getHashParams() {
-  // Harvest selected unit ID from hash string
-  const currentHash = document.location.hash.substring(1);
-  return new URLSearchParams(currentHash);
-}
-
-function getInitialSelectedUnitID() {
-  // Harvest selected unit ID from hash string
-  const params = getHashParams();
-  const unit_id = params.get("unit");
-  // If no unit_id, return null
-  if (unit_id == null) return null;
-  const id = parseInt(unit_id);
-  if (isNaN(id)) return null;
-  return id;
-}
-
-function setHashString(selectedUnitID: number) {
-  const params = getHashParams();
-  params.delete("unit");
-  if (selectedUnitID != null) {
-    params.set("unit", selectedUnitID.toString());
-  }
-  const newHash = params.toString();
-  if (newHash !== document.location.hash) {
-    document.location.hash = newHash;
-  }
 }
