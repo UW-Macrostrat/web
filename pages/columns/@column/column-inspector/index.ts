@@ -123,22 +123,40 @@ function setHashFromState(state: ColumnHashState) {
 
 const hashStateAtom = atom<ColumnHashState>(getStateFromHash());
 
-const selectedUnitIDAtom = atom(
-  (get) => {
-    const hashState = get(hashStateAtom);
-    return hashState.unit;
-  },
-  (get, set, newValue: number | null) => {
-    set(hashStateAtom, (prev) => {
-      return { ...prev, unit: newValue };
-    });
-  }
-);
+function atomWithHashParam<T>(key: keyof ColumnHashState) {
+  return atom(
+    (get) => {
+      const hashState = get(hashStateAtom);
+      return hashState[key] as T;
+    },
+    (get, set, newValue: number | null) => {
+      set(hashStateAtom, (prev) => {
+        return { ...prev, [key]: newValue };
+      });
+    }
+  );
+}
 
-const ageRangeAtom = atom<{ t_age: number | null; b_age: number | null }>({
-  t_age: null,
-  b_age: null,
+const selectedUnitIDAtom = atomWithHashParam<number | null>("unit");
+const selectedUnitAtom = atom((get) => {
+  const units = get(unitsAtom);
+  const selectedUnitID = get(selectedUnitIDAtom);
+  if (selectedUnitID == null) return null;
+  return units.find((d) => d.unit_id == selectedUnitID) ?? null;
 });
+
+const validateSelectedUnitIDAtom = atom(null, (get, set) => {
+  const units = get(unitsAtom);
+  const selectedUnitID = get(selectedUnitIDAtom);
+  const unitIDs = units.map((d) => d.unit_id);
+  if (!unitIDs.includes(selectedUnitID)) {
+    // Clear invalid selection
+    set(selectedUnitIDAtom, null);
+  }
+});
+
+const axisTypeAtom = atomWithHashParam<ColumnAxisType>("axis");
+const facetAtom = atomWithHashParam<string | null>("facet");
 
 const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
@@ -151,9 +169,6 @@ export function ColumnPage(props) {
     h(PatternProvider, h(ColumnPageInner, props))
   );
 }
-
-const heightAxisTypeAtom = atom<ColumnAxisType>();
-const facetAtom = atom<string | null>();
 
 function inferHeightAxisType(axisType: ColumnAxisType, units): ColumnAxisType {
   if (axisType !== ColumnAxisType.HEIGHT && axisType !== ColumnAxisType.DEPTH) {
@@ -178,17 +193,10 @@ const columnTypeAtom = atom<"section" | "column" | null>();
 
 const unitsAtom = atom<ExtUnit[]>();
 
-const selectedUnitAtom = atom((get) => {
-  const units = get(unitsAtom);
-  const selectedUnitID = get(selectedUnitIDAtom);
-  if (selectedUnitID == null) return null;
-  return units.find((d) => d.unit_id == selectedUnitID) ?? null;
-});
-
 const inferredAxisTypeAtom = atom((get) => {
   /** Column axis type, inferred from column type if not set by user */
   const columnType = get(columnTypeAtom);
-  const heightAxisType = get(heightAxisTypeAtom);
+  const heightAxisType = get(axisTypeAtom);
   const isSection = columnType === "section";
   const defaultAxisType = isSection
     ? ColumnAxisType.HEIGHT
@@ -197,7 +205,7 @@ const inferredAxisTypeAtom = atom((get) => {
 });
 
 function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
-  const { units } = columnInfo;
+  const { units, col_id } = columnInfo;
 
   const isSection = columnInfo.col_type == "section";
 
@@ -205,6 +213,16 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     [columnTypeAtom, columnInfo.col_type],
     [unitsAtom, units],
   ]);
+
+  const setUnits = useSetAtom(unitsAtom);
+  const setColumnType = useSetAtom(columnTypeAtom);
+  const validateSelectedUnitID = useSetAtom(validateSelectedUnitIDAtom);
+
+  useEffect(() => {
+    setUnits(units);
+    setColumnType(columnInfo.col_type);
+    validateSelectedUnitID();
+  }, [col_id]);
 
   const a0 = useAtomValue(inferredAxisTypeAtom);
   let axisType = inferHeightAxisType(a0, units);
@@ -303,6 +321,12 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
               h(
                 Column,
                 {
+                  /**  TODO: we ideally would not have to force a re-render like this.
+                   * It is very expensive given the complexity of the column view.
+                   * However, not doing this results in artifacts (particularly with
+                   * label rendering) when columns are switched.
+                  */
+                  key: `column-view-${col_id}-${axisType}`,
                   units,
                   unitComponent: ColoredUnitComponent,
                   unconformityLabels,
@@ -398,14 +422,6 @@ function facetElements(facet: string | null, columnID: number) {
   }
 }
 
-function isValidFacet(facet: string | null) {
-  if (facet == null) return false;
-  for (const d of facets) {
-    if (d.value === facet) return true;
-  }
-  return false;
-}
-
 function ColumnSettingsPanel() {
   return h("div.column-settings-panel", [h(AxisTypeControl), h(FacetControl)]);
 }
@@ -415,7 +431,7 @@ function AxisTypeControl() {
     return { label: k, value: v };
   });
   const axisType = useAtomValue(inferredAxisTypeAtom);
-  const setAxisType = useSetAtom(heightAxisTypeAtom);
+  const setAxisType = useSetAtom(axisTypeAtom);
   return h(
     FormGroup,
     { label: "Axis type", inline: true },
