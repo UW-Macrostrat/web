@@ -78,6 +78,7 @@ function validateAxis(value: string | null): ColumnAxisType | undefined {
 }
 
 const facets = [
+  { label: "None", value: null },
   { label: "Carbon/oxygen isotopes", value: "stable-isotopes" },
   { label: "SGP", value: "sgp-samples" },
   { label: "Fossils (taxa)", value: "fossil-taxa" },
@@ -451,9 +452,11 @@ function ColumnSettingsPanel() {
   const isHeightAxis =
     axisType === ColumnAxisType.HEIGHT || axisType === ColumnAxisType.DEPTH;
 
-  let unit = "Myr";
+  let unit = "pixels/Myr";
   if (isHeightAxis) {
-    unit = "m";
+    unit = "pixels/m";
+  } else if (axisType === ColumnAxisType.ORDINAL) {
+    unit = "pixels/surface";
   }
 
   let heightAxisLabel = "Height";
@@ -480,7 +483,7 @@ function ColumnSettingsPanel() {
       label: h("span", [
         "Fixed scale",
         " ",
-        h(Parenthetical, { className: "unit" }, "pixels/" + unit),
+        h(Parenthetical, { className: "unit" }, unit),
       ]),
       atom: pixelScaleAtom,
     }),
