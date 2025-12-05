@@ -26,7 +26,7 @@ import { onDemand } from "~/_utils";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { DataField, Parenthetical } from "@macrostrat/data-components";
 import { ColumnAxisType } from "@macrostrat/column-components";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom, WritableAtom } from "jotai";
 import {
   Button,
   ControlGroup,
@@ -55,10 +55,8 @@ function validateInt(value: string | null): number | undefined {
 }
 
 function validateNumber(value: string | null): number | undefined {
-  console.log("Validating number:", value);
   if (value == null) return undefined;
   const num = parseFloat(value);
-  console.log(value, num);
   if (isNaN(num)) return undefined;
   return num;
 }
@@ -80,7 +78,6 @@ function validateAxis(value: string | null): ColumnAxisType | undefined {
 }
 
 const facets = [
-  { label: "None", value: null },
   { label: "Carbon/oxygen isotopes", value: "stable-isotopes" },
   { label: "SGP", value: "sgp-samples" },
   { label: "Fossils (taxa)", value: "fossil-taxa" },
@@ -222,6 +219,12 @@ const inferredAxisTypeAtom = atom((get) => {
   return get(axisTypeAtom) ?? get(defaultAxisTypeAtom);
 });
 
+const heightAxisTypeAtom = atom<ColumnAxisType>((get) => {
+  const inferredAxisType = get(inferredAxisTypeAtom);
+  const units = get(unitsAtom);
+  return inferHeightAxisType(inferredAxisType, units);
+});
+
 function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
   const { units, col_id } = columnInfo;
 
@@ -244,8 +247,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     validateSelectedUnitID();
   }, [col_id]);
 
-  const inferredAxisType = useAtomValue(inferredAxisTypeAtom);
-  let axisType = inferHeightAxisType(inferredAxisType, units);
+  let axisType = useAtomValue(heightAxisTypeAtom);
 
   let facetType = useAtomValue(facetAtom);
   const facetElement = useMemo(() => {
@@ -281,6 +283,8 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 
     maxInternalColumns = undefined;
   }
+
+  const { t_age, b_age, t_pos, b_pos } = useAtomValue(hashStateAtom);
 
   const [selectedUnitID, setSelectedUnitID] =
     useAtom<number>(selectedUnitIDAtom);
@@ -356,6 +360,10 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
                   showLabelColumn,
                   hybridScale,
                   pixelScale,
+                  t_age: t_age ?? 0,
+                  b_age: b_age ?? 4500,
+                  t_pos,
+                  b_pos,
                 },
                 children
               ),
@@ -439,6 +447,20 @@ function facetElements(facet: string | null, columnID: number) {
 }
 
 function ColumnSettingsPanel() {
+  const axisType = useAtomValue(heightAxisTypeAtom);
+  const isHeightAxis =
+    axisType === ColumnAxisType.HEIGHT || axisType === ColumnAxisType.DEPTH;
+
+  let unit = "Myr";
+  if (isHeightAxis) {
+    unit = "m";
+  }
+
+  let heightAxisLabel = "Height";
+  if (axisType === ColumnAxisType.DEPTH) {
+    heightAxisLabel = "Depth";
+  }
+
   return h("div.column-settings-panel", [
     h(AxisTypeControl),
     h(FacetControl),
@@ -448,44 +470,24 @@ function ColumnSettingsPanel() {
       topAtom: t_ageAtom,
       bottomAtom: b_ageAtom,
     }),
-    h(RangeControl, {
-      label: "Height range",
+    h.if(isHeightAxis)(RangeControl, {
+      label: heightAxisLabel + " range",
       unit: "m",
       topAtom: t_posAtom,
       bottomAtom: b_posAtom,
     }),
     h(NumericAtomControl, {
-      label: "Fixed scale",
+      label: h("span", [
+        "Fixed scale",
+        " ",
+        h(Parenthetical, { className: "unit" }, "pixels/" + unit),
+      ]),
       atom: pixelScaleAtom,
     }),
   ]);
 }
 
-function AxisTypeControl() {
-  const optionsValues = Object.entries(ageAxisOptions).map(([k, v]) => {
-    return { label: k, value: v };
-  });
-  const axisType = useAtomValue(inferredAxisTypeAtom);
-  const setAxisType = useSetAtom(axisTypeAtom);
-  return h(
-    FormGroup,
-    { label: "Axis type", inline: true },
-    h(ControlGroup, { fill: true }, [
-      h(HTMLSelect, {
-        options: optionsValues,
-        value: axisType,
-        onChange: (evt) => {
-          const value = evt.target.value as ColumnAxisType;
-          // set axis type
-          setAxisType(value);
-        },
-      }),
-      h(ClearButton, { value: axisType, setValue: setAxisType }),
-    ])
-  );
-}
-
-function ClearButton({ value, setValue, disabled = null}) {
+function ClearButton({ value, setValue, disabled = null }) {
   return h(Button, {
     minimal: true,
     small: true,
@@ -531,7 +533,9 @@ function RangeControl({
   disabled,
 }: {
   label: string;
-  atom: typeof t_ageAtom;
+  topAtom: WritableAtom<any, any, any>;
+  bottomAtom: WritableAtom<any, any, any>;
+  disabled?: boolean;
   placeholder?: string;
   unit?: string;
 }) {
@@ -583,20 +587,48 @@ function AtomNumericInput({ atom, ...rest }) {
   });
 }
 
+function AxisTypeControl() {
+  const optionsValues = Object.entries(ageAxisOptions).map(([k, v]) => {
+    return { label: k, value: v };
+  });
+  const axisType = useAtomValue(inferredAxisTypeAtom);
+  const setAxisType = useSetAtom(axisTypeAtom);
+  return h(
+    FormGroup,
+    { label: "Axis type", inline: true },
+    h(ControlGroup, { fill: true }, [
+      h(HTMLSelect, {
+        options: optionsValues,
+        value: axisType,
+        onChange: (evt) => {
+          const value = evt.target.value as ColumnAxisType;
+          // set axis type
+          setAxisType(value);
+        },
+      }),
+      h(ClearButton, { value: axisType, setValue: setAxisType }),
+    ])
+  );
+}
+
 function FacetControl() {
   const [facet, setFacet] = useAtom(facetAtom);
   return h("div.facet-control", [
     h(
       FormGroup,
       { label: "Facet", inline: true },
-      h(HTMLSelect, {
-        options: facets,
-        value: facet,
-        onChange: (evt) => {
-          const value = evt.target.value;
-          setFacet(value);
-        },
-      })
+      h(ControlGroup, { fill: true }, [
+        h(HTMLSelect, {
+          options: facets,
+          value: facet,
+          intent: facet == null ? "none" : "primary",
+          onChange: (evt) => {
+            const value = evt.target.value;
+            setFacet(value);
+          },
+        }),
+        h(ClearButton, { value: facet, setValue: setFacet }),
+      ])
     ),
   ]);
 }
