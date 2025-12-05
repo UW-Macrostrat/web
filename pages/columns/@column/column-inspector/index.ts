@@ -644,7 +644,13 @@ function FacetControl() {
   return h("div.facet-control", [
     h(
       FormGroup,
-      { label: h("span.facet-label", ["Facet ", h(AlphaTag, {content: "This feature is in early development"})]), inline: true },
+      {
+        label: h("span.facet-label", [
+          "Facet ",
+          h(AlphaTag, { content: "This feature is in early development" }),
+        ]),
+        inline: true,
+      },
       h(ControlGroup, { fill: true }, [
         h(HTMLSelect, {
           options: facets,
