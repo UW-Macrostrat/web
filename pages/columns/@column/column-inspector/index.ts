@@ -12,7 +12,7 @@ import {
   ReferencesField,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
-import { useCallback, useEffect, useMemo } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
@@ -24,10 +24,16 @@ import { ModalUnitPanel } from "./modal-panel";
 import { PageBreadcrumbs } from "~/components";
 import { onDemand } from "~/_utils";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import { DataField } from "@macrostrat/data-components";
+import { DataField, Parenthetical } from "@macrostrat/data-components";
 import { ColumnAxisType } from "@macrostrat/column-components";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { Button, FormGroup, HTMLSelect } from "@blueprintjs/core";
+import {
+  Button,
+  ControlGroup,
+  FormGroup,
+  HTMLSelect,
+  NumericInput,
+} from "@blueprintjs/core";
 import { useHydrateAtoms } from "jotai/utils";
 
 interface ColumnHashState {
@@ -38,6 +44,7 @@ interface ColumnHashState {
   b_pos?: number;
   axis?: string;
   facet?: string;
+  scale?: number;
 }
 
 function validateInt(value: string | null): number | undefined {
@@ -48,8 +55,10 @@ function validateInt(value: string | null): number | undefined {
 }
 
 function validateNumber(value: string | null): number | undefined {
+  console.log("Validating number:", value);
   if (value == null) return undefined;
   const num = parseFloat(value);
+  console.log(value, num);
   if (isNaN(num)) return undefined;
   return num;
 }
@@ -86,15 +95,16 @@ function getStateFromHash(): ColumnHashState {
   const params = new URLSearchParams(hash);
   const state: ColumnHashState = {};
 
-  state.unit = validateInt(params.get("unit"));
-  for (const key in ["t_age", "b_age", "t_pos", "b_pos"]) {
-    state[key] = validateNumber(params.get(key));
-  }
-  state.axis = validateAxis(params.get("axis"));
   state.facet = validateValues<string>(
     params.get("facet"),
     validFacets as string[]
   );
+  state.axis = validateAxis(params.get("axis"));
+  state.unit = validateInt(params.get("unit"));
+  for (const key of ["t_age", "b_age", "t_pos", "b_pos", "scale"]) {
+    state[key] = validateNumber(params.get(key));
+  }
+
   return state;
 }
 
@@ -159,6 +169,13 @@ const validateSelectedUnitIDAtom = atom(null, (get, set) => {
 const axisTypeAtom = atomWithHashParam<ColumnAxisType>("axis");
 const facetAtom = atomWithHashParam<string | null>("facet");
 
+const t_ageAtom = atomWithHashParam<number>("t_age");
+const b_ageAtom = atomWithHashParam<number>("b_age");
+const t_posAtom = atomWithHashParam<number>("t_pos");
+const b_posAtom = atomWithHashParam<number>("b_pos");
+
+const pixelScaleAtom = atomWithHashParam<number>("scale");
+
 const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
 const h = hyperStyled(styles);
@@ -219,6 +236,8 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
   const setColumnType = useSetAtom(columnTypeAtom);
   const validateSelectedUnitID = useSetAtom(validateSelectedUnitIDAtom);
 
+  const pixelScale = useAtomValue(pixelScaleAtom);
+
   useEffect(() => {
     setUnits(units);
     setColumnType(columnInfo.col_type);
@@ -237,7 +256,6 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 
   let hybridScale = null;
   let maxInternalColumns = undefined;
-  let unconformityLabels = "minimal";
   let showTimescale = true;
 
   if (isSection) {
@@ -324,10 +342,9 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
                    * However, not doing this results in artifacts (particularly with
                    * label rendering) when columns are switched.
                    */
-                  //key: `column-view-${col_id}-${axisType}`,
                   units,
                   unitComponent: ColoredUnitComponent,
-                  unconformityLabels,
+                  unconformityLabels: "minimal",
                   collapseSmallUnconformities: true,
                   showTimescale,
                   axisType,
@@ -338,6 +355,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
                   maxInternalColumns,
                   showLabelColumn,
                   hybridScale,
+                  pixelScale,
                 },
                 children
               ),
@@ -421,7 +439,26 @@ function facetElements(facet: string | null, columnID: number) {
 }
 
 function ColumnSettingsPanel() {
-  return h("div.column-settings-panel", [h(AxisTypeControl), h(FacetControl)]);
+  return h("div.column-settings-panel", [
+    h(AxisTypeControl),
+    h(FacetControl),
+    h(RangeControl, {
+      label: "Age range",
+      unit: "Ma",
+      topAtom: t_ageAtom,
+      bottomAtom: b_ageAtom,
+    }),
+    h(RangeControl, {
+      label: "Height range",
+      unit: "m",
+      topAtom: t_posAtom,
+      bottomAtom: b_posAtom,
+    }),
+    h(NumericAtomControl, {
+      label: "Fixed scale",
+      atom: pixelScaleAtom,
+    }),
+  ]);
 }
 
 function AxisTypeControl() {
@@ -433,7 +470,7 @@ function AxisTypeControl() {
   return h(
     FormGroup,
     { label: "Axis type", inline: true },
-    h([
+    h(ControlGroup, { fill: true }, [
       h(HTMLSelect, {
         options: optionsValues,
         value: axisType,
@@ -443,15 +480,107 @@ function AxisTypeControl() {
           setAxisType(value);
         },
       }),
-      h(Button, {
-        minimal: true,
-        small: true,
-        icon: "cross",
-        disabled: axisType == null,
-        onClick: () => setAxisType(null),
+      h(ClearButton, { value: axisType, setValue: setAxisType }),
+    ])
+  );
+}
+
+function ClearButton({ value, setValue, disabled = null}) {
+  return h(Button, {
+    minimal: true,
+    small: true,
+    icon: "cross",
+    disabled: disabled ?? value == null,
+    onClick: () => setValue(null),
+  });
+}
+
+function AtomClearButton({ atom, disabled }) {
+  const [value, setValue] = useAtom(atom);
+  return h(ClearButton, { value, setValue, disabled });
+}
+
+function NumericAtomControl({
+  label,
+  atom,
+  placeholder,
+}: {
+  label: string;
+  atom: typeof t_ageAtom;
+  placeholder?: string;
+}) {
+  const [value, setValue] = useAtom(atom);
+  return h(
+    FormGroup,
+    { label, inline: true },
+    h(ControlGroup, { fill: false }, [
+      h(AtomNumericInput, {
+        atom,
+        placeholder,
+      }),
+      h(AtomClearButton, { atom }),
+    ])
+  );
+}
+
+function RangeControl({
+  label,
+  unit,
+  topAtom,
+  bottomAtom,
+  disabled,
+}: {
+  label: string;
+  atom: typeof t_ageAtom;
+  placeholder?: string;
+  unit?: string;
+}) {
+  const bothSetAtom = useRef(
+    atom(
+      (get) => {
+        return get(topAtom) ?? get(bottomAtom);
+      },
+      (get, set) => {
+        set(bottomAtom, null);
+        set(topAtom, null);
+      }
+    )
+  );
+  let labelEl: ReactNode = label;
+  if (unit != null) {
+    labelEl = h("span", [
+      label,
+      " ",
+      h(Parenthetical, { className: "unit" }, unit),
+    ]);
+  }
+
+  return h(
+    FormGroup,
+    { label: labelEl, inline: false, className: "range-control", disabled },
+    h(ControlGroup, { fill: true }, [
+      h(AtomNumericInput, {
+        atom: bottomAtom,
+        placeholder: "Bottom",
+      }),
+      h(AtomNumericInput, {
+        atom: topAtom,
+        placeholder: "Top",
+      }),
+      h(AtomClearButton, {
+        atom: bothSetAtom.current,
       }),
     ])
   );
+}
+
+function AtomNumericInput({ atom, ...rest }) {
+  const [value, setValue] = useAtom(atom);
+  return h(NumericInput, {
+    value: value ?? "",
+    onValueChange: setValue,
+    ...rest,
+  });
 }
 
 function FacetControl() {

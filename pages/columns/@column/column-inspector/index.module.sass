@@ -27,10 +27,26 @@
   top: 0
   display: flex
   flex-direction: column
-  padding: 2em 0
+  padding: 2em 1em
+  overflow-y: scroll
 
   & > *
     border-radius: 4px
+
+  :global
+    .bp5-label
+      flex-grow: 1
+
+
+.range-control
+  :global
+    .bp5-form-group, .bp5-control-group
+      flex: 1
+      justify-content: space-between
+
+    .bp5-control-group > *
+      flex-grow: unset
+      flex-shrink: unset
 
 .right-column-boxes
   display: flex
