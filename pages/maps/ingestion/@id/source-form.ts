@@ -20,7 +20,7 @@ const INPUT_FIELDS = {
   "Reference Year": "ref_year",
   "ISBN DOI": "isbn_doi",
   Scale: "scale",
-  Licence: "licence",
+  License: "license",
   Area: "area",
   "Raster URL": "raster_url",
 };
