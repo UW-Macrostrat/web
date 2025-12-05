@@ -33,10 +33,24 @@
   & > *
     border-radius: 4px
 
-  :global
-    .bp5-label
-      flex-grow: 1
+  h3
+    color: var(--secondary-color)
 
+.column-settings-panel
+  :global
+    .bp5-form-group, .bp5-control-group
+      .bp5-label
+        color: var(--text-color)
+        flex-grow: 1
+
+.facet-control
+  :global(.bp5-html-select).unset select
+    color: var(--secondary-color)
+    font-style: italic
+
+  :global(.bp5-label) .facet-label :global(.bp5-popover-target)
+    margin-left: 0.2em
+    display: inline
 
 .range-control
   :global
@@ -76,8 +90,7 @@
   top: 2.2em
 
   h3
-    color: #444
-    margin-bottom: 0.3em
+    color: var(--secondary-color)
 
 .default-buttons
   width: 100%

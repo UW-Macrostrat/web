@@ -21,14 +21,15 @@ import { navigate } from "vike/client/router";
 import { SGPMeasurementsColumn, StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
 
-import { PageBreadcrumbs } from "~/components";
+import { AlphaTag, BetaTag, PageBreadcrumbs } from "~/components";
 import { onDemand } from "~/_utils";
-import { ErrorBoundary } from "@macrostrat/ui-components";
+import { CollapsePanel, ErrorBoundary } from "@macrostrat/ui-components";
 import { DataField, Parenthetical } from "@macrostrat/data-components";
 import { ColumnAxisType } from "@macrostrat/column-components";
 import { atom, useAtom, useAtomValue, useSetAtom, WritableAtom } from "jotai";
 import {
   Button,
+  Collapse,
   ControlGroup,
   FormGroup,
   HTMLSelect,
@@ -78,7 +79,7 @@ function validateAxis(value: string | null): ColumnAxisType | undefined {
 }
 
 const facets = [
-  { label: "None", value: null },
+  { label: "None", value: "none" },
   { label: "Carbon/oxygen isotopes", value: "stable-isotopes" },
   { label: "SGP", value: "sgp-samples" },
   { label: "Fossils (taxa)", value: "fossil-taxa" },
@@ -86,7 +87,7 @@ const facets = [
   { label: "Detrital zircons", value: "detrital-zircons" },
 ];
 
-const validFacets = facets.map((d) => d.value).filter((d) => d != null);
+const validFacets = facets.map((d) => d.value).filter((d) => d != "none");
 
 function getStateFromHash(): ColumnHashState {
   const hash = document.location.hash.substring(1);
@@ -483,6 +484,7 @@ function ColumnSettingsPanel() {
   }
 
   return h("div.column-settings-panel", [
+    h("h3", "Settings"),
     h(AxisTypeControl),
     h(FacetControl),
     h(RangeControl, {
@@ -613,6 +615,7 @@ function AxisTypeControl() {
     return { label: k, value: v };
   });
   const axisType = useAtomValue(inferredAxisTypeAtom);
+  const defaultAxisType = useAtomValue(defaultAxisTypeAtom);
   const setAxisType = useSetAtom(axisTypeAtom);
   return h(
     FormGroup,
@@ -627,7 +630,11 @@ function AxisTypeControl() {
           setAxisType(value);
         },
       }),
-      h(ClearButton, { value: axisType, setValue: setAxisType }),
+      h(ClearButton, {
+        value: axisType,
+        setValue: setAxisType,
+        disabled: axisType === defaultAxisType,
+      }),
     ])
   );
 }
@@ -637,15 +644,15 @@ function FacetControl() {
   return h("div.facet-control", [
     h(
       FormGroup,
-      { label: "Facet", inline: true },
+      { label: h("span.facet-label", ["Facet ", h(AlphaTag, {content: "This feature is in early development"})]), inline: true },
       h(ControlGroup, { fill: true }, [
         h(HTMLSelect, {
           options: facets,
-          value: facet,
-          intent: facet == null ? "none" : "primary",
+          value: facet ?? "none",
+          className: facet == null ? "unset" : null,
           onChange: (evt) => {
             const value = evt.target.value;
-            setFacet(value);
+            setFacet(value === "none" ? null : value);
           },
         }),
         h(ClearButton, { value: facet, setValue: setFacet }),
