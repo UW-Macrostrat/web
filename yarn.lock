@@ -3196,9 +3196,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "@macrostrat/column-views@npm:2.2.1"
+"@macrostrat/column-views@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "@macrostrat/column-views@npm:2.2.2"
   dependencies:
     "@macrostrat/api-types": "npm:^1.1.3"
     "@macrostrat/color-utils": "npm:^1.1.2"
@@ -3244,7 +3244,7 @@ __metadata:
   peerDependencies:
     "@blueprintjs/core": ^5.0.0
     react: ^16.13.1||^17||^18||^19
-  checksum: 10/cbc3154e5624e3d28573512407d75e235351e6a983ab6de8e662cdcbc264adaf0f3e27c2a098e0908711998771ba96b6d3c3f5385b55d312b43819615d4550e9
+  checksum: 10/14610501bedbf3e7277a82f479ec2d4b84c4581d96e2c0c7ca978077c0bce0d0ecbc2245fc950ff788d78addebd94f9df60c0312b535b47f8968d3e3e63f7b35
   languageName: node
   linkType: hard
 
@@ -3789,7 +3789,7 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.1.3"
     "@macrostrat/color-utils": "npm:^1.1.2"
     "@macrostrat/column-components": "npm:^1.3.1"
-    "@macrostrat/column-views": "npm:^2.2.1"
+    "@macrostrat/column-views": "npm:^2.2.2"
     "@macrostrat/data-components": "npm:^0.2.2"
     "@macrostrat/data-sheet": "npm:^2.2.1"
     "@macrostrat/feedback-components": "npm:^1.1.10"
@@ -3855,6 +3855,7 @@ __metadata:
     immutability-helper: "npm:^3.1.1"
     jose: "npm:^5.1.2"
     jotai: "npm:^2.15.1"
+    jotai-location: "npm:^0.6.2"
     mapbox-gl: "npm:^3.13.0"
     new-github-issue-url: "npm:^1.0.0"
     nodemon: "npm:^3.1.11"
@@ -13303,6 +13304,15 @@ __metadata:
   version: 5.1.3
   resolution: "jose@npm:5.1.3"
   checksum: 10/b8ea7fa0f27709dc1762db1697f18f19af868c3cdf2a00ab796b4cfc9e73a1e9ec9fb35c8785740b412391e99dc0da2aecf899d0fa71a01d9c30a2c6afcc176d
+  languageName: node
+  linkType: hard
+
+"jotai-location@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "jotai-location@npm:0.6.2"
+  peerDependencies:
+    jotai: ">=1.11.0"
+  checksum: 10/2bc81d3e2a0bf8007c69074e0d9b68c55480f24280c9263d1a4638559a2e9ec46d2de9f04f60d5f41a31b5f27a91a149e954e0ac8f6ca31fd375a7f25c9d5ba0
   languageName: node
   linkType: hard
 

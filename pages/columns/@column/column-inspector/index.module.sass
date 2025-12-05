@@ -27,10 +27,40 @@
   top: 0
   display: flex
   flex-direction: column
-  padding: 2em 0
+  padding: 2em 1em
+  overflow-y: scroll
 
   & > *
     border-radius: 4px
+
+  h3
+    color: var(--secondary-color)
+
+.column-settings-panel
+  :global
+    .bp5-form-group, .bp5-control-group
+      .bp5-label
+        color: var(--text-color)
+        flex-grow: 1
+
+.facet-control
+  :global(.bp5-html-select).unset select
+    color: var(--secondary-color)
+    font-style: italic
+
+  :global(.bp5-label) .facet-label :global(.bp5-popover-target)
+    margin-left: 0.2em
+    display: inline
+
+.range-control
+  :global
+    .bp5-form-group, .bp5-control-group
+      flex: 1
+      justify-content: space-between
+
+    .bp5-control-group > *
+      flex-grow: unset
+      flex-shrink: unset
 
 .right-column-boxes
   display: flex
@@ -60,8 +90,7 @@
   top: 2.2em
 
   h3
-    color: #444
-    margin-bottom: 0.3em
+    color: var(--secondary-color)
 
 .default-buttons
   width: 100%

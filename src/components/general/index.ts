@@ -172,25 +172,43 @@ export function IDTag({ id }) {
   return h("div.id-tag", "ID: #" + id);
 }
 
-export function BetaTag({ content = "This page is in beta and may be incomplete."} ) {
+export function BetaTag({
+  content = "This page is in beta and may be incomplete.",
+}) {
+  let _content = content;
+  if (typeof content === "string") {
+    _content = h("div.tag-content", content);
+  }
+
   return h(
     Popover,
     {
-      content: h("div.tag-content", content),
-      interactionKind: "hover"
+      content: _content,
+      interactionKind: "hover",
+      inline: true,
     },
-    [h(Tag, { intent: "warning" }, "Beta")]
+    h(Tag, { intent: "warning" }, "Beta")
   );
 }
 
-export function AlphaTag({ content = "This page is in alpha and highly experimental." }) {
+export function AlphaTag({
+  content = "This page is in alpha and highly experimental.",
+}: {
+  content?: React.ReactNode;
+}) {
+  let _content = content;
+  if (typeof content === "string") {
+    _content = h("div.tag-content", content);
+  }
+
   return h(
     Popover,
     {
-      content: h("div.tag-content", content),
-      interactionKind: "hover"
+      content: _content,
+      interactionKind: "hover",
+      minimal: true,
     },
-    [h(Tag, { intent: "danger" }, "Alpha")]
+    h(Tag, { intent: "danger" }, "Alpha")
   );
 }
 
