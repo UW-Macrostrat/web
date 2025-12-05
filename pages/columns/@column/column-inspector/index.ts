@@ -205,9 +205,21 @@ function inferHeightAxisType(axisType: ColumnAxisType, units): ColumnAxisType {
   return null;
 }
 
-const columnTypeAtom = atom<"section" | "column" | null>();
+interface ColumnInfo {
+  col_id: number;
+  col_type: "section" | "column";
+  units: ExtUnit[];
+}
 
-const unitsAtom = atom<ExtUnit[]>();
+const columnInfoAtom = atom<ColumnInfo>();
+
+const columnTypeAtom = atom<"section" | "column">((get) => {
+  return get(columnInfoAtom).col_type;
+});
+
+const unitsAtom = atom<ExtUnit[]>((get) => {
+  return get(columnInfoAtom).units;
+});
 
 const defaultAxisTypeAtom = atom<ColumnAxisType>((get) => {
   const columnType = get(columnTypeAtom);
@@ -226,25 +238,31 @@ const heightAxisTypeAtom = atom<ColumnAxisType>((get) => {
   return inferHeightAxisType(inferredAxisType, units);
 });
 
+function useUpdateAtoms(atomsWithValues: [WritableAtom<any, any, any>, any][]) {
+  useHydrateAtoms(atomsWithValues);
+  const setAtoms = atomsWithValues.map(([atom]) => useSetAtom(atom));
+  useEffect(
+    () => {
+      atomsWithValues.forEach(([atom, value], i) => {
+        setAtoms[i](value);
+      });
+    },
+    atomsWithValues.map(([, value]) => value)
+  );
+}
+
 function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
   const { units, col_id } = columnInfo;
 
   const isSection = columnInfo.col_type == "section";
 
-  useHydrateAtoms([
-    [columnTypeAtom, columnInfo.col_type],
-    [unitsAtom, units],
-  ]);
+  useUpdateAtoms([[columnInfoAtom, columnInfo]]);
 
-  const setUnits = useSetAtom(unitsAtom);
-  const setColumnType = useSetAtom(columnTypeAtom);
   const validateSelectedUnitID = useSetAtom(validateSelectedUnitIDAtom);
 
   const pixelScale = useAtomValue(pixelScaleAtom);
 
   useEffect(() => {
-    setUnits(units);
-    setColumnType(columnInfo.col_type);
     validateSelectedUnitID();
   }, [col_id]);
 
