@@ -12,7 +12,7 @@ import {
   ReferencesField,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
@@ -131,6 +131,7 @@ function atomWithHashParam<T>(key: keyof ColumnHashState) {
     },
     (get, set, newValue: number | null) => {
       set(hashStateAtom, (prev) => {
+        console.log("Updating hash state", key, newValue);
         return { ...prev, [key]: newValue };
       });
     }
@@ -193,15 +194,15 @@ const columnTypeAtom = atom<"section" | "column" | null>();
 
 const unitsAtom = atom<ExtUnit[]>();
 
+const defaultAxisTypeAtom = atom<ColumnAxisType>((get) => {
+  const columnType = get(columnTypeAtom);
+  const isSection = columnType === "section";
+  return isSection ? ColumnAxisType.HEIGHT : ColumnAxisType.AGE;
+});
+
 const inferredAxisTypeAtom = atom((get) => {
   /** Column axis type, inferred from column type if not set by user */
-  const columnType = get(columnTypeAtom);
-  const heightAxisType = get(axisTypeAtom);
-  const isSection = columnType === "section";
-  const defaultAxisType = isSection
-    ? ColumnAxisType.HEIGHT
-    : ColumnAxisType.AGE;
-  return heightAxisType ?? defaultAxisType;
+  return get(axisTypeAtom) ?? get(defaultAxisTypeAtom);
 });
 
 function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
@@ -224,8 +225,8 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     validateSelectedUnitID();
   }, [col_id]);
 
-  const a0 = useAtomValue(inferredAxisTypeAtom);
-  let axisType = inferHeightAxisType(a0, units);
+  const inferredAxisType = useAtomValue(inferredAxisTypeAtom);
+  let axisType = inferHeightAxisType(inferredAxisType, units);
 
   let facetType = useAtomValue(facetAtom);
   const facetElement = useMemo(() => {
@@ -236,13 +237,12 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 
   let hybridScale = null;
   let maxInternalColumns = undefined;
-  let unconformityLabels = true;
+  let unconformityLabels = "minimal";
   let showTimescale = true;
 
   if (isSection) {
     maxInternalColumns = 1;
     if (axisType !== ColumnAxisType.AGE) {
-      unconformityLabels = false;
       showTimescale = false;
     }
   } else if (
@@ -257,6 +257,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 
   if (axisType == ColumnAxisType.ORDINAL) {
     // For ordinal columns, use the fancier "equidistant-surfaces" scale
+    // We should be able to use height-based scale for height-based columns, but that isn't supported yet
     axisType = ColumnAxisType.AGE;
     hybridScale = { type: HybridScaleType.EquidistantSurfaces };
 
@@ -274,16 +275,13 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     setHashFromState(hashParams);
   }, [hashParams]);
 
-  const onSelectColumn = useCallback(
-    (col_id: number) => {
-      // do nothing
-      // We could probably find a more elegant way to do this
-      navigate(`${linkPrefix}columns/${col_id}${window.location.hash}`, {
-        overwriteLastHistoryEntry: true,
-      });
-    },
-    [setSelectedUnitID]
-  );
+  const onSelectColumn = useCallback((col_id: number) => {
+    // do nothing
+    // We could probably find a more elegant way to do this
+    navigate(`${linkPrefix}columns/${col_id}${window.location.hash}`, {
+      overwriteLastHistoryEntry: true,
+    });
+  }, []);
 
   let assistantContent = h(ColumnGlobalModal, { data: columnInfo });
 
@@ -325,8 +323,8 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
                    * It is very expensive given the complexity of the column view.
                    * However, not doing this results in artifacts (particularly with
                    * label rendering) when columns are switched.
-                  */
-                  key: `column-view-${col_id}-${axisType}`,
+                   */
+                  //key: `column-view-${col_id}-${axisType}`,
                   units,
                   unitComponent: ColoredUnitComponent,
                   unconformityLabels,
