@@ -10,7 +10,7 @@ import {
   MacrostratDataProvider,
   PBDBFossilsColumn,
   ReferencesField,
-  SGPMeasurementsColumn
+  SGPMeasurementsColumn,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
@@ -19,7 +19,7 @@ import { PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
 import { navigate } from "vike/client/router";
 
-import {  StableIsotopesColumn } from "./facets";
+import { StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
 
 import { AlphaTag, BetaTag, PageBreadcrumbs } from "~/components";
