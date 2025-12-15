@@ -9,6 +9,16 @@ import styles from "./ingest-process-card.module.sass";
 import { IngestTagDisplay } from "#/maps/ingestion/components/ingest-tag-display";
 
 const h = hyper.styled(styles);
+interface IngestProcess {
+  id: number;
+  slug: string;
+  name: string;
+  source_id: number;
+  scale: string | null;
+  raster_url: string | null;
+  tags: string[] | { tag: string }[];
+  state?: string;
+}
 
 export function IngestProcessCard({
   ingestProcess,
@@ -19,7 +29,7 @@ export function IngestProcessCard({
   user: any | undefined;
   onUpdate: () => void;
 }) {
-  const { slug, name, source_id, scale, raster_url } = ingestProcess.source;
+  const { slug, name, source_id, scale, raster_url } = ingestProcess;
   const edit_href = `/maps/ingestion/${source_id}`;
 
   return h(

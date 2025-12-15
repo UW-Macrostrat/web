@@ -1,7 +1,7 @@
 import { Card, AnchorButton } from "@blueprintjs/core";
 import { useCallback, useState } from "react";
 
-import { ingestPrefix } from "@macrostrat-web/settings";
+import { ingestPGPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import AddButton from "../components/AddButton";
 import Tag from "./Tag";
@@ -11,7 +11,9 @@ const h = hyper.styled(styles);
 
 const deleteTag = async (tag: string, ingestId: number) => {
   const response = await fetch(
-    `${ingestPrefix}/ingest-process/${ingestId}/tags/${tag}`,
+    `${ingestPGPrefix}/map_ingest_tags?ingest_process_id=eq.${ingestId}&tag=eq.${encodeURIComponent(
+      tag
+    )}`,
     {
       method: "DELETE",
       headers: {
@@ -40,13 +42,15 @@ export function IngestTagDisplay({
 
   const updateIngestProcess = useCallback(async () => {
     const response = await fetch(
-      `${ingestPrefix}/ingest-process/${ingestProcess.id}`
+      `${ingestPGPrefix}/map_ingest?id=eq.${ingestProcess.id}`
     );
-    setIngestProcess(await response.json());
+    const data = await response.json();
+    setIngestProcess(data[0]);
     onUpdate();
   }, []);
 
-  const { id, tags } = _ingestProcess;
+  const { id } = _ingestProcess;
+  const tags = _ingestProcess.tags ?? [];
 
   return h(
     "div.flex.row",
@@ -60,14 +64,15 @@ export function IngestTagDisplay({
         },
         []
       ),
-      tags.map((tag, i) => {
+      tags.map((t) => {
+        const tag = typeof t === "string" ? t : t.tag;
         return h(Tag, {
           key: tag,
           value: tag,
           style: { marginTop: "auto", marginBottom: "auto" },
           onClick: async () => {
-            await updateIngestProcess();
             await deleteTag(tag, id);
+            await updateIngestProcess();
           },
         });
       }),

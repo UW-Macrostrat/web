@@ -1,9 +1,9 @@
-import { ingestPrefix } from "@macrostrat-web/settings";
+import { ingestPGPrefix } from "@macrostrat-web/settings";
 
 export async function data(pageContext) {
   const pageProps = {
     user: pageContext.user,
-    ingest_api: ingestPrefix,
+    ingest_api: ingestPGPrefix,
   };
   return {
     pageContext: {

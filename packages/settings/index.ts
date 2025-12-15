@@ -33,6 +33,11 @@ export const apiV3Prefix = getRuntimeConfig(
   apiDomain + "/api/v3"
 );
 
+export const postgrestPrefix = getRuntimeConfig(
+  "MACROSTRAT_POSTGREST_PREFIX",
+  apiDomain + "/api/pg"
+);
+
 // If MACROSTRAT_INGEST_API is set, warn about deprecation
 if (getRuntimeConfig("MACROSTRAT_INGEST_API") != null) {
   console.warn(
@@ -42,6 +47,11 @@ if (getRuntimeConfig("MACROSTRAT_INGEST_API") != null) {
 export const ingestPrefix = getRuntimeConfig(
   "MACROSTRAT_INGEST_API",
   apiV3Prefix
+);
+
+export const ingestPGPrefix = getRuntimeConfig(
+  "MACROSTRAT_INGEST_API",
+  postgrestPrefix
 );
 
 export const webAssetsPrefix = getRuntimeConfig(
@@ -62,11 +72,6 @@ export const cdrAPIKey = getRuntimeConfig("CDR_API_KEY");
 
 export const mapPagePrefix = "/map";
 export const routerBasename = "/map";
-
-export const postgrestPrefix = getRuntimeConfig(
-  "MACROSTRAT_POSTGREST_PREFIX",
-  apiDomain + "/api/pg"
-);
 
 export const knowledgeGraphAPIURL = getRuntimeConfig(
   "XDD_KNOWLEDGE_GRAPH_API_URL",

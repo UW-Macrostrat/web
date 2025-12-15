@@ -1,5 +1,5 @@
 import { AnchorButton } from "@blueprintjs/core";
-import { ingestPrefix } from "@macrostrat-web/settings";
+import { ingestPGPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import react, { useCallback, useEffect, useState } from "react";
 import { PageBreadcrumbs } from "~/components";
@@ -108,7 +108,7 @@ function TagFilterManager({ tags, setIngestFilter, ingestFilter }) {
       return h(Tag, {
         key: tag,
         value: tag,
-        active: (ingestFilter?.getAll("tags")  ?? []).includes(`eq.${tag}`),
+        active: (ingestFilter?.getAll("tags") ?? []).includes(`eq.${tag}`),
         onClick: async () => {
           updateUrl("tags", `eq.${tag}`, setIngestFilter);
         },
@@ -130,12 +130,18 @@ function AddMapButton({ user }) {
   );
 }
 
-const toggleUrlParam = (urlSearchParam: URLSearchParams | undefined, key: string, value: string) => {
+const toggleUrlParam = (
+  urlSearchParam: URLSearchParams | undefined,
+  key: string,
+  value: string
+) => {
   // Check if this key value pair is already in the search params iteratively
-  const sp = urlSearchParam ? new URLSearchParams(urlSearchParam) : new URLSearchParams()
-  if (sp.getAll(key).includes(value)) sp.delete(key, value)
-  else sp.append(key, value)
-  return sp
+  const sp = urlSearchParam
+    ? new URLSearchParams(urlSearchParam)
+    : new URLSearchParams();
+  if (sp.getAll(key).includes(value)) sp.delete(key, value);
+  else sp.append(key, value);
+  return sp;
 };
 
 const updateUrl = (
@@ -162,14 +168,15 @@ const updateUrl = (
   });
 };
 
-const getTags = async () => {
-  const response = await fetch(`${ingestPrefix}/ingest-process/tags`);
-  return await response.json();
+const getTags = async (): Promise<string[]> => {
+  const response = await fetch(`${ingestPGPrefix}/map_ingest_tags`);
+  const rows = await response.json();
+  return [...new Set(rows.map((r) => r.tag))];
 };
 
 const getIngestProcesses = async (ingestFilter: URLSearchParams) => {
   const response = await fetch(
-    `${ingestPrefix}/ingest-process?source_id=order_by.desc&source_id=not.is.null&page_size=1000&${
+    `${ingestPGPrefix}/map_ingest?source_id=not.is.null&order=source_id.desc&limit=1000&${
       ingestFilter || ""
     }`
   );
