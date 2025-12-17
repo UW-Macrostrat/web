@@ -49,11 +49,6 @@ export const ingestPrefix = getRuntimeConfig(
   apiV3Prefix
 );
 
-export const ingestPGPrefix = getRuntimeConfig(
-  "MACROSTRAT_INGEST_API",
-  postgrestPrefix
-);
-
 export const webAssetsPrefix = getRuntimeConfig(
   "MACROSTRAT_WEB_ASSETS_PREFIX",
   "https://storage.macrostrat.org/assets/web"

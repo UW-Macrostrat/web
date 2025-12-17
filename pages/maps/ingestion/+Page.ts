@@ -1,5 +1,5 @@
 import { AnchorButton } from "@blueprintjs/core";
-import { ingestPGPrefix } from "@macrostrat-web/settings";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import react, { useCallback, useEffect, useState } from "react";
 import { PageBreadcrumbs } from "~/components";
@@ -169,14 +169,14 @@ const updateUrl = (
 };
 
 const getTags = async (): Promise<string[]> => {
-  const response = await fetch(`${ingestPGPrefix}/map_ingest_tags`);
+  const response = await fetch(`${postgrestPrefix}/map_ingest_tags`);
   const rows = await response.json();
   return [...new Set(rows.map((r) => r.tag))];
 };
 
 const getIngestProcesses = async (ingestFilter: URLSearchParams) => {
   const response = await fetch(
-    `${ingestPGPrefix}/map_ingest?source_id=not.is.null&order=source_id.desc&limit=1000&${
+    `${postgrestPrefix}/map_ingest?source_id=not.is.null&order=source_id.desc&limit=1000&${
       ingestFilter || ""
     }`
   );

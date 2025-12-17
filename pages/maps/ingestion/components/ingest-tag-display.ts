@@ -1,7 +1,7 @@
 import { Card, AnchorButton } from "@blueprintjs/core";
 import { useCallback, useState } from "react";
 
-import { ingestPGPrefix } from "@macrostrat-web/settings";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import AddButton from "../components/AddButton";
 import Tag from "./Tag";
@@ -11,7 +11,7 @@ const h = hyper.styled(styles);
 
 const deleteTag = async (tag: string, ingestId: number) => {
   const response = await fetch(
-    `${ingestPGPrefix}/map_ingest_tags?ingest_process_id=eq.${ingestId}&tag=eq.${encodeURIComponent(
+    `${postgrestPrefix}/map_ingest_tags?ingest_process_id=eq.${ingestId}&tag=eq.${encodeURIComponent(
       tag
     )}`,
     {
@@ -42,7 +42,7 @@ export function IngestTagDisplay({
 
   const updateIngestProcess = useCallback(async () => {
     const response = await fetch(
-      `${ingestPGPrefix}/map_ingest?id=eq.${ingestProcess.id}`
+      `${postgrestPrefix}/map_ingest?id=eq.${ingestProcess.id}`
     );
     const data = await response.json();
     setIngestProcess(data[0]);
