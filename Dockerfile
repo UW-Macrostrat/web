@@ -36,8 +36,6 @@ RUN apt-get remove -y rsync
 
 COPY . ./
 
-ENV NODE_ENV=production
-
 RUN yarn run build
 
 EXPOSE 3000

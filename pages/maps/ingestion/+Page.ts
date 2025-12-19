@@ -11,10 +11,23 @@ import { ContentPage } from "~/layouts";
 import Tag from "./components/Tag";
 
 const h = hyper.styled(styles);
-
+type MapSource = {
+  source_id: number;
+  name: string | null;
+};
+interface IngestProcess {
+  id: number;
+  source_id: number | null;
+  slug: string;
+  name: string;
+  scale: string | null;
+  raster_url: string | null;
+  tags?: string[] | { tag: string }[];
+  state?: string;
+}
 export function Page() {
   const { user } = useAuth();
-
+  const [mapSources, setMapSources] = useState<Record<number, MapSource>>({});
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([]);
   const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined);
   const [tags, setTags] = useState<string[]>([]);
@@ -22,6 +35,15 @@ export function Page() {
   const updateTags = useCallback(() => {
     getTags().then((tags) => setTags(tags));
   }, []);
+
+  const getMapSources = async (): Promise<Record<number, MapSource>> => {
+    const res = await fetch(
+      "https://dev.macrostrat.org/api/pg/maps_sources?select=source_id,name"
+    );
+    const rows: MapSource[] = await res.json();
+
+    return Object.fromEntries(rows.map((r) => [r.source_id, r]));
+  };
 
   const updateIngestProcesses = useCallback(() => {
     getIngestProcesses(ingestFilter).then((ingestProcesses) => {
@@ -43,6 +65,9 @@ export function Page() {
     window.onpopstate = () => {
       updateIngestProcesses();
     };
+  }, []);
+  useEffect(() => {
+    getMapSources().then(setMapSources);
   }, []);
 
   // Re-fetch data when the filter changes
@@ -72,9 +97,13 @@ export function Page() {
       h(
         "div.ingestion-body",
         ingestProcess.map((d) => {
+          const name =
+            d.source_id != null ? mapSources[d.source_id]?.name : undefined;
+
           return h(IngestProcessCard, {
             key: d.id,
             ingestProcess: d,
+            refTitle: name,
             user: user,
             onUpdate: () => {
               updateTags();
