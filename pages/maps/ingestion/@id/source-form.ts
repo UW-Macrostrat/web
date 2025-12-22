@@ -22,7 +22,6 @@ const INPUT_FIELDS = {
   Scale: "scale",
   License: "license",
   Area: "area",
-  "Raster URL": "raster_url",
 };
 
 const postSource = async (data: any) => {
