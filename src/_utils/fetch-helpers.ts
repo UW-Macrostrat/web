@@ -53,8 +53,12 @@ async function fetchWrapper(url: string): Promise<Response> {
     if (isServer()) {
       const endTime = performance.now();
       const duration = endTime - startTime;
+
+      const now = new Date();
+      const timestamp = now.toISOString(); 
+
       console.log(
-        `Fetching ${url} - status ${res.status} - ${duration.toFixed(2)} ms`
+        `Fetching ${url} - status ${res.status} - ${duration.toFixed(2)} ms - ${timestamp}`
       );
     }
     return res;
