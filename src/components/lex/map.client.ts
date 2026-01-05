@@ -62,11 +62,13 @@ function ColumnsMapInner({
 
     const map = "/map/layers#" + mapUrl
 
+    console.log(showFossils, 'div.' + (showFossils ? 'selected' : 'btn'))
+
     return h('div.lex-controls', [
       h.if(mapUrl !== "")('div.btn', { onClick: () => navigate(map) }, h(Icon, { icon: "map", className: 'icon' })),
-      h.if(fossilsExist)('div.btn', { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
-      h.if(filters.length > 0)('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
-      h('div.btn', { onClick: handleSatellite }, h(Icon, { icon: "satellite", className: 'icon' })),
+      h.if(fossilsExist)('div.' + (showFossils ? 'selected' : 'btn'), { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
+      h.if(filters.length > 0)('div.' + (showOutcrop ? 'selected' : 'btn'), { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
+      h('div.' + (showSatellite ? 'selected' : 'btn'), { onClick: handleSatellite }, h(Icon, { icon: "satellite", className: 'icon' })),
     ])
   }
 
