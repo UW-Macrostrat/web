@@ -62,8 +62,6 @@ function ColumnsMapInner({
 
     const map = "/map/layers#" + mapUrl
 
-    console.log(showFossils, 'div.' + (showFossils ? 'selected' : 'btn'))
-
     return h('div.lex-controls', [
       h.if(mapUrl !== "")('div.btn', { onClick: () => navigate(map) }, h(Icon, { icon: "map", className: 'icon' })),
       h.if(fossilsExist)('div.' + (showFossils ? 'selected' : 'btn'), { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
