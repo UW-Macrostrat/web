@@ -98,7 +98,6 @@ function ExtractionIndex({setPaperID, title}) {
 
 function MultiFeedbackInterface({ data, models, entityTypes, title, ix, setIX }) {
   const currentData = data[ix];
-  console.log("current data", currentData)
 
   const { model_run } = currentData;
 
