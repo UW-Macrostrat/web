@@ -123,7 +123,7 @@ function ExtractionIndex({setPaperID, customFeedback, selectedFeedbackType}) {
 
   const data = getPGData("/kg_context_entities", {
     source_text: "eq." + sourceTextID,
-    user_id: "is.null"
+    version_id: "gt.0"
   });
 
   if (data == null || models == null || entityTypes == null) {
