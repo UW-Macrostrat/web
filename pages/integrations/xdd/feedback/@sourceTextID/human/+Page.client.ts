@@ -30,7 +30,7 @@ export function Page() {
 
   useEffect(() => {
     if (paper_id) {
-      fetchPGData("kg_publication_entities", { paper_id: "eq." + paper_id })
+      fetchPGData("/kg_publication_entities", { paper_id: "eq." + paper_id })
         .then((paper) => {
           setTitle(paper[0]?.citation?.title);
         });
@@ -99,13 +99,13 @@ function ExtractionIndex({setPaperID, title}) {
 function MultiFeedbackInterface({ data, models, entityTypes, title, ix, setIX }) {
   const currentData = data[ix];
 
-  const { feedback_id } = currentData;
+  const { model_run } = currentData;
 
   const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
 
   return h("div.feedback-interface", [
     h('h1', title),
-    h(FeedbackNotes, { feedback_id }),
+    h(FeedbackNotes, { feedback_id: model_run }),
     h(FeedbackInterface, {
       data: currentData,
       models,
