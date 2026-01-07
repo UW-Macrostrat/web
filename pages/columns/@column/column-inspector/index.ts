@@ -348,61 +348,67 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     h("div.main", [
       // This is probably too high in the page hierarchy
       h(ErrorBoundary, [
-        h(MacrostratColumnStateProvider, { units }, [
-          h("div.left-column", [
-            h("div.column-header", [
-              h("nav", [
-                h(PageBreadcrumbs, {
-                  showLogo: true,
-                  title: columnInfo.col_name,
-                }),
+        h(
+          MacrostratColumnStateProvider,
+          {
+            units,
+            onUnitSelected: setSelectedUnitID,
+            selectedUnit: selectedUnitID,
+          },
+          [
+            h("div.left-column", [
+              h("div.column-header", [
+                h("nav", [
+                  h(PageBreadcrumbs, {
+                    showLogo: true,
+                    title: columnInfo.col_name,
+                  }),
+                ]),
+              ]),
+              h("div.column-view", [
+                h(
+                  Column,
+                  {
+                    /**  TODO: we ideally would not have to force a re-render like this.
+                     * It is very expensive given the complexity of the column view.
+                     * However, not doing this results in artifacts (particularly with
+                     * label rendering) when columns are switched.
+                     */
+                    units,
+                    unitComponent: ColoredUnitComponent,
+                    unconformityLabels: "minimal",
+                    collapseSmallUnconformities: true,
+                    showTimescale,
+                    axisType,
+                    columnWidth: 300,
+                    width: 450,
+                    maxInternalColumns,
+                    showLabelColumn,
+                    hybridScale,
+                    pixelScale,
+                    t_age: t_age ?? 0,
+                    b_age: b_age ?? 4500,
+                    t_pos,
+                    b_pos,
+                  },
+                  children
+                ),
               ]),
             ]),
-            h("div.column-view", [
-              h(
-                Column,
-                {
-                  /**  TODO: we ideally would not have to force a re-render like this.
-                   * It is very expensive given the complexity of the column view.
-                   * However, not doing this results in artifacts (particularly with
-                   * label rendering) when columns are switched.
-                   */
-                  units,
-                  unitComponent: ColoredUnitComponent,
-                  unconformityLabels: "minimal",
-                  collapseSmallUnconformities: true,
-                  showTimescale,
-                  axisType,
-                  columnWidth: 300,
-                  width: 450,
-                  onUnitSelected: setSelectedUnitID,
-                  selectedUnit: selectedUnitID,
-                  maxInternalColumns,
-                  showLabelColumn,
-                  hybridScale,
-                  pixelScale,
-                  t_age: t_age ?? 0,
-                  b_age: b_age ?? 4500,
-                  t_pos,
-                  b_pos,
-                },
-                children
-              ),
+            h("div.right-column", [
+              h("div.right-column-boxes", [
+                h(ColumnMap, {
+                  className: "column-map",
+                  inProcess: true,
+                  projectID,
+                  selectedColumn: columnInfo.col_id,
+                  onSelectColumn,
+                }),
+                assistantContent,
+              ]),
             ]),
-          ]),
-          h("div.right-column", [
-            h("div.right-column-boxes", [
-              h(ColumnMap, {
-                className: "column-map",
-                inProcess: true,
-                projectID,
-                selectedColumn: columnInfo.col_id,
-                onSelectColumn,
-              }),
-              assistantContent,
-            ]),
-          ]),
-        ]),
+          ]
+        ),
       ]),
     ]),
   ]);

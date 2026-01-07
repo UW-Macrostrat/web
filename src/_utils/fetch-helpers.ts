@@ -56,6 +56,10 @@ async function fetchWrapper(url: string): Promise<Response> {
       console.log(
         `Fetching ${url} - status ${res.status} - ${duration.toFixed(2)} ms`
       );
+      const cacheStatus = res.headers.get("x-cache");
+      if (cacheStatus != null) {
+        console.log(`Cache: ${cacheStatus}`);
+      }
     }
     return res;
   } catch (error) {
