@@ -9,11 +9,13 @@
   Formation", "Upper Member of
   the Morrison Formation", "Unknown Granite", "Alluvium", "Fluvial terrace 1A", "Water").
 - `age`: A human-readable description of the age of the feature (e.g., "Cretaceous", "Late Jurassic", "201-145 Ma", "
-  probably Late Miocene", "Kimmeridgian–Tithonian(?)").
+  probably Late Miocene", "Kimmeridgian–Tithonian(?)"). Ideally, this would be the most specific possible age
+  representation
+  that can be assigned to the unit.
 - `descrip`: A text description for the unit, typically what would be rendered in a map legend.
 - `lith`: A comma-separated list of lithologies present in the unit (e.g., "sandstone, shale, conglomerate").
-- `b_interval`: The formal base interval of the unit (Macrostrat `interval_id`)
-- `t_interval`: The formal top interval of the unit (Macrostrat `interval_id`)
+- `b_interval`: The formal base interval of the unit (Macrostrat `interval_id` or interval name)
+- `t_interval`: The formal top interval of the unit (Macrostrat `interval_id` or interval name)
 
 ### Commonly used fields
 
