@@ -1,4 +1,4 @@
-import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
+import { Button, Radio, RadioGroup, Spinner } from "@blueprintjs/core";
 import { SETTINGS, tileserverDomain } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
@@ -7,6 +7,7 @@ import {
   MapMarker,
   MapView,
   PanelCard,
+  useMapMarker,
 } from "@macrostrat/map-interface";
 import { NonIdealState, Switch } from "@blueprintjs/core";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
@@ -23,6 +24,8 @@ import { MapNavbar } from "~/components/map-navbar";
 import styles from "./main.module.sass";
 import { asChromaColor, toRGBAString } from "@macrostrat/color-utils";
 import { boundingGeometryMapStyle } from "~/map-styles";
+import { Popover2 } from "@blueprintjs/popover2";
+import { MapboxMapProvider } from "@macrostrat/mapbox-react";
 
 const h = hyper.styled(styles);
 
@@ -229,21 +232,33 @@ export function MapInterface({
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
+  const settingsPopoverButton =     h(
+    "div.map-controls",h(
+    Popover2,
+    {
+      content: contextPanel,
+    },
+      h(Button, {
+        icon: "cog",
+      })
+  ));
+
   if (mapStyle == null) {
     return h(Spinner);
   }
 
   return h(
-    MapAreaContainer,
+    MapboxMapProvider,
     {
-      className: "single-map",
-      navbar: h(MapNavbar, { isOpen, setOpen, minimal: true }),
-      contextPanel,
-      contextPanelOpen: isOpen,
-      detailPanelOpen: false,
-      fitViewport: false,
+      //className: "single-map",
+      //navbar: h(MapNavbar, { isOpen, setOpen, minimal: true }),
+      // contextPanel: null,
+      // //contextPanelOpen: isOpen,
+      // detailPanelOpen: false,
+      // fitViewport: false,
     },
     [
+      settingsPopoverButton,
       h(MapView, {
         style: mapStyle,
         mapboxToken: SETTINGS.mapboxAccessToken,
