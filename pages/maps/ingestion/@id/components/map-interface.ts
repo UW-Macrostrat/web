@@ -232,16 +232,18 @@ export function MapInterface({
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
-  const settingsPopoverButton =     h(
-    "div.map-controls",h(
-    Popover2,
-    {
-      content: contextPanel,
-    },
+  const settingsPopoverButton = h(
+    "div.map-controls",
+    h(
+      Popover2,
+      {
+        content: contextPanel,
+      },
       h(Button, {
         icon: "cog",
       })
-  ));
+    )
+  );
 
   if (mapStyle == null) {
     return h(Spinner);
