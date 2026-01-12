@@ -3,6 +3,7 @@ import { Lith, LithUnit } from "~/types";
 import { mergeRefs, Tag, Dialog } from "@blueprintjs/core";
 import { Tooltip2, Popover2 } from "@blueprintjs/popover2";
 import styles from "./lith.module.scss";
+import classNames from "classnames";
 
 const h = hyperStyled(styles);
 
@@ -72,38 +73,41 @@ function LithSegment(props: {
   const style = {
     backgroundColor: props.lith.lith_color + "70",
     width: width > 0 ? `${width}%` : "100%",
+    display: "flex",
+    justifyContent: "space-around",
+    position: "relative",
   };
 
-  return h(Tooltip2, {
-    position: "top",
-    content: h(LithSegmentToolTipContent, { lith: props.lith }),
-    renderTarget: ({ isOpen, ref, ...tooltipProps }) =>
+  const className = classNames("lith-segment", {
+    large: props.large,
+    small: !props.large,
+  });
+
+  return h(
+    "div",
+    { style, className },
+    h(
+      Tooltip2,
+      {
+        position: "top",
+        content: h(LithSegmentToolTipContent, { lith: props.lith }),
+      },
       h(
         Tag,
         {
           style: {
-            ...style,
-            padding: props.large ? "5px 7px" : "2px 6px",
-            display: "flex",
-            justifyContent: "space-around",
-            marginRight: "1px",
             borderRadius: 0,
           },
-          onRemove:
-            typeof props.onRemove !== "undefined"
-              ? //@ts-ignore
-                () => props.onRemove(props.lith)
-              : undefined,
-          elementRef: mergeRefs(ref),
-          ...tooltipProps,
+          elementRef: mergeRefs(),
+          onRemove: (evt) => {
+            props.onRemove?.(props.lith);
+            evt?.stopPropagation();
+          },
         },
-        [
-          h(`div.lith-segment ${!props.large ? ".small" : ""}`, [
-            h("p", [props.lith.lith]),
-          ]),
-        ]
-      ),
-  });
+        props.lith.lith
+      )
+    )
+  );
 }
 
 export { LithSegmentContainer, LithSegment };

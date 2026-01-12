@@ -7,7 +7,7 @@ import {
   EnvironUnit,
   TagContainerCell,
 } from "../../index";
-import { InputGroup, NumericInput, FormGroup } from "@blueprintjs/core";
+import { InputGroup, NumericInput } from "@blueprintjs/core";
 import {
   useModelEditor,
   //@ts-ignore
@@ -60,7 +60,6 @@ export function EnvTags(props: { large: boolean }) {
   };
 
   return h("div.tag-container", [
-    h.if(tagData.length == 0 && isEditing)("div", ["Add environments"]),
     h(TagContainerCell, { data: tagData, onClickDelete, isEditing, large }),
     h.if(isEditing)(EnvTagsAdd, { onClick }),
   ]);
@@ -104,7 +103,6 @@ export function LithTags(props: { large?: boolean }) {
   };
 
   return h("div", [
-    h.if(liths.length == 0 && isEditing)("div", ["Add lithologies"]),
     h(LithContainer, {
       large,
       liths,
@@ -146,7 +144,7 @@ export function UnitRowThicknessEditor() {
     isEditing,
   }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
-  return h(React.Fragment, [
+  return h( [
     h.if(!isEditing)("div", [
       unit.min_thick != unit.max_thick
         ? `${unit.min_thick} - ${unit.max_thick}`
@@ -182,7 +180,7 @@ export function InformalUnitName() {
   return h("div", [
     h.if(!isEditing)("p", [unit.strat_name]),
     h.if(isEditing)(InputGroup, {
-      placeholder: "Informal Unit Name",
+      placeholder: "Unit name",
       style: { width: "120px" },
       value: unit.strat_name || undefined,
       onChange: (e) => updateUnitName(e.target.value),

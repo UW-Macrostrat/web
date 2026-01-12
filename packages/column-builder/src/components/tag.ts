@@ -191,7 +191,10 @@ const envItemRenderer: ItemRenderer<SelectDataI> = (
 };
 
 function EnvTagsAdd(props: { onClick: (e: Partial<EnvironUnit>) => void }) {
-  const envs: Partial<EnvironUnit>[] = usePostgrest(pg.from("environs"));
+  const envs: Partial<EnvironUnit>[] = usePostgrest(
+    pg.from("environs").select()
+  );
+
   if (!envs) return null;
 
   const data: SelectDataI[] = envs.map((env, i) => {

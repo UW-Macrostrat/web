@@ -3,6 +3,8 @@
   width: 100%;
   min-width: 100px;
   max-width: 600px;
+  min-height: 30px;
+
   &:hover {
     cursor: pointer;
   }
@@ -11,9 +13,11 @@
 .segment-tooltip {
   display: flex;
   flex-direction: column;
+
   b {
     text-transform: capitalize;
   }
+
   i {
     color: #d3d8de;
   }
@@ -25,17 +29,27 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 
-  p {
+  :global(.bp5-tag) {
     text-overflow: ellipsis;
     overflow: hidden;
     margin-bottom: 0;
     color: black;
     font-size: 13px;
+    width: 100%;
+    height: 100%;
   }
 
-  .small {
+  &.small {
     font-size: 11px !important;
+  }
+
+  & > :global(.bp5-popover-target) {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: block;
   }
 }
 
@@ -43,20 +57,25 @@
   padding: 10px;
   min-height: 400px;
 }
+
 .row {
   display: flex;
 }
+
 .lith-switches {
   list-style: none;
+
   .row {
     display: flex;
     justify-content: space-around;
     align-items: baseline;
     margin: 10px;
+
     .lith-item {
       flex-grow: 1;
       max-width: 100px;
     }
+
     .switch {
       flex-grow: 0;
       display: flex;

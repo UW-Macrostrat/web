@@ -41,6 +41,7 @@ function usePostgrest(
     if (error) {
       console.error(error);
     } else {
+      console.log(data);
       setResult(data);
     }
   }, [query]);

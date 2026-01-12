@@ -57,7 +57,7 @@ interface LithSelectProps {
 }
 
 function LithSelect(props: LithSelectProps) {
-  const liths: Lith[] = usePostgrest(pg.from("liths"));
+  const liths: Lith[] = usePostgrest(pg.from("liths").select("*"));
   if (!liths) return null;
 
   return h(LithQueryList, {
