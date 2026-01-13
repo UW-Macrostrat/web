@@ -104,7 +104,7 @@ function UnitRowNotes() {
     });
   };
 
-  return h(React.Fragment, [
+  return h([
     h.if(isEditing)(TextArea, {
       style: { maxWidth: "100px" },
       value: unit.notes ?? "",
@@ -123,11 +123,9 @@ function UnitCellGroup(props: { unit: UnitsView; onCancel: () => void }) {
     useModelEditor();
 
   const backgroundColor = convertColorNameToHex(unit.color) + "80";
-  return h(React.Fragment, [
-    h("td", [
-      h(Link, { href: `../unit/${unit.id}/edit` }, [h("a", [unit.id])]),
-    ]),
-    h("td", { style: { background: backgroundColor } }, [h(InformalUnitName)]),
+  return h([
+    h("td", [h(Link, { href: `../unit/${unit.id}/edit` }, h("a", [unit.id]))]),
+    h("td", { style: { background: backgroundColor } }, h(InformalUnitName)),
     h("td", { style: { background: backgroundColor } }, [
       h(UnitRowStratNameEditor),
     ]),
@@ -180,7 +178,7 @@ function UnitRow(props: UnitRowProps) {
     });
   };
 
-  return h(React.Fragment, { key: props.unit.id }, [
+  return h([
     h.if(props.unit_index == 0)(AddBtnBetweenRows, {
       colSpan: props.colSpan,
       onClick: (e) => {
@@ -210,7 +208,7 @@ function UnitRow(props: UnitRowProps) {
           ModelEditor,
           {
             isEditing: props.inRowEditing,
-            //@ts-ignore
+            canEdit: true,
             persistChanges,
             model: { ...props.unit },
           },

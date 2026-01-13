@@ -144,7 +144,7 @@ export function UnitRowThicknessEditor() {
     isEditing,
   }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
-  return h( [
+  return h([
     h.if(!isEditing)("div", [
       unit.min_thick != unit.max_thick
         ? `${unit.min_thick} - ${unit.max_thick}`

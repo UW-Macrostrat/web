@@ -37,7 +37,7 @@ function MergeDivideBtn(props: {
       disabled: props.disabled,
       onClick: props.onClick,
     },
-    [props.text]
+    props.text
   );
 }
 
@@ -70,7 +70,7 @@ function ColumnPageBtnMenu(props: ColBtnMenuI) {
           intent: unitsView ? "primary" : "none",
           disabled: unitsView,
         },
-        ["Unit view"]
+        "Unit view"
       ),
       h.if(!props.noSectionView)(
         Button,
@@ -79,12 +79,12 @@ function ColumnPageBtnMenu(props: ColBtnMenuI) {
           intent: !unitsView ? "primary" : "none",
           disabled: !unitsView,
         },
-        ["Section View"]
+        "Section view"
       ),
       h.if(!unitsView)(MergeDivideBtn, {
         onClick: props.mergeSections,
         disabled: mergeIds.length < 2,
-        text: "Merge Sections",
+        text: "Merge sections",
       }),
     ]),
     h.if(unitsView)(ReorderUnitsBtnGrp, {
@@ -142,7 +142,7 @@ export interface UnitRowContextMenuI {
 function UnitRowContextMenu(props: UnitRowContextMenuI) {
   const { state, runAction } = useUnitSectionContext();
   const SubMenu = ({ pos }: { pos: UNIT_ADD_POISITON }) => {
-    return h(React.Fragment, [
+    return h([
       h(MenuItem, {
         text: `Copy unit #${props.unit.id}`,
         icon: "duplicate",
@@ -208,7 +208,7 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
       minimal: true,
       position: "left-top",
     },
-    [h(Button, { minimal: true, icon: "more" })]
+    h(Button, { minimal: true, icon: "more" })
   );
 }
 
@@ -227,28 +227,26 @@ function AddBtnBetweenRows(props: {
           position: "right",
           intent: "success",
         },
-        [
-          h(
-            "div.btwn-row-btn",
-            {
-              onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
-                setStyle({ display: "flex" });
-              },
-              onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
-                setStyle({ display: "none" });
-              },
-              onClick: props.onClick,
+        h(
+          "div.btwn-row-btn",
+          {
+            onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
+              setStyle({ display: "flex" });
             },
-            [
-              h(Button, {
-                intent: "success",
-                fill: true,
-                onClick: props.onClick,
-                style: { ...style, minHeight: "5px" },
-              }),
-            ]
-          ),
-        ]
+            onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
+              setStyle({ display: "none" });
+            },
+            onClick: props.onClick,
+          },
+          [
+            h(Button, {
+              intent: "success",
+              fill: true,
+              onClick: props.onClick,
+              style: { ...style, minHeight: "5px" },
+            }),
+          ]
+        )
       ),
     ]),
   ]);

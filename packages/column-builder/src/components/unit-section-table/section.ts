@@ -95,6 +95,7 @@ function SectionTable(props: SectionTableProps) {
           props.addUnitAt(getEmptyUnit(unit.col_id), unit_index);
         };
         const editUnitAt = (unit_index: number) => {
+          console.log("editing unit at", unit_index);
           props.editUnitAt(unit_index);
         };
         return h(UnitRow, {
