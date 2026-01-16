@@ -10,6 +10,7 @@ import {
 } from "react-beautiful-dnd";
 import { Card, Icon } from "@blueprintjs/core";
 import { useNavigate } from "../components";
+import classNames from "classnames";
 
 interface RowProps {
   children: ReactChild;
@@ -164,7 +165,7 @@ interface DnDTableProps {
   headers?: any[];
   droppableId?: string;
   draggableId?: string;
-  title?: string;
+  title?: React.ReactNode;
   index: number;
   widths?: number[];
 }
@@ -177,10 +178,7 @@ function DnDTable(props: DnDTableProps) {
     droppableId = "table-drop-zone",
   } = props;
   const baseClass =
-    "bp5-html-table .bp5-html-table-condensed .bp5-html-table-bordered .base-table .full-width";
-  let tableClassName = props.interactive
-    ? `${baseClass} .bp5-interactive`
-    : baseClass;
+    "bp5-html-table bp5-html-table-condensed bp5-html-table-bordered base-table full-width";
 
   return h(
     Draggable,
@@ -192,11 +190,16 @@ function DnDTable(props: DnDTableProps) {
     },
     [
       (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
+        const className = classNames(baseClass, {
+          "bp5-interactive": props.interactive,
+        });
+
         return h(
-          `table.${tableClassName}`,
+          `table`,
           {
             ref: provided.innerRef,
             ...provided.draggableProps,
+            className,
           },
           [
             h.if(headers.length > 0)(TableHeader, {
@@ -252,7 +255,7 @@ function TableHeader(props: {
             ...props.dragProps,
             colSpan: props.headers.length,
           },
-          [props.title]
+          props.title
         ),
       ]),
     ]),
