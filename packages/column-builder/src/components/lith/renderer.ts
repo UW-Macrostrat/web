@@ -1,7 +1,7 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { Lith, LithUnit } from "~/types";
-import { mergeRefs, Tag, Dialog } from "@blueprintjs/core";
-import { Tooltip2, Popover2 } from "@blueprintjs/popover2";
+import { Tag } from "@blueprintjs/core";
+import { Tooltip2 } from "@blueprintjs/popover2";
 import styles from "./lith.module.scss";
 import classNames from "classnames";
 
@@ -98,7 +98,6 @@ function LithSegment(props: {
           style: {
             borderRadius: 0,
           },
-          elementRef: mergeRefs(),
           onRemove: (evt) => {
             props.onRemove?.(props.lith);
             evt?.stopPropagation();

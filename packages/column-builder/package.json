@@ -1,11 +1,5 @@
 {
   "name": "@macrostrat-web/column-builder",
-  "scripts": {
-    "dev": "next dev -p 1234",
-    "build": "next build",
-    "start": "next start -p 1234",
-    "lint": "next lint"
-  },
   "module": "src/index.ts",
   "dependencies": {
     "@blueprintjs/core": "^5.10.5",
