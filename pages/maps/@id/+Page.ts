@@ -636,27 +636,6 @@ function OpacitySlider(props) {
   ]);
 }
 
-export async function refreshPBDB(map, pointsRef, filters) {
-  console.log("Refreshing PBDB data", map, pointsRef, filters);
-  let bounds = map.getBounds();
-  console.log("Refreshing PBDB data", bounds);
-  let zoom = map.getZoom();
-  const maxClusterZoom = 7;
-  pointsRef.current = await getPBDBData(filters, bounds, zoom, maxClusterZoom);
-
-  console.log("PBDB points fetched", pointsRef.current);
-  console.log("sourceS",map.getStyle().sources);
-
-
-  // Show or hide the proper PBDB layers
-  // TODO: this is a bit janky
-
-    map.getSource("pbdb-points").setData(pointsRef.current);
-
-    map.setLayoutProperty("pbdb-points", "visibility", "visible");
-}
-
-
 export async function getPBDBData(
   filters: FilterData[],
   bounds: mapboxgl.LngLatBounds,

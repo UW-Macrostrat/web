@@ -1,3 +1,4 @@
+import { tileserverDomain } from "@macrostrat-web/settings";
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 
 /** Add extra types we use in this style... */
@@ -17,30 +18,12 @@ export function buildOverlayStyle() {
 }
 
 const overlaySources: { [k: string]: SourceExt } = {
-  // "pbdb": {
-  //     "type": "vector",
-  //     "tiles": [
-  //       `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
-  //     ],
-  //     "tileSize": 512,
-  //     "maxzoom": 6,
-  // },
-  "pbdb-points": {
-    type: "geojson",
-    cluster: true,
-    clusterRadius: 50,
-    data: {
-      type: "FeatureCollection",
-      features: [],
-    },
-  },
-  "pbdb-clusters": {
-    type: "geojson",
-    generateId: true,
-    data: {
-      type: "FeatureCollection",
-      features: [],
-    },
+  pbdb: {
+    type: "vector",
+    tiles: [
+      tileserverDomain + `/pbdb/fossils/{z}/{x}/{y}`,
+    ],
+    promoteId: 'collection_no' 
   },
   columns: {
     type: "geojson",
@@ -90,6 +73,8 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
   const centerColor = getComputedStyle(document.body).getPropertyValue(
     "--panel-rule-color"
   );
+
+  const clusterThreshold = 1;
 
   return [
     {
@@ -153,85 +138,12 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
       },
     },
     ...buildCrossSectionLayers(),
-
-    // {
-    //   "id": "pbdbCollections",
-    //   "type": "fill",
-    //   "source": "pbdb",
-    //   "source-layer": "hexgrid",
-    //   "layout": {
-    //     "visibility": "none"
-    //   },
-    //   "paint": {
-    //     "fill-color": ['feature-state', 'color'],
-    //     "fill-color": [
-    //       'case',
-    //       ['==', ['feature-state', 'color'], null],
-    //       'rgb(255,255,255)',
-    //       ['feature-state', 'color']
-    //     ],
-    //     "fill-opacity": [
-    //       'case',
-    //       ['==', ['feature-state', 'color'], null],
-    //       0,
-    //       0.7
-    //     ],
-    //     "fill-outline-color": [
-    //       'case',
-    //       ['==', ['feature-state', 'color'], null],
-    //       'rgb(255,255,255)',
-    //       ['feature-state', 'color']
-    //     ],
-    //   }
-    // },
-    {
-      id: "pbdb-points-clustered",
-      type: "circle",
-      source: "pbdb-points",
-      filter: ["has", "point_count"],
-      paint: {
-        "circle-opacity": ["interpolate", ["linear"], ["zoom"], 5, 0.8, 10, 1],
-        "circle-color": [
-          "case",
-          ["boolean", ["feature-state", "hover"], false],
-          "#154974",
-          [
-            "step",
-            ["get", "point_count"],
-            "#bdd7e7",
-            20,
-            "#6baed6",
-            50,
-            "#2171b5",
-          ],
-        ],
-        "circle-radius": ["step", ["get", "point_count"], 20, 20, 30, 50, 40],
-        "circle-stroke-width": [
-          "case",
-          ["boolean", ["feature-state", "hover"], false],
-          2,
-          0,
-        ],
-        "circle-stroke-color": "#fff",
-      },
-    },
-    // {
-    //   "id": "pbdb-point-cluster-count",
-    //   "type": "symbol",
-    //   "source": "pbdb-points",
-    //   "filter": ["has", "point_count"],
-    //   "layout": {
-    //     "text-field": "{point_count_abbreviated}",
-    //     "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-    //     "text-size": 12,
-    //     "icon-allow-overlap": true,
-    //   }
-    // },
     {
       id: "pbdb-points",
       type: "circle",
-      source: "pbdb-points",
-      filter: ["!", ["has", "point_count"]],
+      source: "pbdb",
+      "source-layer": "default",
+      filter: ['<=', ['get', 'n'], clusterThreshold],
       paint: {
         "circle-color": [
           "case",
@@ -248,29 +160,34 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
         ],
         "circle-stroke-color": "#ffffff",
       },
+      layout: {
+        visibility: "none",
+      }
     },
     {
       id: "pbdb-clusters",
       type: "circle",
-      source: "pbdb-clusters",
+      source: "pbdb",
+      "source-layer": "default",
+      filter: ['>', ['get', 'n'], clusterThreshold],
       paint: {
         "circle-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.6, 6, 1],
         "circle-color": [
           "case",
           ["boolean", ["feature-state", "hover"], false],
           "#154974",
-          ["step", ["get", "noc"], "#bdd7e7", 100, "#6baed6", 1000, "#2171b5"],
+          ["step", ["get", "n"], "#bdd7e7", 100, "#6baed6", 1000, "#2171b5"],
         ],
         "circle-radius": [
           "interpolate",
           ["linear"],
           ["zoom"],
           0,
-          ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 2, 1200, 12],
+          ["interpolate", ["linear"], ["get", "n"], 0, 0, 1, 2, 1200, 12],
           3,
-          ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 4, 400, 18],
+          ["interpolate", ["linear"], ["get", "n"], 0, 0, 1, 4, 400, 18],
           6,
-          ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 10, 400, 50],
+          ["interpolate", ["linear"], ["get", "n"], 0, 0, 1, 10, 400, 50],
         ],
         "circle-stroke-width": [
           "case",
@@ -279,6 +196,9 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
           0,
         ],
         "circle-stroke-color": "#fff",
+      },
+      layout: {
+        visibility: "none",
       },
     },
   ];
