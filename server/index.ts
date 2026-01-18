@@ -9,7 +9,6 @@ import compression from "compression";
 import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
 import sirv from "sirv";
 import chalk from "chalk";
-import { isBrowser } from "vike/dist/utils/isBrowser";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -48,10 +47,6 @@ const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 export default startServer();
 
 function startServer() {
-  if (isBrowser()) {
-    throw new Error("Server code cannot be run in the browser");
-  }
-
   const app = express();
 
   app.use(compression());
