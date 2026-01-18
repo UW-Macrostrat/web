@@ -1,27 +1,117 @@
 import revisionInfo from "@macrostrat/revision-info-webpack";
-import mdx from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react";
-import path from "path";
-import ssr from "vike/plugin";
+import vike from "vike/plugin";
 import { defineConfig, Plugin } from "vite";
-import cesium from "vite-plugin-cesium";
-import pkg from "./package.json";
-import { cjsInterop } from "vite-plugin-cjs-interop";
-import { patchCssModules } from "vite-css-modules";
-
-// Non-transpiled typescript can't be imported as a standalone package
+import path from "node:path";
+import { readFileSync } from "node:fs";
 import textToolchain from "./packages/text-toolchain/src";
+import cesium from "vite-plugin-cesium";
 
-const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
-// prefix with VITE_ to make available to client
-for (const [key, value] of Object.entries(gitEnv)) {
-  process.env["VITE_" + key] = value;
+const cesiumPath = import.meta.resolve("cesium").replace("file://", "");
+
+const cesiumRoot = cesiumPath.replace("/Source/Cesium.js", "/Build");
+const cesiumBuildPath = path.join(cesiumRoot, "Cesium");
+
+const pkg = getPackageJSONContents("package.json");
+
+setupVersionEnvironmentVariables(pkg);
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      "~": path.resolve(__dirname, "src"),
+      "#": path.resolve("./pages"),
+    },
+    conditions: ["source", "browser"],
+  },
+  plugins: [
+    vike(),
+    react(),
+    hyperStyles(),
+    textToolchain({
+      contentDir: path.resolve(__dirname, "content"),
+      wikiPrefix: "/docs",
+    }),
+    cesium({
+      cesiumBuildPath,
+      cesiumBuildRootPath: cesiumRoot,
+    }),
+  ],
+  optimizeDeps: {
+    exclude: getDependenciesToExcludeFromOptimization(pkg),
+  },
+  define: {
+    // Cesium base URL
+    CESIUM_BASE_URL: JSON.stringify("/cesium"),
+    // If not building for server context
+  },
+  ssr: {
+    noExternal: [
+      /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
+       * should be listed here.
+       */
+      "@macrostrat/form-components",
+      "@macrostrat/ui-components",
+      "@macrostrat/column-components",
+      "@macrostrat/column-views",
+      "@macrostrat/data-components",
+      "@macrostrat/svg-map-components",
+      "@macrostrat/map-interface",
+      "@macrostrat/feedback-components",
+      "@macrostrat/timescale",
+      "@macrostrat/mapbox-react",
+      "@uiw/react-color-swatch",
+      "@uiw/color-convert",
+    ],
+    resolve: {
+      conditions: ["source"],
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      sass: {
+        api: "modern-compiler",
+      },
+    },
+  },
+  server: {
+    allowedHosts: ["localhost", "dev.macrostrat.local"],
+  },
+});
+
+function getPackageJSONContents(packageJSONPath: string) {
+  return JSON.parse(
+    readFileSync(path.resolve(__dirname, packageJSONPath), "utf-8")
+  );
 }
 
-const cesiumRoot = require.resolve("cesium").replace("/index.cjs", "/Build");
-const cesiumBuildPath = path.resolve(cesiumRoot, "Cesium");
+function getDependenciesToExcludeFromOptimization(pkg: any) {
+  /** If we have locally linked dependencies, we want to exclude them from
+   * optimization.
+   */
+  const excludePrefixes = ["file:", "link:", "workspace:", "portal:"];
 
-// Check if we are building for server context
+  const allPackages = Object.entries(pkg.dependencies)
+    .concat(Object.entries(pkg.devDependencies || {}))
+    .concat(Object.entries(pkg.peerDependencies || {}))
+    .concat(Object.entries(pkg.resolutions || {})) as [string, string][];
+
+  let excludeSet = new Set<string>();
+  for (const [dep, version] of allPackages) {
+    if (excludePrefixes.some((prefix) => version.startsWith(prefix))) {
+      excludeSet.add(dep);
+    }
+  }
+  return Array.from(excludeSet);
+}
+
+function setupVersionEnvironmentVariables(pkg) {
+  const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
+  // prefix with VITE_ to make available to client
+  for (const [key, value] of Object.entries(gitEnv)) {
+    process.env["VITE_" + key] = value;
+  }
+}
 
 const cssModuleMatcher = /\.module\.(css|scss|sass|styl)$/;
 
@@ -45,105 +135,3 @@ function hyperStyles(): Plugin {
     },
   };
 }
-
-// Exclude local development dependencies from optimization
-let exclude = [];
-if ("resolutions" in pkg) {
-  for (const [key, value] of Object.entries(
-    pkg.resolutions as Record<string, string>
-  )) {
-    if (
-      value.startsWith("link:") ||
-      value.startsWith("file:") ||
-      value.startsWith("portal:")
-    ) {
-      exclude.push(key);
-    }
-  }
-}
-export default defineConfig({
-  //root: path.resolve("./src"),
-  resolve: {
-    conditions: ["source"],
-    alias: {
-      "~": path.resolve("./src"),
-      "#": path.resolve("./pages"),
-    },
-    dedupe: [
-      "react",
-      "react-dom",
-      "@macrostrat/column-components",
-      "@macrostrat/ui-components",
-      "@macrostrat/column-views",
-      "@macrostrat/mapbox-react",
-    ],
-  },
-  plugins: [
-    react(),
-    //patchCssModules(),
-    // Fix broken imports in non-ESM packages. We should endeavor to move away from these
-    // dependencies if they are unmaintained.
-    // cjsInterop({
-    //   dependencies: ["react-images", "labella", "react-color", "mapbox-gl"],
-    // }),
-    // This should maybe be integrated directly into the server-side rendering code
-    textToolchain({
-      contentDir: path.resolve(__dirname, "content"),
-      wikiPrefix: "/docs",
-    }),
-    /* Fix error with single-page app reloading where paths
-    with dots (e.g., locations) are not rewritten to index
-    to allow for client-side routing */
-    //rewriteAll(),
-    // cesium({
-    //   cesiumBuildPath,
-    //   cesiumBuildRootPath: cesiumRoot,
-    // }),
-    hyperStyles(),
-    ssr(),
-  ],
-  envDir: path.resolve(__dirname),
-  build: {
-    outDir: path.resolve(__dirname, "dist"),
-    emptyOutDir: true,
-    sourcemap: true,
-  },
-  define: {
-    // Cesium base URL
-    CESIUM_BASE_URL: JSON.stringify("/cesium"),
-    // If not building for server context
-  },
-  server: {
-    allowedHosts: ["localhost", "dev.macrostrat.local"],
-  },
-  ssr: {
-    noExternal: [
-      /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
-       * should be listed here.
-       */
-      "@macrostrat/form-components",
-      "@macrostrat/ui-components",
-      "@macrostrat/column-components",
-      "@macrostrat/column-views",
-      "@macrostrat/data-components",
-      "@macrostrat/svg-map-components",
-      "@macrostrat/map-interface",
-      "@macrostrat/feedback-components",
-      "@macrostrat/timescale",
-      "@macrostrat/mapbox-react",
-    ],
-    resolve: {
-      conditions: ["source"],
-    },
-  },
-  css: {
-    preprocessorOptions: {
-      sass: {
-        api: "modern-compiler",
-      },
-    },
-  },
-  // optimizeDeps: {
-  //   exclude,
-  // },
-});

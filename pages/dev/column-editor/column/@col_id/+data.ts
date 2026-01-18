@@ -1,5 +1,5 @@
 import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
-import { PageContext } from "vike/types";
+import type { PageContext } from "vike/types";
 import pg, {
   ColSectionI,
   fetchIdsFromColId,

@@ -1,4 +1,4 @@
-import { PageContext } from "vike/types";
+import type { PageContext } from "vike/types";
 import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
 import React, { useMemo } from "react";
@@ -187,12 +187,12 @@ export const sitemap: Routes = {
             {
               slug: "extractions",
               name: "Extractions",
-            }, 
+            },
             {
               slug: "sources",
-              name: "Sources"
-            }
-          ]
+              name: "Sources",
+            },
+          ],
         },
       ],
     },

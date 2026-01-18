@@ -1,6 +1,3 @@
-// Auth imports
-//import * as jose from "jose";
-
 // Synthesize the config from the environment at runtime
 
 export async function onCreateGlobalContext(globalContext) {

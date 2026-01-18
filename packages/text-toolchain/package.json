@@ -2,10 +2,12 @@
   "name": "@macrostrat-web/text-toolchain",
   "version": "1.0.0",
   "main": "src/index.ts",
+  "source": "src/index.ts",
+  "type": "module",
   "dependencies": {
     "@mdx-js/rollup": "^2.3.0",
     "@sindresorhus/slugify": "^2.2.0",
-    "@vitejs/plugin-react": "^3.0.0",
+    "@vitejs/plugin-react": "^5.1.2",
     "glob": "^10.2.2",
     "gray-matter": "^4.0.3",
     "remark-frontmatter": "^4.0.1",

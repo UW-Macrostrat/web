@@ -5,7 +5,7 @@ import {
   StratNameI,
 } from "@macrostrat-web/column-builder";
 import { PostgrestError } from "@supabase/postgrest-js";
-import { PageContext } from "vike/types";
+import type { PageContext } from "vike/types";
 
 export async function data(
   ctx: PageContext

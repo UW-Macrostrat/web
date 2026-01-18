@@ -1,10 +1,8 @@
 import { render, redirect } from "vike/abort";
 import { ingestPrefix } from "@macrostrat-web/settings";
-import { GuardAsync } from "vike/dist/esm/shared/page-configs/Config";
+import type { PageContext } from "vike/types";
 
-export const guard: GuardAsync = async (
-  pageContext
-): ReturnType<GuardAsync> => {
+export async function guard(pageContext: PageContext) {
   const { user } = pageContext;
 
   if (user === undefined) {
@@ -21,4 +19,4 @@ export const guard: GuardAsync = async (
     // Render the error page and show message to the user
     return render(403, "Only admins are allowed to access this page.");
   }
-};
+}

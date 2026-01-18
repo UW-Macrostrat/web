@@ -1,5 +1,5 @@
 import pg, { ColumnGroupI } from "@macrostrat-web/column-builder";
-import { PageContext } from "vike/types";
+import type { PageContext } from "vike/types";
 import { PostgrestError } from "@supabase/postgrest-js";
 
 export async function data(ctx: PageContext): Promise<ColumnGroupsData> {

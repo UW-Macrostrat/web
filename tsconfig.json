@@ -1,28 +1,35 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
-    // Allow importing of JSON and default imports from CommonJS modules
+    "strict": false,
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "types": [
+      "vite/client",
+      "vike-react"
+    ],
+    "noEmit": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
-    "sourceMap": true,
-    "jsx": "react",
-    "moduleResolution": "nodenext",
-    "module": "ESNext",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "allowImportingTsExtensions": true,
     "paths": {
-      // Workspace code
-      "@macrostrat-web/*": [
-        "packages/*/src"
-      ],
       "~/*": [
-        "src/*"
-      ],
-      "#/*": [
-        "pages/*"
+        "./src/*"
       ]
     }
   },
+  "exclude": [
+    "dist"
+  ],
   "include": [
-    "packages/*/src/**/*",
-    "src/**/*",
-    "pages/**/*"
+    "../src",
+    "pages"
   ]
 }

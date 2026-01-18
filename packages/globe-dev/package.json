@@ -6,17 +6,10 @@
   },
   "main": "src/index.ts",
   "license": "ISC",
-  "devDependencies": {
-    "react": "^18",
-    "react-dom": "^18",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vite-plugin-cesium": "^1.2.23"
-  },
   "dependencies": {
-    "@macrostrat/cesium-martini": "^1.5.3",
+    "@macrostrat/cesium-martini": "^1.6.0",
     "@macrostrat/cesium-vector-provider": "2.0.2",
-    "@macrostrat/cesium-viewer": "^1.2.1",
+    "@macrostrat/cesium-viewer": "^1.3.0",
     "@macrostrat/hyper": "^3.0.6",
     "@macrostrat/mapbox-react": "^2.6.4",
     "@macrostrat/mapbox-utils": "^1.6.1",

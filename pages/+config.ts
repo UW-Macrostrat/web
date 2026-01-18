@@ -14,7 +14,6 @@ export default {
   passToClient: [
     "pageProps",
     "supportsDarkMode",
-    "macrostratLogoFlavor",
     "routeParams",
     "user",
     "description",
@@ -27,6 +26,8 @@ export default {
   clientRouting: true,
   supportsDarkMode: true,
   trailingSlash: false,
+  prerender: false,
+  prefetch: false,
   meta: {
     supportsDarkMode: {
       env: {

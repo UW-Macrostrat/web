@@ -1,6 +1,6 @@
 import { postgrestPrefix } from "@macrostrat-web/settings";
-import { PageContextServer } from "vike/types";
-import { PostgrestClient } from "@supabase/postgrest-js";
+import type { PageContextServer } from "vike/types";
+import type { PostgrestClient } from "@supabase/postgrest-js";
 
 const client = new PostgrestClient(postgrestPrefix, {
   headers: { Accept: "application/geo+json" },

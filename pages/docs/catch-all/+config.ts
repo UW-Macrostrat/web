@@ -1,4 +1,4 @@
-import { Config, ConfigDefinition } from "vike/types";
+import type { Config, ConfigDefinition } from "vike/types";
 
 export default {
   passToClient: [
