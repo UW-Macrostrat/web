@@ -4473,7 +4473,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swagger-api/apidom-core@npm:^1.0.0-rc.1, @swagger-api/apidom-core@npm:^1.2.2":
+"@swagger-api/apidom-core@npm:*, @swagger-api/apidom-core@npm:^1.0.0-rc.1, @swagger-api/apidom-core@npm:^1.2.2":
   version: 1.2.2
   resolution: "@swagger-api/apidom-core@npm:1.2.2"
   dependencies:
@@ -18325,7 +18325,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"to-buffer@npm:^1.2.0":
+"to-buffer@npm:*, to-buffer@npm:^1.2.0":
   version: 1.2.2
   resolution: "to-buffer@npm:1.2.2"
   dependencies:
