@@ -10,7 +10,6 @@ import {
   MacrostratDataProvider,
   PBDBFossilsColumn,
   ReferencesField,
-  SGPMeasurementsColumn,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
@@ -37,6 +36,7 @@ import {
   NumericInput,
 } from "@blueprintjs/core";
 import { useHydrateAtoms } from "jotai/utils";
+import { SGPMeasurementsColumn } from "./sgp-facet";
 
 interface ColumnHashState {
   unit?: number;
