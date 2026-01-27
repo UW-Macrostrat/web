@@ -35,64 +35,18 @@ function handleFossilLayerClick(
 ): AppAction | MapZoomAction | null {
   const mapZoom = map.getZoom();
   let collections = map.queryRenderedFeatures(event.point, {
-    layers: ["pbdb-points-clustered", "pbdb-points", "pbdb-clusters"],
+    layers: ["pbdb-points"],
   });
-  // Clicked on a hex grid
-  if (
-    collections.length &&
-    collections[0].properties.hasOwnProperty("hex_id")
-  ) {
-    return { type: "zoom-map", dz: 1 };
-    // Clicked on a summary cluster
-  } else if (
-    collections.length &&
-    collections[0].properties.hasOwnProperty("oid") &&
-    collections[0].properties.oid.split(":")[0] === "clu" &&
-    mapZoom <= 12
-  ) {
-    return { type: "zoom-map", dz: 2 };
-    // Clicked on a real cluster of collections
 
-    // ... the way we do clustering here is kind of strange.
-  } else if (
-    collections.length &&
-    (collections[0].properties.hasOwnProperty("cluster") ||
-      // Summary cluster when zoom is too high
-      collections[0].properties.oid.split(":")[0] === "clu")
-  ) {
-    // via https://jsfiddle.net/aznkw784/
-    let pointsInCluster = pbdbPoints.features
-      .filter((f) => {
-        let pointPixels = map.project(f.geometry.coordinates);
-        let pixelDistance = Math.sqrt(
-          Math.pow(event.point.x - pointPixels.x, 2) +
-            Math.pow(event.point.y - pointPixels.y, 2)
-        );
-        return Math.abs(pixelDistance) <= 50;
-      })
-      .map((f) => {
-        return f.properties.oid.replace("col:", "");
-      });
-
-    // Need to recolor on selection somehow
-    return {
-      type: "get-pbdb",
-      collection_nos: pointsInCluster,
-    };
-
-    // Clicked on an unclustered point
-  } else if (
-    collections.length &&
-    collections[0].properties.hasOwnProperty("oid")
-  ) {
-    let collection_nos = collections.map((col) => {
-      return col.properties.oid.replace("col:", "");
-    });
-    return { type: "get-pbdb", collection_nos };
-    //    return
+  // Need to recolor on selection somehow
+  if(collections.length === 0) {
+    return null;
   }
 
-  return null;
+  return {
+    type: "get-pbdb",
+    collection_nos: collections.map((c) => c.properties.collection_no),
+  };
 }
 
 function handleCrossSectionClick(event, _crossSectionLine): AppAction | null {
@@ -136,6 +90,23 @@ function useMapClickHandler(pbdbPoints) {
       if (action != null) {
         runAction(action);
         return;
+      }
+
+      const cluster = map.queryRenderedFeatures(event.point, {
+        layers: ['pbdb-clusters', 'pbdb-points'],
+      });
+
+      const zoom = cluster[0]?.properties?.expansion_zoom;
+
+      if (zoom != null) {
+        console.log('Zooming to cluster at zoom level:', zoom);
+        map.flyTo({
+          center: event.lngLat,
+          zoom: zoom + 2,
+          speed: 0.5,
+          curve: 1.5,
+        })
+        return
       }
 
       // If we are viewing fossils, prioritize clicks on those
@@ -193,32 +164,6 @@ function useMapClickHandler(pbdbPoints) {
   );
 }
 
-// PBDB hexgrids and points are refreshed on every map move
-export async function refreshPBDB(map, pointsRef, filters) {
-  let bounds = map.getBounds();
-  let zoom = map.getZoom();
-  const maxClusterZoom = 7;
-  pointsRef.current = await getPBDBData(filters, bounds, zoom, maxClusterZoom);
-
-  // Show or hide the proper PBDB layers
-  // TODO: this is a bit janky
-  if (zoom < maxClusterZoom) {
-    map.getSource("pbdb-clusters").setData(pointsRef.current);
-    map.setLayoutProperty("pbdb-clusters", "visibility", "visible");
-    map.setLayoutProperty("pbdb-points-clustered", "visibility", "none");
-    //  map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
-    map.setLayoutProperty("pbdb-points", "visibility", "none");
-  } else {
-    map.getSource("pbdb-points").setData(pointsRef.current);
-
-    //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
-    map.setLayoutProperty("pbdb-clusters", "visibility", "none");
-    map.setLayoutProperty("pbdb-points-clustered", "visibility", "visible");
-    //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
-    // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
-  }
-}
-
 export function MacrostratLayerManager() {
   /** Manager for map layers */
   const mapRef = useMapRef();
@@ -270,22 +215,6 @@ export function MacrostratLayerManager() {
     };
   }, [mapRef.current, mapClickHandler]);
 
-  // Handle map movement
-  const mapMovedHandler = useCallback(() => {
-    if (mapRef.current == null) return;
-    if (mapLayers.has(MapLayer.FOSSILS)) {
-      refreshPBDB(mapRef.current, pbdbPoints, filters);
-    }
-  }, [mapRef.current, mapLayers, filters]);
-
-  useEffect(() => {
-    if (mapRef.current == null) return;
-    mapRef.current.on("moveend", mapMovedHandler);
-    return () => {
-      mapRef.current?.off("moveend", mapMovedHandler);
-    };
-  }, [mapRef.current, mapMovedHandler]);
-
   return null;
 }
 
@@ -310,9 +239,7 @@ function useStyleReloader(pbdbPoints) {
           setVisibility(map, layer.id, mapLayers.has(MapLayer.LINES));
         }
         if (
-          layer.source === "pbdb" ||
-          layer.source === "pbdb-points" ||
-          layer.source === "pbdb-clusters"
+          layer.source === "pbdb"
         ) {
           setVisibility(map, layer.id, mapLayers.has(MapLayer.FOSSILS));
         }
@@ -331,10 +258,6 @@ function useStyleReloader(pbdbPoints) {
             mapLayers.has(MapLayer.COLUMNS) && filters.length !== 0
           );
         }
-      }
-
-      if (mapLayers.has(MapLayer.FOSSILS)) {
-        refreshPBDB(map, pbdbPoints, filters);
       }
     },
     [mapLayers, filters]
@@ -381,17 +304,16 @@ export function FlyToPlaceManager() {
 }
 
 const highlightLayers = [
-  { layer: "pbdb-points", source: "pbdb-points" },
-  { layer: "pbdb-points-clustered", source: "pbdb-points" },
-  { layer: "pbdb-clusters", source: "pbdb-clusters" },
+  { layer: "pbdb-points", source: "pbdb", sourceLayer: "default" },
+  { layer: "pbdb-clusters", source: "pbdb", sourceLayer: "default" },
 ];
 
-export function HoveredFeatureManager() {
+export function HoveredFeatureManager() { 
   const mapRef = useMapRef();
   const { isStyleLoaded } = useMapStatus();
   const map = mapRef.current;
   const hoveredFeatures = useRef({});
-
+  
   useEffect(() => {
     if (map == null) return;
     if (!isStyleLoaded) return;
@@ -406,13 +328,13 @@ export function HoveredFeatureManager() {
         if (evt.features) {
           if (hoverState[layer.layer]) {
             map.setFeatureState(
-              { source: layer.source, id: hoverState[layer.layer] },
+              { source: layer.source, id: hoverState[layer.layer], sourceLayer: layer.sourceLayer },
               { hover: false }
             );
           }
           hoverState[layer.layer] = evt.features[0].id;
           map.setFeatureState(
-            { source: layer.source, id: evt.features[0].id },
+            { source: layer.source, id: evt.features[0].id, sourceLayer: layer.sourceLayer },
             { hover: true }
           );
         }
@@ -421,7 +343,7 @@ export function HoveredFeatureManager() {
       map.on("mouseleave", layer.layer, (evt) => {
         if (hoverState[layer.layer]) {
           map.setFeatureState(
-            { source: layer.source, id: hoverState[layer.layer] },
+            { source: layer.source, id: hoverState[layer.layer], sourceLayer: layer.sourceLayer },
             { hover: false }
           );
         }
