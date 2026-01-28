@@ -60,7 +60,7 @@ const AboutText = (props) => {
   });
 
   return (
-    <div className="about bp5-text text-panel">
+    <div className="about bp6-text text-panel">
       <div className={styles["title-block"]}>
         <h2>Macrostrat geologic map</h2>
         <SoftwareInfo />

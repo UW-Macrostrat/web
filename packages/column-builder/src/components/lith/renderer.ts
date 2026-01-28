@@ -105,7 +105,7 @@ function LithSegment(props: {
           },
         },
         props.lith.lith
-      ) 
+      )
     )
   );
 }

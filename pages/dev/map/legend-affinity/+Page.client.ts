@@ -319,7 +319,7 @@ function ModelSelector({ models, model, setModel }) {
             [
               h("span", null, item.name),
               ": ",
-              h("span", { className: "bp5-text-muted" }, item.description),
+              h("span", { className: "bp6-text-muted" }, item.description),
             ]
           );
         },

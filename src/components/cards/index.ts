@@ -17,7 +17,7 @@ export function LinkCard(props: LinkCardProps) {
   return h(
     Link,
     {
-      className: `link-card bp5-card ${className}`,
+      className: `link-card bp6-card ${className}`,
       href,
     },
     [h("h3", title), children]
