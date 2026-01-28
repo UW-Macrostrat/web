@@ -5,6 +5,7 @@ import { defineConfig, Plugin } from "vite";
 import path from "node:path";
 import { readFileSync } from "node:fs";
 import textToolchain from "./packages/text-toolchain/src";
+import { cjsInterop } from "vite-plugin-cjs-interop";
 import cesium from "vite-plugin-cesium";
 
 const cesiumPath = import.meta.resolve("cesium").replace("file://", "");
@@ -85,9 +86,6 @@ export default defineConfig({
       "@uiw/react-color-swatch",
       "@uiw/color-convert",
     ],
-    resolve: {
-      conditions: ["source"],
-    },
   },
   server: {
     allowedHosts: ["localhost", "dev.macrostrat.local"],
