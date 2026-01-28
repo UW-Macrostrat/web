@@ -20,7 +20,7 @@ import {
   getHashString,
   setHashString,
 } from "@macrostrat/ui-components";
-import "@znemz/cesium-navigation/dist/index.css";
+//import "@znemz/cesium-navigation/dist/index.css";
 import "cesium/Source/Widgets/widgets.css";
 import styles from "./main.module.scss";
 import Map from "./map-comparison";

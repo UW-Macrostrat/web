@@ -64,7 +64,6 @@ if ("resolutions" in pkg) {
 export default defineConfig({
   //root: path.resolve("./src"),
   resolve: {
-    conditions: ["source"],
     alias: {
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
@@ -72,10 +71,11 @@ export default defineConfig({
     dedupe: [
       "react",
       "react-dom",
-      "@macrostrat/column-components",
       "@macrostrat/ui-components",
-      "@macrostrat/column-views",
+      "@macrostrat/column-components",
       "@macrostrat/mapbox-react",
+      "@macrostrat/map-interface",
+      "@macrostrat/column-views",
     ],
   },
   plugins: [
@@ -84,7 +84,13 @@ export default defineConfig({
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
     cjsInterop({
-      dependencies: ["react-images", "labella", "react-color", "mapbox-gl"],
+      dependencies: [
+        "react-images",
+        "labella",
+        "react-color",
+        "mapbox-gl",
+        "ui-box",
+      ],
     }),
     // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
@@ -115,26 +121,6 @@ export default defineConfig({
   },
   server: {
     allowedHosts: ["localhost", "dev.macrostrat.local"],
-  },
-  ssr: {
-    noExternal: [
-      /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
-       * should be listed here.
-       */
-      "@macrostrat/form-components",
-      "@macrostrat/ui-components",
-      "@macrostrat/column-components",
-      "@macrostrat/column-views",
-      "@macrostrat/data-components",
-      "@macrostrat/svg-map-components",
-      "@macrostrat/map-interface",
-      "@macrostrat/feedback-components",
-      "@macrostrat/timescale",
-      "@macrostrat/mapbox-react",
-    ],
-    resolve: {
-      conditions: ["source"],
-    },
   },
   css: {
     preprocessorOptions: {
