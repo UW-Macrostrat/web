@@ -161,6 +161,7 @@
   },
   "packageManager": "yarn@4.11.0",
   "resolutions": {
+    "@macrostrat/ui-components": "portal:../web-components/packages/ui-components",
     "@macrostrat/api-types": "portal:../web-components/packages/api-types",
     "@macrostrat/color-utils": "portal:../web-components/packages/color-utils",
     "@macrostrat/column-components": "portal:../web-components/packages/column-components",
@@ -178,7 +179,6 @@
     "@macrostrat/style-system": "portal:../web-components/packages/style-system",
     "@macrostrat/svg-map-components": "portal:../web-components/packages/svg-map-components",
     "@macrostrat/timescale": "portal:../web-components/packages/timescale",
-    "@macrostrat/ui-components": "portal:../web-components/packages/ui-components",
     "@macrostrat/hyperstyle-loader": "portal:../web-components/toolchain/hyperstyle-loader",
     "@macrostrat/vite-plugin-hyperstyles": "portal:../web-components/toolchain/vite-plugin-hyperstyles"
   }
