@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
     "strict": false,
-    "target": "ES2022",
-    "module": "ES2022",
+    "esmoduleInterop": true,
+    "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "Bundler",
     "lib": [
       "DOM",
@@ -29,7 +31,10 @@
     "dist"
   ],
   "include": [
-    "../src",
-    "pages"
+    "packages/*/src/**/*",
+    "src/**/*",
+    "pages/**/*",
+    "server/**/*",
+    "vike.config.ts"
   ]
 }
