@@ -57,7 +57,7 @@ function DraggableOverlay(props: DraggableOverlayPropsI) {
       setState({ top: top_, left: left_ });
       const portals = Array.from(
         document.getElementsByClassName(
-          "bp5-portal"
+          "bp6-portal"
         ) as HTMLCollectionOf<HTMLElement>
       );
       portals.map((portal) => {

@@ -1,6 +1,6 @@
 import { MouseEventHandler } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
-import { Tooltip2 as Tooltip } from "@blueprintjs/popover2";
+import { Tooltip } from "@blueprintjs/core";
 import { Button, MenuItem, Spinner, Tag } from "@blueprintjs/core";
 import {
   IItemModifiers,

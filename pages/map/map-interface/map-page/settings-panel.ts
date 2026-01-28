@@ -33,7 +33,7 @@ const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
-  return h("div.settings.experiments.bp5-text.text-panel", [
+  return h("div.settings.experiments.bp6-text.text-panel", [
     h("h2", "Experimental settings"),
     h(
       Switch,

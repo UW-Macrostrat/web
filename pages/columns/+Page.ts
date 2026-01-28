@@ -393,7 +393,7 @@ function ColumnItem({ data, linkPrefix = "/" }) {
       },
     },
     [
-      h("td.col-id", h("code.bp5-code", col_id)),
+      h("td.col-id", h("code.bp6-code", col_id)),
       h("td.col-name", h("a", { href }, col_name)),
       h("td.col-status", [
         data.status_code === "in process" &&

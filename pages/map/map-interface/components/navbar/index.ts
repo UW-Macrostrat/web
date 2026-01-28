@@ -168,7 +168,7 @@ function Searchbar({ className }) {
 }
 
 function SearchGuidance() {
-  return h("div.search-guidance.bp5-text", [
+  return h("div.search-guidance.bp6-text", [
     h("h3", ["Available categories"]),
     h("ul", [
       h("li", ["Time intervals"]),

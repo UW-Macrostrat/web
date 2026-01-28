@@ -32,7 +32,7 @@ This stylesheet the overall application page layout.
 .right-panel
   width: 24em
 
-.menu-card:global(.bp5-card)
+.menu-card:global(.bp6-card)
   padding: 0
 
 // Menu
@@ -48,7 +48,7 @@ This stylesheet the overall application page layout.
   overflow: hidden
   text-align: right
 
-  :global(.bp5-button-text)
+  :global(.bp6-button-text)
     transition: all 200ms
     transition-delay: 100ms
 
@@ -57,13 +57,13 @@ This stylesheet the overall application page layout.
 
   .panel-header:not(.minimal)
     // .tab-button
-    //   &:not(:hover) :global(.bp5-button-text)
+    //   &:not(:hover) :global(.bp6-button-text)
     //     //width 0
     //     opacity: 1
     //margin-left: -7px
     // Fancy CSS to select all buttons _after_ the currently hovered one
 
-    .tab-button:global(.bp5-active) ~ .tab-button :global(.bp5-button-text)
+    .tab-button:global(.bp6-active) ~ .tab-button :global(.bp6-button-text)
       width 0
       opacity: 0
       margin-left: -7px
@@ -71,7 +71,7 @@ This stylesheet the overall application page layout.
 // Todo: not sure how to deal with this style
 // When panel is closing, fade out the buttons text-first
 :global(.map-context-leave) .menu-card .panel-header
-  .tab-button :global(.bp5-button-text)
+  .tab-button :global(.bp6-button-text)
     opacity: 0
     width: 0
 
@@ -82,13 +82,13 @@ This stylesheet the overall application page layout.
 
 .panel-header.minimal
   .tab-button:not(:hover)
-    &:not(:global(.bp5-active))
+    &:not(:global(.bp6-active))
       padding-left: 0
       padding-right: 0
       min-width: 30px
       width: 30px
 
-    :global(.bp5-button-text)
+    :global(.bp6-button-text)
       width 0
       opacity: 0
       margin-left: -7px
@@ -100,7 +100,7 @@ This stylesheet the overall application page layout.
 
 .menu-card
   :global
-    .bp5-text, .text-panel
+    .bp6-text, .text-panel
       ul
         padding-left: 1em
 
@@ -108,7 +108,7 @@ This stylesheet the overall application page layout.
   display flex
   flex-direction column
 
-  .bp5-button-group
+  .bp6-button-group
     margin-bottom 4px
   margin-bottom -8px
 
@@ -119,7 +119,7 @@ This stylesheet the overall application page layout.
 .macrostrat-map-container
   --navbar-padding: 5px 6px
 
-  :global(.bp5-card)
+  :global(.bp6-card)
     background-color: var(--panel-background-color)
     border-radius: 5px
 
@@ -176,10 +176,9 @@ This stylesheet the overall application page layout.
 
   .collections
     max-height: 90vh
-    overflow: auto     
-    scrollbar-width: none 
+    overflow: auto
+    scrollbar-width: none
 
     &::-webkit-scrollbar
       display: none
 
-  

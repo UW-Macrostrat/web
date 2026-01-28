@@ -19,15 +19,37 @@ setupVersionEnvironmentVariables(pkg);
 export default defineConfig({
   resolve: {
     alias: {
-      "~": path.resolve(__dirname, "src"),
+      "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
     conditions: ["source", "browser"],
+    dedupe: [
+      "react",
+      "react-dom",
+      "@macrostrat/ui-components",
+      "@macrostrat/column-components",
+      "@macrostrat/mapbox-react",
+      "@macrostrat/map-interface",
+      "@macrostrat/column-views",
+    ],
   },
   plugins: [
     vike(),
     react(),
-    hyperStyles(),
+    //hyperStyles(),
+    // patchCssModules(),
+    // Fix broken imports in non-ESM packages. We should endeavor to move away from these
+    // dependencies if they are unmaintained.
+    cjsInterop({
+      dependencies: [
+        "react-images",
+        "labella",
+        "react-color",
+        "mapbox-gl",
+        "ui-box",
+      ],
+    }),
+    // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
       wikiPrefix: "/docs",
@@ -67,15 +89,15 @@ export default defineConfig({
       conditions: ["source"],
     },
   },
+  server: {
+    allowedHosts: ["localhost", "dev.macrostrat.local"],
+  },
   css: {
     preprocessorOptions: {
       sass: {
         api: "modern-compiler",
-      },
+      } as any,
     },
-  },
-  server: {
-    allowedHosts: ["localhost", "dev.macrostrat.local"],
   },
 });
 

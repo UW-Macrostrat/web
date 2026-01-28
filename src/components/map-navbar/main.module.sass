@@ -6,9 +6,11 @@
 
 .map-navbar
   transition: min-width 0.5s
-  :global(.bp5-navbar)
+
+  :global(.bp6-navbar)
     &:hover
       min-width: fit-content
+
       .map-title
         // Allow the title to wrap on hover
         overflow-x: visible
@@ -16,7 +18,9 @@
 .map-minimal-navbar
   display: flex
   flex-direction: row
-  &>.spacer
+
+  & > .spacer
     flex-grow: 1
+
   .map-navbar
     min-width: 0

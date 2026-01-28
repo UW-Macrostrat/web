@@ -9,7 +9,7 @@ import h from "./hyper";
 import { Panel } from "./ui";
 
 const Control = ({ title, children }) =>
-  h("label.bp5-label", [title, h(Switch)]);
+  h("label.bp6-label", [title, h(Switch)]);
 
 const SettingsPanel = function (props) {
   const { inEditMode, generalized, updateState, resetDemoData, ...rest } =

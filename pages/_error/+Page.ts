@@ -46,7 +46,7 @@ function PageContent() {
 
   if (statusCode == 401) {
     return h([
-      h("h1", [h("code.bp5-code", "401"), " Unauthorized"]),
+      h("h1", [h("code.bp6-code", "401"), " Unauthorized"]),
       h("p", [reason]),
       h(LoginButton),
     ]);
