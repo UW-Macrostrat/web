@@ -1,9 +1,10 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { Lith, LithUnit } from "~/types";
 import { Tag } from "@blueprintjs/core";
-import { Tooltip2 } from "@blueprintjs/popover2";
+import { Tooltip } from "@blueprintjs/core";
 import styles from "./lith.module.scss";
 import classNames from "classnames";
+import type { ReactNode } from "react";
 
 const h = hyperStyled(styles);
 
@@ -87,7 +88,7 @@ function LithSegment(props: {
     "div",
     { style, className },
     h(
-      Tooltip2,
+      Tooltip,
       {
         position: "top",
         content: h(LithSegmentToolTipContent, { lith: props.lith }),
@@ -104,7 +105,7 @@ function LithSegment(props: {
           },
         },
         props.lith.lith
-      )
+      ) 
     )
   );
 }

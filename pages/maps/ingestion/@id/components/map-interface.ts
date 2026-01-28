@@ -3,11 +3,9 @@ import { SETTINGS, tileserverDomain } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   FeatureSelectionHandler,
-  MapAreaContainer,
   MapMarker,
   MapView,
   PanelCard,
-  useMapMarker,
 } from "@macrostrat/map-interface";
 import { NonIdealState, Switch } from "@blueprintjs/core";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
@@ -19,12 +17,11 @@ import {
 } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { MapNavbar } from "~/components/map-navbar";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./main.module.sass";
 import { asChromaColor, toRGBAString } from "@macrostrat/color-utils";
 import { boundingGeometryMapStyle } from "~/map-styles";
-import { Popover2 } from "@blueprintjs/popover2";
+import { Popover } from "@blueprintjs/core";
 import { MapboxMapProvider } from "@macrostrat/mapbox-react";
 
 const h = hyper.styled(styles);
@@ -235,7 +232,7 @@ export function MapInterface({
   const settingsPopoverButton = h(
     "div.map-controls",
     h(
-      Popover2,
+      Popover,
       {
         content: contextPanel,
       },

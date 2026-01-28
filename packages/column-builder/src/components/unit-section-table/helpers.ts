@@ -7,7 +7,7 @@ import {
   MenuItem,
   MenuDivider,
 } from "@blueprintjs/core";
-import { Popover2, Tooltip2 } from "@blueprintjs/popover2";
+import { Popover, Tooltip } from "@blueprintjs/core";
 import { UnitsView } from "@macrostrat-web/column-builder/src";
 import styles from "../comp.module.sass";
 import { hyperStyled } from "@macrostrat/hyper";
@@ -202,7 +202,7 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
     ]);
 
   return h(
-    Popover2,
+    Popover,
     {
       content: h(ContextMenu),
       minimal: true,
@@ -220,7 +220,7 @@ function AddBtnBetweenRows(props: {
   return h("tr", [
     h("td", { colSpan: props.colSpan, style: { padding: 0 } }, [
       h(
-        Tooltip2,
+        Tooltip,
         {
           content: "add unit",
           fill: true,

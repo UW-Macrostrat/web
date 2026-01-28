@@ -1,5 +1,5 @@
 import pkg from "react-color";
-import { Popover2 } from "@blueprintjs/popover2";
+import { Popover } from "@blueprintjs/core";
 import h from "../comp.module.sass";
 
 interface ColorProps {
@@ -18,7 +18,7 @@ function ColorBlock(props: ColorProps) {
 
   return h("div", [
     h(
-      Popover2,
+      Popover,
       {
         content: h(pkg, {
           onChange: onChange,
