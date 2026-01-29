@@ -17,6 +17,10 @@ const pkg = getPackageJSONContents("package.json");
 
 setupVersionEnvironmentVariables(pkg);
 
+const macrostratPackages = Object.keys(pkg.dependencies).filter((name: string) =>
+  name.startsWith("@macrostrat/")
+);
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -26,12 +30,7 @@ export default defineConfig({
     dedupe: [
       "react",
       "react-dom",
-      "@macrostrat/ui-components",
-      "@macrostrat/column-components",
-      "@macrostrat/mapbox-react",
-      "@macrostrat/map-interface",
-      "@macrostrat/column-views",
-      "@uiw/react-color",
+      ...macrostratPackages,
     ],
   },
   plugins: [
@@ -59,22 +58,9 @@ export default defineConfig({
       cesiumBuildRootPath: cesiumRoot,
     }),
   ],
-  // optimizeDeps: {
-  //   exclude: ["@macrostrat/column-components"],
-  //   include: [
-  //     "@macrostrat/column-components > @uiw/react-color",
-  //   include: [
-  //     "@macrostrat/column-components > @uiw/react-color",
-  //   ]
-  //   // exclude: ["@macrostrat/column-components"],
-  //   //exclude: [...getDependenciesToExcludeFromOptimization(pkg)],
-  //   //include: ["@uiw/react-color"],
-  // },
-  // ssr: {
-  //   resolve: {
-  //     conditions: ["import", "module"]
-  //   },
-  // },
+  ssr: {
+    noExternal: macrostratPackages
+  },
   define: {
     // Cesium base URL
     CESIUM_BASE_URL: JSON.stringify("/cesium"),
