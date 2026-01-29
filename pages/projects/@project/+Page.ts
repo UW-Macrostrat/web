@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { Page as ColumnListPage } from "#/columns/+Page.ts";
+import { Page as ColumnListPage } from "#/columns/index/+Page.ts";
 import { useData } from "vike-react/useData";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components";
