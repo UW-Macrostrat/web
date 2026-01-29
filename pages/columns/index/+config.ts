@@ -1,5 +1,6 @@
 export default {
-  pageStyle: "fullscreen",
+  title: "Columns",
+  pageStyle: "content",
   meta: {
     Page: {
       env: {
@@ -10,7 +11,7 @@ export default {
     data: {
       env: {
         client: true, // Data is available on the client
-        server: false, // No server-side data fetching
+        server: true, // No server-side data fetching
       },
     },
   },

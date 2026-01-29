@@ -1,4 +1,4 @@
-import { getGroupedColumns } from "./grouped-cols";
+import { getGroupedColumns } from "./grouped-cols.ts";
 
 export async function data(pageContext) {
   // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long

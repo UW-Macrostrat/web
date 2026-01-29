@@ -4,13 +4,13 @@ import { useMemo, Suspense } from "react";
 
 import { ContentPage } from "~/layouts";
 import { Link, DevLinkButton, PageBreadcrumbs } from "~/components";
-import { LithologyTag } from "~/components/lex/tag";
+import { LithologyTag } from "~/components/lex/tag.ts";
 import { Footer, SearchBar } from "~/components/general";
 import {
   ColumnFilterOptions,
   ColumnGroup,
   getGroupedColumns,
-} from "./grouped-cols";
+} from "./grouped-cols.ts";
 import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
 
 import {
@@ -22,7 +22,6 @@ import {
 } from "@blueprintjs/core";
 import { Tag, Icon } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
-import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 
 import { postgrest } from "~/_providers";
@@ -35,20 +34,13 @@ import { postgrest } from "~/_providers";
 import { atom, useAtom, useAtomValue, useSetAtom, Provider } from "jotai";
 import { unwrap, useHydrateAtoms } from "jotai/utils";
 import { debounce } from "underscore";
+import { onDemand } from "~/_utils";
 
 const h = hyper.styled(styles);
 
-function ColumnMapContainer(props) {
-  return h(
-    ClientOnly,
-    {
-      load: () => import("./map.client").then((d) => d.ColumnMapContainer),
-      fallback: h(Spinner),
-      deps: [props.columnIDs, props.projectID],
-    },
-    (component) => h(component, props)
-  );
-}
+const ColumnMapContainer = onDemand(()=> {
+  return import("../map.client.ts").then((d) => d.ColumnMapContainer);
+});
 
 type ColumnFilterKey =
   | "liths"

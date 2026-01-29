@@ -9,11 +9,12 @@ export default {
   pageStyle: "content",
   description:
     "A platform for geological data exploration, integration, and analysis.",
-  extends: [vikeReact],
+  extends: [vikeReact, vikePhoton],
   // https://vike.dev/vike-photon
-  // photon: {
-  //   server: "../server/entry.ts",
-  // },
+  photon: {
+    server: "../server/entry.ts",
+    //static: false
+  },
   // Setting these values forces a pageContext.json request to be generated with each page request.
   // https://vike.dev/pageContext.json#avoid-pagecontext-json-requests
   passToClient: [

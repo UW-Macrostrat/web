@@ -1159,7 +1159,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.18, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.2.0, @babel/runtime@npm:^7.20.13, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.28.4, @babel/runtime@npm:^7.4.4, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.18, @babel/runtime@npm:^7.13.10, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.2.0, @babel/runtime@npm:^7.20.13, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.28.4, @babel/runtime@npm:^7.28.6, @babel/runtime@npm:^7.4.4, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.28.6
   resolution: "@babel/runtime@npm:7.28.6"
   checksum: 10c0/358cf2429992ac1c466df1a21c1601d595c46930a13c1d4662fde908d44ee78ec3c183aaff513ecb01ef8c55c3624afe0309eeeb34715672dbfadb7feedb2c0d
@@ -2906,6 +2906,7 @@ __metadata:
     "@babel/core": "npm:^7.19.6"
     "@babel/preset-env": "npm:^7.19.4"
     "@babel/preset-typescript": "npm:^7.18.6"
+    "@babel/runtime": "npm:^7.28.6"
     "@blueprintjs/core": "npm:^6.7.0"
     "@blueprintjs/select": "npm:^6.0.14"
     "@blueprintjs/table": "npm:^6.0.14"
@@ -2959,6 +2960,7 @@ __metadata:
     "@types/underscore": "npm:^1"
     "@typescript-eslint/eslint-plugin": "npm:^6.3.0"
     "@typescript-eslint/parser": "npm:^6.3.0"
+    "@uiw/react-color": "npm:2.9.2"
     "@universal-middleware/core": "npm:^0.4.16"
     "@visx/axis": "npm:^2.14.0"
     "@visx/group": "npm:^3.12.0"
@@ -3023,7 +3025,7 @@ __metadata:
     use-element-dimensions: "npm:^2.1.3"
     use-react-router-breadcrumbs: "npm:^3.2.1"
     use-resize-observer: "npm:^9.1.0"
-    vike: "npm:^0.4.252"
+    vike: "npm:0.4.252-commit-3ea247f"
     vike-photon: "npm:^0.1.24"
     vike-react: "npm:^0.6.19"
     vite: "npm:^7.3.1"
@@ -6871,7 +6873,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uiw/react-color@npm:^2.9.2":
+"@uiw/react-color@npm:2.9.2, @uiw/react-color@npm:^2.9.2":
   version: 2.9.2
   resolution: "@uiw/react-color@npm:2.9.2"
   dependencies:
@@ -19787,9 +19789,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vike@npm:^0.4.252":
-  version: 0.4.252
-  resolution: "vike@npm:0.4.252"
+"vike@npm:0.4.252-commit-3ea247f":
+  version: 0.4.252-commit-3ea247f
+  resolution: "vike@npm:0.4.252-commit-3ea247f"
   dependencies:
     "@babel/core": "npm:^7.28.5"
     "@babel/types": "npm:^7.28.5"
@@ -19819,7 +19821,7 @@ __metadata:
       optional: true
   bin:
     vike: bin.js
-  checksum: 10c0/6c864b95b95c5791c1cb20fb6204e7ec6fdd513657dc4a9688997f267d255b6770ff19bf049648ae093e7ef24f2c67acd756a00dd8748d272666b17032531f08
+  checksum: 10c0/5849676f3d4eaf4420f9993287437fa0088ea55da17fc9b8bffb35a4a5b7fcfb05e1358c5f3965243a1d6895604be28ea97c5da179192dfe5b7692d88a423465
   languageName: node
   linkType: hard
 

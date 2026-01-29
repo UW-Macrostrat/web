@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { Page as ColumnListPage } from "#/columns/+Page.ts";
+import { Page as ColumnListPage } from "#/columns/index/+Page.ts";
 
 export function Page() {
   return h(ColumnListPage, {

@@ -72,11 +72,11 @@ export default defineConfig({
   //   //exclude: [...getDependenciesToExcludeFromOptimization(pkg)],
   //   //include: ["@uiw/react-color"],
   // },
-  ssr: {
-    resolve: {
-      conditions: ["import", "module"]
-    },
-  },
+  // ssr: {
+  //   resolve: {
+  //     conditions: ["import", "module"]
+  //   },
+  // },
   define: {
     // Cesium base URL
     CESIUM_BASE_URL: JSON.stringify("/cesium"),
