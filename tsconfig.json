@@ -6,15 +6,8 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
-    "types": [
-      "vite/client",
-      "vike-react"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["vite/client", "vike-react"],
     "noEmit": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -22,19 +15,15 @@
     "jsxImportSource": "react",
     "allowImportingTsExtensions": true,
     "paths": {
-      "~/*": [
-        "./src/*"
-      ]
-    }
+      "~/*": ["./src/*"],
+    },
   },
-  "exclude": [
-    "dist"
-  ],
+  "exclude": ["dist"],
   "include": [
     "packages/*/src/**/*",
     "src/**/*",
     "pages/**/*",
     "server/**/*",
-    "vike.config.ts"
-  ]
+    "vite.config.ts",
+  ],
 }

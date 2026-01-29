@@ -32,6 +32,7 @@ export default defineConfig({
       "@macrostrat/mapbox-react",
       "@macrostrat/map-interface",
       "@macrostrat/column-views",
+      "@uiw/react-color",
     ],
   },
   plugins: [
@@ -48,6 +49,7 @@ export default defineConfig({
         "react-color",
         "mapbox-gl",
         "ui-box",
+        "@uiw/react-color",
       ],
     }),
     // This should maybe be integrated directly into the server-side rendering code
@@ -61,7 +63,11 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    exclude: getDependenciesToExcludeFromOptimization(pkg),
+    exclude: [
+      ...getDependenciesToExcludeFromOptimization(pkg),
+
+    ],
+    include: ["@uiw/react-color-swatch", "@uiw/react-color-sketch"],
   },
   define: {
     // Cesium base URL
@@ -70,21 +76,24 @@ export default defineConfig({
   },
   ssr: {
     noExternal: [
+      "@uiw/react-color",
+      //"@macrostrat/column-components",
+      //"@macrostrat/ui-components",
       /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
        * should be listed here.
        */
-      "@macrostrat/form-components",
-      "@macrostrat/ui-components",
-      "@macrostrat/column-components",
-      "@macrostrat/column-views",
-      "@macrostrat/data-components",
-      "@macrostrat/svg-map-components",
-      "@macrostrat/map-interface",
-      "@macrostrat/feedback-components",
-      "@macrostrat/timescale",
-      "@macrostrat/mapbox-react",
-      "@uiw/react-color-swatch",
-      "@uiw/color-convert",
+      // "@macrostrat/form-components",
+      // "@macrostrat/ui-components",
+      // "@macrostrat/column-components",
+      // "@macrostrat/column-views",
+      // "@macrostrat/data-components",
+      // "@macrostrat/svg-map-components",
+      // "@macrostrat/map-interface",
+      // "@macrostrat/feedback-components",
+      // "@macrostrat/timescale",
+      // "@macrostrat/mapbox-react",
+      // "@uiw/react-color-swatch",
+      // "@uiw/color-convert",
     ],
   },
   server: {
@@ -109,13 +118,7 @@ function getDependenciesToExcludeFromOptimization(pkg: any) {
   /** If we have locally linked dependencies, we want to exclude them from
    * optimization.
    */
-  const excludePrefixes = [
-    "file:",
-    "link:",
-    "workspace:",
-    "portal:",
-    "@macrostrat",
-  ];
+  const excludePrefixes = ["file:", "link:", "workspace:", "portal:"];
 
   const allPackages = Object.entries(pkg.dependencies)
     .concat(Object.entries(pkg.devDependencies || {}))
