@@ -11,7 +11,7 @@
     "@visx/group": "^3.3.0",
     "@visx/hierarchy": "^3.3.0",
     "@visx/zoom": "^3.3.0",
-    "chroma-js": "^2.4.2",
+    "chroma-js": "^3.2.0",
     "react": "^19.2.4"
   }
 }
