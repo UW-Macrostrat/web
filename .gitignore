@@ -21,6 +21,8 @@ docker-compose.yaml
 .idea/workspace.xml
 .idea/tasks.xml
 
+# VS Code
+.vscode
 
 # For ignoring static files
 *.png
