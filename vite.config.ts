@@ -37,7 +37,7 @@ export default defineConfig({
   plugins: [
     vike(),
     react(),
-    //hyperStyles(),
+    hyperStyles(),
     // patchCssModules(),
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
@@ -109,7 +109,13 @@ function getDependenciesToExcludeFromOptimization(pkg: any) {
   /** If we have locally linked dependencies, we want to exclude them from
    * optimization.
    */
-  const excludePrefixes = ["file:", "link:", "workspace:", "portal:"];
+  const excludePrefixes = [
+    "file:",
+    "link:",
+    "workspace:",
+    "portal:",
+    "@macrostrat",
+  ];
 
   const allPackages = Object.entries(pkg.dependencies)
     .concat(Object.entries(pkg.devDependencies || {}))
