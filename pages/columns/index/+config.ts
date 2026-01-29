@@ -5,7 +5,7 @@ export default {
     Page: {
       env: {
         client: true, // This page will be rendered on the client
-        server: false, // No server-side rendering for this page
+        server: true, // No server-side rendering for this page
       },
     },
     data: {

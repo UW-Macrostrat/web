@@ -178,6 +178,11 @@
     "@macrostrat/stratigraphy-utils": "portal:../web-components/packages/stratigraphy-utils",
     "@macrostrat/svg-map-components": "portal:../web-components/packages/svg-map-components",
     "@macrostrat/timescale": "portal:../web-components/packages/timescale",
-    "@macrostrat/ui-components": "portal:../web-components/packages/ui-components"
+    "@macrostrat/ui-components": "portal:../web-components/packages/ui-components",
+    "@macrostrat/feedback-components": "portal:../web-components/packages/feedback-components",
+    "@macrostrat/form-components": "portal:../web-components/packages/form-components",
+    "@macrostrat/style-system": "portal:../web-components/packages/style-system",
+    "@macrostrat/hyperstyle-loader": "portal:../web-components/toolchain/hyperstyle-loader",
+    "@macrostrat/vite-plugin-hyperstyles": "portal:../web-components/toolchain/vite-plugin-hyperstyles"
   }
 }

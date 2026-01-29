@@ -19,8 +19,9 @@ import {
   Switch,
   Popover,
   Spinner,
+  Tag,
+  Icon,
 } from "@blueprintjs/core";
-import { Tag, Icon } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 import { navigate } from "vike/client/router";
 
@@ -38,7 +39,7 @@ import { onDemand } from "~/_utils";
 
 const h = hyper.styled(styles);
 
-const ColumnMapContainer = onDemand(()=> {
+const ColumnMapContainer = onDemand(() => {
   return import("../map.client.ts").then((d) => d.ColumnMapContainer);
 });
 
