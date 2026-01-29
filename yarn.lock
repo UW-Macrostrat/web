@@ -2638,13 +2638,14 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/style-system@portal:../web-components/packages/style-system::locator=%40macrostrat%2Fweb%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@macrostrat/style-system@portal:../web-components/packages/style-system::locator=%40macrostrat%2Fweb%40workspace%3A."
+"@macrostrat/style-system@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@macrostrat/style-system@npm:0.3.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.6.1"
+  checksum: 10c0/227ce0a24b9ee18de5242b3ff76ccbbbbadd291c636ee04d29eadeb28b1012bd196982042c8405dbfe49db8b80725da8e39c008b48bdb3f099b83f6b3696cf66
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "@macrostrat/svg-map-components@portal:../web-components/packages/svg-map-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local

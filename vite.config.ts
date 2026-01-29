@@ -19,7 +19,6 @@ setupVersionEnvironmentVariables(pkg);
 
 export default defineConfig({
   resolve: {
-    //conditions: ["source"],
     alias: {
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
