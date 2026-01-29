@@ -1,6 +1,6 @@
 import { fetchIdsFromColId, IdsFromCol } from "@macrostrat-web/column-builder";
 
-import { PageContext } from "vike/types";
+import type { PageContext } from "vike/types";
 
 export async function data(ctx: PageContext): Promise<NewUnitData> {
   let { col_id } = ctx.routeParams;

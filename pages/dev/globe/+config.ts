@@ -7,7 +7,6 @@ export default {
       },
     },
   },
-  clientRouting: false,
   scripts: ["/cesium/Cesium.js"],
   title: "Globe",
   description: "Macrostrat Globe",

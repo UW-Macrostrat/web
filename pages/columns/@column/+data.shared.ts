@@ -64,7 +64,7 @@ async function getAndUnwrap<T>(url: string): Promise<T> {
   console.log("Fetching", url);
   const res = await fetch(url);
   const res1 = await res.json();
-  return res1.success.data;
+  return res1.success?.data ?? null;
 }
 
 async function getData(

@@ -3,7 +3,7 @@ import {
   fetchIdsFromSectionId,
   selectFirst,
 } from "@macrostrat-web/column-builder";
-import { PageContext } from "vike/types";
+import type { PageContext } from "vike/types";
 import { PostgrestError } from "@supabase/postgrest-js";
 
 export interface NewUnitData {

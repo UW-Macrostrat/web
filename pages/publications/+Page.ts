@@ -11,7 +11,7 @@ export function Page() {
       h("h1.pub-title", "Publications"),
       h("p.blurb", "literature utilizing Macrostrat"),
       h(Divider, { className: "divider" }),
-      h("ol", { class: "pub-list", reversed: true }, [
+      h("ol", { className: "pub-list", reversed: true }, [
         h("li", [
           h(
             "span",
@@ -19,7 +19,10 @@ export function Page() {
           ),
           h(
             "a",
-            { href: "https://www.sciencedirect.com/science/article/abs/pii/S0301926825002013?via%3Dihub", target: "_blank" },
+            {
+              href: "https://www.sciencedirect.com/science/article/abs/pii/S0301926825002013?via%3Dihub",
+              target: "_blank",
+            },
             "[link]"
           ),
         ]),
@@ -30,7 +33,10 @@ export function Page() {
           ),
           h(
             "a",
-            { href: "https://onlinelibrary.wiley.com/doi/10.1111/pala.70008", target: "_blank" },
+            {
+              href: "https://onlinelibrary.wiley.com/doi/10.1111/pala.70008",
+              target: "_blank",
+            },
             "[link]"
           ),
         ]),
@@ -41,7 +47,10 @@ export function Page() {
           ),
           h(
             "a",
-            { href: "https://www.pnas.org/doi/10.1073/pnas.2511406122", target: "_blank" },
+            {
+              href: "https://www.pnas.org/doi/10.1073/pnas.2511406122",
+              target: "_blank",
+            },
             "[link]"
           ),
         ]),
@@ -52,7 +61,10 @@ export function Page() {
           ),
           h(
             "a",
-            { href: "https://www.nature.com/articles/s43247-025-02370-6", target: "_blank" },
+            {
+              href: "https://www.nature.com/articles/s43247-025-02370-6",
+              target: "_blank",
+            },
             "[link]"
           ),
         ]),
@@ -63,7 +75,10 @@ export function Page() {
           ),
           h(
             "a",
-            { href: "https://www.nature.com/articles/s41467-025-57345-0", target: "_blank" },
+            {
+              href: "https://www.nature.com/articles/s41467-025-57345-0",
+              target: "_blank",
+            },
             "[link]"
           ),
         ]),
@@ -74,7 +89,10 @@ export function Page() {
           ),
           h(
             "a",
-            { href: "https://linkinghub.elsevier.com/retrieve/pii/S0960982225003100", target: "_blank" },
+            {
+              href: "https://linkinghub.elsevier.com/retrieve/pii/S0960982225003100",
+              target: "_blank",
+            },
             "[link]"
           ),
         ]),
@@ -85,7 +103,10 @@ export function Page() {
           ),
           h(
             "a",
-            { href: "https://apps.crossref.org/pendingpub/pendingpub.html?doi=10.1093%2Fzoolinnean%2Fzlae153", target: "_blank" },
+            {
+              href: "https://apps.crossref.org/pendingpub/pendingpub.html?doi=10.1093%2Fzoolinnean%2Fzlae153",
+              target: "_blank",
+            },
             "[link]"
           ),
         ]),
@@ -96,7 +117,10 @@ export function Page() {
           ),
           h(
             "a",
-            { href: "https://linkinghub.elsevier.com/retrieve/pii/S0012821X24000736", target: "_blank" },
+            {
+              href: "https://linkinghub.elsevier.com/retrieve/pii/S0012821X24000736",
+              target: "_blank",
+            },
             "[link]"
           ),
         ]),
@@ -193,7 +217,10 @@ export function Page() {
           ),
           h(
             "a",
-            { href: "https://www.pnas.org/doi/abs/10.1073/pnas.2309084120", target: "_blank" },
+            {
+              href: "https://www.pnas.org/doi/abs/10.1073/pnas.2309084120",
+              target: "_blank",
+            },
             "[link]"
           ),
         ]),

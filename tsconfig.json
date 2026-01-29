@@ -1,26 +1,29 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
-    // Allow importing of JSON and default imports from CommonJS modules
+    "strict": false,
+    "esmoduleInterop": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["vite/client", "vike-react"],
+    "noEmit": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
-    "sourceMap": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "allowImportingTsExtensions": true,
     "paths": {
-      // Workspace code
-      "@macrostrat-web/*": [
-        "packages/*/src"
-      ],
-      "~/*": [
-        "src/*"
-      ],
-      "#/*": [
-        "pages/*"
-      ]
-    }
+      "~/*": ["./src/*"],
+    },
   },
+  "exclude": ["dist"],
   "include": [
     "packages/*/src/**/*",
     "src/**/*",
-    "pages/**/*"
-  ]
+    "pages/**/*",
+    "server/**/*",
+    "vite.config.ts",
+  ],
 }

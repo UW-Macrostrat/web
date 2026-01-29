@@ -21,7 +21,7 @@ import {
   PostgrestQueryBuilder,
 } from "@supabase/postgrest-js";
 import { StratNameI } from "~/types";
-import { Tooltip2 } from "@blueprintjs/popover2";
+import { Tooltip } from "@blueprintjs/core";
 
 const h = hyperStyled(styles);
 
@@ -35,7 +35,7 @@ const itemPredicate: ItemPredicate<StratNameI> = (query, item, index) => {
 
 const SourceTag = ({ source }: { source: string | undefined }) => {
   return h.if(typeof source !== "undefined")(
-    Tooltip2,
+    Tooltip,
     {
       content: source ?? "",
       className: "source-text",

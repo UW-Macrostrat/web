@@ -1,6 +1,6 @@
 // Import @types/cesium to use along with CesiumJS
 //import VectorProvider from "@macrostrat/cesium-vector-provider";
-import TerrainProvider from "@macrostrat/cesium-martini";
+import MapboxTerrainProvider from "@macrostrat/cesium-martini";
 import { useRef, useEffect } from "react";
 import h from "@macrostrat/hyper";
 import CesiumViewer, {
@@ -10,12 +10,11 @@ import CesiumViewer, {
   GeologyLayer,
 } from "@macrostrat/cesium-viewer";
 import { useCesium } from "resium";
-import {
-  MapboxImageryProvider,
-  createGooglePhotorealistic3DTileset,
-} from "cesium";
+import { createGooglePhotorealistic3DTileset } from "cesium";
 import { MapboxImageryProvider } from "cesium";
-import { elevationLayerURL } from "@macrostrat-web/settings";
+import { elevationLayerURL, mapboxAccessToken } from "@macrostrat-web/settings";
+
+const accessToken = mapboxAccessToken;
 
 // export function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
 //   const provider = useRef(
@@ -40,6 +39,16 @@ function buildSatelliteLayer({ accessToken }) {
   return provider;
 }
 
+const terrainProvider: any = new MapboxTerrainProvider({
+  hasVertexNormals: false,
+  hasWaterMask: false,
+  accessToken,
+  highResolution: true,
+  skipZoomLevels: (z) => z % 3 != 0,
+  credit: "Mapbox",
+  //urlTemplate: elevationLayerURL,
+});
+
 function CesiumView({
   style,
   showGeology,
@@ -48,30 +57,18 @@ function CesiumView({
   googleMapsAPIKey,
   ...rest
 }) {
-  const terrainProvider: any = useRef(
-    new TerrainProvider({
-      hasVertexNormals: false,
-      hasWaterMask: false,
-      accessToken,
-      highResolution: true,
-      skipZoomLevels: (z) => z % 3 != 0,
-      credit: "Mapbox",
-      urlTemplate: elevationLayerURL,
-    })
-  );
-
   if (showGoogleTiles) {
     // @ts-ignore
     return h(
       CesiumViewer,
       {
-        terrainProvider: terrainProvider.current,
+        terrainProvider: terrainProvider,
         displayQuality: DisplayQuality.High,
-        fogDensity: 0.0002,
+        //fogDensity: 0.0002,
         //skyBox: true,
         showInspector: true,
         showIonLogo: false,
-        ...rest,
+        //...rest,
       },
       [
         h(GooglePhotorealistic3DTileset, {
@@ -85,16 +82,16 @@ function CesiumView({
   return h(
     CesiumViewer,
     {
-      terrainProvider: terrainProvider.current,
+      terrainProvider,
       displayQuality: DisplayQuality.High,
       fogDensity: 0.0002,
       //skyBox: true,
       showInspector: true,
       showIonLogo: false,
-      ...rest,
+      //...rest,
     },
     [
-      h(SatelliteLayer, { accessToken, show: !showGoogleTiles }),
+      h(SatelliteLayer, { accessToken, show: true }),
       h(GeologyLayer, { alpha: 0.3, show: showGeology && !showGoogleTiles }),
       h(MapboxLogo),
       // h(GooglePhotorealistic3DTileset, {

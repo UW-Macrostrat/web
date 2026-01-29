@@ -8,14 +8,15 @@ import { pageLayouts } from "~/layouts";
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "~/styles/core.sass";
 import "~/styles/padding.css";
-//
+// Import all style import
+import "~/macrostrat-style-imports";
+
 import h from "@macrostrat/hyper";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
   const { exports = {}, config, user } = pageContext;
   const pageStyle = exports?.pageStyle ?? "fullscreen";
-  // const devTools = exports.devTools ?? [];
 
   const layout = pageLayouts[pageStyle] ?? `div.${pageStyle}-page`;
 

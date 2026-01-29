@@ -142,9 +142,9 @@ interface TableProps {
 function Table(props: TableProps) {
   const { headers = [] } = props;
   const baseClass =
-    "bp5-html-table .bp5-html-table-condensed .bp5-html-table-bordered";
+    "bp6-html-table .bp6-html-table-condensed .bp6-html-table-bordered";
   let className = props.interactive
-    ? `${baseClass} .bp5-interactive`
+    ? `${baseClass} .bp6-interactive`
     : baseClass;
 
   return h(Card, { className: "table-container" }, [
@@ -178,7 +178,7 @@ function DnDTable(props: DnDTableProps) {
     droppableId = "table-drop-zone",
   } = props;
   const baseClass =
-    "bp5-html-table bp5-html-table-condensed bp5-html-table-bordered base-table full-width";
+    "bp6-html-table bp6-html-table-condensed bp6-html-table-bordered base-table full-width";
 
   return h(
     Draggable,
@@ -191,7 +191,7 @@ function DnDTable(props: DnDTableProps) {
     [
       (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
         const className = classNames(baseClass, {
-          "bp5-interactive": props.interactive,
+          "bp6-interactive": props.interactive,
         });
 
         return h(

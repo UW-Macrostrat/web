@@ -6,12 +6,12 @@
   "dependencies": {
     "@macrostrat-web/settings": "workspace:^",
     "@macrostrat/hyper": "^3.0.6",
-    "@macrostrat/ui-components": "^4.5.3",
+    "@macrostrat/ui-components": "^5.0.4",
     "@visx/gradient": "^3.3.0",
     "@visx/group": "^3.3.0",
     "@visx/hierarchy": "^3.3.0",
     "@visx/zoom": "^3.3.0",
-    "chroma-js": "^2.4.2",
-    "react": "^18.2.0"
+    "chroma-js": "^3.2.0",
+    "react": "^19.2.4"
   }
 }

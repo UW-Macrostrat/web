@@ -1,4 +1,4 @@
-import { getGroupedColumns } from "#/columns/grouped-cols";
+import { getGroupedColumns } from "#/columns/index/grouped-cols";
 import { fetchAPIData } from "~/_utils/fetch-helpers";
 
 export async function data(pageContext) {

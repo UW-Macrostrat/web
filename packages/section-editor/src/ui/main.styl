@@ -1,4 +1,3 @@
-
 c1 = rgb(16, 22, 26)
 .panel-header
   h1
@@ -12,16 +11,17 @@ c1 = rgb(16, 22, 26)
   align-items baseline
   padding 0.2em 0.6em
   border-bottom 1px solid #ddd
-  :global(.bp5-button)
+
+  :global(.bp6-button)
     align-self center
 
 .panel-column
   flex-grow 1
   position relative
 
-.panel,.content-panel
+.panel, .content-panel
   overflow hidden
-  box-shadow: 0 0 0 1px alpha(c1,0.2), 0 0 0 alpha(c1, 0), 0 1px 1px alpha(c1, 0.4)
+  box-shadow: 0 0 0 1px alpha(c1, 0.2), 0 0 0 alpha(c1, 0), 0 1px 1px alpha(c1, 0.4)
   border-radius 6px
   background-color white
   display flex
@@ -38,7 +38,8 @@ c1 = rgb(16, 22, 26)
   overflow-y scroll
   padding 1em
   flex 1
-  &>:last-child
+
+  & > :last-child
     margin-bottom 1em
 
 .panel-outer
@@ -55,6 +56,7 @@ c1 = rgb(16, 22, 26)
   right 1em
   display flex
   flex-direction column
+
   .expander
     flex 1
 

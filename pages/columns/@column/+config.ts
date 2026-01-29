@@ -10,7 +10,7 @@ export default {
     data: {
       env: {
         client: true, // Data is available on the client
-        server: true, // No server-side data fetching
+        server: false, // No server-side data fetching
       },
     },
   },

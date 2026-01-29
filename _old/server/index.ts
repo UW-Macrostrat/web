@@ -36,8 +36,6 @@ const hmr = {
   protocol: hmrProtocol,
 };
 
-console.log(hmr);
-
 interface Middleware<
   Context extends Record<string | number | symbol, unknown>
 > {

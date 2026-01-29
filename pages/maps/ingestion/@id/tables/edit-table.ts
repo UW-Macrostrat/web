@@ -2,10 +2,10 @@ import { Button, Checkbox, Icon, useHotkeys } from "@blueprintjs/core";
 import {
   Cell,
   Column,
-  ColumnHeaderCell2,
+  ColumnHeaderCell,
   FocusedCellCoordinates,
   RegionCardinality,
-  RowHeaderCell2,
+  RowHeaderCell,
   Table2,
 } from "@blueprintjs/table";
 import {
@@ -291,7 +291,7 @@ export function TableInterface({
       let filter = tableData.parameters.filter[columnName];
 
       return h(
-        ColumnHeaderCell2,
+        ColumnHeaderCell,
         {
           enableColumnReordering: columnName != "source_layer",
           nameRenderer: () =>
@@ -368,7 +368,7 @@ export function TableInterface({
   const rowHeaderCellRenderer = useCallback(
     (rowIndex: number) => {
       if (transformedData.length == 0) {
-        return h(RowHeaderCell2, { name: "NULL" }, []);
+        return h(RowHeaderCell, { name: "NULL" }, []);
       }
 
       const headerKey = tableData.parameters?.group || "_pkid";
@@ -381,7 +381,7 @@ export function TableInterface({
       }
 
       const omit = transformedData[rowIndex]["omit"] ?? false;
-      return h(RowHeaderCell2, {
+      return h(RowHeaderCell, {
         name: h(
           "span.row-header-text",
           { className: classNames({ omit }) },

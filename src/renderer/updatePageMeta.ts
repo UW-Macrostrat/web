@@ -1,4 +1,4 @@
-import { PageContext, PageContextClient } from "vike/types";
+import type { PageContext, PageContextClient } from "vike/types";
 
 export function updatePageMeta<T extends PageContext | PageContextClient>(
   pageContext: T

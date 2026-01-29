@@ -1,4 +1,4 @@
-import { PageContextServer } from "vike/types";
+import type { PageContextServer } from "vike/types";
 import { useConfig } from "vike-react/useConfig";
 import {
   MacrostratRasterTileset,

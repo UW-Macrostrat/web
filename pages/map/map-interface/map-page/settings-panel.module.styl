@@ -20,7 +20,8 @@
   display: flex
   gap: 0.5em
   align-items: center
-  &>:first-child
+
+  & > :first-child
     flex-grow: 1
 
 .settings
@@ -28,32 +29,36 @@
     font-size: 12px
     font-style: italic
 
-  &>*
+  & > *
     width: 100%
     margin: 0.1em 0 0.2em
 
   :global
-    .bp5-control
+    .bp6-control
       display: flex
       width: 100%
       align-items: center
+
       .control-label
         flex-grow: 1
 
-    .bp5-callout
+    .bp6-callout
       padding: 0.5em
       position: relative
 
-    .bp5-button, .bp5-button-group
+    .bp6-button, .bp6-button-group
       justify-content: start
       align-items: center
       //box-shadow: 0 0 0px 1px var(--card-shadow-color)
       border-radius: 2px
-      .bp5-button-text
+
+      .bp6-button-text
         flex-grow: 1
+
       .spacer
         flex-grow 1
-      .bp5-button
+
+      .bp6-button
         width: auto
         display: inline
         margin: 0
@@ -61,19 +66,23 @@
 .callout-panel
   border-radius: 3px
   overflow: hidden
+
   .callout-header
-    :global(.bp5-button)
+    :global(.bp6-button)
       width: 100%
+
   &.expanded
     .callout-header
-      :global(.bp5-button)
+      :global(.bp6-button)
         border-bottom-left-radius: 0
         border-bottom-right-radius: 0
         margin-bottom: 0
-  :global(.bp5-callout)
+
+  :global(.bp6-callout)
     border-top-left-radius: 0
     border-top-right-radius: 0
-    &>:last-child
+
+    & > :last-child
       margin-bottom: 0
 
 
@@ -81,6 +90,7 @@
   align-items baseline
   max-width: 100%
   margin: 0 1em
+
   h3
     flex: 1
     max-width: 9em
@@ -88,7 +98,8 @@
   flex: 1
   flex-direction: row
   gap: 0.5em
-  &>*
+
+  & > *
     flex: 1
 
 

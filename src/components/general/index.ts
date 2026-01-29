@@ -1,11 +1,15 @@
-import h from "./layout.module.sass";
-import { MacrostratIcon, StickyHeader } from "~/components";
+import hyper from "@macrostrat/hyper";
+import { StickyHeader } from "~/components";
 import { Spinner, Icon, Card, Popover, Tag } from "@blueprintjs/core";
 import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { postgrestPrefix, webAssetsPrefix } from "@macrostrat-web/settings";
+import styles from "./layout.module.sass";
+import type { ReactNode } from "react";
 
-export function Image({ src, className, width, height }) {
+const h = hyper.styled(styles);
+
+export function Image({ src, className, width, height }: any) {
   const srcWithAddedPrefix = webAssetsPrefix + "/main-page/" + src;
   return h("img", { src: srcWithAddedPrefix, className, width, height });
 }
@@ -22,6 +26,11 @@ export function MacrostratLogoLink({
   className,
   logoStyle,
   children,
+}: {
+  href?: string;
+  className?: string;
+  logoStyle?: MacrostratIconStyle;
+  children?: React.ReactNode;
 }) {
   return h("a.macrostrat-logo-link", { href, className }, [
     h(MacrostratIcon, { iconStyle: logoStyle }),
@@ -29,7 +38,21 @@ export function MacrostratLogoLink({
   ]);
 }
 
-export function MacrostratIcon({ iconStyle, className, small = false }) {
+enum MacrostratIconStyle {
+  FULL = "full",
+  MINIMAL = "minimal",
+  SIMPLE = "simple",
+}
+
+export function MacrostratIcon({
+  iconStyle,
+  className,
+  small = false,
+}: {
+  iconStyle?: MacrostratIconStyle;
+  small?: boolean;
+  className?: string;
+}) {
   const iconFile =
     iconStyle != null
       ? `macrostrat-icon-${iconStyle}.svg`
@@ -40,7 +63,15 @@ export function MacrostratIcon({ iconStyle, className, small = false }) {
   });
 }
 
-export function SiteTitle({ logoStyle, className, children }) {
+export function SiteTitle({
+  logoStyle,
+  className,
+  children,
+}: {
+  logoStyle?: MacrostratIconStyle;
+  className?: string;
+  children?: ReactNode;
+}) {
   return h(
     MacrostratLogoLink,
     { logoStyle, className: classNames("site-title", className) },
@@ -52,7 +83,7 @@ export function Navbar({ className, children, showSiteTitle = true }) {
   return h(StickyHeader, { className }, [
     h("nav.navbar", [
       h.if(showSiteTitle)(SiteTitle, {
-        logoStyle: "simple",
+        logoStyle: MacrostratIconStyle.SIMPLE,
         className: "navbar-title",
       }),
       children,

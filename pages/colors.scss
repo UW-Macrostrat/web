@@ -1,5 +1,5 @@
 @use "sass:color";
-@use "@blueprintjs/colors/lib/scss/colors" as *;
+@use "@blueprintjs/core/lib/scss/variables" as *;
 
 $colors: (
   img-color: invert(0),

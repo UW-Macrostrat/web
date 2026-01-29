@@ -1,0 +1,3 @@
+- Integrate ts-rest and zod
+- Development caching for static assets
+- Break things up into sub-packages
