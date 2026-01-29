@@ -2209,14 +2209,14 @@ __metadata:
     "@supabase/postgrest-js": "npm:^1.18.1"
     "@types/mapbox__mapbox-gl-draw": "npm:^1.2.3"
     "@types/node": "npm:^17.0.10"
-    "@types/react": "npm:^17"
+    "@types/react": "npm:^19.2.10"
     "@types/react-beautiful-dnd": "npm:^13.1.2"
     axios: "npm:^1.13.2"
     cross-fetch: "npm:^4.1.0"
     eslint: "npm:^8.7.0"
     eslint-config-next: "npm:^12.0.8"
     mapbox-gl: "npm:^3.0.0"
-    react: "npm:^19.2.3"
+    react: "npm:^19.2.4"
     react-beautiful-dnd: "npm:^13.1.0"
     react-color: "npm:^2.19.3"
     typescript: "npm:^5.9.3"
@@ -2250,7 +2250,7 @@ __metadata:
     "@visx/hierarchy": "npm:^3.3.0"
     "@visx/zoom": "npm:^3.3.0"
     chroma-js: "npm:^2.4.2"
-    react: "npm:^19.2.3"
+    react: "npm:^19.2.4"
   languageName: unknown
   linkType: soft
 
@@ -2280,7 +2280,7 @@ __metadata:
     d3: "npm:^5.12.0"
     labella: "npm:^1.1.4"
     parse-css-sides: "npm:^3.0.1"
-    react: "npm:^19.2.3"
+    react: "npm:^19.2.4"
     react-color: "npm:^2.17.3"
     react-draggable: "npm:^4.1.0"
     react-image-slider: "npm:^0.1.0"
@@ -2314,7 +2314,7 @@ __metadata:
   dependencies:
     "@macrostrat-web/settings": "workspace:*"
     "@macrostrat/hyper": "npm:^3.0.6"
-    "@types/react": "npm:^18"
+    "@types/react": "npm:^19.2.10"
     "@types/react-dom": "npm:^18"
     "@vitejs/plugin-react": "npm:^5.1.2"
     async: "npm:^1.5.2"
@@ -2322,8 +2322,8 @@ __metadata:
     fastclick: "npm:^1.0.6"
     leaflet: "npm:^1.0.0-beta.2"
     leaflet-hash: "npm:^0.2.1"
-    react: "npm:^19.2.3"
-    react-dom: "npm:^19.2.3"
+    react: "npm:^19.2.4"
+    react-dom: "npm:^19.2.4"
     react-router-dom: "npm:^6.21.3"
     topojson: "npm:1.6.19"
     turf-centroid: "npm:^1.1.2"
@@ -2997,9 +2997,9 @@ __metadata:
     part-regex: "npm:^0.1.2"
     prettier: "npm:^2.7.1"
     prop-types: "npm:^15.8.1"
-    react: "npm:^19.2.3"
+    react: "npm:^19.2.4"
     react-cookie: "npm:^3.0.4"
-    react-dom: "npm:^19.2.3"
+    react-dom: "npm:^19.2.4"
     react-intersection-observer: "npm:^9.4.3"
     react-redux: "npm:^7.2.0"
     react-router: "npm:^6.8.2"
@@ -6255,7 +6255,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:>= 16.0.0 < 20.0.0, @types/react@npm:^19.2.8":
+"@types/react@npm:*, @types/react@npm:>= 16.0.0 < 20.0.0, @types/react@npm:^19.2.10, @types/react@npm:^19.2.8":
   version: 19.2.10
   resolution: "@types/react@npm:19.2.10"
   dependencies:
@@ -6264,18 +6264,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^17":
-  version: 17.0.90
-  resolution: "@types/react@npm:17.0.90"
-  dependencies:
-    "@types/prop-types": "npm:*"
-    "@types/scheduler": "npm:^0.16"
-    csstype: "npm:^3.2.2"
-  checksum: 10c0/ae2bb8c87fe94b1ce7bfd501586b6135ba36987ae52d5b97bfc8a85988b6fb69593bcd9854ff98b1a6e8ed7472b9be1ead02cd04385c22f9f1adccac69a411bd
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^18, @types/react@npm:^18.3.12":
+"@types/react@npm:^18.3.12":
   version: 18.3.27
   resolution: "@types/react@npm:18.3.27"
   dependencies:
@@ -6291,13 +6280,6 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/a58ba341cb9e7d74f71810a88862da7b2a6fa42e2a1fc0ce40498f6ea1d44382f0640117057da779f74c47039f7166bf48fad02dc876f94e005c7afa50f5e129
-  languageName: node
-  linkType: hard
-
-"@types/scheduler@npm:^0.16":
-  version: 0.16.8
-  resolution: "@types/scheduler@npm:0.16.8"
-  checksum: 10c0/f86de504945b8fc41b1f391f847444d542e2e4067cf7e5d9bfeb5d2d2393d3203b1161bc0ef3b1e104d828dabfb60baf06e8d2c27e27ff7e8258e6e618d8c4ec
   languageName: node
   linkType: hard
 
@@ -15620,7 +15602,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^19.2.3":
+"react-dom@npm:^19.2.4":
   version: 19.2.4
   resolution: "react-dom@npm:19.2.4"
   dependencies:
@@ -16317,7 +16299,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.2.3":
+"react@npm:^19.2.4":
   version: 19.2.4
   resolution: "react@npm:19.2.4"
   checksum: 10c0/cd2c9ff67a720799cc3b38a516009986f7fc4cb8d3e15716c6211cf098d1357ee3e348ab05ad0600042bbb0fd888530ba92e329198c92eafa0994f5213396596
