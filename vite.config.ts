@@ -32,6 +32,7 @@ export default defineConfig({
       "@macrostrat/mapbox-react",
       "@macrostrat/map-interface",
       "@macrostrat/column-views",
+      "@uiw/react-color",
     ],
   },
   plugins: [
@@ -63,8 +64,6 @@ export default defineConfig({
   //   exclude: ["@macrostrat/column-components"],
   //   include: [
   //     "@macrostrat/column-components > @uiw/react-color",
-  //   ]
-  // },
   //   include: [
   //     "@macrostrat/column-components > @uiw/react-color",
   //   ]
