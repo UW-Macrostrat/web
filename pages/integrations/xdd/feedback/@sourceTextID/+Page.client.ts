@@ -25,7 +25,7 @@ import {
 import { useState } from "react";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
-import { Toaster } from "@blueprintjs/core";
+import { OverlayToaster } from "@blueprintjs/core";
 import { fetchPGData } from "~/_utils";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MultiSelect } from "@blueprintjs/select"
@@ -64,14 +64,14 @@ export function Page() {
         h(FlexRow, { alignItems: "center", justifyContent: "space-between" }, [
           h(FlexRow, [
             h("h1", "Feedback"),
-            h.if(nextID)(Button, { 
+            h.if(nextID)(Button, {
               className: "next btn",
               onClick: () => {
                 window.open(
                   `/integrations/xdd/feedback/${nextID}`,
                   "_self"
-                ); 
-              } 
+                );
+              }
             }, "Next"),
           ]),
           h(AuthStatus)
@@ -80,27 +80,27 @@ export function Page() {
           h(Feedback, { selectedFeedbackType, setSelectedFeedbackType, setCustomFeedback }),
           h(FlexRow, { className: "buttons", flexDirection: "column", gap: ".5em" }, [
             h.if(paper_id)(
-              Button, 
-              { 
+              Button,
+              {
                 className: "paper btn",
                 onClick: () => {
                   window.open(
                     `/integrations/xdd/extractions/${paper_id}`,
                     "_self"
-                  ); 
-                } 
-              }, 
+                  );
+                }
+              },
               "View papers extraction"
             ),
             h.if(previousFeedback?.length > 0)(
-              Button, 
-              { 
+              Button,
+              {
                 className: "previous btn",
                 onClick: () => {
                   window.open(
                     `/integrations/xdd/feedback/${currentID}/human`,
                     "_self"
-                  ); 
+                  );
                 }
               },
               "View human feedback"
@@ -171,7 +171,7 @@ function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, sel
   ]);
 }
 
-const AppToaster = Toaster.create();
+const AppToaster = OverlayToaster.create();
 
 function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedback, selectedFeedbackType }) {
   const window = enhanceData(data, models, entityTypes);
@@ -267,7 +267,7 @@ async function postDataToServer(data: ServerResults, customFeedback: string, sel
   for (const type of selectedFeedbackType) {
     const linkBody = {
       note_id,
-      type_id: type.type_id 
+      type_id: type.type_id
     };
 
     const linkResponse = await fetch(postgrestPrefix + `/lookup_extraction_type`, {

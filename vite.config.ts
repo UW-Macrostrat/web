@@ -19,11 +19,11 @@ setupVersionEnvironmentVariables(pkg);
 
 export default defineConfig({
   resolve: {
+    //conditions: ["source"],
     alias: {
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    conditions: ["source", "browser"],
     dedupe: [
       "react",
       "react-dom",
@@ -32,7 +32,6 @@ export default defineConfig({
       "@macrostrat/mapbox-react",
       "@macrostrat/map-interface",
       "@macrostrat/column-views",
-      "@uiw/react-color",
     ],
   },
   plugins: [
@@ -42,16 +41,14 @@ export default defineConfig({
     // patchCssModules(),
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
-    cjsInterop({
-      dependencies: [
-        "react-images",
-        "labella",
-        "react-color",
-        "mapbox-gl",
-        "ui-box",
-        "@uiw/react-color",
-      ],
-    }),
+    // cjsInterop({
+    //   dependencies: [
+    //     "react-images",
+    //     "labella",
+    //     "react-color",
+    //     "mapbox-gl",
+    //   ],
+    // }),
     // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
@@ -62,39 +59,28 @@ export default defineConfig({
       cesiumBuildRootPath: cesiumRoot,
     }),
   ],
-  optimizeDeps: {
-    exclude: [
-      ...getDependenciesToExcludeFromOptimization(pkg),
-
-    ],
-    include: ["@uiw/react-color-swatch", "@uiw/react-color-sketch"],
+  // optimizeDeps: {
+  //   exclude: ["@macrostrat/column-components"],
+  //   include: [
+  //     "@macrostrat/column-components > @uiw/react-color",
+  //   ]
+  // },
+  //   include: [
+  //     "@macrostrat/column-components > @uiw/react-color",
+  //   ]
+  //   // exclude: ["@macrostrat/column-components"],
+  //   //exclude: [...getDependenciesToExcludeFromOptimization(pkg)],
+  //   //include: ["@uiw/react-color"],
+  // },
+  ssr: {
+    resolve: {
+      conditions: ["import", "module"]
+    },
   },
   define: {
     // Cesium base URL
     CESIUM_BASE_URL: JSON.stringify("/cesium"),
     // If not building for server context
-  },
-  ssr: {
-    noExternal: [
-      "@uiw/react-color",
-      //"@macrostrat/column-components",
-      //"@macrostrat/ui-components",
-      /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
-       * should be listed here.
-       */
-      // "@macrostrat/form-components",
-      // "@macrostrat/ui-components",
-      // "@macrostrat/column-components",
-      // "@macrostrat/column-views",
-      // "@macrostrat/data-components",
-      // "@macrostrat/svg-map-components",
-      // "@macrostrat/map-interface",
-      // "@macrostrat/feedback-components",
-      // "@macrostrat/timescale",
-      // "@macrostrat/mapbox-react",
-      // "@uiw/react-color-swatch",
-      // "@uiw/color-convert",
-    ],
   },
   server: {
     allowedHosts: ["localhost", "dev.macrostrat.local"],

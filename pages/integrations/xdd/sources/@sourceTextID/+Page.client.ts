@@ -25,7 +25,7 @@ import {
 import { useState } from "react";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
-import { Toaster } from "@blueprintjs/core";
+import { OverlayToaster } from "@blueprintjs/core";
 import { fetchPGData } from "~/_utils";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MultiSelect } from "@blueprintjs/select"
@@ -69,16 +69,16 @@ export function Page() {
             h(LithologyTag, { data, href: `/lex/${map[idType]}/${id}` }),
           ]),
           h.if(paper_id)(
-            Button, 
-            { 
+            Button,
+            {
               className: "paper btn",
               onClick: () => {
                 window.open(
                   `/integrations/xdd/extractions/${paper_id}`,
                   "_self"
-                ); 
-              } 
-            }, 
+                );
+              }
+            },
             "View papers extraction"
           ),
         ]),
@@ -144,7 +144,7 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   ]);
 }
 
-const AppToaster = Toaster.create();
+const AppToaster = OverlayToaster.create();
 
 function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   const window = enhanceData(data, models, entityTypes);
