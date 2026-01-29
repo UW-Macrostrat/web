@@ -170,8 +170,6 @@
     "@macrostrat/column-views": "portal:../web-components/packages/column-views",
     "@macrostrat/data-components": "portal:../web-components/packages/data-components",
     "@macrostrat/data-sheet": "portal:../web-components/packages/data-sheet",
-    "@macrostrat/feedback-components": "portal:../web-components/packages/feedback-components",
-    "@macrostrat/form-components": "portal:../web-components/packages/form-components",
     "@macrostrat/map-interface": "portal:../web-components/packages/map-interface",
     "@macrostrat/map-styles": "portal:../web-components/packages/map-styles",
     "@macrostrat/mapbox-react": "portal:../web-components/packages/mapbox-react",
