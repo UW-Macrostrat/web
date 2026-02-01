@@ -1,11 +1,8 @@
 import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { useAppActions } from "#/map/map-interface/app-state";
-import { 
-  LocationPanel,  
-  MacrostratLinkedData,
-  Physiography,
-} from "@macrostrat/map-interface";
+import { LocationPanel } from "@macrostrat/map-interface";
+import { MacrostratLinkedData } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
 import { useAppState } from "#/map/map-interface/app-state";
@@ -14,6 +11,7 @@ import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
 import { RegionalStratigraphy } from "./reg-strat";
+import { Physiography } from "./physiography.ts";
 
 const h = hyper.styled(styles);
 
@@ -107,7 +105,7 @@ function InfoDrawerMainPanel(props) {
       stratNameURL: "/lex/strat-names",
       environmentURL: "/lex/environments",
       intervalURL: "/lex/intervals",
-      lithologyURL: "/lex/lithologies"
+      lithologyURL: "/lex/lithologies",
     }),
     h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansionContainer),
     h(Physiography, { mapInfo }),

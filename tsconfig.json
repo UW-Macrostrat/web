@@ -16,7 +16,8 @@
     "allowImportingTsExtensions": true,
     "paths": {
       "~/*": ["./src/*"],
-    },
+      "#/*": ["./pages/*"]
+    }
   },
   "exclude": ["dist"],
   "include": [
@@ -24,6 +25,6 @@
     "src/**/*",
     "pages/**/*",
     "server/**/*",
-    "vite.config.ts",
-  ],
+    "vite.config.ts"
+  ]
 }
