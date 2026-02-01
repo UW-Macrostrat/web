@@ -2201,7 +2201,7 @@ __metadata:
     "@blueprintjs/select": "npm:^6.0.14"
     "@macrostrat-web/settings": "workspace:*"
     "@macrostrat/column-components": "npm:^2.0.4"
-    "@macrostrat/data-components": "npm:^1.0.1"
+    "@macrostrat/data-components": "npm:^1.1.0"
     "@macrostrat/form-components": "npm:^1.0.3"
     "@macrostrat/hyper": "npm:^3.0.6"
     "@macrostrat/ui-components": "npm:^5.0.4"
@@ -2447,15 +2447,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "@macrostrat/column-views@npm:3.0.3"
+"@macrostrat/column-views@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@macrostrat/column-views@npm:3.1.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.6.1"
     "@macrostrat/api-types": "npm:^1.1.5"
     "@macrostrat/color-utils": "npm:^1.2.1"
     "@macrostrat/column-components": "npm:^2.0.4"
-    "@macrostrat/data-components": "npm:^1.0.1"
+    "@macrostrat/data-components": "npm:^1.1.0"
+    "@macrostrat/data-provider": "npm:^1.0.0"
     "@macrostrat/hyper": "npm:^3.0.6"
     "@macrostrat/map-interface": "npm:^2.0.1"
     "@macrostrat/map-styles": "npm:^2.0.1"
@@ -2496,7 +2497,7 @@ __metadata:
     zustand-computed: "npm:^2.0.2"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/10dbdd20cb0655db1b01d9c6c8d27c0bbd6d219343d92143c8b0f519b2e449270af334ea0f793100de5cd22a6130a7455405f3063575459031611ee2cf826532
+  checksum: 10c0/cdd4026e6155822d7fa6d15df3fedfd6e9de07416a6d1f12ccbdcddc0289fda7ad4b5f2f37bcd8c7efebffb9f411f97460b08a70ba73a23bc5937aeb481b5907
   languageName: node
   linkType: hard
 
@@ -2523,6 +2524,52 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
   checksum: 10c0/8401ff879348ef09b8b84b8f5967a5cc74abd2e4f90cb8cc7b61b8afc9bf24229959f128e5475809dcfb5f7b83eec6f0bc1f97577399175cb38510b93a769a97
+  languageName: node
+  linkType: hard
+
+"@macrostrat/data-components@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@macrostrat/data-components@npm:1.1.0"
+  dependencies:
+    "@blueprintjs/core": "npm:^6.6.1"
+    "@macrostrat/color-utils": "npm:^1.2.1"
+    "@macrostrat/hyper": "npm:^3.0.6"
+    "@macrostrat/mapbox-utils": "npm:^1.7.1"
+    "@macrostrat/stratigraphy-utils": "npm:^1.2.1"
+    "@macrostrat/ui-components": "npm:^5.0.4"
+    "@types/d3-array": "npm:^3.2.1"
+    "@visx/axis": "npm:^3.12.0"
+    "@visx/gradient": "npm:^3.12.0"
+    "@visx/scale": "npm:^3.12.0"
+    "@visx/shape": "npm:^3.12.0"
+    axios: "npm:^1.13.2"
+    classnames: "npm:^2.5.1"
+    cross-fetch: "npm:^4.1.0"
+    d3-array: "npm:^3.2.4"
+    jotai: "npm:^2.17.0"
+    jotai-scope: "npm:^0.10.0"
+    mapbox-gl: "npm:^2.7.0||^3.13.0"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+  checksum: 10c0/be20ea15775d28c8a57998db23ec30149294b39b407e07a244e1c4a772c9e25b0c20aa54f4d7943714349031fecccb778eef4c3a7d33b6bf4547108633e87d38
+  languageName: node
+  linkType: hard
+
+"@macrostrat/data-provider@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@macrostrat/data-provider@npm:1.0.0"
+  dependencies:
+    "@macrostrat/api-types": "npm:^1.1.5"
+    "@macrostrat/hyper": "npm:^3.0.6"
+    "@macrostrat/ui-components": "npm:^5.0.4"
+    "@types/topojson-client": "npm:^3.1.5"
+    cross-fetch: "npm:^4.1.0"
+    d3-geo: "npm:^3.1.1"
+    topojson-client: "npm:^3.1.0"
+    zustand: "npm:^5.0.3"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+  checksum: 10c0/27134ebcae78265e100bc7ca8489fca29e3f32677aaa35073e0e6fcef0fc97a800a4f1ab0b2c160b5994a36559cf4a1cb986e3d6a87215c96484cf932cce6492
   languageName: node
   linkType: hard
 
@@ -2888,8 +2935,9 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.1.5"
     "@macrostrat/color-utils": "npm:^1.2.1"
     "@macrostrat/column-components": "npm:^2.0.4"
-    "@macrostrat/column-views": "npm:^3.0.3"
-    "@macrostrat/data-components": "npm:^1.0.1"
+    "@macrostrat/column-views": "npm:^3.1.0"
+    "@macrostrat/data-components": "npm:^1.1.0"
+    "@macrostrat/data-provider": "npm:^1.0.0"
     "@macrostrat/data-sheet": "npm:^3.0.2"
     "@macrostrat/feedback-components": "npm:^2.0.1"
     "@macrostrat/form-components": "npm:^1.0.3"
@@ -12921,6 +12969,27 @@ __metadata:
     react:
       optional: true
   checksum: 10c0/d3458edd5047c7399002399e9e000cdc1511d10b012b42a8fae2e76e0ef74de759078dbb4951fc01a13fdb75224f823a68a8603242d0fc5f38f4f273e96888eb
+  languageName: node
+  linkType: hard
+
+"jotai@npm:^2.17.0":
+  version: 2.17.0
+  resolution: "jotai@npm:2.17.0"
+  peerDependencies:
+    "@babel/core": ">=7.0.0"
+    "@babel/template": ">=7.0.0"
+    "@types/react": ">=17.0.0"
+    react: ">=17.0.0"
+  peerDependenciesMeta:
+    "@babel/core":
+      optional: true
+    "@babel/template":
+      optional: true
+    "@types/react":
+      optional: true
+    react:
+      optional: true
+  checksum: 10c0/cc6646c792881fa52cc8bef0b05152110af78a167b7ee10ee1cd2635904ed5175a5d00ba255d9a1abe4954549da48e6e963c95cb6deaa069a706cea8ef141bdb
   languageName: node
   linkType: hard
 

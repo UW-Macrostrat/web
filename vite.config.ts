@@ -17,8 +17,8 @@ const pkg = getPackageJSONContents("package.json");
 
 setupVersionEnvironmentVariables(pkg);
 
-const macrostratPackages = Object.keys(pkg.dependencies).filter((name: string) =>
-  name.startsWith("@macrostrat/")
+const macrostratPackages = Object.keys(pkg.dependencies).filter(
+  (name: string) => name.startsWith("@macrostrat/")
 );
 
 export default defineConfig({
@@ -27,11 +27,7 @@ export default defineConfig({
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: [
-      "react",
-      "react-dom",
-      ...macrostratPackages,
-    ],
+    dedupe: ["react", "react-dom", ...macrostratPackages],
   },
   plugins: [
     vike(),
@@ -40,14 +36,9 @@ export default defineConfig({
     // patchCssModules(),
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
-    // cjsInterop({
-    //   dependencies: [
-    //     "react-images",
-    //     "labella",
-    //     "react-color",
-    //     "mapbox-gl",
-    //   ],
-    // }),
+    cjsInterop({
+      dependencies: ["mapbox-gl"],
+    }),
     // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
@@ -59,7 +50,7 @@ export default defineConfig({
     }),
   ],
   ssr: {
-    noExternal: macrostratPackages
+    noExternal: macrostratPackages,
   },
   define: {
     // Cesium base URL

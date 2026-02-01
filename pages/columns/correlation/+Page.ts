@@ -19,15 +19,17 @@ import { useRef } from "react";
 import { Button, OverlaysProvider } from "@blueprintjs/core";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import {
+  MacrostratDataProvider,
+  fetchUnits,
+  useMacrostratStore,
+} from "@macrostrat/data-provider";
+import {
   ColumnCorrelationMap,
   ColumnCorrelationProvider,
   useCorrelationMapStore,
-  MacrostratDataProvider,
-  fetchUnits,
   UnitDetailsPanel,
   CorrelationChart,
   CorrelationChartProps,
-  useMacrostratStore,
 } from "@macrostrat/column-views";
 import {
   getCorrelationHashParams,

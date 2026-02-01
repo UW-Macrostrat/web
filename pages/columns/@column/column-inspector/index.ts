@@ -7,16 +7,16 @@ import {
   HybridScaleType,
   Identifier,
   MacrostratColumnStateProvider,
-  MacrostratDataProvider,
   PBDBFossilsColumn,
   ReferencesField,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { PatternProvider } from "~/_providers";
+import { NavigationLinkProvider, PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
 import { navigate } from "vike/client/router";
+import { MacrostratDataProvider } from "@macrostrat/data-provider";
 
 import { StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
@@ -182,9 +182,12 @@ const h = hyperStyled(styles);
 
 export function ColumnPage(props) {
   return h(
-    MacrostratDataProvider,
-    { baseURL: apiV2Prefix },
-    h(PatternProvider, h(ColumnPageInner, props))
+    NavigationLinkProvider,
+    h(
+      MacrostratDataProvider,
+      { baseURL: apiV2Prefix },
+      h(PatternProvider, h(ColumnPageInner, props))
+    )
   );
 }
 

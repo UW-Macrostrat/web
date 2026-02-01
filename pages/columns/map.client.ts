@@ -1,8 +1,8 @@
+import { ColumnNavigationMap } from "@macrostrat/column-views";
 import {
-  ColumnNavigationMap,
   MacrostratDataProvider,
   useMacrostratColumns,
-} from "@macrostrat/column-views";
+} from "@macrostrat/data-provider";
 import h from "@macrostrat/hyper";
 import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
