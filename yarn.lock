@@ -2908,6 +2908,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat/vite-plugin-hyperstyles@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@macrostrat/vite-plugin-hyperstyles@npm:2.0.0"
+  dependencies:
+    "@macrostrat/hyper": "npm:^3.0.6"
+    magic-string: "npm:^0.30.21"
+    vite: "npm:^5||^6.1.6||^7"
+  checksum: 10c0/0c930fdee0dc316f044ebe4c4efc9ed9afdc312891c663292ac0c1e76aa667acf123ffba6a821d3b089a79fac449bb8c68e5a2140b7dd1105ade190a10c5266f
+  languageName: node
+  linkType: hard
+
 "@macrostrat/web@workspace:.":
   version: 0.0.0-use.local
   resolution: "@macrostrat/web@workspace:."
@@ -2951,6 +2962,7 @@ __metadata:
     "@macrostrat/svg-map-components": "npm:^2.0.1"
     "@macrostrat/timescale": "npm:^3.0.1"
     "@macrostrat/ui-components": "npm:^5.0.4"
+    "@macrostrat/vite-plugin-hyperstyles": "npm:^2.0.0"
     "@mdx-js/rollup": "npm:^2.3.0"
     "@photonjs/express": "npm:^0.1.13"
     "@react-hook/size": "npm:^2.1.2"
@@ -20020,7 +20032,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:>=6.3.0, vite@npm:^7.3.1":
+"vite@npm:>=6.3.0, vite@npm:^5||^6.1.6||^7, vite@npm:^7.3.1":
   version: 7.3.1
   resolution: "vite@npm:7.3.1"
   dependencies:
