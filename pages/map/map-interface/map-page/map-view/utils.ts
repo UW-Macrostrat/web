@@ -1,10 +1,7 @@
-import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
 import { MapBottomControls } from "@macrostrat/map-interface";
 import { LinkButton } from "#/map/map-interface/components/buttons";
-import styles from "../main.module.styl";
-
-const h = hyper.styled(styles);
+import h from "../main.module.sass";
 
 export function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
   // Handle elevation marker location

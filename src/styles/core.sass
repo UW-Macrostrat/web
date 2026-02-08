@@ -2,14 +2,18 @@
 @use "@macrostrat/style-system/src/main.sass"
 @use "./colors" as colorOverrides
 
-@import url("https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro")
+//@import url("https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro")
+
 
 :root
   @each $name, $color in colorOverrides.$colors
     --#{$name}: #{$color}
 
-  --sans-serif-font: "Source Sans Pro", sans-serif
-  --serif-font: "Source Sans Pro", serif
+  --header-font: "Geologica", sans-serif
+  --serif-font: "Crimson Pro", serif
+  // Use system fonts as default sans-serif font for better performance
+  --sans-serif-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+
 
 .secondary
   color: var(--secondary-color)
@@ -22,7 +26,11 @@ body
   font-size: 16px
 
 h1, h2, h3, h4, h5, h6
-  font-family: var(--sans-serif-font)
+  font-family: var(--header-font)
+  font-weight: normal
+
+p, ul
+  font-family: var(--serif-font)
 
 span.spacer
   min-width: 1em

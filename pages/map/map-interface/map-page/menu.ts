@@ -8,7 +8,6 @@ import {
 } from "@blueprintjs/core";
 import loadable from "@loadable/component";
 import { mapPagePrefix } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
 import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
@@ -35,16 +34,14 @@ import FossilIcon from "../components/icons/FossilIcon";
 import LineIcon from "../components/icons/LineIcon";
 import { SearchResults } from "../components/navbar";
 import UsageText from "../usage.mdx";
-import styles from "./main.module.styl";
 import { ExperimentsPanel, SettingsPanel } from "./settings-panel";
+import h from "./main.module.sass";
 
 function ChangelogPanel() {
   return h("div.bp6-text.text-panel", [h(Changelog)]);
 }
 
 const AboutText = loadable(() => import("../components/About"));
-
-const h = hyper.styled(styles);
 
 const TabButton = (props: ButtonProps & { page: MenuPage }) => {
   const { page, ...rest } = props;
