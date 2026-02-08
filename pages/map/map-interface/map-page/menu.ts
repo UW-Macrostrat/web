@@ -37,6 +37,55 @@ import UsageText from "../usage.mdx";
 import { ExperimentsPanel, SettingsPanel } from "./settings-panel";
 import h from "./main.module.sass";
 
+type MenuProps = {
+  className?: string;
+  menuPage: MenuPage;
+};
+
+export { MenuPage };
+
+export default function Menu(props: MenuProps) {
+  let { className, menuPage, baseRoute = "/" } = props;
+  const inputFocus = useAppState((s) => s.core.inputFocus);
+  const runAction = useAppActions();
+
+  const navigateHome = useHashNavigate(baseRoute);
+
+  const pageName = useCurrentPage(baseRoute);
+  const isNarrow = menuPage == MenuPage.LAYERS || menuPage == MenuPage.SETTINGS;
+  const isNarrowTrans = useTransition(isNarrow, 800);
+
+  if (inputFocus) {
+    return h(SearchResults, { className });
+  }
+
+  className = classNames(
+    className,
+    "menu-card",
+    menuPage,
+    { "narrow-card": isNarrowTrans.shouldMount },
+    `narrow-${isNarrowTrans.stage}`
+  );
+
+  return h(
+    CloseableCard,
+    {
+      onClose() {
+        runAction({ type: "toggle-menu" });
+      },
+      insetContent: false,
+      className,
+      renderHeader: () =>
+        h(
+          HeaderWrapper,
+          { minimal: isNarrow },
+          h(MenuHeaderButtons, { baseRoute })
+        ),
+    },
+    elementForMenuPage(menuPage)
+  );
+}
+
 function ChangelogPanel() {
   return h("div.bp6-text.text-panel", [h(Changelog)]);
 }
@@ -219,53 +268,6 @@ function HeaderWrapper({ children, minimal = false }) {
   );
 }
 
-type MenuProps = {
-  className?: string;
-  menuPage: MenuPage;
-};
-
-const Menu = (props: MenuProps) => {
-  let { className, menuPage, baseRoute = "/" } = props;
-  const inputFocus = useAppState((s) => s.core.inputFocus);
-  const runAction = useAppActions();
-
-  const navigateHome = useHashNavigate(baseRoute);
-
-  const pageName = useCurrentPage(baseRoute);
-  const isNarrow = menuPage == MenuPage.LAYERS || menuPage == MenuPage.SETTINGS;
-  const isNarrowTrans = useTransition(isNarrow, 800);
-
-  if (inputFocus) {
-    return h(SearchResults, { className });
-  }
-
-  className = classNames(
-    className,
-    "menu-card",
-    menuPage,
-    { "narrow-card": isNarrowTrans.shouldMount },
-    `narrow-${isNarrowTrans.stage}`
-  );
-
-  return h(
-    CloseableCard,
-    {
-      onClose() {
-        runAction({ type: "toggle-menu" });
-      },
-      insetContent: false,
-      className,
-      renderHeader: () =>
-        h(
-          HeaderWrapper,
-          { minimal: isNarrow },
-          h(MenuHeaderButtons, { baseRoute })
-        ),
-    },
-    elementForMenuPage(menuPage)
-  );
-};
-
 export const PanelCard = (props) =>
   h(Card, { ...props, className: classNames("panel-card", props.className) });
 
@@ -304,6 +306,3 @@ function NotFoundPage() {
     })
   );
 }
-
-export { MenuPage };
-export default Menu;

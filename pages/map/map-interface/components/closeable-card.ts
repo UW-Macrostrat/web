@@ -1,9 +1,6 @@
 import { Card, Button } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
 import classNames from "classnames";
-import styles from "./card.module.styl";
-
-const h = hyper.styled(styles);
+import h from "./closeable-card.module.sass";
 
 const CloseableCardHeader = (props) => h("div.card-header-left", props);
 
