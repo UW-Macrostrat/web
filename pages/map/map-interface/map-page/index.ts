@@ -2,7 +2,7 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 // Import other components
 import { Spinner, Icon } from "@blueprintjs/core";
 import loadable from "@loadable/component";
-import { mapPagePrefix } from "@macrostrat-web/settings";
+import { apiV2Prefix, mapPagePrefix } from "@macrostrat-web/settings";
 import { MapAreaContainer, FossilCollections } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
@@ -21,6 +21,7 @@ import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
 import { useState } from "react";
 
 import h from "./main.module.sass";
+import { MacrostratDataProvider } from "@macrostrat/data-provider";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const Menu = loadable(() => import("./menu"));
@@ -101,17 +102,21 @@ function MapPage({
 }
 
 function MapPageRoutes() {
-  return h(Routes, [
-    h(
-      Object.values(MenuPage).map((page) =>
-        h(Route, {
-          path: mapPagePrefix + "/" + page,
-          element: h(MapPage, { menuPage: page }),
-        })
-      )
-    ),
-    h(Route, { path: "*", element: h(MapPage) }),
-  ]);
+  return h(
+    MacrostratDataProvider,
+    { baseURL: apiV2Prefix },
+    h(Routes, [
+      h(
+        Object.values(MenuPage).map((page) =>
+          h(Route, {
+            path: mapPagePrefix + "/" + page,
+            element: h(MapPage, { menuPage: page }),
+          })
+        )
+      ),
+      h(Route, { path: "*", element: h(MapPage) }),
+    ])
+  );
 }
 
 function InfoDrawerHolder() {

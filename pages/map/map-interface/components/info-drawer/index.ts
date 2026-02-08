@@ -6,12 +6,13 @@ import { MacrostratLinkedData } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
 import { useAppState } from "#/map/map-interface/app-state";
-import styles from "./main.module.styl";
+import styles from "./main.module.sass";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
 import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography.ts";
+import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 
 const h = hyper.styled(styles);
 
@@ -66,6 +67,10 @@ function InfoDrawerInterior(props) {
 }
 
 function InfoDrawerMainPanel(props) {
+  return h(MacrostratInteractionProvider, h(_InfoDrawerMainPanel, props));
+}
+
+function _InfoDrawerMainPanel(props) {
   const mapInfo = useAppState((state) => state.core.mapInfo);
   const columnInfo = useAppState((state) => state.core.columnInfo);
 

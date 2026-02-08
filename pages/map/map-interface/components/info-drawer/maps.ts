@@ -6,7 +6,7 @@ import { FossilCollections } from "./fossil-collections";
 import { MacrostratLinkedData } from "./macrostrat-linked";
 import { Physiography } from "./physiography";
 import { useAppState } from "#/map/map-interface/app-state";
-import styles from "./main.module.styl";
+import styles from "./main.module.sass";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
@@ -14,13 +14,21 @@ import { ExpansionPanel } from "@macrostrat/map-interface";
 import { addCommas } from "#/map/map-interface/utils";
 import { XddExpansion2 } from "./xdd-panel";
 
-
 const h = hyper.styled(styles);
 
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
-  const { xddInfo, className, mapInfo, columnInfo, fetchingMapInfo, position, zoom, setSelectedLocation } = props;
+  const {
+    xddInfo,
+    className,
+    mapInfo,
+    columnInfo,
+    fetchingMapInfo,
+    position,
+    zoom,
+    setSelectedLocation,
+  } = props;
 
   return h(
     LocationPanel,
@@ -38,7 +46,11 @@ function InfoDrawer(props) {
       h(
         LoadingArea,
         { loaded: !fetchingMapInfo, className: "infodrawer-content" },
-        h.if(!fetchingMapInfo)(InfoDrawerInterior, {mapInfo, columnInfo, xddInfo})
+        h.if(!fetchingMapInfo)(InfoDrawerInterior, {
+          mapInfo,
+          columnInfo,
+          xddInfo,
+        })
       ),
     ]
   );
@@ -49,7 +61,7 @@ function InfoDrawerInterior(props) {
   return h(InfoDrawerMainPanel, { mapInfo, columnInfo, xddInfo });
 }
 
-function InfoDrawerMainPanel({mapInfo, columnInfo, xddInfo}) {
+function InfoDrawerMainPanel({ mapInfo, columnInfo, xddInfo }) {
   if (!mapInfo || !mapInfo.mapData) {
     return null;
   }
@@ -69,7 +81,6 @@ function InfoDrawerMainPanel({mapInfo, columnInfo, xddInfo}) {
           ref: {},
         };
 
-
   return h([
     h(RegionalStratigraphy, {
       mapInfo,
@@ -81,7 +92,7 @@ function InfoDrawerMainPanel({mapInfo, columnInfo, xddInfo}) {
       bedrockMatchExpanded: true,
       source,
     }),
-    h.if(xddInfo)(XddExpansion2, {xddInfo}),
+    h.if(xddInfo)(XddExpansion2, { xddInfo }),
     h(Physiography, { mapInfo }),
   ]);
 }
@@ -99,15 +110,13 @@ function RegionalStratigraphy(props) {
       title: "Regional stratigraphy",
       expanded: true,
     },
-    [
-      h.if(columnInfo != null)(ColumnData, { columnInfo }),
-    ]
+    [h.if(columnInfo != null)(ColumnData, { columnInfo })]
   );
 }
 
 function ColumnData({ columnInfo }) {
   return h("div.column-data", [
-    h('a', { href: '/columns/' + columnInfo.col_id }, "View column page"),
+    h("a", { href: "/columns/" + columnInfo.col_id }, "View column page"),
     h(MapAttribute, {
       label: "Name: ",
       content: [columnInfo.col_name],
