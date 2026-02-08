@@ -13,7 +13,7 @@
     "@macrostrat/ui-components": "^5.0.4",
     "@mapbox/mapbox-gl-draw": "^1.3.0",
     "@supabase/postgrest-js": "^1.18.1",
-    "@types/mapbox__mapbox-gl-draw": "^1.2.3",
+    "@types/mapbox__mapbox-gl-draw": "^1.4.9",
     "axios": "^1.13.2",
     "cross-fetch": "^4.1.0",
     "mapbox-gl": "^3.0.0",

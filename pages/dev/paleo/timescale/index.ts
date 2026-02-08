@@ -32,6 +32,7 @@ function BrokenTimescale({ length, ageRange = [1000, 0], age, setAge }) {
     absoluteAgeScale: true,
     levels: ageSpan < 80 ? [2, 4] : [1, 3],
     onClick(d, t) {
+      console.log(d, t);
       setAge(Math.round(t));
     },
   };

@@ -3,20 +3,24 @@ import h from "@macrostrat/hyper";
 import Journal from "./Journal";
 import { ExpansionPanel, XddExpansion } from "@macrostrat/map-interface";
 import { useAppActions, useAppState } from "#/map/map-interface/app-state";
+import { useEffect } from "react";
 
 export function XddExpansionContainer() {
   const runAction = useAppActions();
 
   const xddInfo = useAppState((state) => state.core.xddInfo);
 
-  runAction({ type: "fetch-xdd" });
+  useEffect(() => {
+    if (xddInfo == null || xddInfo.length == 0)
+      runAction({ type: "fetch-xdd" });
+  }, [xddInfo]);
 
   return h(XddExpansion, {
     xddInfo,
   });
 }
 
-export function XddExpansion2({xddInfo}) {
+export function XddExpansion2({ xddInfo }) {
   return h(xDDPanelCore, {
     className: "regional-panel",
     data: xddInfo,
@@ -58,7 +62,6 @@ function groupSnippetsByJournal(
   if (!snippets || snippets.length === 0) {
     return journals;
   }
-  console.log("Grouping snippets by journal:", snippets);
   for (let snippet of snippets) {
     const { pubname: journal } = snippet;
     if (!journals.has(journal)) {
