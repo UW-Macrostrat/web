@@ -8,11 +8,14 @@ import {
   DataField,
   EnvironmentsList,
   LithologyList,
+  Parenthetical,
   Tag,
   TagField,
+  Value,
 } from "@macrostrat/data-components";
 import { AgeRefinementPlot } from "./age-refinement-plot.ts";
 import h from "./main.module.sass";
+import type { ReactNode } from "react";
 
 function MacrostratLinkedData(props) {
   const { mapInfo, expanded, source } = props;
@@ -156,38 +159,44 @@ function Thickness(props) {
   return h(DataField, { label: "Thickness", unit: "m", value });
 }
 
+function addSeparators(values: ReactNode[]) {
+  const result: ReactNode[] = [];
+  values.forEach((val, i) => {
+    result.push(val);
+    if (i < values.length - 1) {
+      result.push(", ");
+    }
+  });
+  return result;
+}
+
 function FossilInfo(props) {
   const { source } = props;
   const { macrostrat } = source;
   if (macrostrat == null) return null;
 
-  return h([h(MinorFossilCollections, { source }), h(FossilOccs, { source })]);
-}
+  const values = {
+    collections: macrostrat.pbdb_collections,
+    occurrences: macrostrat.pbdb_occs,
+  };
 
-function MinorFossilCollections(props) {
-  const { source } = props;
-  const { macrostrat } = source;
-  if (!macrostrat.pbdb_collections) return h("div");
-
-  return h.if(macrostrat && macrostrat.pbdb_collections)(
-    "div.macrostrat-detail",
-    [
-      h("div.expansion-summary-title", "Fossil collections"),
-      h("div", [macrostrat.pbdb_collections]),
-    ]
+  const children = addSeparators(
+    Object.entries(values)
+      .map(([key, val]) => {
+        if (val == null) return null;
+        return h(Value, { value: val, unit: key });
+      })
+      .filter(Boolean)
   );
-}
 
-function FossilOccs(props) {
-  const { source } = props;
-  const { macrostrat } = source;
-
-  if (!macrostrat?.pbdb_occs) return null;
-
-  return h("div.macrostrat-detail", [
-    h("div.expansion-summary-title", "Fossil occurrences"),
-    h("div", [macrostrat.pbdb_occs]),
-  ]);
+  return h(
+    DataField,
+    {
+      label: "Fossils ",
+      value: children,
+    },
+    [h("span.data-source", "via PBDB")]
+  );
 }
 
 function LithsAndClasses(props) {
