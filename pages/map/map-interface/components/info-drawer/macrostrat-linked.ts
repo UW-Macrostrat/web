@@ -13,6 +13,7 @@ import {
   TagField,
   Value,
 } from "@macrostrat/data-components";
+import { ThicknessField } from "@macrostrat/column-views";
 import { AgeRefinementPlot } from "./age-refinement-plot.ts";
 import h from "./main.module.sass";
 import type { ReactNode } from "react";
@@ -148,15 +149,9 @@ function Thickness(props) {
   const max_thick = source.macrostrat?.max_thick;
   if (max_thick == null || max_thick == 0) return null;
 
-  let value = max_thick.toString();
-  if (
-    source.macrostrat.min_min_thick != null &&
-    source.macrostrat.min_min_thick != source.macrostrat.max_thick
-  ) {
-    value = `${source.macrostrat.min_min_thick}–${max_thick}`;
-  }
+  const unit = { max_thick, min_thick: source.macrostrat?.min_min_thick };
 
-  return h(DataField, { label: "Thickness", unit: "m", value });
+  return h(ThicknessField, { unit });
 }
 
 function addSeparators(values: ReactNode[]) {
