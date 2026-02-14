@@ -13,11 +13,12 @@ import { Physiography } from "./physiography.ts";
 import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 
 import h from "./main.module.sass";
+import classNames from "classnames";
 
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
-  let { className } = props;
+  const { className } = props;
   const mapInfo = useAppState((state) => state.core.mapInfo);
   const fetchingMapInfo = useAppState((state) => state.core.fetchingMapInfo);
 
@@ -34,7 +35,7 @@ function InfoDrawer(props) {
   return h(
     LocationPanel,
     {
-      className,
+      className: classNames("info-drawer", className),
       position,
       elevation: mapInfo.elevation,
       zoom,

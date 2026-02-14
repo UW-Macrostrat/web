@@ -1,6 +1,7 @@
 import h from "@macrostrat/hyper";
 import { ReactNode } from "react";
-//import { Identifier } from "@macrostrat/column-views";
+import { DataField } from "@macrostrat/data-components";
+import { Identifier } from "@macrostrat/column-views";
 
 export function MapReference(props) {
   const { reference: ref, showSourceID = true, onClickSourceID = null } = props;
@@ -25,6 +26,10 @@ export function MapReference(props) {
   if (authors?.length) {
     mainText.push(h("span.authors", authors));
   }
+  if (ref_year?.length) {
+    mainText.push(h("span.year", ref_year));
+  }
+
   if (ref_title?.length) {
     mainText.push(
       h(
@@ -34,25 +39,32 @@ export function MapReference(props) {
     );
   }
 
-  if (ref_year?.length) {
-    mainText.push(h("span.year", ref_year));
-  }
   if (ref_source?.length) {
     mainText.push(h("span.source", ref_source));
   }
   if (isbn_doi?.length) {
+    let prefix = "";
+    let doi = isbn_doi;
+    let href = null;
+    if (doi.startsWith("doi:")) {
+      prefix = "doi: ";
+      doi = doi.slice(4);
+    }
+    doi = doi.trim();
+    if (doi.startsWith("10.")) {
+      href = "https://doi.org/" + doi;
+    }
     mainText.push(
-      h(
-        "a.doi-link",
-        { href: "https://doi.org/" + isbn_doi, target: "_blank" },
-        isbn_doi
-      )
+      h([prefix, h("a.doi-link", { href, target: "_blank" }, doi)])
     );
+    mainText.push(h("a", { href: `/maps/${source_id}` }, h("code", source_id)));
   }
 
   const txt = addSeparators(mainText);
 
-  return h("header.map-source", [h("p.map-reference", txt)]);
+  return h(DataField, { label: "Source", inline: true }, [
+    h("span.map-reference", txt),
+  ]);
 }
 
 function addSeparators(

@@ -4,11 +4,7 @@ import {
   ExpansionPanel,
   Parenthetical,
 } from "@macrostrat/data-components";
-import {
-  useAppActions,
-  useAppState,
-  useHashNavigate,
-} from "#/map/map-interface/app-state";
+import { useAppActions } from "#/map/map-interface/app-state";
 import { MapReference } from "~/components/map-info";
 import { AgeRange } from "@macrostrat/column-views";
 
@@ -61,9 +57,6 @@ export function GeologicMapInfo(props) {
     [
       h("div.map-source-attrs", [
         h.if(source.name && source.name.length)("h3.unit-name", source.name),
-        h(MapReference, {
-          reference: source.ref,
-        }),
         h(
           DataField,
           {
@@ -98,6 +91,9 @@ export function GeologicMapInfo(props) {
           text: source.comments,
         }),
         h(GeoMapLines, { source }),
+        h(MapReference, {
+          reference: source.ref,
+        }),
       ]),
     ]
   );
