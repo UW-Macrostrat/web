@@ -19,10 +19,11 @@ function IntervalChip(props) {
   const darkMode = useDarkMode();
   const darkenAmount = darkMode.isEnabled ? 2 : 0;
 
-  return h('a.chip-link', 
+  return h(
+    "a.chip-link",
     {
       href: `/lex/intervals/${interval.int_id}`,
-    }, 
+    },
     h(
       "div.chip.age-chip",
       {
@@ -58,30 +59,4 @@ function AgeChip(props) {
   ]);
 }
 
-function AttrChip(props) {
-  const {
-    fill = null,
-    color,
-    name,
-    className,
-    emphasized = true,
-    style,
-  } = props;
-
-  // Deactivated for now
-  // if (fill) {
-  //   styles["backgroundImage"] = `url('dist/img/geologic-patterns/${fill}.png')`;
-  // }
-  return h("div.lith-chip", { style, className }, [
-    h(
-      "div.lith-chip-inner.chip",
-      {
-        style: { backgroundColor: hexToRgb(color, 0.6) },
-        className: emphasized ? "emphasized" : null,
-      },
-      [name]
-    ),
-  ]);
-}
-
-export { AgeChip, AttrChip, IntervalChip };
+export { AgeChip, IntervalChip };

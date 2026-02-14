@@ -43,13 +43,11 @@ function InfoDrawer(props) {
       showCopyPositionButton: true,
       contentContainer: "div.infodrawer-content-holder",
     },
-    [
-      h(
-        LoadingArea,
-        { loaded: !fetchingMapInfo, className: "infodrawer-content" },
-        h.if(!fetchingMapInfo)(InfoDrawerInterior)
-      ),
-    ]
+    h(
+      LoadingArea,
+      { loaded: !fetchingMapInfo, className: "infodrawer-content" },
+      h.if(!fetchingMapInfo)(InfoDrawerInterior)
+    )
   );
 }
 

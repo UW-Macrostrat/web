@@ -1,16 +1,20 @@
-import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "@macrostrat/data-components";
-import { IntervalChip } from "../info-blocks";
+import h from "./main.module.sass";
+import {
+  DataField,
+  ExpansionPanel,
+  Parenthetical,
+} from "@macrostrat/data-components";
 import {
   useAppActions,
   useAppState,
   useHashNavigate,
 } from "#/map/map-interface/app-state";
 import { MapReference } from "~/components/map-info";
-import LongText from "#/map/map-interface/components/long-text";
+import { AgeRange } from "@macrostrat/column-views";
 
-function LongTextRenderer(props) {
+function LongTextField(props) {
   const { name, text } = props;
+  if (!text || !text.length) return null;
   return text && text.length ? h(LongText, { name, text }) : null;
 }
 
@@ -40,17 +44,11 @@ function GeoMapLines(props) {
   ]);
 }
 
-function GeologicMapInfo(props) {
+export function GeologicMapInfo(props) {
   const { bedrockExpanded, source } = props;
   const runAction = useAppActions();
 
-  if (!source) return h("div");
-  const interval = {
-    int_name: source.age,
-    b_age: source.b_int.b_age,
-    t_age: source.t_int.t_age,
-    color: "#cccccc",
-  };
+  if (!source) return null;
 
   return h(
     ExpansionPanel,
@@ -62,45 +60,63 @@ function GeologicMapInfo(props) {
     },
     [
       h("div.map-source-attrs", [
-        h.if(source.name && source.name.length)("div.map-source-attr", [
-          h("span.attr", ["Name: "]),
-          source.name,
-        ]),
-        h.if(source.age && source.age.length)("div.map-source-attr", [
-          h("span.attr", ["Age: "]),
-          h(IntervalChip, {
-            interval,
-          }),
-        ]),
-        h(LongTextRenderer, {
-          name: "Stratigraphic name(s)",
-          text: source.strat_name,
+        h.if(source.name && source.name.length)("h3.unit-name", source.name),
+        h(MapReference, {
+          reference: source.ref,
         }),
-        h(LongTextRenderer, {
-          name: "Lithology",
-          text: source.lith,
+        h(
+          DataField,
+          {
+            label: "Age",
+          },
+          [
+            h("h4.age-interval", source.age),
+            h(
+              Parenthetical,
+              h(AgeRange, {
+                data: {
+                  b_age: source.b_int.b_age,
+                  t_age: source.t_int.t_age,
+                },
+              })
+            ),
+          ]
+        ),
+        h.if(source.strat_name != source.name)(StratNamesField, {
+          value: source.strat_name,
         }),
-        h(LongTextRenderer, {
+        h(LongTextField, {
           name: "Description",
           text: source.descrip,
         }),
-        h(LongTextRenderer, {
+        h(LongTextField, {
+          name: "Lithology",
+          text: source.lith.replace(/,(\w)/g, ", $1"),
+        }),
+        h(LongTextField, {
           name: "Comments",
           text: source.comments,
         }),
         h(GeoMapLines, { source }),
-        h(MapReference, {
-          reference: source.ref,
-          onClickSourceID() {
-            runAction({
-              type: "set-focused-map-source",
-              source_id: source.source_id,
-            });
-          },
-        }),
       ]),
     ]
   );
 }
 
-export { GeologicMapInfo };
+function StratNamesField(props) {
+  const { value: text } = props;
+  if (!text || !text.length) return null;
+  const isPlural =
+    text.includes(",") || text.includes(";") || text.includes(" and ");
+  const label = "Stratigraphic name" + (isPlural ? "s" : "");
+  return h(DataField, { label }, text);
+}
+
+function LongText(props) {
+  const { name, text } = props;
+  return h(
+    DataField,
+    { label: name, inline: true, className: "long-text-field" },
+    h("p", text)
+  );
+}

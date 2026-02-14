@@ -8,19 +8,19 @@ import {
   Tag,
   TagField,
   Value,
+  Parenthetical,
 } from "@macrostrat/data-components";
 import {
   AgeField,
   ThicknessField,
-  formatRange,
-  getAgeRange,
   IntervalProportions,
+  Duration,
 } from "@macrostrat/column-views";
 import { AgeRefinementPlot } from "./age-refinement-plot.ts";
 import h from "./main.module.sass";
 import type { ReactNode } from "react";
 
-function MacrostratLinkedData(props) {
+export function MacrostratLinkedData(props) {
   const { mapInfo, expanded, source } = props;
 
   if (!mapInfo.mapData[0]) return null;
@@ -86,37 +86,15 @@ function DescribedAgeInfo(props) {
 
 function MacrostratAgeInfoCore({ macrostrat }) {
   const { b_age, t_age, b_int, t_int } = macrostrat;
-  console.log(macrostrat);
 
-  const [lower, upper, unit] = getAgeRange({ b_age, t_age });
-  const formattedRange = `${upper}–${lower}`;
+  const unit = { b_int_id: b_int.int_id, t_int_id: t_int.int_id, b_age, t_age };
 
-  const intRange = h(IntervalProportions, {
-    unit: { b_int_id: b_int.int_id, t_int_id: t_int.int_id },
-  });
-
-  return h(
-    DataField,
-    { label: "Age", row: true, value: formattedRange, unit },
-    intRange
-  );
-
-  if (!b_age) return null;
-
-  let age = b_int.int_name;
-  if (b_int.int_id !== t_int.int_id) {
-    age += ` - ${t_int.int_name}`;
-  }
-  return h(
-    DescribedAgeInfo,
-    {
-      ageElement: h(AgeChip, {
-        b_int: { ...b_int, int_name: age, b_age, t_age },
-        t_int: { ...b_int, int_name: age, b_age, t_age },
-      }),
-    },
-    "Refined using the Macrostrat age model."
-  );
+  return h(AgeField, { unit }, [
+    h(Parenthetical, h(Duration, { value: unit.b_age - unit.t_age })),
+    h(IntervalProportions, {
+      unit,
+    }),
+  ]);
 }
 
 function MacrostratAgeInfo(props) {
@@ -194,6 +172,9 @@ function FossilInfo(props) {
     collections: macrostrat.pbdb_collections,
     occurrences: macrostrat.pbdb_occs,
   };
+
+  // May not be any fossil info
+  if (!values.collections && !values.occurrences) return null;
 
   const children = addSeparators(
     Object.entries(values)
@@ -313,5 +294,3 @@ function Economy(props) {
     )
   );
 }
-
-export { MacrostratLinkedData };
