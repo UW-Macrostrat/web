@@ -4,7 +4,6 @@ import {
   ExpansionPanel,
   Parenthetical,
 } from "@macrostrat/data-components";
-import { useAppActions } from "#/map/map-interface/app-state";
 import { MapReference } from "~/components/map-info";
 import { AgeRange } from "@macrostrat/column-views";
 
@@ -20,29 +19,36 @@ function GeoMapLines(props) {
     return h("div", [""]);
   }
   const { lines } = source;
-  return h("div.map-source-attr", [
-    h("span.attr", ["Lines "]),
-    lines.map((line, i) => {
-      const { name, type, direction, descrip } = line;
-      return h("div.map-source-line", { key: i }, [
-        h.if(name)("span.line-attr", [h("span.attr", ["Name: "]), name]),
-        h.if(type)("span.line-attr", [h("span.attr", ["Type: "]), type]),
-        h.if(direction)("span.line-attr", [
-          h("span.attr", ["Direction: "]),
-          line.direction,
-        ]),
-        h.if(descrip)("span.line-attr", [
-          h("span.attr", ["Description: "]),
-          descrip,
-        ]),
-      ]);
-    }),
-  ]);
+  return h(
+    DataField,
+    { label: "Lines", inline: false },
+    h(
+      "ul.map-lines",
+      lines.map((line, i) => {
+        return h(LineInfo, { line, key: i });
+      })
+    )
+  );
+}
+
+function LineInfo(props) {
+  const { line } = props;
+  const { name, type, direction, descrip } = line;
+
+  const children = [
+    h("span.basic-info", [
+      h.if(name)("strong.line-name", name),
+      h("span.type", type),
+    ]),
+    h("span.direction", direction),
+    h("span.description", descrip),
+  ];
+
+  return h("li.line-info", children);
 }
 
 export function GeologicMapInfo(props) {
   const { bedrockExpanded, source } = props;
-  const runAction = useAppActions();
 
   if (!source) return null;
 
@@ -57,24 +63,11 @@ export function GeologicMapInfo(props) {
     [
       h("div.map-source-attrs", [
         h.if(source.name && source.name.length)("h3.unit-name", source.name),
-        h(
-          DataField,
-          {
-            label: "Age",
-          },
-          [
-            h("h4.age-interval", source.age),
-            h(
-              Parenthetical,
-              h(AgeRange, {
-                data: {
-                  b_age: source.b_int.b_age,
-                  t_age: source.t_int.t_age,
-                },
-              })
-            ),
-          ]
-        ),
+        h(AgeField, {
+          b_age: source.b_int.b_age,
+          t_age: source.t_int.t_age,
+          age: source.age,
+        }),
         h.if(source.strat_name != source.name)(StratNamesField, {
           value: source.strat_name,
         }),
@@ -97,6 +90,29 @@ export function GeologicMapInfo(props) {
       ]),
     ]
   );
+}
+
+function AgeField(props) {
+  const { b_age, t_age, age } = props;
+
+  if (!b_age || !t_age || !age) return null;
+
+  let children = [];
+  if (age) {
+    children.push(h("h4.age-interval", age));
+  }
+  if (b_age && t_age) {
+    const ageRange = h(AgeRange, {
+      data: { b_age, t_age },
+    });
+    if (age) {
+      children.push(h(Parenthetical, ageRange));
+    } else {
+      children.push(ageRange);
+    }
+  }
+
+  return h(DataField, { label: "Age" }, children);
 }
 
 function StratNamesField(props) {
