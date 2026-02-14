@@ -1,0 +1,40 @@
+.strat-column-container
+  padding: 0 1rem 1rem
+  --column-background-color: var(--panel-background-color)
+  --column-stroke-color: var(--text-color)
+  --column-note-color: var(--text-color)
+
+.strat-column-panel h3
+  text-overflow: ellipsis
+  overflow: hidden
+
+.unit-details-panel
+  position: sticky
+  bottom: 0
+  background-color: var(--panel-background-color)
+  max-height: 40vh
+  font-size: 0.9em
+  min-height: 200px
+
+.strat-column-outer
+  display: flex
+  flex-direction: column
+
+.strat-column-header
+  // TODO: align with expansion panel header styles
+  display: flex
+  flex-direction: row
+  position: sticky
+  top: -1px
+  padding: 0 1rem
+  height: 40px
+  gap: 0.5em
+  align-items: center
+  background-color: var(--accent-color)
+  border: 1px solid var(--panel-rule-color)
+  margin-top: -1px
+  z-index: 100
+  &>*
+    margin: 0
+  .spacer
+    flex-grow: 1

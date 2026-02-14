@@ -1,4 +1,3 @@
-import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { useAppActions } from "#/map/map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
@@ -6,7 +5,6 @@ import { MacrostratLinkedData } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
 import { useAppState } from "#/map/map-interface/app-state";
-import styles from "./main.module.sass";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
@@ -14,7 +12,7 @@ import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography.ts";
 import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 
-const h = hyper.styled(styles);
+import h from "./main.module.sass";
 
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
@@ -59,8 +57,7 @@ function InfoDrawerInterior(props) {
   const columnInfo = useAppState((state) => state.core.columnInfo);
   return h(Routes, [
     h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
-    //update view locations route
-    h(Route, { path: "/locations", element: h("div", "hello world") }),
+    //h(Route, { path: "/locations", element: h("div", "hello world") }),
 
     h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
   ]);
