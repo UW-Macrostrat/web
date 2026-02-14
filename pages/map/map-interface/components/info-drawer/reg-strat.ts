@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "@macrostrat/data-components";
 import { addCommas } from "#/map/map-interface/utils";
 import { useAppState } from "#/map/map-interface/app-state";
 import { Spinner } from "@blueprintjs/core";

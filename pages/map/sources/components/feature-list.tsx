@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "@macrostrat/data-components";
 import { Link } from "~/components";
 import { useBurwellActions } from "#/map/sources/app-state";
 import { zoomMap } from "../app-state/utils";

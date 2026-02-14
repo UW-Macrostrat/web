@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "@macrostrat/data-components";
 import PBDBCollections from "./collections";
 
 export function FossilCollections(props) {

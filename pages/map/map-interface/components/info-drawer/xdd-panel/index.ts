@@ -1,7 +1,7 @@
 import { Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import Journal from "./Journal";
-import { ExpansionPanel, XddExpansion } from "@macrostrat/map-interface";
+import { ExpansionPanel, xDDExpansionPanel } from "@macrostrat/data-components";
 import { useAppActions, useAppState } from "#/map/map-interface/app-state";
 import { useEffect } from "react";
 
@@ -15,7 +15,7 @@ export function XddExpansionContainer() {
       runAction({ type: "fetch-xdd" });
   }, [xddInfo]);
 
-  return h(XddExpansion, {
+  return h(xDDExpansionPanel, {
     xddInfo,
   });
 }

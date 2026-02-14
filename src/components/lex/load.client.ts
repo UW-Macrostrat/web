@@ -1,16 +1,16 @@
 import h from "@macrostrat/hyper";
-import { LithologyTag, DataField } from "@macrostrat/data-components";
+import {
+  LithologyTag,
+  DataField,
+  ExpansionPanel,
+} from "@macrostrat/data-components";
 import { FlexRow } from "@macrostrat/ui-components";
-import { ExpansionPanel } from "@macrostrat/map-interface";
 
 export function LithologyTagInner({ data, href }) {
-  return h(
-    LithologyTag,
-    {
-      href,
-      data
-    },
-  );
+  return h(LithologyTag, {
+    href,
+    data,
+  });
 }
 
 export function FlexRowInner(props) {

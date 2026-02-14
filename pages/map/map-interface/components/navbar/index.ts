@@ -9,7 +9,6 @@ import {
 import { FilterPanel } from "../filter-panel";
 import styles from "./navbar.module.sass";
 import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
-import { PanelSubhead } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useAdmoinshments } from "../filter-panel/admonishments";
 import { MacrostratLogoLink } from "~/components";
@@ -55,10 +54,11 @@ function ResultList({ searchResults }) {
   return h("div.search-results", [
     resultCategoriesArr.map((cat: string, i: number) => {
       return h("div.search-result-category", { key: `subheader-${i}` }, [
-        h(PanelSubhead, {
-          className: "search-result-header",
-          title: categoryTitles[cat],
-        }),
+        h(
+          "div.panel-subhead.search-result-header",
+          {},
+          h("h3.title", categoryTitles[cat])
+        ),
         h(
           "ul",
           null,

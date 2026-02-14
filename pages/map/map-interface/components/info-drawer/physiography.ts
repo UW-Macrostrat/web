@@ -1,4 +1,4 @@
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "@macrostrat/data-components";
 import h from "./physiography.module.sass";
 
 function Physiography(props) {

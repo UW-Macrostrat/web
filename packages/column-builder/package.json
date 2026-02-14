@@ -7,7 +7,7 @@
     "@blueprintjs/select": "^6.0.14",
     "@macrostrat-web/settings": "workspace:*",
     "@macrostrat/column-components": "^2.0.4",
-    "@macrostrat/data-components": "^1.1.1",
+    "@macrostrat/data-components": "^1.1.2",
     "@macrostrat/form-components": "^1.0.4",
     "@macrostrat/hyper": "^3.0.6",
     "@macrostrat/ui-components": "^5.0.5",

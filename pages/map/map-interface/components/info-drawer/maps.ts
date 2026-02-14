@@ -10,7 +10,7 @@ import styles from "./main.module.sass";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "@macrostrat/data-components";
 import { addCommas } from "#/map/map-interface/utils";
 import { XddExpansion2 } from "./xdd-panel";
 

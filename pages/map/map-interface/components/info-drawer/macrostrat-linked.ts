@@ -1,19 +1,21 @@
 import { AgeChip } from "../info-blocks";
 import {
   ExpandableDetailsPanel,
-  ExpansionBody,
   ExpansionPanel,
-} from "@macrostrat/map-interface";
-import {
   DataField,
   EnvironmentsList,
   LithologyList,
-  Parenthetical,
   Tag,
   TagField,
   Value,
 } from "@macrostrat/data-components";
-import { ThicknessField } from "@macrostrat/column-views";
+import {
+  AgeField,
+  ThicknessField,
+  formatRange,
+  getAgeRange,
+  IntervalProportions,
+} from "@macrostrat/column-views";
 import { AgeRefinementPlot } from "./age-refinement-plot.ts";
 import h from "./main.module.sass";
 import type { ReactNode } from "react";
@@ -84,6 +86,20 @@ function DescribedAgeInfo(props) {
 
 function MacrostratAgeInfoCore({ macrostrat }) {
   const { b_age, t_age, b_int, t_int } = macrostrat;
+  console.log(macrostrat);
+
+  const [lower, upper, unit] = getAgeRange({ b_age, t_age });
+  const formattedRange = `${upper}–${lower}`;
+
+  const intRange = h(IntervalProportions, {
+    unit: { b_int_id: b_int.int_id, t_int_id: t_int.int_id },
+  });
+
+  return h(
+    DataField,
+    { label: "Age", row: true, value: formattedRange, unit },
+    intRange
+  );
 
   if (!b_age) return null;
 
@@ -107,7 +123,11 @@ function MacrostratAgeInfo(props) {
   return h(
     ExpandableDetailsPanel,
     { headerElement: h(MacrostratAgeInfoCore, props) },
-    h(ExpansionBody, { title: "Age refinement" }, h(AgeRefinementPlot, props))
+    h(
+      DataField,
+      { className: "age-refinement", label: "Age refinement" },
+      h(AgeRefinementPlot, props)
+    )
   );
 }
 
@@ -124,7 +144,7 @@ function MatchBasis(props) {
         h("div.description", "Matched unit"),
       ]),
     },
-    h(ExpansionBody, { title: "All matched names" }, [
+    h(DataField, { label: "All matched names" }, [
       source.macrostrat.strat_names.map((name, i) => {
         let lastElement: boolean =
           i == source.macrostrat.strat_names.length - 1;
@@ -214,13 +234,10 @@ function LithsAndClasses(props) {
     {
       headerElement: h(TypesList, { label: "Lithology", data: lith_types }),
     },
-    h(
-      ExpansionBody,
-      h(LithologyList, {
-        label: "Matched lithologies",
-        lithologies,
-      })
-    )
+    h(LithologyList, {
+      label: "Matched lithologies",
+      lithologies,
+    })
   );
 }
 
@@ -266,12 +283,10 @@ function Environments(props) {
         data: environ_types,
       }),
     },
-    h(ExpansionBody, [
-      h(EnvironmentsList, {
-        label: "Matched environments",
-        environments,
-      }),
-    ])
+    h(EnvironmentsList, {
+      label: "Matched environments",
+      environments,
+    })
   );
 }
 
@@ -285,19 +300,17 @@ function Economy(props) {
     {
       headerElement: h(TypesList, { label: "Economy", data: econ_types }),
     },
-    h(ExpansionBody, [
-      h(
-        TagField,
-        { label: "Matched economic attributes" },
-        econs.map((econ, i) => {
-          return h(Tag, {
-            key: i,
-            name: econ.econ,
-            color: econ.color,
-          });
-        })
-      ),
-    ])
+    h(
+      TagField,
+      { label: "Matched economic attributes" },
+      econs.map((econ, i) => {
+        return h(Tag, {
+          key: i,
+          name: econ.econ,
+          color: econ.color,
+        });
+      })
+    )
   );
 }
 

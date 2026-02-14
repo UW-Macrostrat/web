@@ -1,16 +1,13 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import {
-  Column,
-  ColoredUnitComponent,
-  UnitDetailsFeature,
-} from "@macrostrat/column-views";
+import { Column, ColoredUnitComponent } from "@macrostrat/column-views";
 
 import styles from "./strat-column.module.styl";
 import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
 import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
-import { ExpansionPanel, InfoPanelSection } from "@macrostrat/map-interface";
+import { UnitDetailsFeature } from "@macrostrat/column-views";
+import { ExpansionPanel } from "@macrostrat/data-components";
 import { PatternProvider } from "~/_providers";
 import { useMemo, useState } from "react";
 import { ModalUnitPanel } from "#/columns/@column/column-inspector/modal-panel";
@@ -51,7 +48,7 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
   ]);
 
   return h([
-    h(InfoPanelSection, { className: "strat-column-panel", headerElement }, [
+    h(ExpansionPanel, { className: "strat-column-panel", headerElement }, [
       h("div.strat-column-container", [
         h(Column, {
           units,

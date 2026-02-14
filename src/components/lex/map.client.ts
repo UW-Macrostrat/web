@@ -5,13 +5,13 @@ import {
 import h from "./map.module.sass";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary, useDarkMode } from "@macrostrat/ui-components";
-import { ExpansionPanel, buildInspectorStyle } from "@macrostrat/map-interface";
-import { Icon } from "@blueprintjs/core"
+import { ExpansionPanel } from "@macrostrat/data-components";
+import { Icon } from "@blueprintjs/core";
 import { useState, useRef, useEffect } from "react";
-import { useMapStyleOperator } from "@macrostrat/mapbox-react"
+import { useMapStyleOperator } from "@macrostrat/mapbox-react";
 import { satelliteMapURL } from "@macrostrat-web/settings";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
-import mapboxgl from "mapbox-gl"
+import mapboxgl from "mapbox-gl";
 import { pbdbDomain, tileserverDomain } from "@macrostrat-web/settings";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { getExpressionForFilters } from "./filter-helper";
@@ -38,7 +38,7 @@ function ColumnsMapInner({
   columns = null,
   fossilsData = [],
   filters = [],
-  mapUrl = ""
+  mapUrl = "",
 }) {
   const [showSatellite, setShowSatellite] = useState(true);
   const [showFossils, setShowFossils] = useState(false);
@@ -58,103 +58,121 @@ function ColumnsMapInner({
 
     const handleOutcrop = () => {
       setShowOutcrop(!showOutcrop);
-    }
+    };
 
-    const map = "/map/layers#" + mapUrl
+    const map = "/map/layers#" + mapUrl;
 
-    return h('div.lex-controls', [
-      h.if(mapUrl !== "")('div.btn', { onClick: () => navigate(map) }, h(Icon, { icon: "map", className: 'icon' })),
-      h.if(fossilsExist)('div.' + (showFossils ? 'selected' : 'btn'), { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
-      h.if(filters.length > 0)('div.' + (showOutcrop ? 'selected' : 'btn'), { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
-      h('div.' + (showSatellite ? 'selected' : 'btn'), { onClick: handleSatellite }, h(Icon, { icon: "satellite", className: 'icon' })),
-    ])
+    return h("div.lex-controls", [
+      h.if(mapUrl !== "")(
+        "div.btn",
+        { onClick: () => navigate(map) },
+        h(Icon, { icon: "map", className: "icon" })
+      ),
+      h.if(fossilsExist)(
+        "div." + (showFossils ? "selected" : "btn"),
+        { onClick: handleFossils },
+        h(Icon, { icon: "mountain", className: "icon" })
+      ),
+      h.if(filters.length > 0)(
+        "div." + (showOutcrop ? "selected" : "btn"),
+        { onClick: handleOutcrop },
+        h(Icon, { icon: "excavator", className: "icon" })
+      ),
+      h(
+        "div." + (showSatellite ? "selected" : "btn"),
+        { onClick: handleSatellite },
+        h(Icon, { icon: "satellite", className: "icon" })
+      ),
+    ]);
   }
 
-  columns = columns.features
+  columns = columns.features;
 
   columns = columns.map((col) => {
     col.id = col.properties.col_id;
     return col;
   });
 
-  return h(
-    "div",
-    { className },
-    [
-      h(
-        ColumnNavigationMap, 
-        {
-          columns,
-          accessToken: mapboxAccessToken,
-          style: {  ..._macrostratStyle, height: "100%" },
-          onSelectColumn: (id) => {
-              setTimeout(() => {
-                console.log("fossilClicked", fossilClickRef.current)
-                if(!showFossils || !fossilClickRef.current) {
-                  window.open(
-                    `/columns/${id}`,
-                    "_self"
-                  );
-                }
-              }, 0);
-          },
-          mapStyle: showSatellite ? satelliteMapURL : null,
-          columnColor: showSatellite ? "#000" : null
-        }, 
-        [
-          fossilsExist ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }) : null,
-          h(LexControls),
-          !hasFitted.current ? h(FitBounds, { columnData: columns, hasFitted }) : null,
-          h(OutcropLayer, {showOutcrop, filters})
-        ]
-      ),
-    ]
-  );
+  return h("div", { className }, [
+    h(
+      ColumnNavigationMap,
+      {
+        columns,
+        accessToken: mapboxAccessToken,
+        style: { ..._macrostratStyle, height: "100%" },
+        onSelectColumn: (id) => {
+          setTimeout(() => {
+            console.log("fossilClicked", fossilClickRef.current);
+            if (!showFossils || !fossilClickRef.current) {
+              window.open(`/columns/${id}`, "_self");
+            }
+          }, 0);
+        },
+        mapStyle: showSatellite ? satelliteMapURL : null,
+        columnColor: showSatellite ? "#000" : null,
+      },
+      [
+        fossilsExist
+          ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef })
+          : null,
+        h(LexControls),
+        !hasFitted.current
+          ? h(FitBounds, { columnData: columns, hasFitted })
+          : null,
+        h(OutcropLayer, { showOutcrop, filters }),
+      ]
+    ),
+  ]);
 }
 
-function OutcropLayer({showOutcrop, filters}) {
-  useMapStyleOperator((map) => {
-    if (map == null || filters.length === 0) return;
+function OutcropLayer({ showOutcrop, filters }) {
+  useMapStyleOperator(
+    (map) => {
+      if (map == null || filters.length === 0) return;
 
-    const macrostratLayers = _macrostratStyle.layers
-    const macrostratSources = _macrostratStyle.sources
+      const macrostratLayers = _macrostratStyle.layers;
+      const macrostratSources = _macrostratStyle.sources;
 
-    if(!showOutcrop) {
+      if (!showOutcrop) {
+        macrostratLayers?.forEach((lyr) => {
+          if (map.getLayer(lyr.id)) {
+            map.removeLayer(lyr.id);
+          }
+        });
+        return;
+      }
+
       macrostratLayers?.forEach((lyr) => {
-        if (map.getLayer(lyr.id)) {
-          map.removeLayer(lyr.id);
+        if (!map.getLayer(lyr.id) && lyr.source) {
+          if (!map.getSource(lyr.source)) {
+            map.addSource(
+              lyr.source,
+              (_macrostratStyle.sources as any)[lyr.source]
+            );
+          }
+          map.addLayer(lyr);
         }
       });
-      return;
-    }
 
-    macrostratLayers?.forEach((lyr) => {
-      if (!map.getLayer(lyr.id) && lyr.source) {
-        if (!map.getSource(lyr.source)) {
-          map.addSource(lyr.source, (_macrostratStyle.sources as any)[lyr.source]);
+      Object.keys(macrostratSources).forEach((src) => {
+        if (!map.getSource(src)) {
+          map.addSource(src, (macrostratSources as any)[src]);
         }
-        map.addLayer(lyr);
-      }
-    });
+      });
 
-    Object.keys(macrostratSources).forEach((src) => {
-      if (!map.getSource(src)) {
-        map.addSource(src, (macrostratSources as any)[src]);
-      }
-    });
-    
-    const expr = getExpressionForFilters(filters);
-    map.setFilter("burwell_fill", expr);
-  }, [showOutcrop, filters]);
+      const expr = getExpressionForFilters(filters);
+      map.setFilter("burwell_fill", expr);
+    },
+    [showOutcrop, filters]
+  );
 
   return null;
 }
 
-
 function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   useMapStyleOperator(
     (map) => {
-      if (fossilsData == null) return
+      if (fossilsData == null) return;
 
       setGeoJSON(map, "points", fossilsData);
 
@@ -212,33 +230,37 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
         const coordinates = feature.geometry.coordinates.slice();
         const name = cltn_name || "Unknown Fossil";
         const occurrences = (pbdb_occs || 0) + " occurrences";
-        const url = pbdbDomain + "/classic/displayCollResults?collection_no=col:" + cltn_id;
+        const url =
+          pbdbDomain +
+          "/classic/displayCollResults?collection_no=col:" +
+          cltn_id;
 
         new mapboxgl.Popup()
           .setLngLat(coordinates)
-          .setHTML(`
+          .setHTML(
+            `
             <div style="color: black; text-align: center;">
               <strong><a href="${url}" target="_blank" style="color: black;">
                 ${name}
               </a></strong>
               <div>${occurrences}</div>
             </div>
-          `)
+          `
+          )
           .addTo(map);
       };
 
       map.on("click", onClick);
 
       return () => {
-      map.off("click", onClick);
-    };
+        map.off("click", onClick);
+      };
     },
-    [fossilsData, showFossils],
+    [fossilsData, showFossils]
   );
 
   return null;
 }
-
 
 function FitBounds({ columnData, hasFitted }) {
   useMapStyleOperator((map) => {
@@ -248,14 +270,14 @@ function FitBounds({ columnData, hasFitted }) {
 
     // Flatten all polygon coordinates (assumes Polygon or MultiPolygon)
     const coordinates = columnData
-      .flatMap(col => {
+      .flatMap((col) => {
         const geom = col.geometry;
         if (!geom || !geom.coordinates) return [];
 
         // Handle Polygon or MultiPolygon
-        if (geom.type === 'Polygon') {
+        if (geom.type === "Polygon") {
           return geom.coordinates[0]; // outer ring
-        } else if (geom.type === 'MultiPolygon') {
+        } else if (geom.type === "MultiPolygon") {
           return geom.coordinates.flat(1)[0]; // first outer ring
         }
 
