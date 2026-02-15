@@ -77,6 +77,9 @@ function _InfoDrawerMainPanel(props) {
 
   const { mapData } = mapInfo;
 
+  const matchedStratNames = mapData[0]?.macrostrat?.strat_names ?? [];
+  const terms = matchedStratNames.map((s) => s.rank_name);
+
   let source =
     mapInfo && mapInfo.mapData && mapInfo.mapData.length
       ? mapInfo.mapData[0]
@@ -109,7 +112,7 @@ function _InfoDrawerMainPanel(props) {
       intervalURL: "/lex/intervals",
       lithologyURL: "/lex/lithologies",
     }),
-    h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansionContainer),
+    h.if(terms.length > 0)(XddExpansionContainer, { terms }),
     h(Physiography, { mapInfo }),
   ]);
 }

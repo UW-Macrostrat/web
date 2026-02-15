@@ -3,10 +3,8 @@ import axios from "axios";
 import { joinURL } from "@macrostrat/ui-components";
 import { ColumnGeoJSONRecord } from "./columns";
 import { UPDATE_COLUMN_FILTERS } from "../reducers/core/types";
-import { XDDSnippet } from "~/types";
 
 export const base = apiV2Prefix;
-const basev1 = `${SETTINGS.gddDomain}/api/v1`;
 const pbdbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
 const pbdbURLOccs = `${SETTINGS.pbdbDomain}/data1.2/occs/list.json`;
 
@@ -73,40 +71,6 @@ export async function fetchFilteredColumns(
     type: "update-column-filters",
     columns: res.data.features,
   };
-}
-
-export async function handleXDDQuery(
-  mapInfo,
-  cancelToken
-): Promise<XDDSnippet[]> {
-  if (
-    !mapInfo ||
-    !mapInfo.mapData.length ||
-    Object.keys(mapInfo.mapData[0].macrostrat).length === 0
-  ) {
-    return [];
-  }
-  let stratNames = mapInfo.mapData[0].macrostrat.strat_names
-    .map((d) => {
-      return d.rank_name;
-    })
-    .join(",");
-
-  let url = `${basev1}/snippets`;
-
-  const res = await axios.get(url, {
-    params: {
-      article_limit: 20,
-      term: stratNames,
-    },
-    cancelToken: cancelToken,
-    responseType: "json",
-  });
-  try {
-    return res.data.success.data;
-  } catch (error) {
-    return [];
-  }
 }
 
 function addMapIdToRef(data) {

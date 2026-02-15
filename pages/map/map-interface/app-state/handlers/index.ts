@@ -159,16 +159,6 @@ export default async function actionRunner(
         responseType: "json",
       });
       return { type: "received-search-query", data: res.data.success.data };
-    case "fetch-xdd":
-      const { mapInfo } = coreState;
-      let CancelToken1 = axios.CancelToken;
-      let source1 = CancelToken1.source();
-      dispatch({
-        type: "start-xdd-query",
-        cancelToken: source1,
-      });
-      const gdd_data = await handleXDDQuery(mapInfo, source1.token);
-      return { type: "received-xdd-query", data: gdd_data };
     case "select-search-result":
       const { result } = action;
       if (result.type == "place") {

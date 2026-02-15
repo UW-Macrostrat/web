@@ -300,52 +300,6 @@ export function coreReducer(
         searchCancelToken: null,
       };
 
-    case "start-xdd-query":
-      // When a search is requested, cancel any pending requests first
-      if (state.xddCancelToken) {
-        state.xddCancelToken.cancel();
-      }
-      return {
-        ...state,
-        fetchingXdd: true,
-        xddCancelToken: action.cancelToken,
-      };
-    case "received-xdd-query":
-      let parsed = {
-        journals: [],
-      };
-      let articles = {};
-
-      for (let i = 0; i < action.data.length; i++) {
-        let found = false;
-        if (articles[action.data[i].docid]) {
-          continue;
-        } else {
-          articles[action.data[i].docid] = true;
-        }
-        for (let j = 0; j < parsed.journals.length; j++) {
-          if (parsed.journals[j].name === action.data[i].journal) {
-            parsed.journals[j].articles.push(action.data[i]);
-            found = true;
-          }
-        }
-
-        if (!found) {
-          parsed.journals.push({
-            name: action.data[i].journal,
-            source: action.data[i].publisher,
-            articles: [action.data[i]],
-          });
-        }
-      }
-
-      return {
-        ...state,
-        fetchingXdd: false,
-        xddInfo: action.data,
-        xddCancelToken: null,
-      };
-
     case "update-elevation-marker":
       return { ...state, crossSectionCursorLocation: [action.lng, action.lat] };
 
