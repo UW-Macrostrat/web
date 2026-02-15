@@ -16,7 +16,7 @@ export function XddExpansionContainer() {
   }, [xddInfo]);
 
   return h(xDDExpansionPanel, {
-    xddInfo,
+    data: xddInfo,
   });
 }
 

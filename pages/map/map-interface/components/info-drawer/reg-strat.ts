@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "@macrostrat/data-components";
+import { ExpansionPanel, Tag, TagSize } from "@macrostrat/data-components";
 import { addCommas } from "#/map/map-interface/utils";
 import { useAppState } from "#/map/map-interface/app-state";
 import { Spinner } from "@blueprintjs/core";
@@ -27,9 +27,18 @@ function RegionalStratigraphy(props) {
     },
     [
       h.if(fetchingColumnInfo)(Spinner),
-      h.if(columnInfo != null)(ColumnData, { columnInfo }),
+      h.if(columnInfo != null)(BasicColumnInfo, { columnInfo }),
     ]
   );
+}
+
+function BasicColumnInfo({ columnInfo }) {
+  return h("div.column-data", [
+    h("h4", [
+      h(Link, { to: "column" }, columnInfo.col_name),
+      h.if(columnInfo.col_group)([" — ", columnInfo.col_group]),
+    ]),
+  ]);
 }
 
 function ColumnData({ columnInfo }) {

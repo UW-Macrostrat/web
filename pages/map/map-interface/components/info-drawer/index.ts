@@ -3,6 +3,7 @@ import { useAppActions } from "#/map/map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
 import { MacrostratLinkedData } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
+import { xDDExpansionPanel } from "@macrostrat/data-components";
 import { XddExpansionContainer } from "./xdd-panel";
 import { useAppState } from "#/map/map-interface/app-state";
 import { LoadingArea } from "../transitions";
