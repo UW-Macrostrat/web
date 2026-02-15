@@ -4,7 +4,7 @@ import {
   ExpansionPanel,
   Parenthetical,
 } from "@macrostrat/data-components";
-import { MapReference } from "~/components/map-info";
+import { BaseMapReference, MapReference } from "~/components/map-info";
 import { AgeRange } from "@macrostrat/column-views";
 
 function LongTextField(props) {
@@ -52,6 +52,37 @@ export function GeologicMapInfo(props) {
 
   if (!source) return null;
 
+  const [comments, additionalRefs] = processComments(source.comments);
+
+  const refs = [];
+  /** Stopgap for refs from SGMC, which are stored in comments.
+   * TODO: Eventually the reference model will need to be improved, but
+   * this works for now.
+   */
+  let mainPrefix = null;
+  if (additionalRefs.primary || additionalRefs.original) {
+    mainPrefix = "Compiled in";
+  }
+  refs.push(h(MapReference, { prefix: mainPrefix, reference: source.ref }));
+  if (additionalRefs.original) {
+    refs.push(
+      h(
+        BaseMapReference,
+        { prefix: "Originally from" },
+        additionalRefs.original
+      )
+    );
+  }
+  if (additionalRefs.primary) {
+    refs.push(
+      h(
+        BaseMapReference,
+        { prefix: "Primarily described in" },
+        additionalRefs.primary
+      )
+    );
+  }
+
   return h(
     ExpansionPanel,
     {
@@ -81,15 +112,28 @@ export function GeologicMapInfo(props) {
         }),
         h(LongTextField, {
           name: "Comments",
-          text: source.comments,
+          text: comments,
         }),
         h(GeoMapLines, { source }),
-        h(MapReference, {
-          reference: source.ref,
-        }),
+        h(DataField, { label: "Source" }, refs),
       ]),
     ]
   );
+}
+
+function processComments(comments) {
+  // Extract references from comments if they are present
+  let refs = {};
+  let commentsText = comments;
+  for (let key of ["Primary reference: ", "Original map source: "]) {
+    if (commentsText.includes(key)) {
+      const [mainComments, refPart] = commentsText.split(key);
+      commentsText = mainComments.trim();
+      const keyShort = key.split(" ")[0].toLowerCase();
+      refs[keyShort] = refPart.trim();
+    }
+  }
+  return [commentsText, refs];
 }
 
 function AgeField(props) {

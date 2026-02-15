@@ -1,10 +1,8 @@
 import h from "@macrostrat/hyper";
 import { ReactNode } from "react";
-import { DataField } from "@macrostrat/data-components";
-import { Identifier } from "@macrostrat/column-views";
 
 export function MapReference(props) {
-  const { reference: ref, showSourceID = true, onClickSourceID = null } = props;
+  const { prefix = null, reference: ref } = props;
   if (!ref || Object.keys(ref).length === 0) {
     return null;
   }
@@ -62,9 +60,13 @@ export function MapReference(props) {
 
   const txt = addSeparators(mainText);
 
-  return h(DataField, { label: "Source", inline: true }, [
-    h("span.map-reference", txt),
-  ]);
+  return h(BaseMapReference, { prefix }, txt);
+}
+
+export function BaseMapReference(props) {
+  const { children, prefix = null } = props;
+  const _prefix = prefix ? h("em.prefix", [prefix + " "]) : null;
+  return h("p.map-reference", [_prefix, children]);
 }
 
 function addSeparators(
