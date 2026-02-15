@@ -34,44 +34,37 @@ export function MacrostratLinkedData(props) {
       expanded,
     },
     [
-      h("div", { classes: expansionPanelDetailClasses }, [
-        h(MatchBasis, { source }),
-        h(AgeInformation, { mapInfo, source }),
-        h(Thickness, { source }),
-        h(LithsAndClasses, { source }),
-        h(Environments, { source }),
-        h(Economy, { source }),
-        h(FossilInfo, { source }),
-      ]),
+      h(MatchBasis, { source }),
+      h(AgeInformation, { mapInfo, source }),
+      h(Thickness, { source }),
+      h(LithsAndClasses, { source }),
+      h(Environments, { source }),
+      h(Economy, { source }),
+      h(FossilInfo, { source }),
     ]
   );
 }
-
-const expansionPanelDetailClasses = {
-  root: "expansion-panel-detail",
-};
 
 function AgeInformation(props) {
   const { source, mapInfo } = props;
   const { macrostrat } = source;
 
-  if (!macrostrat?.b_age) return h(MapAgeRenderer, { mapInfo });
+  if (!macrostrat?.b_age) return h(MapAgeInfo, { mapInfo });
 
   return h(MacrostratAgeInfo, { macrostrat, mapInfo });
 }
 
-function MapAgeRenderer(props) {
-  const { mapInfo, ...rest } = props;
-  return h(
-    DescribedAgeInfo,
-    {
-      ageElement: h(AgeChip, {
-        b_int: mapInfo.mapData[0].b_int,
-        t_int: mapInfo.mapData[0].t_int,
-      }),
-    },
-    "Based on geologic map description."
-  );
+function MapAgeInfo(props) {
+  const { mapInfo } = props;
+  console.log(mapInfo);
+  const unit = {
+    b_int_id: mapInfo.mapData[0].b_int.int_id,
+    t_int_id: mapInfo.mapData[0].t_int.int_id,
+  };
+  return h(DataField, { label: "Age" }, [
+    h(IntervalProportions, { unit, showAgeRange: true, multiLine: true }),
+    h("p.description", "Based on geologic map description."),
+  ]);
 }
 
 function DescribedAgeInfo(props) {
