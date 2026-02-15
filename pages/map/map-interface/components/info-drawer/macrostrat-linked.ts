@@ -1,4 +1,3 @@
-import { AgeChip } from "../info-blocks";
 import {
   ExpandableDetailsPanel,
   ExpansionPanel,

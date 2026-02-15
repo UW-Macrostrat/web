@@ -51,6 +51,13 @@ export function GeologicMapInfo(props) {
   const { bedrockExpanded, source } = props;
 
   if (!source) return null;
+  if (
+    !source.name &&
+    !source.descrip &&
+    !source.comments &&
+    (!source.liths || source.liths.length == 0)
+  )
+    return null;
 
   const [comments, additionalRefs] = processComments(source.comments);
 
@@ -108,7 +115,7 @@ export function GeologicMapInfo(props) {
         }),
         h(LongTextField, {
           name: "Lithology",
-          text: source.lith.replace(/,(\w)/g, ", $1"),
+          text: source.lith?.replace(/,(\w)/g, ", $1"),
         }),
         h(LongTextField, {
           name: "Comments",
@@ -125,6 +132,9 @@ function processComments(comments) {
   // Extract references from comments if they are present
   let refs = {};
   let commentsText = comments;
+  if (commentsText == null) {
+    return [null, refs];
+  }
   for (let key of ["Primary reference: ", "Original map source: "]) {
     if (commentsText.includes(key)) {
       const [mainComments, refPart] = commentsText.split(key);
