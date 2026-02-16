@@ -23,60 +23,66 @@ import { useAppState } from "#/map/map-interface/app-state";
 import { Spinner } from "@blueprintjs/core";
 import { Link } from "react-router-dom";
 
-function RegionalStratigraphy(props) {
-  const { mapInfo, columnInfo } = props;
+export function RegionalStratigraphy(props) {
+  const { mapInfo, columnInfo, source, expanded } = props;
   if (mapInfo?.mapData == null) return null;
 
   const fetchingColumnInfo = useAppState((s) => s.core.fetchingColumnInfo);
+  const fetchingMapInfo = useAppState((s) => s.core.fetchingMapInfo);
 
   return h(
     ExpansionPanel,
     {
       classes: { root: "regional-panel" },
       title: "Regional stratigraphy",
-      expanded: true,
-    },
-    [
-      h.if(fetchingColumnInfo)(Spinner),
-      h.if(columnInfo != null)(BasicColumnInfo, { columnInfo }),
-    ]
-  );
-}
-
-function BasicColumnInfo({ columnInfo }) {
-  return h("div.column-data", [
-    h("h4", [
-      h(Link, { to: "column" }, columnInfo.col_name),
-      h.if(columnInfo.col_group)([" — ", columnInfo.col_group]),
-    ]),
-  ]);
-}
-
-export { RegionalStratigraphy };
-
-export function MacrostratLinkedData(props) {
-  const { mapInfo, expanded, source } = props;
-
-  if (!mapInfo.mapData[0]) return null;
-
-  return h(
-    ExpansionPanel,
-    {
-      className: "regional-panel",
-      title: "Macrostrat-linked data",
       helpText: "via Macrostrat",
       expanded,
     },
     [
-      h(MatchBasis, { source }),
-      h(AgeInformation, { mapInfo, source }),
-      h(Thickness, { source }),
-      h(LithsAndClasses, { source }),
-      h(Environments, { source }),
-      h(Economy, { source }),
-      h(MapFossilInfo, { source }),
+      h(RegionalStratigraphyContent, {
+        mapInfo,
+        columnInfo,
+        fetching: fetchingColumnInfo || fetchingMapInfo,
+        source,
+      }),
     ]
   );
+}
+
+function RegionalStratigraphyContent(props) {
+  const { mapInfo, columnInfo, source, fetching } = props;
+  if (fetching) return h(Spinner);
+  if (columnInfo == null || mapInfo == null) return null;
+
+  return h("div.regional-stratigraphy", [
+    h(BasicColumnInfo, { columnInfo }),
+    h(MacrostratLinkedData, { mapInfo, source }),
+  ]);
+}
+
+export function MacrostratLinkedData(props) {
+  const { mapInfo, source } = props;
+
+  if (!mapInfo.mapData[0]) return null;
+
+  return h("div.unit-data", [
+    h(MatchBasis, { source }),
+    h(AgeInformation, { mapInfo, source }),
+    h(Thickness, { source }),
+    h(LithsAndClasses, { source }),
+    h(Environments, { source }),
+    h(Economy, { source }),
+    h(MapFossilInfo, { source }),
+  ]);
+}
+
+function BasicColumnInfo({ columnInfo }) {
+  return h("div.column-info", [
+    h("h3", [
+      h(Link, { to: "column" }, columnInfo.col_name),
+      h.if(columnInfo.col_group)([" — ", columnInfo.col_group]),
+    ]),
+  ]);
 }
 
 function AgeInformation(props) {
@@ -98,16 +104,6 @@ function MapAgeInfo(props) {
   return h(DataField, { label: "Age" }, [
     h(IntervalProportions, { unit, showAgeRange: true, multiLine: true }),
     h("p.description", "Based on geologic map description."),
-  ]);
-}
-
-function DescribedAgeInfo(props) {
-  const { ageElement, children, className } = props;
-
-  return h("div.described-age.macrostrast-detail", [
-    h("div.expansion-summary-title", "Age"),
-    h("div.age-chips", null, ageElement),
-    h("div.description", children),
   ]);
 }
 

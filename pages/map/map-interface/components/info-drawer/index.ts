@@ -99,15 +99,8 @@ function InfoDrawerMainPanel(props) {
     h.if(columnInfo)(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
-    }),
-    h(MacrostratLinkedData, {
-      mapInfo,
-      expanded: true,
       source,
-      stratNameURL: "/lex/strat-names",
-      environmentURL: "/lex/environments",
-      intervalURL: "/lex/intervals",
-      lithologyURL: "/lex/lithologies",
+      expanded: true,
     }),
     h.if(terms.length > 0)(XddExpansionContainer, { terms }),
     h(Physiography, { mapInfo }),
