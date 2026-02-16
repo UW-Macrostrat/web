@@ -4,22 +4,17 @@ import styles from "./main.module.sass";
 import { DataSheetDensity, PostgRESTTableView } from "@macrostrat/data-sheet";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { PageBreadcrumbs } from "~/components";
-import {
-  LongTextViewer,
-  lithologyRenderer,
-  ExpandedLithologies,
-} from "~/components/data-table";
+import { LongTextViewer } from "~/components/data-table";
 import { IntervalCell } from "@macrostrat/data-sheet";
 import { usePageContext } from "vike-react/usePageContext";
 import {
   MacrostratDataProvider,
   useMacrostratData,
   useMacrostratStore,
-} from "@macrostrat/column-views";
+} from "@macrostrat/data-provider";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { useCallback, useMemo } from "react";
 import { Cell } from "@blueprintjs/table";
-import { Spinner } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 

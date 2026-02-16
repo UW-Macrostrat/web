@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import { useRef } from "react";
-import { Timescale } from "@macrostrat/timescale";
+import { Timescale, type TimescaleProps } from "@macrostrat/timescale";
 import { useElementSize } from "@macrostrat/ui-components";
 import { Spinner, Button } from "@blueprintjs/core";
 import styles from "./main.module.styl";
@@ -28,11 +28,12 @@ function BrokenTimescale({ length, ageRange = [1000, 0], age, setAge }) {
     newLength = length - oldLength;
   }
 
-  const props = {
+  const props: Partial<TimescaleProps> = {
     absoluteAgeScale: true,
     levels: ageSpan < 80 ? [2, 4] : [1, 3],
-    onClick(d, t) {
-      setAge(Math.round(t));
+    onClick(e, data) {
+      const { age } = data;
+      setAge(Math.round(age));
     },
   };
 

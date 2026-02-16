@@ -1,56 +1,94 @@
-import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "@macrostrat/map-interface";
-import { IntervalChip } from "../info-blocks";
+import h from "./main.module.sass";
 import {
-  useAppActions,
-  useAppState,
-  useHashNavigate,
-} from "#/map/map-interface/app-state";
-import { MapReference } from "~/components/map-info";
-import LongText from "#/map/map-interface/components/long-text";
+  DataField,
+  ExpansionPanel,
+  Parenthetical,
+} from "@macrostrat/data-components";
+import { BaseMapReference, MapReference } from "~/components/map-info";
+import { AgeRange } from "@macrostrat/column-views";
 
-function LongTextRenderer(props) {
+function LongTextField(props) {
   const { name, text } = props;
+  if (!text || !text.length) return null;
   return text && text.length ? h(LongText, { name, text }) : null;
 }
 
 function GeoMapLines(props) {
   const { source } = props;
   if (!source.lines || source.lines.length == 0) {
-    return h("div", [""]);
+    return null;
   }
   const { lines } = source;
-  return h("div.map-source-attr", [
-    h("span.attr", ["Lines "]),
-    lines.map((line, i) => {
-      const { name, type, direction, descrip } = line;
-      return h("div.map-source-line", { key: i }, [
-        h.if(name)("span.line-attr", [h("span.attr", ["Name: "]), name]),
-        h.if(type)("span.line-attr", [h("span.attr", ["Type: "]), type]),
-        h.if(direction)("span.line-attr", [
-          h("span.attr", ["Direction: "]),
-          line.direction,
-        ]),
-        h.if(descrip)("span.line-attr", [
-          h("span.attr", ["Description: "]),
-          descrip,
-        ]),
-      ]);
-    }),
-  ]);
+  return h(
+    DataField,
+    { label: "Lines", inline: false },
+    h(
+      "ul.map-lines",
+      lines.map((line, i) => {
+        return h(LineInfo, { line, key: i });
+      })
+    )
+  );
 }
 
-function GeologicMapInfo(props) {
-  const { bedrockExpanded, source } = props;
-  const runAction = useAppActions();
+function LineInfo(props) {
+  const { line } = props;
+  const { name, type, direction, descrip } = line;
 
-  if (!source) return h("div");
-  const interval = {
-    int_name: source.age,
-    b_age: source.b_int.b_age,
-    t_age: source.t_int.t_age,
-    color: "#cccccc",
-  };
+  const children = [
+    h("span.basic-info", [
+      h.if(name)("strong.line-name", name),
+      h("span.type", type),
+    ]),
+    h("span.direction", direction),
+    h("span.description", descrip),
+  ];
+
+  return h("li.line-info", children);
+}
+
+export function GeologicMapInfo(props) {
+  const { bedrockExpanded, source } = props;
+
+  if (!source) return null;
+  if (
+    !source.name &&
+    !source.descrip &&
+    !source.comments &&
+    (!source.liths || source.liths.length == 0)
+  )
+    return null;
+
+  const [comments, additionalRefs] = processComments(source.comments);
+
+  const refs = [];
+  /** Stopgap for refs from SGMC, which are stored in comments.
+   * TODO: Eventually the reference model will need to be improved, but
+   * this works for now.
+   */
+  let mainPrefix = null;
+  if (additionalRefs.primary || additionalRefs.original) {
+    mainPrefix = "Compiled in";
+  }
+  refs.push(h(MapReference, { prefix: mainPrefix, reference: source.ref }));
+  if (additionalRefs.original) {
+    refs.push(
+      h(
+        BaseMapReference,
+        { prefix: "Originally from" },
+        additionalRefs.original
+      )
+    );
+  }
+  if (additionalRefs.primary) {
+    refs.push(
+      h(
+        BaseMapReference,
+        { prefix: "Primarily described in" },
+        additionalRefs.primary
+      )
+    );
+  }
 
   return h(
     ExpansionPanel,
@@ -62,45 +100,89 @@ function GeologicMapInfo(props) {
     },
     [
       h("div.map-source-attrs", [
-        h.if(source.name && source.name.length)("div.map-source-attr", [
-          h("span.attr", ["Name: "]),
-          source.name,
-        ]),
-        h.if(source.age && source.age.length)("div.map-source-attr", [
-          h("span.attr", ["Age: "]),
-          h(IntervalChip, {
-            interval,
-          }),
-        ]),
-        h(LongTextRenderer, {
-          name: "Stratigraphic name(s)",
-          text: source.strat_name,
+        h.if(source.name && source.name.length)("h3.unit-name", source.name),
+        h(AgeField, {
+          b_age: source.b_int.b_age,
+          t_age: source.t_int.t_age,
+          age: source.age,
         }),
-        h(LongTextRenderer, {
-          name: "Lithology",
-          text: source.lith,
+        h.if(source.strat_name != source.name)(StratNamesField, {
+          value: source.strat_name,
         }),
-        h(LongTextRenderer, {
+        h(LongTextField, {
           name: "Description",
           text: source.descrip,
         }),
-        h(LongTextRenderer, {
+        h(LongTextField, {
+          name: "Lithology",
+          text: source.lith?.replace(/,(\w)/g, ", $1"),
+        }),
+        h(LongTextField, {
           name: "Comments",
-          text: source.comments,
+          text: comments,
         }),
         h(GeoMapLines, { source }),
-        h(MapReference, {
-          reference: source.ref,
-          onClickSourceID() {
-            runAction({
-              type: "set-focused-map-source",
-              source_id: source.source_id,
-            });
-          },
-        }),
+        h(DataField, { label: "Source" }, refs),
       ]),
     ]
   );
 }
 
-export { GeologicMapInfo };
+function processComments(comments) {
+  // Extract references from comments if they are present
+  let refs = {};
+  let commentsText = comments;
+  if (commentsText == null) {
+    return [null, refs];
+  }
+  for (let key of ["Primary reference: ", "Original map source: "]) {
+    if (commentsText.includes(key)) {
+      const [mainComments, refPart] = commentsText.split(key);
+      commentsText = mainComments.trim();
+      const keyShort = key.split(" ")[0].toLowerCase();
+      refs[keyShort] = refPart.trim();
+    }
+  }
+  return [commentsText, refs];
+}
+
+function AgeField(props) {
+  const { b_age, t_age, age } = props;
+
+  if (!b_age || !t_age || !age) return null;
+
+  let children = [];
+  if (age) {
+    children.push(h("h4.age-interval", age));
+  }
+  if (b_age && t_age) {
+    const ageRange = h(AgeRange, {
+      data: { b_age, t_age },
+    });
+    if (age) {
+      children.push(h(Parenthetical, ageRange));
+    } else {
+      children.push(ageRange);
+    }
+  }
+
+  return h(DataField, { label: "Age" }, children);
+}
+
+function StratNamesField(props) {
+  const { value: text } = props;
+  if (!text || !text.length) return null;
+  const isPlural =
+    text.includes(",") || text.includes(";") || text.includes(" and ");
+  const label = "Stratigraphic name" + (isPlural ? "s" : "");
+  return h(DataField, { label }, text);
+}
+
+function LongText(props) {
+  const { name, text } = props;
+  return h(
+    DataField,
+    { label: name, inline: true, className: "long-text-field" },
+    h("p", text)
+  );
+}

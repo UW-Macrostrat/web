@@ -2,7 +2,6 @@ import { MapAction, MapLayer, MapState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
 import { AddFilter, FilterData, Filter } from "../../handlers/filters";
-import { XDDSnippet } from "../../handlers/fetch";
 import {
   ColumnGeoJSONRecord,
   ColumnProperties,
@@ -20,7 +19,6 @@ export type MapLocation = {
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
-type FETCH_XDD = { type: "fetch-xdd" };
 type MAP_QUERY = {
   type: "map-query";
   z: string | number;
@@ -64,9 +62,6 @@ type MAP_LAYERS_CHANGED = {
   type: "map-layers-changed";
   mapLayers: Set<MapLayer>;
 };
-
-type START_XDD_QUERY = { type: "start-xdd-query"; cancelToken: any };
-type RECEIVED_XDD_QUERY = { type: "received-xdd-query"; data: XDDSnippet[] };
 
 type START_PBDB_QUERY = { type: "start-pbdb-query" };
 type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query"; data: any };
@@ -171,9 +166,6 @@ export type CoreAction =
   | GET_PBDB
   | GET_COLUMN_UNITS
   | MAP_QUERY
-  | FETCH_XDD
-  | START_XDD_QUERY
-  | RECEIVED_XDD_QUERY
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
@@ -263,7 +255,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   focusedMapSource: number | null;
   mapSettings: MapSettings;
   columnInfo: ColumnSummary | null;
-  xddInfo: XDDSnippet[];
   searchResults: any;
   inputFocus: boolean;
   pbdbData: any[];

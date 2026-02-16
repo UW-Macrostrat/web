@@ -174,6 +174,7 @@ export function Page() {
       bottomPanel: h(TimescalePanel, {
         age,
         setAge(age) {
+          console.log("Setting age to", age);
           dispatch({ type: "set-age", age });
         },
         ageRange: ageRangeForModel(activeModel),

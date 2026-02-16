@@ -1,21 +1,14 @@
-import { hyperStyled } from "@macrostrat/hyper";
-import {
-  Column,
-  ColoredUnitComponent,
-  UnitDetailsFeature,
-} from "@macrostrat/column-views";
+import { Column, ColoredUnitComponent } from "@macrostrat/column-views";
 
-import styles from "./strat-column.module.styl";
+import h from "./index.module.sass";
 import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
 import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
-import { ExpansionPanel, InfoPanelSection } from "@macrostrat/map-interface";
+import { UnitDetailsFeature, Identifier } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
 import { useMemo, useState } from "react";
 import { ModalUnitPanel } from "#/columns/@column/column-inspector/modal-panel";
-
-const h = hyperStyled(styles);
 
 function BackButton() {
   const breadcrumbs = useBreadcrumbs();
@@ -39,32 +32,32 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
       h("p", "A stratigraphic column has not been assigned for this location."),
     ]);
 
-  const headerElement = h([
-    h("div.controls", [h(BackButton)]),
-    h("h4", columnInfo.col_name),
-    h("div.spacer"),
-    h(
-      "a",
-      { href: `/columns/${columnInfo.col_id}` },
-      h("code", columnInfo.col_id)
-    ),
-  ]);
-
-  return h([
-    h(InfoPanelSection, { className: "strat-column-panel", headerElement }, [
-      h("div.strat-column-container", [
-        h(Column, {
-          units,
-          unitComponent: ColoredUnitComponent,
-          showLabelColumn: false,
-          targetUnitHeight: 25,
-          unconformityLabels: true,
-          width: 280,
-          columnWidth: 240,
-          selectedUnit: selectedUnitID,
-          onUnitSelected: setSelectedUnitID,
-        }),
-      ]),
+  return h("div.strat-column-outer", [
+    h("div.strat-column-header", [
+      h(BackButton),
+      h("h4", columnInfo.col_name),
+      h("div.spacer"),
+      h(
+        "h4",
+        h(Identifier, {
+          id: columnInfo.col_id,
+          href: `/columns/${columnInfo.col_id}`,
+        })
+      ),
+    ]),
+    h("div.strat-column-container", [
+      h(Column, {
+        units,
+        unitComponent: ColoredUnitComponent,
+        showLabelColumn: false,
+        targetUnitHeight: 25,
+        unconformityLabels: true,
+        width: 280,
+        columnWidth: 240,
+        allowUnitSelection: true,
+        selectedUnit: selectedUnitID,
+        onUnitSelected: setSelectedUnitID,
+      }),
     ]),
     h(ModalUnitPanel, {
       unitData: units,

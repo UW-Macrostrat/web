@@ -1,11 +1,12 @@
 import revisionInfo from "@macrostrat/revision-info-webpack";
 import react from "@vitejs/plugin-react";
 import vike from "vike/plugin";
-import { defineConfig, Plugin } from "vite";
+import { defineConfig } from "vite";
 import path from "node:path";
 import { readFileSync } from "node:fs";
 import textToolchain from "./packages/text-toolchain/src";
 import { cjsInterop } from "vite-plugin-cjs-interop";
+import hyperStyles from "@macrostrat/vite-plugin-hyperstyles";
 import cesium from "vite-plugin-cesium";
 
 const cesiumPath = import.meta.resolve("cesium").replace("file://", "");
@@ -17,8 +18,8 @@ const pkg = getPackageJSONContents("package.json");
 
 setupVersionEnvironmentVariables(pkg);
 
-const macrostratPackages = Object.keys(pkg.dependencies).filter((name: string) =>
-  name.startsWith("@macrostrat/")
+const macrostratPackages = Object.keys(pkg.dependencies).filter(
+  (name: string) => name.startsWith("@macrostrat/")
 );
 
 export default defineConfig({
@@ -27,11 +28,7 @@ export default defineConfig({
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: [
-      "react",
-      "react-dom",
-      ...macrostratPackages,
-    ],
+    dedupe: ["react", "react-dom", ...macrostratPackages],
   },
   plugins: [
     vike(),
@@ -40,14 +37,9 @@ export default defineConfig({
     // patchCssModules(),
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
-    // cjsInterop({
-    //   dependencies: [
-    //     "react-images",
-    //     "labella",
-    //     "react-color",
-    //     "mapbox-gl",
-    //   ],
-    // }),
+    cjsInterop({
+      dependencies: ["mapbox-gl"],
+    }),
     // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
@@ -59,7 +51,7 @@ export default defineConfig({
     }),
   ],
   ssr: {
-    noExternal: macrostratPackages
+    noExternal: macrostratPackages,
   },
   define: {
     // Cesium base URL
@@ -84,53 +76,10 @@ function getPackageJSONContents(packageJSONPath: string) {
   );
 }
 
-function getDependenciesToExcludeFromOptimization(pkg: any) {
-  /** If we have locally linked dependencies, we want to exclude them from
-   * optimization.
-   */
-  const excludePrefixes = ["file:", "link:", "workspace:", "portal:"];
-
-  const allPackages = Object.entries(pkg.dependencies)
-    .concat(Object.entries(pkg.devDependencies || {}))
-    .concat(Object.entries(pkg.peerDependencies || {}))
-    .concat(Object.entries(pkg.resolutions || {})) as [string, string][];
-
-  let excludeSet = new Set<string>();
-  for (const [dep, version] of allPackages) {
-    if (excludePrefixes.some((prefix) => version.startsWith(prefix))) {
-      excludeSet.add(dep);
-    }
-  }
-  return Array.from(excludeSet);
-}
-
 function setupVersionEnvironmentVariables(pkg) {
   const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
   // prefix with VITE_ to make available to client
   for (const [key, value] of Object.entries(gitEnv)) {
     process.env["VITE_" + key] = value;
   }
-}
-
-const cssModuleMatcher = /\.module\.(css|scss|sass|styl)$/;
-
-function hyperStyles(): Plugin {
-  return {
-    name: "hyper-styles",
-    enforce: "post",
-    // Post-process the output to add the hyperStyled import
-    transform(code, id) {
-      const code1 = code.replace("export default", "const styles =");
-      if (cssModuleMatcher.test(id)) {
-        //const code2 = code1 + "\nexport default styles\n";
-        const code3 = `import hyper from "@macrostrat/hyper";
-        ${code1}
-        let h = hyper.styled(styles);
-        // Keep backwards compatibility with the existing default style object.
-        Object.assign(h, styles);
-        export default h;`;
-        return code3;
-      }
-    },
-  };
 }

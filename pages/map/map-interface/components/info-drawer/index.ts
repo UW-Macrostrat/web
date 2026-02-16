@@ -1,26 +1,25 @@
-import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
-import { useAppActions } from "#/map/map-interface/app-state";
-import { 
-  LocationPanel,  
+import { LocationPanel } from "@macrostrat/map-interface";
+import {
   MacrostratLinkedData,
-  Physiography,
-} from "@macrostrat/map-interface";
+  RegionalStratigraphy,
+} from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
-import { useAppState } from "#/map/map-interface/app-state";
-import styles from "./main.module.styl";
+import { useAppActions, useAppState } from "#/map/map-interface/app-state";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
-import { RegionalStratigraphy } from "./reg-strat";
+import { Physiography } from "./physiography.ts";
+import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 
-const h = hyper.styled(styles);
+import h from "./main.module.sass";
+import classNames from "classnames";
 
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
-  let { className } = props;
+  const { className } = props;
   const mapInfo = useAppState((state) => state.core.mapInfo);
   const fetchingMapInfo = useAppState((state) => state.core.fetchingMapInfo);
 
@@ -33,38 +32,36 @@ function InfoDrawer(props) {
 
   const position = useAppState((state) => state.core.infoMarkerPosition);
   const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
+  const columnInfo = useAppState((state) => state.core.columnInfo);
 
   return h(
-    LocationPanel,
-    {
-      className,
-      position,
-      elevation: mapInfo.elevation,
-      zoom,
-      onClose,
-      loading: fetchingMapInfo,
-      showCopyPositionButton: true,
-      contentContainer: "div.infodrawer-content-holder",
-    },
-    [
+    MacrostratInteractionProvider,
+    { linkDomain: "/" },
+    h(
+      LocationPanel,
+      {
+        className: classNames("info-drawer", className),
+        position,
+        elevation: mapInfo.elevation,
+        zoom,
+        onClose,
+        loading: fetchingMapInfo,
+        showCopyPositionButton: true,
+        contentContainer: "div.infodrawer-content-holder",
+      },
       h(
         LoadingArea,
         { loaded: !fetchingMapInfo, className: "infodrawer-content" },
-        h.if(!fetchingMapInfo)(InfoDrawerInterior)
-      ),
-    ]
+        h(Routes, [
+          h(Route, {
+            path: "/column",
+            element: h(StratColumn, { columnInfo }),
+          }),
+          h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
+        ])
+      )
+    )
   );
-}
-
-function InfoDrawerInterior(props) {
-  const columnInfo = useAppState((state) => state.core.columnInfo);
-  return h(Routes, [
-    h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
-    //update view locations route
-    h(Route, { path: "/locations", element: h("div", "hello world") }),
-
-    h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
-  ]);
 }
 
 function InfoDrawerMainPanel(props) {
@@ -76,6 +73,9 @@ function InfoDrawerMainPanel(props) {
   }
 
   const { mapData } = mapInfo;
+
+  const matchedStratNames = mapData[0]?.macrostrat?.strat_names ?? [];
+  const terms = matchedStratNames.map((s) => s.rank_name);
 
   let source =
     mapInfo && mapInfo.mapData && mapInfo.mapData.length
@@ -99,17 +99,10 @@ function InfoDrawerMainPanel(props) {
     h.if(columnInfo)(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
-    }),
-    h(MacrostratLinkedData, {
-      mapInfo,
-      expanded: true,
       source,
-      stratNameURL: "/lex/strat-names",
-      environmentURL: "/lex/environments",
-      intervalURL: "/lex/intervals",
-      lithologyURL: "/lex/lithologies"
+      expanded: true,
     }),
-    h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansionContainer),
+    h.if(terms.length > 0)(XddExpansionContainer, { terms }),
     h(Physiography, { mapInfo }),
   ]);
 }

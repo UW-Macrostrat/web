@@ -1,200 +1,136 @@
-import hyper from "@macrostrat/hyper";
-import { AgeChip, AttrChip } from "../info-blocks";
 import {
-  ExpansionPanel,
   ExpandableDetailsPanel,
-  ExpansionBody,
-} from "@macrostrat/map-interface";
-import styles from "./main.module.styl";
-import { scaleLinear } from "@visx/scale";
-import { AxisBottom } from "@visx/axis";
-import chroma from "chroma-js";
-import { LithologyList } from "@macrostrat/data-components";
+  ExpansionPanel,
+  DataField,
+  EnvironmentsList,
+  LithologyList,
+  Tag,
+  TagField,
+  Value,
+  Parenthetical,
+  useInteractionProps,
+  isClickable,
+} from "@macrostrat/data-components";
+import {
+  AgeField,
+  ThicknessField,
+  IntervalProportions,
+  Duration,
+} from "@macrostrat/column-views";
+import { AgeRefinementPlot } from "./age-refinement-plot.ts";
+import h from "./main.module.sass";
+import type { ReactNode } from "react";
 
-const h = hyper.styled(styles);
+import { useAppState } from "#/map/map-interface/app-state";
+import { Spinner } from "@blueprintjs/core";
+import { Link } from "react-router-dom";
 
-function MacrostratLinkedData(props) {
-  const { mapInfo, bedrockMatchExpanded, source } = props;
+export function RegionalStratigraphy(props) {
+  const { mapInfo, columnInfo, source, expanded } = props;
+  if (mapInfo?.mapData == null) return null;
 
-  if (!mapInfo.mapData[0]) return h("div");
+  const fetchingColumnInfo = useAppState((s) => s.core.fetchingColumnInfo);
+  const fetchingMapInfo = useAppState((s) => s.core.fetchingMapInfo);
 
   return h(
     ExpansionPanel,
     {
-      className: "regional-panel",
-      title: "Macrostrat-linked data",
+      classes: { root: "regional-panel" },
+      title: "Regional stratigraphy",
       helpText: "via Macrostrat",
-      expanded: bedrockMatchExpanded,
+      expanded,
     },
     [
-      h("div", { classes: expansionPanelDetailClasses }, [
-        h(MatchBasis, { source }),
-        h(AgeInformation, { mapInfo, source }),
-        h(Thickness, { source }),
-        h(MinorFossilCollections, { source }),
-        h(FossilOccs, { source }),
-        h(LithsAndClasses, { source }),
-        h(Environments, { source }),
-        h(Economy, { source }),
-      ]),
+      h(RegionalStratigraphyContent, {
+        mapInfo,
+        columnInfo,
+        fetching: fetchingColumnInfo || fetchingMapInfo,
+        source,
+      }),
     ]
   );
 }
 
-const expansionPanelDetailClasses = {
-  root: "expansion-panel-detail",
-};
+function RegionalStratigraphyContent(props) {
+  const { mapInfo, columnInfo, source, fetching } = props;
+  if (fetching) return h(Spinner);
+  if (columnInfo == null || mapInfo == null) return null;
+
+  return h("div.regional-stratigraphy", [
+    h(BasicColumnInfo, { columnInfo }),
+    h(MacrostratLinkedData, { mapInfo, source }),
+  ]);
+}
+
+export function MacrostratLinkedData(props) {
+  const { mapInfo, source } = props;
+
+  if (!mapInfo.mapData[0]) return null;
+
+  return h("div.unit-data", [
+    h(MatchBasis, { source }),
+    h(AgeInformation, { mapInfo, source }),
+    h(Thickness, { source }),
+    h(LithsAndClasses, { source }),
+    h(Environments, { source }),
+    h(Economy, { source }),
+    h(MapFossilInfo, { source }),
+  ]);
+}
+
+function BasicColumnInfo({ columnInfo }) {
+  return h("div.column-info", [
+    h("h3", [
+      h(Link, { to: "column" }, columnInfo.col_name),
+      h.if(columnInfo.col_group)([" — ", columnInfo.col_group]),
+    ]),
+  ]);
+}
 
 function AgeInformation(props) {
   const { source, mapInfo } = props;
   const { macrostrat } = source;
 
-  if (!macrostrat?.b_age) return h(MapAgeRenderer, { mapInfo });
+  if (!macrostrat?.b_age) return h(UnitAgeInfo, { mapInfo });
 
   return h(MacrostratAgeInfo, { macrostrat, mapInfo });
 }
 
-function MapAgeRenderer(props) {
-  const { mapInfo, ...rest } = props;
-  return h(
-    DescribedAgeInfo,
-    {
-      ageElement: h(AgeChip, {
-        b_int: mapInfo.mapData[0].b_int,
-        t_int: mapInfo.mapData[0].t_int,
-      }),
-    },
-    "Based on geologic map description."
-  );
-}
-
-function DescribedAgeInfo(props) {
-  const { ageElement, children, className } = props;
-
-  return h("div.described-age.macrostrast-detail", [
-    h("div.expansion-summary-title", "Age"),
-    h("div.age-chips", null, ageElement),
-    h("div.description", children),
+function UnitAgeInfo(props) {
+  const { mapInfo } = props;
+  const unit = {
+    b_int_id: mapInfo.mapData[0].b_int.int_id,
+    t_int_id: mapInfo.mapData[0].t_int.int_id,
+  };
+  return h(DataField, { label: "Age" }, [
+    h(IntervalProportions, { unit, showAgeRange: true, multiLine: true }),
+    h("p.description", "Based on geologic map description."),
   ]);
-}
-
-function AgeRefinementBar({ scale, data, color, label = null }) {
-  const { b_int, t_int } = data;
-  const b_age = data.b_age ?? b_int.b_age;
-  const t_age = data.t_age ?? t_int.t_age;
-  const backgroundColor = color ?? b_int.color;
-  const accentColor = chroma(backgroundColor).darken(0.5).hex();
-  const labelColor = chroma(backgroundColor).darken(2).hex();
-
-  const left = scale(b_age);
-  const width = scale(t_age) - scale(b_age);
-
-  let labelTranslate = 5;
-  let textAlign = "start";
-
-  // Adjust label placement
-
-  if (width < 100) {
-    if (left < 100) {
-      labelTranslate = width + 5;
-    } else {
-      labelTranslate = -305;
-      textAlign = "end";
-    }
-  }
-
-  return h(
-    "div.age-refinement-bar",
-    {
-      style: {
-        marginLeft: `${left}px`,
-        width: `${width}px`,
-        height: "18px",
-        backgroundColor,
-        border: `2px solid ${accentColor}`,
-        position: "relative",
-      },
-    },
-    h(
-      "div.age-refinement-bar-label",
-      {
-        style: {
-          transform: `translateX(${labelTranslate}px)`,
-          color: labelColor,
-          fontSize: "10px",
-          width: 300,
-          textAlign,
-        },
-      },
-      label
-    )
-  );
-}
-
-function AgeRefinementPlot({ macrostrat, mapInfo }) {
-  // Plot the amount by which the age was refined
-
-  const mapData = mapInfo.mapData[0];
-  const b_age = Math.max(mapData.b_int.b_age, macrostrat.b_age);
-  const t_age = Math.min(mapData.t_int.t_age, macrostrat.t_age);
-
-  const scale = scaleLinear({
-    domain: [1.02 * b_age, t_age * 0.98],
-    range: [20, 360],
-  });
-
-  // use visx to plot the age refinement
-  return h("div.age-refinement-plot", [
-    h(AgeRefinementBar, {
-      scale,
-      data: macrostrat,
-      label: "Macrostrat age model",
-    }),
-    h(AgeRefinementBar, {
-      scale,
-      data: mapData,
-      label: "Map legend",
-    }),
-    // Age axis
-    h("svg", { width: "100%", height: "40px" }, [
-      h(AxisBottom, {
-        scale,
-        numTicks: 5,
-        top: 1,
-        left: 0,
-        label: "Age (Ma)",
-      }),
-    ]),
-  ]);
-}
-
-function MacrostratAgeInfoCore({ macrostrat }) {
-  const { b_age, t_age, b_int, t_int } = macrostrat;
-
-  if (!b_age) return null;
-
-  let age = b_int.int_name;
-  if (b_int.int_id !== t_int.int_id) {
-    age += ` - ${t_int.int_name}`;
-  }
-  return h(
-    DescribedAgeInfo,
-    {
-      ageElement: h(AgeChip, {
-        b_int: { ...b_int, int_name: age, b_age, t_age },
-        t_int: { ...b_int, int_name: age, b_age, t_age },
-      }),
-    },
-    "Refined using the Macrostrat age model."
-  );
 }
 
 function MacrostratAgeInfo(props) {
   return h(
     ExpandableDetailsPanel,
     { headerElement: h(MacrostratAgeInfoCore, props) },
-    h(ExpansionBody, { title: "Age refinement" }, h(AgeRefinementPlot, props))
+    h(
+      DataField,
+      { className: "age-refinement", label: "Age refinement" },
+      h(AgeRefinementPlot, props)
+    )
   );
+}
+
+function MacrostratAgeInfoCore({ macrostrat }) {
+  const { b_age, t_age, b_int, t_int } = macrostrat;
+
+  const unit = { b_int_id: b_int.int_id, t_int_id: t_int.int_id, b_age, t_age };
+
+  return h(AgeField, { unit }, [
+    h(Parenthetical, h(Duration, { value: unit.b_age - unit.t_age })),
+    h(IntervalProportions, {
+      unit,
+    }),
+  ]);
 }
 
 function MatchBasis(props) {
@@ -207,83 +143,94 @@ function MatchBasis(props) {
       className: "macrostrat-unit",
       headerElement: h([
         h("h3", source.macrostrat.strat_names[0].rank_name),
-        h("div.description", "Matched stratigraphic unit"),
+        h("div.description", "Matched unit"),
       ]),
     },
-    h(ExpansionBody, { title: "All matched names" }, [
-      source.macrostrat.strat_names.map((name, i) => {
-        let lastElement: boolean =
-          i == source.macrostrat.strat_names.length - 1;
-        return h("span", { key: i }, [
-          h(
-            "a.externalLink",
-            {
-              href: "/sift/#/strat_name/" + name.strat_name_id,
-              key: i,
-            },
-            [name.rank_name]
-          ),
-          h.if(!lastElement)([", "]),
-        ]);
-      }),
-    ])
+    h(StratNamesField, { stratNames: source.macrostrat.strat_names })
   );
+}
+
+function StratNamesField(props: {
+  stratNames: { strat_name_id: number; rank_name: string }[];
+}) {
+  /** Handling for stratigraphic name field */
+  const { stratNames } = props;
+
+  if (stratNames == null || stratNames.length == 0) return null;
+
+  const names = stratNames.map((s) => {
+    return h(StratNameVal, {
+      strat_name_id: s.strat_name_id,
+      name: s.rank_name,
+    });
+  });
+
+  return h(DataField, { label: "All matched names" }, names);
+}
+
+function StratNameVal({ strat_name_id, name }) {
+  const interactionProps = useInteractionProps({ strat_name_id });
+  const clickable = isClickable(interactionProps);
+  return h(clickable ? "a" : "span", { ...interactionProps }, name);
 }
 
 function Thickness(props) {
   const { source } = props;
-  if (!source.macrostrat.max_thick) return h("div");
+  const max_thick = source.macrostrat?.max_thick;
+  if (max_thick == null || max_thick == 0) return null;
 
-  return h.if(source.macrostrat && source.macrostrat.max_thick)(
-    "div.macrostrat-detail",
-    [
-      h("div.expansion-summary-title", "Thickness"),
-      h("div", [
-        source.macrostrat.min_min_thick,
-        " - ",
-        source.macrostrat.max_thick,
-        "m",
-      ]),
-    ]
-  );
+  const unit = { max_thick, min_thick: source.macrostrat?.min_min_thick };
+
+  return h(ThicknessField, { unit });
 }
 
-function MinorFossilCollections(props) {
+function addSeparators(values: ReactNode[]) {
+  const result: ReactNode[] = [];
+  values.forEach((val, i) => {
+    result.push(val);
+    if (i < values.length - 1) {
+      result.push(", ");
+    }
+  });
+  return result;
+}
+
+function MapFossilInfo(props) {
   const { source } = props;
   const { macrostrat } = source;
-  if (!macrostrat.pbdb_collections) return h("div");
+  if (macrostrat == null) return null;
 
-  return h.if(macrostrat && macrostrat.pbdb_collections)(
-    "div.macrostrat-detail",
-    [
-      h("div.expansion-summary-title", "Fossil collections"),
-      h("div", [macrostrat.pbdb_collections]),
-    ]
+  return h(FossilInfo, {
+    collections: macrostrat.pbdb_collections,
+    occurrences: macrostrat.pbdb_occs,
+  });
+}
+
+export function FossilInfo(props): {
+  collections: number;
+  occurrences: number;
+} {
+  // May not be any fossil info
+  const { collections, occurrences } = props;
+  if (!collections && !occurrences) return null;
+  const values = { collections, occurrences };
+
+  const children = addSeparators(
+    Object.entries(values)
+      .map(([key, val]) => {
+        if (val == null) return null;
+        return h(Value, { value: val, unit: key });
+      })
+      .filter(Boolean)
   );
-}
 
-function FossilOccs(props) {
-  const { source } = props;
-  const { macrostrat } = source;
-
-  if (!macrostrat?.pbdb_occs) return null;
-
-  return h("div.macrostrat-detail", [
-    h("div.expansion-summary-title", "Fossil occurrences"),
-    h("div", [macrostrat.pbdb_occs]),
-  ]);
-}
-
-function LithTypes(props) {
-  const { lith_types } = props;
-
-  return h.if(lith_types && lith_types.length > 0)(
-    "div.lithologies.lithology-types",
-    [
-      h(LithologyList, {
-        lithologies: lith_types,
-      }),
-    ]
+  return h(
+    DataField,
+    {
+      label: "Fossils ",
+      value: children,
+    },
+    [h("span.data-source", "via PBDB")]
   );
 }
 
@@ -293,7 +240,7 @@ function LithsAndClasses(props) {
   const { liths = null, lith_types = null } = macrostrat;
 
   if (!liths || liths.length == 0) return null;
-  
+
   const lithologies = liths.map((lith) => {
     return {
       ...lith,
@@ -305,21 +252,32 @@ function LithsAndClasses(props) {
   return h(
     ExpandableDetailsPanel,
     {
-      title: "Lithology",
-      value: h(LithTypes, { lith_types }),
+      headerElement: h(TypesList, { label: "Lithology", data: lith_types }),
     },
-    h(ExpansionBody, { title: "Matched lithologies" }, [
-      h(LithologyList, {
-        lithologies,
-        getItemHref: (lith) => `/lex/lithologies/${lith.lith_id}`,
-      }),
-    ])
+    h(LithologyList, {
+      label: "Matched lithologies",
+      lithologies,
+    })
   );
 }
 
-function EnvironTypes(props) {
-  const { environ_types } = props;
-  return h.if(environ_types && environ_types.length > 0)(LithologyList, { lithologies: environ_types.filter((e) => e.name != '') });
+function TypesList(props) {
+  /** List for higher-level type/class attributes (e.g. environment types, economic types)
+   * that might not have specific IDs
+   */
+  const { data, label } = props;
+
+  if (!data || data.length == 0) return null;
+
+  return h(
+    TagField,
+    { label },
+    data.map((d) => {
+      let name = d.name;
+      if (name == null || name == "") name = "other";
+      return h(Tag, { name, color: d.color ?? "#888" });
+    })
+  );
 }
 
 function Environments(props) {
@@ -329,7 +287,7 @@ function Environments(props) {
 
   if (!environs || environs.length == 0) return null;
 
-  const lithologies = environs.map((environ) => {
+  const environments = environs.map((environ) => {
     return {
       ...environ,
       name: environ.environ,
@@ -340,54 +298,38 @@ function Environments(props) {
   return h(
     ExpandableDetailsPanel,
     {
-      title: "Environment",
-      value: h(EnvironTypes, { environ_types }),
-    },
-    h(ExpansionBody, { title: "Matched environments" }, [
-       h(LithologyList, {
-        lithologies,
-        getItemHref: (environ) => `/lex/environments/${environ.environ_id}`,
+      headerElement: h(TypesList, {
+        label: "Environment",
+        data: environ_types,
       }),
-    ])
+    },
+    h(EnvironmentsList, {
+      label: "Matched environments",
+      environments,
+    })
   );
-}
-
-function EconType(props) {
-  const { econ_types } = props;
-
-  return h.if(econ_types && econ_types.length > 0)("div", [
-    econ_types.map((econClass, i) => {
-      return h(AttrChip, {
-        key: i,
-        name: econClass.name,
-        color: econClass.color,
-      });
-    }),
-  ]);
 }
 
 function Economy(props) {
   const { source } = props;
   const { macrostrat } = source;
   const { econs = null, econ_types = null } = macrostrat;
-  if (!econs) return h("div");
-
-  return h.if(econs && econs.length > 0)(
+  if (!econs || econs.length == 0) return null;
+  return h(
     ExpandableDetailsPanel,
     {
-      title: "Economy ",
-      value: h(EconType, { econ_types }),
+      headerElement: h(TypesList, { label: "Economy", data: econ_types }),
     },
-    h(ExpansionBody, { title: "Matched economic attributes" }, [
+    h(
+      TagField,
+      { label: "Matched economic attributes" },
       econs.map((econ, i) => {
-        return h(AttrChip, {
+        return h(Tag, {
           key: i,
           name: econ.econ,
           color: econ.color,
         });
-      }),
-    ])
+      })
+    )
   );
 }
-
-export { MacrostratLinkedData };

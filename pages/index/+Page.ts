@@ -42,11 +42,13 @@ export default function Page() {
       ),
       h("div.details", [
         h("p", {}, [
-          "With over 225 maps from data providers around the world at every scale, Macrostrat is the world's largest homogenized geologic map database. ",
-          "Our data processing pipeline links geologic map polygons to stratigraphic columns, external stratigraphic name lexicons, and geochronological intervals. ",
+          h("em", "Macrostrat"),
+          " is the world's largest homogenized geologic map database, ",
+          "with over 225 maps from data providers around the world at every scale. ",
+          "Our data processing pipeline links geologic map polygons to stratigraphic columns, geologic name lexicons, and geochronological intervals. ",
           "This enhancement of map data allows for direct links to the literature via ",
           h("a", { href: "https://xdd.wisc.edu", target: "_blank" }, "xDD"),
-          " (formly GeoDeepDive).",
+          ".",
         ]),
         h("p", [
           "Are you affiliated with a state or national geologic survey? ",

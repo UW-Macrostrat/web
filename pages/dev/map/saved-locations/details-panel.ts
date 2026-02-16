@@ -1,11 +1,8 @@
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import {
-  ExpansionPanel,
-  FeatureProperties,
-  LocationPanel,
-} from "@macrostrat/map-interface";
+import { FeatureProperties, LocationPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "@macrostrat/data-components";
 import { getColors } from "#/dev/map/rockd-strabospot/map-style";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { SaveLocationForm } from "./save-location";

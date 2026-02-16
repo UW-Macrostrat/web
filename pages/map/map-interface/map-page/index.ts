@@ -2,8 +2,8 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 // Import other components
 import { Spinner, Icon } from "@blueprintjs/core";
 import loadable from "@loadable/component";
-import { mapPagePrefix } from "@macrostrat-web/settings";
-import { MapAreaContainer, FossilCollections, LocationPanel } from "@macrostrat/map-interface";
+import { apiV2Prefix, mapPagePrefix } from "@macrostrat-web/settings";
+import { MapAreaContainer, FossilCollections } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import { Route, Routes } from "react-router-dom";
@@ -20,7 +20,8 @@ import { MenuPage } from "./menu";
 import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
 import { useState } from "react";
 
-import h from "./main.module.styl";
+import h from "./main.module.sass";
+import { MacrostratDataProvider } from "@macrostrat/data-provider";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const Menu = loadable(() => import("./menu"));
@@ -48,7 +49,7 @@ function MapPage({
 
   const ref = useRef<HTMLElement>(null);
   const [map, setMap] = useState(null);
-  console.log("MapPage mounted", map);  
+  console.log("MapPage mounted", map);
 
   const contextPanelOpen = useContextPanelOpen(baseRoute);
   const contextClass = useContextClass(baseRoute);
@@ -101,17 +102,21 @@ function MapPage({
 }
 
 function MapPageRoutes() {
-  return h(Routes, [
-    h(
-      Object.values(MenuPage).map((page) =>
-        h(Route, {
-          path: mapPagePrefix + "/" + page,
-          element: h(MapPage, { menuPage: page }),
-        })
-      )
-    ),
-    h(Route, { path: "*", element: h(MapPage) }),
-  ]);
+  return h(
+    MacrostratDataProvider,
+    { baseURL: apiV2Prefix },
+    h(Routes, [
+      h(
+        Object.values(MenuPage).map((page) =>
+          h(Route, {
+            path: mapPagePrefix + "/" + page,
+            element: h(MapPage, { menuPage: page }),
+          })
+        )
+      ),
+      h(Route, { path: "*", element: h(MapPage) }),
+    ])
+  );
 }
 
 function InfoDrawerHolder() {
@@ -129,19 +134,18 @@ function InfoDrawerHolder() {
     () => runAction({ type: "close-infodrawer" }),
     [runAction]
   );
-  
+
   if (pbdbData && pbdbData.length > 0) {
-    return h('div.fossil-container', [
-      h(FlexRow, { justifyContent: "space-between"}, [
-        h('h2.title', 'Fossil Collections (via PBDB)'),
+    return h("div.fossil-container", [
+      h(FlexRow, { justifyContent: "space-between" }, [
+        h("h2.title", "Fossil Collections (via PBDB)"),
         h(Icon, { icon: "cross", onClick: onClose, className: "close-icon" }),
       ]),
-      h('div.collections', [
-        h(FossilCollections, { data: pbdbData, expanded: true })
-      ])
+      h("div.collections", [
+        h(FossilCollections, { data: pbdbData, expanded: true }),
+      ]),
     ]);
   }
-  
 
   return h([
     // This is essentially a shim implementation of React Router

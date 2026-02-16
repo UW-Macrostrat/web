@@ -1,5 +1,4 @@
 import { SETTINGS } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
 import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
   PositionFocusState,
@@ -21,7 +20,6 @@ import {
   useAppActions,
   useAppState,
 } from "#/map/map-interface/app-state";
-import styles from "../main.module.styl";
 import { CrossSectionLine } from "./cross-section";
 import {
   FlyToPlaceManager,
@@ -30,8 +28,7 @@ import {
 } from "./map";
 import { getBaseMapStyle } from "@macrostrat-web/map-utils";
 import { buildOverlayStyle, applyAgeModelStyles } from "../map-styles";
-
-const h = hyper.styled(styles);
+import h from "../main.module.sass";
 
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 

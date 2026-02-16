@@ -27,7 +27,7 @@ import {
   useAppState,
 } from "#/map/map-interface/app-state";
 
-import h from "./settings-panel.module.styl";
+import h from "./settings-panel.module.sass";
 
 const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();

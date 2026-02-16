@@ -1,6 +1,4 @@
-/*
-This stylesheet the overall application page layout.
-*/
+// This stylesheet the overall application page layout.
 
 .panel-card
   padding: 10px
@@ -9,14 +7,14 @@ This stylesheet the overall application page layout.
     margin-bottom: 0
 
 .panel-container
-  display flex
+  display: flex
   flex-direction: column
 
-  & > div
-    pointer-events all
+  &>div
+    pointer-events: all
 
 .panel-title
-  font-size 16px
+  font-size: 16px
 
 .map-view-placeholder
   flex-grow: 1
@@ -27,7 +25,7 @@ This stylesheet the overall application page layout.
   justify-content: center
 
 .searchbar-holder
-  margin-bottom 0.5em
+  margin-bottom: 0.5em
 
 .right-panel
   width: 24em
@@ -64,7 +62,7 @@ This stylesheet the overall application page layout.
     // Fancy CSS to select all buttons _after_ the currently hovered one
 
     .tab-button:global(.bp6-active) ~ .tab-button :global(.bp6-button-text)
-      width 0
+      width: 0
       opacity: 0
       margin-left: -7px
 
@@ -89,7 +87,7 @@ This stylesheet the overall application page layout.
       width: 30px
 
     :global(.bp6-button-text)
-      width 0
+      width: 0
       opacity: 0
       margin-left: -7px
 
@@ -105,15 +103,15 @@ This stylesheet the overall application page layout.
         padding-left: 1em
 
 .menu-content
-  display flex
-  flex-direction column
+  display: flex
+  flex-direction: column
 
   .bp6-button-group
-    margin-bottom 4px
-  margin-bottom -8px
+    margin-bottom: 4px
+  margin-bottom: -8px
 
   hr
-    width 100%
+    width: 100%
 
 
 .macrostrat-map-container

@@ -8,7 +8,14 @@ import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
 import { Link, LithologyTag, PageBreadcrumbs } from "~/components";
 import { Card, Divider, Popover } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { AlphaTag, BetaTag, BlankImage, Footer, Loading, StratTag } from "~/components/general";
+import {
+  AlphaTag,
+  BetaTag,
+  BlankImage,
+  Footer,
+  Loading,
+  StratTag,
+} from "~/components/general";
 import { useState, useMemo, useEffect } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
@@ -18,7 +25,7 @@ import { LinkCard } from "~/components/cards";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
 import { ClientOnly } from "vike-react/ClientOnly";
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "@macrostrat/data-components";
 import { fetchPGData } from "~/_utils";
 
 export function titleCase(str) {
@@ -36,7 +43,13 @@ function ColumnMapContainer(props) {
     {
       load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
       fallback: h("div.loading", "Loading map..."),
-      deps: [props.columns, props.projectID, props.fossilData, props.filters, props.mapUrl],
+      deps: [
+        props.columns,
+        props.projectID,
+        props.fossilData,
+        props.filters,
+        props.mapUrl,
+      ],
     },
     (component) => h(component, props)
   );
@@ -104,10 +117,12 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
   if (!colData || !colData.features || colData.features.length === 0) return;
   const summary = summarize(colData.features || []);
 
-  let filters = []
+  let filters = [];
 
   if (resData?.lith_id) {
-    const legend_ids = useAPIResult(apiV2Prefix + "/mobile/map_filter?lith_id=" + resData.lith_id) 
+    const legend_ids = useAPIResult(
+      apiV2Prefix + "/mobile/map_filter?lith_id=" + resData.lith_id
+    );
 
     if (legend_ids) {
       filters.push({
@@ -115,13 +130,15 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
         type: "lithologies",
         id: resData.lith_id,
         name: resData.name,
-        legend_ids
-      })
+        legend_ids,
+      });
     }
   }
 
   if (resData?.concept_id) {
-    const legend_ids = useAPIResult(apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id)
+    const legend_ids = useAPIResult(
+      apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id
+    );
 
     if (legend_ids) {
       filters.push({
@@ -129,24 +146,22 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
         type: "strat_name_concepts",
         id: resData.concept_id,
         name: resData.name,
-        legend_ids
-      })
+        legend_ids,
+      });
     }
   }
 
   if (resData?.int_id) {
-    filters.push(
-      {
-        ...resData,
-        category: "interval",
-        type: "intervals",
-        id: resData.int_id,
-        name: resData.name,
-      }
-    )
+    filters.push({
+      ...resData,
+      category: "interval",
+      type: "intervals",
+      id: resData.int_id,
+      name: resData.name,
+    });
   }
 
-  console.log("Filters in ColumnsTable:", filters)
+  console.log("Filters in ColumnsTable:", filters);
 
   const { b_age, t_age } = resData;
 
@@ -430,11 +445,13 @@ export function ConceptInfo({ concept_id, showHeader }) {
     data;
 
   return h("div.concept-info", [
-    h.if(showHeader)('div.concept-head-container', [
-        h('h2.head', "Part of "),
-        h("a.concept-header", { href: "/lex/strat-concepts/" + concept_id }, [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })])
-      ]
-    ),
+    h.if(showHeader)("div.concept-head-container", [
+      h("h2.head", "Part of "),
+      h("a.concept-header", { href: "/lex/strat-concepts/" + concept_id }, [
+        h("h3", name),
+        h(StratTag, { isConcept: true, fontSize: "1.5em" }),
+      ]),
+    ]),
     h("div.author", [
       h("span.title", "Author: "),
       h("span.author-text", h(Link, { href: url, target: "_blank" }, author)),
@@ -865,7 +882,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
             cx: "50%",
             cy: "50%",
             fill: "#8884d8",
-            isAnimationActive: false
+            isAnimationActive: false,
           },
           data?.map((entry, index) =>
             h(Cell, {
@@ -931,19 +948,20 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   const label = hasColon ? data.label.split(": ")[1] : data.label;
   const group = hasColon ? data.label.split(": ")[0] : null;
 
-  const finalLabel = label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
+  const finalLabel =
+    label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "");
 
   return h("div.legend-item", [
-    group ? 
-      h(
-        Popover,
-        {
-          content: h('p.group', "Group: " + group),
-          isOpen: hovered,
-          position: 'left'
-        },
-        h("div.box", { style: { backgroundColor: data.color } })
-      ) 
+    group
+      ? h(
+          Popover,
+          {
+            content: h("p.group", "Group: " + group),
+            isOpen: hovered,
+            position: "left",
+          },
+          h("div.box", { style: { backgroundColor: data.color } })
+        )
       : h("div.box", { style: { backgroundColor: data.color } }),
     h(
       "a",
@@ -968,46 +986,45 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
         },
       },
       finalLabel
-    )
+    ),
   ]);
 }
 
 export function Units({ href }) {
-  return h(LinkCard, { 
-    title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
-      h('h4', "Columns"),
-      h(BetaTag)
-    ]), 
-    href: '/lex/units?' + href, 
-    className: "units-card" 
+  return h(LinkCard, {
+    title: h(FlexRow, { alignItems: "center", gap: ".5em" }, [
+      h("h4", "Columns"),
+      h(BetaTag),
+    ]),
+    href: "/lex/units?" + href,
+    className: "units-card",
   });
 }
 
 export function Maps({ href }) {
-  return h(LinkCard, { 
+  return h(LinkCard, {
     title: h(FlexRow, { justifyContent: "space-between" }, [
-      h(FlexRow, { alignItems: "center", gap: ".5em"}, [
-        h('h4', "Map Legends"),
+      h(FlexRow, { alignItems: "center", gap: ".5em" }, [
+        h("h4", "Map Legends"),
         h(BetaTag),
-      ]), 
-    ]), 
-    href: '/lex/legends?' + href,  
-    className: "maps-card" 
+      ]),
+    ]),
+    href: "/lex/legends?" + href,
+    className: "maps-card",
   });
 }
 
-
 export function Fossils({ href }) {
-  return h(LinkCard, { 
+  return h(LinkCard, {
     title: h(FlexRow, { justifyContent: "space-between" }, [
-      h(FlexRow, { alignItems: "center", gap: ".5em"}, [
-        h('h4', "Fossils"),
+      h(FlexRow, { alignItems: "center", gap: ".5em" }, [
+        h("h4", "Fossils"),
         h(BetaTag),
-      ]), 
-      h('p.via', "via PBDB")
-    ]), 
-    href: '/lex/fossils?' + href,  
-    className: "fossils-card" 
+      ]),
+      h("p.via", "via PBDB"),
+    ]),
+    href: "/lex/fossils?" + href,
+    className: "fossils-card",
   });
 }
 
@@ -1029,20 +1046,33 @@ export function MatchesPanel({ fossilsData, href }) {
   const showLoadMore = visibleCount < fossilsData.length;
 
   return h.if(fossilsData?.length > 0)("div.fossils-container", [
-    h(ExpansionPanel, { title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
-      h('h4', "Text Extractions"),
-      h(AlphaTag)
-    ]), className: "fossils-panel" }, [
-      h("div.fossils-list", [...visibleItems]),
-      h.if(showLoadMore)(
-        "div.load-more-wrapper",
-        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
-      ),
-    ]),
+    h(
+      ExpansionPanel,
+      {
+        title: h(FlexRow, { alignItems: "center", gap: ".5em" }, [
+          h("h4", "Text Extractions"),
+          h(AlphaTag),
+        ]),
+        className: "fossils-panel",
+      },
+      [
+        h("div.fossils-list", [...visibleItems]),
+        h.if(showLoadMore)(
+          "div.load-more-wrapper",
+          h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
+        ),
+      ]
+    ),
   ]);
 }
 
-export function TextExtractions({ lith_id, lith_att_id, strat_name_id, concept_id, href }) {
+export function TextExtractions({
+  lith_id,
+  lith_att_id,
+  strat_name_id,
+  concept_id,
+  href,
+}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -1080,10 +1110,14 @@ function Match({ data, href }) {
   );
 
   return h("div", { class: "match-item" }, [
-    h.if(isDev)("a", { href: "/integrations/xdd/sources/" + source + "?" + href }, "View source"),
+    h.if(isDev)(
+      "a",
+      { href: "/integrations/xdd/sources/" + source + "?" + href },
+      "View source"
+    ),
     h(FlexRow, { className: "match-text", alignItems: "center" }, [
       h("p.text", beginning),
-      h(LithologyTag, { data: match, className: 'match-tag' }),
+      h(LithologyTag, { data: match, className: "match-tag" }),
       h("p.text", end),
     ]),
   ]);

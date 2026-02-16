@@ -1,8 +1,8 @@
+import { ColumnNavigationMap } from "@macrostrat/column-views";
 import {
-  ColumnNavigationMap,
   MacrostratDataProvider,
   useMacrostratColumns,
-} from "@macrostrat/column-views";
+} from "@macrostrat/data-provider";
 import h from "@macrostrat/hyper";
 import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
@@ -45,7 +45,6 @@ function ColumnsMapInner({
         style: { height: "100%" },
         accessToken: mapboxAccessToken,
         onSelectColumn: (col) => {
-          console.log(col, projectID);
           if (col == null) return;
           let url = `/columns/${col}`;
           if (projectID != null) {
@@ -65,8 +64,6 @@ function FitBounds({ columnData }) {
   useMapStyleOperator(
     (map) => {
       if (!map || columnData.length === 0) return;
-
-      console.log(columnData);
 
       // Extract coordinates
       const coords = columnData

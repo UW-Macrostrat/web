@@ -57,20 +57,20 @@ export function ModalUnitPanel(props) {
     columnUnits: unitData,
     features,
     onClickItem: (e, unit) => {
-      if(unit?.lith_id) {
-        window.open('/lex/lithologies/' + unit.lith_id, '_self');
+      if (unit?.lith_id) {
+        window.open("/lex/lithologies/" + unit.lith_id, "_self");
       }
 
-      if(unit?.environ_id) {
-        window.open('/lex/environments/' + unit.environ_id, '_self');
+      if (unit?.environ_id) {
+        window.open("/lex/environments/" + unit.environ_id, "_self");
       }
 
-      if(unit?.int_id) {
-        window.open('/lex/intervals/' + unit.int_id, '_self');
+      if (unit?.int_id) {
+        window.open("/lex/intervals/" + unit.int_id, "_self");
       }
 
-      if(unit?.strat_name_id) {
-        window.open('/lex/strat-names/' + unit.strat_name_id, '_self');
+      if (unit?.strat_name_id) {
+        window.open("/lex/strat-names/" + unit.strat_name_id, "_self");
       }
     },
   });
