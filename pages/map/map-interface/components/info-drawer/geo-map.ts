@@ -16,7 +16,7 @@ function LongTextField(props) {
 function GeoMapLines(props) {
   const { source } = props;
   if (!source.lines || source.lines.length == 0) {
-    return h("div", [""]);
+    return null;
   }
   const { lines } = source;
   return h(

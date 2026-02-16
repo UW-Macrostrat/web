@@ -1,11 +1,9 @@
 import { Route, Routes } from "react-router-dom";
-import { useAppActions } from "#/map/map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
 import { MacrostratLinkedData } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
-import { xDDExpansionPanel } from "@macrostrat/data-components";
 import { XddExpansionContainer } from "./xdd-panel";
-import { useAppState } from "#/map/map-interface/app-state";
+import { useAppActions, useAppState } from "#/map/map-interface/app-state";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
