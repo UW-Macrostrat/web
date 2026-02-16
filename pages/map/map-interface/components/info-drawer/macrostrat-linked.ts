@@ -8,6 +8,8 @@ import {
   TagField,
   Value,
   Parenthetical,
+  useInteractionProps,
+  isClickable,
 } from "@macrostrat/data-components";
 import {
   AgeField,
@@ -89,14 +91,13 @@ function AgeInformation(props) {
   const { source, mapInfo } = props;
   const { macrostrat } = source;
 
-  if (!macrostrat?.b_age) return h(MapAgeInfo, { mapInfo });
+  if (!macrostrat?.b_age) return h(UnitAgeInfo, { mapInfo });
 
   return h(MacrostratAgeInfo, { macrostrat, mapInfo });
 }
 
-function MapAgeInfo(props) {
+function UnitAgeInfo(props) {
   const { mapInfo } = props;
-  console.log(mapInfo);
   const unit = {
     b_int_id: mapInfo.mapData[0].b_int.int_id,
     t_int_id: mapInfo.mapData[0].t_int.int_id,
@@ -104,19 +105,6 @@ function MapAgeInfo(props) {
   return h(DataField, { label: "Age" }, [
     h(IntervalProportions, { unit, showAgeRange: true, multiLine: true }),
     h("p.description", "Based on geologic map description."),
-  ]);
-}
-
-function MacrostratAgeInfoCore({ macrostrat }) {
-  const { b_age, t_age, b_int, t_int } = macrostrat;
-
-  const unit = { b_int_id: b_int.int_id, t_int_id: t_int.int_id, b_age, t_age };
-
-  return h(AgeField, { unit }, [
-    h(Parenthetical, h(Duration, { value: unit.b_age - unit.t_age })),
-    h(IntervalProportions, {
-      unit,
-    }),
   ]);
 }
 
@@ -132,6 +120,19 @@ function MacrostratAgeInfo(props) {
   );
 }
 
+function MacrostratAgeInfoCore({ macrostrat }) {
+  const { b_age, t_age, b_int, t_int } = macrostrat;
+
+  const unit = { b_int_id: b_int.int_id, t_int_id: t_int.int_id, b_age, t_age };
+
+  return h(AgeField, { unit }, [
+    h(Parenthetical, h(Duration, { value: unit.b_age - unit.t_age })),
+    h(IntervalProportions, {
+      unit,
+    }),
+  ]);
+}
+
 function MatchBasis(props) {
   const { source } = props;
   if (!source.macrostrat?.strat_names) return null;
@@ -145,24 +146,32 @@ function MatchBasis(props) {
         h("div.description", "Matched unit"),
       ]),
     },
-    h(DataField, { label: "All matched names" }, [
-      source.macrostrat.strat_names.map((name, i) => {
-        let lastElement: boolean =
-          i == source.macrostrat.strat_names.length - 1;
-        return h("span", { key: i }, [
-          h(
-            "a.externalLink",
-            {
-              href: "/sift/#/strat_name/" + name.strat_name_id,
-              key: i,
-            },
-            [name.rank_name]
-          ),
-          h.if(!lastElement)([", "]),
-        ]);
-      }),
-    ])
+    h(StratNamesField, { stratNames: source.macrostrat.strat_names })
   );
+}
+
+function StratNamesField(props: {
+  stratNames: { strat_name_id: number; rank_name: string }[];
+}) {
+  /** Handling for stratigraphic name field */
+  const { stratNames } = props;
+
+  if (stratNames == null || stratNames.length == 0) return null;
+
+  const names = stratNames.map((s) => {
+    return h(StratNameVal, {
+      strat_name_id: s.strat_name_id,
+      name: s.rank_name,
+    });
+  });
+
+  return h(DataField, { label: "All matched names" }, names);
+}
+
+function StratNameVal({ strat_name_id, name }) {
+  const interactionProps = useInteractionProps({ strat_name_id });
+  const clickable = isClickable(interactionProps);
+  return h(clickable ? "a" : "span", { ...interactionProps }, name);
 }
 
 function Thickness(props) {
