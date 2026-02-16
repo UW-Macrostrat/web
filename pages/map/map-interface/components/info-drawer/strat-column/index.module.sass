@@ -11,14 +11,19 @@
 .unit-details-panel
   position: sticky
   bottom: 0
+  // Note: this is a bit hacky way to sync the panel color schemes
+  --panel-secondary-background-color: var(--accent-color)
   background-color: var(--panel-background-color)
-  max-height: 40vh
+  border-top: 1px solid var(--panel-rule-color)
+  height: 30vh
+
   font-size: 0.9em
-  min-height: 200px
+  //min-height: 200px
 
 .strat-column-outer
   display: flex
   flex-direction: column
+  pointer-events: auto
 
 .strat-column-header
   // TODO: align with expansion panel header styles

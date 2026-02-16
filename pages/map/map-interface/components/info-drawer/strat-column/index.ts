@@ -45,7 +45,7 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
         })
       ),
     ]),
-    h("div.strat-column-view", [
+    h("div.strat-column-container", [
       h(Column, {
         units,
         unitComponent: ColoredUnitComponent,
@@ -54,6 +54,7 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
         unconformityLabels: true,
         width: 280,
         columnWidth: 240,
+        allowUnitSelection: true,
         selectedUnit: selectedUnitID,
         onUnitSelected: setSelectedUnitID,
       }),
