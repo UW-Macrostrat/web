@@ -3,7 +3,10 @@
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import fetch from "cross-fetch";
 
-import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
+import {
+  assembleColumnSummary,
+  ColumnSummary,
+} from "#/map/map-interface/app-state/handlers/columns";
 
 export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
@@ -25,8 +28,8 @@ export async function data(pageContext) {
   const responses = await Promise.all([
     getData(
       "columns",
-      { col_id, project_id: projectID, format: "geojson" },
-      (res) => res?.features
+      { col_id, project_id: projectID, format: "json", response: "long" },
+      (res) => res
     ),
     getData(
       `units`,
@@ -42,17 +45,7 @@ export async function data(pageContext) {
 
   const [columns, units]: [any, any] = responses;
 
-  const col = columns?.[0] ?? {};
-
-  if (!columns?.[0]?.properties) {
-    console.warn("Column has no properties:", columns);
-  }
-
-  const columnInfo: ColumnSummary = {
-    ...(col.properties ?? {}),
-    geometry: col.geometry ?? null,
-    units: units ?? [],
-  };
+  const columnInfo: ColumnSummary = assembleColumnSummary(columns[0], units);
   return {
     columnInfo,
     linkPrefix,
@@ -61,7 +54,6 @@ export async function data(pageContext) {
 }
 
 async function getAndUnwrap<T>(url: string): Promise<T> {
-  console.log("Fetching", url);
   const res = await fetch(url);
   const res1 = await res.json();
   return res1.success?.data ?? null;

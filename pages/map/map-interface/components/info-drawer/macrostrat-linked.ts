@@ -19,6 +19,41 @@ import { AgeRefinementPlot } from "./age-refinement-plot.ts";
 import h from "./main.module.sass";
 import type { ReactNode } from "react";
 
+import { useAppState } from "#/map/map-interface/app-state";
+import { Spinner } from "@blueprintjs/core";
+import { Link } from "react-router-dom";
+
+function RegionalStratigraphy(props) {
+  const { mapInfo, columnInfo } = props;
+  if (mapInfo?.mapData == null) return null;
+
+  const fetchingColumnInfo = useAppState((s) => s.core.fetchingColumnInfo);
+
+  return h(
+    ExpansionPanel,
+    {
+      classes: { root: "regional-panel" },
+      title: "Regional stratigraphy",
+      expanded: true,
+    },
+    [
+      h.if(fetchingColumnInfo)(Spinner),
+      h.if(columnInfo != null)(BasicColumnInfo, { columnInfo }),
+    ]
+  );
+}
+
+function BasicColumnInfo({ columnInfo }) {
+  return h("div.column-data", [
+    h("h4", [
+      h(Link, { to: "column" }, columnInfo.col_name),
+      h.if(columnInfo.col_group)([" — ", columnInfo.col_group]),
+    ]),
+  ]);
+}
+
+export { RegionalStratigraphy };
+
 export function MacrostratLinkedData(props) {
   const { mapInfo, expanded, source } = props;
 
@@ -39,7 +74,7 @@ export function MacrostratLinkedData(props) {
       h(LithsAndClasses, { source }),
       h(Environments, { source }),
       h(Economy, { source }),
-      h(FossilInfo, { source }),
+      h(MapFossilInfo, { source }),
     ]
   );
 }
@@ -155,18 +190,25 @@ function addSeparators(values: ReactNode[]) {
   return result;
 }
 
-function FossilInfo(props) {
+function MapFossilInfo(props) {
   const { source } = props;
   const { macrostrat } = source;
   if (macrostrat == null) return null;
 
-  const values = {
+  return h(FossilInfo, {
     collections: macrostrat.pbdb_collections,
     occurrences: macrostrat.pbdb_occs,
-  };
+  });
+}
 
+export function FossilInfo(props): {
+  collections: number;
+  occurrences: number;
+} {
   // May not be any fossil info
-  if (!values.collections && !values.occurrences) return null;
+  const { collections, occurrences } = props;
+  if (!collections && !occurrences) return null;
+  const values = { collections, occurrences };
 
   const children = addSeparators(
     Object.entries(values)

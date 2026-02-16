@@ -1,4 +1,4 @@
-import { MapLayer, PositionFocusState } from "../map";
+import { MapLayer } from "../map";
 import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "../../handlers/filters";

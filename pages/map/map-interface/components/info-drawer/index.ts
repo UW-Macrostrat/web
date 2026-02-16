@@ -1,13 +1,15 @@
 import { Route, Routes } from "react-router-dom";
 import { LocationPanel } from "@macrostrat/map-interface";
-import { MacrostratLinkedData } from "./macrostrat-linked";
+import {
+  MacrostratLinkedData,
+  RegionalStratigraphy,
+} from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
 import { useAppActions, useAppState } from "#/map/map-interface/app-state";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
-import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography.ts";
 import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 
@@ -30,42 +32,39 @@ function InfoDrawer(props) {
 
   const position = useAppState((state) => state.core.infoMarkerPosition);
   const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
+  const columnInfo = useAppState((state) => state.core.columnInfo);
 
   return h(
-    LocationPanel,
-    {
-      className: classNames("info-drawer", className),
-      position,
-      elevation: mapInfo.elevation,
-      zoom,
-      onClose,
-      loading: fetchingMapInfo,
-      showCopyPositionButton: true,
-      contentContainer: "div.infodrawer-content-holder",
-    },
+    MacrostratInteractionProvider,
+    { linkDomain: "/" },
     h(
-      LoadingArea,
-      { loaded: !fetchingMapInfo, className: "infodrawer-content" },
-      h.if(!fetchingMapInfo)(InfoDrawerInterior)
+      LocationPanel,
+      {
+        className: classNames("info-drawer", className),
+        position,
+        elevation: mapInfo.elevation,
+        zoom,
+        onClose,
+        loading: fetchingMapInfo,
+        showCopyPositionButton: true,
+        contentContainer: "div.infodrawer-content-holder",
+      },
+      h(
+        LoadingArea,
+        { loaded: !fetchingMapInfo, className: "infodrawer-content" },
+        h(Routes, [
+          h(Route, {
+            path: "/column",
+            element: h(StratColumn, { columnInfo }),
+          }),
+          h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
+        ])
+      )
     )
   );
 }
 
-function InfoDrawerInterior(props) {
-  const columnInfo = useAppState((state) => state.core.columnInfo);
-  return h(Routes, [
-    h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
-    //h(Route, { path: "/locations", element: h("div", "hello world") }),
-
-    h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
-  ]);
-}
-
 function InfoDrawerMainPanel(props) {
-  return h(MacrostratInteractionProvider, h(_InfoDrawerMainPanel, props));
-}
-
-function _InfoDrawerMainPanel(props) {
   const mapInfo = useAppState((state) => state.core.mapInfo);
   const columnInfo = useAppState((state) => state.core.columnInfo);
 

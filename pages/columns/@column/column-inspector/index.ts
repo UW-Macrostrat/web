@@ -21,9 +21,9 @@ import { MacrostratDataProvider } from "@macrostrat/data-provider";
 import { StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
 
-import { AlphaTag, BetaTag, PageBreadcrumbs } from "~/components";
+import { AlphaTag, PageBreadcrumbs } from "~/components";
 import { onDemand } from "~/_utils";
-import { CollapsePanel, ErrorBoundary } from "@macrostrat/ui-components";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 import { DataField, Parenthetical } from "@macrostrat/data-components";
 import { ColumnAxisType } from "@macrostrat/column-components";
 import { atom, useAtom, useAtomValue, useSetAtom, WritableAtom } from "jotai";
@@ -37,6 +37,7 @@ import {
 } from "@blueprintjs/core";
 import { useHydrateAtoms } from "jotai/utils";
 import { SGPMeasurementsColumn } from "./sgp-facet";
+import { ColumnExtData } from "./column-info";
 
 interface ColumnHashState {
   unit?: number;
@@ -420,12 +421,14 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
 function ColumnGlobalModal({ data }) {
   return h("div.column-assistant", [
     h(ColumnBasicInfo, { data }),
+    h(ColumnExtData, { columnInfo: data }),
     h(ColumnSettingsPanel),
   ]);
 }
 
 function ColumnBasicInfo({ data, showColumnID = true }) {
   if (data == null) return null;
+  console.log(data);
   return h("div.column-info", [
     h("div.column-title-row", [
       h("h1", data.col_name),
@@ -436,7 +439,9 @@ function ColumnBasicInfo({ data, showColumnID = true }) {
       label: "Project",
       value: data.project_id,
     }),
-    h(DataField, { row: true, label: "Group", value: data.col_group }),
+    h(DataField, { row: true, label: "Group", value: data.col_group }, [
+      h(Identifier, { id: data.col_group_id }),
+    ]),
     h(ReferencesField, {
       refs: data.refs,
       inline: false,
