@@ -1,9 +1,4 @@
-import {
-  Collapse,
-  Radio,
-  RadioGroup,
-  Spinner,
-} from "@blueprintjs/core";
+import { Collapse, Radio, RadioGroup, Spinner } from "@blueprintjs/core";
 import {
   tileserverDomain,
   apiDomain,
@@ -39,14 +34,17 @@ import { usePageProps } from "~/renderer/usePageProps";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
-import { fetchMapInfo, fetchColumnInfo, fetchFossilInfo, fetchXddInfo } from "./fetch";
+import {
+  fetchMapInfo,
+  fetchColumnInfo,
+  fetchFossilInfo,
+  fetchXddInfo,
+} from "./fetch";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { 
-  FossilCollections, 
-  XddExpansion, 
-  MacrostratLinkedData, 
-  Physiography, 
-  RegionalStratigraphy  
+import {
+  MacrostratLinkedData,
+  Physiography,
+  RegionalStratigraphy,
 } from "@macrostrat/map-interface";
 
 interface StyleOpts {
@@ -93,10 +91,10 @@ function buildMacrostratStyle({
       },
     },
     layers: buildMacrostratStyleLayers({
-        fillOpacity,
-        strokeOpacity,
-        lineOpacity,
-      })
+      fillOpacity,
+      strokeOpacity,
+      lineOpacity,
+    }),
   };
 }
 
@@ -158,14 +156,9 @@ function buildOverlayStyle({
 function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
   // for infinity
   if (bounds[0] > 180) {
-    return [
-      -90,
-      -90,
-      90,
-      90
-    ]
+    return [-90, -90, 90, 90];
   }
-  
+
   if (bounds[1] < -90) bounds[1] = -90;
   if (bounds[3] > 90) bounds[3] = 90;
   return bounds;
@@ -200,7 +193,9 @@ export function Page() {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
   }, [map.geometry]);
 
-  const [layer, setLayer] = useState(localStorage.getItem('basemap') || Basemap.None);
+  const [layer, setLayer] = useState(
+    localStorage.getItem("basemap") || Basemap.None
+  );
   const [style, setStyle] = useState(null);
   // Basemap style
   useEffect(() => {
@@ -220,7 +215,7 @@ export function Page() {
 
   // Info panel
   const [mapRef, setMapRef] = useState();
-  
+
   const handleMapLoaded = (map) => {
     setMapRef(map);
   };
@@ -345,7 +340,10 @@ export function Page() {
         adaptiveWidth: true,
       },
       detailPanelStyle: DetailPanelStyle.FIXED,
-      detailPanel: selectedLocation != null ? h(InfoDrawer, { selectedLocation, mapRef, setSelectedLocation }) : h(MapLegendPanel, map.properties),
+      detailPanel:
+        selectedLocation != null
+          ? h(InfoDrawer, { selectedLocation, mapRef, setSelectedLocation })
+          : h(MapLegendPanel, map.properties),
     },
     [
       h(
@@ -387,9 +385,21 @@ function BaseLayerSelector({ layer, setLayer }) {
         },
       },
       [
-        h(Radio, { label: "Satellite", value: Basemap.Satellite, onClick: () => localStorage.setItem('basemap', Basemap.Satellite) }),
-        h(Radio, { label: "Basic", value: Basemap.Basic, onClick: () => localStorage.setItem('basemap', Basemap.Basic) }),
-        h(Radio, { label: "None", value: Basemap.None, onClick: () => localStorage.setItem('basemap', Basemap.None) }),
+        h(Radio, {
+          label: "Satellite",
+          value: Basemap.Satellite,
+          onClick: () => localStorage.setItem("basemap", Basemap.Satellite),
+        }),
+        h(Radio, {
+          label: "Basic",
+          value: Basemap.Basic,
+          onClick: () => localStorage.setItem("basemap", Basemap.Basic),
+        }),
+        h(Radio, {
+          label: "None",
+          value: Basemap.None,
+          onClick: () => localStorage.setItem("basemap", Basemap.None),
+        }),
       ]
     ),
   ]);
@@ -403,7 +413,7 @@ function MapLegendPanel(params) {
     h(
       "div.map-legend-container",
       h("div.map-legend", [
-        h(PageBreadcrumbs, { title: params.name}),
+        h(PageBreadcrumbs, { title: params.name }),
         h("div.legend-header", [
           h(ErrorBoundary, [
             h(MapReference, { reference: params, showSourceID: false }),
@@ -440,7 +450,7 @@ function MapLegendPanel(params) {
 
 function MapLegendData({ source_id }) {
   const legendData = useAPIResult(apiDomain + "/api/pg/new_legend", {
-    source_id: 'eq.' + source_id,
+    source_id: "eq." + source_id,
   });
 
   if (legendData == null) return h(Spinner);
@@ -459,16 +469,16 @@ function LegendEntry({ data }) {
   const { name, color, ...rest } = data;
   const {
     legend_id,
-    source_id, 
+    source_id,
     t_interval,
     b_interval,
     //strat_name,
     //strat_name_id,
     unit_id, // need column id
-    area, 
-    tiny_area, 
-    small_area, 
-    medium_area, 
+    area,
+    tiny_area,
+    small_area,
+    medium_area,
     large_area,
     lith,
     // lith_classes,
@@ -510,7 +520,7 @@ function LegendEntry({ data }) {
 
   let AgeTag = null;
 
-  if(!min_age_interval && !max_age_interval) {
+  if (!min_age_interval && !max_age_interval) {
     AgeTag = h(LithologyTag, {
       data: {
         name: age,
@@ -522,7 +532,7 @@ function LegendEntry({ data }) {
         name: min_age_interval.name,
         color: min_age_interval.color,
       },
-      href: `/lex/intervals/${min_age_interval.int_id}`
+      href: `/lex/intervals/${min_age_interval.int_id}`,
     });
   } else if (!min_age_interval && max_age_interval) {
     AgeTag = h(LithologyTag, {
@@ -530,16 +540,16 @@ function LegendEntry({ data }) {
         name: max_age_interval.name,
         color: max_age_interval.color,
       },
-      href: `/lex/intervals/${max_age_interval.int_id}`
+      href: `/lex/intervals/${max_age_interval.int_id}`,
     });
   } else {
-    AgeTag = h('div.age-interval', [
+    AgeTag = h("div.age-interval", [
       h(LithologyTag, {
         data: {
           name: min_age_interval.name,
           color: min_age_interval.color,
         },
-        href: `/lex/intervals/${min_age_interval.int_id}`
+        href: `/lex/intervals/${min_age_interval.int_id}`,
       }),
       " - ",
       h(LithologyTag, {
@@ -547,9 +557,9 @@ function LegendEntry({ data }) {
           name: max_age_interval.name,
           color: max_age_interval.color,
         },
-        href: `/lex/intervals/${max_age_interval.int_id}`
+        href: `/lex/intervals/${max_age_interval.int_id}`,
       }),
-    ])
+    ]);
   }
 
   return h("div.legend-entry", [
@@ -557,65 +567,59 @@ function LegendEntry({ data }) {
     h(Collapse, { isOpen }, [
       h("div.legend-details", [
         h.if(descrip)("p.legend-description", descrip),
-        h.if(strat_names)(
-          DataField,
-          {
-            label: "Stratigraphic names: ",
-            value: h(LithologyList, { 
-              lithologies: strat_names?.map((sn) => ({ name: sn.strat_name, id: sn.strat_name_id })),
-              getItemHref: (sn) => `/lex/strat-names/${sn.id}`
-            }),
-          }
-        ),
-        h.if(lith_classes?.length > 0)(
-          DataField,
-          {
-            label: "Lithology classes: ",
-            value: h(LithologyList, { lithologies: lith_classes?.map((l) => ({ name: l })) })
-          }
-        ),
-        h.if(lith_types?.length > 0)(
-          DataField,
-          {
-            label: "Lithology types: ",
-            value: h(LithologyList, { lithologies: lith_types?.map((l) => ({ name: l })) })
-          }
-        ),
-        h.if(units)(
-          DataField,
-          {
-            label: "Units: ",
-            value: h(LithologyList, { 
-              lithologies: units?.map((unit) => ({ name: unit.name, unit_id: unit.unit_id, col_id: unit.col_id })),
-              getItemHref: (unit) => `/columns/${unit.col_id}#unit=${unit.unit_id}`
-            })
-          }
-        ),
-        h.if(lithologies)(
-          DataField,
-          {
-            label: "Lithologies: ",
-            value: h(LithologyList, { 
-              lithologies: lithologies?.map((lith) => ({ name: lith.lith_name, ...lith })),
-              getItemHref: (lith) => `/lex/lithologies/${lith.lith_id}`
-            })
-          }
-        ),
-        h.if(age)(
-          DataField,
-          {
-            label: "Age: ",
-            value: AgeTag,
-          }
-        ),
-        h.if(area)(
-          DataField,
-          {
-            label: "Area: ",
-            value: area.toLocaleString(),
-            unit: "km²",
-          }
-        ),
+        h.if(strat_names)(DataField, {
+          label: "Stratigraphic names: ",
+          value: h(LithologyList, {
+            lithologies: strat_names?.map((sn) => ({
+              name: sn.strat_name,
+              id: sn.strat_name_id,
+            })),
+            getItemHref: (sn) => `/lex/strat-names/${sn.id}`,
+          }),
+        }),
+        h.if(lith_classes?.length > 0)(DataField, {
+          label: "Lithology classes: ",
+          value: h(LithologyList, {
+            lithologies: lith_classes?.map((l) => ({ name: l })),
+          }),
+        }),
+        h.if(lith_types?.length > 0)(DataField, {
+          label: "Lithology types: ",
+          value: h(LithologyList, {
+            lithologies: lith_types?.map((l) => ({ name: l })),
+          }),
+        }),
+        h.if(units)(DataField, {
+          label: "Units: ",
+          value: h(LithologyList, {
+            lithologies: units?.map((unit) => ({
+              name: unit.name,
+              unit_id: unit.unit_id,
+              col_id: unit.col_id,
+            })),
+            getItemHref: (unit) =>
+              `/columns/${unit.col_id}#unit=${unit.unit_id}`,
+          }),
+        }),
+        h.if(lithologies)(DataField, {
+          label: "Lithologies: ",
+          value: h(LithologyList, {
+            lithologies: lithologies?.map((lith) => ({
+              name: lith.lith_name,
+              ...lith,
+            })),
+            getItemHref: (lith) => `/lex/lithologies/${lith.lith_id}`,
+          }),
+        }),
+        h.if(age)(DataField, {
+          label: "Age: ",
+          value: AgeTag,
+        }),
+        h.if(area)(DataField, {
+          label: "Area: ",
+          value: area.toLocaleString(),
+          unit: "km²",
+        }),
       ]),
     ]),
   ]);
@@ -645,17 +649,15 @@ export async function refreshPBDB(map, pointsRef, filters) {
   pointsRef.current = await getPBDBData(filters, bounds, zoom, maxClusterZoom);
 
   console.log("PBDB points fetched", pointsRef.current);
-  console.log("sourceS",map.getStyle().sources);
-
+  console.log("sourceS", map.getStyle().sources);
 
   // Show or hide the proper PBDB layers
   // TODO: this is a bit janky
 
-    map.getSource("pbdb-points").setData(pointsRef.current);
+  map.getSource("pbdb-points").setData(pointsRef.current);
 
-    map.setLayoutProperty("pbdb-points", "visibility", "visible");
+  map.setLayoutProperty("pbdb-points", "visibility", "visible");
 }
-
 
 export async function getPBDBData(
   filters: FilterData[],
@@ -800,27 +802,32 @@ function InfoDrawer({ selectedLocation, mapRef, setSelectedLocation }) {
         };
 
   return h(
-    LocationPanel, 
+    LocationPanel,
     {
       position: selectedLocation,
-      onClose: () => setSelectedLocation(null)
+      onClose: () => setSelectedLocation(null),
     },
     [
-      mapInfo ? 
-      [ 
-        h(RegionalStratigraphy, { mapInfo, columnInfo, columnURL: "/columns" }),
-        h(Physiography, { mapInfo }),
-        h(MacrostratLinkedData, { 
-          mapInfo, 
-          source,
-          stratNameURL: "/lex/strat-names",
-          environmentURL: "/lex/environments",
-          intervalURL: "/lex/intervals",
-          lithologyURL: "/lex/lithologies",
-        }),
-      ] : null,
-      h(XddExpansion, { xddInfo }),
-      h(FossilCollections, { fossilInfo }),
+      mapInfo
+        ? [
+            h(RegionalStratigraphy, {
+              mapInfo,
+              columnInfo,
+              columnURL: "/columns",
+            }),
+            h(Physiography, { mapInfo }),
+            h(MacrostratLinkedData, {
+              mapInfo,
+              source,
+              stratNameURL: "/lex/strat-names",
+              environmentURL: "/lex/environments",
+              intervalURL: "/lex/intervals",
+              lithologyURL: "/lex/lithologies",
+            }),
+          ]
+        : null,
+      //h(XddExpansion, { xddInfo }),
+      //h(FossilCollections, { fossilInfo }),
     ]
-  )
+  );
 }

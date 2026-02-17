@@ -1,19 +1,13 @@
 import { geoCentroid, geoStereographic, geoNaturalEarth1 } from "d3-geo";
-import {
-  ResizableMapFrame,
-  useMacrostratColumns,
-} from "@macrostrat/column-views";
+import { ResizableMapFrame } from "@macrostrat/column-views";
 import {
   ColumnKeyboardNavigation,
   ColumnFeatures,
-  useMacrostratColumns,
   CurrentColumn,
 } from "@macrostrat/column-views";
+import { useMacrostratColumns } from "@macrostrat/data-provider";
 import { useMemo, forwardRef } from "react";
-import hyper from "@macrostrat/hyper";
-import styles from "./age-model.module.styl";
-
-const h = hyper.styled(styles);
+import h from "./age-model.module.styl";
 
 function useFilteredColumns({ project_id }) {
   // Filter columns by whether they contain any units

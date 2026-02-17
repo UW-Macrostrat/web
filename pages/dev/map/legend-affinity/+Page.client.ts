@@ -2,7 +2,6 @@ import h from "./main.module.sass";
 import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { Select, SelectProps } from "@blueprintjs/select";
-import mapboxgl from "mapbox-gl";
 import { useCallback, useState, useEffect, useMemo } from "react";
 import {
   MapMarker,
@@ -16,10 +15,10 @@ import {
   TileInfo,
   MapMovedReporter,
   PanelCard,
-  ExpandableDetailsPanel,
   getMapPositionForHash,
   applyMapPositionToHash,
 } from "@macrostrat/map-interface";
+import { ExpandableDetailsPanel } from "@macrostrat/data-components";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { PageBreadcrumbs } from "~/components";
 import { Button, Collapse, InputGroup } from "@blueprintjs/core";
