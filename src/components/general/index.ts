@@ -1,7 +1,7 @@
 import hyper from "@macrostrat/hyper";
 import { StickyHeader } from "~/components";
 import { Spinner, Icon, Card, Popover, Tag } from "@blueprintjs/core";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { DarkModeButton, useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { postgrestPrefix, webAssetsPrefix } from "@macrostrat-web/settings";
 import styles from "./layout.module.sass";
@@ -162,6 +162,7 @@ export function Footer() {
         h("div", { className: "funding-line" }, "EAR-1948843"),
         h("div", { className: "funding-line" }, "ICER-1928323"),
         h("div", { className: "funding-line" }, "UW-Madison Dept. Geoscience"),
+        h(DarkModeButton, { className: "dark-mode-button", showText: true }),
       ]),
     ]),
   ]);

@@ -91,10 +91,7 @@ function LexItemPageInner(props: LexItemPageProps) {
 
   return h("div", [
     h(ContentPage, { className: "int-page" }, [
-      h("div.page-header", [
-        h(PageBreadcrumbs, { title: "#" + id }),
-        h(DarkModeButton, { className: "dark-mode-button", showText: true }),
-      ]),
+      h("div.page-header", [h(PageBreadcrumbs, { title: "#" + id })]),
       header ??
         h(LexItemHeader, {
           resData,

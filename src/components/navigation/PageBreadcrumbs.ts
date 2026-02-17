@@ -2,21 +2,22 @@ import type { PageContext } from "vike/types";
 import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
 import React, { useMemo } from "react";
-import { MacrostratIcon, MacrostratLogoLink } from "~/components";
-import hyper from "@macrostrat/hyper";
+import { MacrostratIcon } from "~/components";
 
 import h from "./breadcrumbs.module.sass";
 
-export function PageBreadcrumbs({ showLogo = true, title }) {
+export function PageBreadcrumbs({ showLogo = true, title = null }) {
   const ctx = usePageContext();
+
+  const _title = title ?? ctx.config.title;
 
   const items = useMemo(() => {
     let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
-    if (title != null) {
-      items[items.length - 1].text = title;
+    if (_title != null) {
+      items[items.length - 1].text = _title;
     }
     return items;
-  }, [ctx.urlPathname, title]);
+  }, [ctx.urlPathname, _title]);
 
   return h(PageBreadcrumbsInternal, {
     showLogo,
@@ -59,6 +60,20 @@ export function buildBreadcrumbs(
   const items: Item[] = [];
   let children = [routes];
   let route = "";
+
+  //console.log(ctx.parentData);
+  // console.log(ctx.config);
+  // console.log(ctx._routeMatch);
+  // console.log(parts, children);
+  // console.log(ctx._routeMatch.pageId);
+  // console.log(ctx.pages);
+  // console.log(ctx.pages[ctx._routeMatch.pageId]);
+  //console.log(ctx.urlParsed, ctx);
+
+  //const page = ctx.pages[ctx._routeMatch.pageId];
+  //console.log("title", page?.config.title);
+
+  //console.log("Building breadcrumbs for", currentPath);
 
   for (const urlPart of parts) {
     // if (children == null) {

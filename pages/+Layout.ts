@@ -16,7 +16,7 @@ import h from "@macrostrat/hyper";
 export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
   const { exports = {}, config, user } = pageContext;
-  const pageStyle = exports?.pageStyle ?? "fullscreen";
+  const pageStyle = exports?.pageStyle ?? "content2";
 
   const layout = pageLayouts[pageStyle] ?? `div.${pageStyle}-page`;
 

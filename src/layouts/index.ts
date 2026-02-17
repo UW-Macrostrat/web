@@ -2,7 +2,7 @@ import h from "./main.module.sass";
 import { Spinner } from "@blueprintjs/core";
 import { usePageTransitionStore } from "~/renderer/usePageTransitionStore";
 import classNames from "classnames";
-import { PageBreadcrumbs } from "~/components";
+import { Footer, PageBreadcrumbs } from "~/components";
 import { useTransition } from "transition-hook";
 
 export function BasePage({ children, className, fitViewport = false }) {
@@ -65,7 +65,16 @@ export function CenteredContentPage({ children, className }) {
   );
 }
 
+export function ContentPage2({ children, className, ...rest }) {
+  return h(
+    ContentPage,
+    { className: classNames("content-page-2", className), ...rest },
+    [h(PageBreadcrumbs), h("div.main", [children]), h(Footer)]
+  );
+}
+
 export const pageLayouts = {
   fullscreen: FullscreenPage,
   content: ContentPage,
+  content2: ContentPage2,
 };

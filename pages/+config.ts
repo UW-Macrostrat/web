@@ -6,7 +6,7 @@ import type { Config } from "vike/types";
 // Default config (can be overridden by pages)
 export default {
   title: "Macrostrat",
-  pageStyle: "content",
+  pageStyle: "content2",
   description:
     "A platform for geological data exploration, integration, and analysis.",
   extends: [vikeReact, vikePhoton],
@@ -14,6 +14,7 @@ export default {
   photon: {
     server: "../server/entry.ts",
   },
+  pageName: null,
   // Setting these values forces a pageContext.json request to be generated with each page request.
   // https://vike.dev/pageContext.json#avoid-pagecontext-json-requests
   passToClient: [
@@ -27,6 +28,8 @@ export default {
     "urlPathname",
     "scripts",
     "pageStyle",
+    "pageName",
+    "parentData",
   ],
   clientRouting: true,
   supportsDarkMode: true,
@@ -59,6 +62,12 @@ export default {
       },
     },
     environment: {
+      env: {
+        client: true,
+        server: true,
+      },
+    },
+    pageName: {
       env: {
         client: true,
         server: true,

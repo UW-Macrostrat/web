@@ -4,7 +4,7 @@ import { ContentPage } from "~/layouts";
 
 export function Page() {
   return h(ContentPage, [
-    h(PageBreadcrumbs),
+    h(PageBreadcrumbs, { title: "Stratigraphic concepts" }),
     h("div.names", [
       h("h2", "Stratigraphic Names"),
       h("p", [
