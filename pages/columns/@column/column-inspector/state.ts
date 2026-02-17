@@ -1,10 +1,4 @@
-import {
-  ExtUnit,
-  Identifier,
-  MacrostratColumnStateProvider,
-  ReferencesField,
-  HybridScaleType,
-} from "@macrostrat/column-views";
+import { ExtUnit, HybridScaleType } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
 import { ReactNode, useEffect, useRef } from "react";
 import styles from "./index.module.sass";

@@ -9,27 +9,21 @@ import {
   ReferencesField,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
-import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { NavigationLinkProvider, PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
 import { navigate } from "vike/client/router";
 import { MacrostratDataProvider } from "@macrostrat/data-provider";
-
 import { StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
-
 import { PageBreadcrumbs } from "~/components";
 import { onDemand } from "~/_utils";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { DataField } from "@macrostrat/data-components";
-
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
-import {
-  useColumnState,
-  ColumnSettingsPanel,
-} from "#/columns/@column/column-inspector/state.ts";
+import { useColumnState, ColumnSettingsPanel } from "./state";
 
 const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
