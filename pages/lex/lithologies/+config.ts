@@ -1,4 +1,5 @@
 export default {
+  pageStyle: "content",
   meta: {
     Page: {
       /* Sift must be rendered as a single-page app, because that is its design.

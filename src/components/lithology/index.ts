@@ -1,11 +1,8 @@
 import { useInDarkMode } from "@macrostrat/ui-components";
-import hyper from "@macrostrat/hyper";
 import { Tag, Card, Popover } from "@blueprintjs/core";
 import { asChromaColor } from "@macrostrat/color-utils";
-import styles from "./main.module.sass";
+import h from "./main.module.sass";
 import classNames from "classnames";
-
-const h = hyper.styled(styles);
 
 export function LithologyTag({
   data,
@@ -46,6 +43,7 @@ export function LithologyTag({
         interactionKind: "click",
         minimal: true,
         className: "lithology-tag-popover-holder",
+        usePortal: false,
         ...tooltipProps,
       },
       contents

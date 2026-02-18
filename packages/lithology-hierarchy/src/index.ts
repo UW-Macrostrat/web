@@ -30,14 +30,22 @@ export default function MacrostratLithologyHierarchy({ width, height }) {
 
   console.log("Liths", liths);
 
-  return h("div.flex.row", [
-    h("div.example-container", [
-      h(Hierarchy, { width, height, data: nestLiths(liths) }),
-    ]),
-  ]);
+  return h(Hierarchy, { data: nestLiths(liths) });
 }
 
-export function LexHierarchy({ width, height, data, href = null, onClick = () => {} }: { width: string | number; height: string | number; data: Lith[]; href?: string | null; onClick?: () => void }) {
+export function LexHierarchy({
+  width,
+  height,
+  data,
+  href = null,
+  onClick = () => {},
+}: {
+  width: string | number;
+  height: string | number;
+  data: Lith[];
+  href?: string | null;
+  onClick?: () => void;
+}) {
   const nestedData = nestItems(data);
 
   return h("div.flex.row", [
