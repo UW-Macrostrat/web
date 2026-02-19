@@ -42,4 +42,4 @@ EXPOSE 3000
 
 ENV NODE_NO_WARNINGS=1
 
-CMD ["node", "./dist/server/index.mjs"]
+CMD ["yarn", "node", "./dist/server/index.mjs"]
