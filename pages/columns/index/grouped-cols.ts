@@ -23,6 +23,7 @@ export interface ColumnGroup {
 }
 
 export async function getGroupedColumns(params: ColumnFilterOptions) {
+  console.log("params", params);
   const { data: columns, refs } = await fetchColumns(params);
 
   columns.sort((a, b) => a.col_id - b.col_id);

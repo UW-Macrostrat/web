@@ -156,7 +156,7 @@ export function assembleColumnSummary(
         return d.t_age;
       })
     ),
-    area: Number(column.col_area ?? 0),
+    area: Number(column?.col_area ?? 0),
     timescale: columnTimescale,
     units,
     unitIdx,

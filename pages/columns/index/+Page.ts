@@ -89,15 +89,17 @@ const filterParamsAtom = atom((get) => {
 
   const params = buildParamsFromFilters(filters);
 
-  if (projectID == null) return null;
-
-  params.project_id = projectID;
+  if (projectID != null) {
+    params.project_id = projectID;
+  }
 
   if (!showEmpty) {
     params.empty = false;
   }
   if (!showInProcess) {
     params.status_code = "active";
+  } else {
+    params.status_code = "in process,active";
   }
 
   if (Object.keys(params).length === 0) {
@@ -164,7 +166,8 @@ function InitialStateProvider({ children, projectID, initialData }) {
 }
 
 export function Page({ title = "Columns", linkPrefix = "/" }) {
-  const { project_id, allColumnGroups } = useData();
+  const { project, allColumnGroups } = useData();
+  const project_id = project?.project_id;
   return h(
     ColumnPageProvider,
     { projectID: project_id, initialData: allColumnGroups },

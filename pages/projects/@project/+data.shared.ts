@@ -18,6 +18,7 @@ export async function data(pageContext) {
   return {
     allColumnGroups,
     project,
+    project_id,
     linkPrefix: `/projects/${project_id}/`,
   };
 }

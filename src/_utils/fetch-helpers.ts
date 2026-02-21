@@ -11,12 +11,19 @@ export async function fetchAPIV2Result(apiURL: string, params: any) {
     }
     url.search = p1.toString();
   }
-  const res = await fetchWrapper(url.toString());
-  const res1 = await res?.json();
-  if (res1.error != null) {
-    throw new Error(res1.error);
+  try {
+    const res = await fetchWrapper(url.toString());
+    const res1 = await res?.json();
+    if (res1.error != null) {
+      const msg = res1.error?.message ?? res1.error;
+      throw new Error(msg);
+    }
+    return res1?.success;
+  } catch (error) {
+    let msg = error?.message ?? error;
+    console.error(`Error fetching ${url}:`, msg);
+    throw error;
   }
-  return res1?.success;
 }
 
 export async function fetchAPIData(apiURL: string, params: any) {
