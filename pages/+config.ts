@@ -72,6 +72,7 @@ export default {
         client: true,
         server: true,
       },
+      cumulative: true,
     },
   },
 } satisfies Config;
