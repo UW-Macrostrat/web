@@ -359,7 +359,9 @@ function ColumnGroup({ data, linkPrefix }) {
           ]),
         ]),
         h("tbody", [
-          filteredColumns.map((data) => h(ColumnItem, { data, linkPrefix })),
+          filteredColumns.map((data) =>
+            h(ColumnItem, { data, linkPrefix, key: data.col_id })
+          ),
         ]),
       ]),
     ]),

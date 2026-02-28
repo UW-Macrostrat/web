@@ -1,33 +1,8 @@
 import type { PageContext } from "vike/types";
 
 export function buildBreadcrumbs(ctx: PageContext): Item[] {
-  return buildBreadcrumbsV1(ctx.urlPathname, sitemap, ctx);
-}
-
-function buildBreadcrumbsData(pageContext) {
-  const values = pageContext.sources.pageName[0].values;
-  return values.map((item) => {
-    let configFileLocation = item.definedAt.split(" > ")?.[0];
-
-    configFileLocation = configFileLocation.replace("/pages/", "/");
-    configFileLocation = configFileLocation.replace(/\+.+\.ts$/, "");
-
-    let val = item.value;
-    if (typeof val === "function") {
-      val = val(pageContext);
-    }
-    return {
-      location: configFileLocation,
-      pageName: val,
-    };
-  });
-}
-
-export function buildBreadcrumbsV1(
-  currentPath: string,
-  routes: Routes,
-  ctx: PageContext
-): Item[] {
+  const currentPath = ctx.urlPathname;
+  const routes = sitemap;
   const parts = currentPath.split("/");
   const items: Item[] = [];
   let children = [routes];
@@ -35,7 +10,63 @@ export function buildBreadcrumbsV1(
 
   console.log(currentPath, parts);
 
-  for (const urlPart of parts) {
+  console.log(ctx.urlPathname);
+  console.log(ctx.pageId);
+  console.log(ctx.routeParams);
+
+  const values = ctx.sources.pageName[0].values;
+  const cfgIndex = new Map<string, string>();
+  for (const item of values) {
+    let configFileLocation = item.definedAt.split(" > ")?.[0];
+
+    configFileLocation = configFileLocation.replace("/pages/", "/");
+    configFileLocation = configFileLocation.replace(/\/\+.+\.ts$/, "");
+
+    let val = item.value;
+    if (typeof val === "function") {
+      val = val(ctx);
+    }
+
+    console.log(configFileLocation, val);
+
+    cfgIndex.set(configFileLocation, val);
+  }
+
+  //console.log(v2);
+  const routeElements = ctx.pageId.replace(/^\/pages/, "").split("/");
+
+  console.log(routeElements, parts);
+
+  if (routeElements[routeElements.length - 1] === "index") {
+    // Remove the trailing index route
+    routeElements.pop();
+  }
+
+  let urlAccum = "";
+  let routeAccum = "";
+
+  console.log(cfgIndex);
+
+  for (const urlElement of routeElements) {
+    let urlPart = urlElement;
+    if (urlPart.startsWith("@")) {
+      const param = urlPart.replace(/^@/, "");
+      if (param in ctx.routeParams) {
+        urlPart = ctx.routeParams[param];
+      }
+    }
+
+    if (!routeAccum.endsWith("/")) {
+      routeAccum += "/";
+    }
+    routeAccum += urlElement;
+
+    if (!urlAccum.endsWith("/")) {
+      urlAccum += "/";
+    }
+    urlAccum += urlPart;
+    console.log(routeAccum, urlAccum);
+
     // if (children == null) {
     //   break;
     // }
@@ -64,6 +95,11 @@ export function buildBreadcrumbsV1(
     // if (name == urlPart) {
     //   text = h("code", text);
     // }
+
+    const locationMatch = cfgIndex.get(routeAccum); // v2.find((v) => v.location == routeAccum);
+    if (locationMatch != null) {
+      text = locationMatch;
+    }
 
     let disabled = child?.disabled ?? false;
 
@@ -99,12 +135,6 @@ const columnsSubtree = {
   slug: "columns",
   name: "Columns",
   children: [
-    {
-      param: "@column",
-      name(urlPart, ctx) {
-        return ctx.pageProps?.columnInfo?.col_name ?? urlPart;
-      },
-    },
     {
       slug: "groups",
       name: "Groups",
