@@ -1,1 +1,1 @@
-export { data } from "#/columns/@column/+data.shared";
+export { data } from "#/columns/@column/+data.server.ts";

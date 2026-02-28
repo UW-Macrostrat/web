@@ -30,7 +30,7 @@ import { useEffect, useMemo, useState } from "react";
 import h from "./main.module.sass";
 import { PageBreadcrumbs, MapReference, DevLink } from "~/components";
 import { MapNavbar } from "~/components/map-navbar";
-import { usePageProps } from "~/renderer/usePageProps";
+import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
@@ -182,7 +182,8 @@ function basemapStyle(basemap, inDarkMode) {
 }
 
 export function Page() {
-  const { map } = usePageProps();
+  const { map } = useData();
+
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;

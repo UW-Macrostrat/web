@@ -8,7 +8,7 @@ import {
 import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
 import { PageBreadcrumbs } from "~/components";
-import { usePageProps } from "~/renderer/usePageProps";
+import { useData } from "vike-react/useData";
 import { useLegendData, MapInfo } from "../utils";
 import { useElementSize, useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo, useRef } from "react";
@@ -30,7 +30,7 @@ import { LegendItemInformation } from "./legend-item";
 import { UnitDetailsPopover } from "~/components/unit-details";
 
 export function Page() {
-  const { map } = usePageProps();
+  const { map } = useData();
   const ref = useRef(null);
   const size = useElementSize(ref);
   const legendData = useLegendData(map);
@@ -182,7 +182,8 @@ function CorrelationChart({
               ageRange: domain,
               absoluteAgeScale: true,
               levels: [2, 3],
-              onClick: (e, d) => window.open(`/lex/interval/${d.int_id}`, "_self"),
+              onClick: (e, d) =>
+                window.open(`/lex/interval/${d.int_id}`, "_self"),
             }),
           ]),
           h(

@@ -5,28 +5,15 @@ import { PageContextServer } from "vike/types";
 // This hook is called upon new incoming HTTP requests
 export async function onCreatePageContext(pageContext: PageContextServer) {
   // Get user name from cookies
-  //console.log(pageContext);
-  console.log(pageContext.sources.pageName);
-
-  console.log(buildBreadcrumbsData(pageContext.sources.pageName[0].values));
 
   const cookies = getCookies(pageContext.headers);
   pageContext.user = await getUserFromCookie(cookies);
+  return pageContext;
 }
 
 interface ExportData {
   value: string;
   definedAt: string;
-}
-
-function buildBreadcrumbsData(data: ExportData[]) {
-  return data.map((item) => {
-    const configFileLocation = item.definedAt.split(" > \x1B[36m")?.[0];
-    return {
-      location: configFileLocation,
-      pageName: item.value,
-    };
-  });
 }
 
 async function getUserFromCookie(cookies: Record<string, string>) {

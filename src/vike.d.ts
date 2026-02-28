@@ -15,6 +15,8 @@ import type {
   PageContextServer as PageContextServer,
 } from "vike/types";
 
+import { Item } from "~/_utils/breadcrumbs";
+
 export type PageProps = Record<string, unknown>;
 export type PageStyle = "content" | "fullscreen";
 
@@ -37,6 +39,7 @@ declare global {
       pageProps?: PageProps;
       urlPathname: string;
       user?: User;
+      breadcrumbs?: Item[];
       macrostratLogoFlavor?: string;
       mdxContent?: string;
       environment: Record<string, string>;

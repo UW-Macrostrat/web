@@ -30,6 +30,7 @@ export default {
     "pageStyle",
     "pageName",
     "parentData",
+    "breadcrumbs",
   ],
   clientRouting: true,
   supportsDarkMode: true,
@@ -73,6 +74,18 @@ export default {
         server: true,
       },
       cumulative: true,
+    },
+    pageBreadcrumbs: {
+      env: {
+        client: true,
+        server: true,
+      },
+    },
+    breadcrumbs: {
+      env: {
+        client: true,
+        server: true,
+      },
     },
   },
 } satisfies Config;
