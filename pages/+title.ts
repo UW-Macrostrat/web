@@ -1,7 +1,6 @@
 export default function title(pageContext) {
-  const { pageName } = pageContext.config;
-  console.log("pageName", pageName?.[0]);
-  const pageNameValue = pageName?.[0];
+  const { pageInfo } = pageContext.config;
+  const pageNameValue = pageInfo?.[0]?.name;
   let _pageName = null;
   if (typeof pageNameValue === "string") {
     _pageName = pageNameValue;

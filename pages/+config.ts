@@ -14,7 +14,9 @@ export default {
   photon: {
     server: "../server/entry.ts",
   },
-  pageName: null,
+  pageInfo: {
+    name: null,
+  },
   // Setting these values forces a pageContext.json request to be generated with each page request.
   // https://vike.dev/pageContext.json#avoid-pagecontext-json-requests
   passToClient: [
@@ -28,9 +30,8 @@ export default {
     "urlPathname",
     "scripts",
     "pageStyle",
-    "pageName",
     "parentData",
-    "breadcrumbs",
+    "pageInfo",
   ],
   clientRouting: true,
   supportsDarkMode: true,
@@ -68,7 +69,7 @@ export default {
         server: true,
       },
     },
-    pageName: {
+    pageInfo: {
       env: {
         client: true,
         server: true,

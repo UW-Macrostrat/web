@@ -12,6 +12,6 @@ export default {
       },
     },
   },
-  pageName: "Map",
+  pageInfo: { name: "Map" },
   pageStyle: "fullscreen",
 };

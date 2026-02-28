@@ -1,4 +1,5 @@
 import type { PageContext } from "vike/types";
+import type { ReactNode } from "react";
 
 export function buildBreadcrumbs(ctx: PageContext): Item[] {
   const currentPath = ctx.urlPathname;
@@ -14,8 +15,9 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
   console.log(ctx.pageId);
   console.log(ctx.routeParams);
 
-  const values = ctx.sources.pageName[0].values;
-  const cfgIndex = new Map<string, string>();
+  // Assemble pageInfo lookup table
+  const values = ctx.sources.pageInfo[0].values;
+  const cfgIndex = new Map<string, PageInfo>();
   for (const item of values) {
     let configFileLocation = item.definedAt.split(" > ")?.[0];
 
@@ -65,7 +67,6 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
       urlAccum += "/";
     }
     urlAccum += urlPart;
-    console.log(routeAccum, urlAccum);
 
     // if (children == null) {
     //   break;
@@ -96,18 +97,21 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
     //   text = h("code", text);
     // }
 
+    let item = {
+      disabled: child?.disabled ?? false,
+      href: route == currentPath ? null : route,
+      name: text,
+    };
+
     const locationMatch = cfgIndex.get(routeAccum); // v2.find((v) => v.location == routeAccum);
     if (locationMatch != null) {
-      text = locationMatch;
+      item = {
+        ...item,
+        ...locationMatch,
+      };
     }
 
-    let disabled = child?.disabled ?? false;
-
-    items.push({
-      text,
-      href: route == currentPath ? null : route,
-      disabled,
-    });
+    items.push(item);
     children = child?.children;
   }
 
@@ -116,8 +120,14 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
   return items;
 }
 
-export interface Item {
-  text: string;
+export interface PageInfo {
+  name: string;
+  title?: () => ReactNode;
+  shortTitle?: () => ReactNode;
+  identifier?: number;
+}
+
+export interface Item extends PageInfo {
   href?: string;
   current?: boolean;
   disabled?: boolean;

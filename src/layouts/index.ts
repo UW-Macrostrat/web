@@ -4,6 +4,7 @@ import { usePageTransitionStore } from "~/renderer/usePageTransitionStore";
 import classNames from "classnames";
 import { Footer, PageBreadcrumbs } from "~/components";
 import { useTransition } from "transition-hook";
+import { NavigationLinkProvider } from "~/_providers";
 
 export function BasePage({ children, className, fitViewport = false }) {
   const inPageTransition = usePageTransitionStore(
@@ -45,7 +46,7 @@ export function ContentPage({ children, className, ...rest }) {
   return h(
     BasePage,
     { className: classNames("content-page", className), ...rest },
-    children
+    h(NavigationLinkProvider, children)
   );
 }
 
@@ -69,7 +70,11 @@ export function ContentPage2({ children, className, ...rest }) {
   return h(
     ContentPage,
     { className: classNames("content-page-2", className), ...rest },
-    [h(PageBreadcrumbs), h("div.main", [children]), h(Footer)]
+    [
+      h(PageBreadcrumbs, { separateTitle: true }),
+      h("div.main", [children]),
+      h(Footer),
+    ]
   );
 }
 

@@ -1,3 +1,3 @@
 export default {
-  pageName: "Lexicon",
+  pageInfo: { name: "Lexicon" },
 };
