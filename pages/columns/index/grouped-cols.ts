@@ -19,11 +19,11 @@ interface ColumnResponseShort {
 export interface ColumnGroup {
   id: number;
   name: string;
+  project_id: number;
   columns: ColumnResponseShort[];
 }
 
 export async function getGroupedColumns(params: ColumnFilterOptions) {
-  console.log("params", params);
   const { data: columns, refs } = await fetchColumns(params);
 
   columns.sort((a, b) => a.col_id - b.col_id);
@@ -37,6 +37,7 @@ export async function getGroupedColumns(params: ColumnFilterOptions) {
         groupMap.set(-1, {
           id: -1,
           name: "Ungrouped",
+          project_id: col.project_id,
           columns: [],
         });
       }
@@ -47,6 +48,7 @@ export async function getGroupedColumns(params: ColumnFilterOptions) {
       groupMap.set(col.col_group_id, {
         id: col.col_group_id,
         name: col.col_group,
+        project_id: col.project_id,
         columns: [],
       });
     }

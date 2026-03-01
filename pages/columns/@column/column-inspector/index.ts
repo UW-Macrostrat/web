@@ -167,11 +167,11 @@ function ColumnGlobalModal({ data }) {
   ]);
 }
 
-function ColumnBasicInfo({ data, showColumnID = true }) {
+function ColumnBasicInfo({ data, showTitleRow = false, showColumnID = true }) {
   if (data == null) return null;
   console.log(data);
   return h("div.column-info", [
-    h("div.column-title-row", [
+    h.if(showTitleRow)("div.column-title-row", [
       h("h1", data.col_name),
       h.if(showColumnID)("h2", h(Identifier, { id: data.col_id })),
     ]),

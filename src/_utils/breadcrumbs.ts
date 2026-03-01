@@ -29,15 +29,11 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
       val = val(ctx);
     }
 
-    console.log(configFileLocation, val);
-
     cfgIndex.set(configFileLocation, val);
   }
 
   //console.log(v2);
   const routeElements = ctx.pageId.replace(/^\/pages/, "").split("/");
-
-  console.log(routeElements, parts);
 
   if (routeElements[routeElements.length - 1] === "index") {
     // Remove the trailing index route
@@ -46,8 +42,6 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
 
   let urlAccum = "";
   let routeAccum = "";
-
-  console.log(cfgIndex);
 
   for (const urlElement of routeElements) {
     let urlPart = urlElement;
@@ -93,9 +87,10 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
     route += `/${urlPart}`;
 
     let text = typeof name === "function" ? name(urlPart, ctx) : name;
-    // if (name == urlPart) {
-    //   text = h("code", text);
-    // }
+    // Capitalize th text if it's not a parameter
+    if (text == urlPart) {
+      text = text.charAt(0).toUpperCase() + text.slice(1);
+    }
 
     let item = {
       disabled: child?.disabled ?? false,

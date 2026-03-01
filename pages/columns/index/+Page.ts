@@ -1,11 +1,9 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { useMemo, Suspense } from "react";
-
-import { ContentPage } from "~/layouts";
-import { Link, DevLinkButton, PageBreadcrumbs } from "~/components";
+import { Link, DevLinkButton, TitleBlock } from "~/components";
 import { LithologyTag } from "~/components/lex/tag.ts";
-import { Footer, SearchBar } from "~/components/general";
+import { SearchBar } from "~/components/general";
 import {
   ColumnFilterOptions,
   ColumnGroup,
@@ -230,14 +228,14 @@ function ColumnDataArea({ linkPrefix }) {
     { isLoading },
     h(
       "div.column-groups",
-      data.map((d) =>
-        h(ColumnGroup, {
+      data.map((d) => {
+        return h(ColumnGroupCols, {
           data: d,
           key: d.id,
           linkPrefix,
           showEmpty,
-        })
-      )
+        });
+      })
     )
   );
 }
@@ -327,21 +325,25 @@ function LexCard({ data }) {
   );
 }
 
-function ColumnGroup({ data, linkPrefix }) {
+function ColumnGroupCols({ data, linkPrefix }) {
   const filteredColumns = data.columns;
 
   if (filteredColumns?.length === 0) return null;
 
   const { name } = data;
   return h("div.column-group", [
-    h("div.column-group-header", [
-      h(Link, { href: `/columns/groups/${data.id}`, target: "_self" }, [
-        h(
-          "h2.column-group-name",
-          name + " (Group #" + filteredColumns[0].col_group_id + ")"
-        ),
-      ]),
-    ]),
+    h(TitleBlock, {
+      title: h(
+        Link,
+        {
+          href: `/projects/${data.project_id}/groups/${data.id}`,
+        },
+        name
+      ),
+      identifier: data.id,
+      headingLevel: 2,
+      className: "grouped-cols-header",
+    }),
     h("div.column-list", [
       h("table.column-table", [
         h("thead.column-row.column-header", [

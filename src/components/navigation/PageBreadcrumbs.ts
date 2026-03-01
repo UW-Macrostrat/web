@@ -1,6 +1,6 @@
 import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { MacrostratIcon } from "~/components";
 import { buildBreadcrumbs } from "~/_utils/breadcrumbs";
 
@@ -19,6 +19,29 @@ export function PageBreadcrumbs({ showLogo = true, separateTitle = true }) {
   });
 }
 
+export function TitleBlock({ title, identifier, headingLevel = 1, className }) {
+  const HeadingTag = "h" + headingLevel;
+  const IdentifierTag = "h" + (headingLevel + 1);
+  return h("div.title-block", { className }, [
+    h(HeadingTag, title),
+    h.if(identifier != null)(
+      IdentifierTag,
+      { className: "identifier" },
+      h(Identifier, { identifier })
+    ),
+  ]);
+}
+
+export function Identifier({
+  identifier,
+  className,
+}: {
+  identifier: number;
+  className?: string;
+}) {
+  return h("code.identifier", { className }, ["#", identifier]);
+}
+
 export function PageBreadcrumbsInternal({
   showLogo = false,
   separateTitle = false,
@@ -28,20 +51,18 @@ export function PageBreadcrumbsInternal({
   let titleElement = null;
   if (separateTitle) {
     const item = baseItems.pop();
-    let identifier = null;
-    if (item.identifier != null) {
-      identifier = h("h2.identifier", h("code", ["#", item.identifier]));
-    }
 
-    let titleContent = item.name;
-    if (item.title != null) {
+    let titleContent: ReactNode = item.name;
+    if (typeof item.title === "string") {
+      titleContent = item.title;
+    } else if (item.title != null) {
       titleContent = h(item.title);
     }
 
-    titleElement = h("div.title-block", [
-      h("h1.page-title", titleContent),
-      identifier,
-    ]);
+    titleElement = h(TitleBlock, {
+      title: titleContent,
+      identifier: item.identifier,
+    });
   }
 
   let itemsList = baseItems.map((item) => {

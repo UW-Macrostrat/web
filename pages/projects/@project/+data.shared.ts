@@ -9,7 +9,6 @@ export async function data(pageContext) {
 
   const projects = await fetchAPIData(`/defs/projects`, {
     project_id,
-    in_process: true,
   });
   const project = projects[0];
 

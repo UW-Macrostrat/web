@@ -75,3 +75,26 @@ async function fetchWrapper(url: string): Promise<Response> {
     throw new Error(`Network error while fetching ${url}: ${error}`);
   }
 }
+
+const projectCache = new Map<number, any>();
+
+export async function fetchProjectData(project: string | number) {
+  const project_id = typeof project === "string" ? parseInt(project) : project;
+  if (projectCache.has(project_id)) {
+    return projectCache.get(project_id);
+  }
+  const urlBase = apiV2Prefix + "/defs/projects";
+  const url = `${urlBase}?project_id=${project_id}`;
+  const res = await getAndUnwrap(url);
+  const data = res?.[0] ?? null;
+  if (data != null) {
+    projectCache.set(project_id, data);
+  }
+  return data;
+}
+
+export async function getAndUnwrap<T>(url: string): Promise<T> {
+  const res = await fetchWrapper(url);
+  const res1 = await res.json();
+  return res1.success?.data ?? null;
+}

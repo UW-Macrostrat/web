@@ -1,29 +1,34 @@
-import { fetchAPIData } from "~/_utils/fetch-helpers.ts";
+import { fetchAPIData, fetchProjectData } from "~/_utils/fetch-helpers.ts";
 
 export async function data(pageContext) {
-  const { project, group } = pageContext.routeParams;
+  const { project } = pageContext.routeParams;
 
-  const res = await fetchAPIData(`/columns`, { all: true });
+  const res = await fetchAPIData("/defs/groups", { project_id: project });
 
-  const grouped = {};
+  const projectData = await fetchProjectData(project);
 
-  for (const item of res) {
-    const key = item.col_group_id;
+  //const res = await fetchAPIData(`/columns`, { all: true });
 
-    if (!grouped[key]) {
-      grouped[key] = {
-        name: item.col_group,
-        id: item.col_group_id,
-        columns: [],
-      };
-    }
-
-    grouped[key].columns.push(item);
-  }
-
-  const columnGroups = Object.values(grouped);
+  // const grouped = {};
+  //
+  // for (const item of res) {
+  //   const key = item.col_group_id;
+  //
+  //   if (!grouped[key]) {
+  //     grouped[key] = {
+  //       name: item.col_group,
+  //       id: item.col_group_id,
+  //       columns: [],
+  //     };
+  //   }
+  //
+  //   grouped[key].columns.push(item);
+  // }
+  //
+  // const columnGroups = Object.values(grouped);
 
   return {
-    columnGroups,
+    project: projectData,
+    columnGroups: res,
   };
 }
