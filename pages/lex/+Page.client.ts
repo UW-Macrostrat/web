@@ -1,9 +1,7 @@
-import { LinkCard, PageHeader, StickyHeader } from "~/components";
-import { ContentPage } from "~/layouts";
+import { LinkCard, StickyHeader } from "~/components";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
 import { useData } from "vike-react/useData";
-import { Footer } from "~/components/general";
 import { SearchBar } from "~/components/general";
 import { useState } from "react";
 import { ExpansionPanel } from "~/components/lex/tag";
@@ -13,7 +11,6 @@ import { DocsVideo } from "#/map/map-interface/components/docs";
 export function Page() {
   const { res } = useData();
   const [showBody, setShowBody] = useState(true);
-  const [updateOpen, setUpdateOpen] = useState(false);
 
   const seen = new Set();
   const stats = res.filter((project) => {
@@ -35,24 +32,6 @@ export function Page() {
   });
 
   return h("div", [
-    h("div.header", [
-      h(
-        Tag,
-        {
-          intent: "PRIMARY",
-          active: updateOpen,
-          onClick: () => setUpdateOpen(true),
-        },
-        "Updates"
-      ),
-      h(
-        Dialog,
-        {
-          isOpen: updateOpen,
-        },
-        h(Updates, { setUpdateOpen })
-      ),
-    ]),
     h("p", [
       "This is the homepage of Macrostrat's geological lexicons, which are assembled from many data sources including Canada's ",
       h(
@@ -142,6 +121,7 @@ export function Page() {
         h("strong", h("a", { href: "/sift" }, "Sift")),
         ", Macrostrat's legacy lexicon app, is still available for use as it is gradually brought into this new framework.",
       ]),
+      h(UpdatesExpandableDialog),
     ]),
   ]);
 }
@@ -203,6 +183,29 @@ function LexCard({ data }) {
     groups.find((group) => group.value === type)?.href + "/" + data.id;
 
   return h("div", h("a", { href }, data.name));
+}
+
+function UpdatesExpandableDialog() {
+  const [updateOpen, setUpdateOpen] = useState(false);
+
+  return h("div.header", [
+    h(
+      Tag,
+      {
+        intent: "PRIMARY",
+        active: updateOpen,
+        onClick: () => setUpdateOpen(true),
+      },
+      "Updates"
+    ),
+    h(
+      Dialog,
+      {
+        isOpen: updateOpen,
+      },
+      h(Updates, { setUpdateOpen })
+    ),
+  ]);
 }
 
 function Updates({ setUpdateOpen }) {

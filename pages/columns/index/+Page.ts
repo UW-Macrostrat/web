@@ -173,38 +173,31 @@ export function Page({ title = "Columns", linkPrefix = "/" }) {
     { projectID: project_id, initialData: allColumnGroups },
     h("div.column-list-page", [
       h(Suspense, [
-        h(ContentPage, [
-          h("div.flex-row", [
-            h("div.main", [
-              h("div", [
-                h(PageBreadcrumbs, { showLogo: true }),
-                h(FilterManager),
-                h(LexFilters),
+        h("div.flex-row", [
+          h("div.main", [
+            h("div", [h(FilterManager), h(LexFilters)]),
+            h(ColumnDataArea, { linkPrefix }),
+          ]),
+          h("div.sidebar", [
+            h("div.sidebar-content", [
+              h(ButtonGroup, { vertical: true, large: true }, [
+                h(
+                  AnchorButton,
+                  { href: "/projects", minimal: true },
+                  "Projects"
+                ),
+                h(
+                  DevLinkButton,
+                  { href: "/columns/correlation" },
+                  "Correlation chart"
+                ),
               ]),
-              h(ColumnDataArea, { linkPrefix }),
-            ]),
-            h("div.sidebar", [
-              h("div.sidebar-content", [
-                h(ButtonGroup, { vertical: true, large: true }, [
-                  h(
-                    AnchorButton,
-                    { href: "/projects", minimal: true },
-                    "Projects"
-                  ),
-                  h(
-                    DevLinkButton,
-                    { href: "/columns/correlation" },
-                    "Correlation chart"
-                  ),
-                ]),
-                h(ColumnMapOuter, {
-                  projectID: project_id,
-                }),
-              ]),
+              h(ColumnMapOuter, {
+                projectID: project_id,
+              }),
             ]),
           ]),
         ]),
-        h(Footer),
       ]),
     ])
   );

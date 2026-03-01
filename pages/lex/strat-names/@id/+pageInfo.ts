@@ -5,5 +5,6 @@ export function pageInfo(pageContext: any): PageInfo {
   const { resData } = data;
   return {
     name: resData.strat_name_long,
+    identifier: resData.strat_name_id,
   };
 }

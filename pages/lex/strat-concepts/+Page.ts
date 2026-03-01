@@ -1,7 +1,3 @@
-import h from "@macrostrat/hyper";
-import { PageBreadcrumbs } from "~/components";
-import { ContentPage } from "~/layouts";
-
 import { redirect } from "vike/abort";
 
 export function Page() {

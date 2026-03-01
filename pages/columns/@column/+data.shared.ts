@@ -26,6 +26,7 @@ export async function data(pageContext) {
 
   /** This is a hack to make sure that all requisite data is on the table. */
   const responses = await Promise.all([
+    getProjectData(projectID ?? 14), // Default to project 14 if no project_id is provided
     getData(
       "columns",
       { col_id, project_id: projectID, format: "json", response: "long" },
@@ -43,14 +44,22 @@ export async function data(pageContext) {
     ),
   ]);
 
-  const [columns, units]: [any, any] = responses;
+  const [project, columns, units]: [any, any, any] = responses;
 
   const columnInfo: ColumnSummary = assembleColumnSummary(columns[0], units);
   return {
+    project,
     columnInfo,
     linkPrefix,
     projectID,
   };
+}
+
+async function getProjectData(project_id: number) {
+  const urlBase = apiV2Prefix + "/defs/projects";
+  const url = `${urlBase}?project_id=${project_id}`;
+  const res = await getAndUnwrap(url);
+  return res[0] ?? null;
 }
 
 async function getAndUnwrap<T>(url: string): Promise<T> {

@@ -6,7 +6,7 @@ import type { Config } from "vike/types";
 // Default config (can be overridden by pages)
 export default {
   title: "Macrostrat",
-  pageStyle: "content2",
+  pageStyle: "index",
   description:
     "A platform for geological data exploration, integration, and analysis.",
   extends: [vikeReact, vikePhoton],

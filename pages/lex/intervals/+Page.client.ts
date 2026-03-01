@@ -2,8 +2,7 @@ import h from "./main.module.scss";
 import { StickyHeader } from "~/components";
 import { LithologyTag } from "@macrostrat/data-components";
 import { Card, RangeSlider } from "@blueprintjs/core";
-import { useState, memo } from "react";
-import { ContentPage } from "~/layouts";
+import { useState } from "react";
 import { SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 
@@ -43,26 +42,24 @@ export function Page() {
   const grouped = groupByIntType(filtered);
 
   return h("div.int-list-page", [
-    h(ContentPage, [
-      h(StickyHeader, [
-        h(Card, { className: "filters" }, [
-          h(SearchBar, {
-            placeholder: "Filter by name, type, or abbreviation...",
-            onChange: handleChange,
+    h(StickyHeader, [
+      h(Card, { className: "filters" }, [
+        h(SearchBar, {
+          placeholder: "Filter by name, type, or abbreviation...",
+          onChange: handleChange,
+        }),
+        h("div.age-filter", [
+          h("p", "Filter by ages"),
+          h(RangeSlider, {
+            min: 0,
+            max: 4600,
+            stepSize: 10,
+            labelStepSize: 1000,
+            value: [age[0], age[1]],
+            onChange: (value) => {
+              setAge(value);
+            },
           }),
-          h("div.age-filter", [
-            h("p", "Filter by ages"),
-            h(RangeSlider, {
-              min: 0,
-              max: 4600,
-              stepSize: 10,
-              labelStepSize: 1000,
-              value: [age[0], age[1]],
-              onChange: (value) => {
-                setAge(value);
-              },
-            }),
-          ]),
         ]),
       ]),
       h(
