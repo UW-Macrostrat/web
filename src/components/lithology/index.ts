@@ -1,5 +1,5 @@
 import { useInDarkMode } from "@macrostrat/ui-components";
-import { Tag, Card, Popover } from "@blueprintjs/core";
+import { Tag, Popover } from "@blueprintjs/core";
 import { asChromaColor } from "@macrostrat/color-utils";
 import h from "./main.module.sass";
 import classNames from "classnames";

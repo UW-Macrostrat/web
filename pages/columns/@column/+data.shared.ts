@@ -2,7 +2,6 @@
 
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import fetch from "cross-fetch";
-
 import {
   assembleColumnSummary,
   ColumnSummary,
@@ -11,12 +10,10 @@ import {
 export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
   const col_id = pageContext.routeParams.column;
-
   // In cases where we are in a project context, we need to fetch the project data
   const project_id = pageContext.routeParams.project;
 
   // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long
-
   const linkPrefix = project_id == null ? "/" : `/projects/${project_id}/`;
 
   let projectID = null;
@@ -33,7 +30,7 @@ export async function data(pageContext) {
       (res) => res
     ),
     getData(
-      `units`,
+      "units",
       {
         project_id,
         col_id,
