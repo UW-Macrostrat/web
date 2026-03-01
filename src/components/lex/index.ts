@@ -90,23 +90,12 @@ function LexItemPageInner(props: LexItemPageProps) {
   const { name, strat_name_long } = resData;
 
   return h("div", [
-    h(ContentPage, { className: "int-page" }, [
-      h("div.page-header", [h(PageBreadcrumbs, { title: "#" + id })]),
-      header ??
-        h(LexItemHeader, {
-          resData,
-          name: name ?? strat_name_long,
-          siftLink,
-          id,
-        }),
-      SiftLink({
-        id,
-        siftLink,
-      }),
-      children,
-      h(References, { refs }),
-    ]),
-    h(Footer),
+    SiftLink({
+      id,
+      siftLink,
+    }),
+    children,
+    h(References, { refs }),
   ]);
 }
 

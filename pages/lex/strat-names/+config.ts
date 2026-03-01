@@ -1,4 +1,4 @@
 export default {
-  pageInfo: { name: "Lexicon" },
+  pageInfo: { name: "Names" },
   pageStyle: "index",
 };

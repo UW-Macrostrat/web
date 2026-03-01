@@ -42,7 +42,7 @@ export function FullscreenPage({ children, className, ...rest }) {
   );
 }
 
-export function ContentPage({ children, className, ...rest }) {
+export function BaseContentPage({ children, className, ...rest }) {
   return h(
     BasePage,
     { className: classNames("content-page", className), ...rest },
@@ -60,26 +60,33 @@ export function DocumentationPage({ children, className, ...rest }) {
 
 export function CenteredContentPage({ children, className }) {
   return h(
-    ContentPage,
+    BaseContentPage,
     { className: classNames("centered", className) },
     children
   );
 }
 
-export function ContentPage2({ children, className, ...rest }) {
-  return h(
-    ContentPage,
-    { className: classNames("content-page-2", className), ...rest },
-    [
-      h(PageBreadcrumbs, { separateTitle: true }),
-      h("div.main", [children]),
-      h(Footer),
-    ]
-  );
+export function ContentPage({ children, className, ...rest }) {
+  return h(BaseContentPage, { className, ...rest }, [
+    h(PageBreadcrumbs, { separateTitle: true }),
+    h("div.main", [children]),
+    h(Footer),
+  ]);
+}
+
+export function IndexPage({ children, className, ...rest }) {
+  /** Similar to an index page, but with breadcrumbs that are not separated from the title, leading to easier mechanics for
+   * content where the interior is not the focus */
+  return h(BaseContentPage, { className, ...rest }, [
+    h(PageBreadcrumbs, { separateTitle: false }),
+    h("div.main", [children]),
+    h(Footer),
+  ]);
 }
 
 export const pageLayouts = {
   fullscreen: FullscreenPage,
   content: ContentPage,
-  content2: ContentPage2,
+  content2: ContentPage,
+  index: IndexPage,
 };

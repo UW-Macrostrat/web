@@ -2,30 +2,9 @@ import h from "@macrostrat/hyper";
 import { PageBreadcrumbs } from "~/components";
 import { ContentPage } from "~/layouts";
 
+import { redirect } from "vike/abort";
+
 export function Page() {
-  return h(ContentPage, [
-    h(PageBreadcrumbs, { title: "Stratigraphic concepts" }),
-    h("div.names", [
-      h("h2", "Stratigraphic Names"),
-      h("p", [
-        h("em", "Stratigraphic names"),
-        " are the names of rock units, organized hierarchically.",
-      ]),
-    ]),
-    h("div.concepts", [
-      h("h2", "Stratigraphic Concepts"),
-      h("p", [
-        h("em", "Stratigraphic concepts"),
-        " capture the complexity associated with the usage of stratigraphic names over a long period of time by many workers. A concept establishes a set of stratigraphic names that describe the same rock unit.",
-      ]),
-    ]),
-    h(
-      "h2",
-      h(
-        "a",
-        { href: "/lex/strat-names" },
-        "Click here to search strat names and concepts"
-      )
-    ),
-  ]);
+  // Redirect to the root of strat names; we don't have a separate concepts search yet.
+  throw redirect("/lex/strat-names");
 }

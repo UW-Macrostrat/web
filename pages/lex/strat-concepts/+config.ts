@@ -1,3 +1,3 @@
 export default {
-  pageInfo: { name: "Stratigraphic concepts" },
+  pageInfo: { name: "Concepts" },
 };
