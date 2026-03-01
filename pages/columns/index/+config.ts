@@ -1,6 +1,6 @@
 export default {
   title: "Columns",
-  pageStyle: "content",
+  pageStyle: "index",
   meta: {
     Page: {
       env: {

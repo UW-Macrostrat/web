@@ -10,23 +10,22 @@ import {
   Units,
   Fossils,
   Maps,
-  TextExtractions
+  TextExtractions,
 } from "~/components/lex";
 import { StratTag } from "~/components/general";
 import { LinkCard } from "~/components/cards";
 import { usePageContext } from "vike-react/usePageContext";
 import { fetchAPIData } from "~/_utils";
 import { useEffect, useState } from "react";
-import { ConceptHierarchy } from "~/components/lex/StratNameHierarchy";
 
 export function Page() {
-  const { resData, refs, fossilsData, colData, taxaData, unitsData } = useData();
+  const { resData, refs, fossilsData, colData, taxaData, unitsData } =
+    useData();
 
   const id = usePageContext()?.urlPathname.split("/")?.[3] || [];
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
   const { name } = resData || {};
-
 
   const children = [
     h(ConceptInfo, { concept_id: id, showHeader: false }),
@@ -34,14 +33,18 @@ export function Page() {
       resData,
       colData,
       fossilsData,
-      mapUrl: "strat_name_concept=" + id 
+      mapUrl: "strat_name_concept=" + id,
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h(ConceptBody, { concept_id: id }),
-    h.if(unitsData.length > 0)(Units, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
-    h.if(fossilsData.length > 0)(Fossils, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
+    h.if(unitsData.length > 0)(Units, {
+      href: "strat_name_concept_id=" + id + "&name=" + resData?.name,
+    }),
+    h.if(fossilsData.length > 0)(Fossils, {
+      href: "strat_name_concept_id=" + id + "&name=" + resData?.name,
+    }),
   ];
 
   return LexItemPage({
@@ -77,13 +80,16 @@ function ConceptBody({ concept_id }) {
   if (!data) return null;
 
   return h("div.concept-body", [
-    h("h2.strat-names", "Contains strat names"),
+    h("h2.strat-names", "Usages"),
     h(
       "ul.strat-name-list",
       data.map((strat) =>
         h(
           LinkCard,
-          { href: "/lex/strat-names/" + strat.strat_name_id, className: "strat-name" },
+          {
+            href: "/lex/strat-names/" + strat.strat_name_id,
+            className: "strat-name",
+          },
           strat.strat_name_long + " (" + strat.t_units + ")"
         )
       )

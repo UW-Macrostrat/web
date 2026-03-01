@@ -1,6 +1,8 @@
-import { fetchAPIData } from "~/_utils/fetch-helpers";
+import { fetchAPIData } from "~/_utils/fetch-helpers.ts";
 
-export async function data() {
+export async function data(pageContext) {
+  const { project, group } = pageContext.routeParams;
+
   const res = await fetchAPIData(`/columns`, { all: true });
 
   const grouped = {};

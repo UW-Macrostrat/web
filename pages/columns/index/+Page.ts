@@ -167,7 +167,7 @@ function InitialStateProvider({ children, projectID, initialData }) {
 
 export function Page({ title = "Columns", linkPrefix = "/" }) {
   const { project, allColumnGroups } = useData();
-  const project_id = project?.project_id;
+  const project_id = project?.project_id ?? 14; // Default to project 14 if no project_id is provided
   return h(
     ColumnPageProvider,
     { projectID: project_id, initialData: allColumnGroups },

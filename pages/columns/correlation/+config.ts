@@ -10,5 +10,8 @@ export default {
       },
     },
   },
-  title: "Correlation chart",
+  pageInfo: {
+    name: "Correlation chart",
+  },
+  pageStyle: "fullscreen",
 };

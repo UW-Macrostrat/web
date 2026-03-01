@@ -1,6 +1,6 @@
 import { pbdbDomain } from "@macrostrat-web/settings";
 import { fetchAPIData, fetchAPIRefs } from "~/_utils";
-import { getPrevalentTaxa } from "~/components/lex/data-helper";
+import { getPrevalentTaxa } from "~/components/lex/data-helper.ts";
 
 export async function data(pageContext) {
   const col_group_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
