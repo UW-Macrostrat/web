@@ -9,12 +9,6 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
   let children = [routes];
   let route = "";
 
-  console.log(currentPath, parts);
-
-  console.log(ctx.urlPathname);
-  console.log(ctx.pageId);
-  console.log(ctx.routeParams);
-
   // Assemble pageInfo lookup table
   const values = ctx.sources.pageInfo[0].values;
   const cfgIndex = new Map<string, PageInfo>();
@@ -44,6 +38,10 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
   let routeAccum = "";
 
   for (const urlElement of routeElements) {
+    if (urlElement.startsWith("(") && urlElement.endsWith(")")) {
+      // Skip (parentheses) route domains (which are skipped in Vike's routing engine)
+      continue;
+    }
     let urlPart = urlElement;
     if (urlPart.startsWith("@")) {
       const param = urlPart.replace(/^@/, "");
@@ -109,8 +107,6 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
     items.push(item);
     children = child?.children;
   }
-
-  console.log(currentPath, items);
 
   return items;
 }

@@ -1,41 +1,40 @@
 import { Image } from "~/components/general";
 import h from "./main.module.sass";
-import { Navbar } from "~/layouts";
+import { PageBreadcrumbs } from "~/components";
 
 export function Page() {
   return h([
-    h(Navbar),
     h("div.table", [
       h("dv.table-row", [
-        h("p", "Summary"),
+        h("h2", "Summary"),
         h(
           "p",
           "Macrostrat is a web-based platform for the visualization and analysis of geologic data."
         ),
       ]),
       h("div.table-row", [
-        h("p", "License"),
+        h("h2", "License"),
         h(
           "p",
           "All data are provided under a Creative Commons Attribution 4.0 International license"
         ),
       ]),
       h("div.table-row", [
-        h("p", "Citation"),
+        h("h2", "Citation"),
         h(
           "p",
           "In presentations: Acknowledge Macrostrat by name. You may also include any of the Macrostrat logos accessible on this webpage. In publications: Acknowledge Macrostrat as the source of any information or data. In publications, you may cite our most recent infrastructure paper, Peters et al. (2018). In addition, you should also include citations to the original references associated with the data set that was used. These references are accessible from the API. If you would like your paper listed in the official publications, please contact us and we will provide a citation and link."
         ),
       ]),
       h("div.table-row", [
-        h("p", "Collaboration"),
+        h("h2", "Collaboration"),
         h(
           "p",
           "Our small team has worked hard to compile, format, and make data available via Macrostrat. We strongly encourage and welcome active collaborations, both scientific and geoinformatic. All data are provided freely on under a CC-BY-4.0 license."
         ),
       ]),
       h("div.table-row", [
-        h("p", "Funding"),
+        h("h2", "Funding"),
         h(
           "p",
           "Major Macrostrat data infrastructure development was supported by the US National Science Foundation (EAR-1150082, ICER-1440312), with ongoing support for data acquisition supported by NSF EAR-1948843 and ICER-1928323. Continuous and ongoing support has also been provided by the UW-Madison Department of Geoscience. If you use Macrostrat and like what we do, please consider helping out with a donation. Every contribute helps us to maintain infrastructure and keep improving."
@@ -54,13 +53,13 @@ export function Page() {
     ]),
 
     h("div.apps", [
-      h("h1.big-apps.app-header", "Built with Macrostrat"),
+      h("h2", "Built with Macrostrat"),
       h("div.items", [
         h("a", { href: "/sift" }, [
           h("div.app-box", [
             h(Image, { src: "logo_red.png" }),
             h("div.app-background-text", [
-              "Sift",
+              h("h3", "Sift"),
               h("p.blurb", "Explore Macrostrat (by Macrostrat)"),
             ]),
           ]),
@@ -70,7 +69,7 @@ export function Page() {
           h("div.app-box", [
             h(Image, { src: "rockd.png" }),
             h("div.app-background-text", [
-              "Rockd",
+              h("h3", "Rockd"),
               h("p.blurb", "A mobile field book, Macrostrat style."),
             ]),
           ]),
@@ -80,7 +79,7 @@ export function Page() {
           h("div.app-box", [
             h(Image, { src: "burwell.png" }),
             h("div.app-background-text", [
-              "Map",
+              h("h3", "Map"),
               h(
                 "p.blurb",
                 "Integrating the world's geologic maps (by Macrostrat)"
@@ -100,7 +99,7 @@ export function Page() {
             h("div.app-box", [
               h(Image, { src: "mancos.jpg" }),
               h("div.app-background-text", [
-                "Mancos",
+                h("h3", "Mancos"),
                 h(
                   "p.blurb",
                   "Explore Macrostrat and PBDB in iOS (by Hunt Mountain Software)"
@@ -121,7 +120,7 @@ export function Page() {
             h("div.app-box", [
               h(Image, { src: "foc.png" }),
               h("div.app-background-text", [
-                "FOC",
+                h("h3", "Flyover Country"),
                 h(
                   "p.blurb",
                   "A glass bottom jet (by Amy Myrbo, Shane Loeffler et al.)"
@@ -134,7 +133,7 @@ export function Page() {
           h("div.app-box", [
             h(Image, { src: "api.png" }),
             h("div.app-background-text.app-background-text-small", [
-              "API Template",
+              h("h3", "API Template"),
               h(
                 "p.blurb",
                 "Foundation of all Macrostrat services (by Macrostrat)"

@@ -2,11 +2,12 @@ import h from "./main.module.sass";
 import { Spinner } from "@blueprintjs/core";
 import { usePageTransitionStore } from "~/renderer/usePageTransitionStore";
 import classNames from "classnames";
-import { PageBreadcrumbs } from "~/components";
+import { PageBreadcrumbs, PageTitle, usePageTitle } from "~/components";
 import { useTransition } from "transition-hook";
 import { NavigationLinkProvider } from "~/_providers";
 import { Footer } from "./footer";
 import { Navbar } from "./navbar";
+import { usePageContext } from "vike-react/usePageContext";
 
 export { Footer, Navbar };
 
@@ -81,7 +82,7 @@ export function ContentPage({ children, className, ...rest }) {
 export function MetaPage({ children, className, ...rest }) {
   return h(BaseContentPage, { className, ...rest }, [
     h(Navbar),
-    h("div.main", children),
+    h("div.main", [h(PageTitle), children]),
     h(Footer),
   ]);
 }
@@ -103,3 +104,4 @@ export const pageLayouts = {
   index: IndexPage,
   meta: MetaPage,
 };
+export { NavListItem } from "~/layouts/navbar.ts";

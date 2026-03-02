@@ -1,6 +1,18 @@
 import h from "./navbar.module.sass";
-import { NavListItem, SiteTitle, StickyHeader } from "~/components";
+import { SiteTitle, StickyHeader } from "~/components";
 import { MacrostratIconStyle } from "~/components/general";
+import classNames from "classnames";
+import { usePageContext } from "vike-react/usePageContext";
+
+export function NavListItem({ href, children }) {
+  const ctx = usePageContext();
+  const active = href === ctx.urlPathname;
+  return h(
+    "li.nav-list-item",
+    { className: classNames({ active }) },
+    h("a.nav-link", { href }, children)
+  );
+}
 
 export function Navbar({ className, children, showSiteTitle = true }) {
   return h(StickyHeader, { className }, [

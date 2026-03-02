@@ -1,9 +1,6 @@
 import { Image, SearchBar } from "~/components/general";
 import h from "./main.module.sass";
-import { Card, Divider } from "@blueprintjs/core";
-import { useState } from "react";
-import { ContentPage, Navbar } from "~/layouts";
-import { Footer } from "~/components";
+import { useMemo, useState } from "react";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -109,8 +106,6 @@ export function Page() {
     },
   ];
 
-  console.log(tags);
-
   const tagList = [
     "Student",
     "Researcher",
@@ -120,76 +115,67 @@ export function Page() {
     "Former",
   ];
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setInput(value);
-  };
+  const filteredPeople = useMemo(() => {
+    return res.filter((person) => {
+      const name = person.name.toLowerCase();
+      const role = person.role ? person.role.toLowerCase() : "";
+      const email = person.email ? person.email.toLowerCase() : "";
 
-  const filteredPeople = res.filter((person) => {
-    const name = person.name.toLowerCase();
-    const role = person.role ? person.role.toLowerCase() : "";
-    const email = person.email ? person.email.toLowerCase() : "";
+      const roleTags = tagList
+        .map((tag) => {
+          if (role.includes(tag.toLowerCase())) {
+            return tag;
+          }
+          return null;
+        })
+        .filter((tag) => tag !== null);
+      const tagMatch =
+        tags.length === 0 || tags.every((tag) => roleTags.includes(tag));
 
-    const roleTags = tagList
-      .map((tag) => {
-        if (role.includes(tag.toLowerCase())) {
-          return tag;
-        }
-        return null;
-      })
-      .filter((tag) => tag !== null);
-    const tagMatch =
-      tags.length === 0 || tags.every((tag) => roleTags.includes(tag));
+      return (
+        (name.includes(input) ||
+          role.includes(input) ||
+          email.includes(input)) &&
+        tagMatch
+      );
+    });
+  }, [input, tags]);
 
-    return (
-      (name.includes(input) || role.includes(input) || email.includes(input)) &&
-      tagMatch
-    );
-  });
-
-  return h("div", [
-    h(Navbar),
-    h(ContentPage, { className: "people-page" }, [
-      h("div.page-header", [
-        h("h1.big", "People"),
-        h("p.subtitle", "major contributors to the project"),
-        h(Divider),
-      ]),
-      h(Card, { className: "search-bar" }, [
-        h(SearchBar, {
-          onChange: handleInputChange,
-          placeholder: "Search by name, role, or email",
-        }),
-        h("div.tags", [
-          tagList.map((tag) => {
-            return h(
-              "div",
-              {
-                onClick: () => {
-                  setTags((prevTags) => {
-                    if (prevTags.includes(tag)) {
-                      return prevTags.filter((t) => t !== tag);
-                    } else {
-                      return [...prevTags, tag];
-                    }
-                  });
-                },
-                className: tags.includes(tag)
-                  ? "filter-card selected"
-                  : "filter-card",
+  return h([
+    h(
+      SearchBar,
+      {
+        onChange: setInput,
+        placeholder: "Search by name, role, or email",
+      },
+      h("div.tags", [
+        tagList.map((tag) => {
+          return h(
+            "div",
+            {
+              onClick: () => {
+                setTags((prevTags) => {
+                  if (prevTags.includes(tag)) {
+                    return prevTags.filter((t) => t !== tag);
+                  } else {
+                    return [...prevTags, tag];
+                  }
+                });
               },
-              tag
-            );
-          }),
-        ]),
-      ]),
-      h("div.people", [
-        filteredPeople.map((person) => {
-          return h(PersonCard, person);
+              className: tags.includes(tag)
+                ? "filter-card selected"
+                : "filter-card",
+            },
+            tag
+          );
         }),
-      ]),
+      ])
+    ),
+    h("div.people", [
+      filteredPeople.map((person) => {
+        return h(PersonCard, person);
+      }),
     ]),
-    h(Footer),
   ]);
 }
 

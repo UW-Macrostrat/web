@@ -1,5 +1,12 @@
 import hyper from "@macrostrat/hyper";
-import { Card, Icon, Popover, Spinner, Tag } from "@blueprintjs/core";
+import {
+  Card,
+  Icon,
+  InputGroup,
+  Popover,
+  Spinner,
+  Tag,
+} from "@blueprintjs/core";
 import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { postgrestPrefix, webAssetsPrefix } from "@macrostrat-web/settings";
@@ -11,13 +18,6 @@ const h = hyper.styled(styles);
 export function Image({ src, className, width, height }: any) {
   const srcWithAddedPrefix = webAssetsPrefix + "/main-page/" + src;
   return h("img", { src: srcWithAddedPrefix, className, width, height });
-}
-
-export function NavListItem({ href, children }) {
-  return h(
-    "li.nav-list-item",
-    h("a", { className: "nav-link", href }, children)
-  );
 }
 
 export function MacrostratLogoLink({
@@ -86,14 +86,24 @@ export function Loading() {
   return h("div.loading", h(Spinner));
 }
 
-export function SearchBar({ onChange, placeholder = "Search...", className }) {
-  return h(Card, { className: "search-bar " + className }, [
-    h(Icon, { icon: "search" }),
-    h("input", {
-      type: "text",
+export function SearchBar({
+  onChange,
+  placeholder = "Search...",
+  className,
+  large = true,
+  children,
+}) {
+  return h("div", { className: "search-bar " + className }, [
+    h(InputGroup, {
+      fill: true,
       placeholder,
-      onChange: (e) => onChange(e.target.value),
+      large,
+      leftIcon: "search",
+      onValueChange(val) {
+        onChange(val);
+      },
     }),
+    children,
   ]);
 }
 
