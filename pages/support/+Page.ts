@@ -1,5 +1,6 @@
-import { Image, Navbar } from "~/components/general";
+import { Image } from "~/components/general";
 import h from "./main.module.sass";
+import { Navbar } from "~/layouts";
 
 export function Page() {
   return h("div.total", [

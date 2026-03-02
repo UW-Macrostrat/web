@@ -1,8 +1,8 @@
-import { Image, Navbar, SearchBar } from "~/components/general";
+import { Image, SearchBar } from "~/components/general";
 import h from "./main.module.sass";
 import { Card, Divider } from "@blueprintjs/core";
 import { useState } from "react";
-import { ContentPage } from "~/layouts";
+import { ContentPage, Navbar } from "~/layouts";
 import { Footer } from "~/components";
 
 export function Page() {

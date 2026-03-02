@@ -1,5 +1,4 @@
 import hyper from "@macrostrat/hyper";
-import { StickyHeader } from "~/components";
 import { Card, Icon, Popover, Spinner, Tag } from "@blueprintjs/core";
 import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
@@ -38,7 +37,7 @@ export function MacrostratLogoLink({
   ]);
 }
 
-enum MacrostratIconStyle {
+export enum MacrostratIconStyle {
   FULL = "full",
   MINIMAL = "minimal",
   SIMPLE = "simple",
@@ -77,25 +76,6 @@ export function SiteTitle({
     { logoStyle, className: classNames("site-title", className) },
     h("div.site-title-content", [h("h1", "Macrostrat"), children])
   );
-}
-
-export function Navbar({ className, children, showSiteTitle = true }) {
-  return h(StickyHeader, { className }, [
-    h("nav.navbar", [
-      h.if(showSiteTitle)(SiteTitle, {
-        logoStyle: MacrostratIconStyle.SIMPLE,
-        className: "navbar-title",
-      }),
-      children,
-      h("ul.nav-list", [
-        h(NavListItem, { href: "/about" }, "About"),
-        h(NavListItem, { href: "/people" }, "People"),
-        h(NavListItem, { href: "/publications" }, "Publications"),
-        h(NavListItem, { href: "/support" }, "Support"),
-        h(NavListItem, { href: "https://rockd.org/" }, "Rockd"),
-      ]),
-    ]),
-  ]);
 }
 
 export function BlankImage({ src, className, width, height }) {

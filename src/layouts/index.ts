@@ -6,8 +6,9 @@ import { PageBreadcrumbs } from "~/components";
 import { useTransition } from "transition-hook";
 import { NavigationLinkProvider } from "~/_providers";
 import { Footer } from "./footer";
+import { Navbar } from "./navbar";
 
-export { Footer };
+export { Footer, Navbar };
 
 export function BasePage({ children, className, fitViewport = false }) {
   const inPageTransition = usePageTransitionStore(
@@ -77,6 +78,14 @@ export function ContentPage({ children, className, ...rest }) {
   ]);
 }
 
+export function MetaPage({ children, className, ...rest }) {
+  return h(BaseContentPage, { className, ...rest }, [
+    h(Navbar),
+    h("div.main", children),
+    h(Footer),
+  ]);
+}
+
 export function IndexPage({ children, className, ...rest }) {
   /** Similar to an index page, but with breadcrumbs that are not separated from the title, leading to easier mechanics for
    * content where the interior is not the focus */
@@ -92,4 +101,5 @@ export const pageLayouts = {
   content: ContentPage,
   content2: ContentPage,
   index: IndexPage,
+  meta: MetaPage,
 };

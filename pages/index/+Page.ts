@@ -1,8 +1,9 @@
-import { Image, Navbar, SiteTitle } from "~/components/general";
+import { Image, SiteTitle } from "~/components/general";
 import { LinkCard } from "~/components/cards";
 import { useData } from "vike-react/useData";
 import { isDev, webAssetsPrefix } from "@macrostrat-web/settings";
 import h from "./+Page.module.sass";
+import { Navbar } from "~/layouts";
 
 export default function Page() {
   return h("div.page-main", [
