@@ -8,3 +8,4 @@ export * from "./navigation";
 export * from "./map-controls";
 export * from "./general";
 export { buildCrossSectionLayers } from "~/_utils/map-layers";
+export { Footer } from "~/layouts/footer.ts";

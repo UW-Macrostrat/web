@@ -1,4 +1,4 @@
-import { Image, Navbar, Footer } from "~/components/general";
+import { Image, Navbar } from "~/components/general";
 import h from "./main.module.sass";
 
 export function Page() {
@@ -12,7 +12,7 @@ export function Page() {
             href: "https://secure.supportuw.org/give/?id=E0A03FA3-B2A0-431C-83EE-A121A04EEB5D",
             target: "_blank",
           },
-          [h("h1.title.donate-title", "Donate Now")]
+          h("h1.title.donate-title", "Donate Now")
         ),
         h("div.donate-info", [
           "Grant funding, principally from the ",
@@ -31,6 +31,5 @@ export function Page() {
       ]),
       h(Image, { className: "back-img donate-img", src: "donate_medium.jpg" }),
     ]),
-    h(Footer),
   ]);
 }

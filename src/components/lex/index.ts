@@ -5,14 +5,13 @@ import {
   FlexRow,
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
-import { Link, LithologyTag, PageBreadcrumbs } from "~/components";
+import { Footer, Link, LithologyTag, PageBreadcrumbs } from "~/components";
 import { Card, Divider, Popover } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
   AlphaTag,
   BetaTag,
   BlankImage,
-  Footer,
   Loading,
   StratTag,
 } from "~/components/general";

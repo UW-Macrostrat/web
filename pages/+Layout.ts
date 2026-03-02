@@ -5,10 +5,7 @@ import { AuthProvider } from "~/_providers/auth";
 import { usePageContext } from "vike-react/usePageContext";
 import { pageLayouts } from "~/layouts";
 
-import "@blueprintjs/core/lib/css/blueprint.css";
 import "~/styles/core.sass";
-import "~/styles/padding.css";
-// Import all style import
 import "~/macrostrat-style-imports";
 
 import h from "@macrostrat/hyper";
