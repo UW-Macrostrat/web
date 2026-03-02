@@ -4,6 +4,7 @@ export default {
   passToClient: [
     "pageProps",
     "pageStyle",
+    "pageInfo",
     "supportsDarkMode",
     "routeParams",
     "user",
@@ -11,4 +12,7 @@ export default {
     "title",
   ],
   route: "/docs*",
+  pageInfo: {
+    name: "Documentation",
+  },
 } satisfies Config;

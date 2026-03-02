@@ -30,10 +30,10 @@ import { LegendItemInformation } from "./legend-item";
 import { UnitDetailsPopover } from "~/components/unit-details";
 
 export function Page() {
-  const { map } = useData();
+  const { mapInfo } = useData();
   const ref = useRef(null);
   const size = useElementSize(ref);
-  const legendData = useLegendData(map);
+  const legendData = useLegendData(mapInfo);
 
   const [ageMode, setAgeMode] = useState(AgeDisplayMode.MapLegend);
   const [ageScale, setAgeScale] = useState<AgeScale>("linear");
@@ -57,7 +57,7 @@ export function Page() {
   return h(FullscreenPage, [
     h("div.page-inner", [
       h("div.flex.row", [
-        h(PageBreadcrumbs),
+        h(PageBreadcrumbs, { separateTitle: false }),
         h("div.spacer"),
         h(
           Popover,
@@ -74,7 +74,7 @@ export function Page() {
       ]),
       h("div.vis-container", { ref }, [
         h.if(legendData != null)(CorrelationChart, {
-          map,
+          map: mapInfo,
           ...size,
           data: correlationChartData,
           selectedItem,
