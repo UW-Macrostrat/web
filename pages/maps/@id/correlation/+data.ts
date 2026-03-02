@@ -11,9 +11,9 @@ export async function data(pageContext: PageContextServer) {
     .select("source_id,slug,name")
     .eq("source_id", id);
 
-  const map = res?.data?.[0];
+  const mapInfo = res?.data?.[0];
 
   return {
-    map,
+    mapInfo,
   };
 }

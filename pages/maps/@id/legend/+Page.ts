@@ -1,8 +1,7 @@
 import { HotkeysProvider, Spinner } from "@blueprintjs/core";
 import { DataSheet, ColorCell } from "@macrostrat/data-sheet";
 import { FullscreenPage } from "~/layouts";
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
+import h from "./main.module.sass";
 import { PageBreadcrumbs } from "~/components";
 import {
   LongTextViewer,
@@ -13,11 +12,9 @@ import {
 import { useLegendData } from "../utils";
 import { useData } from "vike-react/useData";
 
-const h = hyper.styled(styles);
-
 export function Page() {
-  const map = useData();
-  const data = useLegendData(map);
+  const { mapInfo } = useData();
+  const data = useLegendData(mapInfo);
 
   if (data == null) {
     return h(Spinner);
@@ -27,7 +24,7 @@ export function Page() {
     HotkeysProvider,
     h(FullscreenPage, { className: "main" }, [
       h(PageBreadcrumbs),
-      h("h1", map.name + " map units"),
+      h("h1", mapInfo.name + " map units"),
       h(DataSheet, {
         data,
         columnSpecOptions: {

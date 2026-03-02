@@ -36,6 +36,7 @@ import { SearchResults } from "../components/navbar";
 import UsageText from "../usage.mdx";
 import { ExperimentsPanel, SettingsPanel } from "./settings-panel";
 import h from "./main.module.sass";
+import { MenuButton } from "~/components";
 
 type MenuProps = {
   className?: string;
@@ -97,8 +98,7 @@ const TabButton = (props: ButtonProps & { page: MenuPage }) => {
   const active = useAppState((s) => s.menu.activePage) == page;
   const runAction = useAppActions();
 
-  return h(Button, {
-    minimal: true,
+  return h(MenuButton, {
     active,
     onClick() {
       runAction({ type: "set-menu-page", page });

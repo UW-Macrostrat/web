@@ -8,12 +8,16 @@ const client = new PostgrestClient(postgrestPrefix, {
 
 export async function data(pageContext: PageContextServer) {
   const { id } = pageContext.routeParams;
-  const res: any = await client.from("sources").select("*").eq("source_id", id);
-  const map = res?.data?.features[0];
 
-  console.log(map.geometry.coordinates);
+  const feature = await fetchMapData(id);
 
   return {
-    map,
+    mapInfo: feature?.properties,
+    geometry: feature?.geometry,
   };
+}
+
+async function fetchMapData(id: string) {
+  const res: any = await client.from("sources").select("*").eq("source_id", id);
+  return res?.data?.features[0];
 }
