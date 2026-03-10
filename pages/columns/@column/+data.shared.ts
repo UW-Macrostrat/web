@@ -1,22 +1,19 @@
 // https://vike.dev/onBeforeRender
 
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import fetch from "cross-fetch";
-
 import {
   assembleColumnSummary,
   ColumnSummary,
 } from "#/map/map-interface/app-state/handlers/columns";
+import { fetchProjectData, getAndUnwrap } from "~/_utils";
 
 export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
   const col_id = pageContext.routeParams.column;
-
   // In cases where we are in a project context, we need to fetch the project data
   const project_id = pageContext.routeParams.project;
 
   // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long
-
   const linkPrefix = project_id == null ? "/" : `/projects/${project_id}/`;
 
   let projectID = null;
@@ -26,13 +23,14 @@ export async function data(pageContext) {
 
   /** This is a hack to make sure that all requisite data is on the table. */
   const responses = await Promise.all([
+    fetchProjectData(projectID ?? 14), // Default to project 14 if no project_id is provided
     getData(
       "columns",
       { col_id, project_id: projectID, format: "json", response: "long" },
       (res) => res
     ),
     getData(
-      `units`,
+      "units",
       {
         project_id,
         col_id,
@@ -43,20 +41,15 @@ export async function data(pageContext) {
     ),
   ]);
 
-  const [columns, units]: [any, any] = responses;
+  const [project, columns, units]: [any, any, any] = responses;
 
   const columnInfo: ColumnSummary = assembleColumnSummary(columns[0], units);
   return {
+    project,
     columnInfo,
     linkPrefix,
     projectID,
   };
-}
-
-async function getAndUnwrap<T>(url: string): Promise<T> {
-  const res = await fetch(url);
-  const res1 = await res.json();
-  return res1.success?.data ?? null;
 }
 
 async function getData(

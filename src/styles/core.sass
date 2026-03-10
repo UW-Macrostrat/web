@@ -1,16 +1,14 @@
 @use "sass:color"
+@use "@blueprintjs/core/lib/css/blueprint.css"
 @use "@macrostrat/style-system/src/main.sass"
 @use "./colors" as colorOverrides
-
-//@import url("https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro")
-
 
 :root
   @each $name, $color in colorOverrides.$colors
     --#{$name}: #{$color}
 
   --header-font: "Geologica", sans-serif
-  --serif-font: "Crimson Pro", serif
+  --serif-font: "PT Serif", serif
   // Use system fonts as default sans-serif font for better performance
   --sans-serif-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
 
@@ -24,14 +22,18 @@
 body
   font-family: var(--sans-serif-font)
   // Default to 14px for the map interface
-  font-size: 14px
+  font-size: 16px
+  line-height: 1.5
 
 h1, h2, h3, h4, h5, h6
   font-family: var(--header-font)
   font-weight: normal
 
-p, ul
+p, ul, ol
   font-family: var(--serif-font)
+
+nav ul
+  font-family: var(--header-font)
 
 span.spacer
   min-width: 1em
@@ -73,3 +75,8 @@ span.spacer
 .bp6-dark
   .bp6-card, .bp6-navbar
     background-color: var(--panel-background-color)
+
+// Override Blueprint's default paragraph spacings
+p
+  margin-top: 0
+  margin-bottom: 1em

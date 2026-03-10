@@ -1,4 +1,10 @@
-import { Collapse, Radio, RadioGroup, Spinner } from "@blueprintjs/core";
+import {
+  ButtonGroup,
+  Collapse,
+  Radio,
+  RadioGroup,
+  Spinner,
+} from "@blueprintjs/core";
 import {
   tileserverDomain,
   apiDomain,
@@ -13,7 +19,6 @@ import {
   MapAreaContainer,
   MapMarker,
   MapView,
-  PanelCard,
   LocationPanel,
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
@@ -28,9 +33,13 @@ import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import h from "./main.module.sass";
-import { PageBreadcrumbs, MapReference, DevLink } from "~/components";
-import { MapNavbar } from "~/components/map-navbar";
-import { usePageProps } from "~/renderer/usePageProps";
+import {
+  PageBreadcrumbs,
+  MapReference,
+  DevLink,
+  MenuButton,
+} from "~/components";
+import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
@@ -46,6 +55,8 @@ import {
   Physiography,
   RegionalStratigraphy,
 } from "@macrostrat/map-interface";
+import { atom, useAtom, useAtomValue } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 
 interface StyleOpts {
   style: string;
@@ -181,21 +192,38 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export function Page() {
-  const { map } = usePageProps();
-  const [isOpen, setOpen] = useState(false);
-  const dark = useDarkMode()?.isEnabled ?? false;
-  const title = map.properties.name;
+type OpacityData = {
+  vector: number | null;
+  raster: number | null;
+};
 
-  const hasRaster = map.properties.raster_url != null;
+const basemapAtom = atomWithStorage("basemap", Basemap.Basic);
+const layerOpacityAtom = atom<OpacityData>({
+  vector: 0.5,
+  raster: 0.5,
+});
+
+interface MapData {
+  mapInfo: {
+    source_id: number;
+    name: string;
+    description: string;
+    raster_url?: string;
+  };
+  geometry: GeoJSON.Geometry;
+}
+
+export function Page() {
+  const { mapInfo, geometry } = useData<MapData>();
+
+  const dark = useDarkMode()?.isEnabled ?? false;
 
   const bounds: LngLatBoundsLike = useMemo(() => {
-    return ensureBoxInGeographicRange(boundingBox(map.geometry));
-  }, [map.geometry]);
+    return ensureBoxInGeographicRange(boundingBox(geometry));
+  }, [geometry]);
 
-  const [layer, setLayer] = useState(
-    localStorage.getItem("basemap") || Basemap.None
-  );
+  const [layer, setLayer] = useAtom(basemapAtom);
+
   const [style, setStyle] = useState(null);
   // Basemap style
   useEffect(() => {
@@ -206,10 +234,7 @@ export function Page() {
     }).then(setStyle);
   }, [layer, dark]);
 
-  const [layerOpacity, setLayerOpacity] = useState({
-    vector: 0.5,
-    raster: 0.5,
-  });
+  const [layerOpacity, setLayerOpacity] = useAtom(layerOpacityAtom);
 
   const [selectedLocation, setSelectedLocation] = useState(null);
 
@@ -226,13 +251,13 @@ export function Page() {
     setMapStyle(
       buildOverlayStyle({
         style,
-        focusedMap: map.properties.source_id,
+        focusedMap: mapInfo.source_id,
         layerOpacity,
-        rasterURL: map.properties.raster_url,
+        rasterURL: mapInfo.raster_url,
       })
     );
   }, [
-    map.properties.source_id,
+    mapInfo.source_id,
     style,
     layerOpacity.raster == null,
     layerOpacity.vector == null,
@@ -243,9 +268,9 @@ export function Page() {
     if (mapStyle == null) return;
     const mergeLayers = buildOverlayStyle({
       style,
-      focusedMap: map.properties.source_id,
+      focusedMap: mapInfo.source_id,
       layerOpacity,
-      rasterURL: map.properties.raster_url,
+      rasterURL: mapInfo.raster_url,
     }).layers;
 
     for (const layer of mapStyle.layers) {
@@ -303,47 +328,18 @@ export function Page() {
 
   if (bounds == null || mapStyle == null) return h(Spinner);
 
-  const contextPanel = h(PanelCard, [
-    h("div.map-meta", [
-      h("p", map.properties.description),
-      h("p", ["Map ID: ", h("code", map.properties.source_id)]),
-    ]),
-    h("div.vector-controls", [
-      h("h3", "Vector map"),
-      h(OpacitySlider, {
-        opacity: layerOpacity.vector,
-        setOpacity(v) {
-          setLayerOpacity({ ...layerOpacity, vector: v });
-        },
-      }),
-    ]),
-    h.if(hasRaster)("div.raster-controls", [
-      h("h3", "Raster map"),
-      h(OpacitySlider, {
-        opacity: layerOpacity.raster,
-        setOpacity(v) {
-          setLayerOpacity({ ...layerOpacity, raster: v });
-        },
-      }),
-    ]),
-    h(BaseLayerSelector, { layer, setLayer }),
-  ]);
-
   return h(
     MapAreaContainer,
     {
       className: "single-map",
-      navbar: h(MapNavbar, { title, parentRoute: "/maps", isOpen, setOpen }),
-      contextPanel,
-      contextPanelOpen: isOpen,
-      contextStackProps: {
-        adaptiveWidth: true,
-      },
+      navbar: null, // h(MapNavbar, { title, parentRoute: "/maps", isOpen, setOpen }),
+      contextPanel: null,
+      contextPanelOpen: false,
       detailPanelStyle: DetailPanelStyle.FIXED,
       detailPanel:
         selectedLocation != null
           ? h(InfoDrawer, { selectedLocation, mapRef, setSelectedLocation })
-          : h(MapLegendPanel, map.properties),
+          : h(MapLegendPanel, mapInfo),
     },
     [
       h(
@@ -371,6 +367,37 @@ export function Page() {
       ),
     ]
   );
+}
+
+function MapSettingsPanel({ hasRaster = false }) {
+  const [layerOpacity, setLayerOpacity] = useAtom(layerOpacityAtom);
+  const [layer, setLayer] = useAtom(basemapAtom);
+
+  return h("div.settings-panel", [
+    // h("div.map-meta", [
+    //   h("p", map.properties.description),
+    //   h("p", ["Map ID: ", h("code", map.properties.source_id)]),
+    // ]),
+    h("div.vector-controls", [
+      h("h3", "Vector map"),
+      h(OpacitySlider, {
+        opacity: layerOpacity.vector,
+        setOpacity(v) {
+          setLayerOpacity({ ...layerOpacity, vector: v });
+        },
+      }),
+    ]),
+    h.if(hasRaster)("div.raster-controls", [
+      h("h3", "Raster map"),
+      h(OpacitySlider, {
+        opacity: layerOpacity.raster,
+        setOpacity(v) {
+          setLayerOpacity({ ...layerOpacity, raster: v });
+        },
+      }),
+    ]),
+    h(BaseLayerSelector, { layer, setLayer }),
+  ]);
 }
 
 function BaseLayerSelector({ layer, setLayer }) {
@@ -405,8 +432,46 @@ function BaseLayerSelector({ layer, setLayer }) {
   ]);
 }
 
-function MapLegendPanel(params) {
-  console.log("MapLegendPanel", params);
+function MenuButtons() {
+  return h("div.menu-buttons", [
+    h(MapMenuButton, {
+      text: "Legend",
+      icon: "tags",
+      page: MenuPage.LEGEND,
+    }),
+    h(MapMenuButton, {
+      text: "Settings",
+      icon: "settings",
+      page: MenuPage.SETTINGS,
+    }),
+  ]);
+}
+
+function MapMenuButton({ text, icon, page }) {
+  const [activePage, setActivePage] = useAtom(activePageAtom);
+  return h(MenuButton, {
+    text,
+    icon,
+    size: "large",
+    active: activePage === page,
+    onClick: () => setActivePage(page),
+  });
+}
+
+enum MenuPage {
+  LEGEND = "legend",
+  SETTINGS = "settings",
+}
+
+const activePageAtom = atom(MenuPage.LEGEND);
+
+function MapLegendPanel(params: MapData["mapInfo"]) {
+  const activePage = useAtomValue(activePageAtom);
+
+  const mainPanel =
+    activePage === MenuPage.LEGEND
+      ? h(MapLegendData, params)
+      : h(MapSettingsPanel, { hasRaster: params.raster_url != null });
 
   return h(
     InfoDrawerContainer,
@@ -418,31 +483,29 @@ function MapLegendPanel(params) {
           h(ErrorBoundary, [
             h(MapReference, { reference: params, showSourceID: false }),
           ]),
+          // h(
+          //   "a.global-link",
+          //   { href: "/map/dev/sources/" + params.slug, target: "_blank" },
+          //   "View on global map"
+          // ),
+        ]),
+        h("div.dev-links", [
           h(
-            "a.global-link",
-            { href: "/map/dev/sources/" + params.slug, target: "_blank" },
-            "View on global map"
+            DevLink,
+            // Not sure why we have to fully construct the URL here, vs. constructing a relative route.
+            // Probably lack of a trailing slash in the main page?
+            { href: `/maps/${params.source_id}/legend` },
+            "Legend table"
+          ),
+          h(
+            DevLink,
+            { href: `/maps/${params.source_id}/correlation` },
+            "Correlation of units"
           ),
         ]),
-        h("div.flex.row", [
-          h("h3", "Legend"),
-          h("div.spacer"),
-          h("div.dev-links", [
-            h(
-              DevLink,
-              // Not sure why we have to fully construct the URL here, vs. constructing a relative route.
-              // Probably lack of a trailing slash in the main page?
-              { href: `/maps/${params.source_id}/legend` },
-              "Legend table"
-            ),
-            h(
-              DevLink,
-              { href: `/maps/${params.source_id}/correlation` },
-              "Correlation of units"
-            ),
-          ]),
-        ]),
-        h(MapLegendData, params),
+        h.if(params.description != null)("p", params.description),
+        h(MenuButtons),
+        mainPanel,
       ])
     )
   );

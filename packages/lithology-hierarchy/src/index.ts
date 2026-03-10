@@ -1,16 +1,13 @@
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
+import h from "./main.module.sass";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { Spinner } from "@blueprintjs/core";
 import { useAPIResult, ErrorCallout } from "@macrostrat/ui-components";
 import { useState } from "react";
-import { nestLiths, nestItems, Lith } from "./nest-data";
+import { nestLiths, nestItems, Lith, nestLithAttributes } from "./nest-data";
 import Hierarchy from "./simple-hierarchy";
 import LexHierarchyInner from "./lex-hierarchy";
 
-const h = hyper.styled(styles);
-
-export default function MacrostratLithologyHierarchy({ width, height }) {
+export function LithologyHierarchy() {
   const [error, setError] = useState(null);
   const res = useAPIResult(
     `${apiV2Prefix}/defs/lithologies`,
@@ -28,9 +25,49 @@ export default function MacrostratLithologyHierarchy({ width, height }) {
   }
   const liths: Lith[] = res.success.data;
 
-  console.log("Liths", liths);
-
   return h(Hierarchy, { data: nestLiths(liths) });
+}
+
+export function EnvironmentsHierarchy() {
+  const [error, setError] = useState(null);
+  const res = useAPIResult(
+    `${apiV2Prefix}/defs/environments`,
+    {
+      all: true,
+    },
+    { onError: setError }
+  );
+
+  if (error != null) {
+    return h(ErrorCallout, { error });
+  }
+  if (res == null) {
+    return h(Spinner);
+  }
+  const environments: Lith[] = res.success.data;
+
+  return h(Hierarchy, { data: nestLiths(environments) });
+}
+
+export function LithAttsHierarchy() {
+  const [error, setError] = useState(null);
+  const res = useAPIResult(
+    `${apiV2Prefix}/defs/lithology_attributes`,
+    {
+      all: true,
+    },
+    { onError: setError }
+  );
+
+  if (error != null) {
+    return h(ErrorCallout, { error });
+  }
+  if (res == null) {
+    return h(Spinner);
+  }
+  const liths: Lith[] = res.success.data;
+
+  return h(Hierarchy, { data: nestLithAttributes(liths) });
 }
 
 export function LexHierarchy({

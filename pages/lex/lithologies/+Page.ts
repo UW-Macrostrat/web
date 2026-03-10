@@ -1,12 +1,6 @@
-import LithologyHierarchy from "@macrostrat-web/lithology-hierarchy";
-import { ContentPage } from "~/layouts";
-import { PageBreadcrumbs, StickyHeader } from "~/components";
-import h from "./main.module.sass";
-import { OverlaysProvider } from "@blueprintjs/core";
+import { LithologyHierarchy } from "@macrostrat-web/lithology-hierarchy";
+import h from "@macrostrat/hyper";
 
 export function Page() {
-  return h("div.main", [
-    h(PageBreadcrumbs, { title: "Lithologies" }),
-    h(OverlaysProvider, h(LithologyHierarchy, { expandOnHover: true })),
-  ]);
+  return h(LithologyHierarchy);
 }

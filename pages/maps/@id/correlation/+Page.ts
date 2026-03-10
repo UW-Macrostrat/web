@@ -8,7 +8,7 @@ import {
 import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
 import { PageBreadcrumbs } from "~/components";
-import { usePageProps } from "~/renderer/usePageProps";
+import { useData } from "vike-react/useData";
 import { useLegendData, MapInfo } from "../utils";
 import { useElementSize, useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo, useRef } from "react";
@@ -30,10 +30,10 @@ import { LegendItemInformation } from "./legend-item";
 import { UnitDetailsPopover } from "~/components/unit-details";
 
 export function Page() {
-  const { map } = usePageProps();
+  const { mapInfo } = useData();
   const ref = useRef(null);
   const size = useElementSize(ref);
-  const legendData = useLegendData(map);
+  const legendData = useLegendData(mapInfo);
 
   const [ageMode, setAgeMode] = useState(AgeDisplayMode.MapLegend);
   const [ageScale, setAgeScale] = useState<AgeScale>("linear");
@@ -57,7 +57,7 @@ export function Page() {
   return h(FullscreenPage, [
     h("div.page-inner", [
       h("div.flex.row", [
-        h(PageBreadcrumbs),
+        h(PageBreadcrumbs, { separateTitle: false }),
         h("div.spacer"),
         h(
           Popover,
@@ -74,7 +74,7 @@ export function Page() {
       ]),
       h("div.vis-container", { ref }, [
         h.if(legendData != null)(CorrelationChart, {
-          map,
+          map: mapInfo,
           ...size,
           data: correlationChartData,
           selectedItem,
@@ -182,7 +182,8 @@ function CorrelationChart({
               ageRange: domain,
               absoluteAgeScale: true,
               levels: [2, 3],
-              onClick: (e, d) => window.open(`/lex/interval/${d.int_id}`, "_self"),
+              onClick: (e, d) =>
+                window.open(`/lex/interval/${d.int_id}`, "_self"),
             }),
           ]),
           h(

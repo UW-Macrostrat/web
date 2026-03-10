@@ -13,7 +13,11 @@ import type {
   PageContextClientWithServerRouting as PageContextClient,
   // For code loaded in server only
   PageContextServer as PageContextServer,
+  SourcesConfigStandard,
+  SourcesConfigCumulative,
 } from "vike/types";
+
+import { Item, PageInfo } from "~/_utils/breadcrumbs";
 
 export type PageProps = Record<string, unknown>;
 export type PageStyle = "content" | "fullscreen";
@@ -35,14 +39,19 @@ declare global {
     }
     interface PageContext {
       pageProps?: PageProps;
+      pageInfo?: PageInfo;
       urlPathname: string;
       user?: User;
+      breadcrumbs?: Item[];
       macrostratLogoFlavor?: string;
       mdxContent?: string;
       environment: Record<string, string>;
       exports: {
         pageStyle?: PageStyle;
         documentProps?: DocumentProps;
+      };
+      sources: {
+        pageInfo: SourcesConfigCumulative;
       };
       // Refine type of pageContext.Page (it's `unknown` by default)
       //Page: () => React.ReactNode;

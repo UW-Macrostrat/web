@@ -1,0 +1,26 @@
+.navbar
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+
+.nav-list
+  display: flex
+  flex-direction: row
+  gap: 0.5em
+  list-style: none
+
+  .nav-list-item
+    padding: 0.2em 0.5em
+    border-radius: 0.2em
+    text-decoration: none
+    transition: background-color 0.3s ease
+
+    &:hover
+      background-color: var(--secondary-background)
+
+  .active
+    background-color: var(--tertiary-background)
+    a
+      color: var(--text-color)
+    &:hover
+      background-color: var(--tertiary-background)

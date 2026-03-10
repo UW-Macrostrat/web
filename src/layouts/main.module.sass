@@ -1,3 +1,6 @@
+.page-container
+  min-height: 100vh
+  position: relative
 
 .fit-viewport
   position: fixed
@@ -6,12 +9,25 @@
   top: 0
   left: 0
 
-.content-page
+.content-page-inner
   width: 970px
-  margin: 3em auto
+  display: flex
+  flex-direction: column
+  position: relative
+  margin: 0 auto
+  flex-grow: 1
   @media only screen and (max-width: 900px)
     padding: 0 1em
 
+  .main
+    flex-grow: 1
+    margin-bottom: 4em
+
+.content-page
+  padding: 3em 0
+  display: flex
+  flex-direction: column
+  min-height: 100vh
 
   .centered
     min-height: 100vh
@@ -46,4 +62,3 @@
   top: 0
   right: 0
   margin: 1em
-

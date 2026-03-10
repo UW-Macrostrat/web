@@ -1,11 +1,9 @@
 import h from "./main.module.scss";
 import { LinkCard, PageBreadcrumbs, StickyHeader } from "~/components";
-import { Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
-import { asChromaColor } from "@macrostrat/color-utils";
 import { useData } from "vike-react/useData";
-import { Loading, SearchBar } from "~/components/general";
+import { SearchBar } from "~/components/general";
 
 export function Page() {
   const [input, setInput] = useState("");

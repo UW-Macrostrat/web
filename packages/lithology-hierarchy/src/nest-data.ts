@@ -116,6 +116,38 @@ function convert(data: TreeNodeMap): TreeNodeData {
   };
 }
 
+function groupByType(items) {
+  return items.reduce((acc, item) => {
+    const type = item.type.toLowerCase();
+    if (!acc[type]) {
+      acc[type] = [];
+    }
+    acc[type].push(item);
+    return acc;
+  }, {});
+}
+
+export interface LithAttribute {
+  lith_att_id: number;
+  t_units: string;
+  name: string;
+  type: string;
+}
+
+export function nestLithAttributes(lithAtts: LithAttribute[]): TreeNodeData {
+  const root: TreeNodeMap = { name: "Lith Attributes", children: new Map() };
+  for (let att of lithAtts) {
+    if (!root.children.has(att.type)) {
+      root.children.set(att.type, {
+        name: att.type,
+        children: new Map<string, TreeNodeMap>(),
+      });
+    }
+    const parent = root.children.get(att.type);
+    parent.children.set(att.name, { name: att.name, lith: null });
+  }
+  return convert(root);
+}
 
 export function nestItems(liths: Lith[]): TreeNodeData {
   const root: TreeNodeMap = { name: "Rocks", children: new Map() };

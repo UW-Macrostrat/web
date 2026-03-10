@@ -117,9 +117,6 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
   }, [focusedLine, selectedUnitID]);
 
   // selected unit management
-  // const selectedUnit = useCorrelationDiagramStore(
-  //   (state) => state.selectedUnit
-  // );
   const onUnitSelected = useCorrelationDiagramStore(
     (state) => state.setSelectedUnit
   );

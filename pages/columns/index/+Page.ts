@@ -1,11 +1,9 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { useMemo, Suspense } from "react";
-
-import { ContentPage } from "~/layouts";
-import { Link, DevLinkButton, PageBreadcrumbs } from "~/components";
+import { Link, DevLinkButton, TitleBlock } from "~/components";
 import { LithologyTag } from "~/components/lex/tag.ts";
-import { Footer, SearchBar } from "~/components/general";
+import { SearchBar } from "~/components/general";
 import {
   ColumnFilterOptions,
   ColumnGroup,
@@ -167,44 +165,37 @@ function InitialStateProvider({ children, projectID, initialData }) {
 
 export function Page({ title = "Columns", linkPrefix = "/" }) {
   const { project, allColumnGroups } = useData();
-  const project_id = project?.project_id;
+  const project_id = project?.project_id ?? 14; // Default to project 14 if no project_id is provided
   return h(
     ColumnPageProvider,
     { projectID: project_id, initialData: allColumnGroups },
     h("div.column-list-page", [
       h(Suspense, [
-        h(ContentPage, [
-          h("div.flex-row", [
-            h("div.main", [
-              h("div", [
-                h(PageBreadcrumbs, { showLogo: true }),
-                h(FilterManager),
-                h(LexFilters),
+        h("div.flex-row", [
+          h("div.main", [
+            h("div", [h(FilterManager), h(LexFilters)]),
+            h(ColumnDataArea, { linkPrefix }),
+          ]),
+          h("div.sidebar", [
+            h("div.sidebar-content", [
+              h(ButtonGroup, { vertical: true, large: true }, [
+                h(
+                  AnchorButton,
+                  { href: "/projects", minimal: true },
+                  "Projects"
+                ),
+                h(
+                  DevLinkButton,
+                  { href: "/columns/correlation" },
+                  "Correlation chart"
+                ),
               ]),
-              h(ColumnDataArea, { linkPrefix }),
-            ]),
-            h("div.sidebar", [
-              h("div.sidebar-content", [
-                h(ButtonGroup, { vertical: true, large: true }, [
-                  h(
-                    AnchorButton,
-                    { href: "/projects", minimal: true },
-                    "Projects"
-                  ),
-                  h(
-                    DevLinkButton,
-                    { href: "/columns/correlation" },
-                    "Correlation chart"
-                  ),
-                ]),
-                h(ColumnMapOuter, {
-                  projectID: project_id,
-                }),
-              ]),
+              h(ColumnMapOuter, {
+                projectID: project_id,
+              }),
             ]),
           ]),
         ]),
-        h(Footer),
       ]),
     ])
   );
@@ -237,14 +228,14 @@ function ColumnDataArea({ linkPrefix }) {
     { isLoading },
     h(
       "div.column-groups",
-      data.map((d) =>
-        h(ColumnGroup, {
+      data.map((d) => {
+        return h(ColumnGroupCols, {
           data: d,
           key: d.id,
           linkPrefix,
           showEmpty,
-        })
-      )
+        });
+      })
     )
   );
 }
@@ -334,21 +325,25 @@ function LexCard({ data }) {
   );
 }
 
-function ColumnGroup({ data, linkPrefix }) {
+function ColumnGroupCols({ data, linkPrefix }) {
   const filteredColumns = data.columns;
 
   if (filteredColumns?.length === 0) return null;
 
   const { name } = data;
   return h("div.column-group", [
-    h("div.column-group-header", [
-      h(Link, { href: `/columns/groups/${data.id}`, target: "_self" }, [
-        h(
-          "h2.column-group-name",
-          name + " (Group #" + filteredColumns[0].col_group_id + ")"
-        ),
-      ]),
-    ]),
+    h(TitleBlock, {
+      title: h(
+        Link,
+        {
+          href: `/projects/${data.project_id}/groups/${data.id}`,
+        },
+        name
+      ),
+      identifier: data.id,
+      headingLevel: 2,
+      className: "grouped-cols-header",
+    }),
     h("div.column-list", [
       h("table.column-table", [
         h("thead.column-row.column-header", [
@@ -359,7 +354,9 @@ function ColumnGroup({ data, linkPrefix }) {
           ]),
         ]),
         h("tbody", [
-          filteredColumns.map((data) => h(ColumnItem, { data, linkPrefix })),
+          filteredColumns.map((data) =>
+            h(ColumnItem, { data, linkPrefix, key: data.col_id })
+          ),
         ]),
       ]),
     ]),

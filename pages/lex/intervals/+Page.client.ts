@@ -1,9 +1,8 @@
 import h from "./main.module.scss";
-import { PageBreadcrumbs, StickyHeader } from "~/components";
+import { StickyHeader } from "~/components";
 import { LithologyTag } from "@macrostrat/data-components";
 import { Card, RangeSlider } from "@blueprintjs/core";
-import { useState, memo } from "react";
-import { ContentPage } from "~/layouts";
+import { useState } from "react";
 import { SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 
@@ -16,46 +15,51 @@ export function Page() {
     setInput(e.toLowerCase());
   };
 
-  const filtered = input.length < 3 && (age[0] == 0 && age[1] == 4600) ? res : res.filter((d) => {
-    const name = d.name?.toLowerCase() || "";
-    const intType = d.int_type?.toLowerCase() || "";
-    const abbrev = d.abbrev?.toLowerCase() || "";
-    const b_age = d.b_age ? parseInt(d.b_age, 10) : 0;
-    const t_age = d.t_age ? parseInt(d.t_age, 10) : 4600;
+  const filtered =
+    input.length < 3 && age[0] == 0 && age[1] == 4600
+      ? res
+      : res.filter((d) => {
+          const name = d.name?.toLowerCase() || "";
+          const intType = d.int_type?.toLowerCase() || "";
+          const abbrev = d.abbrev?.toLowerCase() || "";
+          const b_age = d.b_age ? parseInt(d.b_age, 10) : 0;
+          const t_age = d.t_age ? parseInt(d.t_age, 10) : 4600;
 
-    const matchesName = name.includes(input);
-    const matchesType = intType.includes(input);
-    const matchesAbbrev = abbrev.includes(input);
-    const matchesAgeRange =
-      !isNaN(b_age) && b_age >= age[0] && !isNaN(t_age) && t_age <= age[1];
+          const matchesName = name.includes(input);
+          const matchesType = intType.includes(input);
+          const matchesAbbrev = abbrev.includes(input);
+          const matchesAgeRange =
+            !isNaN(b_age) &&
+            b_age >= age[0] &&
+            !isNaN(t_age) &&
+            t_age <= age[1];
 
-    return (matchesName || matchesType || matchesAbbrev) && matchesAgeRange;
-  });
+          return (
+            (matchesName || matchesType || matchesAbbrev) && matchesAgeRange
+          );
+        });
 
   const grouped = groupByIntType(filtered);
 
   return h("div.int-list-page", [
-    h(ContentPage, [
-      h(StickyHeader, [
-        h(PageBreadcrumbs, { title: "Intervals" }),
-        h(Card, { className: "filters" }, [
-          h(SearchBar, {
-            placeholder: "Filter by name, type, or abbreviation...",
-            onChange: handleChange,
+    h(StickyHeader, [
+      h(Card, { className: "filters" }, [
+        h(SearchBar, {
+          placeholder: "Filter by name, type, or abbreviation...",
+          onChange: handleChange,
+        }),
+        h("div.age-filter", [
+          h("p", "Filter by ages"),
+          h(RangeSlider, {
+            min: 0,
+            max: 4600,
+            stepSize: 10,
+            labelStepSize: 1000,
+            value: [age[0], age[1]],
+            onChange: (value) => {
+              setAge(value);
+            },
           }),
-          h("div.age-filter", [
-            h("p", "Filter by ages"),
-            h(RangeSlider, {
-              min: 0,
-              max: 4600,
-              stepSize: 10,
-              labelStepSize: 1000,
-              value: [age[0], age[1]],
-              onChange: (value) => {
-                setAge(value);
-              },
-            }),
-          ]),
         ]),
       ]),
       h(
@@ -65,14 +69,16 @@ export function Page() {
             h("h2", UpperCase(intType)),
             h(
               "div.int-items",
-              group.map((d) => h(MemoLithologyTag, {
-                  data: {
-                    id: d.int_id,
-                    name: d.name,
-                    color: d.color || "#000000",
-                  },
-                  href: "/lex/intervals/" + d.int_id
-              })),
+              group.map((data) => {
+                let color = data.color;
+                if (color == "") {
+                  color = "#888888";
+                }
+                return h(LithologyTag, {
+                  data,
+                  color,
+                });
+              })
             ),
           ])
         )
@@ -84,7 +90,7 @@ export function Page() {
 function groupByIntType(items) {
   return items.reduce((acc, item) => {
     const intType = item.int_type?.trim?.();
-    if (!intType) return acc; 
+    if (!intType) return acc;
 
     if (!acc[intType]) {
       acc[intType] = [];
@@ -98,15 +104,3 @@ function groupByIntType(items) {
 function UpperCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
-
-
-const MemoLithologyTag = memo(
-  function MemoLithologyTag({ data, href }) {
-    return h(LithologyTag, { data, href });
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.data.name === nextProps.data.name
-    );
-  }
-);

@@ -5,14 +5,13 @@ import {
   FlexRow,
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
-import { Link, LithologyTag, PageBreadcrumbs } from "~/components";
+import { Footer, Link, LithologyTag, PageBreadcrumbs } from "~/components";
 import { Card, Divider, Popover } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
   AlphaTag,
   BetaTag,
   BlankImage,
-  Footer,
   Loading,
   StratTag,
 } from "~/components/general";
@@ -90,26 +89,12 @@ function LexItemPageInner(props: LexItemPageProps) {
   const { name, strat_name_long } = resData;
 
   return h("div", [
-    h(ContentPage, { className: "int-page" }, [
-      h("div.page-header", [
-        h(PageBreadcrumbs, { title: "#" + id }),
-        h(DarkModeButton, { className: "dark-mode-button", showText: true }),
-      ]),
-      header ??
-        h(LexItemHeader, {
-          resData,
-          name: name ?? strat_name_long,
-          siftLink,
-          id,
-        }),
-      SiftLink({
-        id,
-        siftLink,
-      }),
-      children,
-      h(References, { refs }),
-    ]),
-    h(Footer),
+    SiftLink({
+      id,
+      siftLink,
+    }),
+    children,
+    h(References, { refs }),
   ]);
 }
 

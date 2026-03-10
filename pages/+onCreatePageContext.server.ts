@@ -5,8 +5,15 @@ import { PageContextServer } from "vike/types";
 // This hook is called upon new incoming HTTP requests
 export async function onCreatePageContext(pageContext: PageContextServer) {
   // Get user name from cookies
+
   const cookies = getCookies(pageContext.headers);
   pageContext.user = await getUserFromCookie(cookies);
+  return pageContext;
+}
+
+interface ExportData {
+  value: string;
+  definedAt: string;
 }
 
 async function getUserFromCookie(cookies: Record<string, string>) {

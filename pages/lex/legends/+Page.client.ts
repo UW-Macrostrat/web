@@ -1,5 +1,5 @@
 import h from "./main.module.sass";
-import { StickyHeader, LinkCard, PageBreadcrumbs, Footer, BetaTag } from "~/components";
+import { StickyHeader, LinkCard, PageBreadcrumbs, BetaTag } from "~/components";
 import { ContentPage } from "~/layouts";
 import { usePageContext } from "vike-react/usePageContext";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
@@ -11,14 +11,13 @@ export function Page() {
 
   if (!url) {
     return h(Base);
-  } 
+  }
 
   const params = getUrlParams(url);
   const idType = params.idType;
   const id = params[idType];
   const color = params.color;
   const name = params.name;
-
 
   return h(ContentPage, [
     h(Header, { name, color, idType, id }),
@@ -28,21 +27,24 @@ export function Page() {
 
 function Header({ name, color, idType, id }) {
   const map = {
-    'int_id': "intervals",
-    'lith_id': "lithologies",
-    'econ_id': "economics",
-    'environ_id': "environments",
-    'strat_name_id': "strat-names",
-  }
+    int_id: "intervals",
+    lith_id: "lithologies",
+    econ_id: "economics",
+    environ_id: "environments",
+    strat_name_id: "strat-names",
+  };
 
   return h(StickyHeader, { className: "header" }, [
     h(PageBreadcrumbs, {
       title: h(FlexRow, { gap: ".5em", alignItems: "center" }, [
-        h('p.title', 'Legends for '),
-        h(LithologyTag, { data: { name, color }, href: `/lex/${map[idType]}/${id}` }),
+        h("p.title", "Legends for "),
+        h(LithologyTag, {
+          data: { name, color },
+          href: `/lex/${map[idType]}/${id}`,
+        }),
       ]),
     }),
-    h(BetaTag)
+    h(BetaTag),
   ]);
 }
 
@@ -53,7 +55,7 @@ function getUrlParams(urlString) {
   for (const [key, value] of params.entries()) {
     result[key] = value;
 
-    if (key.toLowerCase().includes('id')) {
+    if (key.toLowerCase().includes("id")) {
       result.idType = key;
     }
   }
@@ -62,15 +64,19 @@ function getUrlParams(urlString) {
 }
 
 function Base() {
-  return h(ContentPage, { className: 'page' }, [
-    h(StickyHeader, { className: "header" }, h(PageBreadcrumbs, { title: "Legends" })),
+  return h(ContentPage, { className: "page" }, [
+    h(
+      StickyHeader,
+      { className: "header" },
+      h(PageBreadcrumbs, { title: "Legends" })
+    ),
     h(PostgRESTInfiniteScrollView, {
-      route: postgrestPrefix + '/legend_liths',
-      id_key: 'legend_id',
+      route: postgrestPrefix + "/legend_liths",
+      id_key: "legend_id",
       limit: 20,
       itemComponent: LegendItem,
       filterable: true,
-      searchColumns: [{value: "map_unit_name", label: "Map unit name"}],
+      searchColumns: [{ value: "map_unit_name", label: "Map unit name" }],
     }),
   ]);
 }
@@ -81,12 +87,12 @@ function BaseUnitItem({ data }) {
   return h(LinkCard, {
     href: `/columns/${col_id}#unit=${id}`,
     title: strat_name,
-  })
+  });
 }
 
 function FilterData() {
-  const params = usePageContext().urlParsed.href.split("?")[1].split("=")
-  const id = params[1].split("&")[0]
+  const params = usePageContext().urlParsed.href.split("?")[1].split("=");
+  const id = params[1].split("&")[0];
 
   return h(PostgRESTInfiniteScrollView, {
     route: postgrestPrefix + `/legend_liths`,
@@ -96,7 +102,7 @@ function FilterData() {
       lith_ids: `cs.{${id}}`,
     },
     filterable: true,
-    searchColumns: [{value: "map_unit_name", label: "Map unit name"}],
+    searchColumns: [{ value: "map_unit_name", label: "Map unit name" }],
     itemComponent: LegendItem,
   });
 }

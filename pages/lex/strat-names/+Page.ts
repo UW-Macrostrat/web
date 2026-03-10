@@ -1,9 +1,8 @@
 import h from "./main.module.sass";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
-import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
+import { LinkCard, Link } from "~/components";
 import { Card } from "@blueprintjs/core";
-import { ContentPage } from "~/layouts";
 import { SearchBar, StratTag } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { MultiSelect } from "@blueprintjs/select";
@@ -13,14 +12,8 @@ const PAGE_SIZE = 20;
 export function Page() {
   const { res } = useData();
 
-  return h(ContentPage, [
-    h(StickyHeader, { className: "header" }, [
-      h(PageBreadcrumbs, {
-        title: "Stratigraphic Names",
-      }),
-      
-    ]),
-     h("div.header-description", [
+  return h([
+    h("div.header-description", [
       h(
         Card,
         {
@@ -44,7 +37,7 @@ export function Page() {
           ),
         ]
       ),
-      ]),
+    ]),
     h(PostgRESTInfiniteScrollView, {
       route: `${apiDomain}/api/pg/strat_combined`,
       initialItems: res,
@@ -54,10 +47,8 @@ export function Page() {
       filterable: true,
       SearchBarComponent: SearchBar,
       MultiSelectComponent: MultiSelect,
-      searchColumns: [
-        { label: "Name", value: "all_names" },
-      ],
-    })
+      searchColumns: [{ label: "Name", value: "all_names" }],
+    }),
   ]);
 }
 
@@ -99,7 +90,9 @@ function ConceptBody({ data, input }) {
   }));
 
   // only show strats that match the input
-  if (strats?.some((s) => s.name.toLowerCase().includes(input?.toLowerCase()))) {
+  if (
+    strats?.some((s) => s.name.toLowerCase().includes(input?.toLowerCase()))
+  ) {
     console.log("Filtering strats", strats, input);
     strats = strats.filter((s) =>
       s.name.toLowerCase().includes(input?.toLowerCase())

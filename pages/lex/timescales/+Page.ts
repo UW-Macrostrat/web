@@ -1,10 +1,8 @@
 import h from "./main.module.scss";
-import { PageBreadcrumbs, LinkCard, StickyHeader } from "~/components";
+import { LinkCard } from "~/components";
 import { Card, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
-import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
-import { useEffect } from "react";
 import { SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 
@@ -28,8 +26,7 @@ export function Page() {
     return matchesName && matchesAgeRange;
   });
 
-  return h(ContentPage, { className: "timescale-list-page" }, [
-    h(StickyHeader, [h(PageBreadcrumbs, { title: "Timescales" })]),
+  return h([
     h(Card, { className: "filters" }, [
       h(SearchBar, {
         placeholder: "Filter by name...",
