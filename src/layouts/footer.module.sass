@@ -1,16 +1,48 @@
 .footer
   border-top: 1px solid var(--secondary-background)
+  padding-top: 1em
   color: var(--secondary-color)
+  --filter: grayscale(100%)
 
-  .funding-line
-    color: var(--text-emphasized-color)
+  h3, h4
+    color: var(--secondary-color)
+    margin: 0
 
-  .footer-nav
-    display: flex
-    padding: 2em 0
-    flex-wrap: wrap
-    max-width: 400px
-    gap: 10px 40px
+  h4
+    font-weight: 200
+    font-size: 1rem
+
+  a:hover
+    text-decoration: none
+    color: var(--text-color)
+    h3
+      color: var(--text-color)
+
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  gap: 1rem
+  justify-content: space-between
+  &>*
+    flex: 1
+
+  .nav-link-list
+    :global(.bp6-button.bp6-minimal)
+      font-family: var(--sans-serif-font)
+      --button-color: var(--secondary-color)
+      color: var(--button-color)
+      :global(.bp6-icon):not([class*="bp6-intent-"])
+        color: var(--button-color)
+      img
+        filter: var(--filter)
+        opacity: 0.5
+
+      &:hover
+        --button-color: var(--text-color)
+        img
+          filter: unset
+          opacity: 1
+    margin: 0.2em 0 1em
 
   .footer-nav > *
     width: calc(50% - 20px)
@@ -48,3 +80,35 @@
     display: inline-flex
     gap: 5px
     align-items: center
+
+.homepage-link
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 0.5em
+  h3
+    margin: 0
+    color: var(--secondary-color)
+
+  &:hover
+    .footer-logo
+      filter: unset
+      opacity: 1
+
+  .footer-logo
+    width: 100px
+    aspect-ratio: 1/1
+    // Tint the logo to match the text color
+    filter: var(--filter)
+    opacity: 0.5
+
+.nav-link-list
+  padding-left: 0
+  list-style: none
+
+.link-list-container
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: space-between
+  flex-grow: 1

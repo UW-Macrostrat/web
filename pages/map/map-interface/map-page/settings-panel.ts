@@ -4,22 +4,15 @@
 import {
   AnchorButton,
   Button,
-  ButtonGroup,
   Callout,
   Collapse,
-  Icon,
   IconName,
   Intent,
   Switch,
   Tag,
 } from "@blueprintjs/core";
 import { applyMapPositionToHash } from "@macrostrat/map-interface";
-import {
-  DarkModeButton,
-  buildQueryString,
-  darkModeUpdater,
-  useDarkMode,
-} from "@macrostrat/ui-components";
+import { buildQueryString } from "@macrostrat/ui-components";
 import { useEffect, useState } from "react";
 import {
   MapLayer,
@@ -28,6 +21,7 @@ import {
 } from "#/map/map-interface/app-state";
 
 import h from "./settings-panel.module.sass";
+import { ThemeButton } from "~/components/theme-button.ts";
 
 const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
@@ -191,39 +185,6 @@ function LineSymbolsControl() {
   ]);
 }
 
-function ThemeButton() {
-  const darkMode = useDarkMode();
-  const update = darkModeUpdater();
-  const icon = darkMode.isAutoset ? "tick" : "desktop";
-
-  const darkModeText = darkMode.isEnabled
-    ? "Turn on the lights"
-    : "Turn off the lights";
-  return h("div.dark-mode-controls", [
-    h(DarkModeButton, { minimal: true, active: false, allowReset: true }, [
-      h("span.text", darkModeText),
-    ]),
-    h(
-      Button,
-      {
-        minimal: true,
-        active: darkMode.isAutoset,
-        rightIcon: h(Icon, { icon, size: 12 }),
-        intent: darkMode.isAutoset ? "success" : "primary",
-        className: "auto-button sub-button",
-        small: true,
-        onClick(evt) {
-          if (darkMode.isAutoset) return;
-          evt.stopPropagation();
-          update(null);
-        },
-      },
-
-      "auto"
-    ),
-  ]);
-}
-
 function LabelsButton() {
   const layer = MapLayer.LABELS;
   const isShown = useAppState((state) => state.core.mapLayers.has(layer));
@@ -282,4 +243,4 @@ function HighResolutionTerrainSwitch() {
   );
 }
 
-export { ExperimentsPanel, SettingsPanel, ThemeButton };
+export { ExperimentsPanel, SettingsPanel };

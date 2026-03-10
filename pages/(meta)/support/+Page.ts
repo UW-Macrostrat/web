@@ -4,6 +4,16 @@ import { Navbar } from "~/layouts";
 
 export function Page() {
   return h([
+    h("h2", "Grant funding"),
+    h("ul", { className: "footer-text-container" }, [
+      h("li", { className: "funding-line" }, "EAR-1948843"),
+      h("li", { className: "funding-line" }, "ICER-1928323"),
+      //h(DarkModeButton, { className: "dark-mode-button", showText: true }),
+    ]),
+
+    h("h2", "Other sources of support"),
+    h("ul", [h("li", "UW-Madison Dept. Geoscience")]),
+
     h("div.donate-container", [
       h(
         "a",
