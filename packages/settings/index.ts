@@ -12,6 +12,8 @@ export const burwellTileDomain = getRuntimeConfig(
   "MACROSTRAT_TILESERVER_DOMAIN"
 );
 export const apiDomain = getRuntimeConfig("MACROSTRAT_API_DOMAIN");
+export const xDDapiDomain = getRuntimeConfig("MACROSTRAT_XDD_API_DOMAIN");
+
 export const tileserverDomain = burwellTileDomain;
 // For now,
 export const isDev = true; // getRuntimeConfig("MACROSTRAT_INSTANCE") === "Development";
