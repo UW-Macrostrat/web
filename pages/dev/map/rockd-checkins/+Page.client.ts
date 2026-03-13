@@ -40,7 +40,7 @@ function buildCheckinStyle(darkMode) {
     sources: {
       rockdCheckins: {
         type: "vector",
-        tiles: [tileserverDomain + "/checkins/tiles/{z}/{x}/{y}"],
+        tiles: ["https://rockd.org/api/checkin-tile/{z}/{x}/{y}?cluster=false"],
         minzoom: 4,
         maxzoom: 16,
       },
