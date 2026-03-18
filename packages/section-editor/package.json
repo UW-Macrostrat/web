@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@blueprintjs/core": "^6.7.0",
+    "@blueprintjs/core": "^6.10.0",
     "@macrostrat/hyper": "^3.0.6",
     "@macrostrat/ui-components": "^5.0.5",
     "chroma-js": "^3.2.0",

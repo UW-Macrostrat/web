@@ -70,6 +70,7 @@ async function fetchWrapper(url: string): Promise<Response> {
     }
     return res;
   } catch (error) {
+    console.log(error);
     // Not really sure why we have to catch and re-throw here, but if we don't,
     // the app crashes.
     throw new Error(`Network error while fetching ${url}: ${error}`);

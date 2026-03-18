@@ -3,7 +3,13 @@ import { apiV2Prefix } from "@macrostrat-web/settings";
 import { Spinner } from "@blueprintjs/core";
 import { useAPIResult, ErrorCallout } from "@macrostrat/ui-components";
 import { useState } from "react";
-import { nestLiths, nestItems, Lith, nestLithAttributes } from "./nest-data";
+import {
+  nestLiths,
+  nestItems,
+  Lith,
+  nestLithAttributes,
+  LithAttribute,
+} from "./nest-data";
 import Hierarchy from "./simple-hierarchy";
 import LexHierarchyInner from "./lex-hierarchy";
 
@@ -65,7 +71,7 @@ export function LithAttsHierarchy() {
   if (res == null) {
     return h(Spinner);
   }
-  const liths: Lith[] = res.success.data;
+  const liths: LithAttribute[] = res.success.data;
 
   return h(Hierarchy, { data: nestLithAttributes(liths) });
 }

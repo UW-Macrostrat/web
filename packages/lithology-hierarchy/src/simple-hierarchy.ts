@@ -2,11 +2,12 @@ import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { TreeNodeData } from "./nest-data";
 import { LithologyTag } from "~/components";
+import { OverlaysProvider } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
 export default function Hierarchy({ data }: { data: TreeNodeData }) {
-  return h(Tree, { data, level: 0 });
+  return h(OverlaysProvider, h(Tree, { data, level: 0 }));
 }
 
 function Tree({ data, level = 0 }: { data: TreeNodeData; level: number }) {

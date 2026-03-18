@@ -1,5 +1,5 @@
 import { useInDarkMode } from "@macrostrat/ui-components";
-import { Tag, Popover } from "@blueprintjs/core";
+import { Tag, PopoverNext } from "@blueprintjs/core";
 import { asChromaColor } from "@macrostrat/color-utils";
 import h from "./main.module.sass";
 import classNames from "classnames";
@@ -37,13 +37,14 @@ export function LithologyTag({
 
   if (tooltip != null) {
     return h(
-      Popover,
+      PopoverNext,
       {
         content: tooltip,
         interactionKind: "click",
-        minimal: true,
+        arrow: false,
         className: "lithology-tag-popover-holder",
-        usePortal: false,
+        usePortal: true,
+        lazy: true,
         ...tooltipProps,
       },
       contents

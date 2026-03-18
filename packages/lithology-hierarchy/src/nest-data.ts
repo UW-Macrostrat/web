@@ -135,7 +135,7 @@ export interface LithAttribute {
 }
 
 export function nestLithAttributes(lithAtts: LithAttribute[]): TreeNodeData {
-  const root: TreeNodeMap = { name: "Lith Attributes", children: new Map() };
+  const root: TreeNodeMap = { name: "Lith attributes", children: new Map() };
   for (let att of lithAtts) {
     if (!root.children.has(att.type)) {
       root.children.set(att.type, {
@@ -144,7 +144,14 @@ export function nestLithAttributes(lithAtts: LithAttribute[]): TreeNodeData {
       });
     }
     const parent = root.children.get(att.type);
-    parent.children.set(att.name, { name: att.name, lith: null });
+    parent.children.set(att.name, {
+      name: att.name,
+      lith: {
+        id: att.lith_att_id,
+        lith_id: att.lith_att_id,
+        name: att.name,
+      },
+    });
   }
   return convert(root);
 }
