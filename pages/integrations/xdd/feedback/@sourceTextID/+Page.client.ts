@@ -24,7 +24,7 @@ import {
 } from "@macrostrat/ui-components";
 import { useState } from "react";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
-import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
+import { knowledgeGraphAPIURL, xDDapiDomain } from "@macrostrat-web/settings";
 import { OverlayToaster } from "@blueprintjs/core";
 import { fetchPGData } from "~/_utils";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
@@ -49,7 +49,7 @@ export function Page() {
 
   useEffect(() => {
     if (paper_id) {
-      fetchPGData("kg_publication_entities", { paper_id: "eq." + paper_id })
+      fetchPGData("/kg_publication_entities", { paper_id: "eq." + paper_id })
         .then((paper) => {
           setTitle(paper[0]?.citation?.title);
         });
@@ -215,7 +215,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
 async function postDataToServer(data: ServerResults, customFeedback: string, selectedFeedbackType: string[]) {
  console.log("Posting data to server:", data);
 
-  const response = await fetch("http://localhost:9543/record_run", {
+  const response = await fetch(xDDapiDomain + "/record_run", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

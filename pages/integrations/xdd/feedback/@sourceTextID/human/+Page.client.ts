@@ -44,7 +44,6 @@ export function Page() {
     h(ContentPage, [
       h("div.feedback-main", [h(ExtractionIndex, { setPaperID, title })]),
     ]),
-    h(Footer),
   ]);
 }
 
