@@ -77,8 +77,7 @@ export function Page() {
     }
   }, [ingestFilter]);
 
-  return h(ContentPage, [
-    h(PageBreadcrumbs),
+  return h("div.main", [
     h("div.ingestion-title-bar", [
       h("h1", ["Map ingestion queue"]),
       h("div.spacer"),
