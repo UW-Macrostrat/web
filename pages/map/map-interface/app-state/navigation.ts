@@ -3,19 +3,25 @@ import classNames from "classnames";
 import { matchPath } from "react-router";
 import { useAppState } from "./hooks";
 import { AppState, MenuPage } from "./reducers/types";
-import { createBrowserHistory } from "history";
+import { createBrowserHistory, type To } from "history";
 import { useCallback } from "react";
+import h from "@macrostrat/hyper";
 
 export const browserHistory = createBrowserHistory();
 
-function useLocation() {
+export function useLocation() {
   return browserHistory.location;
 }
 
-function useNavigate(spec) {
-  return useCallback((path) => {
-    return browserHistory.push(path);
+export function useNavigate() {
+  return useCallback((req: To) => {
+    return browserHistory.push(req);
   }, []);
+}
+
+export function Link({ to, children }: { to: To; children: React.ReactNode }) {
+  //const href = browserHistory.createHref(to);
+  return h("a", children);
 }
 
 export function isDetailPanelRouteInternal(pathname: string) {

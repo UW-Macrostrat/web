@@ -10,9 +10,8 @@ import loadable from "@loadable/component";
 import { mapPagePrefix } from "@macrostrat-web/settings";
 import classNames from "classnames";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation } from "../app-state/navigation";
 import { useTransition } from "transition-hook";
-import useBreadcrumbs from "use-react-router-breadcrumbs";
 import {
   MapLayer,
   MenuPage,
@@ -38,6 +37,24 @@ import { ExperimentsPanel, SettingsPanel } from "./settings-panel";
 import h from "./main.module.sass";
 import { MenuButton } from "~/components";
 
+function useBreadcrumbs() {
+  const location = useLocation();
+  const pathSegs = location.pathname.split("/");
+  console.log(pathSegs);
+  const breadcrumbs: { key: string }[] = [];
+
+  let accum = "";
+  for (const elem of pathSegs) {
+    if (elem == "") continue;
+    accum = accum + "/" + elem;
+    breadcrumbs.push({
+      key: accum,
+    });
+  }
+
+  return breadcrumbs;
+}
+
 type MenuProps = {
   className?: string;
   menuPage: MenuPage;
@@ -49,6 +66,8 @@ export default function Menu(props: MenuProps) {
   let { className, menuPage, baseRoute = "/" } = props;
   const inputFocus = useAppState((s) => s.inputFocus);
   const runAction = useAppActions();
+
+  console.log("menu page", menuPage);
 
   const navigateHome = useHashNavigate(baseRoute);
 
@@ -95,7 +114,7 @@ const AboutText = loadable(() => import("../components/About"));
 
 const TabButton = (props: ButtonProps & { page: MenuPage }) => {
   const { page, ...rest } = props;
-  const active = useAppState((s) => s.menu.activePage) == page;
+  const active = useAppState((s) => s.activeMenuPage) == page;
   const runAction = useAppActions();
 
   return h(MenuButton, {
@@ -120,7 +139,7 @@ const MenuGroup = (props) =>
 
 const LayerList = (props) => {
   const runAction = useAppActions();
-  const inPaleoMode = useAppState((s) => s.timeCursorAge != null);
+  //const inPaleoMode = useAppState((s) => s.timeCursorAge != null);
 
   const toggleElevationChart = () => {
     runAction({ type: "toggle-menu" });
@@ -161,7 +180,6 @@ const LayerList = (props) => {
         {
           onClick: toggleElevationChart,
           icon: ElevationIcon,
-          disabled: inPaleoMode,
         },
         "Elevation profile"
       ),
@@ -190,12 +208,14 @@ function useLastPageLocation(
   const breadcrumbs = useBreadcrumbs().filter((b) =>
     b.key.startsWith(baseRoute)
   );
+  console.log("base route", baseRoute);
+  console.log("breadcrumbs", breadcrumbs);
+
   if (breadcrumbs.length < 2) return null;
   const prevPage = breadcrumbs[breadcrumbs.length - 2];
   const currentPage = breadcrumbs[breadcrumbs.length - 1];
   const prevRoute =
-    menuBacklinkLocationOverrides[currentPage.match.pathname] ??
-    prevPage.match.pathname;
+    menuBacklinkLocationOverrides[currentPage.key] ?? prevPage.key;
   if (prevRoute == mapPagePrefix || isDetailPanelRouteInternal(prevRoute))
     return null;
   return {

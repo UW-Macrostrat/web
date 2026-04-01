@@ -92,7 +92,7 @@ function MapPage({
         navbar: h(Searchbar, { className: "searchbar" }),
         contextPanel: h(Menu, {
           className: "context-panel",
-          menuPage: menuPage ?? navMenuPage,
+          menuPage: navMenuPage,
         }),
         detailPanel: h(InfoDrawerHolder),
         detailPanelStyle: "floating",
