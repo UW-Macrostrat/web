@@ -9,7 +9,7 @@ import {
   MacrostratLineSymbolManager,
   MapSourcesLayer,
 } from "@macrostrat/mapbox-react";
-import { getFocusState } from "@macrostrat/mapbox-utils";
+import { getFocusState, getTerrainSourceID } from "@macrostrat/mapbox-utils";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useInDarkMode } from "@macrostrat/ui-components";
@@ -127,6 +127,13 @@ export default function MainMapView(props) {
     runAction({ type: "map-moved", data: { mapPosition: pos } });
   }, []);
 
+  const terrainSourceID = useMemo(() => {
+    if (mapStyle == null) return null;
+    if (!mapSettings.highResolutionTerrain) return null;
+    // TODO: use function from mapbox-react once it's exported
+    return getTerrainSourceID(mapStyle);
+  }, [mapSettings.highResolutionTerrain, mapStyle]);
+
   return h(
     MapView,
     {
@@ -136,9 +143,7 @@ export default function MainMapView(props) {
       onMapLoaded,
       style: mapStyle,
       mapPosition,
-      terrainSourceID: mapSettings.highResolutionTerrain
-        ? "mapbox-3d-dem"
-        : null,
+      terrainSourceID,
       mapboxToken: SETTINGS.mapboxAccessToken,
       onMapMoved,
     },
