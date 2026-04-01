@@ -1,8 +1,22 @@
 import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import classNames from "classnames";
-import { useLocation, useNavigate } from "react-router";
+import { matchPath } from "react-router";
 import { useAppState } from "./hooks";
-import { MenuPage } from "./reducers";
+import { AppState, MenuPage } from "./reducers/types";
+import { createBrowserHistory } from "history";
+import { useCallback } from "react";
+
+export const browserHistory = createBrowserHistory();
+
+function useLocation() {
+  return browserHistory.location;
+}
+
+function useNavigate(spec) {
+  return useCallback((path) => {
+    return browserHistory.push(path);
+  }, []);
+}
 
 export function isDetailPanelRouteInternal(pathname: string) {
   /* Check if we're in a detail panel route from within the app. */
@@ -73,4 +87,51 @@ export function useHashNavigate(to: string) {
       hash: location.hash,
     });
   };
+}
+
+export function setInfoMarkerPosition(
+  state: AppState,
+  pathname: string | null = null
+): AppState {
+  // Check if we are viewing a specific location
+  const loc = matchPath(
+    mapPagePrefix + "/loc/:lng/:lat/*",
+    pathname ?? browserHistory.location.pathname
+  );
+
+  let s1 = state;
+
+  if (loc != null) {
+    const { lng, lat } = loc.params;
+    return {
+      ...s1,
+      infoMarkerPosition: { lng: Number(lng), lat: Number(lat) },
+      infoDrawerOpen: true,
+    };
+  }
+
+  // Check if we're viewing a cross-section
+  const crossSection = matchPath(
+    mapPagePrefix + "/cross-section/:loc1/:loc2",
+    pathname ?? browserHistory.location.pathname
+  );
+  if (crossSection != null) {
+    const { loc1, loc2 } = crossSection.params;
+    const [lng1, lat1] = loc1.split(",").map(Number);
+    const [lng2, lat2] = loc2.split(",").map(Number);
+    if (lng1 != null && lat1 != null && lng2 != null && lat2 != null) {
+      return {
+        ...s1,
+        crossSectionLine: {
+          type: "LineString",
+          coordinates: [
+            [lng1, lat1],
+            [lng2, lat2],
+          ],
+        },
+      };
+    }
+  }
+
+  return state;
 }

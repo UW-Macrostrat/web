@@ -1,6 +1,5 @@
-import appReducer, { browserHistory, MenuPage } from "./reducers";
+import appReducer from "./reducers";
 export default appReducer;
 export * from "./hooks";
 export * from "./reducers";
-export * from "./nav-hooks";
-export { browserHistory, MenuPage };
+export * from "./navigation";

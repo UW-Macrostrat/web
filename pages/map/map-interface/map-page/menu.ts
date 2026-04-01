@@ -23,7 +23,7 @@ import {
 import {
   isDetailPanelRouteInternal,
   useCurrentPage,
-} from "../app-state/nav-hooks";
+} from "../app-state/navigation.ts";
 import Changelog from "../changelog.mdx";
 import { LayerButton, LinkButton, ListButton } from "../components/buttons";
 import { CloseableCard } from "../components/closeable-card";

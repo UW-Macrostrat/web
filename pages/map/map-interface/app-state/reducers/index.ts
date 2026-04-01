@@ -1,20 +1,16 @@
-import { hashStringReducer } from "./hash-string";
-import { CoreState, MapLayer, AppAction, AppState } from "./types";
+import { getInitialStateFromHash, hashStringReducer } from "./hash-string";
+import { AppAction, AppState, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "../handlers/filters";
 import { assembleColumnSummary } from "../handlers/columns";
-import { createBrowserHistory } from "history";
 import {
+  browserHistory,
   contextPanelIsInitiallyOpen,
   currentPageForPathName,
-} from "../nav-hooks";
-import { getInitialStateFromHash } from "./hash-string";
-import { matchPath } from "react-router";
-import { mapPagePrefix } from "@macrostrat-web/settings";
+  setInfoMarkerPosition,
+} from "../navigation.ts";
 
 export { MapLayer };
-
-export const browserHistory = createBrowserHistory();
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -418,53 +414,6 @@ export function buildFilters(filters: FilterData[], newFilters: FilterData[]) {
   });
 
   return [...remainingFilters, ...newFilters];
-}
-
-export function setInfoMarkerPosition(
-  state: AppState,
-  pathname: string | null = null
-): AppState {
-  // Check if we are viewing a specific location
-  const loc = matchPath(
-    mapPagePrefix + "/loc/:lng/:lat/*",
-    pathname ?? browserHistory.location.pathname
-  );
-
-  let s1 = state;
-
-  if (loc != null) {
-    const { lng, lat } = loc.params;
-    return {
-      ...s1,
-      infoMarkerPosition: { lng: Number(lng), lat: Number(lat) },
-      infoDrawerOpen: true,
-    };
-  }
-
-  // Check if we're viewing a cross-section
-  const crossSection = matchPath(
-    mapPagePrefix + "/cross-section/:loc1/:loc2",
-    pathname ?? browserHistory.location.pathname
-  );
-  if (crossSection != null) {
-    const { loc1, loc2 } = crossSection.params;
-    const [lng1, lat1] = loc1.split(",").map(Number);
-    const [lng2, lat2] = loc2.split(",").map(Number);
-    if (lng1 != null && lat1 != null && lng2 != null && lat2 != null) {
-      return {
-        ...s1,
-        crossSectionLine: {
-          type: "LineString",
-          coordinates: [
-            [lng1, lat1],
-            [lng2, lat2],
-          ],
-        },
-      };
-    }
-  }
-
-  return state;
 }
 
 export default function appReducer(
