@@ -58,11 +58,6 @@ export function updateURI(state: CoreState) {
     state.mapPosition.target?.zoom
   );
 
-  if (state.timeCursorAge != null && state.timeCursorAge != 0) {
-    args.age = fmtInt(state.timeCursorAge);
-    args.plate_model = fmtInt(state.plateModelId);
-  }
-
   const layers = getLayerDescriptionFromLayers(state.mapLayers);
   args = { ...args, ...layers };
 
@@ -209,16 +204,22 @@ export function updateMapPositionForHash(
   }
 }
 
-function formatID(id: string, type: FilterType): string | number {
-  switch (type) {
-    case FilterType.AllLithologyClasses:
-    case FilterType.AllLithologyTypes:
-    case FilterType.LithologyClasses:
-    case FilterType.LithologyTypes:
-      return id;
-    default:
-      return Number(id);
-  }
+function isLithologyFilterType(type: FilterType): boolean {
+  return [
+    FilterType.AllLithologyClasses,
+    FilterType.AllLithologyTypes,
+    FilterType.LithologyClasses,
+    FilterType.LithologyTypes,
+  ].includes(type);
+}
+
+function createTypedFilter(type: FilterType, value: string): Filter {
+  const isLithology = isLithologyFilterType(type);
+
+  return {
+    type,
+    id: isLithology ? value : Number(value),
+  } as Filter;
 }
 
 function getActiveFiltersFromHash(hashString: string): Filter[] {
@@ -228,10 +229,7 @@ function getActiveFiltersFromHash(hashString: string): Filter[] {
     const val = hashData[type];
     if (val != null) {
       for (const v of Array.isArray(val) ? val : [val]) {
-        filters.push({
-          type: type as FilterType,
-          id: formatID(v, type),
-        });
+        filters.push(createTypedFilter(type, v));
       }
     }
   }
