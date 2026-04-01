@@ -1,9 +1,283 @@
-import { CoreState, CoreAction } from "./core";
-import { MapAction } from "./map";
+import { CancelToken } from "axios";
+import { AddFilter, FilterData, Filter } from "../handlers/filters";
 import {
-  ReduxRouterState,
-  RouterActions,
-} from "@lagunovsky/redux-react-router";
+  ColumnGeoJSONRecord,
+  ColumnProperties,
+  ColumnSummary,
+} from "../handlers/columns";
+import { UnitLong } from "@macrostrat/api-types";
+import { LineString } from "geojson";
+
+import type { MapPosition } from "@macrostrat/mapbox-utils";
+
+export enum MapLayer {
+  SATELLITE = "satellite",
+  LINES = "lines",
+  COLUMNS = "columns",
+  FOSSILS = "fossils",
+  BEDROCK = "bedrock",
+  SOURCES = "sources",
+  LABELS = "labels",
+  LINE_SYMBOLS = "line-symbols",
+}
+
+type MapInitialState = {
+  mapPosition: MapPosition;
+  mapLayers: Set<MapLayer>;
+};
+
+export type MapState = MapInitialState & {
+  mapIsLoading: boolean;
+};
+
+type MapMoved = {
+  type: "map-moved";
+  data: {
+    mapPosition: MapPosition;
+  };
+};
+
+type GetInitialMapState = { type: "get-initial-map-state" };
+type MapLoading = { type: "map-loading" };
+type MapIdle = { type: "map-idle" };
+type ToggleLayer = { type: "toggle-map-layer"; layer: MapLayer };
+type ToggleMap3D = { type: "toggle-map-3d" };
+
+export type MapAction =
+  | MapMoved
+  | GetInitialMapState
+  | MapLoading
+  | MapIdle
+  | ToggleLayer
+  | ToggleMap3D;
+
+export type MapLocation = {
+  lng: number;
+  lat: number;
+};
+
+//////////// Async Actions ///////////////
+type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
+type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
+type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
+type MAP_QUERY = {
+  type: "do-map-query";
+  z: string | number;
+  map_id: any;
+  columns: ColumnProperties[] | null | undefined;
+} & MapLocation;
+
+type GET_COLUMN_UNITS = { type: "get-column-units"; column: ColumnProperties };
+type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
+// Define constants to be passed with actions
+type RECIEVE_DATA = { type: "recieve-data" };
+type REQUEST_DATA = { type: "request-data" };
+
+type TOGGLE_MENU = { type: "toggle-menu" };
+type TOGGLE_ABOUT = { type: "toggle-about" };
+type EXPAND_INFODRAWER = { type: "expand-infodrawer" };
+type CLOSE_INFODRAWER = { type: "close-infodrawer" };
+
+type TOGGLE_FILTERS = { type: "toggle-filters" };
+type REMOVE_FILTER = { type: "remove-filter"; filter: any };
+export type UPDATE_COLUMN_FILTERS = {
+  type: "update-column-filters";
+  columns: ColumnGeoJSONRecord[];
+};
+type CLEAR_FILTERS = { type: "clear-filters" };
+
+type START_MAP_QUERY = {
+  type: "start-map-query";
+  cancelToken: any;
+} & MapLocation;
+type RECEIVED_MAP_QUERY = { type: "received-map-query"; data: any };
+
+type START_COLUMN_QUERY = { type: "start-column-query"; cancelToken: any };
+type RECEIVED_COLUMN_QUERY = {
+  type: "received-column-query";
+  data: UnitLong[];
+  column: ColumnProperties;
+};
+
+type MAP_LAYERS_CHANGED = {
+  type: "map-layers-changed";
+  mapLayers: Set<MapLayer>;
+};
+
+type START_PBDB_QUERY = { type: "start-pbdb-query" };
+type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query"; data: any };
+type RESET_PBDB = { type: "reset-pbdb" };
+
+type SET_INPUT_FOCUS = {
+  type: "set-input-focus";
+  inputFocus: boolean;
+  menuOpen?: boolean;
+};
+
+type CONTEXT_OUTSIDE_CLICK = {
+  type: "context-outside-click";
+};
+
+type StopSearching = { type: "stop-searching" };
+
+type SET_SEARCH_TERM = {
+  type: "set-search-term";
+  term: string;
+};
+type START_SEARCH_QUERY = {
+  type: "start-search-query";
+  term: string;
+  cancelToken: any;
+};
+type RECEIVED_SEARCH_QUERY = { type: "received-search-query"; data: any };
+type GO_TO_PLACE = { type: "go-to-place"; place: any };
+
+type UPDATE_ELEVATION_MARKER = {
+  type: "update-elevation-marker";
+  lng: number;
+  lat: number;
+};
+
+type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
+
+type UPDATE_STATE = { type: "update-state"; state: any };
+
+type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
+
+type SetFilters = { type: "set-filters"; filters: FilterData[] };
+
+// Toggle cross section
+type ToggleCrossSection = { type: "toggle-cross-section" };
+type SetCrossSectionLine = {
+  type: "update-cross-section";
+  line: LineString | null;
+};
+
+type Place = {
+  type: "place";
+  name: string;
+  bbox?: [number, number, number, number];
+  center?: [number, number];
+};
+
+type ToggleExperimentsPanel = {
+  type: "toggle-experiments-panel";
+  open?: boolean;
+};
+type GoToExperimentsPanel = { type: "go-to-experiments-panel" };
+
+type SelectSearchResult = {
+  type: "select-search-result";
+  result: Filter | Place;
+};
+
+type SetAllColumns = {
+  type: "set-all-columns";
+  columns: ColumnGeoJSONRecord[];
+};
+
+type SetTimeCursor = {
+  type: "set-time-cursor";
+  age: number;
+};
+
+type SetPlateModel = {
+  type: "set-plate-model";
+  plateModel: number;
+};
+
+type GetAllColumns = { type: "get-all-columns" };
+type ClearColumnInfo = { type: "clear-column-info" };
+
+type SetFocusedMapSource = {
+  type: "set-focused-map-source";
+  source_id: number | null;
+};
+
+type InitialLoadComplete = {
+  type: "initial-load-complete";
+  filters: FilterData[];
+};
+
+export type CoreAction =
+  | MAP_LAYERS_CHANGED
+  | CLEAR_FILTERS
+  | SET_INPUT_FOCUS
+  | SET_SEARCH_TERM
+  | GET_PBDB
+  | GET_COLUMN_UNITS
+  | MAP_QUERY
+  | UPDATE_STATE
+  | GET_FILTERED_COLUMNS
+  | ASYNC_ADD_FILTER
+  | FETCH_SEARCH_QUERY
+  | CONTEXT_OUTSIDE_CLICK
+  | RECIEVE_DATA
+  | REQUEST_DATA
+  | TOGGLE_MENU
+  | TOGGLE_ABOUT
+  | EXPAND_INFODRAWER
+  | CLOSE_INFODRAWER
+  | TOGGLE_FILTERS
+  | REMOVE_FILTER
+  | UPDATE_COLUMN_FILTERS
+  | START_MAP_QUERY
+  | RECEIVED_MAP_QUERY
+  | START_COLUMN_QUERY
+  | RECEIVED_COLUMN_QUERY
+  | START_PBDB_QUERY
+  | RECEIVED_PBDB_QUERY
+  | RESET_PBDB
+  | START_SEARCH_QUERY
+  | RECEIVED_SEARCH_QUERY
+  | GO_TO_PLACE
+  | UPDATE_ELEVATION_MARKER
+  | SET_ACTIVE_INDEX_MAP
+  | MapAction
+  | ToggleHighResolutionTerrain
+  | AddFilter
+  | SetTimeCursor
+  | SetPlateModel
+  | StopSearching
+  | SelectSearchResult
+  | ToggleExperimentsPanel
+  | GoToExperimentsPanel
+  | GetAllColumns
+  | SetAllColumns
+  | ToggleCrossSection
+  | SetCrossSectionLine
+  | SetFocusedMapSource
+  | ClearColumnInfo
+  | InitialLoadComplete;
+
+interface AsyncRequestState {
+  // Events and tokens for xhr
+  // NOTE: we should really improve some of this token infrastructure
+  fetchingMapInfo: boolean;
+  fetchingColumnInfo: boolean;
+  fetchingXdd: boolean;
+  xddCancelToken: CancelToken | null;
+  isSearching: boolean;
+  term: string;
+  fetchingElevation: boolean;
+  fetchingPbdb: boolean;
+  mapInfoCancelToken: CancelToken | null;
+  columnInfoCancelToken: CancelToken | null;
+  searchCancelToken: CancelToken | null;
+  elevationCancelToken: CancelToken | null;
+  allColumnsCancelToken: CancelToken | null;
+}
+
+interface MapCenterInfo {
+  type: string;
+  [key: string]: any;
+}
+
+interface MapSettings {
+  highResolutionTerrain: boolean;
+}
+
+export type InfoMarkerPosition = { lat: number; lng: number } | null;
 
 export type MenuAction = { type: "set-menu-page"; page: MenuPage | null };
 
@@ -16,16 +290,38 @@ export enum MenuPage {
   EXPERIMENTS = "experiments",
 }
 
-export type MenuState = {
-  activePage: MenuPage | null;
-};
+export type AppAction = CoreAction | MapAction | MenuAction;
 
-export type AppState = {
-  core: CoreState;
-  //router: ReduxRouterState;
-  menu: MenuState;
-  //nextRouterAction: RouterActions | null;
-};
+export interface CoreState extends MapState, AsyncRequestState {
+  initialLoadComplete: boolean;
+  contextPanelOpen: boolean;
+  menuOpen: boolean;
+  aboutOpen: boolean;
+  infoDrawerOpen: boolean;
+  infoDrawerExpanded: boolean;
+  isFetching: boolean;
+  crossSectionLine: LineString | null;
+  crossSectionCursorLocation: any;
+  infoMarkerPosition: InfoMarkerPosition;
+  mapInfo: any[];
+  timeCursorAge: number | null;
+  plateModelId: number | null;
+  focusedMapSource: number | null;
+  mapSettings: MapSettings;
+  columnInfo: ColumnSummary | null;
+  searchResults: any;
+  inputFocus: boolean;
+  pbdbData: any[];
+  mapCenter: MapCenterInfo;
+  mapUse3D: boolean;
+  filtersOpen: boolean;
+  filtersInfo: Filter[];
+  filters: FilterData[];
+  filteredColumns: ColumnGeoJSONRecord[] | null;
+  showExperimentsPanel: boolean;
+  allColumns: ColumnGeoJSONRecord[] | null;
+  activeMenuPage: MenuPage | null;
+  data: [];
+}
 
-export type AppAction = CoreAction | MapAction | RouterActions | MenuAction;
-export * from "./types";
+export type AppState = CoreState;

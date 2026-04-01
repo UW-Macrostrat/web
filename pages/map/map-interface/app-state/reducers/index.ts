@@ -5,9 +5,9 @@ import {
   contextPanelIsInitiallyOpen,
   currentPageForPathName,
 } from "../nav-hooks";
-import { CoreAction, coreReducer } from "./core";
+import { coreReducer } from "./core";
 import { getInitialStateFromHash, hashStringReducer } from "./hash-string";
-import { AppAction, AppState, MenuAction, MenuState } from "./types";
+import { CoreAction, AppAction, AppState, MenuAction } from "./types";
 import { pathNameAction } from "../handlers/pathname";
 
 export const browserHistory = createBrowserHistory();
@@ -26,7 +26,7 @@ function menuReducer(
 
 const defaultState: AppState = {
   core: coreReducer(undefined, { type: "init" }),
-  menu: menuReducer(undefined, { type: "init" }),
+  //menu: menuReducer(undefined, { type: "init" }),
 };
 
 function mainReducer(
@@ -144,5 +144,4 @@ export function setInfoMarkerPosition(
 
 export * from "./core";
 export * from "./hash-string";
-export * from "./map";
 export * from "./types";

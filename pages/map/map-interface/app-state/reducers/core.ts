@@ -1,9 +1,9 @@
-import { MapLayer } from "../map";
-import { CoreState, CoreAction } from "./types";
+import { CoreState, MapLayer, AppAction } from "./types";
 import update, { Spec } from "immutability-helper";
-import { FilterData } from "../../handlers/filters";
-import { assembleColumnSummary } from "../../handlers/columns";
-export * from "./types";
+import { FilterData } from "../handlers/filters";
+import { assembleColumnSummary } from "../handlers/columns";
+
+export { MapLayer };
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -61,7 +61,8 @@ const defaultState: CoreState = {
   filtersOpen: false,
   filters: [],
   filtersInfo: [],
-  filteredColumns: {},
+  filteredColumns: null,
+  activeMenuPage: null,
   data: [],
   showExperimentsPanel: false,
   timeCursorAge: null,
@@ -78,7 +79,7 @@ const defaultState: CoreState = {
 
 export function coreReducer(
   state: CoreState = defaultState,
-  action: CoreAction
+  action: AppAction
 ): CoreState {
   switch (action.type) {
     case "initial-load-complete":
@@ -89,6 +90,8 @@ export function coreReducer(
     case "map-idle":
       if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false };
+    case "set-menu-page":
+      return { ...state, activeMenuPage: action.page };
     case "map-layers-changed":
       let columnInfo = state.columnInfo;
       let pbdbData = state.pbdbData;
