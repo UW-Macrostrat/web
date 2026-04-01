@@ -1,9 +1,8 @@
-import { Route, Routes } from "react-router-dom";
 import { LocationPanel } from "@macrostrat/map-interface";
 import { RegionalStratigraphy } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
-import { useAppActions, useAppState } from "#/map/map-interface/app-state";
+import { useAppActions, useAppState } from "../../app-state";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
@@ -17,8 +16,8 @@ function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
   const { className, isShowingColumnPage = false } = props;
-  const mapInfo = useAppState((state) => state.core.mapInfo);
-  const fetchingMapInfo = useAppState((state) => state.core.fetchingMapInfo);
+  const mapInfo = useAppState((state) => state.mapInfo);
+  const fetchingMapInfo = useAppState((state) => state.fetchingMapInfo);
 
   const runAction = useAppActions();
 
@@ -27,9 +26,9 @@ function InfoDrawer(props) {
     [runAction]
   );
 
-  const position = useAppState((state) => state.core.infoMarkerPosition);
-  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
-  const columnInfo = useAppState((state) => state.core.columnInfo);
+  const position = useAppState((state) => state.infoMarkerPosition);
+  const zoom = useAppState((state) => state.mapPosition.target?.zoom);
+  const columnInfo = useAppState((state) => state.columnInfo);
 
   let content = null;
   if (isShowingColumnPage) {
@@ -59,8 +58,8 @@ function InfoDrawer(props) {
 }
 
 function InfoDrawerMainPanel(props) {
-  const mapInfo = useAppState((state) => state.core.mapInfo);
-  const columnInfo = useAppState((state) => state.core.columnInfo);
+  const mapInfo = useAppState((state) => state.mapInfo);
+  const columnInfo = useAppState((state) => state.columnInfo);
 
   if (!mapInfo || !mapInfo.mapData) {
     return null;

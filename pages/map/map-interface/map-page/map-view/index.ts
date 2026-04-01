@@ -40,7 +40,7 @@ export default function MainMapView(props) {
     plateModelId,
     infoMarkerPosition,
     focusedMapSource,
-  } = useAppState((state) => state.core);
+  } = useAppState((state) => state);
 
   let mapRef = useMapRef();
   const isDarkMode = useInDarkMode();
@@ -55,7 +55,7 @@ export default function MainMapView(props) {
 
   const runAction = useAppActions();
 
-  const mapSettings = useAppState((state) => state.core.mapSettings);
+  const mapSettings = useAppState((state) => state.mapSettings);
 
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
@@ -164,7 +164,7 @@ export default function MainMapView(props) {
 
 function ColumnDataManager() {
   /* Update columns map layer given columns provided by application. */
-  const allColumns = useAppState((state) => state.core.allColumns);
+  const allColumns = useAppState((state) => state.allColumns);
   useMapStyleOperator(
     (map) => {
       const ncols = allColumns?.length ?? 0;

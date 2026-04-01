@@ -83,7 +83,7 @@ function ResultList({ searchResults }) {
 }
 
 function SearchResults({ className }) {
-  const searchResults = useAppState((s) => s.core.searchResults);
+  const searchResults = useAppState((s) => s.searchResults);
   className = classNames(className, "search-results-card");
 
   return h(Card, { className }, h(ResultList, { searchResults }));
@@ -110,8 +110,8 @@ const filterPanelElement = h(FilterPanel);
 
 function Searchbar({ className }) {
   const runAction = useAppActions();
-  const term = useAppState((s) => s.core.term);
-  const searchResults = useAppState((s) => s.core.searchResults);
+  const term = useAppState((s) => s.term);
+  const searchResults = useAppState((s) => s.searchResults);
 
   const gainInputFocus = useCallback(
     (e) => {
@@ -137,7 +137,7 @@ function Searchbar({ className }) {
     }
   }, [term]);
 
-  const filters = useAppState((s) => s.core.filters);
+  const filters = useAppState((s) => s.filters);
   const admonishments = useAdmoinshments();
 
   let filterPanelElement = null;

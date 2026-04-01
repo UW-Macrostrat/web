@@ -39,22 +39,3 @@ export default function MapApp({ routerBasename }) {
 
   return h(Provider, { store }, h(MapPage));
 }
-
-function RouterSync() {
-  /** This is a temporary solution to sync the store with the history object. */
-  const nextRouterAction = useAppState((state) => state.nextRouterAction);
-  const runAction = useAppActions();
-  useEffect(() => {
-    if (nextRouterAction != null) {
-      runAction(nextRouterAction);
-    }
-  }, [nextRouterAction]);
-  return null;
-}
-
-// Extend the window type to include the Redux DevTools types
-declare global {
-  interface Window {
-    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: Function | undefined;
-  }
-}

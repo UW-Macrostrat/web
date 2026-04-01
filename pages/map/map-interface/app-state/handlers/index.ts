@@ -1,25 +1,17 @@
 import axios from "axios";
-import {
-  AppAction,
-  AppState,
-  MenuPage,
-  setInfoMarkerPosition,
-} from "../reducers";
+import { AppAction, AppState, MenuPage } from "../reducers";
 import {
   base,
   fetchAllColumns,
   fetchFilteredColumns,
   getPBDBData,
-  handleXDDQuery,
   runColumnQuery,
   runMapQuery,
 } from "./fetch";
 import { runFilter } from "./filters";
 
 import { LineString } from "geojson";
-import { currentPageForPathName, isDetailPanelRoute } from "../nav-hooks";
 import { MapLayer } from "../reducers/core";
-import { getInitialStateFromHash } from "../reducers/hash-string";
 import {
   ColumnGeoJSONRecord,
   ColumnSummary,
@@ -32,7 +24,7 @@ export default async function actionRunner(
   action: AppAction,
   dispatch = null
 ): Promise<AppAction | void> {
-  const coreState = state.core;
+  const coreState = state;
 
   switch (action.type) {
     case "get-initial-map-state": {
@@ -63,14 +55,14 @@ export default async function actionRunner(
         );
       });
 
-      if (state.core.infoMarkerPosition != null) {
+      if (state.infoMarkerPosition != null) {
         console.log("Setting info marker position");
         runAsyncAction(
           state,
           {
             type: "do-map-query",
-            z: state.core.mapPosition.target?.zoom ?? 7,
-            ...state.core.infoMarkerPosition,
+            z: state.mapPosition.target?.zoom ?? 7,
+            ...state.infoMarkerPosition,
             map_id: null,
             columns: null,
           },
@@ -79,7 +71,7 @@ export default async function actionRunner(
       }
       // Apply all filters in parallel
       const filters = await Promise.all(
-        state.core.filtersInfo.map((f) => {
+        state.filtersInfo.map((f) => {
           return runFilter(f);
         })
       );
@@ -87,7 +79,7 @@ export default async function actionRunner(
     }
     case "map-layers-changed": {
       const { mapLayers } = action;
-      if (mapLayers.has(MapLayer.COLUMNS) && state.core.allColumns == null) {
+      if (mapLayers.has(MapLayer.COLUMNS) && state.allColumns == null) {
         const columns = await fetchAllColumns();
         return { type: "set-all-columns", columns };
       } else {
@@ -95,24 +87,24 @@ export default async function actionRunner(
       }
     }
     case "set-all-columns":
-      if (state.core.infoMarkerPosition != null) {
+      if (state.infoMarkerPosition != null) {
         fetchColumnInfo(
           {
-            lng: state.core.infoMarkerPosition.lng,
-            lat: state.core.infoMarkerPosition.lat,
+            lng: state.infoMarkerPosition.lng,
+            lat: state.infoMarkerPosition.lat,
             columns: [],
           },
           action.columns,
-          state.core.columnInfo,
+          state.columnInfo,
           dispatch
         );
       }
       return action;
     case "toggle-menu": {
       // Push the menu onto the history stack
-      let activePage = state.menu.activePage;
+      let activePage = state.activeMenuPage;
       // If input is focused we want to open the menu if clicked, not run the toggle action.
-      if (activePage != null && !state.core.inputFocus) {
+      if (activePage != null && !state.inputFocus) {
         activePage = null;
       } else {
         activePage = MenuPage.LAYERS;
@@ -133,7 +125,7 @@ export default async function actionRunner(
     }
     case "toggle-cross-section": {
       let line: LineString | null = null;
-      if (state.core.crossSectionLine == null) {
+      if (state.crossSectionLine == null) {
         line = { type: "LineString", coordinates: [] };
       }
       const action: AppAction = {
@@ -205,8 +197,8 @@ export default async function actionRunner(
 
       fetchColumnInfo(
         { lng, lat, columns: action.columns },
-        state.core.allColumns,
-        state.core.columnInfo,
+        state.allColumns,
+        state.columnInfo,
         dispatch
       );
       return;

@@ -32,7 +32,7 @@ const ExperimentsPanel = (props) => {
     h(
       Switch,
       {
-        checked: useAppState((s) => s.core.mapLayers.has(MapLayer.SOURCES)),
+        checked: useAppState((s) => s.mapLayers.has(MapLayer.SOURCES)),
         onChange() {
           dispatch({ type: "toggle-map-layer", layer: MapLayer.SOURCES });
         },
@@ -44,8 +44,8 @@ const ExperimentsPanel = (props) => {
 
 const SettingsPanel = (props) => {
   const runAction = useAppActions();
-  const showExperiments = useAppState((s) => s.core.showExperimentsPanel);
-  const age = useAppState((s) => s.core.timeCursorAge);
+  const showExperiments = useAppState((s) => s.showExperimentsPanel);
+  const age = useAppState((s) => s.timeCursorAge);
   const [localAge, setLocalAge] = useState(age);
 
   useEffect(() => {
@@ -79,7 +79,7 @@ const SettingsPanel = (props) => {
 };
 
 function GlobeLink() {
-  const mapPosition = useAppState((s) => s.core.mapPosition);
+  const mapPosition = useAppState((s) => s.mapPosition);
   let args = {};
   applyMapPositionToHash(args, mapPosition);
 
@@ -96,7 +96,7 @@ function GlobeLink() {
 
 function PaleogeographyButton() {
   const runAction = useAppActions();
-  const age = useAppState((s) => s.core.timeCursorAge);
+  const age = useAppState((s) => s.timeCursorAge);
   return h(
     Button,
     {
@@ -160,9 +160,7 @@ function LineSymbolsControl() {
     h(
       Switch,
       {
-        checked: useAppState((s) =>
-          s.core.mapLayers.has(MapLayer.LINE_SYMBOLS)
-        ),
+        checked: useAppState((s) => s.mapLayers.has(MapLayer.LINE_SYMBOLS)),
         onChange() {
           runAction({ type: "toggle-map-layer", layer: MapLayer.LINE_SYMBOLS });
         },
@@ -187,10 +185,10 @@ function LineSymbolsControl() {
 
 function LabelsButton() {
   const layer = MapLayer.LABELS;
-  const isShown = useAppState((state) => state.core.mapLayers.has(layer));
+  const isShown = useAppState((state) => state.mapLayers.has(layer));
   const runAction = useAppActions();
   const [localAge, setLocalAge] = useState(null);
-  const age = useAppState((s) => s.core.timeCursorAge);
+  const age = useAppState((s) => s.timeCursorAge);
   useEffect(() => {
     setLocalAge(age);
   }, [age]);
@@ -216,7 +214,7 @@ function SourcesButton() {
   return h(
     Switch,
     {
-      checked: useAppState((s) => s.core.mapLayers.has(MapLayer.SOURCES)),
+      checked: useAppState((s) => s.mapLayers.has(MapLayer.SOURCES)),
       onChange() {
         dispatch({ type: "toggle-map-layer", layer: MapLayer.SOURCES });
       },
@@ -233,7 +231,7 @@ function HighResolutionTerrainSwitch() {
     h(
       Switch,
       {
-        checked: useAppState((s) => s.core.mapSettings.highResolutionTerrain),
+        checked: useAppState((s) => s.mapSettings.highResolutionTerrain),
         onChange() {
           dispatch({ type: "toggle-high-resolution-terrain" });
         },

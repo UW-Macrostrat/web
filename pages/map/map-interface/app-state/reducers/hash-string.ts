@@ -17,13 +17,14 @@ import {
 const fmtInt = format(".0f");
 
 export function hashStringReducer(state: AppState, action: AppAction) {
+  /** Apply hash string changes to the state depending on what actions were taken */
   switch (action.type) {
     case "add-filter":
     case "remove-filter":
     case "clear-filters":
     case "toggle-map-layer":
     case "map-moved":
-      updateURI(state.core);
+      updateURI(state);
   }
   return state;
 }

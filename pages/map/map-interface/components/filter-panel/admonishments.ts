@@ -8,7 +8,7 @@ const h = hyperStyled(styles);
 
 export function useAdmoinshments(): React.ReactNode[] {
   const isLineSymbolsEnabled = useAppState((state) =>
-    state.core.mapLayers.has(MapLayer.LINE_SYMBOLS)
+    state.mapLayers.has(MapLayer.LINE_SYMBOLS)
   );
 
   const admonishments: React.ReactNode[] = [];

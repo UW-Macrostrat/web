@@ -6,7 +6,6 @@ import { apiV2Prefix, mapPagePrefix } from "@macrostrat-web/settings";
 import { MapAreaContainer, FossilCollections } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
-import { Route, Routes } from "react-router-dom";
 import { useTransition } from "transition-hook";
 import {
   useAppActions,
@@ -54,9 +53,9 @@ function MapPage({
   menuPage?: MenuPage;
 }) {
   const runAction = useAppActions();
-  const inputFocus = useAppState((s) => s.core.inputFocus);
-  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
-  const navMenuPage = useAppState((s) => s.menu.activePage);
+  const inputFocus = useAppState((s) => s.inputFocus);
+  const infoDrawerOpen = useAppState((s) => s.infoDrawerOpen);
+  const navMenuPage = useAppState((s) => s.activeMenuPage);
 
   const ref = useRef<HTMLElement>(null);
   //const [map, setMap] = useState(null);
@@ -65,7 +64,7 @@ function MapPage({
   const contextPanelOpen = useContextPanelOpen(baseRoute);
   const contextClass = useContextClass(baseRoute);
 
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
+  const loaded = useSelector((state) => state.initialLoadComplete);
   useSingleEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);
@@ -122,13 +121,13 @@ function MapPageRoutes({ menuPage = null }) {
 
 function InfoDrawerHolder() {
   // We could probably do this in the reducer...
-  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const infoDrawerOpen = useAppState((s) => s.infoDrawerOpen);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
-  const position = useAppState((state) => state.core.infoMarkerPosition);
-  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
+  const position = useAppState((state) => state.infoMarkerPosition);
+  const zoom = useAppState((state) => state.mapPosition.target?.zoom);
 
   // For fossil click
-  const pbdbData = useAppState((state) => state.core.pbdbData);
+  const pbdbData = useAppState((state) => state.pbdbData);
   const runAction = useAppActions();
 
   const onClose = useCallback(

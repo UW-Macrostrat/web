@@ -1,9 +1,19 @@
-import { CoreState, MapLayer, AppAction } from "./types";
+import { CoreState, MapLayer, AppAction, AppState } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "../handlers/filters";
 import { assembleColumnSummary } from "../handlers/columns";
+import { createBrowserHistory } from "history";
+import {
+  contextPanelIsInitiallyOpen,
+  currentPageForPathName,
+} from "../nav-hooks";
+import { getInitialStateFromHash, hashStringReducer } from "./hash-string";
+import { matchPath } from "react-router";
+import { mapPagePrefix } from "@macrostrat-web/settings";
 
 export { MapLayer };
+
+export const browserHistory = createBrowserHistory();
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -77,10 +87,29 @@ const defaultState: CoreState = {
   },
 };
 
+function createInitialState() {
+  const route = browserHistory.location;
+  const { pathname, hash } = route;
+  const isOpen = contextPanelIsInitiallyOpen(pathname);
+  const activeMenuPage = currentPageForPathName(pathname);
+  const s1 = setInfoMarkerPosition(defaultState, pathname);
+  const [coreState, filters] = getInitialStateFromHash(s1, hash);
+
+  return {
+    ...s1,
+    ...coreState,
+    filtersInfo: filters,
+    menuOpen: isOpen,
+    contextPanelOpen: isOpen,
+    activeMenuPage,
+  };
+}
+
 export function coreReducer(
-  state: CoreState = defaultState,
+  state: CoreState | null | undefined,
   action: AppAction
 ): CoreState {
+  if (state == null) return createInitialState();
   switch (action.type) {
     case "initial-load-complete":
       return { ...state, initialLoadComplete: true, filters: action.filters };
@@ -136,7 +165,7 @@ export function coreReducer(
         ...state,
         infoDrawerOpen: false,
         infoMarkerPosition: null,
-        columnInfo: {},
+        columnInfo: null,
       };
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
@@ -187,14 +216,12 @@ export function coreReducer(
           mapData: preprocessMapData(action.data?.mapData),
         };
       }
-      console.log("Received map result", mapInfo);
       return {
         ...state,
         fetchingMapInfo: false,
         mapInfo,
         infoDrawerOpen: true,
       };
-
     case "start-column-query":
       if (
         state.columnInfoCancelToken &&
@@ -398,4 +425,52 @@ export function buildFilters(filters: FilterData[], newFilters: FilterData[]) {
   });
 
   return [...remainingFilters, ...newFilters];
+}
+
+export function setInfoMarkerPosition(
+  state: AppState,
+  pathname: string | null = null
+): AppState {
+  // Check if we are viewing a specific location
+  const loc = matchPath(
+    mapPagePrefix + "/loc/:lng/:lat/*",
+    pathname ?? browserHistory.location.pathname
+  );
+
+  let s1 = state;
+
+  if (loc != null) {
+    const { lng, lat } = loc.params;
+    return {
+      ...s1,
+      infoMarkerPosition: { lng: Number(lng), lat: Number(lat) },
+      infoDrawerOpen: true,
+    };
+  }
+
+  // Check if we're viewing a cross-section
+  const crossSection = matchPath(
+    mapPagePrefix + "/cross-section/:loc1/:loc2",
+    pathname ?? browserHistory.location.pathname
+  );
+  if (crossSection != null) {
+    const { loc1, loc2 } = crossSection.params;
+    const [lng1, lat1] = loc1.split(",").map(Number);
+    const [lng2, lat2] = loc2.split(",").map(Number);
+    if (lng1 != null && lat1 != null && lng2 != null && lat2 != null) {
+      return {
+        ...s1,
+        crossSectionLine: {
+          type: "LineString",
+          coordinates: [
+            [lng1, lat1],
+            [lng2, lat2],
+          ],
+        },
+        crossSectionOpen: true,
+      };
+    }
+  }
+
+  return state;
 }

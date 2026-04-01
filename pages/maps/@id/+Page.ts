@@ -1,6 +1,7 @@
 import {
   ButtonGroup,
   Collapse,
+  NonIdealState,
   Radio,
   RadioGroup,
   Spinner,
@@ -888,7 +889,7 @@ function InfoDrawer({ selectedLocation, mapRef, setSelectedLocation }) {
               lithologyURL: "/lex/lithologies",
             }),
           ]
-        : null,
+        : h(NonIdealState, {}),
       //h(XddExpansion, { xddInfo }),
       //h(FossilCollections, { fossilInfo }),
     ]

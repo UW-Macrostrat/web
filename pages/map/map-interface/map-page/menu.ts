@@ -47,7 +47,7 @@ export { MenuPage };
 
 export default function Menu(props: MenuProps) {
   let { className, menuPage, baseRoute = "/" } = props;
-  const inputFocus = useAppState((s) => s.core.inputFocus);
+  const inputFocus = useAppState((s) => s.inputFocus);
   const runAction = useAppActions();
 
   const navigateHome = useHashNavigate(baseRoute);
@@ -120,7 +120,7 @@ const MenuGroup = (props) =>
 
 const LayerList = (props) => {
   const runAction = useAppActions();
-  const inPaleoMode = useAppState((s) => s.core.timeCursorAge != null);
+  const inPaleoMode = useAppState((s) => s.timeCursorAge != null);
 
   const toggleElevationChart = () => {
     runAction({ type: "toggle-menu" });

@@ -5,9 +5,9 @@ import { LineString } from "geojson";
 import { GeoJSONSource } from "mapbox-gl";
 
 export function CrossSectionLine() {
-  const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
+  const crossSectionLine = useAppState((state) => state.crossSectionLine);
   const crossSectionCursor = useAppState(
-    (state) => state.core.crossSectionCursorLocation
+    (state) => state.crossSectionCursorLocation
   );
   useCrossSectionCursorLocation(crossSectionCursor);
   useCrossSectionLine(crossSectionLine);

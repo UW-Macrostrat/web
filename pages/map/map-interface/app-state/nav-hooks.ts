@@ -29,7 +29,7 @@ export function contextPanelIsInitiallyOpen(pathname: string) {
 }
 
 export function useContextPanelOpen() {
-  return useAppState((s) => s.menu.activePage != null);
+  return useAppState((s) => s.activeMenuPage != null);
 }
 
 export function currentPageForPathName(pathname: string): MenuPage | null {
@@ -39,7 +39,7 @@ export function currentPageForPathName(pathname: string): MenuPage | null {
 }
 
 export function useContextClass() {
-  const activePage = useAppState((s) => s.menu.activePage);
+  const activePage = useAppState((s) => s.activeMenuPage);
   if (activePage == null) return null;
   return classNames("map-context-open", activePage);
 }
