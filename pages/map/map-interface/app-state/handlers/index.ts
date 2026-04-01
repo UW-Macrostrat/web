@@ -11,7 +11,7 @@ import {
 import { runFilter } from "./filters";
 
 import { LineString } from "geojson";
-import { MapLayer } from "../reducers/core";
+import { MapLayer } from "../reducers/types";
 import {
   ColumnGeoJSONRecord,
   ColumnSummary,

@@ -2,7 +2,7 @@ import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import axios from "axios";
 import { joinURL } from "@macrostrat/ui-components";
 import { ColumnGeoJSONRecord } from "./columns";
-import { UPDATE_COLUMN_FILTERS } from "../reducers/core/types";
+import { UPDATE_COLUMN_FILTERS } from "../reducers/types";
 
 export const base = apiV2Prefix;
 const pbdbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;

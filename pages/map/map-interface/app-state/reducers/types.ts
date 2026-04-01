@@ -1,4 +1,4 @@
-import { CancelToken } from "axios";
+import { CancelTokenSource } from "axios";
 import { AddFilter, FilterData, Filter } from "../handlers/filters";
 import {
   ColumnGeoJSONRecord,
@@ -255,17 +255,15 @@ interface AsyncRequestState {
   // NOTE: we should really improve some of this token infrastructure
   fetchingMapInfo: boolean;
   fetchingColumnInfo: boolean;
-  fetchingXdd: boolean;
-  xddCancelToken: CancelToken | null;
   isSearching: boolean;
   term: string;
   fetchingElevation: boolean;
   fetchingPbdb: boolean;
-  mapInfoCancelToken: CancelToken | null;
-  columnInfoCancelToken: CancelToken | null;
-  searchCancelToken: CancelToken | null;
-  elevationCancelToken: CancelToken | null;
-  allColumnsCancelToken: CancelToken | null;
+  mapInfoCancelToken: CancelTokenSource | null;
+  columnInfoCancelToken: CancelTokenSource | null;
+  searchCancelToken: CancelTokenSource | null;
+  elevationCancelToken: CancelTokenSource | null;
+  allColumnsCancelToken: CancelTokenSource | null;
 }
 
 interface MapCenterInfo {
@@ -321,7 +319,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   showExperimentsPanel: boolean;
   allColumns: ColumnGeoJSONRecord[] | null;
   activeMenuPage: MenuPage | null;
-  data: [];
 }
 
 export type AppState = CoreState;
