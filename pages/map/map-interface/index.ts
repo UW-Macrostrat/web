@@ -2,6 +2,7 @@ import { ReduxRouter } from "@lagunovsky/redux-react-router";
 import h from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
+import { usePageContext } from "vike-react/usePageContext";
 
 import "./searchbar.styl";
 
@@ -33,15 +34,10 @@ let store = createStore<AppState, AppAction, any, any>(
 );
 
 export default function MapApp({ routerBasename }) {
-  return h(
-    Provider,
-    { store },
-    h(
-      ReduxRouter,
-      { basename: routerBasename, store, history: browserHistory },
-      [h(Routes, [h(Route, { path: "*", element: h(MapPage) })]), h(RouterSync)]
-    )
-  );
+  const ctx = usePageContext();
+  console.log(routerBasename, ctx);
+
+  return h(Provider, { store }, h(MapPage));
 }
 
 function RouterSync() {

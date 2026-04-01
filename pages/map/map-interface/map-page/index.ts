@@ -112,21 +112,11 @@ function MapPage({
   );
 }
 
-function MapPageRoutes() {
+function MapPageRoutes({ menuPage = null }) {
   return h(
     MacrostratDataProvider,
     { baseURL: apiV2Prefix },
-    h(Routes, [
-      h(
-        Object.values(MenuPage).map((page) =>
-          h(Route, {
-            path: mapPagePrefix + "/" + page,
-            element: h(MapPage, { menuPage: page }),
-          })
-        )
-      ),
-      h(Route, { path: "*", element: h(MapPage) }),
-    ])
+    h(MapPage, { menuPage })
   );
 }
 
@@ -158,19 +148,24 @@ function InfoDrawerHolder() {
     ]);
   }
 
-  return h([
-    // This is essentially a shim implementation of React Router
-    h(Routes, [
-      h(Route, {
-        path: mapPagePrefix + "/loc/:lng/:lat/*",
-        element: h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-          position,
-          zoom,
-        }),
-      }),
-    ]),
-    //h(InfoDrawerLocationGrabber),
-  ]);
+  return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+    position,
+    zoom,
+  });
+
+  // return h([
+  //   // This is essentially a shim implementation of React Router
+  //   h(Routes, [
+  //     h(Route, {
+  //       path: mapPagePrefix + "/loc/:lng/:lat/*",
+  //       element: h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+  //         position,
+  //         zoom,
+  //       }),
+  //     }),
+  //   ]),
+  //   //h(InfoDrawerLocationGrabber),
+  // ]);
 }
 
 export default MapPageRoutes;

@@ -1,9 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { LocationPanel } from "@macrostrat/map-interface";
-import {
-  MacrostratLinkedData,
-  RegionalStratigraphy,
-} from "./macrostrat-linked";
+import { RegionalStratigraphy } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
 import { useAppActions, useAppState } from "#/map/map-interface/app-state";
@@ -19,7 +16,7 @@ import classNames from "classnames";
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
-  const { className } = props;
+  const { className, isShowingColumnPage = false } = props;
   const mapInfo = useAppState((state) => state.core.mapInfo);
   const fetchingMapInfo = useAppState((state) => state.core.fetchingMapInfo);
 
@@ -33,6 +30,13 @@ function InfoDrawer(props) {
   const position = useAppState((state) => state.core.infoMarkerPosition);
   const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
   const columnInfo = useAppState((state) => state.core.columnInfo);
+
+  let content = null;
+  if (isShowingColumnPage) {
+    content = h(StratColumn, { columnInfo });
+  } else {
+    content = h(InfoDrawerMainPanel);
+  }
 
   return h(
     MacrostratInteractionProvider,
@@ -49,17 +53,7 @@ function InfoDrawer(props) {
         showCopyPositionButton: true,
         contentContainer: "div.infodrawer-content-holder",
       },
-      h(
-        LoadingArea,
-        { loaded: !fetchingMapInfo, className: "infodrawer-content" },
-        h(Routes, [
-          h(Route, {
-            path: "/column",
-            element: h(StratColumn, { columnInfo }),
-          }),
-          h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
-        ])
-      )
+      h(LoadingArea, { loaded: true, className: "infodrawer-content" }, content)
     )
   );
 }

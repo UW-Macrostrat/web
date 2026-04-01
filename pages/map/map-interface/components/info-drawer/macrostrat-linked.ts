@@ -79,9 +79,10 @@ export function MacrostratLinkedData(props) {
 }
 
 function BasicColumnInfo({ columnInfo }) {
+  const currentURL = window.location.href;
   return h("div.column-info", [
     h("h3", [
-      h(Link, { to: "column" }, columnInfo.col_name),
+      h("a", { href: currentURL + "/column" }, columnInfo.col_name),
       h.if(columnInfo.col_group)([" — ", columnInfo.col_group]),
     ]),
   ]);
