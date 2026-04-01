@@ -93,6 +93,7 @@ export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {
 export async function runMapQuery(lng, lat, z, map_id, cancelToken) {
   const params = { lng, lat, z, map_id };
   let url = base + "/mobile/map_query_v2";
+  console.log("Running map query");
   let res = await axios.get(url, { cancelToken, responseType: "json", params });
   let data = addMapIdToRef(res.data).success.data;
 

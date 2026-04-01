@@ -68,7 +68,7 @@ export default async function actionRunner(
         runAsyncAction(
           state,
           {
-            type: "map-query",
+            type: "do-map-query",
             z: state.core.mapPosition.target?.zoom ?? 7,
             ...state.core.infoMarkerPosition,
             map_id: null,
@@ -175,7 +175,7 @@ export default async function actionRunner(
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
       return await fetchFilteredColumns(coreState.filters);
-    case "map-query":
+    case "do-map-query":
       const { lng, lat, z, map_id } = action;
       // Get column data from the map action if it is provided.
       // This saves us from having to filter the columns more inefficiently
@@ -194,9 +194,14 @@ export default async function actionRunner(
       });
 
       // Run a bunch of async queries in ~parallel
-      runMapQuery(lng, lat, z, map_id, sourceMapQuery.token).then((res) => {
-        dispatch({ type: "received-map-query", data: res });
-      });
+      runMapQuery(lng, lat, z, map_id, sourceMapQuery.token)
+        .then((res) => {
+          dispatch({ type: "received-map-query", data: res });
+        })
+        .catch((err) => {
+          console.log(err);
+          console.log("Error running map query");
+        });
 
       fetchColumnInfo(
         { lng, lat, columns: action.columns },

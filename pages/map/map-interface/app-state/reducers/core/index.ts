@@ -177,64 +177,18 @@ export function coreReducer(
         mapInfoCancelToken: action.cancelToken,
       };
     case "received-map-query":
-      if (action.data && action.data.mapData) {
-        action.data.mapData = action.data.mapData.map((source) => {
-          if (source.macrostrat) {
-            if (source.macrostrat.liths) {
-              let types = {};
-
-              source.macrostrat.liths.forEach((lith) => {
-                if (!types[lith.lith_type]) {
-                  types[lith.lith_type] = {
-                    name: lith.lith_type,
-                    color: classColors[lith.lith_class],
-                  };
-                }
-              });
-              source.macrostrat.lith_types = Object.keys(types).map(
-                (l) => types[l]
-              );
-            }
-            if (source.macrostrat.environs) {
-              let types = {};
-
-              source.macrostrat.environs.forEach((environ) => {
-                if (!types[environ.environ_type]) {
-                  types[environ.environ_type] = {
-                    name: environ.environ_type,
-                    color: classColors[environ.environ_class],
-                  };
-                }
-              });
-              source.macrostrat.environ_types = Object.keys(types).map(
-                (l) => types[l]
-              );
-            }
-            if (source.macrostrat.econs) {
-              let types = {};
-
-              source.macrostrat.econs.forEach((econ) => {
-                if (!types[econ.econ_type]) {
-                  types[econ.econ_type] = {
-                    name: econ.econ_type,
-                    color: classColors[econ.econ_class],
-                  };
-                }
-              });
-              source.macrostrat.econ_types = Object.keys(types).map(
-                (l) => types[l]
-              );
-            }
-          }
-
-          return source;
-        });
+      let mapInfo = null;
+      if (action.data != null) {
+        mapInfo = {
+          ...action.data,
+          mapData: preprocessMapData(action.data?.mapData),
+        };
       }
-
+      console.log("Received map result", mapInfo);
       return {
         ...state,
         fetchingMapInfo: false,
-        mapInfo: action.data,
+        mapInfo,
         infoDrawerOpen: true,
       };
 
@@ -365,6 +319,58 @@ export function coreReducer(
     default:
       return state;
   }
+}
+
+function preprocessMapData(mapData) {
+  /** Preprocess map data types */
+  if (mapData == null) return null;
+  return mapData.map((source) => {
+    if (source.macrostrat) {
+      if (source.macrostrat.liths) {
+        let types = {};
+
+        source.macrostrat.liths.forEach((lith) => {
+          if (!types[lith.lith_type]) {
+            types[lith.lith_type] = {
+              name: lith.lith_type,
+              color: classColors[lith.lith_class],
+            };
+          }
+        });
+        source.macrostrat.lith_types = Object.keys(types).map((l) => types[l]);
+      }
+      if (source.macrostrat.environs) {
+        let types = {};
+
+        source.macrostrat.environs.forEach((environ) => {
+          if (!types[environ.environ_type]) {
+            types[environ.environ_type] = {
+              name: environ.environ_type,
+              color: classColors[environ.environ_class],
+            };
+          }
+        });
+        source.macrostrat.environ_types = Object.keys(types).map(
+          (l) => types[l]
+        );
+      }
+      if (source.macrostrat.econs) {
+        let types = {};
+
+        source.macrostrat.econs.forEach((econ) => {
+          if (!types[econ.econ_type]) {
+            types[econ.econ_type] = {
+              name: econ.econ_type,
+              color: classColors[econ.econ_class],
+            };
+          }
+        });
+        source.macrostrat.econ_types = Object.keys(types).map((l) => types[l]);
+      }
+    }
+
+    return source;
+  });
 }
 
 function isTheSame(f: FilterData, newFilter: FilterData) {

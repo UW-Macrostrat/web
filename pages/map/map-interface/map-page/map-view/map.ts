@@ -130,6 +130,7 @@ function useMapClickHandler(pbdbPoints) {
 
   return useCallback(
     (event) => {
+      console.log("Map clicked", event);
       const map = mapRef.current;
 
       const action = handleCrossSectionClick(event, crossSectionLine);
@@ -181,7 +182,7 @@ function useMapClickHandler(pbdbPoints) {
         });
 
       runAction({
-        type: "map-query",
+        type: "do-map-query",
         lng: event.lngLat.lng,
         lat: event.lngLat.lat,
         z: map.getZoom(),
