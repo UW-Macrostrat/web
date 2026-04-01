@@ -22,9 +22,9 @@ export type MenuState = {
 
 export type AppState = {
   core: CoreState;
-  router: ReduxRouterState;
+  //router: ReduxRouterState;
   menu: MenuState;
-  nextRouterAction: RouterActions | null;
+  //nextRouterAction: RouterActions | null;
 };
 
 export type AppAction = CoreAction | MapAction | RouterActions | MenuAction;

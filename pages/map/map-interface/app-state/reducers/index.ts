@@ -1,11 +1,6 @@
-import {
-  RouterActions,
-  createRouterReducer,
-} from "@lagunovsky/redux-react-router";
 import { mapPagePrefix } from "@macrostrat-web/settings";
 import { createBrowserHistory } from "history";
 import { matchPath } from "react-router";
-import { performanceReducer } from "../../performance/core";
 import {
   contextPanelIsInitiallyOpen,
   currentPageForPathName,
@@ -16,8 +11,6 @@ import { AppAction, AppState, MenuAction, MenuState } from "./types";
 import { pathNameAction } from "../handlers/pathname";
 
 export const browserHistory = createBrowserHistory();
-
-const routerReducer = createRouterReducer(browserHistory);
 
 function menuReducer(
   state: MenuState = { activePage: null },
@@ -33,9 +26,7 @@ function menuReducer(
 
 const defaultState: AppState = {
   core: coreReducer(undefined, { type: "init" }),
-  router: routerReducer(undefined, { type: "init" }),
   menu: menuReducer(undefined, { type: "init" }),
-  nextRouterAction: null,
 };
 
 function mainReducer(
@@ -49,15 +40,12 @@ function mainReducer(
 
   switch (action.type) {
     case "@@INIT": {
-      const route = state.router.location;
-      const { pathname } = route;
+      const route = browserHistory.location;
+      const { pathname, hash } = route;
       const isOpen = contextPanelIsInitiallyOpen(pathname);
       const activePage = currentPageForPathName(pathname);
       const s1 = setInfoMarkerPosition(state, pathname);
-      const [coreState, filters] = getInitialStateFromHash(
-        s1.core,
-        s1.router.location.hash
-      );
+      const [coreState, filters] = getInitialStateFromHash(s1.core, hash);
 
       return {
         ...s1,
@@ -71,33 +59,6 @@ function mainReducer(
         menu: { activePage },
       };
     }
-    case "@@router/ON_LOCATION_CHANGED": {
-      const newRoute = action.payload.location;
-      const { pathname } = newRoute;
-      const isOpen = contextPanelIsInitiallyOpen(pathname);
-
-      const s1 = setInfoMarkerPosition(state, pathname);
-
-      let newAction = action;
-      if (newRoute.hash == "") {
-        newAction = {
-          ...action,
-          payload: {
-            ...action.payload,
-            location: {
-              ...action.payload.location,
-              hash: s1.router.location.hash,
-            },
-          },
-        };
-      }
-
-      return {
-        ...s1,
-        core: { ...s1.core, menuOpen: isOpen, contextPanelOpen: isOpen },
-        router: routerReducer(s1.router, newAction),
-      };
-    }
     case "set-menu-page":
       return {
         ...state,
@@ -106,11 +67,9 @@ function mainReducer(
       };
     default:
       return {
-        router: routerReducer(state.router, action as RouterActions),
         core: coreReducer(state.core, action as CoreAction),
         menu: menuReducer(state.menu, action as MenuAction),
-        performance: performanceReducer(state.performance, action),
-        nextRouterAction: state.nextRouterAction,
+        //performance: performanceReducer(state.performance, action),
       };
   }
 }
@@ -118,10 +77,7 @@ function mainReducer(
 export default function appReducer(state: AppState, action: AppAction) {
   // This might not be the right way to do hash management, but it
   // centralizes the logic in one place.
-  return applyNextPath(
-    hashStringReducer(mainReducer(state, action), action),
-    action
-  );
+  return hashStringReducer(mainReducer(state, action), action);
 }
 
 const pathChangingActions: AppAction["type"][] = [
@@ -131,17 +87,6 @@ const pathChangingActions: AppAction["type"][] = [
   "start-map-query",
   "close-infodrawer",
 ];
-
-function applyNextPath(state: AppState, action: AppAction): AppState {
-  if (!pathChangingActions.includes(action.type)) return state;
-
-  const nextRouterAction = pathNameAction(state);
-  if (nextRouterAction == null) return state;
-  return {
-    ...state,
-    nextRouterAction,
-  };
-}
 
 export function setInfoMarkerPosition(
   state: AppState,
