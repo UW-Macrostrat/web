@@ -6,7 +6,7 @@ import { useTransition } from "transition-hook";
 
 const h = hyper.styled(styles);
 
-function LoadingArea(props) {
+export function LoadingArea(props) {
   const { loaded, children = null, className } = props;
   const trans = useTransition(loaded, 500);
   const invTrans = useTransition(!loaded, 500);
@@ -20,5 +20,3 @@ function LoadingArea(props) {
     ]
   );
 }
-
-export { LoadingArea };

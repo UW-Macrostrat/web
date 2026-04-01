@@ -18,7 +18,6 @@ import Searchbar from "../components/navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
 import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
-import { useState } from "react";
 
 import h from "./main.module.sass";
 import { MacrostratDataProvider } from "@macrostrat/data-provider";
@@ -48,8 +47,8 @@ function MapPage({
   const navMenuPage = useAppState((s) => s.menu.activePage);
 
   const ref = useRef<HTMLElement>(null);
-  const [map, setMap] = useState(null);
-  console.log("MapPage mounted", map);
+  //const [map, setMap] = useState(null);
+  //console.log("MapPage mounted", map);
 
   const contextPanelOpen = useContextPanelOpen(baseRoute);
   const contextClass = useContextClass(baseRoute);
@@ -63,7 +62,7 @@ function MapPage({
     (event) => {
       if (!(inputFocus || contextPanelOpen)) return;
       if (ref.current?.contains(event.target)) return;
-
+      console.log("Clicked outside context");
       runAction({ type: "context-outside-click" });
       event.stopPropagation();
     },

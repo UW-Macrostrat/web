@@ -160,7 +160,10 @@ export function coreReducer(
       // if (state.inputFocus) {
       //   return { ...state, inputFocus: false };
       // }
-      if (state.mapInfoCancelToken) {
+      if (
+        state.mapInfoCancelToken &&
+        state.mapInfoCancelToken != action.cancelToken
+      ) {
         state.mapInfoCancelToken.cancel();
       }
       return {
@@ -236,7 +239,10 @@ export function coreReducer(
       };
 
     case "start-column-query":
-      if (state.columnInfoCancelToken) {
+      if (
+        state.columnInfoCancelToken &&
+        state.columnInfoCancelToken != action.cancelToken
+      ) {
         state.columnInfoCancelToken.cancel();
       }
       return {

@@ -64,6 +64,7 @@ export default async function actionRunner(
       });
 
       if (state.core.infoMarkerPosition != null) {
+        console.log("Setting info marker position");
         runAsyncAction(
           state,
           {

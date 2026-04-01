@@ -74,21 +74,18 @@ function InfoDrawerMainPanel(props) {
 
   const { mapData } = mapInfo;
 
-  const matchedStratNames = mapData[0]?.macrostrat?.strat_names ?? [];
+  const matchedStratNames = mapData?.[0]?.macrostrat?.strat_names ?? [];
   const terms = matchedStratNames.map((s) => s.rank_name);
 
-  let source =
-    mapInfo && mapInfo.mapData && mapInfo.mapData.length
-      ? mapInfo.mapData[0]
-      : {
-          name: null,
-          descrip: null,
-          comments: null,
-          liths: [],
-          b_int: {},
-          t_int: {},
-          ref: {},
-        };
+  let source = mapData?.[0] ?? {
+    name: null,
+    descrip: null,
+    comments: null,
+    liths: [],
+    b_int: {},
+    t_int: {},
+    ref: {},
+  };
 
   return h([
     h(GeologicMapInfo, {
@@ -96,7 +93,7 @@ function InfoDrawerMainPanel(props) {
       bedrockExpanded: true,
       source,
     }),
-    h.if(columnInfo)(RegionalStratigraphy, {
+    h.if(columnInfo != null)(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
       source,
