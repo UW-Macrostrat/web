@@ -1,6 +1,5 @@
 import { actionRunner } from "./handlers";
-import React, { useCallback } from "react";
-import { isCancel } from "axios";
+import { useCallback } from "react";
 
 import { AppAction, AppState } from "./types";
 import { historyManager } from "./navigation";
@@ -21,9 +20,14 @@ export function appReducer(
   return nextState;
 }
 
+type SelectorFn = (state: AppState) => any;
+
+export type StateGetter = (selector?: SelectorFn) => any;
+
 interface ZustandState {
-  coreState: AppState | null | undefined;
+  coreState: AppState;
   dispatch: (nextState: AppState) => void;
+  getState: StateGetter;
   asyncDispatch: (action: AppAction) => Promise<void>;
 }
 
@@ -36,11 +40,17 @@ export const useStore = create<ZustandState>((set, get) => {
       };
     });
 
+  const defaultSelector = (state: AppState) => state;
+  const getState = (selector: SelectorFn = defaultSelector) => {
+    return selector(get().coreState);
+  };
+
   return {
     coreState: createInitialState(),
     dispatch,
+    getState,
     asyncDispatch: async (action: AppAction): Promise<void> => {
-      const newAction = await actionRunner(get().coreState, action, dispatch);
+      const newAction = await actionRunner(getState, action, dispatch);
       if (newAction == undefined) {
         return;
       }
@@ -49,15 +59,15 @@ export const useStore = create<ZustandState>((set, get) => {
   };
 });
 
-function useActionDispatch() {
+export function useDispatch() {
   return useStore((store) => store.dispatch);
 }
 
-function useAppActions(): (action: AppAction) => Promise<void> {
+export function useAppActions(): (action: AppAction) => Promise<void> {
   return useStore((state) => state.asyncDispatch);
 }
 
-function useAppState<T>(selectorFn: (state: AppState) => T): T {
+export function useAppState<T>(selectorFn: (state: AppState) => T): T {
   const wrappedSelector = useCallback(
     (state: ZustandState) => {
       if (state.coreState == null) {
@@ -69,5 +79,3 @@ function useAppState<T>(selectorFn: (state: AppState) => T): T {
   );
   return useStore(wrappedSelector);
 }
-
-export { useAppActions, useAppState };
