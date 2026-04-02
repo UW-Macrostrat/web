@@ -58,6 +58,7 @@ const defaultState: CoreState = {
   searchResults: null,
   pbdbData: [],
   mapIsLoading: false,
+  isShowingColumnPage: false,
   mapCenter: {
     type: null,
   },
@@ -83,6 +84,8 @@ const defaultState: CoreState = {
 function createInitialState() {
   const route = browserHistory.location;
   const { pathname, hash } = route;
+  console.log(pathname);
+
   const isOpen = contextPanelIsInitiallyOpen(pathname);
   const activeMenuPage = currentPageForPathName(pathname);
   const s1 = setInfoMarkerPosition(defaultState, pathname);
@@ -422,7 +425,9 @@ export default function appReducer(
 ) {
   // This might not be the right way to do hash management, but it
   // centralizes the logic in one place.
-  return hashStringReducer(coreReducer(state, action), action);
+  const nextState = coreReducer(state, action);
+  hashStringReducer(state, nextState, action);
+  return nextState;
 }
 
 export * from "./hash-string";

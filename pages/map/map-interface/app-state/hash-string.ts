@@ -3,8 +3,7 @@ import {
   getMapPositionForHash,
 } from "@macrostrat/map-interface";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
-import { getHashString, setHashString } from "@macrostrat/ui-components";
-import { format } from "d3-format";
+import { buildQueryString, getHashString } from "@macrostrat/ui-components";
 import { Filter, FilterType } from "./handlers/filters";
 import {
   AppAction,
@@ -13,20 +12,39 @@ import {
   CoreState,
   MapLayer,
 } from "./types";
+import type { To } from "history";
+import { buildPathName } from "./pathname";
+import { browserHistory } from "./navigation";
 
-const fmtInt = format(".0f");
+export function hashStringReducer(
+  prevState: AppState,
+  nextState: AppState,
+  action: AppAction
+): void {
+  let url = buildPathName(nextState);
+  const hashString = buildHashString(nextState);
 
-export function hashStringReducer(state: AppState, action: AppAction) {
-  /** Apply hash string changes to the state depending on what actions were taken */
-  switch (action.type) {
-    case "add-filter":
-    case "remove-filter":
-    case "clear-filters":
-    case "toggle-map-layer":
-    case "map-moved":
-      updateURI(state);
+  // check if they match current params
+  let to: To = {};
+
+  if (browserHistory.location.pathname !== url) {
+    to.pathname = url;
   }
-  return state;
+  if (browserHistory.location.hash !== hashString) {
+    to.hash = hashString;
+  }
+
+  if (Object.keys(to).length === 0) {
+    // No changes to the URL are needed
+    return;
+  }
+
+  // If only the hash changed, replace state
+  if (to.pathname == null) {
+    browserHistory.replace(to);
+  } else {
+    browserHistory.push(to);
+  }
 }
 
 interface HashParams {
@@ -42,7 +60,7 @@ interface HashParams {
 //   return filter.id ?? filter.name;
 // }
 
-export function updateURI(state: CoreState) {
+function buildHashString(state: CoreState): string {
   let args: HashParams = {};
 
   // Get filter information from URI.
@@ -61,8 +79,17 @@ export function updateURI(state: CoreState) {
   const layers = getLayerDescriptionFromLayers(state.mapLayers);
   args = { ...args, ...layers };
 
-  setHashString(args, { arrayFormat: "comma", sort: false });
-  return state;
+  const hashString = buildQueryString(args, {
+    arrayFormat: "comma",
+    sort: false,
+  });
+
+  return hashString;
+  //
+  // console.log("hashString", hashString);
+  //
+  // setHashString(args, { arrayFormat: "comma", sort: false });
+  // return state;
 }
 
 function applyInfoMarkerPosition(

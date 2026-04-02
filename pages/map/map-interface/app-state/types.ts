@@ -319,6 +319,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   showExperimentsPanel: boolean;
   allColumns: ColumnGeoJSONRecord[] | null;
   activeMenuPage: MenuPage | null;
+  isShowingColumnPage: boolean;
 }
 
 export type AppState = CoreState;
