@@ -1,12 +1,8 @@
-import { Route, Routes } from "react-router-dom";
 import { LocationPanel } from "@macrostrat/map-interface";
-import {
-  MacrostratLinkedData,
-  RegionalStratigraphy,
-} from "./macrostrat-linked";
+import { RegionalStratigraphy } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
-import { useAppActions, useAppState } from "#/map/map-interface/app-state";
+import { useAppActions, useAppState } from "../../app-state";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
@@ -20,8 +16,9 @@ function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
   const { className } = props;
-  const mapInfo = useAppState((state) => state.core.mapInfo);
-  const fetchingMapInfo = useAppState((state) => state.core.fetchingMapInfo);
+  const isShowingColumnPage = useAppState((state) => state.isShowingColumnPage);
+  const mapInfo = useAppState((state) => state.mapInfo);
+  const fetchingMapInfo = useAppState((state) => state.fetchingMapInfo);
 
   const runAction = useAppActions();
 
@@ -30,9 +27,16 @@ function InfoDrawer(props) {
     [runAction]
   );
 
-  const position = useAppState((state) => state.core.infoMarkerPosition);
-  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
-  const columnInfo = useAppState((state) => state.core.columnInfo);
+  const position = useAppState((state) => state.infoMarkerPosition);
+  const zoom = useAppState((state) => state.mapPosition.target?.zoom);
+  const columnInfo = useAppState((state) => state.columnInfo);
+
+  let content = null;
+  if (isShowingColumnPage) {
+    content = h(StratColumn, { columnInfo });
+  } else {
+    content = h(InfoDrawerMainPanel, { mapInfo, columnInfo });
+  }
 
   return h(
     MacrostratInteractionProvider,
@@ -52,43 +56,31 @@ function InfoDrawer(props) {
       h(
         LoadingArea,
         { loaded: !fetchingMapInfo, className: "infodrawer-content" },
-        h(Routes, [
-          h(Route, {
-            path: "/column",
-            element: h(StratColumn, { columnInfo }),
-          }),
-          h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
-        ])
+        content
       )
     )
   );
 }
 
-function InfoDrawerMainPanel(props) {
-  const mapInfo = useAppState((state) => state.core.mapInfo);
-  const columnInfo = useAppState((state) => state.core.columnInfo);
-
+function InfoDrawerMainPanel({ mapInfo, columnInfo }) {
   if (!mapInfo || !mapInfo.mapData) {
     return null;
   }
 
   const { mapData } = mapInfo;
 
-  const matchedStratNames = mapData[0]?.macrostrat?.strat_names ?? [];
+  const matchedStratNames = mapData?.[0]?.macrostrat?.strat_names ?? [];
   const terms = matchedStratNames.map((s) => s.rank_name);
 
-  let source =
-    mapInfo && mapInfo.mapData && mapInfo.mapData.length
-      ? mapInfo.mapData[0]
-      : {
-          name: null,
-          descrip: null,
-          comments: null,
-          liths: [],
-          b_int: {},
-          t_int: {},
-          ref: {},
-        };
+  let source = mapData?.[0] ?? {
+    name: null,
+    descrip: null,
+    comments: null,
+    liths: [],
+    b_int: {},
+    t_int: {},
+    ref: {},
+  };
 
   return h([
     h(GeologicMapInfo, {
@@ -96,7 +88,7 @@ function InfoDrawerMainPanel(props) {
       bedrockExpanded: true,
       source,
     }),
-    h.if(columnInfo)(RegionalStratigraphy, {
+    h.if(columnInfo != null)(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
       source,

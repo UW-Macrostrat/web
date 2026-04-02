@@ -1,14 +1,56 @@
-import { MapAction, MapLayer, MapState } from "../map";
-import { CancelToken } from "axios";
-export * from "../map";
-import { AddFilter, FilterData, Filter } from "../../handlers/filters";
+import { CancelTokenSource } from "axios";
+import { AddFilter, FilterData, Filter } from "./handlers/filters";
 import {
   ColumnGeoJSONRecord,
   ColumnProperties,
   ColumnSummary,
-} from "../../handlers/columns";
+} from "./handlers/columns";
 import { UnitLong } from "@macrostrat/api-types";
 import { LineString } from "geojson";
+
+import type { MapPosition } from "@macrostrat/mapbox-utils";
+import type { Location } from "history";
+
+export enum MapLayer {
+  SATELLITE = "satellite",
+  LINES = "lines",
+  COLUMNS = "columns",
+  FOSSILS = "fossils",
+  BEDROCK = "bedrock",
+  SOURCES = "sources",
+  LABELS = "labels",
+  LINE_SYMBOLS = "line-symbols",
+}
+
+type MapInitialState = {
+  mapPosition: MapPosition;
+  mapLayers: Set<MapLayer>;
+};
+
+export type MapState = MapInitialState & {
+  mapIsLoading: boolean;
+};
+
+type MapMoved = {
+  type: "map-moved";
+  data: {
+    mapPosition: MapPosition;
+  };
+};
+
+type GetInitialMapState = { type: "get-initial-map-state" };
+type MapLoading = { type: "map-loading" };
+type MapIdle = { type: "map-idle" };
+type ToggleLayer = { type: "toggle-map-layer"; layer: MapLayer };
+type ToggleMap3D = { type: "toggle-map-3d" };
+
+export type MapAction =
+  | MapMoved
+  | GetInitialMapState
+  | MapLoading
+  | MapIdle
+  | ToggleLayer
+  | ToggleMap3D;
 
 export type MapLocation = {
   lng: number;
@@ -20,7 +62,7 @@ type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
 type MAP_QUERY = {
-  type: "map-query";
+  type: "do-map-query";
   z: string | number;
   map_id: any;
   columns: ColumnProperties[] | null | undefined;
@@ -207,24 +249,23 @@ export type CoreAction =
   | SetCrossSectionLine
   | SetFocusedMapSource
   | ClearColumnInfo
-  | InitialLoadComplete;
+  | InitialLoadComplete
+  | { type: "close-column-page" };
 
 interface AsyncRequestState {
   // Events and tokens for xhr
   // NOTE: we should really improve some of this token infrastructure
   fetchingMapInfo: boolean;
   fetchingColumnInfo: boolean;
-  fetchingXdd: boolean;
-  xddCancelToken: CancelToken | null;
   isSearching: boolean;
   term: string;
   fetchingElevation: boolean;
   fetchingPbdb: boolean;
-  mapInfoCancelToken: CancelToken | null;
-  columnInfoCancelToken: CancelToken | null;
-  searchCancelToken: CancelToken | null;
-  elevationCancelToken: CancelToken | null;
-  allColumnsCancelToken: CancelToken | null;
+  mapInfoCancelToken: CancelTokenSource | null;
+  columnInfoCancelToken: CancelTokenSource | null;
+  searchCancelToken: CancelTokenSource | null;
+  elevationCancelToken: CancelTokenSource | null;
+  allColumnsCancelToken: CancelTokenSource | null;
 }
 
 interface MapCenterInfo {
@@ -238,9 +279,28 @@ interface MapSettings {
 
 export type InfoMarkerPosition = { lat: number; lng: number } | null;
 
+export type MenuAction = { type: "set-menu-page"; page: MenuPage | null };
+
+export enum MenuPage {
+  LAYERS = "layers",
+  SETTINGS = "settings",
+  ABOUT = "about",
+  USAGE = "usage",
+  CHANGELOG = "changelog",
+  EXPERIMENTS = "experiments",
+}
+
+type LocationAction = {
+  type: "set-location";
+  location: Location;
+};
+
+export type AppAction = CoreAction | MapAction | MenuAction | LocationAction;
+
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   contextPanelOpen: boolean;
+  mapIsMoving: boolean;
   menuOpen: boolean;
   aboutOpen: boolean;
   infoDrawerOpen: boolean;
@@ -266,5 +326,8 @@ export interface CoreState extends MapState, AsyncRequestState {
   filteredColumns: ColumnGeoJSONRecord[] | null;
   showExperimentsPanel: boolean;
   allColumns: ColumnGeoJSONRecord[] | null;
-  data: [];
+  activeMenuPage: MenuPage | null;
+  isShowingColumnPage: boolean;
 }
+
+export type AppState = CoreState;

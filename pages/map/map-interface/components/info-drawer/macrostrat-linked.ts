@@ -21,16 +21,15 @@ import { AgeRefinementPlot } from "./age-refinement-plot.ts";
 import h from "./main.module.sass";
 import type { ReactNode } from "react";
 
-import { useAppState } from "#/map/map-interface/app-state";
+import { useAppState, useLocation, Link } from "../../app-state";
 import { Spinner } from "@blueprintjs/core";
-import { Link } from "react-router-dom";
 
 export function RegionalStratigraphy(props) {
   const { mapInfo, columnInfo, source, expanded } = props;
   if (mapInfo?.mapData == null) return null;
 
-  const fetchingColumnInfo = useAppState((s) => s.core.fetchingColumnInfo);
-  const fetchingMapInfo = useAppState((s) => s.core.fetchingMapInfo);
+  const fetchingColumnInfo = useAppState((s) => s.fetchingColumnInfo);
+  const fetchingMapInfo = useAppState((s) => s.fetchingMapInfo);
 
   return h(
     ExpansionPanel,
@@ -79,9 +78,10 @@ export function MacrostratLinkedData(props) {
 }
 
 function BasicColumnInfo({ columnInfo }) {
+  const { pathname } = useLocation();
   return h("div.column-info", [
     h("h3", [
-      h(Link, { to: "column" }, columnInfo.col_name),
+      h(Link, { to: pathname + "/column" }, columnInfo.col_name),
       h.if(columnInfo.col_group)([" — ", columnInfo.col_group]),
     ]),
   ]);

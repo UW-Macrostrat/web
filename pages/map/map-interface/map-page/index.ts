@@ -2,11 +2,9 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 // Import other components
 import { Spinner, Icon } from "@blueprintjs/core";
 import loadable from "@loadable/component";
-import { apiV2Prefix, mapPagePrefix } from "@macrostrat-web/settings";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import { MapAreaContainer, FossilCollections } from "@macrostrat/map-interface";
 import classNames from "classnames";
-import { useSelector } from "react-redux";
-import { Route, Routes } from "react-router-dom";
 import { useTransition } from "transition-hook";
 import {
   useAppActions,
@@ -18,7 +16,6 @@ import Searchbar from "../components/navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
 import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
-import { useState } from "react";
 
 import h from "./main.module.sass";
 import { MacrostratDataProvider } from "@macrostrat/data-provider";
@@ -35,6 +32,18 @@ function MapView(props) {
   );
 }
 
+function useSingleEffect(callback, dependencies) {
+  /** Use an effect that is guaranteed to be called only once per page.
+   * This is a hack for better state management */
+  const hasRun = useRef(false);
+  useEffect(() => {
+    if (!hasRun.current) {
+      hasRun.current = true;
+      callback();
+    }
+  }, dependencies);
+}
+
 function MapPage({
   baseRoute = "/",
   menuPage = null,
@@ -43,19 +52,19 @@ function MapPage({
   menuPage?: MenuPage;
 }) {
   const runAction = useAppActions();
-  const inputFocus = useAppState((s) => s.core.inputFocus);
-  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
-  const navMenuPage = useAppState((s) => s.menu.activePage);
+  const inputFocus = useAppState((s) => s.inputFocus);
+  const infoDrawerOpen = useAppState((s) => s.infoDrawerOpen);
+  const navMenuPage = useAppState((s) => s.activeMenuPage);
 
   const ref = useRef<HTMLElement>(null);
-  const [map, setMap] = useState(null);
-  console.log("MapPage mounted", map);
+  //const [map, setMap] = useState(null);
+  //console.log("MapPage mounted", map);
 
   const contextPanelOpen = useContextPanelOpen(baseRoute);
   const contextClass = useContextClass(baseRoute);
+  const loaded = useAppState((s) => s.initialLoadComplete);
 
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
-  useEffect(() => {
+  useSingleEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);
 
@@ -63,7 +72,6 @@ function MapPage({
     (event) => {
       if (!(inputFocus || contextPanelOpen)) return;
       if (ref.current?.contains(event.target)) return;
-
       runAction({ type: "context-outside-click" });
       event.stopPropagation();
     },
@@ -82,7 +90,7 @@ function MapPage({
         navbar: h(Searchbar, { className: "searchbar" }),
         contextPanel: h(Menu, {
           className: "context-panel",
-          menuPage: menuPage ?? navMenuPage,
+          menuPage: navMenuPage,
         }),
         detailPanel: h(InfoDrawerHolder),
         detailPanelStyle: "floating",
@@ -101,33 +109,23 @@ function MapPage({
   );
 }
 
-function MapPageRoutes() {
+function MapPageRoutes({ menuPage = null }) {
   return h(
     MacrostratDataProvider,
     { baseURL: apiV2Prefix },
-    h(Routes, [
-      h(
-        Object.values(MenuPage).map((page) =>
-          h(Route, {
-            path: mapPagePrefix + "/" + page,
-            element: h(MapPage, { menuPage: page }),
-          })
-        )
-      ),
-      h(Route, { path: "*", element: h(MapPage) }),
-    ])
+    h(MapPage, { menuPage })
   );
 }
 
 function InfoDrawerHolder() {
   // We could probably do this in the reducer...
-  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const infoDrawerOpen = useAppState((s) => s.infoDrawerOpen);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
-  const position = useAppState((state) => state.core.infoMarkerPosition);
-  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
+  const position = useAppState((state) => state.infoMarkerPosition);
+  const zoom = useAppState((state) => state.mapPosition.target?.zoom);
 
   // For fossil click
-  const pbdbData = useAppState((state) => state.core.pbdbData);
+  const pbdbData = useAppState((state) => state.pbdbData);
   const runAction = useAppActions();
 
   const onClose = useCallback(
@@ -147,19 +145,24 @@ function InfoDrawerHolder() {
     ]);
   }
 
-  return h([
-    // This is essentially a shim implementation of React Router
-    h(Routes, [
-      h(Route, {
-        path: mapPagePrefix + "/loc/:lng/:lat/*",
-        element: h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-          position,
-          zoom,
-        }),
-      }),
-    ]),
-    //h(InfoDrawerLocationGrabber),
-  ]);
+  return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+    position,
+    zoom,
+  });
+
+  // return h([
+  //   // This is essentially a shim implementation of React Router
+  //   h(Routes, [
+  //     h(Route, {
+  //       path: mapPagePrefix + "/loc/:lng/:lat/*",
+  //       element: h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+  //         position,
+  //         zoom,
+  //       }),
+  //     }),
+  //   ]),
+  //   //h(InfoDrawerLocationGrabber),
+  // ]);
 }
 
 export default MapPageRoutes;

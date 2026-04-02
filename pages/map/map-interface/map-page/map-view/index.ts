@@ -4,12 +4,15 @@ import {
   PositionFocusState,
   useMapLabelVisibility,
   useMapRef,
-  useMapStatus,
   useMapStyleOperator,
   MacrostratLineSymbolManager,
   MapSourcesLayer,
 } from "@macrostrat/mapbox-react";
-import { getFocusState } from "@macrostrat/mapbox-utils";
+import {
+  getFocusState,
+  getTerrainSourceID,
+  setGeoJSON,
+} from "@macrostrat/mapbox-utils";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useInDarkMode } from "@macrostrat/ui-components";
@@ -27,20 +30,15 @@ import {
   MacrostratLayerManager,
 } from "./map";
 import { getBaseMapStyle } from "@macrostrat-web/map-utils";
-import { buildOverlayStyle, applyAgeModelStyles } from "../map-styles";
+import { buildOverlayStyle } from "../map-styles";
 import h from "../main.module.sass";
 
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
 export default function MainMapView(props) {
-  const {
-    mapLayers,
-    mapPosition,
-    timeCursorAge,
-    plateModelId,
-    infoMarkerPosition,
-    focusedMapSource,
-  } = useAppState((state) => state.core);
+  const mapLayers = useAppState((state) => state.mapLayers);
+  const mapPosition = useAppState((state) => state.mapPosition);
+  const infoMarkerPosition = useAppState((state) => state.infoMarkerPosition);
 
   let mapRef = useMapRef();
   const isDarkMode = useInDarkMode();
@@ -51,34 +49,33 @@ export default function MainMapView(props) {
   );
 
   // At the moment, these seem to force a re-render of the map
-  const { isInitialized, isStyleLoaded } = useMapStatus();
+  //const { isInitialized, isStyleLoaded } = useMapStatus();
 
   const runAction = useAppActions();
 
-  const mapSettings = useAppState((state) => state.core.mapSettings);
+  const mapSettings = useAppState((state) => state.mapSettings);
 
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
     if (baseStyle == null) return null;
     const macrostratStyle = buildMacrostratStyle({
-      focusedMap: focusedMapSource,
       tileserverDomain: SETTINGS.burwellTileDomain,
     });
 
-    const overlayStyle = buildOverlayStyle();
+    const overlayStyle: any = buildOverlayStyle();
 
-    if (timeCursorAge != null) {
-      return applyAgeModelStyles(baseStyle, macrostratStyle, {
-        age: timeCursorAge,
-        model: plateModelId ?? 1,
-        baseStyle,
-        overlayStyles: overlayStyle,
-        isDarkMode,
-        tileserverDomain: SETTINGS.burwellTileDomain,
-      });
-    }
+    // if (timeCursorAge != null) {
+    //   return applyAgeModelStyles(baseStyle, macrostratStyle, {
+    //     age: timeCursorAge,
+    //     model: plateModelId ?? 1,
+    //     baseStyle,
+    //     overlayStyles: overlayStyle,
+    //     isDarkMode,
+    //     tileserverDomain: SETTINGS.burwellTileDomain,
+    //   });
+    // }
     return mergeStyles(baseStyle, macrostratStyle, overlayStyle);
-  }, [baseStyle, timeCursorAge, plateModelId, isDarkMode, focusedMapSource]);
+  }, [baseStyle, isDarkMode]);
 
   useEffect(() => {
     getMapboxStyle(baseMapURL, {
@@ -127,6 +124,13 @@ export default function MainMapView(props) {
     runAction({ type: "map-moved", data: { mapPosition: pos } });
   }, []);
 
+  const terrainSourceID = useMemo(() => {
+    if (mapStyle == null) return null;
+    if (!mapSettings.highResolutionTerrain) return null;
+    // TODO: use function from mapbox-react once it's exported
+    return getTerrainSourceID(mapStyle);
+  }, [mapSettings.highResolutionTerrain, mapStyle]);
+
   return h(
     MapView,
     {
@@ -136,9 +140,7 @@ export default function MainMapView(props) {
       onMapLoaded,
       style: mapStyle,
       mapPosition,
-      terrainSourceID: mapSettings.highResolutionTerrain
-        ? "mapbox-3d-dem"
-        : null,
+      terrainSourceID,
       mapboxToken: SETTINGS.mapboxAccessToken,
       onMapMoved,
     },
@@ -159,14 +161,12 @@ export default function MainMapView(props) {
 
 function ColumnDataManager() {
   /* Update columns map layer given columns provided by application. */
-  const allColumns = useAppState((state) => state.core.allColumns);
+  const allColumns = useAppState((state) => state.allColumns);
   useMapStyleOperator(
     (map) => {
       const ncols = allColumns?.length ?? 0;
       if (ncols == 0) return;
-      const source = map.getSource("columns");
-      if (source == null) return;
-      source.setData({
+      setGeoJSON(map, "columns", {
         type: "FeatureCollection",
         features: allColumns,
       });

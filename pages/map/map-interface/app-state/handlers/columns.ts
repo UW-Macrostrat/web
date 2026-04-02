@@ -1,4 +1,4 @@
-import { MapLocation } from "../reducers/core";
+import { MapLocation } from "../reducers/reducer.ts";
 import booleanContains from "@turf/boolean-contains";
 import { MultiPolygon, Polygon } from "geojson";
 import { UnitLong } from "@macrostrat/api-types";

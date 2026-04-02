@@ -1,9 +1,10 @@
-import { MapLayer } from "../map";
-import { CoreState, CoreAction } from "./types";
+import { AppAction, AppState, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
-import { FilterData } from "../../handlers/filters";
-import { assembleColumnSummary } from "../../handlers/columns";
-export * from "./types";
+import { FilterData } from "./handlers/filters";
+import { assembleColumnSummary } from "./handlers/columns";
+import { updateStateFromLocation, historyManager } from "./navigation";
+
+export { MapLayer };
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -19,6 +20,7 @@ const classColors = {
 
 const defaultState: CoreState = {
   initialLoadComplete: false,
+  mapIsMoving: false,
   contextPanelOpen: false,
   allColumns: null,
   allColumnsCancelToken: null,
@@ -39,9 +41,6 @@ const defaultState: CoreState = {
   mapInfoCancelToken: null,
   fetchingColumnInfo: false,
   columnInfoCancelToken: null,
-  fetchingXdd: false,
-  xddCancelToken: null,
-  xddInfo: [],
   isSearching: false,
   inputFocus: false,
   term: "",
@@ -54,6 +53,7 @@ const defaultState: CoreState = {
   searchResults: null,
   pbdbData: [],
   mapIsLoading: false,
+  isShowingColumnPage: false,
   mapCenter: {
     type: null,
   },
@@ -61,8 +61,8 @@ const defaultState: CoreState = {
   filtersOpen: false,
   filters: [],
   filtersInfo: [],
-  filteredColumns: {},
-  data: [],
+  filteredColumns: null,
+  activeMenuPage: null,
   showExperimentsPanel: false,
   timeCursorAge: null,
   plateModelId: 3,
@@ -76,19 +76,28 @@ const defaultState: CoreState = {
   },
 };
 
+export function createInitialState() {
+  return updateStateFromLocation(defaultState);
+}
+
 export function coreReducer(
-  state: CoreState = defaultState,
-  action: CoreAction
+  state: CoreState | null | undefined,
+  action: AppAction
 ): CoreState {
   switch (action.type) {
     case "initial-load-complete":
       return { ...state, initialLoadComplete: true, filters: action.filters };
+    case "set-location":
+      console.log("Setting location to", action.location);
+      return updateStateFromLocation(state, action.location);
     case "map-loading":
       if (state.mapIsLoading) return state;
       return { ...state, mapIsLoading: true };
     case "map-idle":
       if (!state.mapIsLoading) return state;
-      return { ...state, mapIsLoading: false };
+      return { ...state, mapIsLoading: false, mapIsMoving: false };
+    case "set-menu-page":
+      return { ...state, activeMenuPage: action.page };
     case "map-layers-changed":
       let columnInfo = state.columnInfo;
       let pbdbData = state.pbdbData;
@@ -128,12 +137,15 @@ export function coreReducer(
         ...state,
         showExperimentsPanel: action.open ?? !state.showExperimentsPanel,
       };
+    case "close-column-page":
+      return { ...state, isShowingColumnPage: false };
     case "close-infodrawer":
       return {
         ...state,
         infoDrawerOpen: false,
         infoMarkerPosition: null,
-        columnInfo: {},
+        columnInfo: null,
+        isShowingColumnPage: false,
       };
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
@@ -160,7 +172,10 @@ export function coreReducer(
       // if (state.inputFocus) {
       //   return { ...state, inputFocus: false };
       // }
-      if (state.mapInfoCancelToken) {
+      if (
+        state.mapInfoCancelToken &&
+        state.mapInfoCancelToken != action.cancelToken
+      ) {
         state.mapInfoCancelToken.cancel();
       }
       return {
@@ -170,73 +185,27 @@ export function coreReducer(
           lat: action.lat,
         },
         fetchingMapInfo: true,
+        mapIsMoving: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
       };
     case "received-map-query":
-      if (action.data && action.data.mapData) {
-        action.data.mapData = action.data.mapData.map((source) => {
-          if (source.macrostrat) {
-            if (source.macrostrat.liths) {
-              let types = {};
-
-              source.macrostrat.liths.forEach((lith) => {
-                if (!types[lith.lith_type]) {
-                  types[lith.lith_type] = {
-                    name: lith.lith_type,
-                    color: classColors[lith.lith_class],
-                  };
-                }
-              });
-              source.macrostrat.lith_types = Object.keys(types).map(
-                (l) => types[l]
-              );
-            }
-            if (source.macrostrat.environs) {
-              let types = {};
-
-              source.macrostrat.environs.forEach((environ) => {
-                if (!types[environ.environ_type]) {
-                  types[environ.environ_type] = {
-                    name: environ.environ_type,
-                    color: classColors[environ.environ_class],
-                  };
-                }
-              });
-              source.macrostrat.environ_types = Object.keys(types).map(
-                (l) => types[l]
-              );
-            }
-            if (source.macrostrat.econs) {
-              let types = {};
-
-              source.macrostrat.econs.forEach((econ) => {
-                if (!types[econ.econ_type]) {
-                  types[econ.econ_type] = {
-                    name: econ.econ_type,
-                    color: classColors[econ.econ_class],
-                  };
-                }
-              });
-              source.macrostrat.econ_types = Object.keys(types).map(
-                (l) => types[l]
-              );
-            }
-          }
-
-          return source;
-        });
-      }
-
+      const mapInfo = {
+        ...action.data,
+        mapData: preprocessMapData(action.data?.mapData),
+      };
       return {
         ...state,
         fetchingMapInfo: false,
-        mapInfo: action.data,
+        mapInfo,
+        mapInfoCancelToken: null,
         infoDrawerOpen: true,
       };
-
     case "start-column-query":
-      if (state.columnInfoCancelToken) {
+      if (
+        state.columnInfoCancelToken &&
+        state.columnInfoCancelToken != action.cancelToken
+      ) {
         state.columnInfoCancelToken.cancel();
       }
       return {
@@ -333,13 +302,10 @@ export function coreReducer(
         ...state,
         filteredColumns: action.columns,
       };
-    case "request-data":
-      return { ...state, isFetching: true };
-    case "recieve-data":
-      return { ...state, isFetching: false, data: action.data };
     case "map-moved":
       return {
         ...state,
+        mapIsMoving: false,
         ...action.data,
       };
     case "toggle-high-resolution-terrain":
@@ -359,6 +325,58 @@ export function coreReducer(
     default:
       return state;
   }
+}
+
+function preprocessMapData(mapData: any) {
+  /** Preprocess map data types */
+  if (mapData == null) return null;
+  return mapData.map((source) => {
+    if (source.macrostrat) {
+      if (source.macrostrat.liths) {
+        let types = {};
+
+        source.macrostrat.liths.forEach((lith) => {
+          if (!types[lith.lith_type]) {
+            types[lith.lith_type] = {
+              name: lith.lith_type,
+              color: classColors[lith.lith_class],
+            };
+          }
+        });
+        source.macrostrat.lith_types = Object.keys(types).map((l) => types[l]);
+      }
+      if (source.macrostrat.environs) {
+        let types = {};
+
+        source.macrostrat.environs.forEach((environ) => {
+          if (!types[environ.environ_type]) {
+            types[environ.environ_type] = {
+              name: environ.environ_type,
+              color: classColors[environ.environ_class],
+            };
+          }
+        });
+        source.macrostrat.environ_types = Object.keys(types).map(
+          (l) => types[l]
+        );
+      }
+      if (source.macrostrat.econs) {
+        let types = {};
+
+        source.macrostrat.econs.forEach((econ) => {
+          if (!types[econ.econ_type]) {
+            types[econ.econ_type] = {
+              name: econ.econ_type,
+              color: classColors[econ.econ_class],
+            };
+          }
+        });
+        source.macrostrat.econ_types = Object.keys(types).map((l) => types[l]);
+      }
+    }
+
+    return source;
+  });
 }
 
 function isTheSame(f: FilterData, newFilter: FilterData) {
@@ -384,3 +402,6 @@ export function buildFilters(filters: FilterData[], newFilters: FilterData[]) {
 
   return [...remainingFilters, ...newFilters];
 }
+
+export * from "./hash-string";
+export * from "./types";

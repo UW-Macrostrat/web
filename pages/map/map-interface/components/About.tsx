@@ -2,7 +2,7 @@ import { AnchorButton } from "@blueprintjs/core";
 import { mapPagePrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import newGithubIssueUrl from "new-github-issue-url";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "../app-state/navigation";
 import styles from "./about.module.styl";
 
 const h = hyper.styled(styles);
@@ -46,7 +46,7 @@ const LinkButton = ({ to, ...props }) => {
   return h(AnchorButton, {
     ...props,
     onClick() {
-      navigate(mapPagePrefix + to);
+      navigate(to);
     },
   });
 };

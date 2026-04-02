@@ -3,25 +3,9 @@ import {
   getMapPositionForHash,
 } from "@macrostrat/map-interface";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
-import { getHashString, setHashString } from "@macrostrat/ui-components";
-import { format } from "d3-format";
-import { Filter, FilterType } from "../handlers/filters";
-import { CoreState, InfoMarkerPosition, MapLayer } from "./core";
-import { AppAction, AppState } from "./types";
-
-const fmtInt = format(".0f");
-
-export function hashStringReducer(state: AppState, action: AppAction) {
-  switch (action.type) {
-    case "add-filter":
-    case "remove-filter":
-    case "clear-filters":
-    case "toggle-map-layer":
-    case "map-moved":
-      updateURI(state.core);
-  }
-  return state;
-}
+import { buildQueryString, getHashString } from "@macrostrat/ui-components";
+import { Filter, FilterType } from "./handlers/filters";
+import { CoreState, InfoMarkerPosition, MapLayer } from "./types";
 
 interface HashParams {
   x?: string;
@@ -36,7 +20,7 @@ interface HashParams {
 //   return filter.id ?? filter.name;
 // }
 
-export function updateURI(state: CoreState) {
+export function buildHashString(state: CoreState): string {
   let args: HashParams = {};
 
   // Get filter information from URI.
@@ -52,16 +36,20 @@ export function updateURI(state: CoreState) {
     state.mapPosition.target?.zoom
   );
 
-  if (state.timeCursorAge != null && state.timeCursorAge != 0) {
-    args.age = fmtInt(state.timeCursorAge);
-    args.plate_model = fmtInt(state.plateModelId);
-  }
-
   const layers = getLayerDescriptionFromLayers(state.mapLayers);
   args = { ...args, ...layers };
 
-  setHashString(args, { arrayFormat: "comma", sort: false });
-  return state;
+  const hashString = buildQueryString(args, {
+    arrayFormat: "comma",
+    sort: false,
+  });
+
+  return hashString;
+  //
+  // console.log("hashString", hashString);
+  //
+  // setHashString(args, { arrayFormat: "comma", sort: false });
+  // return state;
 }
 
 function applyInfoMarkerPosition(
@@ -203,16 +191,22 @@ export function updateMapPositionForHash(
   }
 }
 
-function formatID(id: string, type: FilterType): string | number {
-  switch (type) {
-    case FilterType.AllLithologyClasses:
-    case FilterType.AllLithologyTypes:
-    case FilterType.LithologyClasses:
-    case FilterType.LithologyTypes:
-      return id;
-    default:
-      return Number(id);
-  }
+function isLithologyFilterType(type: FilterType): boolean {
+  return [
+    FilterType.AllLithologyClasses,
+    FilterType.AllLithologyTypes,
+    FilterType.LithologyClasses,
+    FilterType.LithologyTypes,
+  ].includes(type);
+}
+
+function createTypedFilter(type: FilterType, value: string): Filter {
+  const isLithology = isLithologyFilterType(type);
+
+  return {
+    type,
+    id: isLithology ? value : Number(value),
+  } as Filter;
 }
 
 function getActiveFiltersFromHash(hashString: string): Filter[] {
@@ -222,10 +216,7 @@ function getActiveFiltersFromHash(hashString: string): Filter[] {
     const val = hashData[type];
     if (val != null) {
       for (const v of Array.isArray(val) ? val : [val]) {
-        filters.push({
-          type: type as FilterType,
-          id: formatID(v, type),
-        });
+        filters.push(createTypedFilter(type, v));
       }
     }
   }

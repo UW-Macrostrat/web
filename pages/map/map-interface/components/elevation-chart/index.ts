@@ -8,7 +8,7 @@ import { scaleLinear } from "d3-scale";
 import { select, pointer } from "d3-selection";
 import { area, line } from "d3-shape";
 import React, { useEffect, useRef } from "react";
-import { useAppActions, useAppState } from "#/map/map-interface/app-state";
+import { useAppActions, useAppState } from "../../app-state";
 
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import styles from "./main.module.styl";
@@ -231,7 +231,7 @@ function ElevationChartPanel({ startPos, endPos }) {
 }
 
 function ElevationChartContainer() {
-  const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
+  const crossSectionLine = useAppState((state) => state.crossSectionLine);
   const runAction = useAppActions();
 
   const nCoords = crossSectionLine?.coordinates?.length ?? 0;
@@ -246,7 +246,9 @@ function ElevationChartContainer() {
     null,
     h("div.elevation-chart", [
       h("div.control-bar", [
-        hasElevationData ? h(LocationFocusButton, { location: crossSectionLine }) : null,
+        hasElevationData
+          ? h(LocationFocusButton, { location: crossSectionLine })
+          : null,
         h("div.spacer"),
         h(Button, {
           icon: "cross",

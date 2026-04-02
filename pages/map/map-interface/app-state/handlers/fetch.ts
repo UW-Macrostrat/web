@@ -2,7 +2,7 @@ import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import axios from "axios";
 import { joinURL } from "@macrostrat/ui-components";
 import { ColumnGeoJSONRecord } from "./columns";
-import { UPDATE_COLUMN_FILTERS } from "../reducers/core/types";
+import { UPDATE_COLUMN_FILTERS } from "../types";
 
 export const base = apiV2Prefix;
 const pbdbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
@@ -93,6 +93,7 @@ export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {
 export async function runMapQuery(lng, lat, z, map_id, cancelToken) {
   const params = { lng, lat, z, map_id };
   let url = base + "/mobile/map_query_v2";
+  console.log("Running map query");
   let res = await axios.get(url, { cancelToken, responseType: "json", params });
   let data = addMapIdToRef(res.data).success.data;
 

@@ -1,43 +1,61 @@
-import { AppState, AppAction, MenuPage } from "#/map/map-interface/app-state";
-import { push, UpdateLocationAction } from "@lagunovsky/redux-react-router";
+import { AppState, MenuPage } from "./types";
 import { LineString } from "geojson";
 import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 
-export function pathNameAction(
-  state: AppState
-): UpdateLocationAction<"push"> | null {
+function keyChangeDetector<T extends object>(keys: (keyof T)[]) {
+  return (state: T, nextState: T): boolean => {
+    for (const key of keys) {
+      if (state[key] !== nextState[key]) {
+        return true;
+      }
+    }
+    return false;
+  };
+}
+
+export const mayHavePathNameChange = keyChangeDetector<AppState>([
+  "infoMarkerPosition",
+  "crossSectionLine",
+  "activeMenuPage",
+  "isShowingColumnPage",
+]);
+
+export const mayHaveHashChange = keyChangeDetector<AppState>([
+  "infoMarkerPosition",
+  "mapPosition",
+  "mapLayers",
+  "filters",
+]);
+
+export function buildPathName(state: AppState): string | null {
   /** Set the pathname based on the current state. Only one of a location, cross-section line,
    * or active page can be selected at a time.
    * The following priority is applied:
-   * 1. If a location is selected, show that location
+   * 1. If a location is selected, set the path to that location
+   *   - add /column suffix if needed
    * 2. If a cross-section line is selected, set the cross-section path
    * 3. If an active page is selected, show that page
    */
 
-  const pos = state.core.infoMarkerPosition;
-  let nextPathname: string = state.router.location.pathname;
+  const pos = state.infoMarkerPosition;
+  let nextPathname: string = routerBasename;
   if (pos != null) {
-    const z = state.core.mapPosition.target?.zoom ?? 7;
+    const z = state.mapPosition.target?.zoom ?? 7;
     nextPathname = buildLocationPath(pos.lng, pos.lat, z);
     // TODO: we could probably assign column page based on a flag in the state
-    if (state.router.location.pathname.endsWith("/column")) {
+    if (state.isShowingColumnPage) {
       nextPathname += "/column";
     }
-  } else if (state.core.crossSectionLine != null) {
-    nextPathname = buildCrossSectionPath(state.core.crossSectionLine);
-  } else if (state.menu.activePage != null) {
-    nextPathname = routeForActivePage(state.menu.activePage);
-  } else {
-    nextPathname = routerBasename;
+  } else if (state.crossSectionLine != null) {
+    nextPathname = buildCrossSectionPath(state.crossSectionLine);
+  } else if (state.activeMenuPage != null) {
+    nextPathname = routeForActivePage(state.activeMenuPage);
   }
-  if (nextPathname == state.router.location.pathname) {
-    return null;
-  }
-  return push({ pathname: nextPathname, hash: state.router.location.hash });
+  return nextPathname;
 }
 
-function buildCrossSectionPath(line: LineString) {
+export function buildCrossSectionPath(line: LineString) {
   const pts = line.coordinates
     .map((p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`)
     .join("/");

@@ -1,39 +1,29 @@
 import axios from "axios";
-import {
-  AppAction,
-  AppState,
-  MenuPage,
-  setInfoMarkerPosition,
-} from "../reducers";
+import { AppAction, MenuPage, MapLayer } from "../types";
 import {
   base,
   fetchAllColumns,
   fetchFilteredColumns,
   getPBDBData,
-  handleXDDQuery,
   runColumnQuery,
   runMapQuery,
 } from "./fetch";
 import { runFilter } from "./filters";
 
 import { LineString } from "geojson";
-import { currentPageForPathName, isDetailPanelRoute } from "../nav-hooks";
-import { MapLayer } from "../reducers/core";
-import { getInitialStateFromHash } from "../reducers/hash-string";
 import {
   ColumnGeoJSONRecord,
   ColumnSummary,
   ColumnProperties,
   findColumnsForLocation,
 } from "./columns";
+import { StateGetter } from "../store";
 
-export default async function actionRunner(
-  state: AppState,
+export async function actionRunner(
+  getState: StateGetter,
   action: AppAction,
   dispatch = null
 ): Promise<AppAction | void> {
-  const coreState = state.core;
-
   switch (action.type) {
     case "get-initial-map-state": {
       // Harvest as much information as possible from the hash string
@@ -54,7 +44,7 @@ export default async function actionRunner(
 
       fetchAllColumns().then((res) => {
         runAsyncAction(
-          state,
+          getState,
           {
             type: "set-all-columns",
             columns: res,
@@ -63,22 +53,24 @@ export default async function actionRunner(
         );
       });
 
-      if (state.core.infoMarkerPosition != null) {
+      const state = getState();
+      if (state.infoMarkerPosition != null) {
+        console.log("Setting info marker position");
         runAsyncAction(
-          state,
+          getState,
           {
-            type: "map-query",
-            z: state.core.mapPosition.target?.zoom ?? 7,
-            ...state.core.infoMarkerPosition,
+            type: "do-map-query",
+            z: state.mapPosition.target?.zoom ?? 7,
+            ...state.infoMarkerPosition,
             map_id: null,
             columns: null,
           },
           dispatch
-        );
+        ).then(() => {});
       }
       // Apply all filters in parallel
       const filters = await Promise.all(
-        state.core.filtersInfo.map((f) => {
+        state.filtersInfo.map((f) => {
           return runFilter(f);
         })
       );
@@ -86,7 +78,7 @@ export default async function actionRunner(
     }
     case "map-layers-changed": {
       const { mapLayers } = action;
-      if (mapLayers.has(MapLayer.COLUMNS) && state.core.allColumns == null) {
+      if (mapLayers.has(MapLayer.COLUMNS) && state.allColumns == null) {
         const columns = await fetchAllColumns();
         return { type: "set-all-columns", columns };
       } else {
@@ -94,30 +86,33 @@ export default async function actionRunner(
       }
     }
     case "set-all-columns":
-      if (state.core.infoMarkerPosition != null) {
+      const infoMarkerPosition = getState((state) => state.infoMarkerPosition);
+      const columnInfo = getState((state) => state.columnInfo);
+      if (infoMarkerPosition != null) {
         fetchColumnInfo(
           {
-            lng: state.core.infoMarkerPosition.lng,
-            lat: state.core.infoMarkerPosition.lat,
+            lng: infoMarkerPosition.lng,
+            lat: infoMarkerPosition.lat,
             columns: [],
           },
           action.columns,
-          state.core.columnInfo,
+          columnInfo,
           dispatch
         );
       }
       return action;
     case "toggle-menu": {
+      const state = getState();
       // Push the menu onto the history stack
-      let activePage = state.menu.activePage;
+      let activePage = state.activeMenuPage;
       // If input is focused we want to open the menu if clicked, not run the toggle action.
-      if (activePage != null && !state.core.inputFocus) {
+      if (activePage != null && !state.inputFocus) {
         activePage = null;
       } else {
         activePage = MenuPage.LAYERS;
       }
       return await actionRunner(
-        state,
+        getState,
         { type: "set-menu-page", page: activePage },
         dispatch
       );
@@ -125,21 +120,22 @@ export default async function actionRunner(
     case "go-to-experiments-panel": {
       await dispatch({ type: "toggle-experiments-panel", open: true });
       return await actionRunner(
-        state,
+        getState,
         { type: "set-menu-page", page: MenuPage.SETTINGS },
         dispatch
       );
     }
     case "toggle-cross-section": {
+      const state = getState();
       let line: LineString | null = null;
-      if (state.core.crossSectionLine == null) {
+      if (state.crossSectionLine == null) {
         line = { type: "LineString", coordinates: [] };
       }
       const action: AppAction = {
         type: "update-cross-section",
         line,
       };
-      return actionRunner(state, action, dispatch);
+      return actionRunner(getState, action, dispatch);
     }
     case "fetch-search-query":
       const { term } = action;
@@ -165,7 +161,7 @@ export default async function actionRunner(
         return { type: "go-to-place", place: result };
       } else {
         return actionRunner(
-          state,
+          getState,
           { type: "async-add-filter", filter: result },
           dispatch
         );
@@ -173,13 +169,15 @@ export default async function actionRunner(
     case "async-add-filter":
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
-      return await fetchFilteredColumns(coreState.filters);
-    case "map-query":
+      const filters = getState((state) => state.filters);
+      return await fetchFilteredColumns(filters);
+    case "do-map-query":
       const { lng, lat, z, map_id } = action;
       // Get column data from the map action if it is provided.
       // This saves us from having to filter the columns more inefficiently
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
+      const coreState = getState();
       if (coreState.inputFocus && coreState.contextPanelOpen) {
         // Dismiss the current context panel
         return { type: "context-outside-click" };
@@ -193,14 +191,19 @@ export default async function actionRunner(
       });
 
       // Run a bunch of async queries in ~parallel
-      runMapQuery(lng, lat, z, map_id, sourceMapQuery.token).then((res) => {
-        dispatch({ type: "received-map-query", data: res });
-      });
+      runMapQuery(lng, lat, z, map_id, sourceMapQuery.token)
+        .then((res) => {
+          dispatch({ type: "received-map-query", data: res });
+        })
+        .catch((err) => {
+          console.log(err);
+          console.log("Error running map query");
+        });
 
       fetchColumnInfo(
         { lng, lat, columns: action.columns },
-        state.core.allColumns,
-        state.core.columnInfo,
+        coreState.allColumns,
+        coreState.columnInfo,
         dispatch
       );
       return;
@@ -217,11 +220,11 @@ export default async function actionRunner(
 }
 
 async function runAsyncAction(
-  state: AppState,
+  getState: StateGetter,
   action: AppAction,
   dispatch: any
 ) {
-  const res = await actionRunner(state, action, dispatch);
+  const res = await actionRunner(getState, action, dispatch);
   if (res != null) dispatch(res);
 }
 

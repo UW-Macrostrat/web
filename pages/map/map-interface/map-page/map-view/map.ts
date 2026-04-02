@@ -125,11 +125,12 @@ function useMapClickHandler(pbdbPoints) {
   const mapRef = useMapRef();
   const runAction = useAppActions();
 
-  const crossSectionLine = useAppState((s) => s.core.crossSectionLine);
-  const mapLayers = useAppState((s) => s.core.mapLayers);
+  const crossSectionLine = useAppState((s) => s.crossSectionLine);
+  const mapLayers = useAppState((s) => s.mapLayers);
 
   return useCallback(
     (event) => {
+      console.log("Map clicked", event);
       const map = mapRef.current;
 
       const action = handleCrossSectionClick(event, crossSectionLine);
@@ -181,7 +182,7 @@ function useMapClickHandler(pbdbPoints) {
         });
 
       runAction({
-        type: "map-query",
+        type: "do-map-query",
         lng: event.lngLat.lng,
         lat: event.lngLat.lat,
         z: map.getZoom(),
@@ -222,9 +223,9 @@ export async function refreshPBDB(map, pointsRef, filters) {
 export function MacrostratLayerManager() {
   /** Manager for map layers */
   const mapRef = useMapRef();
-  const filters = useAppState((s) => s.core.filters);
-  const mapLayers = useAppState((s) => s.core.mapLayers);
-  const filteredColumns = useAppState((s) => s.core.filteredColumns);
+  const filters = useAppState((s) => s.filters);
+  const mapLayers = useAppState((s) => s.mapLayers);
+  const filteredColumns = useAppState((s) => s.filteredColumns);
   const runAction = useAppActions();
 
   const pbdbPoints = useRef({});
@@ -292,8 +293,8 @@ export function MacrostratLayerManager() {
 function useStyleReloader(pbdbPoints) {
   // This selection tracking used to be used for PBDB but I think no longer is
   const selectedFeatures = useRef({});
-  const filters = useAppState((s) => s.core.filters);
-  const mapLayers = useAppState((s) => s.core.mapLayers);
+  const filters = useAppState((s) => s.filters);
+  const mapLayers = useAppState((s) => s.mapLayers);
 
   return useMapStyleOperator(
     (map) => {
@@ -347,7 +348,7 @@ function setVisibility(map, layerID, visible) {
 }
 
 export function FlyToPlaceManager() {
-  const mapCenter = useAppState((s) => s.core.mapCenter);
+  const mapCenter = useAppState((s) => s.mapCenter);
   const mapRef = useMapRef();
   useEffect(() => {
     /* Increasing the duration somehow breaks this interaction.
