@@ -134,12 +134,15 @@ export function coreReducer(
         ...state,
         showExperimentsPanel: action.open ?? !state.showExperimentsPanel,
       };
+    case "close-column-page":
+      return { ...state, isShowingColumnPage: false };
     case "close-infodrawer":
       return {
         ...state,
         infoDrawerOpen: false,
         infoMarkerPosition: null,
         columnInfo: null,
+        isShowingColumnPage: false,
       };
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
@@ -184,17 +187,15 @@ export function coreReducer(
         mapInfoCancelToken: action.cancelToken,
       };
     case "received-map-query":
-      let mapInfo = null;
-      if (action.data != null) {
-        mapInfo = {
-          ...action.data,
-          mapData: preprocessMapData(action.data?.mapData),
-        };
-      }
+      const mapInfo = {
+        ...action.data,
+        mapData: preprocessMapData(action.data?.mapData),
+      };
       return {
         ...state,
         fetchingMapInfo: false,
         mapInfo,
+        mapInfoCancelToken: null,
         infoDrawerOpen: true,
       };
     case "start-column-query":
@@ -407,7 +408,6 @@ export default function appReducer(
   // centralizes the logic in one place.
   const nextState = coreReducer(state, action);
   if (action.type == "set-location") {
-    console.log(nextState);
     return nextState;
   }
   historyManager(state, nextState);

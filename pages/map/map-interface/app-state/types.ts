@@ -249,7 +249,8 @@ export type CoreAction =
   | SetCrossSectionLine
   | SetFocusedMapSource
   | ClearColumnInfo
-  | InitialLoadComplete;
+  | InitialLoadComplete
+  | { type: "close-column-page" };
 
 interface AsyncRequestState {
   // Events and tokens for xhr

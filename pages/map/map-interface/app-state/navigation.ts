@@ -18,10 +18,16 @@ export const browserHistory = createBrowserHistory();
 // This sometimes gets called when the page isn't properly loaded yet,
 // so we have put in place a hacky guard...
 // We should do this within the component tree
-browserHistory.push({
-  pathname: routerBasename,
-  hash: window.location.hash,
-});
+
+export function startRecordingAppHistory() {
+  browserHistory.replace(
+    {
+      pathname: window.location.pathname,
+      hash: window.location.hash,
+    },
+    { managed: true }
+  );
+}
 
 const historyAtom = atom(browserHistory);
 
@@ -38,9 +44,9 @@ export function useNavigate() {
   }, []);
 }
 
-export function Link({ to, children }: { to: To; children: React.ReactNode }) {
-  //const href = browserHistory.createHref(to);
-  return h("a", children);
+export function Link({ to, ...rest }: { to: To; children: React.ReactNode }) {
+  const href = browserHistory.createHref(to);
+  return h("a", { href, ...rest });
 }
 
 export function createInitialState(
@@ -53,12 +59,18 @@ export function createInitialState(
   const s1 = setInfoMarkerPosition(baseState, pathname);
   const [coreState, filters] = getInitialStateFromHash(s1, hash);
 
+  let isShowingColumnPage = false;
+  if (activeMenuPage == null && pathname.endsWith("/column")) {
+    isShowingColumnPage = true;
+  }
+
   return {
     ...s1,
     ...coreState,
     filtersInfo: filters,
     menuOpen: isOpen,
     contextPanelOpen: isOpen,
+    isShowingColumnPage,
     activeMenuPage,
   };
 }

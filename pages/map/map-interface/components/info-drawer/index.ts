@@ -15,7 +15,8 @@ import classNames from "classnames";
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
-  const { className, isShowingColumnPage = false } = props;
+  const { className } = props;
+  const isShowingColumnPage = useAppState((state) => state.isShowingColumnPage);
   const mapInfo = useAppState((state) => state.mapInfo);
   const fetchingMapInfo = useAppState((state) => state.fetchingMapInfo);
 
@@ -34,7 +35,7 @@ function InfoDrawer(props) {
   if (isShowingColumnPage) {
     content = h(StratColumn, { columnInfo });
   } else {
-    content = h(InfoDrawerMainPanel);
+    content = h(InfoDrawerMainPanel, { mapInfo, columnInfo });
   }
 
   return h(
@@ -61,10 +62,7 @@ function InfoDrawer(props) {
   );
 }
 
-function InfoDrawerMainPanel(props) {
-  const mapInfo = useAppState((state) => state.mapInfo);
-  const columnInfo = useAppState((state) => state.columnInfo);
-
+function InfoDrawerMainPanel({ mapInfo, columnInfo }) {
   if (!mapInfo || !mapInfo.mapData) {
     return null;
   }

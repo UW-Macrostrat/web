@@ -7,7 +7,7 @@ import { useTransition } from "transition-hook";
 const h = hyper.styled(styles);
 
 export function LoadingArea(props) {
-  const { loaded, children = null, className } = props;
+  const { loaded, children, className } = props;
   const trans = useTransition(loaded, 500);
   const invTrans = useTransition(!loaded, 500);
 
@@ -15,8 +15,8 @@ export function LoadingArea(props) {
     "div.loading-area",
     { className: classNames(className, trans.stage) },
     [
-      h.if(invTrans.shouldMount)("div.spinner", null, h(Spinner)),
-      h.if(trans.shouldMount)("div.data", null, children),
+      h.if(trans.shouldMount)("div.spinner", null, h(Spinner)),
+      h("div.data", null, children),
     ]
   );
 }

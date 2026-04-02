@@ -2,19 +2,23 @@ import { Column, ColoredUnitComponent } from "@macrostrat/column-views";
 
 import h from "./index.module.sass";
 import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
-import { NonIdealState } from "@blueprintjs/core";
-import useBreadcrumbs from "use-react-router-breadcrumbs";
-import { LinkButton } from "../../buttons";
+import { NonIdealState, Button } from "@blueprintjs/core";
 import { UnitDetailsFeature, Identifier } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
 import { useMemo, useState } from "react";
 import { ModalUnitPanel } from "#/columns/@column/column-inspector/modal-panel";
+import { useAppActions } from "../../../app-state";
 
 function BackButton() {
-  const breadcrumbs = useBreadcrumbs();
-  const prevRoute = breadcrumbs[breadcrumbs.length - 2];
-  let to = prevRoute?.match.pathname;
-  return h(LinkButton, { to, icon: "arrow-left", minimal: true, small: true });
+  const runAction = useAppActions();
+  return h(Button, {
+    onClick() {
+      runAction({ type: "close-column-page" });
+    },
+    icon: "arrow-left",
+    minimal: true,
+    small: true,
+  });
 }
 
 function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
