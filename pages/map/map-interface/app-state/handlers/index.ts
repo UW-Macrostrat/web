@@ -18,7 +18,7 @@ import {
   findColumnsForLocation,
 } from "./columns";
 
-export default async function actionRunner(
+export async function actionRunner(
   state: AppState,
   action: AppAction,
   dispatch = null

@@ -2,7 +2,7 @@ import { AppAction, AppState, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "./handlers/filters";
 import { assembleColumnSummary } from "./handlers/columns";
-import { createInitialState, historyManager } from "./navigation";
+import { updateStateFromLocation, historyManager } from "./navigation";
 
 export { MapLayer };
 
@@ -76,17 +76,20 @@ const defaultState: CoreState = {
   },
 };
 
+export function createInitialState() {
+  return updateStateFromLocation(defaultState);
+}
+
 export function coreReducer(
   state: CoreState | null | undefined,
   action: AppAction
 ): CoreState {
-  if (state == null) return createInitialState(defaultState);
   switch (action.type) {
     case "initial-load-complete":
       return { ...state, initialLoadComplete: true, filters: action.filters };
     case "set-location":
       console.log("Setting location to", action.location);
-      return createInitialState(state, action.location);
+      return updateStateFromLocation(state, action.location);
     case "map-loading":
       if (state.mapIsLoading) return state;
       return { ...state, mapIsLoading: true };
@@ -398,20 +401,6 @@ export function buildFilters(filters: FilterData[], newFilters: FilterData[]) {
   });
 
   return [...remainingFilters, ...newFilters];
-}
-
-export default function appReducer(
-  state: AppState | undefined,
-  action: AppAction
-) {
-  // This might not be the right way to do hash management, but it
-  // centralizes the logic in one place.
-  const nextState = coreReducer(state, action);
-  if (action.type == "set-location") {
-    return nextState;
-  }
-  historyManager(state, nextState);
-  return nextState;
 }
 
 export * from "./hash-string";

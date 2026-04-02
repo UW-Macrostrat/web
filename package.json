@@ -159,7 +159,7 @@
     "vite-css-modules": "^1.11.1",
     "vite-plugin-cesium": "^1.2.23",
     "vite-plugin-cjs-interop": "^2.3.0",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.12"
   },
   "prettier": {
     "proseWrap": "always"

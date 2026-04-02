@@ -1,7 +1,7 @@
 import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import classNames from "classnames";
 import { matchPath } from "react-router";
-import { useAppState } from "./hooks";
+import { useAppState } from "./store.ts";
 import { AppState, MenuPage } from "./types";
 import { createBrowserHistory, type To, type Location } from "history";
 import { useCallback } from "react";
@@ -49,7 +49,7 @@ export function Link({ to, ...rest }: { to: To; children: React.ReactNode }) {
   return h("a", { href, ...rest });
 }
 
-export function createInitialState(
+export function updateStateFromLocation(
   baseState: AppState,
   location?: Location | null
 ): AppState {

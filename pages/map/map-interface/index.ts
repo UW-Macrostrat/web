@@ -2,13 +2,7 @@ import h from "@macrostrat/hyper";
 
 import "./searchbar.styl";
 
-import { Provider } from "react-redux";
-import { compose, createStore } from "redux";
-import reducerStack, {
-  AppAction,
-  AppState,
-  startRecordingAppHistory,
-} from "./app-state";
+import { startRecordingAppHistory, useAppActions } from "./app-state";
 import MapPage from "./map-page";
 import type { Update } from "history";
 import { browserHistory } from "./app-state";
@@ -19,14 +13,6 @@ import { useEffect } from "react";
  * state management solutions that work on individual pages.
  */
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-// Create the data store
-export const store = createStore<AppState, AppAction, any, any>(
-  reducerStack,
-  composeEnhancers()
-);
-
 function isAppUpdate(event: Update) {
   const { action, location } = event;
   if (action == "POP") return false;
@@ -34,20 +20,20 @@ function isAppUpdate(event: Update) {
   return false;
 }
 
-browserHistory.listen((event) => {
-  // Most location changes should be driven directly by the app.
-  console.log(event);
-  if (isAppUpdate(event)) return;
-  const { location } = event;
-  // Respond to unmanaged changes by updating app state to match new values
-  store.dispatch({ type: "set-location", location });
-});
-
 export default function MapApp() {
+  const runAction = useAppActions();
   useEffect(() => {
     console.log("Starting app history recording");
     startRecordingAppHistory();
+    browserHistory.listen((event) => {
+      // Most location changes should be driven directly by the app.
+      console.log(event);
+      if (isAppUpdate(event)) return;
+      const { location } = event;
+      // Respond to unmanaged changes by updating app state to match new values
+      runAction({ type: "set-location", location });
+    });
   }, []);
 
-  return h(Provider, { store }, h(MapPage));
+  return h(MapPage);
 }
