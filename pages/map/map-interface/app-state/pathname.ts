@@ -3,6 +3,31 @@ import { LineString } from "geojson";
 import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 
+function keyChangeDetector<T extends object>(keys: (keyof T)[]) {
+  return (state: T, nextState: T): boolean => {
+    for (const key of keys) {
+      if (state[key] !== nextState[key]) {
+        return true;
+      }
+    }
+    return false;
+  };
+}
+
+export const mayHavePathNameChange = keyChangeDetector<AppState>([
+  "infoMarkerPosition",
+  "crossSectionLine",
+  "activeMenuPage",
+  "isShowingColumnPage",
+]);
+
+export const mayHaveHashChange = keyChangeDetector<AppState>([
+  "infoMarkerPosition",
+  "mapPosition",
+  "mapLayers",
+  "filters",
+]);
+
 export function buildPathName(state: AppState): string | null {
   /** Set the pathname based on the current state. Only one of a location, cross-section line,
    * or active page can be selected at a time.

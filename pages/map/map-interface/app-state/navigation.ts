@@ -6,6 +6,12 @@ import { AppState, MenuPage } from "./types";
 import { createBrowserHistory, type To } from "history";
 import { useCallback } from "react";
 import h from "@macrostrat/hyper";
+import {
+  buildPathName,
+  mayHaveHashChange,
+  mayHavePathNameChange,
+} from "./pathname";
+import { buildHashString, getInitialStateFromHash } from "./hash-string";
 
 export const browserHistory = createBrowserHistory();
 
@@ -22,6 +28,51 @@ export function useNavigate() {
 export function Link({ to, children }: { to: To; children: React.ReactNode }) {
   //const href = browserHistory.createHref(to);
   return h("a", children);
+}
+
+export function createInitialState(baseState: AppState) {
+  const route = browserHistory.location;
+  const { pathname, hash } = route;
+
+  const isOpen = contextPanelIsInitiallyOpen(pathname);
+  const activeMenuPage = currentPageForPathName(pathname);
+  const s1 = setInfoMarkerPosition(baseState, pathname);
+  const [coreState, filters] = getInitialStateFromHash(s1, hash);
+
+  return {
+    ...s1,
+    ...coreState,
+    filtersInfo: filters,
+    menuOpen: isOpen,
+    contextPanelOpen: isOpen,
+    activeMenuPage,
+  };
+}
+
+export function historyManager(prevState: AppState, nextState: AppState): void {
+  /** Manages history for a given app state change */
+  if (prevState == undefined) return;
+
+  // check if they match current params
+  let to: To = {
+    pathname: browserHistory.location.pathname,
+    hash: browserHistory.location.hash,
+  };
+
+  if (mayHavePathNameChange(prevState, nextState)) {
+    to.pathname = buildPathName(nextState);
+  }
+  if (mayHaveHashChange(prevState, nextState)) {
+    to.hash = buildHashString(nextState);
+  }
+
+  // If only the hash changed, replace state
+  if (to.pathname != browserHistory.location.pathname) {
+    browserHistory.push(to);
+  } else if (to.hash != browserHistory.location.hash) {
+    // Replace hash directly to avoid pushing to history stack
+    browserHistory.replace({ hash: to.hash });
+  }
 }
 
 export function isDetailPanelRouteInternal(pathname: string) {

@@ -5,47 +5,7 @@ import {
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 import { buildQueryString, getHashString } from "@macrostrat/ui-components";
 import { Filter, FilterType } from "./handlers/filters";
-import {
-  AppAction,
-  AppState,
-  InfoMarkerPosition,
-  CoreState,
-  MapLayer,
-} from "./types";
-import type { To } from "history";
-import { buildPathName } from "./pathname";
-import { browserHistory } from "./navigation";
-
-export function hashStringReducer(
-  prevState: AppState,
-  nextState: AppState,
-  action: AppAction
-): void {
-  let url = buildPathName(nextState);
-  const hashString = buildHashString(nextState);
-
-  // check if they match current params
-  let to: To = {};
-
-  if (browserHistory.location.pathname !== url) {
-    to.pathname = url;
-  }
-  if (browserHistory.location.hash !== hashString) {
-    to.hash = hashString;
-  }
-
-  if (Object.keys(to).length === 0) {
-    // No changes to the URL are needed
-    return;
-  }
-
-  // If only the hash changed, replace state
-  if (to.pathname == null) {
-    browserHistory.replace(to);
-  } else {
-    browserHistory.push(to);
-  }
-}
+import { CoreState, InfoMarkerPosition, MapLayer } from "./types";
 
 interface HashParams {
   x?: string;
@@ -60,7 +20,7 @@ interface HashParams {
 //   return filter.id ?? filter.name;
 // }
 
-function buildHashString(state: CoreState): string {
+export function buildHashString(state: CoreState): string {
   let args: HashParams = {};
 
   // Get filter information from URI.

@@ -1,14 +1,8 @@
-import { getInitialStateFromHash, hashStringReducer } from "./hash-string";
 import { AppAction, AppState, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "./handlers/filters";
 import { assembleColumnSummary } from "./handlers/columns";
-import {
-  browserHistory,
-  contextPanelIsInitiallyOpen,
-  currentPageForPathName,
-  setInfoMarkerPosition,
-} from "./navigation";
+import { createInitialState, historyManager } from "./navigation";
 
 export { MapLayer };
 
@@ -81,31 +75,11 @@ const defaultState: CoreState = {
   },
 };
 
-function createInitialState() {
-  const route = browserHistory.location;
-  const { pathname, hash } = route;
-  console.log(pathname);
-
-  const isOpen = contextPanelIsInitiallyOpen(pathname);
-  const activeMenuPage = currentPageForPathName(pathname);
-  const s1 = setInfoMarkerPosition(defaultState, pathname);
-  const [coreState, filters] = getInitialStateFromHash(s1, hash);
-
-  return {
-    ...s1,
-    ...coreState,
-    filtersInfo: filters,
-    menuOpen: isOpen,
-    contextPanelOpen: isOpen,
-    activeMenuPage,
-  };
-}
-
 export function coreReducer(
   state: CoreState | null | undefined,
   action: AppAction
 ): CoreState {
-  if (state == null) return createInitialState();
+  if (state == null) return createInitialState(defaultState);
   switch (action.type) {
     case "initial-load-complete":
       return { ...state, initialLoadComplete: true, filters: action.filters };
@@ -426,7 +400,7 @@ export default function appReducer(
   // This might not be the right way to do hash management, but it
   // centralizes the logic in one place.
   const nextState = coreReducer(state, action);
-  hashStringReducer(state, nextState, action);
+  historyManager(state, nextState);
   return nextState;
 }
 

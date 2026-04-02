@@ -1,10 +1,10 @@
 import { CancelTokenSource } from "axios";
-import { AddFilter, FilterData, Filter } from "../handlers/filters";
+import { AddFilter, FilterData, Filter } from "./handlers/filters";
 import {
   ColumnGeoJSONRecord,
   ColumnProperties,
   ColumnSummary,
-} from "../handlers/columns";
+} from "./handlers/columns";
 import { UnitLong } from "@macrostrat/api-types";
 import { LineString } from "geojson";
 
