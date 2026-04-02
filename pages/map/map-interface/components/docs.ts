@@ -3,7 +3,7 @@ import { routerBasename } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import classNames from "classnames";
 import { useInView } from "react-intersection-observer";
-import { HashLink } from "react-router-hash-link";
+import { Link } from "../app-state/navigation";
 import { joinURL } from "@macrostrat/ui-components";
 import styles from "./docs.module.styl";
 
@@ -74,7 +74,7 @@ export function InternalLink({ to, children }) {
 
 export function NewSwatch({ children, version = 0 }) {
   return h(
-    HashLink,
+    Link,
     {
       to: routerBasename + `changelog#version-${version}`,
       className: "new-swatch",
