@@ -45,7 +45,10 @@ export function useNavigate() {
 }
 
 export function Link({ to, ...rest }: { to: To; children: React.ReactNode }) {
-  const href = browserHistory.createHref(to);
+  let href = null;
+  if (to != null) {
+    href = browserHistory.createHref(to);
+  }
   return h("a", { href, ...rest });
 }
 
