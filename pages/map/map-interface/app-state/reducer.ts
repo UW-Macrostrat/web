@@ -20,6 +20,7 @@ const classColors = {
 
 const defaultState: CoreState = {
   initialLoadComplete: false,
+  mapIsMoving: false,
   contextPanelOpen: false,
   allColumns: null,
   allColumnsCancelToken: null,
@@ -83,12 +84,15 @@ export function coreReducer(
   switch (action.type) {
     case "initial-load-complete":
       return { ...state, initialLoadComplete: true, filters: action.filters };
+    case "set-location":
+      console.log("Setting location to", action.location);
+      return createInitialState(state, action.location);
     case "map-loading":
       if (state.mapIsLoading) return state;
       return { ...state, mapIsLoading: true };
     case "map-idle":
       if (!state.mapIsLoading) return state;
-      return { ...state, mapIsLoading: false };
+      return { ...state, mapIsLoading: false, mapIsMoving: false };
     case "set-menu-page":
       return { ...state, activeMenuPage: action.page };
     case "map-layers-changed":
@@ -175,6 +179,7 @@ export function coreReducer(
           lat: action.lat,
         },
         fetchingMapInfo: true,
+        mapIsMoving: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
       };
@@ -296,6 +301,7 @@ export function coreReducer(
     case "map-moved":
       return {
         ...state,
+        mapIsMoving: false,
         ...action.data,
       };
     case "toggle-high-resolution-terrain":
@@ -400,6 +406,10 @@ export default function appReducer(
   // This might not be the right way to do hash management, but it
   // centralizes the logic in one place.
   const nextState = coreReducer(state, action);
+  if (action.type == "set-location") {
+    console.log(nextState);
+    return nextState;
+  }
   historyManager(state, nextState);
   return nextState;
 }

@@ -35,7 +35,7 @@ function MapView(props) {
 
 function useSingleEffect(callback, dependencies) {
   /** Use an effect that is guaranteed to be called only once per page.
-   * This is probably  hack for better state management */
+   * This is a hack for better state management */
   const hasRun = useRef(false);
   useEffect(() => {
     if (!hasRun.current) {

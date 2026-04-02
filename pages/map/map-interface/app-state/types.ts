@@ -9,6 +9,7 @@ import { UnitLong } from "@macrostrat/api-types";
 import { LineString } from "geojson";
 
 import type { MapPosition } from "@macrostrat/mapbox-utils";
+import type { Location } from "history";
 
 export enum MapLayer {
   SATELLITE = "satellite",
@@ -288,11 +289,17 @@ export enum MenuPage {
   EXPERIMENTS = "experiments",
 }
 
-export type AppAction = CoreAction | MapAction | MenuAction;
+type LocationAction = {
+  type: "set-location";
+  location: Location;
+};
+
+export type AppAction = CoreAction | MapAction | MenuAction | LocationAction;
 
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   contextPanelOpen: boolean;
+  mapIsMoving: boolean;
   menuOpen: boolean;
   aboutOpen: boolean;
   infoDrawerOpen: boolean;

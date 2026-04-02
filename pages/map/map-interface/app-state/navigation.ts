@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { matchPath } from "react-router";
 import { useAppState } from "./hooks";
 import { AppState, MenuPage } from "./types";
-import { createBrowserHistory, type To } from "history";
+import { createBrowserHistory, type To, type Location } from "history";
 import { useCallback } from "react";
 import h from "@macrostrat/hyper";
 import {
@@ -12,16 +12,29 @@ import {
   mayHavePathNameChange,
 } from "./pathname";
 import { buildHashString, getInitialStateFromHash } from "./hash-string";
+import { atom, useAtomValue } from "jotai";
 
 export const browserHistory = createBrowserHistory();
+// This sometimes gets called when the page isn't properly loaded yet,
+// so we have put in place a hacky guard...
+// We should do this within the component tree
+browserHistory.push({
+  pathname: routerBasename,
+  hash: window.location.hash,
+});
+
+const historyAtom = atom(browserHistory);
+
+export const useHistory = () => useAtomValue(historyAtom);
 
 export function useLocation() {
-  return browserHistory.location;
+  return useHistory().location;
 }
 
 export function useNavigate() {
+  const history = useHistory();
   return useCallback((req: To) => {
-    return browserHistory.push(req);
+    return history.push(req);
   }, []);
 }
 
@@ -30,10 +43,11 @@ export function Link({ to, children }: { to: To; children: React.ReactNode }) {
   return h("a", children);
 }
 
-export function createInitialState(baseState: AppState) {
-  const route = browserHistory.location;
-  const { pathname, hash } = route;
-
+export function createInitialState(
+  baseState: AppState,
+  location?: Location | null
+): AppState {
+  const { pathname, hash } = location ?? browserHistory.location;
   const isOpen = contextPanelIsInitiallyOpen(pathname);
   const activeMenuPage = currentPageForPathName(pathname);
   const s1 = setInfoMarkerPosition(baseState, pathname);
@@ -62,16 +76,16 @@ export function historyManager(prevState: AppState, nextState: AppState): void {
   if (mayHavePathNameChange(prevState, nextState)) {
     to.pathname = buildPathName(nextState);
   }
-  if (mayHaveHashChange(prevState, nextState)) {
+  if (mayHaveHashChange(prevState, nextState) && !nextState.mapIsMoving) {
     to.hash = buildHashString(nextState);
   }
 
   // If only the hash changed, replace state
   if (to.pathname != browserHistory.location.pathname) {
-    browserHistory.push(to);
+    browserHistory.push(to, { managed: true });
   } else if (to.hash != browserHistory.location.hash) {
     // Replace hash directly to avoid pushing to history stack
-    browserHistory.replace({ hash: to.hash });
+    browserHistory.push(to, { managed: true });
   }
 }
 
