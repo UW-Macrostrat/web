@@ -1,6 +1,5 @@
 import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import classNames from "classnames";
-import { matchPath } from "react-router";
 import { useAppState } from "./store.ts";
 import { AppState, MenuPage } from "./types";
 import { createBrowserHistory, type To, type Location } from "history";
@@ -13,6 +12,7 @@ import {
 } from "./pathname";
 import { buildHashString, getInitialStateFromHash } from "./hash-string";
 import { atom, useAtomValue } from "jotai";
+import partRegex from "part-regex";
 
 export const browserHistory = createBrowserHistory();
 // This sometimes gets called when the page isn't properly loaded yet,
@@ -175,20 +175,26 @@ export function useHashNavigate(to: string) {
   };
 }
 
+// Regex for one part of a spatial coordinate
+const coordRegex = /(-?\d+(?:\.\d+)?)/;
+
+const crossSectionPageURL = partRegex`${mapPagePrefix}/cross-section/${coordRegex},${coordRegex}/${coordRegex},${coordRegex}`;
+
+const locationPageURL = partRegex`${mapPagePrefix}/loc/${coordRegex}/${coordRegex}`;
+
 export function setInfoMarkerPosition(
   state: AppState,
   pathname: string | null = null
 ): AppState {
   // Check if we are viewing a specific location
-  const loc = matchPath(
-    mapPagePrefix + "/loc/:lng/:lat/*",
+  const match = locationPageURL.exec(
     pathname ?? browserHistory.location.pathname
   );
 
   let s1 = state;
 
-  if (loc != null) {
-    const { lng, lat } = loc.params;
+  if (match != null) {
+    const [_, lng, lat] = match;
     return {
       ...s1,
       infoMarkerPosition: { lng: Number(lng), lat: Number(lat) },
@@ -196,15 +202,16 @@ export function setInfoMarkerPosition(
     };
   }
 
-  // Check if we're viewing a cross-section
-  const crossSection = matchPath(
-    mapPagePrefix + "/cross-section/:loc1/:loc2",
+  const crossSectionMatch = crossSectionPageURL.exec(
     pathname ?? browserHistory.location.pathname
   );
-  if (crossSection != null) {
-    const { loc1, loc2 } = crossSection.params;
-    const [lng1, lat1] = loc1.split(",").map(Number);
-    const [lng2, lat2] = loc2.split(",").map(Number);
+
+  // Check if we're viewing a cross-section
+
+  if (crossSectionMatch != null) {
+    const [_, ...coords] = crossSectionMatch;
+    const coordsNumeric = coords.map(Number);
+    const [lng1, lat1, lng2, lat2] = coordsNumeric;
     if (lng1 != null && lat1 != null && lng2 != null && lat2 != null) {
       return {
         ...s1,

@@ -2272,20 +2272,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lagunovsky/redux-react-router@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "@lagunovsky/redux-react-router@npm:3.2.0"
-  peerDependencies:
-    history: ^5
-    react: ^16.8 || ^17 || ^18
-    react-dom: ^16.8 || ^17 || ^18
-    react-redux: ^6 || ^7 || ^8
-    react-router: ^6
-    redux: ^4
-  checksum: 10c0/ddca398ba076551c78ec72d8cf8fd91924f69359908d3df04f150a5ef78e04d13c10bde1fcd04c4875196a530e16c631be9d63299ea5757f19ccdc9d091b16eb
-  languageName: node
-  linkType: hard
-
 "@loadable/component@npm:^5.14.1":
   version: 5.16.7
   resolution: "@loadable/component@npm:5.16.7"
@@ -3108,7 +3094,6 @@ __metadata:
     "@blueprintjs/select": "npm:^6.0.14"
     "@blueprintjs/table": "npm:^6.0.14"
     "@corelle/svg-map-layers": "npm:^1.0.0"
-    "@lagunovsky/redux-react-router": "npm:^3.2.0"
     "@loadable/component": "npm:^5.14.1"
     "@macrostrat-web/column-builder": "workspace:*"
     "@macrostrat-web/globe": "workspace:*"
@@ -3168,7 +3153,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^5.1.2"
     "@yarnpkg/sdks": "npm:^3.1.0"
     allotment: "npm:^1.20.2"
-    axios: "npm:^1.13.2"
+    axios: "npm:^1.14.0"
     cesium: "npm:^1.135.0"
     chroma-js: "npm:^3.2.0"
     classnames: "npm:^2.2.6"
@@ -3206,9 +3191,7 @@ __metadata:
     react-redux: "npm:^7.2.0"
     react-router: "npm:^6.8.2"
     react-router-dom: "npm:^6.8.2"
-    react-router-hash-link: "npm:^2.4.3"
     recharts: "npm:^2.13.0"
-    reduce-reducers: "npm:^1.0.4"
     redux: "npm:^4.0.5"
     sass-embedded: "npm:^1.79.1"
     stylus: "npm:^0.55.0"
@@ -8291,7 +8274,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.12.2, axios@npm:^1.13.2, axios@npm:^1.7.9":
+"axios@npm:^1.12.2, axios@npm:^1.7.9":
   version: 1.13.4
   resolution: "axios@npm:1.13.4"
   dependencies:
@@ -8299,6 +8282,17 @@ __metadata:
     form-data: "npm:^4.0.4"
     proxy-from-env: "npm:^1.1.0"
   checksum: 10c0/474c00b7d71f4de4ad562589dae6b615149df7c2583bbc5ebba96229f3f85bfb0775d23705338df072f12e48d3e85685c065a3cf6855d58968a672d19214c728
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.13.2, axios@npm:^1.14.0":
+  version: 1.14.0
+  resolution: "axios@npm:1.14.0"
+  dependencies:
+    follow-redirects: "npm:^1.15.11"
+    form-data: "npm:^4.0.5"
+    proxy-from-env: "npm:^2.1.0"
+  checksum: 10c0/2541f4aa215a7d1842429dad006fc682d82bc0e74bd14500823f7d8cce3bbae0e0a8c328c8538946718f366ab8ce5a4c12e9ad40e5a0f3482ff8bff0cd115d45
   languageName: node
   linkType: hard
 
@@ -11577,7 +11571,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.6":
+"follow-redirects@npm:^1.15.11, follow-redirects@npm:^1.15.6":
   version: 1.15.11
   resolution: "follow-redirects@npm:1.15.11"
   peerDependenciesMeta:
@@ -11613,7 +11607,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^4.0.4":
+"form-data@npm:^4.0.4, form-data@npm:^4.0.5":
   version: 4.0.5
   resolution: "form-data@npm:4.0.5"
   dependencies:
@@ -15881,6 +15875,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"proxy-from-env@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "proxy-from-env@npm:2.1.0"
+  checksum: 10c0/ed01729fd4d094eab619cd7e17ce3698b3413b31eb102c4904f9875e677cd207392795d5b4adee9cec359dfd31c44d5ad7595a3a3ad51c40250e141512281c58
+  languageName: node
+  linkType: hard
+
 "psl@npm:^1.1.28":
   version: 1.15.0
   resolution: "psl@npm:1.15.0"
@@ -16669,18 +16670,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-hash-link@npm:^2.4.3":
-  version: 2.4.3
-  resolution: "react-router-hash-link@npm:2.4.3"
-  dependencies:
-    prop-types: "npm:^15.7.2"
-  peerDependencies:
-    react: ">=15"
-    react-router-dom: ">=4"
-  checksum: 10c0/19f400653de2cff6e2bdbebf09c33313579618422b9a746c085df1fd4f89dc7df6e012c4471bc05641d6ccf4e65bb66e1d53731f899dd753cca2d47ce67a3ff5
-  languageName: node
-  linkType: hard
-
 "react-router@npm:5.3.4, react-router@npm:^5.1.0":
   version: 5.3.4
   resolution: "react-router@npm:5.3.4"
@@ -17083,13 +17072,6 @@ __metadata:
   dependencies:
     balanced-match: "npm:^1.0.0"
   checksum: 10c0/7e844708d8c3d2946d3df5c537ee1e23c3c60c98ac0dbc724828f36d8d309c391a14995f47ce4f5ba84eea2df5c73d58e4ba100ba331af496920932421a322ed
-  languageName: node
-  linkType: hard
-
-"reduce-reducers@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "reduce-reducers@npm:1.0.4"
-  checksum: 10c0/94f7945bd86ce5e8d0f760a1552376daf4801207ce7e9e2b4a8b43e00ec33ce872aac19c506b835c75824d718f35d6b20b05c72315577dd8a8d177781dff927c
   languageName: node
   linkType: hard
 
