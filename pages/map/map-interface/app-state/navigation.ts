@@ -2,7 +2,7 @@ import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import classNames from "classnames";
 import { matchPath } from "react-router";
 import { useAppState } from "./hooks";
-import { AppState, MenuPage } from "./reducers/types";
+import { AppState, MenuPage } from "./types";
 import { createBrowserHistory, type To } from "history";
 import { useCallback } from "react";
 import h from "@macrostrat/hyper";

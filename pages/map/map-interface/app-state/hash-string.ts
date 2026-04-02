@@ -5,7 +5,7 @@ import {
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { format } from "d3-format";
-import { Filter, FilterType } from "../handlers/filters";
+import { Filter, FilterType } from "./handlers/filters";
 import {
   AppAction,
   AppState,

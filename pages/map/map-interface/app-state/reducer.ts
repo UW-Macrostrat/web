@@ -1,14 +1,14 @@
 import { getInitialStateFromHash, hashStringReducer } from "./hash-string";
 import { AppAction, AppState, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
-import { FilterData } from "../handlers/filters";
-import { assembleColumnSummary } from "../handlers/columns";
+import { FilterData } from "./handlers/filters";
+import { assembleColumnSummary } from "./handlers/columns";
 import {
   browserHistory,
   contextPanelIsInitiallyOpen,
   currentPageForPathName,
   setInfoMarkerPosition,
-} from "../navigation.ts";
+} from "./navigation";
 
 export { MapLayer };
 

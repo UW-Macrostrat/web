@@ -1,7 +1,7 @@
-import { AppAction } from "./reducers";
+import { AppAction } from "./reducer";
 import actionRunner from "./handlers";
 import { useStore, useSelector, useDispatch } from "react-redux";
-import { AppState } from ".";
+import { AppState } from "./types";
 import React, { useCallback } from "react";
 import { isCancel } from "axios";
 

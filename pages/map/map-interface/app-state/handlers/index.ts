@@ -1,5 +1,5 @@
 import axios from "axios";
-import { AppAction, AppState, MenuPage } from "../reducers";
+import { AppAction, AppState, MenuPage, MapLayer } from "../types";
 import {
   base,
   fetchAllColumns,
@@ -11,7 +11,6 @@ import {
 import { runFilter } from "./filters";
 
 import { LineString } from "geojson";
-import { MapLayer } from "../reducers/types";
 import {
   ColumnGeoJSONRecord,
   ColumnSummary,
