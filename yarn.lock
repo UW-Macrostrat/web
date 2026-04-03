@@ -3179,6 +3179,7 @@ __metadata:
     jose: "npm:^5.1.2"
     jotai: "npm:^2.15.1"
     jotai-location: "npm:^0.6.2"
+    jotai-zustand: "npm:^0.6.0"
     mapbox-gl: "npm:^3.13.0"
     new-github-issue-url: "npm:^1.0.0"
     part-regex: "npm:^0.1.2"
@@ -13259,6 +13260,15 @@ __metadata:
     jotai: ">=2.16.0"
     react: ">=16.0.0"
   checksum: 10c0/3f920059920d294dcaf7fe86c3919e909584f9fba8d5740161a11662bc0306b824346a0de1b62875a43dcd739cce19a314444c90c31e3368a505783b3046fe42
+  languageName: node
+  linkType: hard
+
+"jotai-zustand@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "jotai-zustand@npm:0.6.0"
+  peerDependencies:
+    jotai: ">=2.0.0"
+  checksum: 10c0/807ceced838731803057597834fa8670d30c19a734df43bbb09b6b49d228d3c014785f2556c49e91b355fadcf927005d1866260248e6f5706e2a805d4db1575f
   languageName: node
   linkType: hard
 

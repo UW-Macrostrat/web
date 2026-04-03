@@ -4,7 +4,11 @@ import { useCallback } from "react";
 import { AppAction, AppState } from "./types";
 import { historyManager } from "./navigation";
 import { coreReducer, createInitialState } from "./reducer";
-import { create } from "zustand";
+import { createStore } from "zustand/vanilla";
+import { devtools } from "zustand/middleware";
+import { useStore as useStoreInternal } from "zustand/react";
+import { atomWithStore } from "jotai-zustand";
+import { atom } from "jotai";
 
 export function appReducer(
   state: AppState | null | undefined,
@@ -26,38 +30,47 @@ export type StateGetter = (selector?: SelectorFn) => any;
 
 interface ZustandState {
   coreState: AppState;
-  dispatch: (nextState: AppState) => void;
+  dispatch: (action: AppAction) => void;
   getState: StateGetter;
   asyncDispatch: (action: AppAction) => Promise<void>;
 }
 
-export const useStore = create<ZustandState>((set, get) => {
-  const dispatch = (action: AppAction) =>
-    set((state: ZustandState) => {
-      return {
-        ...state,
-        coreState: appReducer(state.coreState, action),
-      };
-    });
+const store = createStore<ZustandState>(
+  devtools((set, get): ZustandState => {
+    const dispatch = (action: AppAction) =>
+      set((state: ZustandState) => {
+        return {
+          ...state,
+          coreState: appReducer(state.coreState, action),
+        };
+      });
 
-  const defaultSelector = (state: AppState) => state;
-  const getState = (selector: SelectorFn = defaultSelector) => {
-    return selector(get().coreState);
-  };
+    const defaultSelector = (state: AppState) => state;
+    const getState = (selector: SelectorFn = defaultSelector) => {
+      return selector(get().coreState);
+    };
 
-  return {
-    coreState: createInitialState(),
-    dispatch,
-    getState,
-    asyncDispatch: async (action: AppAction): Promise<void> => {
-      const newAction = await actionRunner(getState, action, dispatch);
-      if (newAction == undefined) {
-        return;
-      }
-      dispatch(newAction as AppAction);
-    },
-  };
-});
+    return {
+      coreState: createInitialState(),
+      dispatch,
+      getState,
+      asyncDispatch: async (action: AppAction): Promise<void> => {
+        const newAction = await actionRunner(getState, action, dispatch);
+        if (newAction == undefined) {
+          return;
+        }
+        dispatch(newAction as AppAction);
+      },
+    };
+  }) as any
+);
+
+const zustandStoreAtom = atomWithStore(store);
+const appStateAtom = atom((get) => get(zustandStoreAtom).coreState);
+
+export function useStore(selector) {
+  return useStoreInternal(store, selector);
+}
 
 export function useDispatch() {
   return useStore((store) => store.dispatch);
