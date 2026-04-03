@@ -61,18 +61,9 @@ export type MapLocation = {
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
-type MAP_QUERY = {
-  type: "do-map-query";
-  z: string | number;
-  map_id: any;
-  columns: ColumnProperties[] | null | undefined;
-} & MapLocation;
 
 type GET_COLUMN_UNITS = { type: "get-column-units"; column: ColumnProperties };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
-// Define constants to be passed with actions
-type RECIEVE_DATA = { type: "recieve-data" };
-type REQUEST_DATA = { type: "request-data" };
 
 type TOGGLE_MENU = { type: "toggle-menu" };
 type TOGGLE_ABOUT = { type: "toggle-about" };
@@ -89,7 +80,6 @@ type CLEAR_FILTERS = { type: "clear-filters" };
 
 type START_MAP_QUERY = {
   type: "start-map-query";
-  cancelToken: any;
 } & MapLocation;
 type RECEIVED_MAP_QUERY = { type: "received-map-query"; data: any };
 
@@ -207,14 +197,11 @@ export type CoreAction =
   | SET_SEARCH_TERM
   | GET_PBDB
   | GET_COLUMN_UNITS
-  | MAP_QUERY
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
   | FETCH_SEARCH_QUERY
   | CONTEXT_OUTSIDE_CLICK
-  | RECIEVE_DATA
-  | REQUEST_DATA
   | TOGGLE_MENU
   | TOGGLE_ABOUT
   | EXPAND_INFODRAWER
@@ -223,7 +210,6 @@ export type CoreAction =
   | REMOVE_FILTER
   | UPDATE_COLUMN_FILTERS
   | START_MAP_QUERY
-  | RECEIVED_MAP_QUERY
   | START_COLUMN_QUERY
   | RECEIVED_COLUMN_QUERY
   | START_PBDB_QUERY
@@ -255,13 +241,11 @@ export type CoreAction =
 interface AsyncRequestState {
   // Events and tokens for xhr
   // NOTE: we should really improve some of this token infrastructure
-  fetchingMapInfo: boolean;
   fetchingColumnInfo: boolean;
   isSearching: boolean;
   term: string;
   fetchingElevation: boolean;
   fetchingPbdb: boolean;
-  mapInfoCancelToken: CancelTokenSource | null;
   columnInfoCancelToken: CancelTokenSource | null;
   searchCancelToken: CancelTokenSource | null;
   elevationCancelToken: CancelTokenSource | null;
@@ -309,7 +293,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   crossSectionLine: LineString | null;
   crossSectionCursorLocation: any;
   infoMarkerPosition: InfoMarkerPosition;
-  mapInfo: any[];
   timeCursorAge: number | null;
   plateModelId: number | null;
   focusedMapSource: number | null;

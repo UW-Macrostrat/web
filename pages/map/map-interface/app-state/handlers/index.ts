@@ -6,7 +6,6 @@ import {
   fetchFilteredColumns,
   getPBDBData,
   runColumnQuery,
-  runMapQuery,
 } from "./fetch";
 import { runFilter } from "./filters";
 
@@ -54,20 +53,21 @@ export async function actionRunner(
       });
 
       const state = getState();
-      if (state.infoMarkerPosition != null) {
-        console.log("Setting info marker position");
-        runAsyncAction(
-          getState,
-          {
-            type: "do-map-query",
-            z: state.mapPosition.target?.zoom ?? 7,
-            ...state.infoMarkerPosition,
-            map_id: null,
-            columns: null,
-          },
-          dispatch
-        ).then(() => {});
-      }
+      // const state = getState();
+      // if (state.infoMarkerPosition != null) {
+      //   console.log("Setting info marker position");
+      //   runAsyncAction(
+      //     getState,
+      //     {
+      //       type: "do-map-query",
+      //       z: state.mapPosition.target?.zoom ?? 7,
+      //       ...state.infoMarkerPosition,
+      //       map_id: null,
+      //       columns: null,
+      //     },
+      //     dispatch
+      //   ).then(() => {});
+      // }
       // Apply all filters in parallel
       const filters = await Promise.all(
         state.filtersInfo.map((f) => {
@@ -171,42 +171,23 @@ export async function actionRunner(
     case "get-filtered-columns":
       const filters = getState((state) => state.filters);
       return await fetchFilteredColumns(filters);
-    case "do-map-query":
-      const { lng, lat, z, map_id } = action;
-      // Get column data from the map action if it is provided.
-      // This saves us from having to filter the columns more inefficiently
-      let CancelTokenMapQuery = axios.CancelToken;
-      let sourceMapQuery = CancelTokenMapQuery.source();
-      const coreState = getState();
-      if (coreState.inputFocus && coreState.contextPanelOpen) {
-        // Dismiss the current context panel
-        return { type: "context-outside-click" };
-      }
-
-      dispatch({
-        type: "start-map-query",
-        lng,
-        lat,
-        cancelToken: sourceMapQuery,
-      });
-
-      // Run a bunch of async queries in ~parallel
-      runMapQuery(lng, lat, z, map_id, sourceMapQuery.token)
-        .then((res) => {
-          dispatch({ type: "received-map-query", data: res });
-        })
-        .catch((err) => {
-          console.log(err);
-          console.log("Error running map query");
-        });
-
-      fetchColumnInfo(
-        { lng, lat, columns: action.columns },
-        coreState.allColumns,
-        coreState.columnInfo,
-        dispatch
-      );
-      return;
+    // case "do-map-query":
+    //   const { lng, lat, z, map_id } = action;
+    //   // Get column data from the map action if it is provided.
+    //   // This saves us from having to filter the columns more inefficiently
+    //   const coreState = getState();
+    //   if (coreState.inputFocus && coreState.contextPanelOpen) {
+    //     // Dismiss the current context panel
+    //     return { type: "context-outside-click" };
+    //   }
+    //
+    //   fetchColumnInfo(
+    //     { lng, lat, columns: action.columns },
+    //     coreState.allColumns,
+    //     coreState.columnInfo,
+    //     dispatch
+    //   );
+    //   return;
     case "get-pbdb":
       let collection_nos = action.collection_nos;
       dispatch({ type: "start-pdbd-query" });

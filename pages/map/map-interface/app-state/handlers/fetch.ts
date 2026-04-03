@@ -1,14 +1,13 @@
-import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
+import { apiV2Prefix, SETTINGS } from "@macrostrat-web/settings";
 import axios from "axios";
 import { joinURL } from "@macrostrat/ui-components";
 import { ColumnGeoJSONRecord } from "./columns";
 import { UPDATE_COLUMN_FILTERS } from "../types";
+import { FilterType } from "./filters";
 
 export const base = apiV2Prefix;
 const pbdbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
 const pbdbURLOccs = `${SETTINGS.pbdbDomain}/data1.2/occs/list.json`;
-
-import { FilterType } from "./filters";
 
 type PossibleFields = {
   [Property in FilterType]: string[];
@@ -73,14 +72,6 @@ export async function fetchFilteredColumns(
   };
 }
 
-function addMapIdToRef(data) {
-  data.success.data.mapData = data.success.data.mapData.map((source) => {
-    source.ref.map_id = source.map_id;
-    return source;
-  });
-  return data;
-}
-
 export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {
   let res = await axios.get(joinURL(base, "columns"), {
     responseType: "json",
@@ -88,32 +79,6 @@ export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {
   });
 
   return res.data.features;
-}
-
-export async function runMapQuery(lng, lat, z, map_id, cancelToken) {
-  const params = { lng, lat, z, map_id };
-  let url = base + "/mobile/map_query_v2";
-  console.log("Running map query");
-  let res = await axios.get(url, { cancelToken, responseType: "json", params });
-  let data = addMapIdToRef(res.data).success.data;
-
-  // if (data.hasColumns) {
-  //   // TODO: fix this...
-  //   // Somewhat ridiculously, we need to run a separate query to get the
-  //   // column ID, because the map query doesn't return it.
-  //   // This needs to get a lot better.
-  //   const pointData = await axios.get(base + "/mobile/point", {
-  //     params: {
-  //       lng,
-  //       lat,
-  //       z,
-  //     },
-  //   });
-  //   const col_id = pointData.data.success.data.col_id;
-  //   data.col_id = col_id;
-  // }
-
-  return data;
 }
 
 export async function runColumnQuery(column, cancelToken) {
