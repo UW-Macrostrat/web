@@ -1,14 +1,13 @@
-import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
+import { apiV2Prefix, SETTINGS } from "@macrostrat-web/settings";
 import axios from "axios";
 import { joinURL } from "@macrostrat/ui-components";
 import { ColumnGeoJSONRecord } from "./columns";
 import { UPDATE_COLUMN_FILTERS } from "../types";
+import { FilterType } from "./filters";
 
 export const base = apiV2Prefix;
 const pbdbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
 const pbdbURLOccs = `${SETTINGS.pbdbDomain}/data1.2/occs/list.json`;
-
-import { FilterType } from "./filters";
 
 type PossibleFields = {
   [Property in FilterType]: string[];
@@ -71,14 +70,6 @@ export async function fetchFilteredColumns(
     type: "update-column-filters",
     columns: res.data.features,
   };
-}
-
-export function addMapIdToRef(data) {
-  data.success.data.mapData = data.success.data.mapData.map((source) => {
-    source.ref.map_id = source.map_id;
-    return source;
-  });
-  return data;
 }
 
 export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {

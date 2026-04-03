@@ -1,22 +1,10 @@
-import { AppAction, AppState, CoreState, MapLayer } from "./types";
+import { AppAction, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "./handlers/filters";
 import { assembleColumnSummary } from "./handlers/columns";
-import { updateStateFromLocation, historyManager } from "./navigation";
+import { updateStateFromLocation } from "./navigation";
 
 export { MapLayer };
-
-const classColors = {
-  sedimentary: "#FF8C00",
-  metamorphic: "#8B4513",
-  igneous: "#9F1D0F",
-  marine: "#047BFF",
-  "non-marine": "#A67A45",
-  "precious commodity": "#FDFDFC",
-  material: "#777777",
-  water: "#00CCFF",
-  energy: "#333333",
-};
 
 const defaultState: CoreState = {
   initialLoadComplete: false,
@@ -303,58 +291,6 @@ export function coreReducer(
     default:
       return state;
   }
-}
-
-export function preprocessMapData(mapData: any) {
-  /** Preprocess map data types */
-  if (mapData == null) return null;
-  return mapData.map((source) => {
-    if (source.macrostrat) {
-      if (source.macrostrat.liths) {
-        let types = {};
-
-        source.macrostrat.liths.forEach((lith) => {
-          if (!types[lith.lith_type]) {
-            types[lith.lith_type] = {
-              name: lith.lith_type,
-              color: classColors[lith.lith_class],
-            };
-          }
-        });
-        source.macrostrat.lith_types = Object.keys(types).map((l) => types[l]);
-      }
-      if (source.macrostrat.environs) {
-        let types = {};
-
-        source.macrostrat.environs.forEach((environ) => {
-          if (!types[environ.environ_type]) {
-            types[environ.environ_type] = {
-              name: environ.environ_type,
-              color: classColors[environ.environ_class],
-            };
-          }
-        });
-        source.macrostrat.environ_types = Object.keys(types).map(
-          (l) => types[l]
-        );
-      }
-      if (source.macrostrat.econs) {
-        let types = {};
-
-        source.macrostrat.econs.forEach((econ) => {
-          if (!types[econ.econ_type]) {
-            types[econ.econ_type] = {
-              name: econ.econ_type,
-              color: classColors[econ.econ_class],
-            };
-          }
-        });
-        source.macrostrat.econ_types = Object.keys(types).map((l) => types[l]);
-      }
-    }
-
-    return source;
-  });
 }
 
 function isTheSame(f: FilterData, newFilter: FilterData) {

@@ -1,14 +1,8 @@
-import { atomWithStore } from "jotai-zustand";
 import { atom } from "jotai";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { store } from "./store.ts";
+import { appStateAtom } from "./store.ts";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
-import { addMapIdToRef } from "./handlers/fetch.ts";
 import { loadable } from "jotai/utils";
-import { preprocessMapData } from "./reducer.ts";
-
-const zustandStoreAtom = atomWithStore(store);
-const appStateAtom = atom((get) => get(zustandStoreAtom).coreState);
 
 const infoMarkerPositionAtom = atom((get) => {
   const appState = get(appStateAtom);
@@ -43,14 +37,82 @@ const mapInfoDataAtom = atom<Promise<MapQueryData>>(async (get, { signal }) => {
 
   const response = await fetch(url, { signal });
   const res: MapQueryResponse = await response.json();
-  const res1 = addMapIdToRef(res).success.data;
-  return {
-    ...res1,
-    mapData: preprocessMapData(res1.mapData),
-  };
+  return preprocessMapResponse(res);
 });
 
 export const mapInfoAtom = loadable(mapInfoDataAtom);
+
+const classColors = {
+  sedimentary: "#FF8C00",
+  metamorphic: "#8B4513",
+  igneous: "#9F1D0F",
+  marine: "#047BFF",
+  "non-marine": "#A67A45",
+  "precious commodity": "#FDFDFC",
+  material: "#777777",
+  water: "#00CCFF",
+  energy: "#333333",
+};
+
+function preprocessMapResponse(res: MapQueryResponse): MapQueryData {
+  const data = res.success.data;
+  return {
+    ...data,
+    mapData: data.mapData.map(preprocessMapSource),
+  };
+}
+
+function preprocessMapSource(source: MapData): MapData {
+  // Add map_id to each reference
+  source.ref.map_id = source.map_id;
+
+  if (source.macrostrat == null) {
+    return source;
+  }
+
+  if (source.macrostrat.liths) {
+    let types = {};
+
+    source.macrostrat.liths.forEach((lith) => {
+      if (!types[lith.lith_type]) {
+        types[lith.lith_type] = {
+          name: lith.lith_type,
+          color: classColors[lith.lith_class],
+        };
+      }
+    });
+    source.macrostrat.lith_types = Object.keys(types).map((l) => types[l]);
+  }
+
+  if (source.macrostrat.environs) {
+    let types = {};
+
+    source.macrostrat.environs.forEach((environ) => {
+      if (!types[environ.environ_type]) {
+        types[environ.environ_type] = {
+          name: environ.environ_type,
+          color: classColors[environ.environ_class],
+        };
+      }
+    });
+    source.macrostrat.environ_types = Object.keys(types).map((l) => types[l]);
+  }
+  if (source.macrostrat.econs) {
+    let types = {};
+
+    source.macrostrat.econs.forEach((econ) => {
+      if (!types[econ.econ_type]) {
+        types[econ.econ_type] = {
+          name: econ.econ_type,
+          color: classColors[econ.econ_class],
+        };
+      }
+    });
+    source.macrostrat.econ_types = Object.keys(types).map((l) => types[l]);
+  }
+
+  return source;
+}
 
 /** TODO: move these types to @macrostrat/api-types */
 
@@ -63,6 +125,7 @@ interface Reference {
   ref_year: string;
   ref_source: string;
   isbn_doi: string;
+  map_id?: number;
 }
 
 interface Lithology {
