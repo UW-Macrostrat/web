@@ -19,6 +19,7 @@ function InfoDrawer(props) {
   const isShowingColumnPage = useAppState((state) => state.isShowingColumnPage);
   const mapInfo = useAppState((state) => state.mapInfo);
   const fetchingMapInfo = useAppState((state) => state.fetchingMapInfo);
+  const mapInfoIsLoaded = mapInfo != null && !fetchingMapInfo;
 
   const runAction = useAppActions();
 
@@ -55,7 +56,7 @@ function InfoDrawer(props) {
       },
       h(
         LoadingArea,
-        { loaded: !fetchingMapInfo, className: "infodrawer-content" },
+        { loaded: mapInfoIsLoaded, className: "infodrawer-content" },
         content
       )
     )
