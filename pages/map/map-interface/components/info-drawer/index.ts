@@ -47,7 +47,7 @@ function InfoDrawerInner(props) {
 
   useAtomDevtools(mapInfoAtom);
 
-  const mapInfo = useAtomValue(mapInfoDataAtom);
+  const mapInfo = useAtomValue(mapInfoAtom);
   useEffect(() => {
     console.log("mapInfo changed", mapInfo);
   }, [mapInfo]);
@@ -95,15 +95,15 @@ function InfoDrawerContent() {
   if (isShowingColumnPage) {
     return h(StratColumn, { columnInfo });
   } else {
-    return h(InfoDrawerMainPanel, { mapInfo, columnInfo });
+    return h(InfoDrawerMainPanel, {
+      mapInfo,
+      columnInfo,
+    });
   }
 }
 
 function InfoDrawerMainPanel({ mapInfo, columnInfo }) {
-  if (!mapInfo || !mapInfo.mapData) {
-    return null;
-  }
-
+  if (mapInfo == null) return null;
   const { mapData } = mapInfo;
 
   const matchedStratNames = mapData?.[0]?.macrostrat?.strat_names ?? [];
@@ -131,6 +131,7 @@ function InfoDrawerMainPanel({ mapInfo, columnInfo }) {
       source,
       expanded: true,
     }),
+    // Found the culprit!
     h.if(terms.length > 0)(XddExpansionContainer, { terms }),
     h(Physiography, { mapInfo }),
   ]);

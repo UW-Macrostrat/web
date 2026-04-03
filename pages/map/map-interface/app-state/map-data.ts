@@ -20,25 +20,34 @@ export const mapZoomAtom = atom((get) => {
   return Math.round(zoom);
 });
 
-const mapInfoDataAtom = atom<Promise<MapQueryData>>(async (get, { signal }) => {
-  /** Atom to handle fetching of map data */
-  const { lng, lat } = get(infoMarkerPositionAtom);
-  const z = get(mapZoomAtom);
-  const params = {
-    lng: formatCoordForZoomLevel(lng, z),
-    lat: formatCoordForZoomLevel(lat, z),
-    z: z.toFixed(0),
-    //map_id: null,
-  };
+interface KeyedMapQueryData extends MapQueryData {
+  key: string;
+}
 
-  const queryParams = new URLSearchParams(params).toString();
+const mapInfoDataAtom = atom<Promise<KeyedMapQueryData>>(
+  async (get, { signal }) => {
+    /** Atom to handle fetching of map data */
+    const { lng, lat } = get(infoMarkerPositionAtom);
+    const z = get(mapZoomAtom);
+    const params = {
+      lng: formatCoordForZoomLevel(lng, z),
+      lat: formatCoordForZoomLevel(lat, z),
+      z: z.toFixed(0),
+      //map_id: null,
+    };
 
-  let url = apiV2Prefix + "/mobile/map_query_v2?" + queryParams;
+    const queryParams = new URLSearchParams(params).toString();
 
-  const response = await fetch(url, { signal });
-  const res: MapQueryResponse = await response.json();
-  return preprocessMapResponse(res);
-});
+    let url = apiV2Prefix + "/mobile/map_query_v2?" + queryParams;
+
+    const response = await fetch(url, { signal });
+    const res: MapQueryResponse = await response.json();
+    return {
+      key: queryParams,
+      ...preprocessMapResponse(res),
+    };
+  }
+);
 
 export const mapInfoAtom = loadable(mapInfoDataAtom);
 
