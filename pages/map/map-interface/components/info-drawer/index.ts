@@ -11,15 +11,23 @@ import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 
 import h from "./main.module.sass";
 import classNames from "classnames";
+import { mapInfoAtom } from "../../app-state";
+import { useAtomValue } from "jotai";
 
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
   const { className } = props;
   const isShowingColumnPage = useAppState((state) => state.isShowingColumnPage);
-  const mapInfo = useAppState((state) => state.mapInfo);
-  const fetchingMapInfo = useAppState((state) => state.fetchingMapInfo);
-  const mapInfoIsLoaded = mapInfo != null && !fetchingMapInfo;
+
+  const mapInfoRes = useAtomValue(mapInfoAtom);
+
+  const mapInfoIsLoaded = mapInfoRes.state == "hasData";
+  const fetchingMapInfo = mapInfoRes.state == "loading";
+  console.log(mapInfoRes.data);
+  const mapInfo = mapInfoRes.data;
+
+  //const mapInfo = useAppState((state) => state.mapInfo);
 
   const runAction = useAppActions();
 
@@ -47,7 +55,7 @@ function InfoDrawer(props) {
       {
         className: classNames("info-drawer", className),
         position,
-        elevation: mapInfo.elevation,
+        elevation: mapInfo?.elevation,
         zoom,
         onClose,
         loading: fetchingMapInfo,

@@ -7,8 +7,6 @@ import { coreReducer, createInitialState } from "./reducer";
 import { createStore } from "zustand/vanilla";
 import { devtools } from "zustand/middleware";
 import { useStore as useStoreInternal } from "zustand/react";
-import { atomWithStore } from "jotai-zustand";
-import { atom } from "jotai";
 
 export function appReducer(
   state: AppState | null | undefined,
@@ -35,7 +33,7 @@ interface ZustandState {
   asyncDispatch: (action: AppAction) => Promise<void>;
 }
 
-const store = createStore<ZustandState>(
+export const store = createStore<ZustandState>(
   devtools((set, get): ZustandState => {
     const dispatch = (action: AppAction) =>
       set((state: ZustandState) => {
@@ -65,15 +63,8 @@ const store = createStore<ZustandState>(
   }) as any
 );
 
-const zustandStoreAtom = atomWithStore(store);
-const appStateAtom = atom((get) => get(zustandStoreAtom).coreState);
-
 export function useStore(selector) {
   return useStoreInternal(store, selector);
-}
-
-export function useDispatch() {
-  return useStore((store) => store.dispatch);
 }
 
 export function useAppActions(): (action: AppAction) => Promise<void> {

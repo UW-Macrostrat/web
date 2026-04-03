@@ -73,7 +73,7 @@ export async function fetchFilteredColumns(
   };
 }
 
-function addMapIdToRef(data) {
+export function addMapIdToRef(data) {
   data.success.data.mapData = data.success.data.mapData.map((source) => {
     source.ref.map_id = source.map_id;
     return source;
