@@ -7,6 +7,7 @@ import { usePageProps } from "~/renderer/usePageProps";
 import { useState } from "react";
 import { Allotment } from "allotment";
 import { MapSelectedFeatures } from "./details-panel";
+import { useData } from "vike-react/useData";
 import "allotment/dist/style.css";
 
 const h = hyper.styled(styles);
@@ -23,11 +24,14 @@ interface EditInterfaceProps {
 export function Page() {
   const { source_id, source, mapBounds, ingestProcess }: EditInterfaceProps =
     usePageProps();
-  const title = source.name;
+
+  const { mapInfo, geometry } = useData();
 
   const headerProps = {
-    title,
     ingestProcess,
+    title: mapInfo.name,
+    identifier: mapInfo.source_id,
+    slug: mapInfo.slug,
     sourceURL: source.url,
   };
 
@@ -40,6 +44,7 @@ export function Page() {
     mapSelectedFeatures != null && mapSelectedFeatures.length > 0;
 
   return h("div.page", [
+    // TODO: make this header part of a layout component once we've figured out its semantics
     h(Header, headerProps),
     h("div.ingestion-main-panel", [
       h("div.context-panel", [h(EditMenu, { parentRoute: basename })]),

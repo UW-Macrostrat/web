@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { xDDExpansionPanel, XDDSnippet } from "@macrostrat/data-components";
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import fetch from "cross-fetch";
 import { gddDomain } from "@macrostrat-web/settings";
@@ -35,23 +35,4 @@ export function XddExpansionContainer(props) {
     isFetching: res.state === "loading",
     className: null,
   });
-}
-
-async function abortableFetch(url: URL | string) {
-  // Create an AbortController for this request
-  const controller = new AbortController();
-  const signal = controller.signal;
-
-  // Schedule abortion if the atom re-evaluates (dependency change)
-  // Note: Jotai cleans up async atoms automatically when they are no longer used
-
-  try {
-    const response = await fetch(url, { signal });
-    return await response.json();
-  } catch (error) {
-    if (error.name === "AbortError") {
-      console.log(`Request to ${url} was aborted.`);
-    }
-    throw error;
-  }
 }

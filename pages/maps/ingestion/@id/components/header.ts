@@ -32,11 +32,9 @@ export function Header({
   }, []);
 
   return h("div.header", [
-    h(PageBreadcrumbs),
+    h(PageBreadcrumbs, { separateTitle: true }),
     h("div.edit-page-header", [
-      h("h2", "Map ingestion"),
       h("div", [
-        h("h3.map-name", title),
         h(IngestTagDisplay, {
           ingestProcess: ingestProcess,
           onUpdate: () => {},
