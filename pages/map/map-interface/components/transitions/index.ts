@@ -4,13 +4,13 @@ import { Spinner } from "@blueprintjs/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export function LoadingArea(props) {
-  const { loaded, children, className } = props;
+  const { loading, children, className } = props;
   //const trans = useTransition(loaded, 500);
 
-  const _className = classNames("loading-area", className); //, trans.stage);
+  const _className = classNames("loading-area", className, { loading }); //, trans.stage);
 
   let spinner = null;
-  if (!loaded) {
+  if (loading) {
     spinner = h("div.spinner", null, h(Spinner));
   }
 

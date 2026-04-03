@@ -19,10 +19,11 @@ import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
 
 import h from "./main.module.sass";
 import { MacrostratDataProvider } from "@macrostrat/data-provider";
+import InfoDrawer from "../components/info-drawer";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const Menu = loadable(() => import("./menu"));
-const InfoDrawer = loadable(() => import("../components/info-drawer"));
+//const InfoDrawer = loadable(() => import("../components/info-drawer"));
 
 function MapView(props) {
   return h(
@@ -121,8 +122,6 @@ function InfoDrawerHolder() {
   // We could probably do this in the reducer...
   const infoDrawerOpen = useAppState((s) => s.infoDrawerOpen);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
-  const position = useAppState((state) => state.infoMarkerPosition);
-  const zoom = useAppState((state) => state.mapPosition.target?.zoom);
 
   // For fossil click
   const pbdbData = useAppState((state) => state.pbdbData);
@@ -145,10 +144,9 @@ function InfoDrawerHolder() {
     ]);
   }
 
-  return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-    position,
-    zoom,
-  });
+  if (!infoDrawerOpen) return null;
+
+  return h(InfoDrawer);
 
   // return h([
   //   // This is essentially a shim implementation of React Router

@@ -4,17 +4,17 @@ import { appStateAtom } from "./store.ts";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 import { loadable } from "jotai/utils";
 
-const infoMarkerPositionAtom = atom((get) => {
+export const infoMarkerPositionAtom = atom((get) => {
   const appState = get(appStateAtom);
   return appState.infoMarkerPosition;
 });
 
-const mapPositionAtom = atom((get) => {
+export const mapPositionAtom = atom((get) => {
   const appState = get(appStateAtom);
   return appState.mapPosition;
 });
 
-const mapZoomAtom = atom((get) => {
+export const mapZoomAtom = atom((get) => {
   const mapPosition = get(mapPositionAtom);
   const zoom = mapPosition.target?.zoom ?? 7;
   return Math.round(zoom);
