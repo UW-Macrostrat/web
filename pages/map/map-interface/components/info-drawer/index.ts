@@ -24,10 +24,7 @@ function InfoDrawer(props) {
 
   const mapInfoIsLoaded = mapInfoRes.state == "hasData";
   const fetchingMapInfo = mapInfoRes.state == "loading";
-  console.log(mapInfoRes.data);
   const mapInfo = mapInfoRes.data;
-
-  //const mapInfo = useAppState((state) => state.mapInfo);
 
   const runAction = useAppActions();
 

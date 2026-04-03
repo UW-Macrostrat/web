@@ -5,6 +5,7 @@ import { store } from "./store.ts";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 import { addMapIdToRef } from "./handlers/fetch.ts";
 import { loadable } from "jotai/utils";
+import { preprocessMapData } from "./reducer.ts";
 
 const zustandStoreAtom = atomWithStore(store);
 const appStateAtom = atom((get) => get(zustandStoreAtom).coreState);
@@ -19,15 +20,20 @@ const mapPositionAtom = atom((get) => {
   return appState.mapPosition;
 });
 
+const mapZoomAtom = atom((get) => {
+  const mapPosition = get(mapPositionAtom);
+  const zoom = mapPosition.target?.zoom ?? 7;
+  return Math.round(zoom);
+});
+
 const mapInfoDataAtom = atom<Promise<MapQueryData>>(async (get, { signal }) => {
   /** Atom to handle fetching of map data */
   const { lng, lat } = get(infoMarkerPositionAtom);
-  const mapPosition = get(mapPositionAtom);
-  const z = mapPosition.target?.zoom ?? 7;
+  const z = get(mapZoomAtom);
   const params = {
-    z: z.toFixed(0),
     lng: formatCoordForZoomLevel(lng, z),
     lat: formatCoordForZoomLevel(lat, z),
+    z: z.toFixed(0),
     //map_id: null,
   };
 
@@ -37,7 +43,11 @@ const mapInfoDataAtom = atom<Promise<MapQueryData>>(async (get, { signal }) => {
 
   const response = await fetch(url, { signal });
   const res: MapQueryResponse = await response.json();
-  return addMapIdToRef(res).success.data;
+  const res1 = addMapIdToRef(res).success.data;
+  return {
+    ...res1,
+    mapData: preprocessMapData(res1.mapData),
+  };
 });
 
 export const mapInfoAtom = loadable(mapInfoDataAtom);

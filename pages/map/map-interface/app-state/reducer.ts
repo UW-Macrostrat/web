@@ -37,8 +37,6 @@ const defaultState: CoreState = {
   },
   // Events and tokens for xhr
   isFetching: false,
-  fetchingMapInfo: false,
-  mapInfoCancelToken: null,
   fetchingColumnInfo: false,
   columnInfoCancelToken: null,
   isSearching: false,
@@ -48,7 +46,6 @@ const defaultState: CoreState = {
   fetchingElevation: false,
   elevationCancelToken: null,
   fetchingPbdb: false,
-  mapInfo: [],
   columnInfo: null,
   searchResults: null,
   pbdbData: [],
@@ -172,33 +169,14 @@ export function coreReducer(
       // if (state.inputFocus) {
       //   return { ...state, inputFocus: false };
       // }
-      if (
-        state.mapInfoCancelToken &&
-        state.mapInfoCancelToken != action.cancelToken
-      ) {
-        state.mapInfoCancelToken.cancel();
-      }
+      console.log("Starting map query", action);
       return {
         ...state,
         infoMarkerPosition: {
           lng: action.lng,
           lat: action.lat,
         },
-        fetchingMapInfo: true,
         mapIsMoving: true,
-        infoDrawerOpen: true,
-        mapInfoCancelToken: action.cancelToken,
-      };
-    case "received-map-query":
-      const mapInfo = {
-        ...action.data,
-        mapData: preprocessMapData(action.data?.mapData),
-      };
-      return {
-        ...state,
-        fetchingMapInfo: false,
-        mapInfo,
-        mapInfoCancelToken: null,
         infoDrawerOpen: true,
       };
     case "start-column-query":
@@ -327,7 +305,7 @@ export function coreReducer(
   }
 }
 
-function preprocessMapData(mapData: any) {
+export function preprocessMapData(mapData: any) {
   /** Preprocess map data types */
   if (mapData == null) return null;
   return mapData.map((source) => {

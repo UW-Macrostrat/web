@@ -182,12 +182,9 @@ function useMapClickHandler(pbdbPoints) {
         });
 
       runAction({
-        type: "do-map-query",
+        type: "start-map-query",
         lng: event.lngLat.lng,
         lat: event.lngLat.lat,
-        z: map.getZoom(),
-        columns,
-        map_id: null,
       });
     },
     [mapRef.current, mapLayers, crossSectionLine]
