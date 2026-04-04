@@ -90,8 +90,6 @@ export function MapInterface({
   inspectPosition,
   setInspectPosition,
 }) {
-  const [isOpen, setOpen] = useState(false);
-
   // Catch empty map data
   if (map == null || Object.keys(map.geometry).length == 0) {
     return h(

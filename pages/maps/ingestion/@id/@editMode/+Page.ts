@@ -1,18 +1,15 @@
 import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
 import { ErrorBoundary, useStoredState } from "@macrostrat/ui-components";
 import { BasePage } from "~/layouts";
 import { Header, MapInterface } from "../components";
-import styles from "./main.module.sass";
+import h from "./main.module.sass";
 import { LinesTable, PointsTable, PolygonsTable } from "../tables";
 import { usePageProps } from "~/renderer/usePageProps";
 import { Allotment } from "allotment";
 import { useState } from "react";
 import "allotment/dist/style.css";
-import { MapSelectedFeatures } from "#/maps/ingestion/@id/details-panel";
-
-const h = hyper.styled(styles);
+import { MapSelectedFeatures } from "../details-panel";
 
 interface EditInterfaceProps {
   title?: string;
@@ -86,6 +83,7 @@ export function Page() {
               onClickFeatures: selectFeatures,
               inspectPosition,
               setInspectPosition,
+              className: "map-panel-container",
             }),
           ]),
           h.if(showSelectedFeatures)(MapSelectedFeatures, {
