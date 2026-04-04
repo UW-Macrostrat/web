@@ -49,16 +49,15 @@ export function Page() {
     h("div.ingestion-main-panel", [
       h("div.context-panel", [h(EditMenu, { parentRoute: basename })]),
       h(Allotment, { className: "main-panel", defaultSizes: [800, 300] }, [
-        h("div.map-container", [
-          h(MapInterface, {
-            map: mapBounds,
-            slug: source.slug,
-            onClickFeatures: selectFeatures,
-            selectedFeatures: mapSelectedFeatures,
-            inspectPosition,
-            setInspectPosition,
-          }),
-        ]),
+        h(MapInterface, {
+          map: mapBounds,
+          slug: source.slug,
+          onClickFeatures: selectFeatures,
+          selectedFeatures: mapSelectedFeatures,
+          inspectPosition,
+          setInspectPosition,
+          className: "map-container",
+        }),
         h(Allotment.Pane, { visible: showSelectedFeatures }, [
           h(MapSelectedFeatures, {
             features: mapSelectedFeatures,

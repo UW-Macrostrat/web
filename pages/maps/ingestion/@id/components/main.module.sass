@@ -12,6 +12,18 @@
 
 .map-interface
   height: 100%
+  overflow: hidden
+  position: relative
+
+.map-controls-container
+  padding: 0.5em
+  border-radius: 6px
+  max-height: calc(100vh - 300px)
+  overflow-y: scroll !important
+  &>:first-child
+    margin-top: 0
+    &>:first-child
+      margin-top: 0
 
 .map-interface.no-map
   display: flex
@@ -30,3 +42,4 @@
   background-color: var(--background-color)
   pointer-events: all
   width: fit-content
+  z-index: 1000

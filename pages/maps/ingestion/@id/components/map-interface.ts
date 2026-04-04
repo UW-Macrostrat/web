@@ -1,20 +1,19 @@
 import {
   Button,
   NonIdealState,
-  Popover,
+  PopoverNext,
   Radio,
   RadioGroup,
   Switch,
 } from "@blueprintjs/core";
 import { SETTINGS, tileserverDomain } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
 import {
   FeatureSelectionHandler,
   MapMarker,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/map-styles";
+import { buildMacrostratStyle, StyleFragment } from "@macrostrat/map-styles";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
 import {
   NullableSlider,
@@ -23,13 +22,11 @@ import {
 } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
-import { useEffect, useMemo, useState } from "react";
-import styles from "./main.module.sass";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { boundingGeometryMapStyle } from "~/map-styles";
 import { MapboxMapProvider } from "@macrostrat/mapbox-react";
-import { baseElements, buildBasicStyle } from "#/maps/ingestion/@id/utils";
-
-const h = hyper.styled(styles);
+import { baseElements, buildBasicStyle } from "../utils";
+import h from "./main.module.sass";
 
 function rasterURL(source_id) {
   // Placeholder for figuring out a better version of this.
@@ -86,6 +83,7 @@ function basemapStyle(basemap, inDarkMode) {
 export function MapInterface({
   map,
   slug,
+  className,
   featureTypes = ["points", "lines", "polygons", "rgeom"],
   onClickFeatures,
   selectedFeatures,
@@ -102,6 +100,8 @@ export function MapInterface({
       "Map data not generated"
     );
   }
+
+  const containerRef = useRef<HTMLDivElement>();
 
   const dark = useDarkMode()?.isEnabled ?? false;
 
@@ -153,8 +153,8 @@ export function MapInterface({
   );
 
   // Overlay style
-  const overlayStyle = useMemo(() => {
-    return buildOverlayStyle({
+  const overlayStyles = useMemo(() => {
+    return buildOverlayStyles({
       mapSlug: slug,
       layers: _featureTypes,
       layerOpacity,
@@ -189,7 +189,7 @@ export function MapInterface({
     ]);
   }
 
-  const contextPanel = h(PanelCard, [
+  const contextPanel = h("div.map-controls-container", [
     h(FeatureTypeSwitches, { featureTypes: _featureTypes, setFeatureTypes }),
     h("div.vector-controls", [
       h("h3", "Display options"),
@@ -230,9 +230,11 @@ export function MapInterface({
   const settingsPopoverButton = h(
     "div.map-controls",
     h(
-      Popover,
+      PopoverNext,
       {
         content: contextPanel,
+        placement: "bottom-start",
+        boundary: containerRef.current,
       },
       h(Button, {
         icon: "cog",
@@ -240,22 +242,13 @@ export function MapInterface({
     )
   );
 
-  return h(
-    MapboxMapProvider,
-    {
-      //className: "single-map",
-      //navbar: h(MapNavbar, { isOpen, setOpen, minimal: true }),
-      // contextPanel: null,
-      // //contextPanelOpen: isOpen,
-      // detailPanelOpen: false,
-      // fitViewport: false,
-    },
-    [
+  return h("div.map-container", { className, ref: containerRef }, [
+    h(MapboxMapProvider, [
       settingsPopoverButton,
       h(MapView, {
         style,
         mapboxToken: SETTINGS.mapboxAccessToken,
-        overlayStyles: [overlayStyle],
+        overlayStyles,
         bounds,
         mapPosition: null,
         fitBoundsOptions: { padding: 50 },
@@ -268,8 +261,8 @@ export function MapInterface({
         position: inspectPosition,
         setPosition: setInspectPosition,
       }),
-    ]
-  );
+    ]),
+  ]);
 }
 
 function FeatureTypeSwitches({ featureTypes, setFeatureTypes }) {
@@ -330,7 +323,7 @@ function OpacitySlider(props) {
 // TODO: make user tunable??
 const _defaultColor = "rgb(74, 242, 161)";
 
-function buildOverlayStyle({
+function buildOverlayStyles({
   mapSlug,
   layers = ["points", "lines", "polygons", "rgeom"],
   layerOpacity,
@@ -339,15 +332,16 @@ function buildOverlayStyle({
   selectedFeatures,
 }: StyleOpts): any {
   // let baseStyle = style ?? emptyStyle;
-  // let macrostratStyle = {};
-  // if (layerOpacity.vector != null) {
-  //   macrostratStyle = buildMacrostratStyle({
-  //     tileserverDomain: SETTINGS.burwellTileDomain,
-  //     fillOpacity: layerOpacity.vector - 0.1,
-  //     strokeOpacity: layerOpacity.vector + 0.2,
-  //     lineOpacity: layerOpacity.vector + 0.4,
-  //   });
-  // }
+  const styles: StyleFragment[] = [];
+  if (layerOpacity.vector != null) {
+    const macrostratStyle = buildMacrostratStyle({
+      tileserverDomain: SETTINGS.burwellTileDomain,
+      fillOpacity: layerOpacity.vector - 0.1,
+      strokeOpacity: layerOpacity.vector + 0.2,
+      lineOpacity: layerOpacity.vector + 0.4,
+    });
+    styles.push(macrostratStyle);
+  }
   //
   const notOmitted = ["!=", "omit", true];
 
@@ -365,25 +359,6 @@ function buildOverlayStyle({
     tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
     filter: buildFilters(notOmitted),
   });
-
-  let selectedStyle = null;
-  if (selectedFeatures != null && selectedFeatures.length > 0) {
-    selectedStyle = buildBasicStyle({
-      inDarkMode: false,
-      sourceID: mapSlug,
-      featureTypes: layers,
-      color: "red",
-      tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
-      suffix: "selected",
-      adjustForDarkMode: false,
-      fillOpacity: 0.3,
-    });
-    for (let layer of selectedStyle.layers) {
-      const type = layer["source-layer"];
-      const isSelected = buildSelectionFilters(selectedFeatures, type);
-      layer.filter = buildFilters(layer.filter, isSelected);
-    }
-  }
 
   if (showColors) {
     for (let layer of tableStyle.layers) {
@@ -412,9 +387,10 @@ function buildOverlayStyle({
     }
   }
 
-  let omittedTableStyle = null;
+  styles.push(tableStyle);
+
   if (showOmittedRows) {
-    omittedTableStyle = buildBasicStyle({
+    const omittedTableStyle = buildBasicStyle({
       inDarkMode: false,
       sourceID: mapSlug,
       featureTypes: layers,
@@ -423,21 +399,35 @@ function buildOverlayStyle({
       filter: buildFilters(["==", "omit", true]),
       color: omitColor,
     });
+    styles.push(omittedTableStyle);
   }
 
-  let rgeomStyle = null;
   if (layers.includes("rgeom")) {
-    rgeomStyle = boundingGeometryMapStyle(false, mapSlug);
+    const rgeomStyle = boundingGeometryMapStyle(false, mapSlug);
+    styles.push(rgeomStyle);
   }
 
-  return mergeStyles(
-    //baseStyle,
-    //macrostratStyle,
-    rgeomStyle,
-    tableStyle,
-    omittedTableStyle,
-    selectedStyle
-  );
+  if (selectedFeatures != null && selectedFeatures.length > 0) {
+    const selectedStyle = buildBasicStyle({
+      inDarkMode: false,
+      sourceID: mapSlug,
+      featureTypes: layers,
+      color: "red",
+      tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
+      suffix: "selected",
+      adjustForDarkMode: false,
+      fillOpacity: 0.3,
+    });
+    for (let layer of selectedStyle.layers) {
+      const type = layer["source-layer"];
+      const isSelected = buildSelectionFilters(selectedFeatures, type);
+      layer.filter = buildFilters(layer.filter, isSelected);
+    }
+
+    styles.push(selectedStyle);
+  }
+
+  return styles;
 }
 
 function buildSelectionFilters(selectedFeatures, type = "polygons") {
