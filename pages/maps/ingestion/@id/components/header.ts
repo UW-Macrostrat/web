@@ -14,6 +14,7 @@ export function Header({
   sourceURL,
   ingestProcess,
   children,
+  separateTitle = true,
 }: {
   title: string;
   parentRoute?: string;
@@ -32,7 +33,7 @@ export function Header({
   }, []);
 
   return h("div.header", [
-    h(PageBreadcrumbs, { separateTitle: true }),
+    h(PageBreadcrumbs, { separateTitle }),
     h("div.edit-page-header", [
       h("div", [
         h(IngestTagDisplay, {

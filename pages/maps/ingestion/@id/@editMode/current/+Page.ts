@@ -2,14 +2,15 @@ import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import { ErrorBoundary, useStoredState } from "@macrostrat/ui-components";
 import { BasePage } from "~/layouts";
-import { Header, MapInterface } from "../components";
 import h from "./main.module.sass";
-import { LinesTable, PointsTable, PolygonsTable } from "../tables";
 import { usePageProps } from "~/renderer/usePageProps";
 import { Allotment } from "allotment";
 import { useState } from "react";
 import "allotment/dist/style.css";
-import { MapSelectedFeatures } from "../details-panel";
+
+import { LinesTable, PointsTable, PolygonsTable } from "../../tables";
+import { Header, MapInterface } from "../../components";
+import { MapSelectedFeatures } from "../../details-panel";
 
 interface EditInterfaceProps {
   title?: string;
@@ -63,6 +64,7 @@ export function Page() {
                 title: source.name,
                 sourceURL: source.url,
                 ingestProcess,
+                separateTitle: false,
               },
               [h(ShowMapButton, { showMap, setShowMap })]
             ),
