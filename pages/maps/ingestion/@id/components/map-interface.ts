@@ -11,10 +11,8 @@ import {
   FeatureSelectionHandler,
   MapMarker,
   MapView,
-  PanelCard,
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyle, StyleFragment } from "@macrostrat/map-styles";
-import { mergeStyles } from "@macrostrat/mapbox-utils";
 import {
   NullableSlider,
   useDarkMode,
