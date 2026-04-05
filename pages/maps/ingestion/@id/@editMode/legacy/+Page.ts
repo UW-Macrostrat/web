@@ -8,7 +8,7 @@ import { Allotment } from "allotment";
 import { useState } from "react";
 import "allotment/dist/style.css";
 
-import { LinesTable, PointsTable, PolygonsTable } from "../../tables";
+import { LinesTable, PointsTable, PolygonsTable } from "../../tables-legacy";
 import { Header, MapInterface } from "../../components";
 import { MapSelectedFeatures } from "../../details-panel";
 
