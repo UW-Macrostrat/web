@@ -26,7 +26,7 @@ import {
   isColumnActive,
   submitTableUpdates,
 } from "../utils";
-import { initialState, TableData, tableDataReducer } from "../reducer";
+import { initialState, TableData, tableDataReducer } from "./reducer";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import {
   downloadSourceFiles,

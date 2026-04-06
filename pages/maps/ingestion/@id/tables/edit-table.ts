@@ -26,8 +26,9 @@ import {
   isColumnActive,
   submitTableUpdates,
 } from "../utils";
-import { initialState, TableData, tableDataReducer } from "../reducer";
+import { initialState, TableData, tableDataReducer } from "./reducer";
 import { ingestPrefix } from "@macrostrat-web/settings";
+import { DataSheet } from "@macrostrat/data-sheet";
 import {
   downloadSourceFiles,
   EditableCell,
@@ -429,6 +430,23 @@ export function TableInterface({
     transformedData,
     tableData.remoteData,
   ]);
+
+  console.log(transformedData);
+
+  return h(DataSheet, {
+    data: tableData.remoteData,
+    editable: true,
+    enableColumnReordering: false,
+    columnOptions: {},
+    onVisibleCellsChange: (visibleCells) => {
+      if (
+        visibleCells["rowIndexEnd"] >
+        parseInt(tableData.parameters.select.pageSize) - 5
+      ) {
+        dispatch({ type: "incrementPageSize", increment: 50 });
+      }
+    },
+  });
 
   return h(
     HotkeysManager,
