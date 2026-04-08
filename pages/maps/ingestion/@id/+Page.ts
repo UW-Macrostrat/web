@@ -1,5 +1,4 @@
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
+import h from "./main.module.sass";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { Header } from "./components";
 import { MapInterface } from "./components";
@@ -7,9 +6,8 @@ import { usePageProps } from "~/renderer/usePageProps";
 import { useState } from "react";
 import { Allotment } from "allotment";
 import { MapSelectedFeatures } from "./details-panel";
+import { useData } from "vike-react/useData";
 import "allotment/dist/style.css";
-
-const h = hyper.styled(styles);
 
 interface EditInterfaceProps {
   title?: string;
@@ -21,14 +19,19 @@ interface EditInterfaceProps {
 }
 
 export function Page() {
-  const { source_id, source, mapBounds, ingestProcess }: EditInterfaceProps =
+  const { source_id, source, ingestProcess }: EditInterfaceProps =
     usePageProps();
-  const title = source.name;
+
+  const data = useData();
+  const { mapInfo, geometry } = data;
 
   const headerProps = {
-    title,
     ingestProcess,
+    title: mapInfo.name,
+    identifier: mapInfo.source_id,
+    slug: mapInfo.slug,
     sourceURL: source.url,
+    refTitle: mapInfo.ref_title ?? mapInfo.name,
   };
 
   const basename = `/maps/ingestion/${source_id}`;
@@ -39,21 +42,26 @@ export function Page() {
   const showSelectedFeatures =
     mapSelectedFeatures != null && mapSelectedFeatures.length > 0;
 
+  const mapBounds = {
+    geometry,
+    properties: mapInfo,
+  };
+
   return h("div.page", [
+    // TODO: make this header part of a layout component once we've figured out its semantics
     h(Header, headerProps),
     h("div.ingestion-main-panel", [
       h("div.context-panel", [h(EditMenu, { parentRoute: basename })]),
       h(Allotment, { className: "main-panel", defaultSizes: [800, 300] }, [
-        h("div.map-container", [
-          h(MapInterface, {
-            map: mapBounds,
-            slug: source.slug,
-            onClickFeatures: selectFeatures,
-            selectedFeatures: mapSelectedFeatures,
-            inspectPosition,
-            setInspectPosition,
-          }),
-        ]),
+        h(MapInterface, {
+          map: mapBounds,
+          slug: source.slug,
+          onClickFeatures: selectFeatures,
+          selectedFeatures: mapSelectedFeatures,
+          inspectPosition,
+          setInspectPosition,
+          className: "map-container",
+        }),
         h(Allotment.Pane, { visible: showSelectedFeatures }, [
           h(MapSelectedFeatures, {
             features: mapSelectedFeatures,

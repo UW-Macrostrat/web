@@ -2,12 +2,7 @@ import { LocationPanel } from "@macrostrat/map-interface";
 import { RegionalStratigraphy } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
-import {
-  infoMarkerPositionAtom,
-  mapZoomAtom,
-  useAppActions,
-  useAppState,
-} from "../../app-state";
+import { useAppActions, useAppState } from "../../app-state";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback, useEffect } from "react";

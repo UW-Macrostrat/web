@@ -1,5 +1,5 @@
 import type { PageContextServer } from "vike/types";
-import { getIngestProcessData } from "../_data";
+import { getIngestProcessData } from "../+data";
 
 const validEditModes = ["points", "lines", "polygons"];
 

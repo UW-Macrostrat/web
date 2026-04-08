@@ -1,15 +1,18 @@
-import { Button, Radio, RadioGroup, Spinner } from "@blueprintjs/core";
+import {
+  Button,
+  NonIdealState,
+  PopoverNext,
+  Radio,
+  RadioGroup,
+  Switch,
+} from "@blueprintjs/core";
 import { SETTINGS, tileserverDomain } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
 import {
   FeatureSelectionHandler,
   MapMarker,
   MapView,
-  PanelCard,
 } from "@macrostrat/map-interface";
-import { NonIdealState, Switch } from "@blueprintjs/core";
-import { buildMacrostratStyle } from "@macrostrat/map-styles";
-import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
+import { buildMacrostratStyle, StyleFragment } from "@macrostrat/map-styles";
 import {
   NullableSlider,
   useDarkMode,
@@ -17,14 +20,11 @@ import {
 } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
-import { useEffect, useMemo, useState } from "react";
-import styles from "./main.module.sass";
-import { asChromaColor, toRGBAString } from "@macrostrat/color-utils";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { boundingGeometryMapStyle } from "~/map-styles";
-import { Popover } from "@blueprintjs/core";
 import { MapboxMapProvider } from "@macrostrat/mapbox-react";
-
-const h = hyper.styled(styles);
+import { baseElements, buildBasicStyle } from "../utils";
+import h from "./main.module.sass";
 
 function rasterURL(source_id) {
   // Placeholder for figuring out a better version of this.
@@ -81,14 +81,13 @@ function basemapStyle(basemap, inDarkMode) {
 export function MapInterface({
   map,
   slug,
+  className,
   featureTypes = ["points", "lines", "polygons", "rgeom"],
   onClickFeatures,
   selectedFeatures,
   inspectPosition,
   setInspectPosition,
 }) {
-  const [isOpen, setOpen] = useState(false);
-
   // Catch empty map data
   if (map == null || Object.keys(map.geometry).length == 0) {
     return h(
@@ -97,6 +96,8 @@ export function MapInterface({
       "Map data not generated"
     );
   }
+
+  const containerRef = useRef<HTMLDivElement>();
 
   const dark = useDarkMode()?.isEnabled ?? false;
 
@@ -109,7 +110,7 @@ export function MapInterface({
 
   const [showColors, setShowColors] = useStoredState(
     "ingestion:mapShowColors",
-    false
+    true
   );
 
   const bounds: LngLatBoundsLike | "invalid" = useMemo(() => {
@@ -130,9 +131,7 @@ export function MapInterface({
   useEffect(() => {
     if (layer == null) setStyle(null);
     const styleURL = basemapStyle(layer, dark);
-    getMapboxStyle(styleURL, {
-      access_token: SETTINGS.mapboxAccessToken,
-    }).then(setStyle);
+    setStyle(styleURL);
   }, [layer, dark]);
 
   const [layerOpacity, setLayerOpacity] = useStoredState(
@@ -150,20 +149,15 @@ export function MapInterface({
   );
 
   // Overlay style
-  const [mapStyle, setMapStyle] = useState(null);
-  useEffect(() => {
-    setMapStyle(
-      buildOverlayStyle({
-        style,
-        mapSlug: slug,
-        layers: _featureTypes,
-        focusedMap: map.properties.source_id,
-        layerOpacity,
-        showOmittedRows,
-        showColors,
-        selectedFeatures,
-      })
-    );
+  const overlayStyles = useMemo(() => {
+    return buildOverlayStyles({
+      mapSlug: slug,
+      layers: _featureTypes,
+      layerOpacity,
+      showOmittedRows,
+      showColors,
+      selectedFeatures,
+    });
   }, [
     map.properties.source_id,
     style,
@@ -191,7 +185,7 @@ export function MapInterface({
     ]);
   }
 
-  const contextPanel = h(PanelCard, [
+  const contextPanel = h("div.map-controls-container", [
     h(FeatureTypeSwitches, { featureTypes: _featureTypes, setFeatureTypes }),
     h("div.vector-controls", [
       h("h3", "Display options"),
@@ -232,9 +226,11 @@ export function MapInterface({
   const settingsPopoverButton = h(
     "div.map-controls",
     h(
-      Popover,
+      PopoverNext,
       {
         content: contextPanel,
+        placement: "bottom-start",
+        boundary: containerRef.current,
       },
       h(Button, {
         icon: "cog",
@@ -242,25 +238,13 @@ export function MapInterface({
     )
   );
 
-  if (mapStyle == null) {
-    return h(Spinner);
-  }
-
-  return h(
-    MapboxMapProvider,
-    {
-      //className: "single-map",
-      //navbar: h(MapNavbar, { isOpen, setOpen, minimal: true }),
-      // contextPanel: null,
-      // //contextPanelOpen: isOpen,
-      // detailPanelOpen: false,
-      // fitViewport: false,
-    },
-    [
+  return h("div.map-container", { className, ref: containerRef }, [
+    h(MapboxMapProvider, [
       settingsPopoverButton,
       h(MapView, {
-        style: mapStyle,
+        style,
         mapboxToken: SETTINGS.mapboxAccessToken,
+        overlayStyles,
         bounds,
         mapPosition: null,
         fitBoundsOptions: { padding: 50 },
@@ -273,8 +257,8 @@ export function MapInterface({
         position: inspectPosition,
         setPosition: setInspectPosition,
       }),
-    ]
-  );
+    ]),
+  ]);
 }
 
 function FeatureTypeSwitches({ featureTypes, setFeatureTypes }) {
@@ -332,10 +316,10 @@ function OpacitySlider(props) {
   ]);
 }
 
+// TODO: make user tunable??
 const _defaultColor = "rgb(74, 242, 161)";
 
-function buildOverlayStyle({
-  style,
+function buildOverlayStyles({
   mapSlug,
   layers = ["points", "lines", "polygons", "rgeom"],
   layerOpacity,
@@ -343,17 +327,18 @@ function buildOverlayStyle({
   showColors,
   selectedFeatures,
 }: StyleOpts): any {
-  let baseStyle = style ?? emptyStyle;
-  let macrostratStyle = {};
+  // let baseStyle = style ?? emptyStyle;
+  const styles: StyleFragment[] = [];
   if (layerOpacity.vector != null) {
-    macrostratStyle = buildMacrostratStyle({
+    const macrostratStyle = buildMacrostratStyle({
       tileserverDomain: SETTINGS.burwellTileDomain,
       fillOpacity: layerOpacity.vector - 0.1,
       strokeOpacity: layerOpacity.vector + 0.2,
       lineOpacity: layerOpacity.vector + 0.4,
     });
+    styles.push(macrostratStyle);
   }
-
+  //
   const notOmitted = ["!=", "omit", true];
 
   let mainColor = "#000000";
@@ -370,26 +355,6 @@ function buildOverlayStyle({
     tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
     filter: buildFilters(notOmitted),
   });
-
-  let selectedStyle = null;
-  if (selectedFeatures != null && selectedFeatures.length > 0) {
-    selectedStyle = buildBasicStyle({
-      inDarkMode: false,
-      sourceID: mapSlug,
-      featureTypes: layers,
-      color: "red",
-      tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
-      //filter: buildFilters(isSelected),
-      suffix: "selected",
-      adjustForDarkMode: false,
-      fillOpacity: 0.3,
-    });
-    for (let layer of selectedStyle.layers) {
-      const type = layer["source-layer"];
-      const isSelected = buildSelectionFilters(selectedFeatures, type);
-      layer.filter = buildFilters(layer.filter, isSelected);
-    }
-  }
 
   if (showColors) {
     for (let layer of tableStyle.layers) {
@@ -418,9 +383,10 @@ function buildOverlayStyle({
     }
   }
 
-  let omittedTableStyle = null;
+  styles.push(tableStyle);
+
   if (showOmittedRows) {
-    omittedTableStyle = buildBasicStyle({
+    const omittedTableStyle = buildBasicStyle({
       inDarkMode: false,
       sourceID: mapSlug,
       featureTypes: layers,
@@ -429,21 +395,35 @@ function buildOverlayStyle({
       filter: buildFilters(["==", "omit", true]),
       color: omitColor,
     });
+    styles.push(omittedTableStyle);
   }
 
-  let rgeomStyle = null;
   if (layers.includes("rgeom")) {
-    rgeomStyle = boundingGeometryMapStyle(false, mapSlug);
+    const rgeomStyle = boundingGeometryMapStyle(false, mapSlug);
+    styles.push(rgeomStyle);
   }
 
-  return mergeStyles(
-    baseStyle,
-    macrostratStyle,
-    rgeomStyle,
-    tableStyle,
-    omittedTableStyle,
-    selectedStyle
-  );
+  if (selectedFeatures != null && selectedFeatures.length > 0) {
+    const selectedStyle = buildBasicStyle({
+      inDarkMode: false,
+      sourceID: mapSlug,
+      featureTypes: layers,
+      color: "red",
+      tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
+      suffix: "selected",
+      adjustForDarkMode: false,
+      fillOpacity: 0.3,
+    });
+    for (let layer of selectedStyle.layers) {
+      const type = layer["source-layer"];
+      const isSelected = buildSelectionFilters(selectedFeatures, type);
+      layer.filter = buildFilters(layer.filter, isSelected);
+    }
+
+    styles.push(selectedStyle);
+  }
+
+  return styles;
 }
 
 function buildSelectionFilters(selectedFeatures, type = "polygons") {
@@ -473,95 +453,4 @@ function anyFilters(...filters) {
   if (_filters.length == 0) return null;
   if (_filters.length == 1) return _filters[0];
   return ["any", ..._filters];
-}
-
-function baseElements(sourceID, featureType, suffix = "", filter = null) {
-  let id = sourceID + "_" + featureType;
-  if (suffix != null && suffix != "") {
-    id += "_" + suffix;
-  }
-  let lyr = {
-    id,
-    source: sourceID,
-    "source-layer": featureType,
-  };
-
-  if (filter != null) {
-    lyr.filter = filter;
-  }
-  return lyr;
-}
-
-export function buildBasicStyle({
-  color = "rgb(74, 242, 161)",
-  inDarkMode,
-  sourceLayers,
-  sourceID = "tileLayer",
-  featureTypes = ["points", "lines", "polygons"],
-  tileURL,
-  filter = null,
-  suffix = null,
-  adjustForDarkMode = true,
-  fillOpacity = 0.1,
-}): mapboxgl.Style {
-  const xRayColor = (opacity = 1, darken = 0) => {
-    const c0 = asChromaColor(color).alpha(opacity);
-    let c1 = c0;
-    if (adjustForDarkMode) {
-      if (!inDarkMode) {
-        c1 = c0.darken(2 - darken);
-      }
-      c1 = c0.darken(darken);
-    }
-    return toRGBAString(c1);
-  };
-
-  let layers = [];
-
-  const fillOutlineOpacity = Math.max(fillOpacity + 0.4, 1);
-
-  if (featureTypes.includes("points")) {
-    layers.push({
-      ...baseElements(sourceID, "points", suffix, filter),
-      type: "circle",
-      paint: {
-        "circle-color": xRayColor(1, 1),
-        "circle-radius": 5,
-      },
-    });
-  }
-
-  if (featureTypes.includes("lines")) {
-    layers.push({
-      ...baseElements(sourceID, "lines", suffix, filter),
-      type: "line",
-      paint: {
-        "line-color": xRayColor(1, -1),
-        "line-width": 1.5,
-      },
-    });
-  }
-
-  if (featureTypes.includes("polygons")) {
-    layers.push({
-      ...baseElements(sourceID, "polygons", suffix, filter),
-      type: "fill",
-      paint: {
-        "fill-color": xRayColor(fillOpacity),
-        "fill-outline-color": xRayColor(fillOutlineOpacity),
-      },
-    });
-  }
-
-  return {
-    version: 8,
-    name: "basic",
-    sources: {
-      [sourceID]: {
-        type: "vector",
-        url: tileURL,
-      },
-    },
-    layers,
-  };
 }

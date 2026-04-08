@@ -1,18 +1,17 @@
 import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
 import { ErrorBoundary, useStoredState } from "@macrostrat/ui-components";
 import { BasePage } from "~/layouts";
-import { Header, MapInterface } from "../components";
-import styles from "./main.module.sass";
-import { LinesTable, PointsTable, PolygonsTable } from "../tables";
+import h from "./main.module.sass";
 import { usePageProps } from "~/renderer/usePageProps";
 import { Allotment } from "allotment";
 import { useState } from "react";
 import "allotment/dist/style.css";
-import { MapSelectedFeatures } from "#/maps/ingestion/@id/details-panel";
+import { useData } from "vike-react/useData";
 
-const h = hyper.styled(styles);
+import { LinesTable, PointsTable, PolygonsTable } from "../../tables";
+import { Header, MapInterface } from "../../components";
+import { MapSelectedFeatures } from "../../details-panel";
 
 interface EditInterfaceProps {
   title?: string;
@@ -30,9 +29,15 @@ const routeMap = {
 };
 
 export function Page() {
-  const { source, ingestProcess, editMode, mapBounds, source_id } =
-    usePageProps();
+  const { source, ingestProcess, editMode, source_id } = usePageProps();
   const slug = source.slug;
+
+  const data = useData();
+  const { mapInfo, geometry } = data;
+  const mapBounds = {
+    geometry,
+    properties: mapInfo,
+  };
 
   const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
 
@@ -66,6 +71,7 @@ export function Page() {
                 title: source.name,
                 sourceURL: source.url,
                 ingestProcess,
+                separateTitle: false,
               },
               [h(ShowMapButton, { showMap, setShowMap })]
             ),
@@ -86,6 +92,7 @@ export function Page() {
               onClickFeatures: selectFeatures,
               inspectPosition,
               setInspectPosition,
+              className: "map-panel-container",
             }),
           ]),
           h.if(showSelectedFeatures)(MapSelectedFeatures, {

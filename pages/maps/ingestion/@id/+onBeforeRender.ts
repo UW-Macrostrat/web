@@ -1,5 +1,5 @@
 import type { PageContextServer } from "vike/types";
-import { getIngestProcessData } from "./_data";
+import { getIngestProcessData } from "./+data";
 
 export async function onBeforeRender(pageContext: PageContextServer) {
   const { id } = pageContext.routeParams;
