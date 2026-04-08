@@ -7,6 +7,7 @@ import { usePageProps } from "~/renderer/usePageProps";
 import { Allotment } from "allotment";
 import { useState } from "react";
 import "allotment/dist/style.css";
+import { useData } from "vike-react/useData";
 
 import { LinesTable, PointsTable, PolygonsTable } from "../../tables";
 import { Header, MapInterface } from "../../components";
@@ -28,9 +29,15 @@ const routeMap = {
 };
 
 export function Page() {
-  const { source, ingestProcess, editMode, mapBounds, source_id } =
-    usePageProps();
+  const { source, ingestProcess, editMode, source_id } = usePageProps();
   const slug = source.slug;
+
+  const data = useData();
+  const { mapInfo, geometry } = data;
+  const mapBounds = {
+    geometry,
+    properties: mapInfo,
+  };
 
   const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
 

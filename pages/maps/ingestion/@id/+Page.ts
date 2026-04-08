@@ -1,5 +1,4 @@
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
+import h from "./main.module.sass";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { Header } from "./components";
 import { MapInterface } from "./components";
@@ -9,8 +8,6 @@ import { Allotment } from "allotment";
 import { MapSelectedFeatures } from "./details-panel";
 import { useData } from "vike-react/useData";
 import "allotment/dist/style.css";
-
-const h = hyper.styled(styles);
 
 interface EditInterfaceProps {
   title?: string;
@@ -22,10 +19,11 @@ interface EditInterfaceProps {
 }
 
 export function Page() {
-  const { source_id, source, mapBounds, ingestProcess }: EditInterfaceProps =
+  const { source_id, source, ingestProcess }: EditInterfaceProps =
     usePageProps();
 
-  const { mapInfo, geometry } = useData();
+  const data = useData();
+  const { mapInfo, geometry } = data;
 
   const headerProps = {
     ingestProcess,
@@ -33,6 +31,7 @@ export function Page() {
     identifier: mapInfo.source_id,
     slug: mapInfo.slug,
     sourceURL: source.url,
+    refTitle: mapInfo.ref_title ?? mapInfo.name,
   };
 
   const basename = `/maps/ingestion/${source_id}`;
@@ -42,6 +41,11 @@ export function Page() {
 
   const showSelectedFeatures =
     mapSelectedFeatures != null && mapSelectedFeatures.length > 0;
+
+  const mapBounds = {
+    geometry,
+    properties: mapInfo,
+  };
 
   return h("div.page", [
     // TODO: make this header part of a layout component once we've figured out its semantics

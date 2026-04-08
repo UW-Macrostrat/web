@@ -110,7 +110,7 @@ export function MapInterface({
 
   const [showColors, setShowColors] = useStoredState(
     "ingestion:mapShowColors",
-    false
+    true
   );
 
   const bounds: LngLatBoundsLike | "invalid" = useMemo(() => {

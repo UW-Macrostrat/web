@@ -1,14 +1,22 @@
 export default function title(pageContext) {
-  const { pageInfo } = pageContext.config;
-  const pageNameValue = pageInfo?.[0]?.name;
-  let _pageName = null;
-  if (typeof pageNameValue === "string") {
-    _pageName = pageNameValue;
-  } else if (typeof pageNameValue === "function") {
-    _pageName = pageNameValue(pageContext);
-  }
-  if (_pageName != null) {
-    return _pageName + " – Macrostrat";
+  const pageName = getPageName(pageContext);
+  if (pageName != null) {
+    return pageName + " – Macrostrat";
   }
   return "Macrostrat";
+}
+
+function getPageName(pageContext): string | null {
+  const { pageInfo } = pageContext.config;
+  const firstPageInfoEntry = pageInfo?.[0];
+  if (firstPageInfoEntry == null) return null;
+  if (typeof firstPageInfoEntry === "string") return firstPageInfoEntry;
+  let pageInfoEntry = null;
+  if (typeof firstPageInfoEntry === "function") {
+    pageInfoEntry = firstPageInfoEntry(pageContext);
+  }
+  if (typeof firstPageInfoEntry === "object") {
+    pageInfoEntry = firstPageInfoEntry;
+  }
+  return pageInfoEntry.shortName ?? pageInfoEntry.name;
 }

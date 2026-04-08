@@ -2,16 +2,14 @@ import { useState, useCallback } from "react";
 
 import { ButtonGroup, AnchorButton } from "@blueprintjs/core";
 import { PageBreadcrumbs } from "~/components";
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
-import { IngestTagDisplay } from "#/maps/ingestion/components/ingest-tag-display";
+import h from "./main.module.sass";
+import { IngestTagDisplay } from "../../components/ingest-tag-display";
 import { ingestPrefix } from "@macrostrat-web/settings";
-
-const h = hyper.styled(styles);
 
 export function Header({
   title,
   sourceURL,
+  refTitle,
   ingestProcess,
   children,
   separateTitle = true,
@@ -19,6 +17,7 @@ export function Header({
   title: string;
   parentRoute?: string;
   sourceURL: string;
+  refTitle?: string;
   ingestProcess: IngestProcess;
   children?: React.ReactNode;
 }) {
@@ -35,6 +34,10 @@ export function Header({
   return h("div.header", [
     h(PageBreadcrumbs, { separateTitle }),
     h("div.edit-page-header", [
+      h.if(sourceURL != null)(NavigateMapSourceButton, {
+        title: refTitle,
+        href: sourceURL,
+      }),
       h("div", [
         h(IngestTagDisplay, {
           ingestProcess: ingestProcess,
@@ -42,28 +45,32 @@ export function Header({
         }),
       ]),
       h("div.spacer"),
-      h(ButtonGroup, { minimal: true, className: "edit-page-buttons" }, [
-        h.if(sourceURL != null)(NavigateMapSourceButton, {
-          href: sourceURL,
-        }),
-        children,
-      ]),
+      h(
+        ButtonGroup,
+        { minimal: true, className: "edit-page-buttons" },
+        children
+      ),
     ]),
   ]);
 }
 
-function NavigateMapSourceButton({ href }: { href: string }) {
+export function NavigateMapSourceButton({
+  href,
+  title,
+}: {
+  href: string;
+  title?: string;
+}) {
   return h(
     AnchorButton,
     {
       minimal: true,
-      title: "Source",
-      icon: "link",
+      rightIcon: "link",
       intent: "primary",
       target: "_blank",
       large: true,
       href: href,
     },
-    "Source"
+    title ?? "Source"
   );
 }

@@ -101,12 +101,27 @@ export function TableInterface({ url }: EditTableProps) {
   return h(DataSheet, {
     data,
     editable: true,
+    columnSpecOptions: {
+      overrides: {
+        orig_id: {
+          name: "Original ID",
+        },
+        descrip: {
+          name: "Description",
+        },
+        name: {
+          name: "Name",
+        },
+      },
+      omitColumns: INTERNAL_COLUMNS,
+    },
     enableColumnReordering: false,
     onVisibleCellsChange: (visibleCells) => {
       if (visibleCells["rowIndexEnd"] > data.length - 5) {
         loadMoreData();
       }
     },
+    selectionModes: [RegionCardinality.FULL_COLUMNS],
   });
 }
 
