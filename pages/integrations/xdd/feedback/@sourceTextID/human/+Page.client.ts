@@ -57,7 +57,7 @@ function ExtractionIndex({ setPaperID, title }) {
 
   const data = getPGData("/kg_context_entities", {
     source_text: "eq." + sourceTextID,
-    version_id: "is.null",
+    user_id: "not.is.null",
   });
 
   const count = data?.length || 0;
