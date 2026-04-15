@@ -47,6 +47,8 @@ export function Page() {
   const nextID = getNextID();
   const previousFeedback = getPreviousFeedback();
 
+  console.log("previous_feedback", previousFeedback)
+
   useEffect(() => {
     if (paper_id) {
       fetchPGData("/kg_publication_entities", { paper_id: "eq." + paper_id })
@@ -140,13 +142,16 @@ function ExtractionIndex({setPaperID, customFeedback, selectedFeedbackType}) {
 
 function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, selectedFeedbackType }) {
   const [ix, setIX] = useState(0);
-  const currentData = data[ix];
-  const count = data.length;
+  const baseData = data.filter(e =>
+    e.user_id != null
+  );
+  const currentData = baseData[ix];
+  const count = baseData.length;
 
   const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
 
   return h("div.feedback-interface", [
-    h.if(data.length > 1)([
+    h.if(baseData.length > 1)([
       h(NonIdealState, {
         icon: "warning-sign",
         title: "Multiple model runs for feedback",
@@ -175,8 +180,9 @@ const AppToaster = OverlayToaster.create();
 
 function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedback, selectedFeedbackType }) {
   const window = enhanceData(data, models, entityTypes);
-  const { entities = [], paragraph_text, model } = window;
+  const { entities = [], paragraph_text, model, version_id } = window;
   const { user } = useAuth();
+  const model_id = model.id
 
   console.log(window);
   console.log(Array.from(entityTypes.values()));
@@ -200,7 +206,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
       async (tree) => {
         const data = prepareDataForServer(tree, window.source_text, [
           window.model_run,
-        ]);
+        ], model_id, version_id);
         await postDataToServer(data, customFeedback, selectedFeedbackType);
       },
       AppToaster,
@@ -317,7 +323,9 @@ interface ServerResults extends GraphData {
 function prepareDataForServer(
   tree: TreeData[],
   sourceTextID: number,
-  supersedesRunIDs: number[] | null
+  supersedesRunIDs: number[] | null,
+  model_id: number,
+  version_id: number
 ): ServerResults {
   /** This function should be used before sending the data to the server */
   const { nodes, edges } = treeToGraph(tree);
@@ -335,6 +343,8 @@ function prepareDataForServer(
     edges,
     sourceTextId: sourceTextID,
     supersedesRunIds: supersedesRunIDs ?? [],
+    model_id: model_id,
+    version_id: version_id
   };
 }
 
@@ -388,11 +398,10 @@ function getPreviousFeedback() {
   const currentID = usePageContext().urlPathname.split("/").pop();
 
   return getPGData(
-    "/kg_context_entities",
+    "/feedback",
     {
-      select: "model_run",
-      source_text: "eq." + currentID,
-      version_id: "is.null"
+      select: "id",
+      source_text_id: "eq." + currentID,
     }
   )
 }
