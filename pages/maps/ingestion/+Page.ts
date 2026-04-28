@@ -199,10 +199,32 @@ const getTags = async (): Promise<string[]> => {
 };
 
 const getIngestProcesses = async (ingestFilter: URLSearchParams) => {
-  const response = await fetch(
-    `${postgrestPrefix}/map_ingest?source_id=not.is.null&order=source_id.desc&limit=1000&${
+  const ingestResponse = await fetch(
+    `${postgrestPrefix}/map_ingest?source_id=not.is.null&order=source_id.desc&limit=10000&${
       ingestFilter || ""
     }`
   );
-  return await response.json();
+
+  const ingestProcesses: IngestProcess[] = await ingestResponse.json();
+
+  const tagResponse = await fetch(`${postgrestPrefix}/map_ingest_tags`);
+  const tagRows: { ingest_process_id: number; tag: string }[] =
+    await tagResponse.json();
+
+  const tagsByIngestProcessId = tagRows.reduce<Record<number, string[]>>(
+    (acc, row) => {
+      if (!acc[row.ingest_process_id]) {
+        acc[row.ingest_process_id] = [];
+      }
+
+      acc[row.ingest_process_id].push(row.tag);
+      return acc;
+    },
+    {}
+  );
+
+  return ingestProcesses.map((process) => ({
+    ...process,
+    tags: tagsByIngestProcessId[process.id] ?? [],
+  }));
 };

@@ -54,7 +54,15 @@ export function IngestTagDisplay({
 
   return h(
     "div.flex.row",
-    { style: { paddingBottom: "4px", display: "flex", gap: "0.5em" } },
+    {
+      style: {
+      paddingBottom: "4px",
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "0.5em",
+      alignItems: "center",
+      },
+    },
     [
       h.if(ingestProcess.state !== undefined)(
         Tag,
