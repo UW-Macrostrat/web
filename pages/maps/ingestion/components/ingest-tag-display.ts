@@ -39,16 +39,29 @@ export function IngestTagDisplay({
   const [_ingestProcess, setIngestProcess] =
     useState<IngestProcess>(ingestProcess);
   const [tagToDelete, setTagToDelete] = useState<string | null>(null);
-  const updateIngestProcess = useCallback(async () => {
-    const response = await fetch(
-      `${postgrestPrefix}/map_ingest?id=eq.${ingestProcess.id}`
-    );
-    const data = await response.json();
-    setIngestProcess(data[0]);
-    onUpdate();
-  }, []);
   const { id } = _ingestProcess;
   const tags = _ingestProcess.tags ?? [];
+
+
+  const updateIngestProcess = useCallback(async () => {
+    const ingestResponse = await fetch(
+      `${postgrestPrefix}/map_ingest?id=eq.${ingestProcess.id}`
+    );
+    const ingestRows = await ingestResponse.json();
+    const updatedIngestProcess = ingestRows[0];
+    const tagResponse = await fetch(
+      `${postgrestPrefix}/map_ingest_tags?ingest_process_id=eq.${ingestProcess.id}`
+    );
+    const tagRows: { ingest_process_id: number; tag: string }[] =
+      await tagResponse.json();
+
+    setIngestProcess({
+      ...updatedIngestProcess,
+      tags: tagRows.map((row) => row.tag),
+    });
+
+    onUpdate();
+  }, [ingestProcess.id, onUpdate]);
 
   const confirmDeleteTag = useCallback(async () => {
     if (tagToDelete == null) return;

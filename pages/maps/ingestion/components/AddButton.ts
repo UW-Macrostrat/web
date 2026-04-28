@@ -61,18 +61,20 @@ const Input = ({
   onBlur: () => void;
 }) => {
   const handleKeyDown = useCallback(
-    async (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
+  async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.stopPropagation();
 
-        await addNewTag(e.currentTarget.value, ingestId);
-        await onChange();
+    if (e.key !== "Enter") return;
 
-        e.currentTarget.value = "";
-      }
-    },
-    [ingestId, onChange]
-  );
+    e.preventDefault();
+
+    await addNewTag(e.currentTarget.value, ingestId);
+    await onChange();
+
+    e.currentTarget.value = "";
+  },
+  [ingestId, onChange]
+);
 
   return h(
     InputGroup,
