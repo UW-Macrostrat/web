@@ -36,7 +36,7 @@ interface EditInterfaceProps {
 export function Page() {
   const { source_id, source, ingestProcess }: EditInterfaceProps =
     usePageProps();
-
+  const [currentIngestProcess, setCurrentIngestProcess] = useState(ingestProcess);
   const [ingestState, setIngestState] = useState<string>(
     ingestProcess?.state ?? ""
   );
@@ -45,7 +45,7 @@ export function Page() {
   const { mapInfo, geometry } = data;
 
   const headerProps = {
-    ingestProcess,
+    ingestProcess: currentIngestProcess,
     title: mapInfo.name,
     identifier: mapInfo.source_id,
     slug: mapInfo.slug,
@@ -75,6 +75,7 @@ export function Page() {
       sourceId: source_id,
       value: ingestState,
       onChange: setIngestState,
+      onUpdateIngestProcess: setCurrentIngestProcess,
     }),
     ]),
     h("div.ingestion-main-panel", [
@@ -112,11 +113,14 @@ function StatusDropdown({
   sourceId,
   value,
   onChange,
+  onUpdateIngestProcess,
 }: {
   ingestProcessId?: number;
   sourceId?: number;
   value: string;
   onChange: (value: string) => void;
+  onUpdateIngestProcess: (ingestProcess: any) => void;
+
 }) {
   const [draftValue, setDraftValue] = useState<string>(value ?? "");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -140,13 +144,20 @@ function StatusDropdown({
       },
       body: JSON.stringify({ state: draftValue }),
     });
-
     setIsSubmitting(false);
-
     if (!response.ok) {
       const text = await response.text();
       console.error("Failed to update ingest state", response.status, text);
       return;
+    }
+
+    const updatedRows = await response.json();
+    const updatedIngestProcess = updatedRows?.[0];
+    if (updatedIngestProcess != null) {
+      onUpdateIngestProcess(updatedIngestProcess);
+      onChange(updatedIngestProcess.state);
+    } else {
+      onChange(draftValue);
     }
 
     onChange(draftValue);

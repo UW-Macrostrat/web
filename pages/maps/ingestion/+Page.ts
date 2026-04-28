@@ -27,9 +27,14 @@ export function Page() {
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([]);
   const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined);
   const [tags, setTags] = useState<string[]>([]);
+  const [states, setStates] = useState<string[]>([]);
 
   const updateTags = useCallback(() => {
     getTags().then((tags) => setTags(tags));
+  }, []);
+
+  const updateStates = useCallback(() => {
+  getStates().then((states) => setStates(states));
   }, []);
 
   const getMapSources = async (): Promise<Record<number, MapSource>> => {
@@ -54,14 +59,17 @@ export function Page() {
     const searchParams = new URLSearchParams(url.search);
     searchParams.set("state", "not.eq.abandoned");
     setIngestFilter(searchParams);
-    updateIngestProcesses();
     updateTags();
+    updateStates();
 
     // Set up the popstate event listener
     window.onpopstate = () => {
-      updateIngestProcesses();
+      const url = new URL(window.location.href);
+      setIngestFilter(new URLSearchParams(url.search));
     };
   }, []);
+
+
   useEffect(() => {
     getMapSources().then(setMapSources);
   }, []);
@@ -83,6 +91,7 @@ export function Page() {
       h("div.ingestion-body", [
         h(AddMapButton, { user }),
         h(TagFilterManager, {
+          states,
           tags,
           setIngestFilter: setIngestFilter,
           ingestFilter: ingestFilter,
@@ -102,6 +111,7 @@ export function Page() {
             user: user,
             onUpdate: () => {
               updateTags();
+              updateStates();
               updateIngestProcesses();
             },
           });
@@ -111,26 +121,23 @@ export function Page() {
   ]);
 }
 
-function TagFilterManager({ tags, setIngestFilter, ingestFilter }) {
+function TagFilterManager({ states, tags, setIngestFilter, ingestFilter }) {
   return h("div.tag-filter-manager", [
     h("h3", ["Filter by tag"]),
-    h(Tag, {
-      value: "pending",
-      active: (ingestFilter?.getAll("state") ?? []).includes("eq.pending"),
-      onClick: async () => {
-        updateUrl("state", "eq.pending", setIngestFilter);
-      },
-    }),
-    h(Tag, {
-      value: "ingested",
-      active: (ingestFilter?.getAll("state") ?? []).includes("eq.ingested"),
-      onClick: async () => {
-        updateUrl("state", "eq.ingested", setIngestFilter);
-      },
+
+    states.map((state) => {
+      return h(Tag, {
+        key: `state-${state}`,
+        value: state,
+        active: (ingestFilter?.getAll("state") ?? []).includes(`eq.${state}`),
+        onClick: async () => {
+          updateUrl("state", `eq.${state}`, setIngestFilter);
+        },
+      });
     }),
     tags.map((tag) => {
       return h(Tag, {
-        key: tag,
+        key: `tag-${tag}`,
         value: tag,
         active: (ingestFilter?.getAll("tags") ?? []).includes(`eq.${tag}`),
         onClick: async () => {
@@ -196,6 +203,14 @@ const getTags = async (): Promise<string[]> => {
   const response = await fetch(`${postgrestPrefix}/map_ingest_tags`);
   const rows = await response.json();
   return [...new Set(rows.map((r) => r.tag))];
+};
+
+const getStates = async (): Promise<string[]> => {
+  const response = await fetch(
+    `${postgrestPrefix}/map_ingest?select=state&state=not.is.null&source_id=not.is.null&order=state.asc`
+  );
+  const rows: { state: string | null }[] = await response.json();
+  return [...new Set(rows.map((r) => r.state).filter(Boolean))] as string[];
 };
 
 const getIngestProcesses = async (ingestFilter: URLSearchParams) => {

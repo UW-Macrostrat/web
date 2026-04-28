@@ -8,26 +8,33 @@ import {
   useState,
 } from "react";
 
-import { ingestPrefix } from "@macrostrat-web/settings";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import styles from "./add-button.module.sass";
 
 const h = hyper.styled(styles);
 
 const addNewTag = async (tag: string, ingestId: number) => {
-  const response = await fetch(
-    `${ingestPrefix}/ingest-process/${ingestId}/tags`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ tag: tag }),
-    }
-  );
+  const cleanedTag = tag.trim();
+
+  if (cleanedTag === "") return;
+
+  const response = await fetch(`${postgrestPrefix}/map_ingest_tags`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify({
+      ingest_process_id: ingestId,
+      tag: cleanedTag,
+    }),
+  });
+
   if (!response.ok) {
-    console.log("error", response);
+    const text = await response.text();
+    console.error("Failed to add tag", response.status, text);
   }
 };
 
@@ -56,12 +63,15 @@ const Input = ({
   const handleKeyDown = useCallback(
     async (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
+        e.preventDefault();
+
         await addNewTag(e.currentTarget.value, ingestId);
         await onChange();
+
         e.currentTarget.value = "";
       }
     },
-    []
+    [ingestId, onChange]
   );
 
   return h(

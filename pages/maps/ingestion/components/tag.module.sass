@@ -1,2 +1,54 @@
 .ingest-tag
-  cursor: pointer
+  display: inline-flex
+  align-items: center
+  width: fit-content
+  max-width: 100%
+  flex: 0 1 auto
+  min-width: 0
+  box-sizing: border-box
+  transition: filter 0.12s ease
+
+  &:hover
+    filter: brightness(1.03)
+
+  .ingest-tag-content
+    display: inline-flex
+    align-items: center
+    width: fit-content
+    max-width: 100%
+    min-width: 0
+    gap: 0.25rem
+    transition: font-size 0.12s ease, font-weight 0.12s ease
+
+  &:hover .ingest-tag-content
+    font-weight: 700
+    font-size: 1.04em
+
+  .ingest-tag-remove
+    appearance: none
+    border: 0
+    opacity: 0
+    width: 0
+    min-width: 0
+    max-width: 0
+    height: 0.75rem
+    min-height: 0.75rem
+    padding: 0
+    margin: 0
+    overflow: hidden
+    border-radius: 999px
+    background: transparent
+    color: rgba(70, 70, 70, 0.9)
+    font-size: 0.75rem
+    font-weight: 700
+    line-height: 0.75rem
+    text-align: center
+    cursor: pointer
+    transition: opacity 0.12s ease, width 0.12s ease, max-width 0.12s ease, margin-left 0.12s ease
+
+  &:hover .ingest-tag-remove
+    opacity: 1
+    width: 0.75rem
+    min-width: 0.75rem
+    max-width: 0.75rem
+    margin-left: 0.2rem

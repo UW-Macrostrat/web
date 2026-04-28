@@ -1,5 +1,4 @@
-import { Card, AnchorButton } from "@blueprintjs/core";
-import { useCallback, useState } from "react";
+import { Alert } from "@blueprintjs/core";import { useCallback, useState } from "react";
 
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
@@ -39,7 +38,7 @@ export function IngestTagDisplay({
 }) {
   const [_ingestProcess, setIngestProcess] =
     useState<IngestProcess>(ingestProcess);
-
+  const [tagToDelete, setTagToDelete] = useState<string | null>(null);
   const updateIngestProcess = useCallback(async () => {
     const response = await fetch(
       `${postgrestPrefix}/map_ingest?id=eq.${ingestProcess.id}`
@@ -48,9 +47,16 @@ export function IngestTagDisplay({
     setIngestProcess(data[0]);
     onUpdate();
   }, []);
-
   const { id } = _ingestProcess;
   const tags = _ingestProcess.tags ?? [];
+
+  const confirmDeleteTag = useCallback(async () => {
+    if (tagToDelete == null) return;
+    await deleteTag(tagToDelete, id);
+    await updateIngestProcess();
+    setTagToDelete(null);
+  }, [tagToDelete, id, updateIngestProcess]);
+
 
   return h(
     "div.flex.row",
@@ -61,26 +67,27 @@ export function IngestTagDisplay({
       flexWrap: "wrap",
       gap: "0.5em",
       alignItems: "center",
+      maxWidth: "100%",
       },
     },
     [
-      h.if(ingestProcess.state !== undefined)(
+      h.if(_ingestProcess.state !== undefined)(
         Tag,
         {
-          value: ingestProcess.state,
+          value: _ingestProcess.state,
           style: { marginTop: "auto", marginBottom: "auto" },
         },
         []
       ),
-      tags.map((t) => {
+     tags.map((t) => {
         const tag = typeof t === "string" ? t : t.tag;
+
         return h(Tag, {
           key: tag,
           value: tag,
           style: { marginTop: "auto", marginBottom: "auto" },
-          onClick: async () => {
-            await deleteTag(tag, id);
-            await updateIngestProcess();
+          onRemove: () => {
+            setTagToDelete(tag);
           },
         });
       }),
@@ -92,6 +99,21 @@ export function IngestTagDisplay({
         },
         []
       ),
+      h(Alert, {
+        isOpen: tagToDelete != null,
+        intent: "danger",
+        icon: "trash",
+        confirmButtonText: "Delete tag",
+        cancelButtonText: "Cancel",
+        onConfirm: confirmDeleteTag,
+        onCancel: () => setTagToDelete(null),
+      }, [
+        h("p", [
+          "Are you sure you want to delete the tag ",
+          h("strong", tagToDelete ?? ""),
+          "?",
+        ]),
+      ]),
     ]
   );
 }
