@@ -174,10 +174,9 @@ function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, sel
   ]);
 }
 
-const AppToaster = OverlayToaster.create();
+const AppToasterPromise = OverlayToaster.create();
 
 function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedback, selectedFeedbackType }) {
-  console.log("DATA", data)
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model, version_id } = window;
   const { user } = useAuth();
@@ -185,7 +184,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
 
   console.log(window);
   console.log(Array.from(entityTypes.values()));
-
+  
   return h(FeedbackComponent, {
     entities,
     text: paragraph_text,
@@ -208,7 +207,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
         ], model_id, version_id);
         await postDataToServer(data, customFeedback, selectedFeedbackType);
       },
-      AppToaster,
+      AppToasterPromise,
       {
         success: "Model information saved",
         error: "Failed to save model information",
@@ -291,13 +290,15 @@ async function postDataToServer(data: ServerResults, customFeedback: string, sel
 
 function wrapWithToaster(
   fn: (...args: any[]) => Promise<void>,
-  toaster: Toaster,
+  toasterPromise,
   messages: {
     success: string;
     error: string;
   }
 ) {
   return async (...args: any[]) => {
+    const toaster = await toasterPromise;
+
     try {
       await fn(...args);
       toaster.show({
