@@ -44,7 +44,6 @@ export function Page() {
     h(ContentPage, [
       h("div.feedback-main", [h(ExtractionIndex, { setPaperID, title })]),
     ]),
-    h(Footer),
   ]);
 }
 
@@ -58,7 +57,7 @@ function ExtractionIndex({ setPaperID, title }) {
 
   const data = getPGData("/kg_context_entities", {
     source_text: "eq." + sourceTextID,
-    version_id: "is.null",
+    user_id: "not.is.null",
   });
 
   const count = data?.length || 0;
@@ -125,6 +124,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   const { entities = [], paragraph_text, model } = window;
 
   return h(FeedbackComponent, {
+    key: data?.model_run,
     entities,
     text: paragraph_text,
     model,
