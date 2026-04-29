@@ -124,6 +124,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   const { entities = [], paragraph_text, model } = window;
 
   return h(FeedbackComponent, {
+    key: data?.model_run,
     entities,
     text: paragraph_text,
     model,
