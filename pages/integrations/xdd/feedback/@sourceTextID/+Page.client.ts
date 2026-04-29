@@ -148,6 +148,9 @@ function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, sel
 
   const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
 
+
+  console.log("Entities going into FeedbackComponent:", currentData.entities);
+
   return h("div.feedback-interface", [
     h.if(baseData.length > 1)([
       h(NonIdealState, {
