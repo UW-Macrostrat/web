@@ -69,9 +69,12 @@ export function Page() {
   return h("div.page", [
     // TODO: make this header part of a layout component once we've figured out its semantics
     h("div", { style: { position: "relative" } }, [
-    h(Header, headerProps),
-    h(StatusDropdown, {
-      ingestProcessId: ingestProcess?.id,
+    h(Header, {
+      ...headerProps,
+      key: `${currentIngestProcess?.id}-${currentIngestProcess?.state}`,
+    }),
+      h(StatusDropdown, {
+      ingestProcessId: currentIngestProcess?.id,
       sourceId: source_id,
       value: ingestState,
       onChange: setIngestState,
@@ -153,14 +156,14 @@ function StatusDropdown({
 
     const updatedRows = await response.json();
     const updatedIngestProcess = updatedRows?.[0];
+
     if (updatedIngestProcess != null) {
       onUpdateIngestProcess(updatedIngestProcess);
       onChange(updatedIngestProcess.state);
+      setDraftValue(updatedIngestProcess.state);
     } else {
       onChange(draftValue);
     }
-
-    onChange(draftValue);
   };
 
   return h(
