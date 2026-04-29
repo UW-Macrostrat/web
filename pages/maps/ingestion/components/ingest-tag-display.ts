@@ -1,5 +1,5 @@
-import { Alert } from "@blueprintjs/core";import { useCallback, useState } from "react";
-
+import { Alert } from "@blueprintjs/core";
+import { useCallback, useEffect, useState } from "react";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import AddButton from "../components/AddButton";
@@ -21,12 +21,12 @@ const deleteTag = async (tag: string, ingestId: number) => {
       },
     }
   );
-
-  if (response.ok) {
-    return;
-  } else {
-    console.log("error", response);
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Failed to delete tag", response.status, text);
+    return false;
   }
+  return true;
 };
 
 export function IngestTagDisplay({
@@ -47,28 +47,46 @@ export function IngestTagDisplay({
     const ingestResponse = await fetch(
       `${postgrestPrefix}/map_ingest?id=eq.${ingestProcess.id}`
     );
+    if (!ingestResponse.ok) {
+      const text = await ingestResponse.text();
+      console.error("Failed to fetch ingest process", ingestResponse.status, text);
+      return;
+    }
     const ingestRows = await ingestResponse.json();
     const updatedIngestProcess = ingestRows[0];
+    if (updatedIngestProcess == null) return;
     const tagResponse = await fetch(
       `${postgrestPrefix}/map_ingest_tags?ingest_process_id=eq.${ingestProcess.id}`
     );
+    if (!tagResponse.ok) {
+      const text = await tagResponse.text();
+      console.error("Failed to fetch ingest tags", tagResponse.status, text);
+      return;
+    }
     const tagRows: { ingest_process_id: number; tag: string }[] =
       await tagResponse.json();
-
     setIngestProcess({
       ...updatedIngestProcess,
       tags: tagRows.map((row) => row.tag),
     });
+  }, [ingestProcess.id]);
 
-    onUpdate();
-  }, [ingestProcess.id, onUpdate]);
+
+  useEffect(() => {
+    updateIngestProcess();
+  }, [updateIngestProcess]);
+
 
   const confirmDeleteTag = useCallback(async () => {
     if (tagToDelete == null) return;
-    await deleteTag(tagToDelete, id);
+
+    const deleted = await deleteTag(tagToDelete, id);
+    if (!deleted) return;
+
     await updateIngestProcess();
+    onUpdate();
     setTagToDelete(null);
-  }, [tagToDelete, id, updateIngestProcess]);
+  }, [tagToDelete, id, updateIngestProcess, onUpdate]);
 
 
   return h(
@@ -108,7 +126,10 @@ export function IngestTagDisplay({
         AddButton,
         {
           ingestId: id,
-          onChange: updateIngestProcess,
+          onChange: async () => {
+            await updateIngestProcess();
+            onUpdate();
+          },
         },
         []
       ),
