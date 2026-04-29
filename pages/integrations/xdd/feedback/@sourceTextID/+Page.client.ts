@@ -47,8 +47,6 @@ export function Page() {
   const nextID = getNextID();
   const previousFeedback = getPreviousFeedback();
 
-  console.log("previous_feedback", previousFeedback)
-
   useEffect(() => {
     if (paper_id) {
       fetchPGData("/kg_publication_entities", { paper_id: "eq." + paper_id })
@@ -143,7 +141,7 @@ function ExtractionIndex({setPaperID, customFeedback, selectedFeedbackType}) {
 function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, selectedFeedbackType }) {
   const [ix, setIX] = useState(0);
   const baseData = data.filter(e =>
-    e.user_id != null
+    e.user_id == null
   );
   const currentData = baseData[ix];
   const count = baseData.length;
@@ -179,6 +177,7 @@ function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, sel
 const AppToaster = OverlayToaster.create();
 
 function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedback, selectedFeedbackType }) {
+  console.log("DATA", data)
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model, version_id } = window;
   const { user } = useAuth();
