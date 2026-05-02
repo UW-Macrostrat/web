@@ -81,19 +81,6 @@ export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {
   return res.data.features;
 }
 
-export async function runColumnQuery(column, cancelToken) {
-  const res = await axios.get(base + "/units", {
-    cancelToken,
-    responseType: "json",
-    params: { response: "long", col_id: column.col_id },
-  });
-  try {
-    return res.data.success.data;
-  } catch (error) {
-    return [];
-  }
-}
-
 /* PBDB data */
 // use new cancellation API
 

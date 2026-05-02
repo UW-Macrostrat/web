@@ -292,7 +292,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   isFetching: boolean;
   crossSectionLine: LineString | null;
   crossSectionCursorLocation: any;
-  infoMarkerPosition: InfoMarkerPosition;
+  infoMarkerPosition: InfoMarkerPosition | null;
   timeCursorAge: number | null;
   plateModelId: number | null;
   focusedMapSource: number | null;

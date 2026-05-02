@@ -181,6 +181,7 @@ function useMapClickHandler(pbdbPoints) {
           return f.properties;
         });
 
+      /** Here is where we actually do a query */
       runAction({
         type: "start-map-query",
         lng: event.lngLat.lng,

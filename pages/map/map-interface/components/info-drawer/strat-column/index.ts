@@ -7,7 +7,15 @@ import { UnitDetailsFeature, Identifier } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
 import { useMemo, useState } from "react";
 import { ModalUnitPanel } from "#/columns/@column/column-inspector/modal-panel";
-import { useAppActions } from "../../../app-state";
+import { columnInfoAtom, useAppActions } from "../../../app-state";
+import { useAtomValue } from "jotai";
+
+export function StratColumn() {
+  const { data: columnInfo } = useAtomValue(columnInfoAtom);
+  console.log("columnInfo (column)", columnInfo);
+
+  return h(PatternProvider, h(ColumnOverlay, { columnInfo }));
+}
 
 function BackButton() {
   const runAction = useAppActions();
@@ -74,8 +82,4 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
       ]),
     }),
   ]);
-}
-
-export function StratColumn(props) {
-  return h(PatternProvider, h(ColumnOverlay, props));
 }
