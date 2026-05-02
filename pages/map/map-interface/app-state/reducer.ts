@@ -24,7 +24,6 @@ const defaultState: CoreState = {
   },
   // Events and tokens for xhr
   isFetching: false,
-  fetchingColumnInfo: false,
   columnInfoCancelToken: null,
   isSearching: false,
   inputFocus: false,
@@ -33,7 +32,6 @@ const defaultState: CoreState = {
   fetchingElevation: false,
   elevationCancelToken: null,
   fetchingPbdb: false,
-  columnInfo: null,
   searchResults: null,
   pbdbData: [],
   mapIsLoading: false,

@@ -61,7 +61,6 @@ type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
 
-type GET_COLUMN_UNITS = { type: "get-column-units"; column: ColumnProperties };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
 
 type TOGGLE_MENU = { type: "toggle-menu" };
@@ -187,7 +186,6 @@ export type CoreAction =
   | SET_INPUT_FOCUS
   | SET_SEARCH_TERM
   | GET_PBDB
-  | GET_COLUMN_UNITS
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
@@ -230,7 +228,6 @@ export type CoreAction =
 interface AsyncRequestState {
   // Events and tokens for xhr
   // NOTE: we should really improve some of this token infrastructure
-  fetchingColumnInfo: boolean;
   isSearching: boolean;
   term: string;
   fetchingElevation: boolean;
@@ -286,7 +283,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   plateModelId: number | null;
   focusedMapSource: number | null;
   mapSettings: MapSettings;
-  columnInfo: ColumnSummary | null;
   searchResults: any;
   inputFocus: boolean;
   pbdbData: any[];

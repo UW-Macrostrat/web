@@ -3,14 +3,13 @@ import { RegionalStratigraphy } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
 import {
-  columnInfoAtom,
   selectedColumnMetadataAtom,
   useAppActions,
   useAppState,
 } from "../../app-state";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { Physiography } from "./physiography.ts";
 import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 
@@ -47,9 +46,6 @@ function InfoDrawerInner(props) {
   useAtomDevtools(mapInfoAtom);
 
   const mapInfo = useAtomValue(mapInfoAtom);
-  useEffect(() => {
-    console.log("mapInfo changed", mapInfo);
-  }, [mapInfo]);
 
   const loading = useAtomValue(loadingAtom);
   const elevation = useAtomValue(elevationAtom);
@@ -110,8 +106,6 @@ function InfoDrawerMainPanel({ mapInfo, columnInfo, loading }) {
 
   const matchedStratNames = mapData?.[0]?.macrostrat?.strat_names ?? [];
   const terms = matchedStratNames.map((s) => s.rank_name);
-
-  console.log("Column info", columnInfo);
 
   let source = mapData?.[0] ?? {
     name: null,
