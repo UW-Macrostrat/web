@@ -4,7 +4,7 @@ import {
   MapLayer,
   useAppActions,
 } from "#/map/map-interface/app-state";
-import { ColumnProperties } from "#/map/map-interface/app-state/handlers/columns";
+import { ColumnProperties } from "#/map/map-interface/app-state/columns/columns.ts";
 import {
   useMapRef,
   useMapStatus,

@@ -4,8 +4,7 @@ import {
   ColumnGeoJSONRecord,
   ColumnProperties,
   ColumnSummary,
-} from "./handlers/columns";
-import { UnitLong } from "@macrostrat/api-types";
+} from "./columns/utils";
 import { LineString } from "geojson";
 
 import type { MapPosition } from "@macrostrat/mapbox-utils";
@@ -81,14 +80,6 @@ type CLEAR_FILTERS = { type: "clear-filters" };
 type START_MAP_QUERY = {
   type: "start-map-query";
 } & MapLocation;
-type RECEIVED_MAP_QUERY = { type: "received-map-query"; data: any };
-
-type START_COLUMN_QUERY = { type: "start-column-query"; cancelToken: any };
-type RECEIVED_COLUMN_QUERY = {
-  type: "received-column-query";
-  data: UnitLong[];
-  column: ColumnProperties;
-};
 
 type MAP_LAYERS_CHANGED = {
   type: "map-layers-changed";
@@ -210,8 +201,6 @@ export type CoreAction =
   | REMOVE_FILTER
   | UPDATE_COLUMN_FILTERS
   | START_MAP_QUERY
-  | START_COLUMN_QUERY
-  | RECEIVED_COLUMN_QUERY
   | START_PBDB_QUERY
   | RECEIVED_PBDB_QUERY
   | RESET_PBDB

@@ -1,7 +1,7 @@
 import { apiV2Prefix, SETTINGS } from "@macrostrat-web/settings";
 import axios from "axios";
 import { joinURL } from "@macrostrat/ui-components";
-import { ColumnGeoJSONRecord } from "./columns";
+import { ColumnGeoJSONRecord } from "../columns/columns.ts";
 import { UPDATE_COLUMN_FILTERS } from "../types";
 import { FilterType } from "./filters";
 

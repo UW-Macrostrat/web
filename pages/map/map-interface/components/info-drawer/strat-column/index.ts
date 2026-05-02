@@ -1,7 +1,7 @@
 import { Column, ColoredUnitComponent } from "@macrostrat/column-views";
 
 import h from "./index.module.sass";
-import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
+import { ColumnSummary } from "#/map/map-interface/app-state/columns/columns.ts";
 import { NonIdealState, Button } from "@blueprintjs/core";
 import { UnitDetailsFeature, Identifier } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";

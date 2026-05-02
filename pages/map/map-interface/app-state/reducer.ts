@@ -1,7 +1,6 @@
 import { AppAction, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "./handlers/filters";
-import { assembleColumnSummary } from "./handlers/columns";
 import { updateStateFromLocation } from "./navigation";
 
 export { MapLayer };
@@ -167,31 +166,9 @@ export function coreReducer(
         mapIsMoving: true,
         infoDrawerOpen: true,
       };
-    case "start-column-query":
-      if (
-        state.columnInfoCancelToken &&
-        state.columnInfoCancelToken != action.cancelToken
-      ) {
-        state.columnInfoCancelToken.cancel();
-      }
-      return {
-        ...state,
-        fetchingColumnInfo: true,
-        columnInfo: null,
-        columnInfoCancelToken: action.cancelToken,
-      };
-
     case "set-all-columns":
       return { ...state, allColumns: action.columns };
 
-    case "received-column-query":
-      return {
-        ...state,
-        fetchingColumnInfo: false,
-        columnInfo: assembleColumnSummary(action.column, action.data),
-      };
-    case "clear-column-info":
-      return { ...state, columnInfo: null, fetchingColumnInfo: false };
     case "toggle-map-layer":
       const op = state.mapLayers.has(action.layer) ? "$remove" : "$add";
       const mapLayers: Spec<Set<MapLayer>, any> = {
