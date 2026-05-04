@@ -1,13 +1,21 @@
 import { Column, ColoredUnitComponent } from "@macrostrat/column-views";
 
 import h from "./index.module.sass";
-import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
+import { ColumnSummary } from "../../../app-state/columns/columns.ts";
 import { NonIdealState, Button } from "@blueprintjs/core";
 import { UnitDetailsFeature, Identifier } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
 import { useMemo, useState } from "react";
 import { ModalUnitPanel } from "#/columns/@column/column-inspector/modal-panel";
-import { useAppActions } from "../../../app-state";
+import { columnInfoAtom, useAppActions } from "../../../app-state";
+import { useAtomValue } from "jotai";
+
+export function StratColumn() {
+  const { data: columnInfo } = useAtomValue(columnInfoAtom);
+  console.log("columnInfo (column)", columnInfo);
+
+  return h(PatternProvider, h(ColumnOverlay, { columnInfo }));
+}
 
 function BackButton() {
   const runAction = useAppActions();
@@ -55,7 +63,7 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
         unitComponent: ColoredUnitComponent,
         showLabelColumn: false,
         targetUnitHeight: 25,
-        unconformityLabels: true,
+        unconformityLabels: "minimal",
         width: 280,
         columnWidth: 240,
         allowUnitSelection: true,
@@ -74,8 +82,4 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
       ]),
     }),
   ]);
-}
-
-export function StratColumn(props) {
-  return h(PatternProvider, h(ColumnOverlay, props));
 }

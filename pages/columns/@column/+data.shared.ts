@@ -4,7 +4,7 @@ import { apiV2Prefix } from "@macrostrat-web/settings";
 import {
   assembleColumnSummary,
   ColumnSummary,
-} from "#/map/map-interface/app-state/handlers/columns";
+} from "#/map/map-interface/app-state/columns/columns.ts";
 import { fetchProjectData, getAndUnwrap } from "~/_utils";
 
 export async function data(pageContext) {

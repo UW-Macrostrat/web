@@ -2,10 +2,14 @@ import { LocationPanel } from "@macrostrat/map-interface";
 import { RegionalStratigraphy } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
-import { useAppActions, useAppState } from "../../app-state";
+import {
+  selectedColumnMetadataAtom,
+  useAppActions,
+  useAppState,
+} from "../../app-state";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { Physiography } from "./physiography.ts";
 import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 
@@ -18,7 +22,6 @@ import { useAtomDevtools } from "jotai-devtools";
 const loadingAtom = atom((get) => get(mapInfoAtom).state == "loading");
 const mapInfoDataAtom = atom((get) => {
   const mapInfoRes = get(mapInfoAtom);
-  console.log("mapInfoDataAtom", mapInfoRes.state, mapInfoRes.data);
   return mapInfoRes.data;
 });
 
@@ -43,9 +46,6 @@ function InfoDrawerInner(props) {
   useAtomDevtools(mapInfoAtom);
 
   const mapInfo = useAtomValue(mapInfoAtom);
-  useEffect(() => {
-    console.log("mapInfo changed", mapInfo);
-  }, [mapInfo]);
 
   const loading = useAtomValue(loadingAtom);
   const elevation = useAtomValue(elevationAtom);
@@ -84,8 +84,10 @@ function InfoDrawerInner(props) {
 
 function InfoDrawerContent() {
   const isShowingColumnPage = useAppState((state) => state.isShowingColumnPage);
-  const columnInfo = useAppState((state) => state.columnInfo);
-  const mapInfo = useAtomValue(mapInfoDataAtom);
+  const { data: mapInfo, state: mapInfoState } = useAtomValue(mapInfoAtom);
+  const columnInfo = useAtomValue(selectedColumnMetadataAtom);
+
+  const loading = mapInfoState === "loading";
 
   if (isShowingColumnPage) {
     return h(StratColumn, { columnInfo });
@@ -93,11 +95,12 @@ function InfoDrawerContent() {
     return h(InfoDrawerMainPanel, {
       mapInfo,
       columnInfo,
+      loading,
     });
   }
 }
 
-function InfoDrawerMainPanel({ mapInfo, columnInfo }) {
+function InfoDrawerMainPanel({ mapInfo, columnInfo, loading }) {
   if (mapInfo == null) return null;
   const { mapData } = mapInfo;
 
@@ -123,6 +126,7 @@ function InfoDrawerMainPanel({ mapInfo, columnInfo }) {
     h.if(columnInfo != null)(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
+      loading,
       source,
       expanded: true,
     }),
