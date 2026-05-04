@@ -1,7 +1,7 @@
 import { Column, ColoredUnitComponent } from "@macrostrat/column-views";
 
 import h from "./index.module.sass";
-import { ColumnSummary } from "#/map/map-interface/app-state/columns/columns.ts";
+import { ColumnSummary } from "../../../app-state/columns/columns.ts";
 import { NonIdealState, Button } from "@blueprintjs/core";
 import { UnitDetailsFeature, Identifier } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
@@ -63,7 +63,7 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
         unitComponent: ColoredUnitComponent,
         showLabelColumn: false,
         targetUnitHeight: 25,
-        unconformityLabels: true,
+        unconformityLabels: "minimal",
         width: 280,
         columnWidth: 240,
         allowUnitSelection: true,
