@@ -252,12 +252,18 @@ function RowActions({ rows, dispatch, data, updateProps }) {
     return null;
   }
 
-  console.log(data);
-  const allRowsChecked = rows.every((i) => toBoolean(data[i]["omit"]));
-  const allRowsUnchecked = rows.every((i) => !toBoolean(data[i]["omit"]));
+  const validRows = rows.filter((i) => data?.[i] != null);
+
+  if (validRows.length === 0) {
+    return null;
+  }
+
+  const allRowsChecked = validRows.every((i) => toBoolean(data[i]?.omit));
+  const allRowsUnchecked = validRows.every((i) => !toBoolean(data[i]?.omit));
 
   let checked = null;
   const indeterminate = !(allRowsChecked || allRowsUnchecked);
+
   if (!indeterminate) {
     checked = allRowsChecked;
   }
@@ -265,23 +271,18 @@ function RowActions({ rows, dispatch, data, updateProps }) {
   const { url, dataParameters } = updateProps;
 
   return h("div.table-actions", {}, [
-    // Omit rows
     h(Checkbox, {
       checked,
       indeterminate,
       label: "Omit Rows",
       onChange: (e) => {
-        // Get boolean value
         const value = e.target.checked;
-        // If state is indeterminate, do nothing
         if (value == null) return;
 
-        // Synthesize updates (we don't support multi-row or ranged updates currently)
-        const updates = rows.map((i) => {
+        const updates = validRows.map((i) => {
           return createTableUpdate(url, value, "omit", data[i], dataParameters);
         });
 
-        // Dispatch updates
         dispatch({ type: "addTableUpdates", tableUpdates: updates });
       },
     }),
