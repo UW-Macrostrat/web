@@ -10,7 +10,9 @@ export const allColumnsAtom = atom((get) => {
 });
 export const selectedColumnMetadataAtom = atom((get) => {
   const pos = get(infoMarkerPositionAtom);
+  if (pos == null) return null;
   const allColumns = get(allColumnsAtom);
+  if (allColumns == null) return null;
 
   const providedColumns = findColumnsForLocation(allColumns ?? [], pos).map(
     (c) => c.properties

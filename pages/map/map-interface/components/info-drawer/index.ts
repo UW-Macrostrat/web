@@ -3,6 +3,7 @@ import { RegionalStratigraphy } from "./macrostrat-linked";
 import { GeologicMapInfo } from "./geo-map";
 import { XddExpansionContainer } from "./xdd-panel";
 import {
+  infoMarkerPositionAtom,
   selectedColumnMetadataAtom,
   useAppActions,
   useAppState,
@@ -57,7 +58,8 @@ function InfoDrawerInner(props) {
     [runAction]
   );
 
-  const position = useAppState((state) => state.infoMarkerPosition);
+  const position = useAtomValue(infoMarkerPositionAtom);
+
   const zoom = useAppState((state) => state.mapPosition.target?.zoom);
 
   /** Clicking near edmondton at scale small never loads */
