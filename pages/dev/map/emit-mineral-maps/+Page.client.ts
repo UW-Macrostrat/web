@@ -1,22 +1,21 @@
 import h from "@macrostrat/hyper";
 // Import other components
-import { mapboxAccessToken } from "@macrostrat-web/settings";
+import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 // Import other components
-import { Spacer, useDarkMode } from "@macrostrat/ui-components";
-import { useState, useEffect } from "react";
+import { Box, Spacer } from "@macrostrat/ui-components";
+import { useState } from "react";
 import {
   FloatingNavbar,
   MapLoadingButton,
   MapAreaContainer,
-  buildInspectorStyle,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { boundingGeometryMapStyle } from "~/map-styles";
 import { atom, useAtom, useAtomValue } from "jotai";
-import { ControlGroup, FormGroup, HTMLSelect } from "@blueprintjs/core";
+import { ControlGroup, FormGroup, HTMLSelect, Slider } from "@blueprintjs/core";
 import { loadable } from "jotai/utils";
 import { useMapEaseTo } from "@macrostrat/mapbox-react";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 
 export function Page() {
   const [isOpen, setOpen] = useState(false);
@@ -24,7 +23,7 @@ export function Page() {
   const mapBounds = useAtomValue(mapBoundsAtom);
   const rasterOverlayStyle = useAtomValue(mapOverlayStyleAtom);
 
-  const overlayStyles = [rasterOverlayStyle];
+  const overlayStyles = [macrostratStyle, rasterOverlayStyle];
 
   return h(
     MapAreaContainer,
@@ -92,27 +91,15 @@ const cogURLAtom = atom((get) => {
   return `${bucketURL}${selectedMap}.tif`;
 });
 
-const tileLayerAtom = atom((get) => {
-  const url = get(cogURLAtom);
-  return {
-    id: "mineral-maps",
-    type: "raster",
-    source: {
-      type: "raster",
-      tiles: [`${baseURL}/tiles/{z}/{x}/{y}?url=${encodeURIComponent(url)}`],
-      tileSize: 256,
-    },
-  };
-});
-
 const mapOverlayStyleAtom = atom((get) => {
+  const opacity = get(rasterOpacityAtom);
   return {
     version: 8,
     sources: {
       "mineral-maps": {
         type: "raster",
         tiles: [
-          `${baseURL}/tiles/{z}/{x}/{y}?url=${encodeURIComponent(
+          `${baseURL}/tiles/{z}/{x}/{y}@2x?resampling=nearest&url=${encodeURIComponent(
             get(cogURLAtom)
           )}`,
         ],
@@ -122,10 +109,19 @@ const mapOverlayStyleAtom = atom((get) => {
       {
         type: "raster",
         source: "mineral-maps",
+        paint: {
+          "raster-opacity": opacity,
+        },
       },
     ],
   };
 });
+
+const macrostratStyle = buildMacrostratStyle({
+  tileserverDomain: burwellTileDomain,
+  fillOpacity: 0.1,
+  strokeOpacity: 0.2,
+}) as mapboxgl.Style;
 
 const layerInfoAtom = atom(async (get, { signal }) => {
   const url = get(cogURLAtom);
@@ -144,6 +140,10 @@ const layerInfoLoadableAtom = loadable(layerInfoAtom);
 
 function MapSelectorPanel() {
   return h("div.map-selector-panel", [
+    h(
+      "p",
+      "EMIT mineral maps created by Zaid Al-Attar and Thomas Monecke, Colorado School of Mines."
+    ),
     h(SelectedMapControl),
     h(LayerErrorReporter),
   ]);
@@ -177,7 +177,31 @@ function SelectedMapControl() {
         }),
       ])
     ),
+    h(RasterOpacitySlider),
   ]);
+}
+
+const rasterOpacityAtom = atom(0.8);
+
+function RasterOpacitySlider() {
+  const [opacity, setOpacity] = useAtom(rasterOpacityAtom);
+  return h(
+    FormGroup,
+    { label: "Raster opacity" },
+    h(
+      Box,
+      { paddingX: 20 },
+      h(Slider, {
+        min: 0,
+        max: 1,
+        stepSize: 0.05,
+        value: opacity,
+        onChange: (v) => {
+          setOpacity(v);
+        },
+      })
+    )
+  );
 }
 
 function LayerErrorReporter() {
