@@ -1,7 +1,7 @@
 import { apiV2Prefix, SETTINGS } from "@macrostrat-web/settings";
 import axios from "axios";
 import { joinURL } from "@macrostrat/ui-components";
-import { ColumnGeoJSONRecord } from "./columns";
+import { ColumnGeoJSONRecord } from "../columns/columns.ts";
 import { UPDATE_COLUMN_FILTERS } from "../types";
 import { FilterType } from "./filters";
 
@@ -79,19 +79,6 @@ export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {
   });
 
   return res.data.features;
-}
-
-export async function runColumnQuery(column, cancelToken) {
-  const res = await axios.get(base + "/units", {
-    cancelToken,
-    responseType: "json",
-    params: { response: "long", col_id: column.col_id },
-  });
-  try {
-    return res.data.success.data;
-  } catch (error) {
-    return [];
-  }
 }
 
 /* PBDB data */

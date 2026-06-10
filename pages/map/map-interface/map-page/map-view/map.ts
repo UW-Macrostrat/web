@@ -4,7 +4,7 @@ import {
   MapLayer,
   useAppActions,
 } from "#/map/map-interface/app-state";
-import { ColumnProperties } from "#/map/map-interface/app-state/handlers/columns";
+import { ColumnProperties } from "#/map/map-interface/app-state/columns/columns.ts";
 import {
   useMapRef,
   useMapStatus,
@@ -181,6 +181,7 @@ function useMapClickHandler(pbdbPoints) {
           return f.properties;
         });
 
+      /** Here is where we actually do a query */
       runAction({
         type: "start-map-query",
         lng: event.lngLat.lng,

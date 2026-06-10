@@ -1,6 +1,6 @@
 import { Button, Checkbox } from "@blueprintjs/core";
 import { RegionCardinality } from "@blueprintjs/table";
-import { useCallback } from "react";
+import { useCallback, useReducer } from "react";
 import { createTableUpdate, DataParameters } from "../utils";
 import { DataSheet } from "@macrostrat/data-sheet";
 import { toBoolean } from "../components";
@@ -19,7 +19,7 @@ const INTERNAL_COLUMNS = ["_pkid", "source_id", "omit"];
 export interface EditTableProps {
   url: string;
   ingestProcessId: number;
-  finalColumns: string[];
+  columns: string[];
   columnGenerator: (props: ColumnConfigGenerator) => ColumnConfig;
   featureType: FeatureType;
 }
@@ -39,10 +39,12 @@ function editColumnForFeatureType(featureType: FeatureType) {
 /** Switch to Jotai based state */
 
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { initialState, tableDataReducer } from "./reducer.ts";
 
 const tableDataAtom = atom<any[]>([]);
 const isLoadingAtom = atom(false);
 const nextPageAtom = atom(0);
+const isDoneLoadingAtom = atom(false);
 
 async function getData(url: string, parameters: DataParameters) {
   const params = new URLSearchParams(parameters);
@@ -60,8 +62,9 @@ async function getData(url: string, parameters: DataParameters) {
 
 const loadMoreDataAtom = atom(null, (get, set, { url, parameters }) => {
   // First, get current data length
-  if (get(isLoadingAtom)) return;
+  if (get(isLoadingAtom) || get(isDoneLoadingAtom)) return;
 
+  console.log("Loading more data");
   const currentData = get(tableDataAtom);
   const pageSize = 100;
   const nextPage = get(nextPageAtom);
@@ -80,9 +83,15 @@ const loadMoreDataAtom = atom(null, (get, set, { url, parameters }) => {
   }
 
   getData(url, params).then((newData) => {
-    set(tableDataAtom, [...currentData, ...newData]);
+    const nextTableData = [...currentData, ...newData];
+    set(tableDataAtom, nextTableData);
     set(isLoadingAtom, false);
-    set(nextPageAtom, nextPage + 1);
+    const expectedDataLength = (nextPage + 1) * pageSize;
+    if (newData.length < pageSize) {
+      set(isDoneLoadingAtom, true);
+    } else {
+      set(nextPageAtom, nextPage + 1);
+    }
   });
 });
 
@@ -94,7 +103,18 @@ function useLoadData(url: string, params = {}) {
   );
 }
 
-export function TableInterface({ url }: EditTableProps) {
+export function TableInterface({
+  ref,
+  columns,
+  url,
+  ingestProcessId,
+  featureType,
+}: EditTableProps) {
+  const [tableData1, dispatch] = useReducer(tableDataReducer, {
+    ...initialState,
+    allColumns: columns,
+  });
+
   const data = useAtomValue(tableDataAtom);
   const loadMoreData = useLoadData(url, {});
 
@@ -232,12 +252,18 @@ function RowActions({ rows, dispatch, data, updateProps }) {
     return null;
   }
 
-  console.log(data);
-  const allRowsChecked = rows.every((i) => toBoolean(data[i]["omit"]));
-  const allRowsUnchecked = rows.every((i) => !toBoolean(data[i]["omit"]));
+  const validRows = rows.filter((i) => data?.[i] != null);
+
+  if (validRows.length === 0) {
+    return null;
+  }
+
+  const allRowsChecked = validRows.every((i) => toBoolean(data[i]?.omit));
+  const allRowsUnchecked = validRows.every((i) => !toBoolean(data[i]?.omit));
 
   let checked = null;
   const indeterminate = !(allRowsChecked || allRowsUnchecked);
+
   if (!indeterminate) {
     checked = allRowsChecked;
   }
@@ -245,23 +271,18 @@ function RowActions({ rows, dispatch, data, updateProps }) {
   const { url, dataParameters } = updateProps;
 
   return h("div.table-actions", {}, [
-    // Omit rows
     h(Checkbox, {
       checked,
       indeterminate,
       label: "Omit Rows",
       onChange: (e) => {
-        // Get boolean value
         const value = e.target.checked;
-        // If state is indeterminate, do nothing
         if (value == null) return;
 
-        // Synthesize updates (we don't support multi-row or ranged updates currently)
-        const updates = rows.map((i) => {
+        const updates = validRows.map((i) => {
           return createTableUpdate(url, value, "omit", data[i], dataParameters);
         });
 
-        // Dispatch updates
         dispatch({ type: "addTableUpdates", tableUpdates: updates });
       },
     }),

@@ -4,8 +4,7 @@ import {
   ColumnGeoJSONRecord,
   ColumnProperties,
   ColumnSummary,
-} from "./handlers/columns";
-import { UnitLong } from "@macrostrat/api-types";
+} from "./columns/utils";
 import { LineString } from "geojson";
 
 import type { MapPosition } from "@macrostrat/mapbox-utils";
@@ -62,7 +61,6 @@ type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
 
-type GET_COLUMN_UNITS = { type: "get-column-units"; column: ColumnProperties };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
 
 type TOGGLE_MENU = { type: "toggle-menu" };
@@ -81,14 +79,6 @@ type CLEAR_FILTERS = { type: "clear-filters" };
 type START_MAP_QUERY = {
   type: "start-map-query";
 } & MapLocation;
-type RECEIVED_MAP_QUERY = { type: "received-map-query"; data: any };
-
-type START_COLUMN_QUERY = { type: "start-column-query"; cancelToken: any };
-type RECEIVED_COLUMN_QUERY = {
-  type: "received-column-query";
-  data: UnitLong[];
-  column: ColumnProperties;
-};
 
 type MAP_LAYERS_CHANGED = {
   type: "map-layers-changed";
@@ -196,7 +186,6 @@ export type CoreAction =
   | SET_INPUT_FOCUS
   | SET_SEARCH_TERM
   | GET_PBDB
-  | GET_COLUMN_UNITS
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
@@ -210,8 +199,6 @@ export type CoreAction =
   | REMOVE_FILTER
   | UPDATE_COLUMN_FILTERS
   | START_MAP_QUERY
-  | START_COLUMN_QUERY
-  | RECEIVED_COLUMN_QUERY
   | START_PBDB_QUERY
   | RECEIVED_PBDB_QUERY
   | RESET_PBDB
@@ -241,7 +228,6 @@ export type CoreAction =
 interface AsyncRequestState {
   // Events and tokens for xhr
   // NOTE: we should really improve some of this token infrastructure
-  fetchingColumnInfo: boolean;
   isSearching: boolean;
   term: string;
   fetchingElevation: boolean;
@@ -292,12 +278,11 @@ export interface CoreState extends MapState, AsyncRequestState {
   isFetching: boolean;
   crossSectionLine: LineString | null;
   crossSectionCursorLocation: any;
-  infoMarkerPosition: InfoMarkerPosition;
+  infoMarkerPosition: InfoMarkerPosition | null;
   timeCursorAge: number | null;
   plateModelId: number | null;
   focusedMapSource: number | null;
   mapSettings: MapSettings;
-  columnInfo: ColumnSummary | null;
   searchResults: any;
   inputFocus: boolean;
   pbdbData: any[];

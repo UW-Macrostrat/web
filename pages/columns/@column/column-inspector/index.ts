@@ -97,7 +97,10 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
           MacrostratColumnStateProvider,
           {
             units,
-            onUnitSelected: setSelectedUnitID,
+            onUnitSelected(d) {
+              console.log("Selected unit", d);
+              setSelectedUnitID(d);
+            },
             selectedUnit: selectedUnitID,
           },
           [

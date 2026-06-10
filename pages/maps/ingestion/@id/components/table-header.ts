@@ -104,8 +104,11 @@ export const TableHeader = ({
         h(
           Button,
           {
-            type: "submit",
-            onClick: submitTableUpdates,
+            type: "button",
+            onClick: async (event) => {
+              event?.preventDefault?.();
+              await submitTableUpdates();
+            },
             disabled: tableUpdates.length == 0,
             intent: "success",
           },

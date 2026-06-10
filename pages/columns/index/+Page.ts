@@ -31,7 +31,7 @@ import { postgrest } from "~/_providers";
  */
 
 import { atom, useAtom, useAtomValue, useSetAtom, Provider } from "jotai";
-import { unwrap, useHydrateAtoms } from "jotai/utils";
+import { atomWithStorage, unwrap, useHydrateAtoms } from "jotai/utils";
 import { debounce } from "underscore";
 import { onDemand } from "~/_utils";
 
@@ -65,7 +65,7 @@ const addFilterAtom = atom(null, (_, set, data: ColumnFilterDef) => {
 });
 
 const showEmptyAtom = atom(true);
-const showInProcessAtom = atom(false);
+const showInProcessAtom = atomWithStorage("macrostrat:show-in-process", false);
 
 const inputTextAtom = atom("");
 

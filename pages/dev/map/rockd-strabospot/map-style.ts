@@ -92,7 +92,7 @@ function buildCheckinStyle(darkMode) {
 
 export function getColors(darkMode): { checkins: string; spots: string } {
   return {
-    checkins: darkMode ? "#8561f5" : "#7426d3",
-    spots: darkMode ? "#3fea71" : "#1d9a44",
+    checkins: "#8561f5",
+    spots: "magenta",
   };
 }
