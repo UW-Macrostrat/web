@@ -1,3 +1,20 @@
+// Temporary local fixes for the floating navbar header. The title block
+// otherwise inherits a large default heading size and margins, and the navbar
+// grows to fit it. Ideally map-interface/PageBreadcrumbs would expose this.
+.topology-navbar {
+  :global(.page-nav) {
+    gap: 2px;
+  }
+
+  :global(.title-block) {
+    h1 {
+      font-size: 1.4rem;
+      line-height: 1.2;
+      margin: 0;
+    }
+  }
+}
+
 .layer-selector {
   .layer-field {
     margin-bottom: 0;

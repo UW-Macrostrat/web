@@ -43,7 +43,8 @@ import {
 } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { loadable } from "jotai/utils";
-import { Link } from "~/components";
+import { atomWithLocation } from "jotai-location";
+import { Link, PageBreadcrumbs } from "~/components";
 import styles from "./main.module.scss";
 
 const h = hyper.styled(styles);
@@ -73,8 +74,30 @@ const layersAtom = atom(async (get, { signal }): Promise<TopologyLayer[]> => {
 
 const layersLoadableAtom = loadable(layersAtom);
 
+/** Map state synced to the URL query string, so the current view (selected
+ * layer, polygon overlay) can be recovered from a shared/bookmarked link. */
+const locationAtom = atomWithLocation({ replace: true });
+
+/** Derive a read/write atom backed by a single URL query parameter. Writing
+ * null (or "") removes the parameter, keeping default views out of the URL. */
+function atomWithSearchParam(key: string) {
+  return atom(
+    (get) => get(locationAtom).searchParams?.get(key) ?? null,
+    (get, set, value: string | null) => {
+      const loc = get(locationAtom);
+      const searchParams = new URLSearchParams(loc.searchParams);
+      if (value == null || value === "") {
+        searchParams.delete(key);
+      } else {
+        searchParams.set(key, value);
+      }
+      set(locationAtom, { ...loc, searchParams });
+    }
+  );
+}
+
 /** The slug of the selected map layer, or null for the whole topology. */
-const selectedLayerSlugAtom = atom<string | null>(null);
+const selectedLayerSlugAtom = atomWithSearchParam("layer");
 
 /** Whether to render topology elements (edges + nodes). Off by default. */
 const showElementsAtom = atom(false);
@@ -84,7 +107,15 @@ const showElementsAtom = atom(false);
  * require a selected layer, so "maps" is the default and the whole-topology
  * fallback. */
 type PolygonOverlay = "faces" | "maps";
-const polygonOverlayAtom = atom<PolygonOverlay>("maps");
+const polygonOverlayParamAtom = atomWithSearchParam("polygons");
+const polygonOverlayAtom = atom(
+  (get): PolygonOverlay =>
+    get(polygonOverlayParamAtom) === "faces" ? "faces" : "maps",
+  (get, set, value: PolygonOverlay) => {
+    // Only the non-default ("faces") is stored in the URL.
+    set(polygonOverlayParamAtom, value === "faces" ? "faces" : null);
+  }
+);
 
 /** The selected layer object, resolved from the loaded layer list. */
 const selectedLayerAtom = atom<TopologyLayer | null>((get) => {
@@ -142,19 +173,29 @@ export function Page() {
     );
   }
 
-  const contextPanel = h(PanelCard, h(LayerSelectorPanel));
+  // Temporary width bump — PanelCard doesn't expose a flexible width, so we
+  // widen it here until that can be addressed upstream in map-interface.
+  const contextPanel = h(
+    PanelCard,
+    { style: { width: 280 } },
+    h(LayerSelectorPanel)
+  );
 
   return h(
     MapAreaContainer,
     {
-      navbar: h(FloatingNavbar, [
-        h("h2", selectedLayer?.name ?? "Map topology"),
-        h(Spacer),
-        h(MapLoadingButton, {
-          active: isOpen,
-          onClick: () => setOpen(!isOpen),
-        }),
-      ]),
+      navbar: h(
+        FloatingNavbar,
+        { className: styles["topology-navbar"], width: 340 },
+        [
+          h(PageBreadcrumbs, { separateTitle: true }),
+          h(Spacer),
+          h(MapLoadingButton, {
+            active: isOpen,
+            onClick: () => setOpen(!isOpen),
+          }),
+        ]
+      ),
       contextPanel,
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
