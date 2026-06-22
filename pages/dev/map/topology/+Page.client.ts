@@ -103,7 +103,7 @@ export function Page() {
   const showElements = useAtomValue(showElementsAtom);
 
   const overlayStyles = useMemo(
-    () => [topologyMapStyle(selectedLayer, showElements)],
+    () => topologyOverlayStyles(selectedLayer, showElements),
     [selectedLayer, showElements]
   );
 
@@ -237,49 +237,61 @@ function MapItem({ map }) {
   );
 }
 
-/** Build the topology overlay style for the given layer.
+/** Build the list of independent overlay styles for the current selection.
  *
- * When a layer is selected, its faces are shown. Topology elements (edges +
- * nodes) are rendered on top only when `showElements` is enabled — for the
- * selected layer, or for the whole topology when no layer is selected.
+ * Faces and elements are kept as separate styles (rather than merged into one)
+ * so they can be layered and toggled independently. Faces come first so they
+ * render beneath the elements. Topology elements are included only when
+ * `showElements` is enabled — for the selected layer, or for the whole
+ * topology when no layer is selected.
  */
-function topologyMapStyle(
+function topologyOverlayStyles(
   layer: TopologyLayer | null,
   showElements: boolean
-): mapboxgl.Style {
-  const slug = layer?.slug;
-
-  const sources: mapboxgl.Style["sources"] = {};
-  const layers: mapboxgl.AnyLayer[] = [];
-
-  // Faces render underneath elements, so add them first.
-  if (slug != null) {
-    sources.faces = {
-      type: "vector",
-      tiles: [`${burwellTileDomain}/dev/topology/faces/${slug}/{z}/{x}/{y}`],
-      maxzoom: layer?.max_zoom ?? 9,
-    };
-    layers.push(...buildFaceLayers());
+): mapboxgl.Style[] {
+  const overlays: mapboxgl.Style[] = [];
+  if (layer != null) {
+    overlays.push(facesStyle(layer));
   }
-
   if (showElements) {
-    const elementsTiles =
-      slug != null
-        ? `${burwellTileDomain}/dev/topology/elements/${slug}/{z}/{x}/{y}`
-        : `${burwellTileDomain}/dev/topology/elements/{z}/{x}/{y}`;
-
-    sources.topology = {
-      type: "vector",
-      tiles: [elementsTiles],
-      maxzoom: layer?.max_zoom ?? 9,
-    };
-    layers.push(...buildTopologyLayers());
+    overlays.push(elementsStyle(layer));
   }
+  return overlays;
+}
+
+function facesStyle(layer: TopologyLayer): mapboxgl.Style {
+  return {
+    version: 8,
+    sources: {
+      faces: {
+        type: "vector",
+        tiles: [
+          `${burwellTileDomain}/dev/topology/faces/${layer.slug}/{z}/{x}/{y}`,
+        ],
+        maxzoom: layer.max_zoom ?? 9,
+      },
+    },
+    layers: buildFaceLayers(),
+  };
+}
+
+function elementsStyle(layer: TopologyLayer | null): mapboxgl.Style {
+  const slug = layer?.slug;
+  const tiles =
+    slug != null
+      ? `${burwellTileDomain}/dev/topology/elements/${slug}/{z}/{x}/{y}`
+      : `${burwellTileDomain}/dev/topology/elements/{z}/{x}/{y}`;
 
   return {
     version: 8,
-    sources,
-    layers,
+    sources: {
+      topology: {
+        type: "vector",
+        tiles: [tiles],
+        maxzoom: layer?.max_zoom ?? 9,
+      },
+    },
+    layers: buildTopologyLayers(),
   };
 }
 
