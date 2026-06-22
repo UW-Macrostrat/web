@@ -8,6 +8,8 @@
  * - Topology faces: /faces/{layer}/{z}/{x}/{y} - map_faces for a specific map layer
  * - Topology elements: /elements/{z}/{x}/{y} - edges, nodes for the whole topology
  *                     /elements/{layer}/{z}/{x}/{y} - edges, nodes for a specific map layer
+ * - Maps: /maps/{z}/{x}/{y} - constituent map boundaries
+ *         /maps/{layer}/{z}/{x}/{y} - constituent map boundaries for a specific layer
  *
  *  The {layer} path segment is a map layer's `slug` (e.g. "tiny", "carto-small").
  *
@@ -35,6 +37,8 @@ import {
   FormGroup,
   HTMLSelect,
   Switch,
+  Radio,
+  RadioGroup,
   Spinner,
 } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
@@ -75,6 +79,13 @@ const selectedLayerSlugAtom = atom<string | null>(null);
 /** Whether to render topology elements (edges + nodes). Off by default. */
 const showElementsAtom = atom(false);
 
+/** Which polygon overlay to render. Faces and maps are mutually exclusive;
+ * both carry the source info that powers the contextual click panel. Faces
+ * require a selected layer, so "maps" is the default and the whole-topology
+ * fallback. */
+type PolygonOverlay = "faces" | "maps";
+const polygonOverlayAtom = atom<PolygonOverlay>("maps");
+
 /** The selected layer object, resolved from the loaded layer list. */
 const selectedLayerAtom = atom<TopologyLayer | null>((get) => {
   const slug = get(selectedLayerSlugAtom);
@@ -101,10 +112,16 @@ export function Page() {
 
   const selectedLayer = useAtomValue(selectedLayerAtom);
   const showElements = useAtomValue(showElementsAtom);
+  const polygonOverlay = useAtomValue(polygonOverlayAtom);
 
   const overlayStyles = useMemo(
-    () => topologyOverlayStyles(selectedLayer, showElements),
-    [selectedLayer, showElements]
+    () =>
+      topologyOverlayStyles(
+        selectedLayer,
+        { showElements, polygonOverlay },
+        isEnabled
+      ),
+    [selectedLayer, showElements, polygonOverlay, isEnabled]
   );
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
@@ -169,6 +186,7 @@ function LayerSelectorPanel() {
   const layers = useAtomValue(layersLoadableAtom);
   const [selectedSlug, setSelectedSlug] = useAtom(selectedLayerSlugAtom);
   const [showElements, setShowElements] = useAtom(showElementsAtom);
+  const [polygonOverlay, setPolygonOverlay] = useAtom(polygonOverlayAtom);
 
   let layerControl = null;
   if (layers.state === "loading") {
@@ -196,8 +214,26 @@ function LayerSelectorPanel() {
     );
   }
 
+  // Faces require a selected layer; without one we always fall back to maps.
+  const hasLayer = selectedSlug != null;
+  const polygonValue = hasLayer ? polygonOverlay : "maps";
+
   return h("div.layer-selector", [
     layerControl,
+    h(
+      RadioGroup,
+      {
+        label: "Polygons",
+        inline: true,
+        selectedValue: polygonValue,
+        onChange: (evt) =>
+          setPolygonOverlay(evt.currentTarget.value as PolygonOverlay),
+      },
+      [
+        h(Radio, { label: "Faces", value: "faces", disabled: !hasLayer }),
+        h(Radio, { label: "Maps", value: "maps" }),
+      ]
+    ),
     h(Switch, {
       label: "Show elements",
       checked: showElements,
@@ -207,9 +243,17 @@ function LayerSelectorPanel() {
 }
 
 function MapInspectorPanel({ features }) {
+  // Both the maps and faces sources carry the same source info; a single map
+  // can span many faces, so dedupe by source_id.
+  const seen = new Set();
   let maps = features
-    ?.filter((d) => d.source == "rgeom")
-    ?.map((d) => d.properties);
+    ?.filter((d) => d.source == "maps" || d.source == "faces")
+    ?.map((d) => d.properties)
+    ?.filter((p) => {
+      if (seen.has(p.source_id)) return false;
+      seen.add(p.source_id);
+      return true;
+    });
 
   maps?.sort((a, b) => a.source_id - b.source_id);
 
@@ -227,36 +271,93 @@ function MapInspectorPanel({ features }) {
 }
 
 function MapItem({ map }) {
-  return h(
-    "li",
+  return h("li", [
     h(Link, { href: `/maps/${map.source_id}` }, [
       h("span.name", map.name),
       " ",
       h("code.id", map.source_id),
-    ])
-  );
+    ]),
+    map.scale != null ? h("span.scale", ` ${map.scale}`) : null,
+  ]);
+}
+
+interface TopologyOverlayOptions {
+  showElements: boolean;
+  polygonOverlay: PolygonOverlay;
 }
 
 /** Build the list of independent overlay styles for the current selection.
  *
- * Faces and elements are kept as separate styles (rather than merged into one)
- * so they can be layered and toggled independently. Faces come first so they
- * render beneath the elements. Topology elements are included only when
- * `showElements` is enabled — for the selected layer, or for the whole
- * topology when no layer is selected.
+ * Styles are kept independent (rather than merged into one) so they can be
+ * layered and toggled separately, ordered bottom-to-top. The polygon overlay
+ * is either faces or maps (mutually exclusive); faces require a selected layer,
+ * so we fall back to maps for the whole topology. Topology elements render on
+ * top when enabled.
  */
 function topologyOverlayStyles(
   layer: TopologyLayer | null,
-  showElements: boolean
+  { showElements, polygonOverlay }: TopologyOverlayOptions,
+  darkMode: boolean
 ): mapboxgl.Style[] {
   const overlays: mapboxgl.Style[] = [];
-  if (layer != null) {
+
+  if (polygonOverlay === "faces" && layer != null) {
     overlays.push(facesStyle(layer));
+  } else {
+    overlays.push(mapsStyle(layer, darkMode));
   }
+
   if (showElements) {
     overlays.push(elementsStyle(layer));
   }
   return overlays;
+}
+
+/** Constituent map boundaries, styled like the rgeom bounds on /dev/map/sources.
+ * Clicking these features powers the contextual info panel. */
+function mapsStyle(
+  layer: TopologyLayer | null,
+  darkMode: boolean
+): mapboxgl.Style {
+  const slug = layer?.slug;
+  const tiles =
+    slug != null
+      ? `${burwellTileDomain}/dev/topology/maps/${slug}/{z}/{x}/{y}`
+      : `${burwellTileDomain}/dev/topology/maps/{z}/{x}/{y}`;
+
+  const color = darkMode ? 255 : 20;
+
+  return {
+    version: 8,
+    sources: {
+      maps: {
+        type: "vector",
+        tiles: [tiles],
+        maxzoom: layer?.max_zoom ?? 9,
+      },
+    },
+    layers: [
+      {
+        id: "maps",
+        type: "fill",
+        source: "maps",
+        "source-layer": "maps",
+        paint: {
+          "fill-color": `rgba(${color}, ${color}, ${color}, 0.1)`,
+        },
+      },
+      {
+        id: "maps-line",
+        type: "line",
+        source: "maps",
+        "source-layer": "maps",
+        paint: {
+          "line-color": `rgba(${color}, ${color}, ${color}, 0.5)`,
+          "line-width": 1,
+        },
+      },
+    ],
+  };
 }
 
 function facesStyle(layer: TopologyLayer): mapboxgl.Style {
