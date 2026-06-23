@@ -21,7 +21,7 @@
 import hyper from "@macrostrat/hyper";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { Spacer, useDarkMode, ErrorCallout } from "@macrostrat/ui-components";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MapMarker,
   FloatingNavbar,
@@ -30,8 +30,10 @@ import {
   LocationPanel,
   MapView,
   FeatureSelectionHandler,
+  Features,
   PanelCard,
 } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "@macrostrat/data-components";
 import {
   NonIdealState,
   FormGroup,
@@ -40,6 +42,7 @@ import {
   Collapse,
   SegmentedControl,
   Callout,
+  Tag,
   Spinner,
 } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
@@ -221,7 +224,7 @@ export function Page() {
         },
         position: inspectPosition,
       },
-      h(MapInspectorPanel, { features: data })
+      h(MapInspectorPanel, { position: inspectPosition, features: data })
     );
   }
 
@@ -435,48 +438,169 @@ function WholeTopologyWarning({ mode }: { mode: DisplayMode }) {
   );
 }
 
-function MapInspectorPanel({ features }) {
-  // Both the maps and faces sources carry the same source info; a single map
-  // can span many faces, so dedupe by source_id.
-  const seen = new Set();
-  let maps = features
-    ?.filter((d) => d.source == "maps" || d.source == "faces")
-    ?.map((d) => d.properties)
-    ?.filter((p) => {
-      if (seen.has(p.source_id)) return false;
-      seen.add(p.source_id);
-      return true;
+/** A row from /dev/topology/info: a map present at the clicked point within a
+ * topology layer. `map_face_id` is non-null when that map forms the visible face
+ * there — i.e. it's the active map for that layer at this point. */
+interface TopologyInfoRow {
+  source_id: number;
+  priority: number;
+  map_layer: string;
+  layer_name: string;
+  name: string;
+  slug: string;
+  scale: string | null;
+  is_composite: boolean;
+  map_face_id: number | null;
+}
+
+interface TopologyInfoState {
+  loading: boolean;
+  data: TopologyInfoRow[] | null;
+  error: Error | null;
+}
+
+/** Fetch /dev/topology/info for a clicked point, scoped to a map layer when one
+ * is selected. Uses a raw fetch (like the layers list) since the tileserver
+ * isn't the configured API-provider host. */
+function useTopologyInfo(
+  position: mapboxgl.LngLat | null,
+  mapLayer: string | null
+): TopologyInfoState {
+  const [state, setState] = useState<TopologyInfoState>({
+    loading: false,
+    data: null,
+    error: null,
+  });
+
+  useEffect(() => {
+    if (position == null) {
+      setState({ loading: false, data: null, error: null });
+      return;
+    }
+
+    const controller = new AbortController();
+    setState({ loading: true, data: null, error: null });
+
+    const params = new URLSearchParams({
+      lng: String(position.lng),
+      lat: String(position.lat),
     });
+    if (mapLayer != null) params.set("map_layer", mapLayer);
 
-  maps?.sort((a, b) => a.source_id - b.source_id);
+    fetch(`${burwellTileDomain}/dev/topology/info?${params}`, {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load info: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .then((data) => setState({ loading: false, data, error: null }))
+      .catch((error) => {
+        if (error.name === "AbortError") return;
+        setState({ loading: false, data: null, error });
+      });
 
-  if (maps == null || maps.length == 0) {
-    return h(NonIdealState, { icon: "map", title: "No maps found" });
+    return () => controller.abort();
+  }, [position?.lng, position?.lat, mapLayer]);
+
+  return state;
+}
+
+/** Vector-tile sources rendered by this page; everything else queried at the
+ * click point is basemap noise we keep out of the primitives callout. */
+const TOPOLOGY_SOURCES = new Set(["maps", "faces", "topology"]);
+
+function MapInspectorPanel({ position, features }) {
+  return h("div.map-inspector", [
+    h(TopologyMapsList, { position }),
+    h(TileFeaturesCallout, { features }),
+  ]);
+}
+
+/** Maps present at the clicked point (from /dev/topology/info), grouped by
+ * topology layer, with the active map (the one forming the face) tagged. */
+function TopologyMapsList({ position }: { position: mapboxgl.LngLat }) {
+  const layerSlug = useAtomValue(selectedLayerSlugAtom);
+  const { loading, data, error } = useTopologyInfo(position, layerSlug);
+
+  if (loading) return h(Spinner);
+  if (error != null) return h(ErrorCallout, { error });
+  if (data == null || data.length === 0) {
+    return h(NonIdealState, { icon: "map", title: "No maps here" });
   }
 
-  return h("div", [
-    h("h2", "Maps"),
+  // Group rows by topology layer, preserving the API's priority ordering.
+  const groups = new Map<string, TopologyInfoRow[]>();
+  for (const row of data) {
+    let rows = groups.get(row.map_layer);
+    if (rows == null) {
+      rows = [];
+      groups.set(row.map_layer, rows);
+    }
+    rows.push(row);
+  }
+
+  return h(
+    "div.topology-maps",
+    Array.from(groups.values()).map((rows) =>
+      h(TopologyLayerGroup, { key: rows[0].map_layer, rows })
+    )
+  );
+}
+
+function TopologyLayerGroup({ rows }: { rows: TopologyInfoRow[] }) {
+  return h("div.topology-layer-group", [
+    h("h3.layer-name", rows[0].layer_name),
     h(
-      "ul",
-      maps.map((d) => h(MapItem, { map: d }))
+      "ul.map-list",
+      rows.map((row) => h(TopologyMapItem, { key: row.source_id, map: row }))
     ),
   ]);
 }
 
-function MapItem({ map }) {
+function TopologyMapItem({ map }: { map: TopologyInfoRow }) {
+  let activeTag = null;
+  if (map.map_face_id != null) {
+    activeTag = h(
+      Tag,
+      { minimal: true, round: true, intent: "success" },
+      "active"
+    );
+  }
+
   let scale = null;
   if (map.scale != null) {
     scale = h("span.scale", ` ${map.scale}`);
   }
 
-  return h("li", [
+  return h("li.map-item", [
     h(Link, { href: `/maps/${map.source_id}` }, [
       h("span.name", map.name),
       " ",
       h("code.id", map.source_id),
     ]),
     scale,
+    activeTag,
   ]);
+}
+
+/** The raw vector-tile features at the click point, shown as collapsible
+ * primitive properties via the shared dev feature-display components. */
+function TileFeaturesCallout({ features }) {
+  let primitives = null;
+  if (features != null) {
+    primitives = features.filter((f) => TOPOLOGY_SOURCES.has(f.source));
+  }
+
+  if (primitives == null || primitives.length === 0) return null;
+
+  return h(
+    ExpansionPanel,
+    { title: "Tile features", className: "tile-features", expanded: false },
+    h(Features, { features: primitives })
+  );
 }
 
 /** Build the overlay style(s) for the active display mode. Each mode is a

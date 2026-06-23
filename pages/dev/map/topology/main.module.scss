@@ -97,6 +97,44 @@
   }
 }
 
+// Click-inspector panel: maps from /info, then a collapsible primitives callout.
+.map-inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .topology-layer-group {
+    .layer-name {
+      font-size: 0.95rem;
+      margin: 0 0 4px;
+    }
+  }
+
+  .map-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    .map-item {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      padding: 2px 0;
+
+      // Push the "active" tag to the right edge of the row.
+      :global(.bp6-tag) {
+        margin-left: auto;
+        align-self: center;
+      }
+    }
+  }
+
+  // Keep the raw-features callout quiet and secondary.
+  .tile-features {
+    font-size: 12px;
+  }
+}
+
 .scale {
   opacity: 0.6;
   font-size: 0.85em;
