@@ -4,17 +4,17 @@
  *
  * List layers: /layers
  *
- * Tile routes for each layer:
- * - Topology faces: /faces/{layer}/{z}/{x}/{y} - map_faces for a specific map layer
- * - Topology elements: /elements/{z}/{x}/{y} - edges, nodes for the whole topology
- *                     /elements/{layer}/{z}/{x}/{y} - edges, nodes for a specific map layer
+ * Tile routes:
+ * - Faces: /faces/{layer}/{z}/{x}/{y} - map_faces for a specific map layer
+ *          /faces/{z}/{x}/{y} - topology primitive faces for the whole topology
+ * - Elements: /elements/{z}/{x}/{y} - edges, nodes for the whole topology
+ *             /elements/{layer}/{z}/{x}/{y} - edges, nodes for a specific map layer
  * - Maps: /maps/{z}/{x}/{y} - constituent map boundaries
  *         /maps/{layer}/{z}/{x}/{y} - constituent map boundaries for a specific layer
  *
  *  The {layer} path segment is a map layer's `slug` (e.g. "tiny", "carto-small").
  *
- *  Info (not yet implemented):
- *  /info?lng=<lng>&lat=<lat>
+ *  Info: /info?lng=<lng>&lat=<lat>[&map_layer=<slug>]
  *
  */
 
@@ -36,18 +36,30 @@ import {
   NonIdealState,
   FormGroup,
   HTMLSelect,
-  Switch,
-  Radio,
-  RadioGroup,
+  Button,
+  Collapse,
+  SegmentedControl,
+  Callout,
   Spinner,
 } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { loadable } from "jotai/utils";
 import { atomWithLocation } from "jotai-location";
-import { Link, PageBreadcrumbs } from "~/components";
+import {
+  Link,
+  PageBreadcrumbsInternal,
+  PageTitle,
+  usePageBreadcrumbs,
+  BaseLayerSelector,
+  Basemap,
+  basemapStyle,
+} from "~/components";
 import styles from "./main.module.scss";
 
 const h = hyper.styled(styles);
+
+/** Shared width for the floating navbar and the context panel below it. */
+const PANEL_WIDTH = 320;
 
 /** A map layer as returned by /dev/topology/layers */
 interface TopologyLayer {
@@ -99,21 +111,68 @@ function atomWithSearchParam(key: string) {
 /** The slug of the selected map layer, or null for the whole topology. */
 const selectedLayerSlugAtom = atomWithSearchParam("layer");
 
-/** Whether to render topology elements (edges + nodes). Off by default. */
-const showElementsAtom = atom(false);
+/** The map's display mode — three mutually exclusive views onto the same
+ * topology:
+ *  - "maps":  footprints of the source maps compiled into the layer
+ *  - "faces": topological faces (polygons built from the edge network)
+ *  - "edges": raw topology elements (edges and their nodes)
+ */
+type DisplayMode = "maps" | "faces" | "edges";
+const DEFAULT_MODE: DisplayMode = "maps";
+const displayModeParamAtom = atomWithSearchParam("mode");
+const displayModeAtom = atom(
+  (get): DisplayMode => {
+    const value = get(displayModeParamAtom);
+    if (value === "faces" || value === "edges") return value;
+    return DEFAULT_MODE;
+  },
+  (get, set, value: DisplayMode) => {
+    // The default mode is kept out of the URL.
+    let param: DisplayMode | null = value;
+    if (value === DEFAULT_MODE) param = null;
+    set(displayModeParamAtom, param);
+  }
+);
 
-/** Which polygon overlay to render. Faces and maps are mutually exclusive;
- * both carry the source info that powers the contextual click panel. Faces
- * require a selected layer, so "maps" is the default and the whole-topology
- * fallback. */
-type PolygonOverlay = "faces" | "maps";
-const polygonOverlayParamAtom = atomWithSearchParam("polygons");
-const polygonOverlayAtom = atom(
-  (get): PolygonOverlay =>
-    get(polygonOverlayParamAtom) === "faces" ? "faces" : "maps",
-  (get, set, value: PolygonOverlay) => {
-    // Only the non-default ("faces") is stored in the URL.
-    set(polygonOverlayParamAtom, value === "faces" ? "faces" : null);
+/** User-facing label and explanatory text for each display mode. */
+interface DisplayModeInfo {
+  value: DisplayMode;
+  label: string;
+  description: string;
+}
+const DISPLAY_MODES: DisplayModeInfo[] = [
+  {
+    value: "maps",
+    label: "Maps",
+    description: "Footprints of the source maps compiled into this layer.",
+  },
+  {
+    value: "faces",
+    label: "Faces",
+    description: "Topological faces — polygons built from the edge network.",
+  },
+  {
+    value: "edges",
+    label: "Edges",
+    description: "Raw topology elements: edges and their nodes.",
+  },
+];
+
+/** The base map style, persisted in the URL (parallel to the main map page).
+ * "basic" is the default and is kept out of the query string. */
+const basemapParamAtom = atomWithSearchParam("basemap");
+const basemapAtom = atom(
+  (get): Basemap => {
+    const value = get(basemapParamAtom);
+    if (value === Basemap.Satellite || value === Basemap.None) {
+      return value as Basemap;
+    }
+    return Basemap.Basic;
+  },
+  (get, set, value: Basemap) => {
+    let param: Basemap | null = value;
+    if (value === Basemap.Basic) param = null;
+    set(basemapParamAtom, param);
   }
 );
 
@@ -130,9 +189,8 @@ export function Page() {
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
 
-  const baseStyle = isEnabled
-    ? "mapbox://styles/mapbox/dark-v10"
-    : "mapbox://styles/mapbox/light-v10";
+  const basemap = useAtomValue(basemapAtom);
+  const baseStyle = basemapStyle(basemap, isEnabled);
 
   const [isOpen, setOpen] = useState(true);
 
@@ -142,17 +200,11 @@ export function Page() {
   const [data, setData] = useState(null);
 
   const selectedLayer = useAtomValue(selectedLayerAtom);
-  const showElements = useAtomValue(showElementsAtom);
-  const polygonOverlay = useAtomValue(polygonOverlayAtom);
+  const displayMode = useAtomValue(displayModeAtom);
 
   const overlayStyles = useMemo(
-    () =>
-      topologyOverlayStyles(
-        selectedLayer,
-        { showElements, polygonOverlay },
-        isEnabled
-      ),
-    [selectedLayer, showElements, polygonOverlay, isEnabled]
+    () => topologyOverlayStyles(selectedLayer, displayMode, isEnabled),
+    [selectedLayer, displayMode, isEnabled]
   );
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
@@ -173,11 +225,11 @@ export function Page() {
     );
   }
 
-  // Temporary width bump — PanelCard doesn't expose a flexible width, so we
-  // widen it here until that can be addressed upstream in map-interface.
+  // Mirror the navbar width. PanelCard doesn't expose a flexible width, so we
+  // set it here until that can be addressed upstream in map-interface.
   const contextPanel = h(
     PanelCard,
-    { style: { width: 280 } },
+    { style: { width: PANEL_WIDTH } },
     h(LayerSelectorPanel)
   );
 
@@ -186,15 +238,11 @@ export function Page() {
     {
       navbar: h(
         FloatingNavbar,
-        { className: styles["topology-navbar"], width: 340 },
-        [
-          h(PageBreadcrumbs, { separateTitle: true }),
-          h(Spacer),
-          h(MapLoadingButton, {
-            active: isOpen,
-            onClick: () => setOpen(!isOpen),
-          }),
-        ]
+        { className: styles["topology-navbar"], width: PANEL_WIDTH },
+        h(NavbarHeader, {
+          isOpen,
+          onToggle: () => setOpen(!isOpen),
+        })
       ),
       contextPanel,
       detailPanel: detailElement,
@@ -223,11 +271,37 @@ export function Page() {
   );
 }
 
+/** Navbar header: a collapsing breadcrumb trail on top, with the page title
+ * and the panel toggle on a row below it. */
+function NavbarHeader({
+  isOpen,
+  onToggle,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  // Drop the leaf (the current page) from the trail; it's shown as the title.
+  const trail = usePageBreadcrumbs().slice(0, -1);
+
+  return h("div.navbar-header", [
+    h(PageBreadcrumbsInternal, {
+      items: trail,
+      showLogo: true,
+      separateTitle: false,
+    }),
+    h("div.title-row", [
+      h(PageTitle, { headingLevel: 2 }),
+      h(Spacer),
+      h(MapLoadingButton, { active: isOpen, onClick: onToggle, large: false }),
+    ]),
+  ]);
+}
+
 function LayerSelectorPanel() {
   const layers = useAtomValue(layersLoadableAtom);
   const [selectedSlug, setSelectedSlug] = useAtom(selectedLayerSlugAtom);
-  const [showElements, setShowElements] = useAtom(showElementsAtom);
-  const [polygonOverlay, setPolygonOverlay] = useAtom(polygonOverlayAtom);
+  const [mode, setMode] = useAtom(displayModeAtom);
+  const [basemap, setBasemap] = useAtom(basemapAtom);
 
   let layerControl = null;
   if (layers.state === "loading") {
@@ -235,52 +309,130 @@ function LayerSelectorPanel() {
   } else if (layers.state === "hasError") {
     layerControl = h(ErrorCallout, { error: layers.error });
   } else {
-    const options = [
-      { label: "Whole topology", value: "" },
-      ...layers.data.map((layer) => ({
-        label: layer.name,
-        value: layer.slug,
-      })),
-    ];
+    const options = layers.data.map((layer) => ({
+      label: layer.name,
+      value: layer.slug,
+    }));
 
     layerControl = h(
       FormGroup,
       { label: "Map layer", className: "layer-field" },
-      h(HTMLSelect, {
-        fill: true,
+      h(NullableDropdown, {
         options,
-        value: selectedSlug ?? "",
-        onChange: (evt) => setSelectedSlug(evt.target.value || null),
+        value: selectedSlug,
+        onChange: setSelectedSlug,
+        placeholder: "Select a layer…",
       })
     );
   }
 
-  // Faces require a selected layer; without one we always fall back to maps.
   const hasLayer = selectedSlug != null;
-  const polygonValue = hasLayer ? polygonOverlay : "maps";
+
+  // Only the active mode's description is shown, beneath the segmented control.
+  const activeMode = DISPLAY_MODES.find((m) => m.value === mode);
+
+  let warning = null;
+  if (!hasLayer) {
+    warning = h(WholeTopologyWarning, { mode });
+  }
 
   return h("div.layer-selector", [
     layerControl,
-    h(
-      RadioGroup,
-      {
-        label: "Polygons",
-        inline: true,
-        selectedValue: polygonValue,
-        onChange: (evt) =>
-          setPolygonOverlay(evt.currentTarget.value as PolygonOverlay),
-      },
-      [
-        h(Radio, { label: "Faces", value: "faces", disabled: !hasLayer }),
-        h(Radio, { label: "Maps", value: "maps" }),
-      ]
-    ),
-    h(Switch, {
-      label: "Show elements",
-      checked: showElements,
-      onChange: (evt) => setShowElements(evt.currentTarget.checked),
+    h(FormGroup, { label: "Display mode", className: "mode-field" }, [
+      h(SegmentedControl, {
+        fill: true,
+        small: true,
+        options: DISPLAY_MODES.map((m) => ({ label: m.label, value: m.value })),
+        value: mode,
+        onValueChange: (value) => setMode(value as DisplayMode),
+      }),
+      h("p.mode-description", activeMode?.description),
+    ]),
+    warning,
+    h(BaseLayerDisclosure, { basemap, setBasemap }),
+  ]);
+}
+
+/** A select that can be cleared back to null via an adjacent close button. The
+ * leading placeholder option represents the null state within the dropdown. */
+function NullableDropdown({ options, value, onChange, placeholder = "—" }) {
+  const allOptions = [{ label: placeholder, value: "" }, ...options];
+  return h("div.nullable-dropdown", [
+    h(HTMLSelect, {
+      fill: true,
+      options: allOptions,
+      value: value ?? "",
+      onChange: (evt) => onChange(evt.target.value || null),
+    }),
+    h(Button, {
+      icon: "cross",
+      minimal: true,
+      disabled: value == null,
+      "aria-label": "Clear selection",
+      onClick: () => onChange(null),
     }),
   ]);
+}
+
+/** Slim, low-key disclosure for the base-layer selector — it should escape
+ * attention until opened. */
+function BaseLayerDisclosure({ basemap, setBasemap }) {
+  const [isOpen, setOpen] = useState(false);
+
+  let chevron = "chevron-down";
+  if (isOpen) chevron = "chevron-up";
+
+  return h("div.base-layer-disclosure", [
+    h(Button, {
+      className: "base-layer-toggle",
+      text: "Base layer",
+      minimal: true,
+      small: true,
+      fill: true,
+      alignText: "left",
+      rightIcon: chevron,
+      onClick: () => setOpen(!isOpen),
+    }),
+    h(
+      Collapse,
+      { isOpen },
+      h(BaseLayerSelector, {
+        layer: basemap,
+        setLayer: setBasemap,
+        showTitle: false,
+      })
+    ),
+  ]);
+}
+
+/** Shown when no layer is selected: whole-topology views still render, but we
+ * nudge the user to pick a layer and warn that on-the-fly primitive faces are
+ * slow at low zoom. */
+function WholeTopologyWarning({ mode }: { mode: DisplayMode }) {
+  let facesNote = null;
+  if (mode === "faces") {
+    facesNote = h(
+      "p",
+      "Primitive faces for the whole topology are computed on the fly and can be slow to load, especially at low zoom."
+    );
+  }
+
+  return h(
+    Callout,
+    {
+      className: "whole-topology-warning",
+      intent: "warning",
+      icon: "warning-sign",
+      title: "No layer selected",
+    },
+    [
+      h(
+        "p",
+        "Showing the whole topology. Select a map layer to focus on a single compilation."
+      ),
+      facesNote,
+    ]
+  );
 }
 
 function MapInspectorPanel({ features }) {
@@ -312,46 +464,37 @@ function MapInspectorPanel({ features }) {
 }
 
 function MapItem({ map }) {
+  let scale = null;
+  if (map.scale != null) {
+    scale = h("span.scale", ` ${map.scale}`);
+  }
+
   return h("li", [
     h(Link, { href: `/maps/${map.source_id}` }, [
       h("span.name", map.name),
       " ",
       h("code.id", map.source_id),
     ]),
-    map.scale != null ? h("span.scale", ` ${map.scale}`) : null,
+    scale,
   ]);
 }
 
-interface TopologyOverlayOptions {
-  showElements: boolean;
-  polygonOverlay: PolygonOverlay;
-}
-
-/** Build the list of independent overlay styles for the current selection.
- *
- * Styles are kept independent (rather than merged into one) so they can be
- * layered and toggled separately, ordered bottom-to-top. The polygon overlay
- * is either faces or maps (mutually exclusive); faces require a selected layer,
- * so we fall back to maps for the whole topology. Topology elements render on
- * top when enabled.
- */
+/** Build the overlay style(s) for the active display mode. Each mode is a
+ * single, mutually-exclusive view; every style handles a null layer by falling
+ * back to its whole-topology tile route. */
 function topologyOverlayStyles(
   layer: TopologyLayer | null,
-  { showElements, polygonOverlay }: TopologyOverlayOptions,
+  mode: DisplayMode,
   darkMode: boolean
 ): mapboxgl.Style[] {
-  const overlays: mapboxgl.Style[] = [];
-
-  if (polygonOverlay === "faces" && layer != null) {
-    overlays.push(facesStyle(layer));
-  } else {
-    overlays.push(mapsStyle(layer, darkMode));
+  switch (mode) {
+    case "maps":
+      return [mapsStyle(layer, darkMode)];
+    case "faces":
+      return [facesStyle(layer)];
+    case "edges":
+      return [elementsStyle(layer)];
   }
-
-  if (showElements) {
-    overlays.push(elementsStyle(layer));
-  }
-  return overlays;
 }
 
 /** Constituent map boundaries, styled like the rgeom bounds on /dev/map/sources.
@@ -361,12 +504,14 @@ function mapsStyle(
   darkMode: boolean
 ): mapboxgl.Style {
   const slug = layer?.slug;
-  const tiles =
-    slug != null
-      ? `${burwellTileDomain}/dev/topology/maps/${slug}/{z}/{x}/{y}`
-      : `${burwellTileDomain}/dev/topology/maps/{z}/{x}/{y}`;
 
-  const color = darkMode ? 255 : 20;
+  let tiles = `${burwellTileDomain}/dev/topology/maps/{z}/{x}/{y}`;
+  if (slug != null) {
+    tiles = `${burwellTileDomain}/dev/topology/maps/${slug}/{z}/{x}/{y}`;
+  }
+
+  let color = 20;
+  if (darkMode) color = 255;
 
   return {
     version: 8,
@@ -401,28 +546,42 @@ function mapsStyle(
   };
 }
 
-function facesStyle(layer: TopologyLayer): mapboxgl.Style {
+/** Faces overlay. With a layer selected this serves that layer's `map_faces`;
+ * with no layer it serves the whole-topology primitive faces (slower). The two
+ * routes emit different MVT source-layers (`map_faces` vs `faces`). */
+function facesStyle(layer: TopologyLayer | null): mapboxgl.Style {
+  // Whole-topology primitive faces borrow the purple of the "edges" mode to
+  // signal they belong to the topology itself, not the magenta map-face
+  // compilation; they also come from a different route and MVT source-layer.
+  let tiles = `${burwellTileDomain}/dev/topology/faces/{z}/{x}/{y}`;
+  let sourceLayer = "faces";
+  let color = "#4f11ab";
+  if (layer != null) {
+    tiles = `${burwellTileDomain}/dev/topology/faces/${layer.slug}/{z}/{x}/{y}`;
+    sourceLayer = "map_faces";
+    color = "#c61b9e";
+  }
+
   return {
     version: 8,
     sources: {
       faces: {
         type: "vector",
-        tiles: [
-          `${burwellTileDomain}/dev/topology/faces/${layer.slug}/{z}/{x}/{y}`,
-        ],
-        maxzoom: layer.max_zoom ?? 9,
+        tiles: [tiles],
+        maxzoom: layer?.max_zoom ?? 9,
       },
     },
-    layers: buildFaceLayers(),
+    layers: buildFaceLayers(sourceLayer, color),
   };
 }
 
 function elementsStyle(layer: TopologyLayer | null): mapboxgl.Style {
   const slug = layer?.slug;
-  const tiles =
-    slug != null
-      ? `${burwellTileDomain}/dev/topology/elements/${slug}/{z}/{x}/{y}`
-      : `${burwellTileDomain}/dev/topology/elements/{z}/{x}/{y}`;
+
+  let tiles = `${burwellTileDomain}/dev/topology/elements/{z}/{x}/{y}`;
+  if (slug != null) {
+    tiles = `${burwellTileDomain}/dev/topology/elements/${slug}/{z}/{x}/{y}`;
+  }
 
   return {
     version: 8,
@@ -437,15 +596,15 @@ function elementsStyle(layer: TopologyLayer | null): mapboxgl.Style {
   };
 }
 
-export function buildFaceLayers() {
+export function buildFaceLayers(sourceLayer = "map_faces", color = "#c61b9e") {
   return [
     {
       id: "faces",
       type: "fill",
       source: "faces",
-      "source-layer": "map_faces",
+      "source-layer": sourceLayer,
       paint: {
-        "fill-color": "#c61b9e",
+        "fill-color": color,
         "fill-opacity": 0.15,
       },
     },
@@ -453,9 +612,9 @@ export function buildFaceLayers() {
       id: "face-outlines",
       type: "line",
       source: "faces",
-      "source-layer": "map_faces",
+      "source-layer": sourceLayer,
       paint: {
-        "line-color": "#c61b9e",
+        "line-color": color,
         "line-width": 1,
         "line-opacity": 0.8,
       },
@@ -476,16 +635,15 @@ export function buildTopologyLayers() {
         "line-color": "#4f11ab",
       },
     },
-    // Nodes
+    // Nodes. The nodes source-layer carries geometry only (the topo-primitives
+    // queries group by geom and emit no attributes), so there's nothing to sort
+    // or data-drive on here.
     {
       id: "nodes",
       type: "circle",
       source: "topology",
       "source-layer": "nodes",
       "min-zoom": 4,
-      layout: {
-        "circle-sort-key": ["get", "n_edges"],
-      },
       paint: {
         // Small radius when zoomed out and larger when zoomed in
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 12, 3],

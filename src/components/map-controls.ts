@@ -4,9 +4,9 @@ import h from "@macrostrat/hyper";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { LngLatBoundsLike } from "mapbox-gl";
 
-export function BaseLayerSelector({ layer, setLayer }) {
+export function BaseLayerSelector({ layer, setLayer, showTitle = true }) {
   return h("div.base-layer-selector", [
-    h("h3", "Base layer"),
+    showTitle ? h("h3", "Base layer") : null,
     h(
       RadioGroup,
       {

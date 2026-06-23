@@ -2,8 +2,6 @@ import {
   ButtonGroup,
   Collapse,
   NonIdealState,
-  Radio,
-  RadioGroup,
   Spinner,
 } from "@blueprintjs/core";
 import {
@@ -39,6 +37,7 @@ import {
   MapReference,
   DevLink,
   MenuButton,
+  BaseLayerSelector,
 } from "~/components";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
@@ -398,38 +397,6 @@ function MapSettingsPanel({ hasRaster = false }) {
       }),
     ]),
     h(BaseLayerSelector, { layer, setLayer }),
-  ]);
-}
-
-function BaseLayerSelector({ layer, setLayer }) {
-  return h("div.base-layer-selector", [
-    h("h3", "Base layer"),
-    h(
-      RadioGroup,
-      {
-        selectedValue: layer,
-        onChange(e) {
-          setLayer(e.currentTarget.value);
-        },
-      },
-      [
-        h(Radio, {
-          label: "Satellite",
-          value: Basemap.Satellite,
-          onClick: () => localStorage.setItem("basemap", Basemap.Satellite),
-        }),
-        h(Radio, {
-          label: "Basic",
-          value: Basemap.Basic,
-          onClick: () => localStorage.setItem("basemap", Basemap.Basic),
-        }),
-        h(Radio, {
-          label: "None",
-          value: Basemap.None,
-          onClick: () => localStorage.setItem("basemap", Basemap.None),
-        }),
-      ]
-    ),
   ]);
 }
 
