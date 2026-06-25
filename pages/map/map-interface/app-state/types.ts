@@ -78,6 +78,7 @@ type CLEAR_FILTERS = { type: "clear-filters" };
 
 type START_MAP_QUERY = {
   type: "start-map-query";
+  zoom: number;
 } & MapLocation;
 
 type MAP_LAYERS_CHANGED = {
@@ -247,7 +248,11 @@ interface MapSettings {
   highResolutionTerrain: boolean;
 }
 
-export type InfoMarkerPosition = { lat: number; lng: number } | null;
+export type InfoMarkerPosition = {
+  lat: number;
+  lng: number;
+  zoom: number;
+} | null;
 
 export type MenuAction = { type: "set-menu-page"; page: MenuPage | null };
 

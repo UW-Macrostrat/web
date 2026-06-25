@@ -186,6 +186,7 @@ function useMapClickHandler(pbdbPoints) {
         type: "start-map-query",
         lng: event.lngLat.lng,
         lat: event.lngLat.lat,
+        zoom: map.getZoom(),
       });
     },
     [mapRef.current, mapLayers, crossSectionLine]
