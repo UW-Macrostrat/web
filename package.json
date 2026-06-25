@@ -79,7 +79,7 @@
     "@macrostrat/feedback-components": "^2.1.3",
     "@macrostrat/form-components": "^1.0.9",
     "@macrostrat/hyper": "^3.1.1",
-    "@macrostrat/map-interface": "^2.2.6",
+    "@macrostrat/map-interface": "^2.2.7",
     "@macrostrat/map-styles": "^2.2.3",
     "@macrostrat/mapbox-react": "^3.2.2",
     "@macrostrat/mapbox-utils": "^1.7.4",
