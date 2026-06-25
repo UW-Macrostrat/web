@@ -20,7 +20,14 @@
 
 import hyper from "@macrostrat/hyper";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
-import { Spacer, useDarkMode, ErrorCallout } from "@macrostrat/ui-components";
+import {
+  Spacer,
+  useDarkMode,
+  DarkModeButton,
+  ErrorCallout,
+} from "@macrostrat/ui-components";
+import { removeMapLabels } from "@macrostrat/mapbox-utils";
+import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MapMarker,
@@ -41,6 +48,7 @@ import {
   Button,
   Collapse,
   SegmentedControl,
+  Switch,
   Callout,
   Tag,
   Spinner,
@@ -179,6 +187,30 @@ const basemapAtom = atom(
   }
 );
 
+/** Whether the basemap's text labels are shown. On by default; the "off" state
+ * is stored in the URL. */
+const labelsParamAtom = atomWithSearchParam("labels");
+const showLabelsAtom = atom(
+  (get) => get(labelsParamAtom) !== "off",
+  (get, set, value: boolean) => {
+    let param: string | null = null;
+    if (!value) param = "off";
+    set(labelsParamAtom, param);
+  }
+);
+
+/** Whether to overlay the live Macrostrat map (the carto_new tileserver layer).
+ * Off by default; "on" is stored in the URL. */
+const cartoParamAtom = atomWithSearchParam("carto");
+const showCartoAtom = atom(
+  (get) => get(cartoParamAtom) === "on",
+  (get, set, value: boolean) => {
+    let param: string | null = null;
+    if (value) param = "on";
+    set(cartoParamAtom, param);
+  }
+);
+
 /** The selected layer object, resolved from the loaded layer list. */
 const selectedLayerAtom = atom<TopologyLayer | null>((get) => {
   const slug = get(selectedLayerSlugAtom);
@@ -204,10 +236,28 @@ export function Page() {
 
   const selectedLayer = useAtomValue(selectedLayerAtom);
   const displayMode = useAtomValue(displayModeAtom);
+  const showLabels = useAtomValue(showLabelsAtom);
+  const showCarto = useAtomValue(showCartoAtom);
 
-  const overlayStyles = useMemo(
-    () => topologyOverlayStyles(selectedLayer, displayMode, isEnabled),
-    [selectedLayer, displayMode, isEnabled]
+  const overlayStyles = useMemo(() => {
+    const overlays = topologyOverlayStyles(selectedLayer, displayMode, isEnabled);
+    // The live Macrostrat map sits beneath the topology overlays.
+    if (showCarto) {
+      overlays.unshift(cartoStyle());
+    }
+    return overlays;
+  }, [selectedLayer, displayMode, isEnabled, showCarto]);
+
+  // Toggle basemap labels by stripping label layers from the resolved style.
+  // TODO(upstream): a labels on/off toggle is a common need — consider baking a
+  // `showLabels` prop into @macrostrat/map-interface's MapView so each page
+  // doesn't re-implement this transformStyle.
+  const transformStyle = useCallback(
+    (style) => {
+      if (showLabels) return style;
+      return removeMapLabels(style, true);
+    },
+    [showLabels]
   );
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
@@ -259,6 +309,7 @@ export function Page() {
         projection: { name: "globe" },
         mapboxToken: mapboxAccessToken,
         overlayStyles,
+        transformStyle,
       },
       [
         h(FeatureSelectionHandler, {
@@ -305,6 +356,7 @@ function LayerSelectorPanel() {
   const [selectedSlug, setSelectedSlug] = useAtom(selectedLayerSlugAtom);
   const [mode, setMode] = useAtom(displayModeAtom);
   const [basemap, setBasemap] = useAtom(basemapAtom);
+  const [showCarto, setShowCarto] = useAtom(showCartoAtom);
 
   let layerControl = null;
   if (layers.state === "loading") {
@@ -351,6 +403,12 @@ function LayerSelectorPanel() {
       }),
       h("p.mode-description", activeMode?.description),
     ]),
+    h(Switch, {
+      className: "carto-toggle",
+      label: "Macrostrat map",
+      checked: showCarto,
+      onChange: (evt) => setShowCarto(evt.currentTarget.checked),
+    }),
     warning,
     h(BaseLayerDisclosure, { basemap, setBasemap }),
   ]);
@@ -381,6 +439,7 @@ function NullableDropdown({ options, value, onChange, placeholder = "—" }) {
  * attention until opened. */
 function BaseLayerDisclosure({ basemap, setBasemap }) {
   const [isOpen, setOpen] = useState(false);
+  const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
 
   let chevron = "chevron-down";
   if (isOpen) chevron = "chevron-up";
@@ -399,11 +458,21 @@ function BaseLayerDisclosure({ basemap, setBasemap }) {
     h(
       Collapse,
       { isOpen },
-      h(BaseLayerSelector, {
-        layer: basemap,
-        setLayer: setBasemap,
-        showTitle: false,
-      })
+      h("div.base-layer-content", [
+        h(BaseLayerSelector, {
+          layer: basemap,
+          setLayer: setBasemap,
+          showTitle: false,
+          // "None" is a no-op on this globe view, so offer only real basemaps.
+          options: [Basemap.Satellite, Basemap.Basic],
+        }),
+        h(Switch, {
+          label: "Map labels",
+          checked: showLabels,
+          onChange: (evt) => setShowLabels(evt.currentTarget.checked),
+        }),
+        h(DarkModeButton, { showText: true, minimal: true, small: true }),
+      ])
     ),
   ]);
 }
@@ -551,11 +620,13 @@ function TopologyMapsList({ position }: { position: mapboxgl.LngLat }) {
 }
 
 function TopologyLayerGroup({ rows }: { rows: TopologyInfoRow[] }) {
+  // Highest priority first.
+  const sorted = [...rows].sort((a, b) => b.priority - a.priority);
   return h("div.topology-layer-group", [
-    h("h3.layer-name", rows[0].layer_name),
+    h("h3.layer-name", sorted[0].layer_name),
     h(
       "ul.map-list",
-      rows.map((row) => h(TopologyMapItem, { key: row.source_id, map: row }))
+      sorted.map((row) => h(TopologyMapItem, { key: row.source_id, map: row }))
     ),
   ]);
 }
@@ -576,6 +647,7 @@ function TopologyMapItem({ map }: { map: TopologyInfoRow }) {
   }
 
   return h("li.map-item", [
+    h("span.priority", { title: "Priority" }, map.priority),
     h(Link, { href: `/maps/${map.source_id}` }, [
       h("span.name", map.name),
       " ",
@@ -598,9 +670,33 @@ function TileFeaturesCallout({ features }) {
 
   return h(
     ExpansionPanel,
-    { title: "Tile features", className: "tile-features", expanded: false },
+    {
+      title: "Tile features",
+      className: styles["tile-features"],
+      expanded: false,
+    },
     h(Features, { features: primitives })
   );
+}
+
+/** The live Macrostrat geologic map, built from the carto_new tileserver layer
+ * (the "carto v2" tileset). The source must be named "burwell" — that's what
+ * buildMacrostratStyleLayers targets (source-layers `units` and `lines`). */
+function cartoStyle(): mapboxgl.Style {
+  return {
+    version: 8,
+    sources: {
+      burwell: {
+        type: "vector",
+        tiles: [`${burwellTileDomain}/dev/carto/{z}/{x}/{y}`],
+      },
+    },
+    layers: buildMacrostratStyleLayers({
+      fillOpacity: 0.4,
+      strokeOpacity: 0.4,
+      lineOpacity: 0.8,
+    }),
+  };
 }
 
 /** Build the overlay style(s) for the active display mode. Each mode is a
@@ -755,8 +851,8 @@ export function buildTopologyLayers() {
       source: "topology",
       "source-layer": "edges",
       paint: {
-        "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 12, 2],
-        "line-color": "#4f11ab",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 12, 1.5],
+        "line-color": "#606ad9", // "#4f11ab",
       },
     },
     // Nodes. The nodes source-layer carries geometry only (the topo-primitives
@@ -770,7 +866,7 @@ export function buildTopologyLayers() {
       "min-zoom": 4,
       paint: {
         // Small radius when zoomed out and larger when zoomed in
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 12, 3],
+        "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, 1, 12, 3],
         "circle-color": "#606ad9",
       },
     },

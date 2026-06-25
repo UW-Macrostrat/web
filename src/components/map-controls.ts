@@ -4,9 +4,27 @@ import h from "@macrostrat/hyper";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { LngLatBoundsLike } from "mapbox-gl";
 
-export function BaseLayerSelector({ layer, setLayer, showTitle = true }) {
+/** Base map selector. By default offers all three basemaps; pass `options` (a
+ * list of Basemap values) to restrict the choices, e.g. on pages where "none"
+ * isn't meaningful. */
+export function BaseLayerSelector({ layer, setLayer, showTitle = true, options }) {
+  const allOptions = [
+    { label: "Satellite", value: Basemap.Satellite },
+    { label: "Basic", value: Basemap.Basic },
+    { label: "None", value: Basemap.None },
+  ];
+  let opts = allOptions;
+  if (options != null) {
+    opts = allOptions.filter((o) => options.includes(o.value));
+  }
+
+  let title = null;
+  if (showTitle) {
+    title = h("h3", "Base layer");
+  }
+
   return h("div.base-layer-selector", [
-    showTitle ? h("h3", "Base layer") : null,
+    title,
     h(
       RadioGroup,
       {
@@ -15,11 +33,7 @@ export function BaseLayerSelector({ layer, setLayer, showTitle = true }) {
           setLayer(e.currentTarget.value);
         },
       },
-      [
-        h(Radio, { label: "Satellite", value: Basemap.Satellite }),
-        h(Radio, { label: "Basic", value: Basemap.Basic }),
-        h(Radio, { label: "None", value: Basemap.None }),
-      ]
+      opts.map((o) => h(Radio, { key: o.value, label: o.label, value: o.value }))
     ),
   ]);
 }
