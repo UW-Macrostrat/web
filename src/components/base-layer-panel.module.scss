@@ -1,16 +1,8 @@
-// Slim, low-key base-layer disclosure — quiet until opened.
-.base-layer-disclosure {
-  .base-layer-toggle {
-    font-size: 12px;
-    opacity: 0.7;
-  }
-
-  // The disclosed controls: basemap radios, labels switch, dark-mode button.
-  .base-layer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    padding: 6px 0 2px;
-  }
+// The disclosed controls inside the panel: basemap radios, labels switch,
+// dark-mode button.
+.base-layer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
