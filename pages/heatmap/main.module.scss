@@ -1,0 +1,91 @@
+// Floating-navbar header tweaks, mirroring the topology page so the two dev map
+// apps read consistently. Ideally these knobs live upstream in map-interface.
+.heatmap-navbar {
+  :global(.bp6-navbar) {
+    height: auto;
+    --navbar-padding: 5px 9px 7px;
+  }
+}
+
+.navbar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+
+  :global(.page-nav) {
+    min-width: 0;
+  }
+
+  :global(.bp6-breadcrumbs) {
+    font-size: 12px;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .title-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+
+    :global(.title-block) {
+      min-width: 0;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      line-height: 1.2;
+      margin: 0;
+    }
+  }
+}
+
+.layer-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .intro {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    opacity: 0.7;
+  }
+
+  .layers-field {
+    margin-bottom: 0;
+
+    // Tighten the stack of switches.
+    :global(.bp6-switch) {
+      margin-bottom: 4px;
+    }
+  }
+
+  // Small color-ramp legend for the request-density layer, indented to sit
+  // beneath its switch label.
+  .request-legend {
+    margin: -2px 0 8px 38px;
+
+    .legend-bar {
+      height: 8px;
+      border-radius: 2px;
+      // Mirror the map's opacity scaling — the low-density end fades out.
+      mask-image: linear-gradient(to right, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 1) 75%);
+      -webkit-mask-image: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.12),
+        rgba(0, 0, 0, 1) 75%
+      );
+    }
+
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2px;
+      font-size: 10px;
+      opacity: 0.6;
+    }
+  }
+}

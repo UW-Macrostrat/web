@@ -6,6 +6,7 @@ export * from "./lithology";
 export * from "./buttons";
 export * from "./navigation";
 export * from "./map-controls";
+export * from "./base-layer-panel";
 export * from "./general";
 export { buildCrossSectionLayers } from "~/_utils/map-layers";
 export { Footer } from "~/layouts/footer.ts";
