@@ -51,6 +51,11 @@ const layerIndex: LayerInfo[] = [
     type: "vector",
   },
   {
+    slug: "carto-v2",
+    tileset: tileserverDomain + "/dev/carto/{z}/{x}/{y}",
+    type: "vector",
+  },
+  {
     slug: "carto-raster",
     tileset: tileserverDomain + "/carto/{z}/{x}/{y}.png",
     type: "raster",

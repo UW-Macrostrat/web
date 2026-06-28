@@ -3,21 +3,11 @@ import { apiV2Prefix } from "@macrostrat-web/settings";
 import { appStateAtom } from "./store.ts";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 import { loadable } from "jotai/utils";
+import mapboxgl from "mapbox-gl";
 
 export const infoMarkerPositionAtom = atom((get) => {
   const appState = get(appStateAtom);
   return appState.infoMarkerPosition;
-});
-
-export const mapPositionAtom = atom((get) => {
-  const appState = get(appStateAtom);
-  return appState.mapPosition;
-});
-
-export const mapZoomAtom = atom((get) => {
-  const mapPosition = get(mapPositionAtom);
-  const zoom = mapPosition.target?.zoom ?? 7;
-  return Math.round(zoom);
 });
 
 interface KeyedMapQueryData extends MapQueryData {
@@ -27,12 +17,11 @@ interface KeyedMapQueryData extends MapQueryData {
 const mapInfoDataAtom = atom<Promise<KeyedMapQueryData>>(
   async (get, { signal }) => {
     /** Atom to handle fetching of map data */
-    const { lng, lat } = get(infoMarkerPositionAtom);
-    const z = get(mapZoomAtom);
+    const { lng, lat, zoom } = get(infoMarkerPositionAtom);
     const params = {
-      lng: formatCoordForZoomLevel(lng, z),
-      lat: formatCoordForZoomLevel(lat, z),
-      z: z.toFixed(0),
+      lng: formatCoordForZoomLevel(lng, zoom),
+      lat: formatCoordForZoomLevel(lat, zoom),
+      z: zoom.toFixed(0),
       //map_id: null,
     };
 

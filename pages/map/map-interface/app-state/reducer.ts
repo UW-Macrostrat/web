@@ -160,6 +160,7 @@ export function coreReducer(
         infoMarkerPosition: {
           lng: action.lng,
           lat: action.lat,
+          zoom: action.zoom,
         },
         mapIsMoving: true,
         infoDrawerOpen: true,

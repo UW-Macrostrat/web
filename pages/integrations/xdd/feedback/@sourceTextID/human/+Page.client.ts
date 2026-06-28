@@ -137,7 +137,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
-    view: true,
+    view: false,
     autoSelect,
   });
 }

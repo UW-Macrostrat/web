@@ -64,7 +64,7 @@ export function Page() {
   );
 }
 
-export function PageInner() {
+function PageInner() {
   const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
   const ref = useRef();
 
