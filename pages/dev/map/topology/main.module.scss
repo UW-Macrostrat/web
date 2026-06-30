@@ -59,18 +59,6 @@
     margin-bottom: 0;
   }
 
-  // Layer dropdown with an inline clear button to its right.
-  .nullable-dropdown {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-
-    :global(.bp6-html-select) {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-  }
-
   // Description of the active display mode, beneath the segmented control.
   .mode-description {
     margin: 6px 0 0;

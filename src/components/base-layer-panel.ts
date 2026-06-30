@@ -16,7 +16,7 @@ const h = hyper.styled(styles);
  * URL-synced atoms) and pass it in, so the panel renders identically wherever
  * it's used. `options` restricts the offered basemaps (default: Satellite +
  * Basic, since "None" is a no-op on globe views). */
-export function BaseLayerDisclosure({
+export function BaseLayerForm({
   basemap,
   setBasemap,
   showLabels,

@@ -55,9 +55,10 @@ import {
   PageBreadcrumbsInternal,
   PageTitle,
   usePageBreadcrumbs,
-  BaseLayerDisclosure,
+  BaseLayerForm,
   Basemap,
   basemapStyle,
+  NullableDropdown,
 } from "~/components";
 import styles from "./main.module.scss";
 
@@ -251,7 +252,11 @@ export function Page() {
   const { data: errors } = useTopologyErrors(selectedLayer?.slug, showErrors);
 
   const overlayStyles = useMemo(() => {
-    const overlays = topologyOverlayStyles(selectedLayer, displayMode, isEnabled);
+    const overlays = topologyOverlayStyles(
+      selectedLayer,
+      displayMode,
+      isEnabled
+    );
     // The live Macrostrat map sits beneath the topology overlays.
     if (showCarto) {
       overlays.unshift(cartoStyle());
@@ -433,28 +438,7 @@ function LayerSelectorPanel() {
       onChange: (evt) => setShowErrors(evt.currentTarget.checked),
     }),
     warning,
-    h(BaseLayerDisclosure, { basemap, setBasemap, showLabels, setShowLabels }),
-  ]);
-}
-
-/** A select that can be cleared back to null via an adjacent close button. The
- * leading placeholder option represents the null state within the dropdown. */
-function NullableDropdown({ options, value, onChange, placeholder = "—" }) {
-  const allOptions = [{ label: placeholder, value: "" }, ...options];
-  return h("div.nullable-dropdown", [
-    h(HTMLSelect, {
-      fill: true,
-      options: allOptions,
-      value: value ?? "",
-      onChange: (evt) => onChange(evt.target.value || null),
-    }),
-    h(Button, {
-      icon: "cross",
-      minimal: true,
-      disabled: value == null,
-      "aria-label": "Clear selection",
-      onClick: () => onChange(null),
-    }),
+    h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),
   ]);
 }
 
@@ -598,9 +582,12 @@ function useTopologyErrors(
     if (mapLayer != null) params.set("map_layer", mapLayer);
     const query = params.toString();
 
-    fetch(`${burwellTileDomain}/dev/topology/errors${query ? `?${query}` : ""}`, {
-      signal: controller.signal,
-    })
+    fetch(
+      `${burwellTileDomain}/dev/topology/errors${query ? `?${query}` : ""}`,
+      {
+        signal: controller.signal,
+      }
+    )
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Failed to load errors: ${res.statusText}`);
