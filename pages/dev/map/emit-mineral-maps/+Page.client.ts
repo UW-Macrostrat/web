@@ -16,6 +16,7 @@ import { ControlGroup, FormGroup, HTMLSelect, Slider } from "@blueprintjs/core";
 import { loadable } from "jotai/utils";
 import { useMapEaseTo } from "@macrostrat/mapbox-react";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
+import { NullableDropdown } from "~/components";
 
 export function Page() {
   const [isOpen, setOpen] = useState(false);
@@ -70,6 +71,14 @@ const mapOptions = [
 
 const selectedMapAtom = atom(mapOptions[0].key);
 
+const layerInfoDataAtom = atom((get) => {
+  const layerInfo = get(layerInfoLoadableAtom);
+  if (layerInfo.state === "hasData") {
+    return layerInfo.data;
+  }
+  return null;
+});
+
 const mapBoundsAtom = atom((get) => {
   const layerInfo = get(layerInfoLoadableAtom);
   if (layerInfo.state === "loading") {
@@ -80,6 +89,27 @@ const mapBoundsAtom = atom((get) => {
   }
   // Default map bounds
   return [-125, 24, -66, 49];
+});
+
+const mineralClassesAtom = atom((get) => {
+  const layerInfo = get(layerInfoDataAtom);
+  if (layerInfo == null) {
+    return [];
+  }
+  try {
+    const val = layerInfo.band_metadata[0][1]["MINERAL_CLASSES"];
+    const v1 = val.replace("{", "").replace("}", "").replace(/'/g, "");
+    const vals = v1.split(",").map((d) => {
+      const [k, v] = d.split(":");
+      return {
+        id: Number(k.trim()),
+        name: v.trim(),
+      };
+    });
+    return vals;
+  } catch (e) {
+    return [];
+  }
 });
 
 const baseURL = "https://tiles.dev.macrostrat.org/cog";
@@ -93,6 +123,36 @@ const cogURLAtom = atom((get) => {
 
 const mapOverlayStyleAtom = atom((get) => {
   const opacity = get(rasterOpacityAtom);
+  const mineralSpecie = get(selectedMineralClassAtom);
+  let mineralSpecieStyle = {};
+  if (mineralSpecie != null) {
+    // Render only the single raster value and ignore the rest
+    mineralSpecieStyle = {
+      // 2. Decode the specific color channel you want to isolate (e.g., Red channel)
+      // Format: [multiply_r, multiply_g, multiply_b, offset]
+      "raster-color-mix": [1, 0, 0, 0],
+      // 3. Define the bounding range of your target value (e.g., Target pixel value = 150)
+      // Maps standard 0-255 values to a 0.0 - 1.0 range
+      "raster-color-range": [0, 1],
+      // 4. Drop all other values to 0 opacity, colorizing only your single target value
+      "raster-color": [
+        "interpolate",
+        ["linear"],
+        ["raster-value"],
+        0,
+        "rgba(0,0,0,0)",
+        (mineralSpecie - 10) / 255,
+        "rgba(255,0,0,0)", // Everything below 150 is invisible
+        mineralSpecie / 255,
+        "rgba(255, 0, 0, 1.0)", // Target value 150 is solid Red
+        (mineralSpecie + 10) / 255,
+        "rgba(255,0,0,0)", // Everything above 150 is invisible
+        1,
+        "rgba(0,0,0,0)",
+      ],
+    };
+  }
+
   return {
     version: 8,
     sources: {
@@ -111,6 +171,7 @@ const mapOverlayStyleAtom = atom((get) => {
         source: "mineral-maps",
         paint: {
           "raster-opacity": opacity,
+          ...mineralSpecieStyle,
         },
       },
     ],
@@ -136,7 +197,22 @@ const layerInfoAtom = atom(async (get, { signal }) => {
 
 const baseStyle = "mapbox://styles/mapbox/light-v10";
 
+const selectedMineralClassAtom = atom<number>();
+
 const layerInfoLoadableAtom = loadable(layerInfoAtom);
+
+function MineralClassDropdown() {
+  const [mineralClass, setMineralClass] = useAtom(selectedMineralClassAtom);
+  const value = useAtomValue(mineralClassesAtom);
+  console.log(value);
+
+  return h(NullableDropdown, {
+    options: value.map((d) => ({ label: d.name, value: d.id })),
+    placeholder: "Select mineral class",
+    value: mineralClass,
+    onChange: (value) => setMineralClass(Number(value)),
+  });
+}
 
 function MapSelectorPanel() {
   return h("div.map-selector-panel", [
@@ -145,6 +221,7 @@ function MapSelectorPanel() {
       "EMIT mineral maps created by Zaid Al-Attar and Thomas Monecke, Colorado School of Mines."
     ),
     h(SelectedMapControl),
+    h(MineralClassDropdown),
     h(LayerErrorReporter),
   ]);
 }

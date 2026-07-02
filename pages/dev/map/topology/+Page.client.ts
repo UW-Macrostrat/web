@@ -20,12 +20,7 @@
 
 import hyper from "@macrostrat/hyper";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
-import {
-  Spacer,
-  useDarkMode,
-  DarkModeButton,
-  ErrorCallout,
-} from "@macrostrat/ui-components";
+import { Spacer, useDarkMode, ErrorCallout } from "@macrostrat/ui-components";
 import { removeMapLabels } from "@macrostrat/mapbox-utils";
 import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -46,7 +41,6 @@ import {
   FormGroup,
   HTMLSelect,
   Button,
-  Collapse,
   SegmentedControl,
   Switch,
   Callout,
@@ -61,9 +55,10 @@ import {
   PageBreadcrumbsInternal,
   PageTitle,
   usePageBreadcrumbs,
-  BaseLayerSelector,
+  BaseLayerForm,
   Basemap,
   basemapStyle,
+  NullableDropdown,
 } from "~/components";
 import styles from "./main.module.scss";
 
@@ -211,6 +206,18 @@ const showCartoAtom = atom(
   }
 );
 
+/** Whether to overlay topology-solving errors (the /errors GeoJSON layer).
+ * Off by default; "on" is stored in the URL. */
+const errorsParamAtom = atomWithSearchParam("errors");
+const showErrorsAtom = atom(
+  (get) => get(errorsParamAtom) === "on",
+  (get, set, value: boolean) => {
+    let param: string | null = null;
+    if (value) param = "on";
+    set(errorsParamAtom, param);
+  }
+);
+
 /** The selected layer object, resolved from the loaded layer list. */
 const selectedLayerAtom = atom<TopologyLayer | null>((get) => {
   const slug = get(selectedLayerSlugAtom);
@@ -238,15 +245,28 @@ export function Page() {
   const displayMode = useAtomValue(displayModeAtom);
   const showLabels = useAtomValue(showLabelsAtom);
   const showCarto = useAtomValue(showCartoAtom);
+  const showErrors = useAtomValue(showErrorsAtom);
+
+  // Topology-solving errors are fetched as GeoJSON (small set, ~tens of faces)
+  // and scoped to the selected layer, mirroring the /info popup.
+  const { data: errors } = useTopologyErrors(selectedLayer?.slug, showErrors);
 
   const overlayStyles = useMemo(() => {
-    const overlays = topologyOverlayStyles(selectedLayer, displayMode, isEnabled);
+    const overlays = topologyOverlayStyles(
+      selectedLayer,
+      displayMode,
+      isEnabled
+    );
     // The live Macrostrat map sits beneath the topology overlays.
     if (showCarto) {
       overlays.unshift(cartoStyle());
     }
+    // Errors sit on top of everything so they're never hidden by the mode layer.
+    if (showErrors && errors != null) {
+      overlays.push(errorsStyle(errors));
+    }
     return overlays;
-  }, [selectedLayer, displayMode, isEnabled, showCarto]);
+  }, [selectedLayer, displayMode, isEnabled, showCarto, showErrors, errors]);
 
   // Toggle basemap labels by stripping label layers from the resolved style.
   // TODO(upstream): a labels on/off toggle is a common need — consider baking a
@@ -357,6 +377,8 @@ function LayerSelectorPanel() {
   const [mode, setMode] = useAtom(displayModeAtom);
   const [basemap, setBasemap] = useAtom(basemapAtom);
   const [showCarto, setShowCarto] = useAtom(showCartoAtom);
+  const [showErrors, setShowErrors] = useAtom(showErrorsAtom);
+  const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
 
   let layerControl = null;
   if (layers.state === "loading") {
@@ -409,71 +431,14 @@ function LayerSelectorPanel() {
       checked: showCarto,
       onChange: (evt) => setShowCarto(evt.currentTarget.checked),
     }),
+    h(Switch, {
+      className: "errors-toggle",
+      label: "Topology errors",
+      checked: showErrors,
+      onChange: (evt) => setShowErrors(evt.currentTarget.checked),
+    }),
     warning,
-    h(BaseLayerDisclosure, { basemap, setBasemap }),
-  ]);
-}
-
-/** A select that can be cleared back to null via an adjacent close button. The
- * leading placeholder option represents the null state within the dropdown. */
-function NullableDropdown({ options, value, onChange, placeholder = "—" }) {
-  const allOptions = [{ label: placeholder, value: "" }, ...options];
-  return h("div.nullable-dropdown", [
-    h(HTMLSelect, {
-      fill: true,
-      options: allOptions,
-      value: value ?? "",
-      onChange: (evt) => onChange(evt.target.value || null),
-    }),
-    h(Button, {
-      icon: "cross",
-      minimal: true,
-      disabled: value == null,
-      "aria-label": "Clear selection",
-      onClick: () => onChange(null),
-    }),
-  ]);
-}
-
-/** Slim, low-key disclosure for the base-layer selector — it should escape
- * attention until opened. */
-function BaseLayerDisclosure({ basemap, setBasemap }) {
-  const [isOpen, setOpen] = useState(false);
-  const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
-
-  let chevron = "chevron-down";
-  if (isOpen) chevron = "chevron-up";
-
-  return h("div.base-layer-disclosure", [
-    h(Button, {
-      className: "base-layer-toggle",
-      text: "Base layer",
-      minimal: true,
-      small: true,
-      fill: true,
-      alignText: "left",
-      rightIcon: chevron,
-      onClick: () => setOpen(!isOpen),
-    }),
-    h(
-      Collapse,
-      { isOpen },
-      h("div.base-layer-content", [
-        h(BaseLayerSelector, {
-          layer: basemap,
-          setLayer: setBasemap,
-          showTitle: false,
-          // "None" is a no-op on this globe view, so offer only real basemaps.
-          options: [Basemap.Satellite, Basemap.Basic],
-        }),
-        h(Switch, {
-          label: "Map labels",
-          checked: showLabels,
-          onChange: (evt) => setShowLabels(evt.currentTarget.checked),
-        }),
-        h(DarkModeButton, { showText: true, minimal: true, small: true }),
-      ])
-    ),
+    h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),
   ]);
 }
 
@@ -577,15 +542,122 @@ function useTopologyInfo(
   return state;
 }
 
-/** Vector-tile sources rendered by this page; everything else queried at the
- * click point is basemap noise we keep out of the primitives callout. */
-const TOPOLOGY_SOURCES = new Set(["maps", "faces", "topology"]);
+/** A GeoJSON FeatureCollection of topology-solving error faces, as returned by
+ * /dev/topology/errors. Each feature's properties carry the source map and the
+ * error text. */
+interface ErrorsCollection {
+  type: "FeatureCollection";
+  features: any[];
+}
+
+interface TopologyErrorsState {
+  loading: boolean;
+  data: ErrorsCollection | null;
+  error: Error | null;
+}
+
+/** Fetch /dev/topology/errors as GeoJSON, scoped to a map layer when one is
+ * selected (matching the /info popup). Only fetches while `enabled`. Uses a raw
+ * fetch like the layers list, since the tileserver isn't the API-provider host. */
+function useTopologyErrors(
+  mapLayer: string | null | undefined,
+  enabled: boolean
+): TopologyErrorsState {
+  const [state, setState] = useState<TopologyErrorsState>({
+    loading: false,
+    data: null,
+    error: null,
+  });
+
+  useEffect(() => {
+    if (!enabled) {
+      setState({ loading: false, data: null, error: null });
+      return;
+    }
+
+    const controller = new AbortController();
+    setState({ loading: true, data: null, error: null });
+
+    const params = new URLSearchParams();
+    if (mapLayer != null) params.set("map_layer", mapLayer);
+    const query = params.toString();
+
+    fetch(
+      `${burwellTileDomain}/dev/topology/errors${query ? `?${query}` : ""}`,
+      {
+        signal: controller.signal,
+      }
+    )
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load errors: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .then((data) => setState({ loading: false, data, error: null }))
+      .catch((error) => {
+        if (error.name === "AbortError") return;
+        setState({ loading: false, data: null, error });
+      });
+
+    return () => controller.abort();
+  }, [mapLayer, enabled]);
+
+  return state;
+}
+
+/** Vector-tile (and GeoJSON) sources rendered by this page; everything else
+ * queried at the click point is basemap noise we keep out of the callouts. */
+const TOPOLOGY_SOURCES = new Set(["maps", "faces", "topology", "errors"]);
 
 function MapInspectorPanel({ position, features }) {
   return h("div.map-inspector", [
+    h(ErrorFeaturesCallout, { features }),
     h(TopologyMapsList, { position }),
     h(TileFeaturesCallout, { features }),
   ]);
+}
+
+/** Topology-solving errors at the click point: each clicked error face shows
+ * its source map (linked) and the topology_error text. Only the `errors`
+ * GeoJSON source contributes here; absent when no error face was clicked. */
+function ErrorFeaturesCallout({ features }) {
+  let errors = null;
+  if (features != null) {
+    errors = features.filter((f) => f.source === "errors");
+  }
+
+  if (errors == null || errors.length === 0) return null;
+
+  // A clicked point can hit overlapping error faces; de-duplicate by face id.
+  const seen = new Set<number>();
+  const items = [];
+  for (const f of errors) {
+    const p = f.properties ?? {};
+    if (seen.has(p.id)) continue;
+    seen.add(p.id);
+    items.push(
+      h("li.error-item", { key: p.id }, [
+        h(Link, { href: `/maps/${p.map_id}` }, [
+          h("span.name", p.name),
+          " ",
+          h("code.id", p.map_id),
+        ]),
+        h("p.error-message", p.topology_error),
+      ])
+    );
+  }
+
+  return h(
+    Callout,
+    {
+      className: "error-features",
+      intent: "danger",
+      icon: "error",
+      title: "Topology errors",
+    },
+    h("ul.error-list", items)
+  );
 }
 
 /** Maps present at the clicked point (from /dev/topology/info), grouped by
@@ -696,6 +768,42 @@ function cartoStyle(): mapboxgl.Style {
       strokeOpacity: 0.4,
       lineOpacity: 0.8,
     }),
+  };
+}
+
+/** Topology-solving error faces, drawn from a GeoJSON source (the small /errors
+ * FeatureCollection rather than vector tiles) so they can be clicked for the
+ * error text. Distinct red, with a heavier outline so small faces stay visible. */
+function errorsStyle(data: ErrorsCollection): mapboxgl.Style {
+  const color = "#e5340b";
+  return {
+    version: 8,
+    sources: {
+      errors: {
+        type: "geojson",
+        data,
+      },
+    },
+    layers: [
+      {
+        id: "errors-fill",
+        type: "fill",
+        source: "errors",
+        paint: {
+          "fill-color": color,
+          "fill-opacity": 0.25,
+        },
+      },
+      {
+        id: "errors-outline",
+        type: "line",
+        source: "errors",
+        paint: {
+          "line-color": color,
+          "line-width": 2,
+        },
+      },
+    ],
   };
 }
 

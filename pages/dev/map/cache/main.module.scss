@@ -1,0 +1,125 @@
+// Shared with topology page — keep the same two-row navbar layout.
+.cache-navbar {
+  :global(.bp6-navbar) {
+    height: auto;
+    --navbar-padding: 5px 9px 7px;
+  }
+}
+
+.navbar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+
+  :global(.page-nav) {
+    min-width: 0;
+  }
+
+  :global(.bp6-breadcrumbs) {
+    font-size: 12px;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .title-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+
+    :global(.title-block) {
+      min-width: 0;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      line-height: 1.2;
+      margin: 0;
+    }
+  }
+}
+
+.cache-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .field {
+    margin-bottom: 0;
+  }
+
+  .target-info {
+    .target-name {
+      margin: 0 0 6px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    p {
+      margin: 0 0 6px;
+      font-size: 12px;
+    }
+
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .map-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      max-height: 180px;
+      overflow-y: auto;
+
+      .map-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 2px 0;
+        font-size: 12px;
+
+        .map-name {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .map-band {
+          flex: 0 0 auto;
+        }
+      }
+    }
+  }
+
+  .footprint-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .result-callout {
+    margin-top: 4px;
+  }
+}
+
+// Fixed on-screen rectangle marking the viewport-expiry region. Positioned
+// within the map container; `left` is set inline to clear the floating panel.
+.cache-rect {
+  position: absolute;
+  top: 24px;
+  right: 72px;
+  bottom: 80px;
+  pointer-events: none;
+  border: 2px solid #ff6600;
+  border-radius: 3px;
+  background: rgba(255, 102, 0, 0.08);
+  z-index: 5;
+}
