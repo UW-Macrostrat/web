@@ -1,9 +1,9 @@
 /** Spatial usage views for Macrostrat.
  *
  * The headline layer is **tile-request density** from the tileserver-stats
- * pipeline (`/dev/request-stats/{z}/{x}/{y}`, MVT source-layer `requests`,
- * feature property `num_requests`). The legacy app-access points
- * (`/usage-stats/macrostrat/...`) remain available as toggles.
+ * pipeline (`/stats/tileserver/{z}/{x}/{y}`, MVT source-layer `requests`,
+ * feature property `num_requests`). The app-access points
+ * (`/stats/web/macrostrat/...`) remain available as toggles.
  *
  * Styled after /dev/map/topology: a floating navbar + context panel over a
  * full-bleed globe map.
@@ -32,7 +32,7 @@ import {
   PageBreadcrumbsInternal,
   PageTitle,
   usePageBreadcrumbs,
-  BaseLayerDisclosure,
+  BaseLayerForm,
   Basemap,
   basemapStyle,
 } from "~/components";
@@ -296,7 +296,7 @@ function LayerPanel() {
         onChange: (e) => setShowAccessToday(e.currentTarget.checked),
       }),
     ]),
-    h(BaseLayerDisclosure, { basemap, setBasemap, showLabels, setShowLabels }),
+    h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),
   ]);
 }
 
@@ -308,4 +308,3 @@ function RequestLegend() {
     h("div.legend-labels", [h("span", "fewer"), h("span", "more requests")]),
   ]);
 }
-

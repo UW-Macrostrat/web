@@ -1,9 +1,10 @@
 /** Mapbox overlay styles for the heatmap page.
  *
  * The headline layer is tile-request density from the tileserver-stats pipeline
- * (`/dev/request-stats/{z}/{x}/{y}`, MVT source-layer `requests`, property
- * `num_requests`); the access-point layers consume the legacy `/usage-stats`
- * routes. Source-layer names are a cross-repo contract with the tileserver.
+ * (`/stats/tileserver/{z}/{x}/{y}`, MVT source-layer `requests`, property
+ * `num_requests`); the access-point layers consume the web-usage routes
+ * (`/stats/web/...`). Source-layer names are a cross-repo contract with the
+ * tileserver.
  */
 
 import { tileserverDomain } from "@macrostrat-web/settings";
@@ -87,14 +88,14 @@ function opacityRamp(offset: number) {
 
 /** Tile-request density heatmap from tileserver_stats.location_index. The
  * MVT source-layer (`requests`) and property (`num_requests`) are a contract
- * with the tileserver route /dev/request-stats/{z}/{x}/{y}. */
+ * with the tileserver route /stats/tileserver/{z}/{x}/{y}. */
 export function requestStatsStyle(): mapboxgl.Style {
   return {
     version: 8,
     sources: {
       "request-stats": {
         type: "vector",
-        tiles: [`${tileserverDomain}/dev/request-stats/{z}/{x}/{y}`],
+        tiles: [`${tileserverDomain}/stats/tileserver/{z}/{x}/{y}`],
         // Data caps at the z8 binning; overzoom rather than fetch finer tiles.
         maxzoom: 8,
       },
@@ -143,7 +144,7 @@ export function allAccessStyle(): mapboxgl.Style {
     sources: {
       access: {
         type: "vector",
-        tiles: [`${tileserverDomain}/usage-stats/macrostrat/{z}/{x}/{y}`],
+        tiles: [`${tileserverDomain}/stats/web/macrostrat/{z}/{x}/{y}`],
       },
     },
     layers: [
@@ -166,7 +167,7 @@ export function todayAccessStyle(): mapboxgl.Style {
       today: {
         type: "vector",
         tiles: [
-          `${tileserverDomain}/usage-stats/macrostrat/{z}/{x}/{y}?today=true`,
+          `${tileserverDomain}/stats/web/macrostrat/{z}/{x}/{y}?today=true`,
         ],
       },
     },

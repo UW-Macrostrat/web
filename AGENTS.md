@@ -28,6 +28,11 @@ The site is built with **Vike + React + Mapbox GL**. Pages live under `pages/`; 
 ## Code style
 
 - **Avoid inline conditionals.** Don't render `cond ? h(...) : null` or select values with inline ternaries; hoist the result to a named `let` resolved with `if`/`else` before the return. Null-safety operators (`?.`, `??`) are fine — the rule targets conditional *selection* of a value or component.
+- **Avoid deep nesting.** Keep components and functions flat. Extract data-fetching, imperative map actions, and multi-step async logic into named custom hooks (`useThing`) or helpers rather than inlining large `useEffect`/`useCallback` bodies in a component. Prefer early returns over nested `if`/`else`, and lift derived values out of the render body. A component's top level should read as a short list of named pieces.
+
+## Stylesheets
+
+Use SASS modules (`.module.sass`) for component-specific styles. Prefer sass to scss. Attempt to reuse existing shared styles and css variables where possible.
 
 ## Typechecking
 
