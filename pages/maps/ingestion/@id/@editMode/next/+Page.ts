@@ -1,5 +1,6 @@
 import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
+import { secureFetch } from "@macrostrat-web/security";
 import { ErrorBoundary, useStoredState } from "@macrostrat/ui-components";
 import { BasePage } from "~/layouts";
 import h from "./main.module.sass";
@@ -10,7 +11,7 @@ import "allotment/dist/style.css";
 import { useData } from "vike-react/useData";
 
 import { LinesTable, PointsTable, PolygonsTable } from "../../tables";
-import { Header, MapInterface } from "../../components";
+import { Header, MapInterface, downloadSourceFiles } from "../../components";
 import { MapSelectedFeatures } from "../../details-panel";
 
 interface EditInterfaceProps {
@@ -73,7 +74,10 @@ export function Page() {
                 ingestProcess,
                 separateTitle: false,
               },
-              [h(ShowMapButton, { showMap, setShowMap })]
+              [
+                h(SourceActions, { ingestProcessId }),
+                h(ShowMapButton, { showMap, setShowMap }),
+              ]
             ),
             h("div.table-container", [
               h(ErrorBoundary, [
@@ -107,6 +111,40 @@ export function Page() {
       ]),
     ])
   );
+}
+
+/** Source-level actions (top page header): download source files and
+ * generate map. These operate on the whole ingest process, so they live on
+ * the page rather than in the per-column data-sheet toolbar. */
+function SourceActions({ ingestProcessId }) {
+  async function onGenerateMap() {
+    const res = await secureFetch(
+      `${ingestPrefix}/ingest-process/${ingestProcessId}`,
+      {
+        method: "PATCH",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ state: "post_harmonization" }),
+      }
+    );
+    if (res.ok) window.location.reload();
+  }
+
+  return h([
+    h(
+      Button,
+      {
+        minimal: true,
+        icon: "download",
+        onClick: () => downloadSourceFiles(ingestProcessId),
+      },
+      "Download sources"
+    ),
+    h(
+      Button,
+      { intent: "success", icon: "layout-hierarchy", onClick: onGenerateMap },
+      "Generate map"
+    ),
+  ]);
 }
 
 function ShowMapButton({ showMap, setShowMap }) {
