@@ -1,7 +1,7 @@
-import { Button, OverlayToaster, Spinner, Tag } from "@blueprintjs/core";
+import { Button, OverlayToaster, Spinner, Switch, Tag } from "@blueprintjs/core";
 import { RegionCardinality } from "@blueprintjs/table";
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { useAtom, useAtomValue, useStore } from "jotai";
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import {
   DataSheet,
   generateColumnSpec,
@@ -14,11 +14,12 @@ import { createAppToaster } from "@macrostrat/ui-components";
 import { FeatureType } from "./defs";
 import { toBoolean } from "../components";
 import {
+  autoFocusEditorAtom,
+  columnOrderAtom,
   defaultFilters,
   filtersAtom,
   groupAtom,
   hiddenColumnsAtom,
-  showOmittedAtom,
   sortAtom,
   useIngestData,
   useResetIngestState,
@@ -61,23 +62,35 @@ function safeRenderer(fn: ((d: any) => any) | undefined) {
   };
 }
 
-/** Reorder a column spec: pin `source_layer` first, and ensure `b_interval`
- * precedes `t_interval`. Other columns keep their natural order. */
-function orderColumns<T extends { key: string }>(cols: T[]): T[] {
-  const out = [...cols];
-  const pinFirst = (key: string) => {
-    const i = out.findIndex((c) => c.key === key);
-    if (i > 0) out.unshift(out.splice(i, 1)[0]);
-  };
-  pinFirst("source_layer");
+/** Default order: final (harmonized) columns first, in `finalColumns` order,
+ * then the remaining columns in their natural order (both stable). */
+function orderByFinal<T extends { key: string }>(
+  cols: T[],
+  finalColumns: string[],
+): T[] {
+  const idx = new Map(finalColumns.map((k, i) => [k, i]));
+  return [...cols].sort((a, b) => {
+    const fa = idx.has(a.key);
+    const fb = idx.has(b.key);
+    if (fa && fb) return (idx.get(a.key) ?? 0) - (idx.get(b.key) ?? 0);
+    if (fa) return -1;
+    if (fb) return 1;
+    return 0;
+  });
+}
 
-  const ib = out.findIndex((c) => c.key === "b_interval");
-  const it = out.findIndex((c) => c.key === "t_interval");
-  if (ib >= 0 && it >= 0 && it < ib) {
-    const [t] = out.splice(it, 1);
-    out.splice(out.findIndex((c) => c.key === "b_interval") + 1, 0, t);
-  }
-  return out;
+/** Order by an explicit key list (user reorder); unlisted columns keep their
+ * natural order at the end. */
+function orderByKeys<T extends { key: string }>(
+  cols: T[],
+  order: string[],
+): T[] {
+  const idx = new Map(order.map((k, i) => [k, i]));
+  return [...cols].sort((a, b) => {
+    const ia = idx.has(a.key) ? (idx.get(a.key) as number) : Infinity;
+    const ib = idx.has(b.key) ? (idx.get(b.key) as number) : Infinity;
+    return ia - ib;
+  });
 }
 
 /** Resolve an OverlayToaster instance. In Blueprint v6 `OverlayToaster.create()`
@@ -117,11 +130,15 @@ export function TableInterface({
   const store = useStore();
   const toaster = useToasterInstance();
   const hiddenColumns = useAtomValue(hiddenColumnsAtom);
-  const { data, total, loading, loadMore, reload } = useIngestData(url);
+  const columnOrder = useAtomValue(columnOrderAtom);
+  const autoFocusEditor = useAtomValue(autoFocusEditorAtom);
+  const { data, total, loading, loadMore, reload, removeRows, patchRows } =
+    useIngestData(url);
 
   const actions = useMemo(
-    () => makeIngestActions({ url, store, reload, toaster }),
-    [url, store, reload, toaster],
+    () =>
+      makeIngestActions({ url, store, reload, removeRows, patchRows, toaster }),
+    [url, store, reload, removeRows, patchRows, toaster],
   );
 
   const columnHeaderCellRenderer = useMemo(
@@ -135,6 +152,7 @@ export function TableInterface({
   // columns (and internal identity columns) are dropped from the view.
   const columnKeys = data.length === 0 ? "" : Object.keys(data[0] ?? {}).join();
   const hiddenKey = hiddenColumns.join();
+  const orderKey = columnOrder?.join() ?? "";
   const columnSpec = useMemo(() => {
     const spec = generateColumnSpec(data, {
       overrides,
@@ -146,9 +164,12 @@ export function TableInterface({
       filterable: false,
       valueRenderer: safeRenderer(col.valueRenderer),
     }));
-    return orderColumns(normalized);
+    // A saved (user) order takes precedence; otherwise final columns lead.
+    return columnOrder != null
+      ? orderByKeys(normalized, columnOrder)
+      : orderByFinal(normalized, finalColumns);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnKeys, hiddenKey, overrides]);
+  }, [columnKeys, hiddenKey, orderKey, overrides, finalColumns]);
 
   return h(DataSheet, {
     data,
@@ -156,12 +177,16 @@ export function TableInterface({
     editable: true,
     actions,
     columnHeaderCellRenderer,
-    enableColumnReordering: false,
+    enableColumnReordering: true,
+    autoFocusEditor,
     dataSheetActions: h("div.ingest-top", [
       h(ColumnControls),
       h("div.ingest-toolbar", [
         h(FilterStatusBar),
-        h(StatusBar, { total, loading, loaded: data.length }),
+        h("div.ingest-toolbar-right", [
+          h(EditorFocusToggle),
+          h(StatusBar, { total, loading, loaded: data.length }),
+        ]),
       ]),
     ]),
     onVisibleCellsChange: (visibleCells) => {
@@ -177,7 +202,12 @@ const isEmptyValue = (v: any) => v == null || v === "";
 
 /** Runs inside the DataSheet provider to keep the store consistent:
  *  1. Bridges the `omit` key (source of truth) to row-deletion status, so
- *     omitted rows render struck-through.
+ *     omitted rows render struck-through *in place* — matching data-sheet's
+ *     deletion model, which keeps deleted rows in the array (identity indices)
+ *     rather than reindexing. (A client-side hide filter was tried, but
+ *     data-sheet's edit methods — `onSelectionEdited`, `clearSelection`,
+ *     `fillValues` — apply edits by raw selection index without mapping through
+ *     `filteredRowIndices`, so filtering rows out desynced cell edits.)
  *  2. Prunes phantom / no-op overlay edits (e.g. the empty→"" edit produced by
  *     focusing and blurring an empty cell), which otherwise show a green cell.
  *     Workaround for a data-sheet `onCellEdited` bug; safe to remove once the
@@ -187,28 +217,24 @@ function StoreSync(): null {
   const storeAPI = useStoreAPI();
   const data = useSelector((s: any) => s.data);
   const updatedData = useSelector((s: any) => s.updatedData);
-  const showOmitted = useAtomValue(showOmittedAtom);
+  const columnSpec = useSelector((s: any) => s.columnSpec);
+  const setColumnOrder = useSetAtom(columnOrderAtom);
 
-  // Hide/show omitted rows on the fly. In hide mode, a client-side filter keyed
-  // on the effective `omit` value removes omitted rows (including ones omitted
-  // this session, which the server hasn't filtered yet). Re-applied on data /
-  // edit changes so newly-omitted rows drop out immediately.
+  // Capture data-sheet's in-store column order (e.g. after a drag-reorder) back
+  // into the atom, so the loader re-initializing the spec preserves it.
   useEffect(() => {
-    const api = storeAPI.getState();
-    if (showOmitted) {
-      api.removeFilter("hide-omitted");
-    } else {
-      api.setFilter(
-        "hide-omitted",
-        {
-          id: "hide-omitted",
-          name: "Omitted",
-          predicate: (row: any) => toBoolean(row?.omit) !== true,
-        },
-        null,
-      );
-    }
-  }, [showOmitted, data, updatedData, storeAPI]);
+    const keys = columnSpec.map((c: any) => c.key);
+    setColumnOrder((prev) => {
+      if (
+        prev != null &&
+        prev.length === keys.length &&
+        prev.every((k, i) => k === keys[i])
+      ) {
+        return prev;
+      }
+      return keys;
+    });
+  }, [columnSpec, setColumnOrder]);
 
   // Prune phantom / no-op overlay edits.
   useEffect(() => {
@@ -325,6 +351,18 @@ function FilterStatusBar(): ReactNode {
       "Clear all",
     ),
   ]);
+}
+
+/** Toggle between click-to-focus (default) and auto-focus cell editing. */
+function EditorFocusToggle(): ReactNode {
+  const [autoFocus, setAutoFocus] = useAtom(autoFocusEditorAtom);
+  return h(Switch, {
+    checked: autoFocus,
+    label: "Auto-focus editor",
+    inline: true,
+    className: "editor-focus-toggle",
+    onChange: (e) => setAutoFocus(e.currentTarget.checked),
+  });
 }
 
 function StatusBar({

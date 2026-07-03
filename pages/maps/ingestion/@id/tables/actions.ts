@@ -21,8 +21,20 @@ import {
   filtersAtom,
   groupAtom,
   hiddenColumnsAtom,
+  patchColumnForRows,
   saveIngestUpdates,
 } from "./state";
+
+/** Remove the given indices from an array while preserving the positions of the
+ * rest. Works on sparse arrays (holes become `undefined`), so the index-keyed
+ * edit overlay stays aligned with the shortened data. */
+function removeIndices<T>(arr: T[], drop: Set<number>): T[] {
+  const out: T[] = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (!drop.has(i)) out.push(arr[i]);
+  }
+  return out;
+}
 
 /** A row's effective omit state = its overlaid `omit`, falling back to the
  * loaded value. This (the `omit` key) is the source of truth; the struck-
@@ -52,6 +64,8 @@ export interface IngestActionDeps {
   url: string;
   store: JotaiStore;
   reload: () => void;
+  removeRows: (pkids: any[]) => void;
+  patchRows: (pkids: any[], patch: Record<string, any>) => void;
   toaster?: OverlayToaster | null;
 }
 
@@ -59,6 +73,8 @@ export function makeIngestActions({
   url,
   store,
   reload,
+  removeRows,
+  patchRows,
   toaster,
 }: IngestActionDeps): TableAction[] {
   const notify = (message: string, intent: "success" | "danger" | "primary") =>
@@ -86,17 +102,10 @@ export function makeIngestActions({
     },
   };
 
-  // Omit/restore are overlay edits to the `omit` key, held locally and applied
-  // on Save. The struck-through visual is derived from `omit` by `OmitSync`.
-  const setOmit = (ctx: any, omit: boolean) => {
-    const rows = ctx.getSelectedRowIndices();
-    if (rows.length === 0) return;
-    ctx.editCells(
-      rows.map((rowIndex: number) => ({ rowIndex, columnKey: "omit", value: omit })),
-    );
-    ctx.clearSelection();
-  };
-
+  // Omit applies immediately: PATCH omit=true, then optimistically splice the
+  // rows out of the store (all three arrays together, so the index-keyed edit
+  // overlay stays aligned) and drop them from the loader cache — no full reload,
+  // so other unsaved edits survive.
   const omitRowsAction: TableAction = {
     id: "omit-rows",
     name: "Omit rows",
@@ -107,9 +116,38 @@ export function makeIngestActions({
       const rows = getSelectedRowIndices(s.selection);
       return rows.length === 0 || rows.every((r) => isOmitted(s, r));
     },
-    run: (ctx) => setOmit(ctx, true),
+    async run(ctx) {
+      const indices = ctx
+        .getSelectedRowIndices()
+        .filter((i: number) => ctx.data[i] != null && !isOmitted(ctx, i));
+      if (indices.length === 0) return;
+      const baseRows = indices.map((i: number) => ctx.data[i]);
+      const group = store.get(groupAtom);
+      try {
+        await patchColumnForRows(url, baseRows, "omit", true, group);
+        const drop = new Set<number>(indices);
+        ctx.setState({
+          data: removeIndices(ctx.data, drop),
+          updatedData: removeIndices(ctx.updatedData, drop),
+          rowStatus: removeIndices(ctx.rowStatus, drop),
+          selection: [],
+          focusedCell: null,
+          topLeftCell: null,
+        });
+        removeRows(baseRows);
+        notify(
+          `Omitted ${indices.length} row${indices.length === 1 ? "" : "s"}`,
+          "success",
+        );
+      } catch (err) {
+        console.error(err);
+        notify("Failed to omit rows", "danger");
+      }
+    },
   };
 
+  // Restore is only reachable in "show omitted" mode (omitted rows loaded and
+  // struck through). PATCH omit=false and clear it in place so the row un-strikes.
   const restoreRowsAction: TableAction = {
     id: "restore-rows",
     name: "Restore rows",
@@ -120,7 +158,28 @@ export function makeIngestActions({
       const rows = getSelectedRowIndices(s.selection);
       return rows.length === 0 || !rows.some((r) => isOmitted(s, r));
     },
-    run: (ctx) => setOmit(ctx, false),
+    async run(ctx) {
+      const indices = ctx
+        .getSelectedRowIndices()
+        .filter((i: number) => ctx.data[i] != null && isOmitted(ctx, i));
+      if (indices.length === 0) return;
+      const baseRows = indices.map((i: number) => ctx.data[i]);
+      const group = store.get(groupAtom);
+      try {
+        await patchColumnForRows(url, baseRows, "omit", false, group);
+        const next = ctx.data.slice();
+        for (const i of indices) next[i] = { ...next[i], omit: false };
+        ctx.setState({ data: next, selection: [] });
+        patchRows(baseRows, { omit: false });
+        notify(
+          `Restored ${indices.length} row${indices.length === 1 ? "" : "s"}`,
+          "success",
+        );
+      } catch (err) {
+        console.error(err);
+        notify("Failed to restore rows", "danger");
+      }
+    },
   };
 
   const toggleOmittedAction: TableAction = {

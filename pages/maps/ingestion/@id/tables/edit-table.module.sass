@@ -96,9 +96,6 @@ div.warning
     overflow: hidden
     text-overflow: ellipsis
 
-  .final-indicator
-    opacity: 0.5
-
   .column-indicators
     display: flex
     flex-direction: row
@@ -186,6 +183,17 @@ div.warning
   gap: 4px
   padding: 2px 8px
 
+.ingest-toolbar-right
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 8px
+  margin-left: auto
+
+  .editor-focus-toggle
+    margin-bottom: 0
+    font-size: 12px
+
 .ingest-status-bar
   display: flex
   flex-direction: row
@@ -194,7 +202,13 @@ div.warning
   padding: 2px 8px
   font-size: 12px
   opacity: 0.8
-  margin-left: auto
+
+// Final / harmonized columns get a subtle desaturated-blue header tint
+// (className applied to the Blueprint header cell, so matched globally).
+:global
+  .bp6-table-header.final-column-header,
+  .final-column-header
+    background-color: rgba(45, 114, 210, 0.12)
 
 .interval-editor
   display: flex

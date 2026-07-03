@@ -41,6 +41,15 @@ export const groupAtom = atom<string | undefined>(undefined);
 /** Columns hidden from view (not sent to the server; purely presentational). */
 export const hiddenColumnsAtom = atom<string[]>([]);
 
+/** User-defined column order (list of keys), or null for the default
+ * final-columns-first order. Captured from data-sheet's in-store reorder so it
+ * survives the loader re-initializing the column spec on each page load. */
+export const columnOrderAtom = atom<string[] | null>(null);
+
+/** Whether selecting a cell auto-focuses its editor. Default false =
+ * click-to-focus. */
+export const autoFocusEditorAtom = atom(false);
+
 /** Reference data: interval definitions, populated once per table (polygons). */
 export const intervalsAtom = atom<Interval[]>([]);
 
@@ -118,6 +127,10 @@ export interface IngestData {
   loadMore: () => void;
   /** Discard loaded rows and re-fetch from the first page. */
   reload: () => void;
+  /** Drop rows from the loaded cache by object reference (optimistic omit). */
+  removeRows: (rows: any[]) => void;
+  /** Patch loaded rows in place by object reference (optimistic restore). */
+  patchRows: (rows: any[], patch: Record<string, any>) => void;
 }
 
 /** Lazy, filter/sort/group-aware loader for a single ingestion feature table.
@@ -194,7 +207,25 @@ export function useIngestData(url: string): IngestData {
     load(true);
   }, [load]);
 
-  return { data, total, loading, loadMore, reload };
+  // Drop rows from the loaded cache by object reference (used for optimistic
+  // omit). Reference identity is used rather than `_pkid` so this is correct in
+  // grouped mode too, where aggregated rows share/lack a `_pkid` — the store
+  // rows are the same objects as this cache.
+  const removeRows = useCallback((rows: any[]) => {
+    const s = new Set(rows);
+    setData((prev) => prev.filter((r) => !s.has(r)));
+    setTotal((t) => (t == null ? t : Math.max(0, t - rows.length)));
+  }, []);
+
+  // Patch loaded rows in place by object reference (used for optimistic restore).
+  const patchRows = useCallback((rows: any[], patch: Record<string, any>) => {
+    const s = new Set(rows);
+    setData((prev) =>
+      prev.map((r) => (s.has(r) ? { ...r, ...patch } : r)),
+    );
+  }, []);
+
+  return { data, total, loading, loadMore, reload, removeRows, patchRows };
 }
 
 /** The filter that identifies which server rows a given (base) row maps to.
@@ -250,6 +281,23 @@ export async function saveIngestUpdates(
   return count;
 }
 
+/** PATCH a single column to a fixed value for a set of (base) rows, each
+ * scoped by its identity filter. Used by the immediate omit/restore actions. */
+export async function patchColumnForRows(
+  url: string,
+  baseRows: Record<string, any>[],
+  column: string,
+  value: any,
+  group: string | undefined,
+): Promise<number> {
+  let count = 0;
+  for (const row of baseRows) {
+    await submitChange(url, value, [column], identityFilter(row, group));
+    count += 1;
+  }
+  return count;
+}
+
 /** Reset the (default-store) view-state atoms when the active table changes,
  * so filters / sort / group don't leak between the polygon / line / point
  * routes. The atoms live on jotai's default store rather than a dedicated
@@ -263,6 +311,7 @@ export function useResetIngestState(url: string) {
     store.set(sortAtom, null);
     store.set(groupAtom, undefined);
     store.set(hiddenColumnsAtom, []);
+    store.set(columnOrderAtom, null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 }

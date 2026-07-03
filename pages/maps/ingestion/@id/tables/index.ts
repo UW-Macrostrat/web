@@ -32,12 +32,14 @@ const INTERVAL_OVERRIDES: Record<string, Partial<ColumnSpec>> = {
     cellComponent: IntervalCell,
     dataEditor: IntervalEditor,
     valueRenderer: renderIntervalName,
+    width: 200,
   },
   b_interval: {
     name: "Bottom interval",
     cellComponent: IntervalCell,
     dataEditor: IntervalEditor,
     valueRenderer: renderIntervalName,
+    width: 200,
   },
 };
 
