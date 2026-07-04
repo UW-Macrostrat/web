@@ -1,18 +1,38 @@
-import { Button, OverlayToaster, Spinner, Switch, Tag } from "@blueprintjs/core";
+import {
+  Button,
+  ButtonGroup,
+  Icon,
+  Menu,
+  MenuItem,
+  OverlayToaster,
+  PopoverNext,
+  Spinner,
+  Switch,
+  Tag,
+} from "@blueprintjs/core";
 import { RegionCardinality } from "@blueprintjs/table";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import {
   DataSheet,
   generateColumnSpec,
-  TableElementStatus,
+  getSelectionCardinality,
+  runActionWrapper,
+  TableAction,
   useSelector,
   useStoreAPI,
   type ColumnSpec,
 } from "@macrostrat/data-sheet";
 import { createAppToaster } from "@macrostrat/ui-components";
 import { FeatureType } from "./defs";
-import { toBoolean } from "../components";
+import { applyOps, diffToOps, opsAtom } from "./pending-ops";
 import {
   autoFocusEditorAtom,
   columnOrderAtom,
@@ -20,14 +40,26 @@ import {
   filtersAtom,
   groupAtom,
   hiddenColumnsAtom,
+  saveProgressAtom,
   sortAtom,
   useIngestData,
   useResetIngestState,
+  useTableStatePersistence,
 } from "./state";
-import { makeIngestActions } from "./actions";
-import { makeColumnHeaderRenderer } from "./column-header";
+import { ProgressPopover } from "../components";
+import { makeIngestActions, type IngestActions } from "./actions";
+import { makeColumnHeaderRenderer, SYSTEM_COLUMN } from "./column-header";
 import { ColumnControls } from "./column-controls";
 import h from "../hyper";
+
+/** Force the system column (`source_layer`) to the front, wherever it landed. */
+function pinSystemColumn<T extends { key: string }>(cols: T[]): T[] {
+  const i = cols.findIndex((c) => c.key === SYSTEM_COLUMN);
+  if (i <= 0) return cols;
+  const out = [...cols];
+  out.unshift(out.splice(i, 1)[0]);
+  return out;
+}
 
 /** Human-readable labels for the ingestion filter operators. */
 const OPERATOR_LABELS: Record<string, string> = {
@@ -123,22 +155,24 @@ export interface EditTableProps {
 
 export function TableInterface({
   url,
+  ingestProcessId,
+  featureType,
   finalColumns,
   overrides = {},
 }: EditTableProps) {
   useResetIngestState(url);
+  useTableStatePersistence(ingestProcessId, featureType);
   const store = useStore();
   const toaster = useToasterInstance();
   const hiddenColumns = useAtomValue(hiddenColumnsAtom);
   const columnOrder = useAtomValue(columnOrderAtom);
   const autoFocusEditor = useAtomValue(autoFocusEditorAtom);
-  const { data, total, loading, loadMore, reload, removeRows, patchRows } =
-    useIngestData(url);
+  const group = useAtomValue(groupAtom);
+  const { data, total, loading, done, loadMore, reload } = useIngestData(url);
 
   const actions = useMemo(
-    () =>
-      makeIngestActions({ url, store, reload, removeRows, patchRows, toaster }),
-    [url, store, reload, removeRows, patchRows, toaster],
+    () => makeIngestActions({ url, store, reload, toaster }),
+    [url, store, reload, toaster],
   );
 
   const columnHeaderCellRenderer = useMemo(
@@ -165,121 +199,107 @@ export function TableInterface({
       valueRenderer: safeRenderer(col.valueRenderer),
     }));
     // A saved (user) order takes precedence; otherwise final columns lead.
-    return columnOrder != null
-      ? orderByKeys(normalized, columnOrder)
-      : orderByFinal(normalized, finalColumns);
+    const ordered =
+      columnOrder != null
+        ? orderByKeys(normalized, columnOrder)
+        : orderByFinal(normalized, finalColumns);
+    return pinSystemColumn(ordered);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnKeys, hiddenKey, orderKey, overrides, finalColumns]);
 
-  return h(DataSheet, {
-    data,
-    columnSpec,
-    editable: true,
-    actions,
-    columnHeaderCellRenderer,
-    enableColumnReordering: true,
-    autoFocusEditor,
-    dataSheetActions: h("div.ingest-top", [
-      h(ColumnControls),
-      h("div.ingest-toolbar", [
-        h(FilterStatusBar),
-        h("div.ingest-toolbar-right", [
-          h(EditorFocusToggle),
-          h(StatusBar, { total, loading, loaded: data.length }),
+  return h("div.ingest-table-wrap", [
+    h(
+      DataSheet,
+      {
+        data,
+        columnSpec,
+        editable: true,
+        // Only the hotkey-only clipboard actions go to the built-in toolbar
+        // (they render nothing since `targets: []`); everything else is in our
+        // own contextual toolbar below. `enableClipboard: false` avoids the
+        // built-in clipboard actions duplicating hotkeys.
+        actions: actions.clipboard,
+        columnHeaderCellRenderer,
+        enableColumnReordering: true,
+        enableClipboard: false,
+        autoFocusEditor,
+        dataSheetActions: h("div.ingest-top", [
+          h(IngestToolbar, { actions, toaster }),
+          h(FilterStatusBar),
+          h(SaveProgress),
         ]),
-      ]),
-    ]),
-    onVisibleCellsChange: (visibleCells) => {
-      if (visibleCells.rowIndexEnd > data.length - 20) {
-        loadMore();
-      }
-    },
-    selectionModes: [RegionCardinality.FULL_COLUMNS, RegionCardinality.FULL_ROWS],
-  }, h(StoreSync));
+        onVisibleCellsChange: (visibleCells) => {
+          if (visibleCells.rowIndexEnd > data.length - 20) {
+            loadMore();
+          }
+        },
+        selectionModes: [
+          RegionCardinality.FULL_COLUMNS,
+          RegionCardinality.FULL_ROWS,
+        ],
+      },
+      h(StoreSync, { base: data, group }),
+    ),
+    h(StatusBar, { total, loading, done, loaded: data.length }),
+  ]);
 }
 
-const isEmptyValue = (v: any) => v == null || v === "";
-
-/** Runs inside the DataSheet provider to keep the store consistent:
- *  1. Bridges the `omit` key (source of truth) to row-deletion status, so
- *     omitted rows render struck-through *in place* — matching data-sheet's
- *     deletion model, which keeps deleted rows in the array (identity indices)
- *     rather than reindexing. (A client-side hide filter was tried, but
- *     data-sheet's edit methods — `onSelectionEdited`, `clearSelection`,
- *     `fillValues` — apply edits by raw selection index without mapping through
- *     `filteredRowIndices`, so filtering rows out desynced cell edits.)
- *  2. Prunes phantom / no-op overlay edits (e.g. the empty→"" edit produced by
- *     focusing and blurring an empty cell), which otherwise show a green cell.
- *     Workaround for a data-sheet `onCellEdited` bug; safe to remove once the
- *     library normalizes empty↔null.
+/** Runs inside the DataSheet provider and keeps the store in sync with the
+ * page-side state:
+ *  1. Captures data-sheet's in-store column order (after a drag-reorder) into
+ *     `columnOrderAtom`, so the loader re-initializing the spec preserves it.
+ *  2. Derives the edit overlay + row status from the pending-ops stack and the
+ *     loaded rows (`applyOps`), pushing them into the store.
+ *  3. Captures inline cell edits (which data-sheet writes straight to
+ *     `updatedData`) back into the ops stack, keeping the stack authoritative.
+ *     Once the library exposes an op-based edit API this step goes away.
  */
-function StoreSync(): null {
+function StoreSync({
+  base,
+  group,
+}: {
+  base: any[];
+  group: string | undefined;
+}): null {
   const storeAPI = useStoreAPI();
-  const data = useSelector((s: any) => s.data);
-  const updatedData = useSelector((s: any) => s.updatedData);
+  const [ops, setOps] = useAtom(opsAtom);
+  const overlay = useSelector((s: any) => s.updatedData);
   const columnSpec = useSelector((s: any) => s.columnSpec);
   const setColumnOrder = useSetAtom(columnOrderAtom);
+  const derivedRef = useRef<any[]>([]);
 
-  // Capture data-sheet's in-store column order (e.g. after a drag-reorder) back
-  // into the atom, so the loader re-initializing the spec preserves it.
+  // (1) Capture column reorder.
   useEffect(() => {
     const keys = columnSpec.map((c: any) => c.key);
-    setColumnOrder((prev) => {
-      if (
-        prev != null &&
-        prev.length === keys.length &&
-        prev.every((k, i) => k === keys[i])
-      ) {
-        return prev;
-      }
-      return keys;
-    });
+    setColumnOrder((prev) =>
+      prev != null &&
+      prev.length === keys.length &&
+      prev.every((k, i) => k === keys[i])
+        ? prev
+        : keys,
+    );
   }, [columnSpec, setColumnOrder]);
 
-  // Prune phantom / no-op overlay edits.
+  // (2) Derive overlay + row status from ops + loaded rows.
   useEffect(() => {
-    const state = storeAPI.getState();
-    const next = state.updatedData.slice();
-    let changed = false;
-    for (let i = 0; i < next.length; i++) {
-      const row = next[i];
-      if (row == null) continue;
-      let pruned: any = null;
-      for (const key of Object.keys(row)) {
-        const val = row[key];
-        const base = state.data[i]?.[key];
-        if (val === base || (isEmptyValue(val) && isEmptyValue(base))) {
-          pruned = pruned ?? { ...row };
-          delete pruned[key];
-        }
-      }
-      if (pruned != null) {
-        changed = true;
-        next[i] = Object.keys(pruned).length > 0 ? pruned : undefined;
-      }
-    }
-    if (changed) storeAPI.setState({ updatedData: next });
-  }, [updatedData, storeAPI]);
+    const { updatedData, rowStatus } = applyOps(base, ops);
+    derivedRef.current = updatedData;
+    storeAPI.setState({ updatedData, rowStatus });
+  }, [ops, base, storeAPI]);
 
-  // Mirror effective omit → row-deletion status (strikethrough).
+  // (3) Capture inline edits: when the store overlay diverges from what we
+  // derived, translate the delta into ops (which re-derives, converging). If
+  // the divergence yields no ops (a phantom empty↔null edit), re-assert the
+  // derived overlay to clear the stray value.
   useEffect(() => {
-    const { rowStatus } = storeAPI.getState();
-    const next = [...rowStatus];
-    let changed = false;
-    const n = Math.max(data.length, updatedData.length);
-    for (let i = 0; i < n; i++) {
-      const omitted = toBoolean(updatedData[i]?.omit ?? data[i]?.omit) === true;
-      const marked = next[i] === TableElementStatus.DELETED;
-      if (omitted && !marked) {
-        next[i] = TableElementStatus.DELETED;
-        changed = true;
-      } else if (!omitted && marked) {
-        next[i] = undefined;
-        changed = true;
-      }
+    if (overlay === derivedRef.current) return;
+    const newOps = diffToOps(overlay, derivedRef.current, base, group);
+    if (newOps.length > 0) {
+      setOps((prev) => [...prev, ...newOps]);
+    } else {
+      storeAPI.setState({ updatedData: derivedRef.current });
     }
-    if (changed) storeAPI.setState({ rowStatus: next });
-  }, [data, updatedData, storeAPI]);
+  }, [overlay, base, group, setOps, storeAPI]);
 
   return null;
 }
@@ -353,6 +373,151 @@ function FilterStatusBar(): ReactNode {
   ]);
 }
 
+/** Single contextual toolbar: controls for the current selection mode on the
+ * left, always-available Save / Reset on the right. Replaces the separate
+ * per-mode strips so the top of the UI stays stable as selection changes. */
+function IngestToolbar({
+  actions,
+  toaster,
+}: {
+  actions: IngestActions;
+  toaster: OverlayToaster | null;
+}): ReactNode {
+  const storeAPI = useStoreAPI();
+  const selection = useSelector((s: any) => s.selection);
+  const cardinality = getSelectionCardinality(selection);
+  const run = useCallback(
+    (action: TableAction) =>
+      runActionWrapper(action, storeAPI.getState(), storeAPI.setState, toaster),
+    [storeAPI, toaster],
+  );
+
+  let context: ReactNode;
+  switch (cardinality) {
+    case RegionCardinality.FULL_COLUMNS:
+      context = h(ColumnControls);
+      break;
+    case RegionCardinality.FULL_ROWS:
+      context = h(ButtonGroup, { minimal: true }, [
+        h(ActionBtn, { action: actions.omit, run }),
+        h(ActionBtn, { action: actions.restore, run }),
+      ]);
+      break;
+    case RegionCardinality.CELLS:
+      context = h(EditorFocusToggle);
+      break;
+    default:
+      // No selection / whole table.
+      context = h(ButtonGroup, { minimal: true }, [
+        h(ActionBtn, { action: actions.toggleOmitted, run }),
+        h(ActionBtn, { action: actions.showHidden, run }),
+      ]);
+      break;
+  }
+
+  return h("div.ingest-action-bar", [
+    h("div.context-controls", context),
+    h("div.spacer"),
+    h(PendingOpsControl),
+    h(ButtonGroup, { minimal: true }, [
+      h(ActionBtn, { action: actions.save, run }),
+      h(ActionBtn, { action: actions.reset, run }),
+    ]),
+  ]);
+}
+
+/** Shows the count of pending operations; the popover lists them grouped by the
+ * action that produced them, with a ✕ to revert a whole batch. */
+function PendingOpsControl(): ReactNode {
+  const [ops, setOps] = useAtom(opsAtom);
+  if (ops.length === 0) return null;
+
+  // Group ops by the batch that created them (one edit / paste / omit action).
+  const batches: { id: string; label: string; count: number }[] = [];
+  const seen = new Map<string, number>();
+  for (const op of ops) {
+    const idx = seen.get(op.batchId);
+    if (idx == null) {
+      seen.set(op.batchId, batches.length);
+      batches.push({ id: op.batchId, label: op.label, count: 1 });
+    } else {
+      batches[idx].count += 1;
+    }
+  }
+
+  const removeBatch = (batchId: string) =>
+    setOps((prev) => prev.filter((op) => op.batchId !== batchId));
+
+  return h(
+    PopoverNext,
+    {
+      placement: "bottom-end",
+      content: h(
+        Menu,
+        {},
+        batches.map((b) =>
+          h(MenuItem, {
+            key: b.id,
+            text: b.count > 1 ? `${b.label} (${b.count})` : b.label,
+            shouldDismissPopover: false,
+            labelElement: h(Button, {
+              icon: "cross",
+              minimal: true,
+              small: true,
+              onClick: (e: any) => {
+                e.stopPropagation();
+                removeBatch(b.id);
+              },
+            }),
+          }),
+        ),
+      ),
+    },
+    h(
+      Button,
+      { minimal: true, small: true, icon: "history", rightIcon: "caret-down" },
+      `${batches.length} pending`,
+    ),
+  );
+}
+
+/** A toolbar button for a TableAction, with reactive disabled state. */
+function ActionBtn({
+  action,
+  run,
+}: {
+  action: TableAction;
+  run: (a: TableAction) => void;
+}): ReactNode {
+  const disabled = useSelector((s: any) =>
+    typeof action.disabled === "function"
+      ? action.disabled(s)
+      : Boolean(action.disabled),
+  );
+  return h(
+    Button,
+    {
+      small: true,
+      icon: action.icon,
+      intent: action.intent,
+      disabled,
+      onClick: () => run(action),
+    },
+    action.name,
+  );
+}
+
+/** Progress bar shown while a batch save is in flight. */
+function SaveProgress(): ReactNode {
+  const progress = useAtomValue(saveProgressAtom);
+  if (progress == null) return null;
+  return h(ProgressPopover, {
+    progressBarProps: { intent: "success" },
+    value: progress.value,
+    text: progress.text,
+  });
+}
+
 /** Toggle between click-to-focus (default) and auto-focus cell editing. */
 function EditorFocusToggle(): ReactNode {
   const [autoFocus, setAutoFocus] = useAtom(autoFocusEditorAtom);
@@ -368,16 +533,25 @@ function EditorFocusToggle(): ReactNode {
 function StatusBar({
   total,
   loading,
+  done,
   loaded,
 }: {
   total: number | null;
   loading: boolean;
+  done: boolean;
   loaded: number;
 }): ReactNode {
-  const count =
-    total != null ? `${loaded} / ${total} rows` : `${loaded} rows`;
-  return h("div.ingest-status-bar", [
-    h.if(loading)(Spinner, { size: 14 }),
-    h("span.row-count", count),
-  ]);
+  const fullyLoaded = done || (total != null && loaded >= total);
+  const count = total != null ? `${loaded} / ${total} rows` : `${loaded} rows`;
+
+  let indicator: ReactNode;
+  if (loading) {
+    indicator = h(Spinner, { size: 12 });
+  } else if (fullyLoaded) {
+    indicator = h(Icon, { icon: "small-tick", size: 12, className: "load-done" });
+  } else {
+    indicator = h(Icon, { icon: "more", size: 12, className: "load-more" });
+  }
+
+  return h("div.ingest-status-bar", [h("span.row-count", count), indicator]);
 }

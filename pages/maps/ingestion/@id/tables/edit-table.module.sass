@@ -138,15 +138,39 @@ div.warning
   display: flex
   flex-direction: column
 
-.column-controls
+// Wrapper: table fills, status bar pinned to the bottom.
+.ingest-table-wrap
+  display: flex
+  flex-direction: column
+  height: 100%
+  min-height: 0
+
+  :global .data-sheet-container
+    flex: 1 1 auto
+    min-height: 0
+
+// Single contextual toolbar: context controls (left) + Save/Reset (right).
+// Always present with a reserved height so the table doesn't shift as the
+// selection mode changes.
+.ingest-action-bar
   display: flex
   flex-direction: row
   align-items: center
-  flex-wrap: wrap
-  gap: 12px
-  padding: 4px 8px
-  background-color: var(--secondary-background, rgba(127, 127, 127, 0.08))
-  border-bottom: 1px solid rgba(127, 127, 127, 0.2)
+  gap: 8px
+  padding: 3px 8px
+  min-height: 36px
+  background-color: rgba(143, 153, 168, 0.12)
+  border-bottom: 1px solid rgba(143, 153, 168, 0.25)
+
+  .spacer
+    flex: 1 1 auto
+
+  .context-controls
+    display: flex
+    flex-direction: row
+    align-items: center
+    flex-wrap: wrap
+    gap: 12px
 
   .column-controls-label
     display: flex
@@ -167,14 +191,6 @@ div.warning
     align-items: center
     gap: 4px
 
-.ingest-toolbar
-  display: flex
-  flex-direction: row
-  align-items: center
-  flex-wrap: wrap
-  gap: 8px
-  justify-content: space-between
-
 .ingest-filter-bar
   display: flex
   flex-direction: row
@@ -183,25 +199,25 @@ div.warning
   gap: 4px
   padding: 2px 8px
 
-.ingest-toolbar-right
-  display: flex
-  flex-direction: row
-  align-items: center
-  gap: 8px
-  margin-left: auto
-
-  .editor-focus-toggle
-    margin-bottom: 0
-    font-size: 12px
+.editor-focus-toggle
+  margin-bottom: 0
+  font-size: 12px
 
 .ingest-status-bar
   display: flex
   flex-direction: row
   align-items: center
-  gap: 8px
-  padding: 2px 8px
+  justify-content: flex-end
+  gap: 6px
+  padding: 3px 10px
   font-size: 12px
-  opacity: 0.8
+  opacity: 0.85
+  border-top: 1px solid rgba(143, 153, 168, 0.25)
+  background-color: rgba(143, 153, 168, 0.1)
+
+  // Subtle, muted load indicators (no bright "success" color).
+  .load-done, .load-more
+    opacity: 0.5
 
 // Final / harmonized columns get a subtle desaturated-blue header tint
 // (className applied to the Blueprint header cell, so matched globally).

@@ -10,6 +10,9 @@ import { useAtomValue } from "jotai";
 import { filtersAtom, groupAtom, sortAtom } from "./state";
 import h from "../hyper";
 
+/** The fixed system column, always first and not reorderable. */
+export const SYSTEM_COLUMN = "source_layer";
+
 /** Build a data-sheet `columnHeaderCellRenderer` closed over the set of
  * "final" (harmonized) columns, which get a star indicator. */
 export function makeColumnHeaderRenderer(finalColumns: string[]) {
@@ -20,6 +23,8 @@ export function makeColumnHeaderRenderer(finalColumns: string[]) {
       // A subtle tinted header marks final / harmonized columns (styled via the
       // global `.final-column-header` rule).
       className: finalSet.has(col.key) ? "final-column-header" : undefined,
+      // `source_layer` is a fixed system column — pinned first, not reorderable.
+      enableColumnReordering: col.key !== SYSTEM_COLUMN,
       nameRenderer: () =>
         h(IngestHeaderName, { columnKey: col.key, name: col.name }),
     });

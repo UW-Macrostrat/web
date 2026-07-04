@@ -1,9 +1,12 @@
 /**
- * "Column controls" strip, shown at the top of the table when a single whole
- * column is selected. Provides that column's sort / filter / group-by / hide
- * controls (relocated from the column-header dropdown), wired to the jotai
- * view-state atoms. Rendered inside the DataSheet provider so it can read the
- * current selection via data-sheet's `useSelector`.
+ * "Column controls" strip, shown at the top of the table. Always rendered (so
+ * the table doesn't jump as the selection changes); its content depends on the
+ * column selection:
+ *  - none: a hint
+ *  - one whole column: that column's sort / filter / group-by / hide controls
+ *  - multiple whole columns: a bulk "hide columns" control
+ * Wired to the jotai view-state atoms. Rendered inside the DataSheet provider so
+ * it can read the current selection via data-sheet's `useSelector`.
  */
 import { useSelector } from "@macrostrat/data-sheet";
 import { Button, ButtonGroup, HTMLSelect, InputGroup } from "@blueprintjs/core";
@@ -11,6 +14,7 @@ import { useAtom, useSetAtom } from "jotai";
 import { useRef, useState } from "react";
 import type { ColumnOperators } from "./defs";
 import { Filter } from "../utils";
+import { SYSTEM_COLUMN } from "./column-header";
 import { filtersAtom, groupAtom, hiddenColumnsAtom, sortAtom } from "./state";
 import h from "../hyper";
 
@@ -32,30 +36,62 @@ const OPERATOR_OPTIONS: OperatorOption[] = [
   { value: "is", label: "is", placeholder: "true | false | null" },
 ];
 
-/** The single whole-column selection, if any. */
-function singleSelectedColumn(
-  selection: any[],
-  columnSpec: any[],
-): { key: string; name: string } | null {
-  if (selection == null || selection.length !== 1) return null;
-  const r = selection[0];
-  // Whole-column selection: columns set, rows unset.
-  if (r.cols == null || r.rows != null) return null;
-  if (r.cols[0] !== r.cols[1]) return null;
-  const col = columnSpec[r.cols[0]];
-  return col ? { key: col.key, name: col.name } : null;
+/** Keys of the whole columns in the current selection. */
+function selectedColumnKeys(selection: any[], columnSpec: any[]): string[] {
+  const keys: string[] = [];
+  for (const r of selection ?? []) {
+    // Whole-column selection: columns set, rows unset.
+    if (r.cols == null || r.rows != null) continue;
+    for (let i = r.cols[0]; i <= r.cols[1]; i++) {
+      const col = columnSpec[i];
+      if (col && !keys.includes(col.key)) keys.push(col.key);
+    }
+  }
+  return keys;
 }
 
 export function ColumnControls() {
   const selection = useSelector((s: any) => s.selection);
   const columnSpec = useSelector((s: any) => s.columnSpec);
-  const target = singleSelectedColumn(selection, columnSpec);
-  if (target == null) return null;
-  return h(ColumnControlsStrip, {
-    key: target.key,
-    columnKey: target.key,
-    columnName: target.name,
-  });
+  const keys = selectedColumnKeys(selection, columnSpec);
+
+  if (keys.length === 0) return null;
+  if (keys.length === 1) {
+    const col = columnSpec.find((c: any) => c.key === keys[0]);
+    return h(ColumnControlsStrip, {
+      key: col.key,
+      columnKey: col.key,
+      columnName: col.name,
+    });
+  }
+  return h(MultiColumnControls, { columnKeys: keys });
+}
+
+function MultiColumnControls({ columnKeys }: { columnKeys: string[] }) {
+  const setHidden = useSetAtom(hiddenColumnsAtom);
+  // Never hide the fixed system column.
+  const hideable = columnKeys.filter((k) => k !== SYSTEM_COLUMN);
+  return h([
+    h("span.column-controls-label", [
+      h("span.label", "Columns"),
+      h("span.col-name", `${columnKeys.length} selected`),
+    ]),
+    h("div.control-group", [
+      h(
+        Button,
+        {
+          small: true,
+          icon: "eye-off",
+          disabled: hideable.length === 0,
+          onClick: () =>
+            setHidden((prev) =>
+              Array.from(new Set([...prev, ...hideable])),
+            ),
+        },
+        `Hide ${hideable.length} column${hideable.length === 1 ? "" : "s"}`,
+      ),
+    ]),
+  ]);
 }
 
 function ColumnControlsStrip({
@@ -80,6 +116,7 @@ function ColumnControlsStrip({
   const isSortedDesc = sort?.key === columnKey && !sort.ascending;
   const isGrouped = group === columnKey;
   const hasFilter = activeFilter?.is_valid() === true;
+  const isSystem = columnKey === SYSTEM_COLUMN;
 
   const applyFilter = () => {
     const value = valueRef.current?.value ?? "";
@@ -104,7 +141,7 @@ function ColumnControlsStrip({
     (o) => o.value === operator,
   )?.placeholder;
 
-  return h("div.column-controls", [
+  return h([
     h("span.column-controls-label", [
       h("span.label", "Column"),
       h("span.col-name", columnName),
@@ -167,7 +204,7 @@ function ColumnControlsStrip({
         },
         isGrouped ? "Grouped" : "Group by",
       ),
-      h(
+      h.if(!isSystem)(
         Button,
         {
           small: true,

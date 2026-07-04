@@ -1,44 +1,36 @@
 /**
  * Selection-aware toolbar actions for the ingestion data-sheet.
  *
- * These are `TableAction`s consumed by data-sheet's `ActionsToolbar`, which
- * renders them contextually based on the current selection cardinality. The
- * factory captures the loader/reload handles and the jotai store so an action's
- * `run` can read and mutate live view-state (filters / group / hidden columns)
- * at run time.
+ * All mutations go through the pending-ops stack (`opsAtom`): edits, omit /
+ * restore, and whole-column copy append ops; Save flushes the stack to the API;
+ * Reset clears it. The edit overlay is derived from the stack (see
+ * `pending-ops.ts` / `OpsSync`), so Save/Reset disabled state can read the
+ * (derived) `updatedData` reactively.
  */
 import { RegionCardinality } from "@blueprintjs/table";
 import {
+  copyAction,
+  cutAction,
   getSelectedRowIndices,
-  resetChangesAction,
+  pasteAction,
   TableAction,
 } from "@macrostrat/data-sheet";
 import type { OverlayToaster } from "@blueprintjs/core";
 import type { createStore } from "jotai";
 import { toBoolean } from "../components";
 import { Filter } from "../utils";
+import { filtersAtom, groupAtom, hiddenColumnsAtom, saveProgressAtom } from "./state";
 import {
-  filtersAtom,
-  groupAtom,
-  hiddenColumnsAtom,
-  patchColumnForRows,
-  saveIngestUpdates,
-} from "./state";
+  makeCellOp,
+  makeColumnCopyOp,
+  nextBatch,
+  opsAtom,
+  saveOps,
+  type PendingOp,
+} from "./pending-ops";
 
-/** Remove the given indices from an array while preserving the positions of the
- * rest. Works on sparse arrays (holes become `undefined`), so the index-keyed
- * edit overlay stays aligned with the shortened data. */
-function removeIndices<T>(arr: T[], drop: Set<number>): T[] {
-  const out: T[] = [];
-  for (let i = 0; i < arr.length; i++) {
-    if (!drop.has(i)) out.push(arr[i]);
-  }
-  return out;
-}
-
-/** A row's effective omit state = its overlaid `omit`, falling back to the
- * loaded value. This (the `omit` key) is the source of truth; the struck-
- * through visual is derived from it (see `OmitSync`). */
+/** A row's effective omit state = its overlaid `omit` (derived from the ops
+ * stack), falling back to the loaded value. */
 function isOmitted(state: any, i: number): boolean {
   return toBoolean(state.updatedData[i]?.omit ?? state.data[i]?.omit) === true;
 }
@@ -53,32 +45,42 @@ const ALL_CARDINALITIES: TableAction["targets"] = [
   RegionCardinality.CELLS,
 ];
 
-/** True if the update overlay holds at least one pending change. */
+/** True if the (derived) overlay holds at least one pending change. */
 function hasPendingChanges(updatedData: any[]): boolean {
-  return updatedData.some(
-    (row) => row != null && Object.keys(row).length > 0,
-  );
+  return updatedData.some((row) => row != null && Object.keys(row).length > 0);
 }
 
 export interface IngestActionDeps {
   url: string;
   store: JotaiStore;
   reload: () => void;
-  removeRows: (pkids: any[]) => void;
-  patchRows: (pkids: any[], patch: Record<string, any>) => void;
   toaster?: OverlayToaster | null;
+}
+
+/** Named actions for the contextual toolbar, plus hotkey-only clipboard
+ * actions (`targets: []` keeps them out of any toolbar while their hotkeys
+ * still register). */
+export interface IngestActions {
+  clipboard: TableAction[];
+  save: TableAction;
+  reset: TableAction;
+  omit: TableAction;
+  restore: TableAction;
+  toggleOmitted: TableAction;
+  showHidden: TableAction;
 }
 
 export function makeIngestActions({
   url,
   store,
   reload,
-  removeRows,
-  patchRows,
   toaster,
-}: IngestActionDeps): TableAction[] {
+}: IngestActionDeps): IngestActions {
   const notify = (message: string, intent: "success" | "danger" | "primary") =>
     toaster?.show({ message, intent });
+
+  const appendOps = (ops: PendingOp[]) =>
+    store.set(opsAtom, [...store.get(opsAtom), ...ops]);
 
   const saveAction: TableAction = {
     id: "save-data",
@@ -88,24 +90,69 @@ export function makeIngestActions({
     requiresEditable: true,
     targets: ALL_CARDINALITIES,
     disabled: (ctx) => !hasPendingChanges(ctx.updatedData),
-    async run(ctx) {
-      const group = store.get(groupAtom);
+    async run() {
+      const ops = store.get(opsAtom);
+      if (ops.length === 0) return;
       try {
-        const n = await saveIngestUpdates(url, ctx.updatedData, ctx.data, group);
-        ctx.resetChanges();
+        const n = await saveOps(url, ops, (done, total) => {
+          store.set(
+            saveProgressAtom,
+            total > 1
+              ? { value: done / total, text: `Saving ${done} / ${total}…` }
+              : null,
+          );
+        });
+        store.set(saveProgressAtom, null);
+        store.set(opsAtom, []);
         reload();
         notify(`Saved ${n} change${n === 1 ? "" : "s"}`, "success");
       } catch (err) {
+        store.set(saveProgressAtom, null);
         console.error(err);
         notify("Failed to save", "danger");
       }
     },
   };
 
-  // Omit applies immediately: PATCH omit=true, then optimistically splice the
-  // rows out of the store (all three arrays together, so the index-keyed edit
-  // overlay stays aligned) and drop them from the loader cache — no full reload,
-  // so other unsaved edits survive.
+  const resetAction: TableAction = {
+    id: "reset-changes",
+    name: "Reset",
+    icon: "reset",
+    intent: "warning",
+    requiresEditable: true,
+    targets: ALL_CARDINALITIES,
+    disabled: (ctx) => !hasPendingChanges(ctx.updatedData),
+    run() {
+      store.set(opsAtom, []);
+    },
+  };
+
+  // Omit / restore append `setCell` ops on the `omit` column (revertible; the
+  // struck-through visual is derived from the resulting overlay). Grouped rows
+  // fan out over the whole group via the op's identity match.
+  const setOmit = (ctx: any, omit: boolean) => {
+    const group = store.get(groupAtom);
+    const rows = ctx
+      .getSelectedRowIndices()
+      .map((i: number) => ctx.data[i])
+      .filter(Boolean);
+    if (rows.length === 0) return;
+    const batch = nextBatch();
+    appendOps(
+      rows.map((r: any) =>
+        makeCellOp(
+          r,
+          group,
+          "omit",
+          omit,
+          omit ? "Omit rows" : "Restore rows",
+          batch,
+        ),
+      ),
+    );
+    ctx.clearSelection();
+  };
+
   const omitRowsAction: TableAction = {
     id: "omit-rows",
     name: "Omit rows",
@@ -116,38 +163,9 @@ export function makeIngestActions({
       const rows = getSelectedRowIndices(s.selection);
       return rows.length === 0 || rows.every((r) => isOmitted(s, r));
     },
-    async run(ctx) {
-      const indices = ctx
-        .getSelectedRowIndices()
-        .filter((i: number) => ctx.data[i] != null && !isOmitted(ctx, i));
-      if (indices.length === 0) return;
-      const baseRows = indices.map((i: number) => ctx.data[i]);
-      const group = store.get(groupAtom);
-      try {
-        await patchColumnForRows(url, baseRows, "omit", true, group);
-        const drop = new Set<number>(indices);
-        ctx.setState({
-          data: removeIndices(ctx.data, drop),
-          updatedData: removeIndices(ctx.updatedData, drop),
-          rowStatus: removeIndices(ctx.rowStatus, drop),
-          selection: [],
-          focusedCell: null,
-          topLeftCell: null,
-        });
-        removeRows(baseRows);
-        notify(
-          `Omitted ${indices.length} row${indices.length === 1 ? "" : "s"}`,
-          "success",
-        );
-      } catch (err) {
-        console.error(err);
-        notify("Failed to omit rows", "danger");
-      }
-    },
+    run: (ctx) => setOmit(ctx, true),
   };
 
-  // Restore is only reachable in "show omitted" mode (omitted rows loaded and
-  // struck through). PATCH omit=false and clear it in place so the row un-strikes.
   const restoreRowsAction: TableAction = {
     id: "restore-rows",
     name: "Restore rows",
@@ -158,28 +176,7 @@ export function makeIngestActions({
       const rows = getSelectedRowIndices(s.selection);
       return rows.length === 0 || !rows.some((r) => isOmitted(s, r));
     },
-    async run(ctx) {
-      const indices = ctx
-        .getSelectedRowIndices()
-        .filter((i: number) => ctx.data[i] != null && isOmitted(ctx, i));
-      if (indices.length === 0) return;
-      const baseRows = indices.map((i: number) => ctx.data[i]);
-      const group = store.get(groupAtom);
-      try {
-        await patchColumnForRows(url, baseRows, "omit", false, group);
-        const next = ctx.data.slice();
-        for (const i of indices) next[i] = { ...next[i], omit: false };
-        ctx.setState({ data: next, selection: [] });
-        patchRows(baseRows, { omit: false });
-        notify(
-          `Restored ${indices.length} row${indices.length === 1 ? "" : "s"}`,
-          "success",
-        );
-      } catch (err) {
-        console.error(err);
-        notify("Failed to restore rows", "danger");
-      }
-    },
+    run: (ctx) => setOmit(ctx, false),
   };
 
   const toggleOmittedAction: TableAction = {
@@ -211,14 +208,52 @@ export function makeIngestActions({
     },
   };
 
-  const resetAction: TableAction = { ...resetChangesAction, name: "Reset" };
+  // Whole-column copy: pasting a copied full column onto other column(s) appends
+  // a `setColumn` copy op (a revertible rule → server-side copy on Save).
+  // Everything else falls through to the built-in paste, whose local overlay
+  // writes are captured back into the ops stack as cell edits.
+  const pasteHijack: TableAction = {
+    ...pasteAction,
+    targets: [],
+    async run(ctx) {
+      const proxy = ctx.clipboardProxy;
+      const source = proxy?.columnKeys?.[0];
+      if (
+        proxy?.cardinality === RegionCardinality.FULL_COLUMNS &&
+        source != null &&
+        ctx.selectionCardinality === RegionCardinality.FULL_COLUMNS
+      ) {
+        const targets = ctx
+          .getSelectedColumnKeys()
+          .filter((k: string) => k !== source);
+        if (targets.length > 0) {
+          const filters = store.get(filtersAtom);
+          const batch = nextBatch();
+          appendOps(
+            targets.map((t) => makeColumnCopyOp(source, t, filters, batch)),
+          );
+          notify(
+            `Copy ${source} → ${targets.length} column${targets.length === 1 ? "" : "s"} (pending)`,
+            "primary",
+          );
+          return;
+        }
+      }
+      await pasteAction.run(ctx);
+    },
+  };
 
-  return [
-    saveAction,
-    resetAction,
-    omitRowsAction,
-    restoreRowsAction,
-    toggleOmittedAction,
-    showHiddenAction,
-  ];
+  return {
+    clipboard: [
+      { ...copyAction, targets: [] },
+      { ...cutAction, targets: [] },
+      pasteHijack,
+    ],
+    save: saveAction,
+    reset: resetAction,
+    omit: omitRowsAction,
+    restore: restoreRowsAction,
+    toggleOmitted: toggleOmittedAction,
+    showHidden: showHiddenAction,
+  };
 }

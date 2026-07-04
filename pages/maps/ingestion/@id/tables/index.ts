@@ -2,7 +2,7 @@ import { CustomTableProps } from "./defs";
 import h from "../hyper";
 import { TableInterface } from "./edit-table";
 import { COMMON_COLUMNS } from "./defs";
-import type { ColumnSpec } from "@macrostrat/data-sheet";
+import { EditableTextArea, type ColumnSpec } from "@macrostrat/data-sheet";
 import {
   IntervalCell,
   IntervalEditor,
@@ -13,8 +13,10 @@ import {
 /** Column display-name / read-only overrides shared by all feature tables. */
 const COMMON_OVERRIDES: Record<string, Partial<ColumnSpec> | string> = {
   orig_id: "Original ID",
-  descrip: "Description",
   name: "Name",
+  // Long free-text columns get a multi-line popover editor.
+  descrip: { name: "Description", dataEditor: EditableTextArea },
+  comments: { name: "Comments", dataEditor: EditableTextArea },
   // Grey via a valueRenderer span rather than `style`: data-sheet mutates the
   // shared `col.style` object when styling deleted/omitted rows, which would
   // otherwise strike through the whole column.

@@ -12,9 +12,11 @@
  * `useIngestData` hook.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { atom, useAtomValue, useStore } from "jotai";
-import { addFilterToURL, createFiltersKey, Filter, submitChange } from "../utils";
+import { atom, useAtom, useAtomValue, useStore } from "jotai";
+import { useAsyncEffect } from "@macrostrat/ui-components";
+import { addFilterToURL, createFiltersKey, Filter } from "../utils";
 import { Interval } from "../components";
+import { postgrest } from "~/_providers";
 
 export const PAGE_SIZE = 100;
 
@@ -52,6 +54,11 @@ export const autoFocusEditorAtom = atom(false);
 
 /** Reference data: interval definitions, populated once per table (polygons). */
 export const intervalsAtom = atom<Interval[]>([]);
+
+/** In-progress save state (for the batch-save progress indicator), or null. */
+export const saveProgressAtom = atom<{ text: string; value: number } | null>(
+  null,
+);
 
 /** Whether omitted rows are currently shown (drives the `omit` filter). */
 export const showOmittedAtom = atom(
@@ -123,14 +130,12 @@ export interface IngestData {
   /** Total row count for the current query, from `X-Total-Count`. */
   total: number | null;
   loading: boolean;
+  /** True once the last page has been loaded (no more rows to fetch). */
+  done: boolean;
   /** Load the next page (no-op while loading or once exhausted). */
   loadMore: () => void;
   /** Discard loaded rows and re-fetch from the first page. */
   reload: () => void;
-  /** Drop rows from the loaded cache by object reference (optimistic omit). */
-  removeRows: (rows: any[]) => void;
-  /** Patch loaded rows in place by object reference (optimistic restore). */
-  patchRows: (rows: any[], patch: Record<string, any>) => void;
 }
 
 /** Lazy, filter/sort/group-aware loader for a single ingestion feature table.
@@ -146,6 +151,7 @@ export function useIngestData(url: string): IngestData {
   const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
 
   // Private cursor bookkeeping — refs so the load callback stays stable
   const loadingRef = useRef(false);
@@ -176,6 +182,7 @@ export function useIngestData(url: string): IngestData {
           pageSize: PAGE_SIZE,
         });
         doneRef.current = rows.length < PAGE_SIZE;
+        setDone(doneRef.current);
         pageRef.current = page + 1;
         if (newTotal != null) setTotal(newTotal);
         setData((prev) =>
@@ -192,6 +199,7 @@ export function useIngestData(url: string): IngestData {
   // Reset and reload whenever the query changes
   useEffect(() => {
     doneRef.current = false;
+    setDone(false);
     pageRef.current = 0;
     setData([]);
     setTotal(null);
@@ -203,99 +211,12 @@ export function useIngestData(url: string): IngestData {
   const loadMore = useCallback(() => load(false), [load]);
   const reload = useCallback(() => {
     doneRef.current = false;
+    setDone(false);
     pageRef.current = 0;
     load(true);
   }, [load]);
 
-  // Drop rows from the loaded cache by object reference (used for optimistic
-  // omit). Reference identity is used rather than `_pkid` so this is correct in
-  // grouped mode too, where aggregated rows share/lack a `_pkid` — the store
-  // rows are the same objects as this cache.
-  const removeRows = useCallback((rows: any[]) => {
-    const s = new Set(rows);
-    setData((prev) => prev.filter((r) => !s.has(r)));
-    setTotal((t) => (t == null ? t : Math.max(0, t - rows.length)));
-  }, []);
-
-  // Patch loaded rows in place by object reference (used for optimistic restore).
-  const patchRows = useCallback((rows: any[], patch: Record<string, any>) => {
-    const s = new Set(rows);
-    setData((prev) =>
-      prev.map((r) => (s.has(r) ? { ...r, ...patch } : r)),
-    );
-  }, []);
-
-  return { data, total, loading, loadMore, reload, removeRows, patchRows };
-}
-
-/** The filter that identifies which server rows a given (base) row maps to.
- *
- * When grouped, an edit targets *every* row sharing the group value (bulk edit);
- * otherwise it targets the single row by its `_pkid`. Mirrors the legacy
- * `createTableUpdate` semantics.
- */
-function identityFilter(
-  baseRow: Record<string, any>,
-  group: string | undefined,
-): Record<string, Filter> {
-  if (group != null) {
-    const value = baseRow[group];
-    if (value == null) {
-      return { [group]: new Filter(group, "is", "null") };
-    }
-    return { [group]: new Filter(group, "eq", value) };
-  }
-  return { _pkid: new Filter("_pkid", "eq", baseRow["_pkid"]) };
-}
-
-/** Persist a data-sheet update overlay to the ingestion endpoint.
- *
- * `updates` is the sparse `updatedData` array (row index → partial row) and
- * `data` is the base data. Each changed cell becomes a filter-scoped PATCH.
- * Returns the number of columns successfully written.
- */
-export async function saveIngestUpdates(
-  url: string,
-  updates: any[],
-  data: any[],
-  group: string | undefined,
-): Promise<number> {
-  const isEmpty = (v: any) => v == null || v === "";
-  let count = 0;
-  for (const [rowIndexStr, partial] of Object.entries(updates)) {
-    if (partial == null) continue;
-    const rowIndex = Number(rowIndexStr);
-    const baseRow = data[rowIndex];
-    if (baseRow == null) continue;
-    const filters = identityFilter(baseRow, group);
-    for (const [column, value] of Object.entries(partial)) {
-      // Skip no-op edits, including the empty↔null "phantom" edits produced by
-      // focusing and blurring an empty cell (which would otherwise PATCH an
-      // empty string into non-text columns and fail).
-      const current = baseRow[column];
-      if (value === current || (isEmpty(value) && isEmpty(current))) continue;
-      await submitChange(url, value as string, [column], filters);
-      count += 1;
-    }
-  }
-  return count;
-}
-
-/** PATCH a single column to a fixed value for a set of (base) rows, each
- * scoped by its identity filter. Used by the immediate omit/restore actions. */
-export async function patchColumnForRows(
-  url: string,
-  baseRows: Record<string, any>[],
-  column: string,
-  value: any,
-  group: string | undefined,
-): Promise<number> {
-  let count = 0;
-  for (const row of baseRows) {
-    await submitChange(url, value, [column], identityFilter(row, group));
-    count += 1;
-  }
-  return count;
+  return { data, total, loading, done, loadMore, reload };
 }
 
 /** Reset the (default-store) view-state atoms when the active table changes,
@@ -314,4 +235,66 @@ export function useResetIngestState(url: string) {
     store.set(columnOrderAtom, null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
+}
+
+/** Persist hidden columns + column order per ingest process / feature type to
+ * `map_ingest_metadata.{feature}_state`, so they survive reloads. Loads on
+ * mount (and when the process/feature changes) and saves (debounced) on change.
+ */
+export function useTableStatePersistence(
+  ingestProcessId: number,
+  featureType: string,
+) {
+  const [hidden, setHidden] = useAtom(hiddenColumnsAtom);
+  const [order, setOrder] = useAtom(columnOrderAtom);
+  const columnName = `${featureType}_state`;
+  // Only save once we've loaded state for *this* process, so the reset-on-mount
+  // and cross-feature switches don't clobber stored state before it loads.
+  const loadedForRef = useRef<number | null>(null);
+
+  useAsyncEffect(async () => {
+    loadedForRef.current = null;
+    try {
+      const res = await postgrest
+        .from("map_ingest_metadata")
+        .select(columnName)
+        .eq("id", ingestProcessId)
+        .maybeSingle();
+      const state = (res.data?.[columnName] ?? {}) as any;
+      setHidden(Array.isArray(state.hiddenColumns) ? state.hiddenColumns : []);
+      setOrder(Array.isArray(state.columnOrder) ? state.columnOrder : null);
+    } catch (err) {
+      console.error("Failed to load table state", err);
+    }
+    loadedForRef.current = ingestProcessId;
+  }, [ingestProcessId, featureType]);
+
+  useEffect(() => {
+    if (loadedForRef.current !== ingestProcessId) return;
+    const value = { hiddenColumns: hidden, columnOrder: order };
+    const timer = setTimeout(async () => {
+      // Update the existing row; `.select` tells us whether a row matched.
+      // postgrest resolves with `{ data, error }` (it does not reject on API
+      // errors), so we must inspect `error` explicitly.
+      const { data, error } = await postgrest
+        .from("map_ingest_metadata")
+        .update({ [columnName]: value })
+        .eq("id", ingestProcessId)
+        .select("id");
+      if (error) {
+        console.error("Failed to save table state", error);
+        return;
+      }
+      if (data == null || data.length === 0) {
+        // No metadata row for this ingest process yet — create it.
+        const { error: insertError } = await postgrest
+          .from("map_ingest_metadata")
+          .upsert({ id: ingestProcessId, [columnName]: value });
+        if (insertError) {
+          console.error("Failed to create table state row", insertError);
+        }
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [hidden, order, ingestProcessId, columnName]);
 }
