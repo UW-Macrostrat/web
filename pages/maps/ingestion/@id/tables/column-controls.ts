@@ -57,12 +57,7 @@ export function ColumnControls() {
 
   if (keys.length === 0) return null;
   if (keys.length === 1) {
-    const col = columnSpec.find((c: any) => c.key === keys[0]);
-    return h(ColumnControlsStrip, {
-      key: col.key,
-      columnKey: col.key,
-      columnName: col.name,
-    });
+    return h(ColumnControlsStrip, { key: keys[0], columnKey: keys[0] });
   }
   return h(MultiColumnControls, { columnKeys: keys });
 }
@@ -71,36 +66,22 @@ function MultiColumnControls({ columnKeys }: { columnKeys: string[] }) {
   const setHidden = useSetAtom(hiddenColumnsAtom);
   // Never hide the fixed system column.
   const hideable = columnKeys.filter((k) => k !== SYSTEM_COLUMN);
-  return h([
-    h("span.column-controls-label", [
-      h("span.label", "Columns"),
-      h("span.col-name", `${columnKeys.length} selected`),
-    ]),
-    h("div.control-group", [
-      h(
-        Button,
-        {
-          small: true,
-          icon: "eye-off",
-          disabled: hideable.length === 0,
-          onClick: () =>
-            setHidden((prev) =>
-              Array.from(new Set([...prev, ...hideable])),
-            ),
-        },
-        `Hide ${hideable.length} column${hideable.length === 1 ? "" : "s"}`,
-      ),
-    ]),
+  return h("div.control-group", [
+    h(
+      Button,
+      {
+        small: true,
+        icon: "eye-off",
+        disabled: hideable.length === 0,
+        onClick: () =>
+          setHidden((prev) => Array.from(new Set([...prev, ...hideable]))),
+      },
+      `Hide ${hideable.length} column${hideable.length === 1 ? "" : "s"}`,
+    ),
   ]);
 }
 
-function ColumnControlsStrip({
-  columnKey,
-  columnName,
-}: {
-  columnKey: string;
-  columnName: string;
-}) {
+function ColumnControlsStrip({ columnKey }: { columnKey: string }) {
   const [sort, setSort] = useAtom(sortAtom);
   const [filters, setFilters] = useAtom(filtersAtom);
   const [group, setGroup] = useAtom(groupAtom);
@@ -142,10 +123,6 @@ function ColumnControlsStrip({
   )?.placeholder;
 
   return h([
-    h("span.column-controls-label", [
-      h("span.label", "Column"),
-      h("span.col-name", columnName),
-    ]),
     h("div.control-group", [
       h(ButtonGroup, { minimal: true }, [
         h(Button, {

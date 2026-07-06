@@ -150,7 +150,9 @@ export function makeIngestActions({
         ),
       ),
     );
-    ctx.clearSelection();
+    // Deselect (note: data-sheet's `clearSelection` clears cell *values*, not
+    // the selection).
+    ctx.setState({ selection: [], focusedCell: null, topLeftCell: null });
   };
 
   const omitRowsAction: TableAction = {

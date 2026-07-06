@@ -23,6 +23,8 @@ import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import {
   DataSheet,
   generateColumnSpec,
+  getSelectedColumnKeys,
+  getSelectedRowIndices,
   getSelectionCardinality,
   runActionWrapper,
   TableAction,
@@ -385,6 +387,7 @@ function IngestToolbar({
 }): ReactNode {
   const storeAPI = useStoreAPI();
   const selection = useSelector((s: any) => s.selection);
+  const columnSpec = useSelector((s: any) => s.columnSpec);
   const cardinality = getSelectionCardinality(selection);
   const run = useCallback(
     (action: TableAction) =>
@@ -392,31 +395,48 @@ function IngestToolbar({
     [storeAPI, toaster],
   );
 
-  let context: ReactNode;
+  let controls: ReactNode;
   switch (cardinality) {
     case RegionCardinality.FULL_COLUMNS:
-      context = h(ColumnControls);
+      controls = h(ColumnControls);
       break;
     case RegionCardinality.FULL_ROWS:
-      context = h(ButtonGroup, { minimal: true }, [
+      controls = h(ButtonGroup, { minimal: true }, [
         h(ActionBtn, { action: actions.omit, run }),
         h(ActionBtn, { action: actions.restore, run }),
       ]);
       break;
     case RegionCardinality.CELLS:
-      context = h(EditorFocusToggle);
+      controls = h(EditorFocusToggle);
       break;
     default:
       // No selection / whole table.
-      context = h(ButtonGroup, { minimal: true }, [
+      controls = h(ButtonGroup, { minimal: true }, [
         h(ActionBtn, { action: actions.toggleOmitted, run }),
         h(ActionBtn, { action: actions.showHidden, run }),
       ]);
       break;
   }
 
+  const info = selectionInfo(cardinality, selection, columnSpec);
+  const hasSelection = selection != null && selection.length > 0;
+
   return h("div.ingest-action-bar", [
-    h("div.context-controls", context),
+    h("div.context-controls", [
+      h(ContextLabel, { kind: info.kind, detail: info.detail }),
+      controls,
+      h.if(hasSelection)(
+        Button,
+        {
+          small: true,
+          minimal: true,
+          icon: "cross",
+          onClick: () =>
+            storeAPI.getState().setSelection([]),
+        },
+        "Clear selection",
+      ),
+    ]),
     h("div.spacer"),
     h(PendingOpsControl),
     h(ButtonGroup, { minimal: true }, [
@@ -424,6 +444,58 @@ function IngestToolbar({
       h(ActionBtn, { action: actions.reset, run }),
     ]),
   ]);
+}
+
+/** Parallel contextual label for the current selection mode. */
+function ContextLabel({
+  kind,
+  detail,
+}: {
+  kind: string;
+  detail?: string;
+}): ReactNode {
+  return h("span.column-controls-label", [
+    h("span.label", kind),
+    h.if(detail != null)("span.col-name", detail),
+  ]);
+}
+
+/** Human summary of the current selection, mirroring the column label across
+ * row / cell / table modes. */
+function selectionInfo(
+  cardinality: RegionCardinality | null,
+  selection: any[],
+  columnSpec: any[],
+): { kind: string; detail?: string } {
+  switch (cardinality) {
+    case RegionCardinality.FULL_COLUMNS: {
+      const keys = getSelectedColumnKeys(selection, columnSpec);
+      if (keys.length === 1) {
+        const col = columnSpec.find((c: any) => c.key === keys[0]);
+        return { kind: "Column", detail: col?.name ?? keys[0] };
+      }
+      return { kind: "Columns", detail: `${keys.length} selected` };
+    }
+    case RegionCardinality.FULL_ROWS: {
+      const n = getSelectedRowIndices(selection).length;
+      return n === 1 ? { kind: "Row" } : { kind: "Rows", detail: `${n} selected` };
+    }
+    case RegionCardinality.CELLS: {
+      const n = countSelectedCells(selection);
+      return n === 1 ? { kind: "Cell" } : { kind: "Cells", detail: `${n} selected` };
+    }
+    default:
+      return { kind: "Table" };
+  }
+}
+
+function countSelectedCells(selection: any[]): number {
+  let n = 0;
+  for (const r of selection ?? []) {
+    if (r.rows == null || r.cols == null) continue;
+    n += (r.rows[1] - r.rows[0] + 1) * (r.cols[1] - r.cols[0] + 1);
+  }
+  return n;
 }
 
 /** Shows the count of pending operations; the popover lists them grouped by the
