@@ -34,12 +34,12 @@ export function Page() {
   }, []);
 
   const updateStates = useCallback(() => {
-  getStates().then((states) => setStates(states));
+    getStates().then((states) => setStates(states));
   }, []);
 
   const getMapSources = async (): Promise<Record<number, MapSource>> => {
     const res = await fetch(
-      "https://dev.macrostrat.org/api/pg/maps_sources?select=source_id,name"
+      postgrestPrefix + "/maps_sources?select=source_id,name"
     );
     const rows: MapSource[] = await res.json();
 
@@ -68,7 +68,6 @@ export function Page() {
       setIngestFilter(new URLSearchParams(url.search));
     };
   }, []);
-
 
   useEffect(() => {
     getMapSources().then(setMapSources);
