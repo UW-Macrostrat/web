@@ -1,17 +1,17 @@
-import { AnchorButton, Button, HotkeysProvider } from "@blueprintjs/core";
+import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
+import { secureFetch } from "@macrostrat-web/security";
 import { ErrorBoundary, useStoredState } from "@macrostrat/ui-components";
 import { BasePage } from "~/layouts";
 import h from "./main.module.sass";
 import { usePageProps } from "~/renderer/usePageProps";
 import { Allotment } from "allotment";
 import { useState } from "react";
-import { useData } from "vike-react/useData";
-import { usePageContext } from "vike-react/usePageContext";
 import "allotment/dist/style.css";
+import { useData } from "vike-react/useData";
 
-import { LinesTable, PointsTable, PolygonsTable } from "../../tables-legacy";
-import { Header, MapInterface } from "../../components";
+import { LinesTable, PointsTable, PolygonsTable } from "../../tables";
+import { Header, MapInterface, downloadSourceFiles } from "../../components";
 import { MapSelectedFeatures } from "../../details-panel";
 
 interface EditInterfaceProps {
@@ -31,7 +31,7 @@ const routeMap = {
 
 export function Page() {
   const { source, ingestProcess, editMode, source_id } = usePageProps();
-  const { urlPathname } = usePageContext();
+  const slug = source.slug;
 
   const data = useData();
   const { mapInfo, geometry } = data;
@@ -39,7 +39,6 @@ export function Page() {
     geometry,
     properties: mapInfo,
   };
-  const slug = source.slug;
 
   const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
 
@@ -59,6 +58,7 @@ export function Page() {
 
   const showSelectedFeatures =
     mapSelectedFeatures != null && mapSelectedFeatures.length > 0;
+
   return h(
     BasePage,
     { fitViewport: true },
@@ -70,21 +70,12 @@ export function Page() {
               Header,
               {
                 title: source.name,
-                refTitle: mapInfo.ref_title ?? mapInfo.name,
                 sourceURL: source.url,
                 ingestProcess,
                 separateTitle: false,
               },
               [
-                h(
-                  AnchorButton,
-                  {
-                    href: urlPathname + "/next",
-                    intent: "success",
-                    rightIcon: "updated",
-                  },
-                  "New interface"
-                ),
+                h(SourceActions, { ingestProcessId }),
                 h(ShowMapButton, { showMap, setShowMap }),
               ]
             ),
@@ -120,6 +111,40 @@ export function Page() {
       ]),
     ])
   );
+}
+
+/** Source-level actions (top page header): download source files and
+ * generate map. These operate on the whole ingest process, so they live on
+ * the page rather than in the per-column data-sheet toolbar. */
+function SourceActions({ ingestProcessId }) {
+  async function onGenerateMap() {
+    const res = await secureFetch(
+      `${ingestPrefix}/ingest-process/${ingestProcessId}`,
+      {
+        method: "PATCH",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ state: "post_harmonization" }),
+      }
+    );
+    if (res.ok) window.location.reload();
+  }
+
+  return h([
+    h(
+      Button,
+      {
+        minimal: true,
+        icon: "download",
+        onClick: () => downloadSourceFiles(ingestProcessId),
+      },
+      "Download sources"
+    ),
+    h(
+      Button,
+      { intent: "success", icon: "layout-hierarchy", onClick: onGenerateMap },
+      "Generate map"
+    ),
+  ]);
 }
 
 function ShowMapButton({ showMap, setShowMap }) {

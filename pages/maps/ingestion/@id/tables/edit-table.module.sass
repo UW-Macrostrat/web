@@ -84,3 +84,166 @@ div.warning
 
   .spacer
     flex-grow: 1
+
+// Contextual column header
+.ingest-column-header
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 4px
+
+  .column-name
+    overflow: hidden
+    text-overflow: ellipsis
+
+  .column-indicators
+    display: flex
+    flex-direction: row
+    gap: 2px
+    margin-left: auto
+    opacity: 0.8
+
+.ingest-column-menu
+  .column-actions-popover
+    display: flex
+    flex-direction: column
+    gap: 8px
+    padding: 8px
+    min-width: 220px
+
+  .popover-section
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+  .popover-section-title
+    font-size: 11px
+    font-weight: 600
+    text-transform: uppercase
+    opacity: 0.6
+
+  .filter-row
+    display: flex
+    flex-direction: row
+    gap: 4px
+    align-items: center
+
+  .clear-section
+    display: flex
+    justify-content: flex-end
+    border-top: 1px solid rgba(127, 127, 127, 0.2)
+    padding-top: 6px
+
+.ingest-top
+  display: flex
+  flex-direction: column
+
+// Wrapper: table fills, status bar pinned to the bottom.
+.ingest-table-wrap
+  display: flex
+  flex-direction: column
+  height: 100%
+  min-height: 0
+
+  :global .data-sheet-container
+    flex: 1 1 auto
+    min-height: 0
+
+// Single contextual toolbar: context controls (left) + Save/Reset (right).
+// Always present with a reserved height so the table doesn't shift as the
+// selection mode changes.
+.ingest-action-bar
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 8px
+  padding: 3px 8px
+  min-height: 36px
+  background-color: rgba(143, 153, 168, 0.12)
+  border-bottom: 1px solid rgba(143, 153, 168, 0.25)
+
+  .spacer
+    flex: 1 1 auto
+
+  .context-controls
+    display: flex
+    flex-direction: row
+    align-items: center
+    flex-wrap: wrap
+    gap: 12px
+
+  .column-controls-label
+    display: flex
+    flex-direction: column
+    line-height: 1.1
+
+    .label
+      font-size: 10px
+      text-transform: uppercase
+      opacity: 0.6
+
+    .col-name
+      font-weight: 600
+
+  .control-group
+    display: flex
+    flex-direction: row
+    align-items: center
+    gap: 4px
+
+.ingest-filter-bar
+  display: flex
+  flex-direction: row
+  align-items: center
+  flex-wrap: wrap
+  gap: 4px
+  padding: 2px 8px
+
+.editor-focus-toggle
+  margin-bottom: 0
+  font-size: 12px
+
+.ingest-status-bar
+  display: flex
+  flex-direction: row
+  align-items: center
+  justify-content: flex-end
+  gap: 6px
+  padding: 3px 10px
+  font-size: 12px
+  opacity: 0.85
+  border-top: 1px solid rgba(143, 153, 168, 0.25)
+  background-color: rgba(143, 153, 168, 0.1)
+
+  // Subtle, muted load indicators (no bright "success" color).
+  .load-done, .load-more
+    opacity: 0.5
+
+// Final / harmonized columns get a subtle desaturated-blue header tint
+// (className applied to the Blueprint header cell, so matched globally).
+:global
+  .bp6-table-header.final-column-header,
+  .final-column-header
+    background-color: rgba(45, 114, 210, 0.12)
+
+.interval-editor
+  display: flex
+  flex-direction: column
+  gap: 4px
+  padding: 4px
+  // Fixed width so the popover doesn't reposition as results change while typing
+  width: 280px
+
+  .interval-list
+    max-height: 300px
+    overflow-y: auto
+    width: 100%
+
+    :global .bp6-menu-item
+      // Truncate long interval names rather than widening the popover
+      white-space: nowrap
+      overflow: hidden
+
+      .bp6-text-overflow-ellipsis, .bp6-menu-item-label
+        overflow: hidden
+        text-overflow: ellipsis
