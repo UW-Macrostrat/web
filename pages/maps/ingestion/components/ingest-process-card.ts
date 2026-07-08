@@ -109,9 +109,7 @@ export function IngestProcessCard({
           h("p", [
             "Are you sure you want to delete the map ",
             h("strong", slug),
-            "? This runs ",
-            h("code", "macrostrat maps staging delete"),
-            " in the background and cannot be undone.",
+            "? This cannot be undone.",
           ]),
         ]
       ),
