@@ -30,52 +30,52 @@ const deleteTag = async (tag: string, ingestId: number) => {
 };
 
 export function IngestTagDisplay({
-  ingestProcess,
+  data,
   onUpdate,
 }: {
-  ingestProcess: IngestProcess;
+  data: IngestProcess;
   onUpdate: () => void;
 }) {
-  const [_ingestProcess, setIngestProcess] =
-    useState<IngestProcess>(ingestProcess);
+  const [_ingestProcess, setIngestProcess] = useState<IngestProcess>(data);
   const [tagToDelete, setTagToDelete] = useState<string | null>(null);
   const { id } = _ingestProcess;
-  const tags = _ingestProcess.tags ?? [];
+  const tags = data.tags ?? [];
 
-
-  const updateIngestProcess = useCallback(async () => {
-    const ingestResponse = await fetch(
-      `${postgrestPrefix}/map_ingest?id=eq.${ingestProcess.id}`
-    );
-    if (!ingestResponse.ok) {
-      const text = await ingestResponse.text();
-      console.error("Failed to fetch ingest process", ingestResponse.status, text);
-      return;
-    }
-    const ingestRows = await ingestResponse.json();
-    const updatedIngestProcess = ingestRows[0];
-    if (updatedIngestProcess == null) return;
-    const tagResponse = await fetch(
-      `${postgrestPrefix}/map_ingest_tags?ingest_process_id=eq.${ingestProcess.id}`
-    );
-    if (!tagResponse.ok) {
-      const text = await tagResponse.text();
-      console.error("Failed to fetch ingest tags", tagResponse.status, text);
-      return;
-    }
-    const tagRows: { ingest_process_id: number; tag: string }[] =
-      await tagResponse.json();
-    setIngestProcess({
-      ...updatedIngestProcess,
-      tags: tagRows.map((row) => row.tag),
-    });
-  }, [ingestProcess.id]);
-
-
-  useEffect(() => {
-    updateIngestProcess();
-  }, [updateIngestProcess]);
-
+  // const updateIngestProcess = useCallback(async () => {
+  //   const ingestResponse = await fetch(
+  //     `${postgrestPrefix}/map_ingest?id=eq.${ingestProcess.id}`
+  //   );
+  //   if (!ingestResponse.ok) {
+  //     const text = await ingestResponse.text();
+  //     console.error(
+  //       "Failed to fetch ingest process",
+  //       ingestResponse.status,
+  //       text
+  //     );
+  //     return;
+  //   }
+  //   const ingestRows = await ingestResponse.json();
+  //   const updatedIngestProcess = ingestRows[0];
+  //   if (updatedIngestProcess == null) return;
+  //   const tagResponse = await fetch(
+  //     `${postgrestPrefix}/map_ingest_tags?ingest_process_id=eq.${ingestProcess.id}`
+  //   );
+  //   if (!tagResponse.ok) {
+  //     const text = await tagResponse.text();
+  //     console.error("Failed to fetch ingest tags", tagResponse.status, text);
+  //     return;
+  //   }
+  //   const tagRows: { ingest_process_id: number; tag: string }[] =
+  //     await tagResponse.json();
+  //   setIngestProcess({
+  //     ...updatedIngestProcess,
+  //     tags: tagRows.map((row) => row.tag),
+  //   });
+  // }, [ingestProcess.id]);
+  //
+  // useEffect(() => {
+  //   updateIngestProcess();
+  // }, [updateIngestProcess]);
 
   const confirmDeleteTag = useCallback(async () => {
     if (tagToDelete == null) return;
@@ -83,22 +83,21 @@ export function IngestTagDisplay({
     const deleted = await deleteTag(tagToDelete, id);
     if (!deleted) return;
 
-    await updateIngestProcess();
+    //await updateIngestProcess();
     onUpdate();
     setTagToDelete(null);
-  }, [tagToDelete, id, updateIngestProcess, onUpdate]);
-
+  }, [tagToDelete, id, onUpdate]);
 
   return h(
     "div.flex.row",
     {
       style: {
-      paddingBottom: "4px",
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "0.5em",
-      alignItems: "center",
-      maxWidth: "100%",
+        paddingBottom: "4px",
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "0.5em",
+        alignItems: "center",
+        maxWidth: "100%",
       },
     },
     [
@@ -110,7 +109,7 @@ export function IngestTagDisplay({
         },
         []
       ),
-     tags.map((t) => {
+      tags.map((t) => {
         const tag = typeof t === "string" ? t : t.tag;
 
         return h(Tag, {
@@ -133,21 +132,25 @@ export function IngestTagDisplay({
         },
         []
       ),
-      h(Alert, {
-        isOpen: tagToDelete != null,
-        intent: "danger",
-        icon: "trash",
-        confirmButtonText: "Delete tag",
-        cancelButtonText: "Cancel",
-        onConfirm: confirmDeleteTag,
-        onCancel: () => setTagToDelete(null),
-      }, [
-        h("p", [
-          "Are you sure you want to delete the tag ",
-          h("strong", tagToDelete ?? ""),
-          "?",
-        ]),
-      ]),
+      h(
+        Alert,
+        {
+          isOpen: tagToDelete != null,
+          intent: "danger",
+          icon: "trash",
+          confirmButtonText: "Delete tag",
+          cancelButtonText: "Cancel",
+          onConfirm: confirmDeleteTag,
+          onCancel: () => setTagToDelete(null),
+        },
+        [
+          h("p", [
+            "Are you sure you want to delete the tag ",
+            h("strong", tagToDelete ?? ""),
+            "?",
+          ]),
+        ]
+      ),
     ]
   );
 }

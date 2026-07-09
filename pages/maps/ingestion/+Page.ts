@@ -1,5 +1,5 @@
-import { AnchorButton } from "@blueprintjs/core";
-import { postgrestPrefix } from "@macrostrat-web/settings";
+import { AnchorButton, Spinner } from "@blueprintjs/core";
+import { apiV3Prefix, postgrestPrefix } from "@macrostrat-web/settings";
 import react, { useCallback, useEffect, useState } from "react";
 import { IngestProcessCard } from "./components";
 import h from "./main.module.sass";
@@ -21,9 +21,9 @@ interface IngestProcess {
   tags?: string[] | { tag: string }[];
   state?: string;
 }
+
 export function Page() {
   const { user } = useAuth();
-  const [mapSources, setMapSources] = useState<Record<number, MapSource>>({});
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([]);
   const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined);
   const [tags, setTags] = useState<string[]>([]);
@@ -33,19 +33,6 @@ export function Page() {
     getTags().then((tags) => setTags(tags));
   }, []);
 
-  const updateStates = useCallback(() => {
-    getStates().then((states) => setStates(states));
-  }, []);
-
-  const getMapSources = async (): Promise<Record<number, MapSource>> => {
-    const res = await fetch(
-      postgrestPrefix + "/maps_sources?select=source_id,name"
-    );
-    const rows: MapSource[] = await res.json();
-
-    return Object.fromEntries(rows.map((r) => [r.source_id, r]));
-  };
-
   const updateIngestProcesses = useCallback(() => {
     getIngestProcesses(ingestFilter).then((ingestProcesses) => {
       setIngestProcess(ingestProcesses);
@@ -53,14 +40,13 @@ export function Page() {
   }, [ingestFilter]);
 
   // Get the initial data with the filter from the URL
-  react.useEffect(() => {
+  useEffect(() => {
     // Get the ingest process data
     const url = new URL(window.location.href);
     const searchParams = new URLSearchParams(url.search);
     searchParams.set("state", "not.eq.abandoned");
     setIngestFilter(searchParams);
     updateTags();
-    updateStates();
 
     // Set up the popstate event listener
     window.onpopstate = () => {
@@ -69,16 +55,15 @@ export function Page() {
     };
   }, []);
 
-  useEffect(() => {
-    getMapSources().then(setMapSources);
-  }, []);
-
   // Re-fetch data when the filter changes
-  react.useEffect(() => {
+  useEffect(() => {
     if (ingestFilter) {
       updateIngestProcesses();
     }
   }, [ingestFilter]);
+
+  console.log(ingestProcess);
+  const maps = ingestProcess ?? [];
 
   return h("div.main", [
     h("div.ingestion-title-bar", [
@@ -99,20 +84,19 @@ export function Page() {
       h("h2", "Maps"),
       h(
         "div.ingestion-body",
-        ingestProcess.map((d) => {
-          const name =
-            d.source_id != null ? mapSources[d.source_id]?.name : undefined;
+        maps.map((d) => {
+          const name = d.name;
 
           return h(IngestProcessCard, {
             key: d.id,
-            ingestProcess: d,
+            data: d,
             refTitle: name,
             user: user,
-            onUpdate: () => {
-              updateTags();
-              updateStates();
-              updateIngestProcesses();
-            },
+            // onUpdate: () => {
+            //   updateTags();
+            //   updateStates();
+            //   updateIngestProcesses();
+            // },
           });
         })
       ),
@@ -213,32 +197,33 @@ const getStates = async (): Promise<string[]> => {
 };
 
 const getIngestProcesses = async (ingestFilter: URLSearchParams) => {
-  const ingestResponse = await fetch(
-    `${postgrestPrefix}/map_ingest?source_id=not.is.null&order=source_id.desc&limit=10000&${
-      ingestFilter || ""
-    }`
-  );
+  const ingestResponse = await fetch(apiV3Prefix + "/map-ingestion/pg/maps");
 
-  const ingestProcesses: IngestProcess[] = await ingestResponse.json();
-
-  const tagResponse = await fetch(`${postgrestPrefix}/map_ingest_tags`);
-  const tagRows: { ingest_process_id: number; tag: string }[] =
-    await tagResponse.json();
-
-  const tagsByIngestProcessId = tagRows.reduce<Record<number, string[]>>(
-    (acc, row) => {
-      if (!acc[row.ingest_process_id]) {
-        acc[row.ingest_process_id] = [];
-      }
-
-      acc[row.ingest_process_id].push(row.tag);
-      return acc;
-    },
-    {}
-  );
-
-  return ingestProcesses.map((process) => ({
-    ...process,
-    tags: tagsByIngestProcessId[process.id] ?? [],
-  }));
+  const data = await ingestResponse.json();
+  if (!Array.isArray(data)) {
+    console.error("Unexpected response from map-ingestion/pg/maps", data);
+    return [];
+  }
+  return data;
+  //
+  // const tagResponse = await fetch(`${postgrestPrefix}/map_ingest_tags`);
+  // const tagRows: { ingest_process_id: number; tag: string }[] =
+  //   await tagResponse.json();
+  //
+  // const tagsByIngestProcessId = tagRows.reduce<Record<number, string[]>>(
+  //   (acc, row) => {
+  //     if (!acc[row.ingest_process_id]) {
+  //       acc[row.ingest_process_id] = [];
+  //     }
+  //
+  //     acc[row.ingest_process_id].push(row.tag);
+  //     return acc;
+  //   },
+  //   {}
+  // );
+  //
+  // return ingestProcesses.map((process) => ({
+  //   ...process,
+  //   tags: tagsByIngestProcessId[process.id] ?? [],
+  // }));
 };

@@ -21,17 +21,15 @@ interface IngestProcess {
 }
 
 export function IngestProcessCard({
-  ingestProcess,
-  refTitle,
+  data,
   user,
   onUpdate,
 }: {
-  ingestProcess: IngestProcess;
-  refTitle?: string | null;
+  data: IngestProcess;
   user: any | undefined;
   onUpdate: () => void;
 }) {
-  const { slug, source_id, scale, raster_url } = ingestProcess;
+  const { slug, source_id, name, scale, raster_url } = data;
   const edit_href = `/maps/ingestion/${source_id}`;
 
   return h(
@@ -41,14 +39,14 @@ export function IngestProcessCard({
     },
     [
       h("div.flex.row", [
-        h("h3.map-card-title", refTitle),
+        h("h3.map-card-title", data.name),
         h("div.spacer"),
         h.if(user !== undefined)(AnchorButton, {
           href: edit_href,
           icon: "edit",
         }),
       ]),
-      h(IngestTagDisplay, { ingestProcess: ingestProcess, onUpdate }),
+      h(IngestTagDisplay, { data, onUpdate }),
       h("div.flex.row", [
         h("h6", { style: { margin: "0px" } }, `Scale: ${scale}`),
         h("h6", { style: { margin: "0px" } }, `Source ID: ${source_id}`),
