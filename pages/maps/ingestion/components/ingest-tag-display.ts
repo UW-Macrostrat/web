@@ -31,15 +31,18 @@ const deleteTag = async (tag: string, ingestId: number) => {
 
 export function IngestTagDisplay({
   data,
+  ingestProcess,
   onUpdate,
 }: {
   data: IngestProcess;
   onUpdate: () => void;
 }) {
-  const [_ingestProcess, setIngestProcess] = useState<IngestProcess>(data);
+  const [_ingestProcess, setIngestProcess] = useState<IngestProcess>(
+    data ?? ingestProcess
+  );
   const [tagToDelete, setTagToDelete] = useState<string | null>(null);
   const { id } = _ingestProcess;
-  const tags = data.tags ?? [];
+  const tags = _ingestProcess.tags ?? [];
 
   // const updateIngestProcess = useCallback(async () => {
   //   const ingestResponse = await fetch(
@@ -125,10 +128,10 @@ export function IngestTagDisplay({
         AddButton,
         {
           ingestId: id,
-          onChange: async () => {
-            await updateIngestProcess();
-            onUpdate();
-          },
+          // onChange: async () => {
+          //   await updateIngestProcess();
+          //   onUpdate();
+          // },
         },
         []
       ),

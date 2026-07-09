@@ -75,7 +75,7 @@
     "@macrostrat/column-views": "^3.5.1",
     "@macrostrat/data-components": "^1.1.13",
     "@macrostrat/data-provider": "^1.1.0",
-    "@macrostrat/data-sheet": "^4.0.0-dev3",
+    "@macrostrat/data-sheet": "^4.0.0",
     "@macrostrat/feedback-components": "^2.1.4",
     "@macrostrat/form-components": "^1.0.9",
     "@macrostrat/hyper": "^3.1.1",

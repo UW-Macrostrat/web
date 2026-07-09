@@ -225,11 +225,6 @@ export function TableInterface({
         enableColumnReordering: true,
         enableClipboard: false,
         autoFocusEditor,
-        dataSheetActions: h("div.ingest-top", [
-          h(IngestToolbar, { actions, toaster }),
-          h(FilterStatusBar),
-          h(SaveProgress),
-        ]),
         onVisibleCellsChange: (visibleCells) => {
           if (visibleCells.rowIndexEnd > data.length - 20) {
             loadMore();
@@ -240,7 +235,17 @@ export function TableInterface({
           RegionCardinality.FULL_ROWS,
         ],
       },
-      h(StoreSync, { base: data, group }),
+      // `dataSheetActions` was removed in data-sheet v4 — our top chrome now
+      // renders as DataSheet children (above the table); StoreSync is an
+      // invisible sync component.
+      [
+        h("div.ingest-top", { key: "ingest-top" }, [
+          h(IngestToolbar, { actions, toaster }),
+          h(FilterStatusBar),
+          h(SaveProgress),
+        ]),
+        h(StoreSync, { key: "store-sync", base: data, group }),
+      ],
     ),
     h(StatusBar, { total, loading, done, loaded: data.length }),
   ]);
