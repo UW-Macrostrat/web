@@ -1,16 +1,11 @@
 import type { PageContextServer } from "vike/types";
 import { getIngestProcessData } from "../+data";
 
-const validEditModes = ["points", "lines", "polygons"];
-
 export async function onBeforeRender(pageContext: PageContextServer) {
+  // editMode is validated in +guard.ts before we get here.
   const { id, editMode } = pageContext.routeParams;
   const source_id = parseInt(id);
   const props = await getIngestProcessData(source_id);
-
-  if (!validEditModes.includes(editMode)) {
-    throw "Invalid edit mode";
-  }
 
   return {
     pageContext: {
