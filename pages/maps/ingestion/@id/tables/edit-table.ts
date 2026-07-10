@@ -1,58 +1,80 @@
 import {
   Button,
-  ButtonGroup,
   Icon,
   Menu,
   MenuItem,
   OverlayToaster,
   PopoverNext,
-  Spinner,
   Switch,
   Tag,
 } from "@blueprintjs/core";
 import { RegionCardinality } from "@blueprintjs/table";
-import {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import {
   DataSheet,
   generateColumnSpec,
-  getSelectedColumnKeys,
-  getSelectedRowIndices,
-  getSelectionCardinality,
-  runActionWrapper,
-  TableAction,
   useSelector,
-  useStoreAPI,
   type ColumnSpec,
+  type EditEvent,
 } from "@macrostrat/data-sheet";
 import { createAppToaster } from "@macrostrat/ui-components";
 import { FeatureType } from "./defs";
-import { applyOps, diffToOps, opsAtom } from "./pending-ops";
 import {
+  applyOps,
+  makeCellOp,
+  nextBatch,
+  OMITTED_STATUS,
+  opsAtom,
+} from "./pending-ops";
+import type {
+  RowHeaderRenderContext,
+  RowStatusStyles,
+} from "@macrostrat/data-sheet";
+import { Filter, rowPassesFilters } from "../utils";
+import {
+  activeServerFiltersAtom,
   autoFocusEditorAtom,
   columnOrderAtom,
-  defaultFilters,
-  filtersAtom,
   groupAtom,
   hiddenColumnsAtom,
+  libraryFilterToServer,
+  makeIngestProvider,
+  omitFilter,
+  PAGE_SIZE,
+  reloadNonceAtom,
   saveProgressAtom,
-  sortAtom,
-  useIngestData,
+  showOmittedAtom,
+  SYSTEM_COLUMN,
   useResetIngestState,
   useTableStatePersistence,
 } from "./state";
 import { ProgressPopover } from "../components";
-import { makeIngestActions, type IngestActions } from "./actions";
-import { makeColumnHeaderRenderer, SYSTEM_COLUMN } from "./column-header";
-import { ColumnControls } from "./column-controls";
+import { makeIngestActions } from "./actions";
 import h from "../hyper";
+
+const isEmptyValue = (v: any) => v == null || v === "";
+
+/** Presentation for omitted rows — dimmed + struck through, but *grey* (no
+ * danger intent), so an omitted row reads as "excluded from export", distinct
+ * from a staged delete. */
+const ROW_STATUS_STYLES: RowStatusStyles = {
+  [OMITTED_STATUS]: {
+    cellStyle: { opacity: 0.55, textDecoration: "line-through" },
+    headerStyle: { opacity: 0.7 },
+  },
+};
+
+/** Row-header content: mark omitted rows with an eye-off icon beside the row
+ * number; other rows keep the default label. */
+function renderIngestRowHeader(ctx: RowHeaderRenderContext): ReactNode {
+  if (ctx.status !== OMITTED_STATUS) return null;
+  return h(
+    "span",
+    { style: { display: "inline-flex", alignItems: "center", gap: "3px" } },
+    [ctx.defaultLabel, h(Icon, { icon: "eye-off", size: 10 })]
+  );
+}
 
 /** Force the system column (`source_layer`) to the front, wherever it landed. */
 function pinSystemColumn<T extends { key: string }>(cols: T[]): T[] {
@@ -63,24 +85,21 @@ function pinSystemColumn<T extends { key: string }>(cols: T[]): T[] {
   return out;
 }
 
-/** Human-readable labels for the ingestion filter operators. */
-const OPERATOR_LABELS: Record<string, string> = {
-  eq: "=",
-  ne: "≠",
-  lt: "<",
-  le: "≤",
-  gt: ">",
-  ge: "≥",
-  like: "contains",
-  in: "in",
-  is: "is",
-  is_distinct_from: "≠",
-  is_not_distinct_from: "=",
-};
-
 /** Columns present in the data but never shown directly (identity / control).
  * `omit` is controlled via the Omit/Restore actions (row-deletion mechanism). */
 const INTERNAL_COLUMNS = ["_pkid", "source_id", "omit"];
+
+/** CSS that tints "final" (harmonized) column headers, matched on the library's
+ * `data-column-key` attribute (so no bespoke header-styling prop is needed).
+ * Only simple keys are emitted, guarding the attribute selector. */
+function buildFinalColumnCSS(finalColumns: string[]): string {
+  const keys = finalColumns.filter((k) => /^[A-Za-z0-9_-]+$/.test(k));
+  if (keys.length === 0) return "";
+  const header = keys
+    .map((k) => `.bp6-table-header:has([data-column-key="${k}"])`)
+    .join(",");
+  return `${header}{background-color:rgba(45,114,210,0.12)}`;
+}
 
 /** Wrap a column's valueRenderer so a bad value (e.g. an edited string in a
  * column whose default renderer calls `toFixed`) degrades to the raw value
@@ -100,7 +119,7 @@ function safeRenderer(fn: ((d: any) => any) | undefined) {
  * then the remaining columns in their natural order (both stable). */
 function orderByFinal<T extends { key: string }>(
   cols: T[],
-  finalColumns: string[],
+  finalColumns: string[]
 ): T[] {
   const idx = new Map(finalColumns.map((k, i) => [k, i]));
   return [...cols].sort((a, b) => {
@@ -117,7 +136,7 @@ function orderByFinal<T extends { key: string }>(
  * natural order at the end. */
 function orderByKeys<T extends { key: string }>(
   cols: T[],
-  order: string[],
+  order: string[]
 ): T[] {
   const idx = new Map(order.map((k, i) => [k, i]));
   return [...cols].sort((a, b) => {
@@ -170,112 +189,164 @@ export function TableInterface({
   const columnOrder = useAtomValue(columnOrderAtom);
   const autoFocusEditor = useAtomValue(autoFocusEditorAtom);
   const group = useAtomValue(groupAtom);
-  const { data, total, loading, done, loadMore, reload } = useIngestData(url);
+  const showOmitted = useAtomValue(showOmittedAtom);
+  const reloadNonce = useAtomValue(reloadNonceAtom);
+  const setReloadNonce = useSetAtom(reloadNonceAtom);
+
+  // The library owns windowed loading via a `fetchData` provider (scroll +
+  // progress) and the sort/filter state; the provider reads group + the omit
+  // view-toggle from the store at fetch time. A change to those page-side bits
+  // (or a post-save reload) bumps `refreshToken`; the library re-fetches on its
+  // own sort/filter changes.
+  const provider = useMemo(() => makeIngestProvider(url, store), [url, store]);
+  const reload = useCallback(
+    () => setReloadNonce((n) => n + 1),
+    [setReloadNonce]
+  );
+  const refreshToken = useMemo(
+    () => [group ?? "", showOmitted ? "1" : "0", reloadNonce].join("|"),
+    [group, showOmitted, reloadNonce]
+  );
+
+  // The edit overlay is a pure derivation of the pending-ops stack over the
+  // loaded rows. Since the library owns the rows, we derive it *inside* the
+  // sheet via `deriveOverlay(rows)` (re-run when the rows load/change or `ops`
+  // change) rather than passing a controlled `updatedData`/`rowStatus`.
+  const ops = useAtomValue(opsAtom);
+  const setOps = useSetAtom(opsAtom);
+  const deriveOverlay = useMemo(
+    () => (rows: any[]) => applyOps(rows, ops),
+    [ops]
+  );
+
+  // Inline edits arrive as structured `onEdit` events carrying the base `row`
+  // (v4.1). Each real cell edit becomes a `setCell` op; retyping the base value
+  // drops the row+column's single-cell ops (revert).
+  const handleEdit = useCallback(
+    (event: EditEvent) => {
+      if (event.type !== "setCells") return;
+      setOps((prev) => {
+        let next = prev;
+        const additions = [];
+        const batchId = nextBatch();
+        for (const { row, column, value } of event.cells) {
+          if (row == null) continue;
+          const baseValue = row[column];
+          const isNoop =
+            value === baseValue ||
+            (isEmptyValue(value) && isEmptyValue(baseValue));
+          if (isNoop) {
+            // Revert: drop this row+column's single-cell ops (leave column-copy
+            // rules, which carry a `source`, intact).
+            next = next.filter(
+              (op) =>
+                op.source != null ||
+                op.column !== column ||
+                !rowPassesFilters(row, Object.values(op.match))
+            );
+          } else {
+            additions.push(
+              makeCellOp(row, group, column, value, undefined, batchId)
+            );
+          }
+        }
+        return additions.length > 0 ? [...next, ...additions] : next;
+      });
+    },
+    [group, setOps]
+  );
 
   const actions = useMemo(
     () => makeIngestActions({ url, store, reload, toaster }),
-    [url, store, reload, toaster],
+    [url, store, reload, toaster]
   );
 
-  const columnHeaderCellRenderer = useMemo(
-    () => makeColumnHeaderRenderer(finalColumns),
-    [finalColumns],
+  // Column spec derived from the loaded rows (via the library's function-form
+  // `columnSpec` — no separate schema fetch). Sort/filter are enabled (the
+  // library's column-header menus drive them; the provider translates them to
+  // the server query). The system column is pinned (non-reorderable); hidden +
+  // internal columns are dropped. The library re-derives when this callback's
+  // identity changes (hidden columns / order), reusing the already-loaded rows.
+  const columnSpec = useCallback(
+    (rows: any[]): ColumnSpec[] => {
+      const spec = generateColumnSpec(rows, {
+        overrides,
+        omitColumns: [...INTERNAL_COLUMNS, ...hiddenColumns],
+      });
+      const normalized = spec.map((col) => ({
+        ...col,
+        sortable: true,
+        filterable: true,
+        reorderable: col.key !== SYSTEM_COLUMN,
+        valueRenderer: safeRenderer(col.valueRenderer),
+      }));
+      // A saved (user) order takes precedence; otherwise final columns lead.
+      const ordered =
+        columnOrder != null
+          ? orderByKeys(normalized, columnOrder)
+          : orderByFinal(normalized, finalColumns);
+      return pinSystemColumn(ordered);
+    },
+    [overrides, hiddenColumns, columnOrder, finalColumns]
   );
 
-  // Build a stable column spec from the loaded rows. Client-side sort/filter is
-  // disabled here (`sortable`/`filterable` = false) because sorting and
-  // filtering happen server-side via the column-header dropdowns. Hidden
-  // columns (and internal identity columns) are dropped from the view.
-  const columnKeys = data.length === 0 ? "" : Object.keys(data[0] ?? {}).join();
-  const hiddenKey = hiddenColumns.join();
-  const orderKey = columnOrder?.join() ?? "";
-  const columnSpec = useMemo(() => {
-    const spec = generateColumnSpec(data, {
-      overrides,
-      omitColumns: [...INTERNAL_COLUMNS, ...hiddenColumns],
-    });
-    const normalized = spec.map((col) => ({
-      ...col,
-      sortable: false,
-      filterable: false,
-      valueRenderer: safeRenderer(col.valueRenderer),
-    }));
-    // A saved (user) order takes precedence; otherwise final columns lead.
-    const ordered =
-      columnOrder != null
-        ? orderByKeys(normalized, columnOrder)
-        : orderByFinal(normalized, finalColumns);
-    return pinSystemColumn(ordered);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnKeys, hiddenKey, orderKey, overrides, finalColumns]);
+  // Tint "final" (harmonized) columns by targeting the header's
+  // `data-column-key` (set by the library) — no bespoke styling prop needed.
+  const finalColumnCSS = useMemo(
+    () => buildFinalColumnCSS(finalColumns),
+    [finalColumns]
+  );
 
   return h("div.ingest-table-wrap", [
+    h.if(finalColumnCSS !== "")("style", finalColumnCSS),
     h(
       DataSheet,
       {
-        data,
+        provider,
         columnSpec,
         editable: true,
-        // Only the hotkey-only clipboard actions go to the built-in toolbar
-        // (they render nothing since `targets: []`); everything else is in our
-        // own contextual toolbar below. `enableClipboard: false` avoids the
-        // built-in clipboard actions duplicating hotkeys.
-        actions: actions.clipboard,
-        columnHeaderCellRenderer,
+        pageSize: PAGE_SIZE,
+        // Overlay derived inside the sheet from the pending-ops stack;
+        // `refreshToken` re-fetches on a page-side view change or post-save.
+        deriveOverlay,
+        refreshToken,
+        onEdit: handleEdit,
+        // All page actions (save/reset/omit/restore/group/hide + hotkey-only
+        // clipboard) run through the library's own toolbar + column-header
+        // menus. `enableClipboard: false` avoids duplicate clipboard hotkeys.
+        actions,
         enableColumnReordering: true,
         enableClipboard: false,
         autoFocusEditor,
-        onVisibleCellsChange: (visibleCells) => {
-          if (visibleCells.rowIndexEnd > data.length - 20) {
-            loadMore();
-          }
-        },
+        // View-state controls (group tag, omit/hidden toggles, editor focus,
+        // pending-ops, save progress) live in the bottom status bar.
+        statusBar: h(IngestStatusBar),
+        // Omitted rows are a first-class row status (grey/struck, eye-off in
+        // the gutter) — distinct from a staged delete.
+        rowStatusStyles: ROW_STATUS_STYLES,
+        rowHeaderRenderer: renderIngestRowHeader,
         selectionModes: [
           RegionCardinality.FULL_COLUMNS,
           RegionCardinality.FULL_ROWS,
         ],
       },
-      // `dataSheetActions` was removed in data-sheet v4 — our top chrome now
-      // renders as DataSheet children (above the table); StoreSync is an
-      // invisible sync component.
+      // Sync helpers run inside the DataSheet provider: column reorder → page
+      // state; active library filters → the server-filter mirror (copy scope).
       [
-        h("div.ingest-top", { key: "ingest-top" }, [
-          h(IngestToolbar, { actions, toaster }),
-          h(FilterStatusBar),
-          h(SaveProgress),
-        ]),
-        h(StoreSync, { key: "store-sync", base: data, group }),
-      ],
+        h(StoreSync, { key: "store-sync" }),
+        h(ViewStateSync, { key: "view-sync" }),
+      ]
     ),
-    h(StatusBar, { total, loading, done, loaded: data.length }),
   ]);
 }
 
-/** Runs inside the DataSheet provider and keeps the store in sync with the
- * page-side state:
- *  1. Captures data-sheet's in-store column order (after a drag-reorder) into
- *     `columnOrderAtom`, so the loader re-initializing the spec preserves it.
- *  2. Derives the edit overlay + row status from the pending-ops stack and the
- *     loaded rows (`applyOps`), pushing them into the store.
- *  3. Captures inline cell edits (which data-sheet writes straight to
- *     `updatedData`) back into the ops stack, keeping the stack authoritative.
- *     Once the library exposes an op-based edit API this step goes away.
- */
-function StoreSync({
-  base,
-  group,
-}: {
-  base: any[];
-  group: string | undefined;
-}): null {
-  const storeAPI = useStoreAPI();
-  const [ops, setOps] = useAtom(opsAtom);
-  const overlay = useSelector((s: any) => s.updatedData);
+/** Runs inside the DataSheet provider to capture the in-store column order
+ * (after a drag-reorder) into `columnOrderAtom`, so the loader re-initializing
+ * the spec preserves it. */
+function StoreSync(): null {
   const columnSpec = useSelector((s: any) => s.columnSpec);
   const setColumnOrder = useSetAtom(columnOrderAtom);
-  const derivedRef = useRef<any[]>([]);
 
-  // (1) Capture column reorder.
   useEffect(() => {
     const keys = columnSpec.map((c: any) => c.key);
     setColumnOrder((prev) =>
@@ -283,224 +354,102 @@ function StoreSync({
       prev.length === keys.length &&
       prev.every((k, i) => k === keys[i])
         ? prev
-        : keys,
+        : keys
     );
   }, [columnSpec, setColumnOrder]);
-
-  // (2) Derive overlay + row status from ops + loaded rows.
-  useEffect(() => {
-    const { updatedData, rowStatus } = applyOps(base, ops);
-    derivedRef.current = updatedData;
-    storeAPI.setState({ updatedData, rowStatus });
-  }, [ops, base, storeAPI]);
-
-  // (3) Capture inline edits: when the store overlay diverges from what we
-  // derived, translate the delta into ops (which re-derives, converging). If
-  // the divergence yields no ops (a phantom empty↔null edit), re-assert the
-  // derived overlay to clear the stray value.
-  useEffect(() => {
-    if (overlay === derivedRef.current) return;
-    const newOps = diffToOps(overlay, derivedRef.current, base, group);
-    if (newOps.length > 0) {
-      setOps((prev) => [...prev, ...newOps]);
-    } else {
-      storeAPI.setState({ updatedData: derivedRef.current });
-    }
-  }, [overlay, base, group, setOps, storeAPI]);
 
   return null;
 }
 
-/** Bar of active group / sort / filter state, shown above the table. Each is a
- * removable tag that clears the corresponding view-state atom. The default
- * "hide omitted" filter is not shown (it has its own toolbar toggle). */
-function FilterStatusBar(): ReactNode {
-  const [filters, setFilters] = useAtom(filtersAtom);
-  const [sort, setSort] = useAtom(sortAtom);
+/** Mirror the library's active column filters (owned by the data-sheet store)
+ * into `activeServerFiltersAtom`, translated to the server operator vocabulary
+ * and including the omit view-toggle — so the whole-column-copy action can
+ * scope its server copy to the current filtered view. */
+function ViewStateSync(): null {
+  const activeFilters = useSelector((s: any) => s.activeFilters);
+  const showOmitted = useAtomValue(showOmittedAtom);
+  const setServerFilters = useSetAtom(activeServerFiltersAtom);
+
+  useEffect(() => {
+    const out: Filter[] = [];
+    for (const entry of activeFilters?.values?.() ?? []) {
+      const f = libraryFilterToServer(entry?.filter?.columnKey, entry?.state);
+      if (f != null) out.push(f);
+    }
+    if (!showOmitted) out.push(omitFilter());
+    setServerFilters(out);
+  }, [activeFilters, showOmitted, setServerFilters]);
+
+  return null;
+}
+
+/** The bottom status-bar content: active group tag + view toggles (show
+ * omitted / show hidden / editor focus), the pending-ops control, and the
+ * batch-save progress. Sort/filter tags are rendered by the library itself. */
+function IngestStatusBar(): ReactNode {
+  return h("div.ingest-view-state", [
+    h(GroupTag, { key: "group" }),
+    h(ShowOmittedToggle, { key: "omitted" }),
+    h(ShowHiddenControl, { key: "hidden" }),
+    h(EditorFocusToggle, { key: "focus" }),
+    h(PendingOpsControl, { key: "pending" }),
+    h(SaveProgress, { key: "progress" }),
+  ]);
+}
+
+/** The active group-by column, as a removable tag. */
+function GroupTag(): ReactNode {
   const [group, setGroup] = useAtom(groupAtom);
-
-  const filterTags = Object.values(filters).filter(
-    (f) => f.is_valid() && f.column_name !== "omit",
+  if (group == null) return null;
+  return h(
+    Tag,
+    {
+      icon: "group-objects",
+      intent: "primary",
+      minimal: true,
+      onRemove: () => setGroup(undefined),
+    },
+    `Grouped: ${group}`
   );
-
-  const removeFilter = (key: string) =>
-    setFilters((prev) => {
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
-
-  const clearAll = () => {
-    setFilters(defaultFilters());
-    setSort(null);
-    setGroup(undefined);
-  };
-
-  if (group == null && sort == null && filterTags.length === 0) return null;
-
-  return h("div.ingest-filter-bar", [
-    h.if(group != null)(
-      Tag,
-      {
-        icon: "group-objects",
-        intent: "primary",
-        minimal: true,
-        onRemove: () => setGroup(undefined),
-      },
-      `Grouped: ${group}`,
-    ),
-    h.if(sort != null)(
-      Tag,
-      {
-        icon: sort?.ascending ? "sort-asc" : "sort-desc",
-        intent: "primary",
-        minimal: true,
-        onRemove: () => setSort(null),
-      },
-      sort?.key,
-    ),
-    ...filterTags.map((f) =>
-      h(
-        Tag,
-        {
-          key: f.column_name,
-          icon: "filter",
-          intent: "warning",
-          minimal: true,
-          onRemove: () => removeFilter(f.column_name),
-        },
-        `${f.column_name} ${OPERATOR_LABELS[f.operator ?? ""] ?? f.operator} ${f.value}`,
-      ),
-    ),
-    h(
-      Button,
-      { minimal: true, small: true, icon: "cross", onClick: clearAll },
-      "Clear all",
-    ),
-  ]);
 }
 
-/** Single contextual toolbar: controls for the current selection mode on the
- * left, always-available Save / Reset on the right. Replaces the separate
- * per-mode strips so the top of the UI stays stable as selection changes. */
-function IngestToolbar({
-  actions,
-  toaster,
-}: {
-  actions: IngestActions;
-  toaster: OverlayToaster | null;
-}): ReactNode {
-  const storeAPI = useStoreAPI();
-  const selection = useSelector((s: any) => s.selection);
-  const columnSpec = useSelector((s: any) => s.columnSpec);
-  const cardinality = getSelectionCardinality(selection);
-  const run = useCallback(
-    (action: TableAction) =>
-      runActionWrapper(action, storeAPI.getState(), storeAPI.setState, toaster),
-    [storeAPI, toaster],
+/** Toggle whether omitted rows are shown (drives the provider's omit filter). */
+function ShowOmittedToggle(): ReactNode {
+  const [showOmitted, setShowOmitted] = useAtom(showOmittedAtom);
+  return h(Switch, {
+    checked: showOmitted,
+    label: "Show omitted",
+    inline: true,
+    onChange: (e) => setShowOmitted(e.currentTarget.checked),
+  });
+}
+
+/** Button to reveal hidden columns; only shown when some are hidden. */
+function ShowHiddenControl(): ReactNode {
+  const [hidden, setHidden] = useAtom(hiddenColumnsAtom);
+  if (hidden.length === 0) return null;
+  return h(
+    Button,
+    {
+      minimal: true,
+      small: true,
+      icon: "eye-open",
+      onClick: () => setHidden([]),
+    },
+    `Show ${hidden.length} hidden column${hidden.length === 1 ? "" : "s"}`
   );
-
-  let controls: ReactNode;
-  switch (cardinality) {
-    case RegionCardinality.FULL_COLUMNS:
-      controls = h(ColumnControls);
-      break;
-    case RegionCardinality.FULL_ROWS:
-      controls = h(ButtonGroup, { minimal: true }, [
-        h(ActionBtn, { action: actions.omit, run }),
-        h(ActionBtn, { action: actions.restore, run }),
-      ]);
-      break;
-    case RegionCardinality.CELLS:
-      controls = h(EditorFocusToggle);
-      break;
-    default:
-      // No selection / whole table.
-      controls = h(ButtonGroup, { minimal: true }, [
-        h(ActionBtn, { action: actions.toggleOmitted, run }),
-        h(ActionBtn, { action: actions.showHidden, run }),
-      ]);
-      break;
-  }
-
-  const info = selectionInfo(cardinality, selection, columnSpec);
-  const hasSelection = selection != null && selection.length > 0;
-
-  return h("div.ingest-action-bar", [
-    h("div.context-controls", [
-      h(ContextLabel, { kind: info.kind, detail: info.detail }),
-      controls,
-      h.if(hasSelection)(
-        Button,
-        {
-          small: true,
-          minimal: true,
-          icon: "cross",
-          onClick: () =>
-            storeAPI.getState().setSelection([]),
-        },
-        "Clear selection",
-      ),
-    ]),
-    h("div.spacer"),
-    h(PendingOpsControl),
-    h(ButtonGroup, { minimal: true }, [
-      h(ActionBtn, { action: actions.save, run }),
-      h(ActionBtn, { action: actions.reset, run }),
-    ]),
-  ]);
 }
 
-/** Parallel contextual label for the current selection mode. */
-function ContextLabel({
-  kind,
-  detail,
-}: {
-  kind: string;
-  detail?: string;
-}): ReactNode {
-  return h("span.column-controls-label", [
-    h("span.label", kind),
-    h.if(detail != null)("span.col-name", detail),
-  ]);
-}
-
-/** Human summary of the current selection, mirroring the column label across
- * row / cell / table modes. */
-function selectionInfo(
-  cardinality: RegionCardinality | null,
-  selection: any[],
-  columnSpec: any[],
-): { kind: string; detail?: string } {
-  switch (cardinality) {
-    case RegionCardinality.FULL_COLUMNS: {
-      const keys = getSelectedColumnKeys(selection, columnSpec);
-      if (keys.length === 1) {
-        const col = columnSpec.find((c: any) => c.key === keys[0]);
-        return { kind: "Column", detail: col?.name ?? keys[0] };
-      }
-      return { kind: "Columns", detail: `${keys.length} selected` };
-    }
-    case RegionCardinality.FULL_ROWS: {
-      const n = getSelectedRowIndices(selection).length;
-      return n === 1 ? { kind: "Row" } : { kind: "Rows", detail: `${n} selected` };
-    }
-    case RegionCardinality.CELLS: {
-      const n = countSelectedCells(selection);
-      return n === 1 ? { kind: "Cell" } : { kind: "Cells", detail: `${n} selected` };
-    }
-    default:
-      return { kind: "Table" };
-  }
-}
-
-function countSelectedCells(selection: any[]): number {
-  let n = 0;
-  for (const r of selection ?? []) {
-    if (r.rows == null || r.cols == null) continue;
-    n += (r.rows[1] - r.rows[0] + 1) * (r.cols[1] - r.cols[0] + 1);
-  }
-  return n;
+/** Toggle between click-to-focus (default) and auto-focus cell editing. */
+function EditorFocusToggle(): ReactNode {
+  const [autoFocus, setAutoFocus] = useAtom(autoFocusEditorAtom);
+  return h(Switch, {
+    checked: autoFocus,
+    label: "Auto-focus editor",
+    inline: true,
+    className: "editor-focus-toggle",
+    onChange: (e) => setAutoFocus(e.currentTarget.checked),
+  });
 }
 
 /** Shows the count of pending operations; the popover lists them grouped by the
@@ -528,7 +477,7 @@ function PendingOpsControl(): ReactNode {
   return h(
     PopoverNext,
     {
-      placement: "bottom-end",
+      placement: "top-end",
       content: h(
         Menu,
         {},
@@ -546,41 +495,15 @@ function PendingOpsControl(): ReactNode {
                 removeBatch(b.id);
               },
             }),
-          }),
-        ),
+          })
+        )
       ),
     },
     h(
       Button,
       { minimal: true, small: true, icon: "history", rightIcon: "caret-down" },
-      `${batches.length} pending`,
-    ),
-  );
-}
-
-/** A toolbar button for a TableAction, with reactive disabled state. */
-function ActionBtn({
-  action,
-  run,
-}: {
-  action: TableAction;
-  run: (a: TableAction) => void;
-}): ReactNode {
-  const disabled = useSelector((s: any) =>
-    typeof action.disabled === "function"
-      ? action.disabled(s)
-      : Boolean(action.disabled),
-  );
-  return h(
-    Button,
-    {
-      small: true,
-      icon: action.icon,
-      intent: action.intent,
-      disabled,
-      onClick: () => run(action),
-    },
-    action.name,
+      `${batches.length} pending`
+    )
   );
 }
 
@@ -593,42 +516,4 @@ function SaveProgress(): ReactNode {
     value: progress.value,
     text: progress.text,
   });
-}
-
-/** Toggle between click-to-focus (default) and auto-focus cell editing. */
-function EditorFocusToggle(): ReactNode {
-  const [autoFocus, setAutoFocus] = useAtom(autoFocusEditorAtom);
-  return h(Switch, {
-    checked: autoFocus,
-    label: "Auto-focus editor",
-    inline: true,
-    className: "editor-focus-toggle",
-    onChange: (e) => setAutoFocus(e.currentTarget.checked),
-  });
-}
-
-function StatusBar({
-  total,
-  loading,
-  done,
-  loaded,
-}: {
-  total: number | null;
-  loading: boolean;
-  done: boolean;
-  loaded: number;
-}): ReactNode {
-  const fullyLoaded = done || (total != null && loaded >= total);
-  const count = total != null ? `${loaded} / ${total} rows` : `${loaded} rows`;
-
-  let indicator: ReactNode;
-  if (loading) {
-    indicator = h(Spinner, { size: 12 });
-  } else if (fullyLoaded) {
-    indicator = h(Icon, { icon: "small-tick", size: 12, className: "load-done" });
-  } else {
-    indicator = h(Icon, { icon: "more", size: 12, className: "load-more" });
-  }
-
-  return h("div.ingest-status-bar", [h("span.row-count", count), indicator]);
 }

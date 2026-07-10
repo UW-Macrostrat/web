@@ -134,10 +134,6 @@ div.warning
     border-top: 1px solid rgba(127, 127, 127, 0.2)
     padding-top: 6px
 
-.ingest-top
-  display: flex
-  flex-direction: column
-
 // Wrapper: table fills, status bar pinned to the bottom.
 .ingest-table-wrap
   display: flex
@@ -149,82 +145,22 @@ div.warning
     flex: 1 1 auto
     min-height: 0
 
-// Single contextual toolbar: context controls (left) + Save/Reset (right).
-// Always present with a reserved height so the table doesn't shift as the
-// selection mode changes.
-.ingest-action-bar
-  display: flex
-  flex-direction: row
-  align-items: center
-  gap: 8px
-  padding: 3px 8px
-  min-height: 36px
-  background-color: rgba(143, 153, 168, 0.12)
-  border-bottom: 1px solid rgba(143, 153, 168, 0.25)
-
-  .spacer
-    flex: 1 1 auto
-
-  .context-controls
-    display: flex
-    flex-direction: row
-    align-items: center
-    flex-wrap: wrap
-    gap: 12px
-
-  .column-controls-label
-    display: flex
-    flex-direction: column
-    line-height: 1.1
-
-    .label
-      font-size: 10px
-      text-transform: uppercase
-      opacity: 0.6
-
-    .col-name
-      font-weight: 600
-
-  .control-group
-    display: flex
-    flex-direction: row
-    align-items: center
-    gap: 4px
-
-.ingest-filter-bar
-  display: flex
-  flex-direction: row
-  align-items: center
-  flex-wrap: wrap
-  gap: 4px
-  padding: 2px 8px
-
 .editor-focus-toggle
   margin-bottom: 0
   font-size: 12px
 
-.ingest-status-bar
+// View-state controls injected into the library's bottom status bar (group
+// tag, omit / hidden toggles, editor-focus, pending-ops, save progress).
+.ingest-view-state
   display: flex
   flex-direction: row
   align-items: center
-  justify-content: flex-end
-  gap: 6px
-  padding: 3px 10px
+  flex-wrap: wrap
+  gap: 8px
   font-size: 12px
-  opacity: 0.85
-  border-top: 1px solid rgba(143, 153, 168, 0.25)
-  background-color: rgba(143, 153, 168, 0.1)
 
-  // Subtle, muted load indicators (no bright "success" color).
-  .load-done, .load-more
-    opacity: 0.5
-
-// Final / harmonized columns get a subtle desaturated-blue header tint
-// (className applied to the Blueprint header cell, so matched globally).
-:global
-  .bp6-table-header.final-column-header,
-  .final-column-header
-    background-color: rgba(45, 114, 210, 0.12)
+  .bp6-switch
+    margin-bottom: 0
 
 .interval-editor
   display: flex
