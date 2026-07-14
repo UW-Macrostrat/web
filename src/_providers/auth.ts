@@ -58,7 +58,6 @@ export function AuthProvider(props) {
 }
 
 export async function fetchUser() {
-  return null;
   if (isLocalTesting()) return mockUser;
   const response = await fetch(`${ingestPrefix}/security/me`, {
     method: "GET",
