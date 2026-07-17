@@ -9,8 +9,7 @@ import {
 import { useState } from "react";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
-import { IDTag } from "~/components/general";
-import { useData } from "vike-react/useData";
+import { Identifier } from "@macrostrat/column-views";
 
 const PAGE_SIZE = 20;
 
@@ -107,7 +106,7 @@ function SourceItem({ data }) {
           h("span", ref_source + ": " + ref_title + " (" + ref_year + ") "),
           h("a", { href: url, target: "_self" }, h(Icon, { icon: "link" })),
         ]),
-        h("div.tags", [h(IDTag, { id: source_id })]),
+        h("div.tags", [h(Identifier, { id: source_id })]),
       ]),
     ]
   );

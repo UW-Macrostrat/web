@@ -1,19 +1,9 @@
-import hyper from "@macrostrat/hyper";
-import {
-  Card,
-  Icon,
-  InputGroup,
-  Popover,
-  Spinner,
-  Tag,
-} from "@blueprintjs/core";
+import { InputGroup, Popover, Spinner, Tag } from "@blueprintjs/core";
 import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { postgrestPrefix, webAssetsPrefix } from "@macrostrat-web/settings";
-import styles from "./layout.module.sass";
+import h from "./layout.module.sass";
 import type { ReactNode } from "react";
-
-const h = hyper.styled(styles);
 
 export function Image({ src, className, width, height }: any) {
   const srcWithAddedPrefix = webAssetsPrefix + "/main-page/" + src;

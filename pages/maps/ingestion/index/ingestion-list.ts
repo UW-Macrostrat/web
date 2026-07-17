@@ -1,5 +1,5 @@
 import h from "./ingestion-list.module.sass";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Intent,
@@ -14,59 +14,18 @@ import { PostgrestClient } from "@supabase/postgrest-js";
 import { TagEditor } from "@macrostrat/data-components";
 import { useToaster } from "@macrostrat/ui-components";
 import {
-  SelectionInteractionStyle,
-  createPostgRESTProvider,
-  DataPanel,
+  type ColumnSpec,
+  createDataCard,
   getSelectedRowIndices,
   TableAction,
   TableFilter,
   useSelector,
   useStoreAPI,
-  createDataCard,
-  DataCard,
-  type ColumnSpec,
 } from "@macrostrat/data-sheet";
 import { RegionCardinality } from "@blueprintjs/table";
 import { apiV3Prefix } from "@macrostrat-web/settings";
 import classNames from "classnames";
-
-export function IngestionListPanel({ footer }: { footer: ReactNode }) {
-  const provider = useMemo(
-    () =>
-      createPostgRESTProvider<IngestMap>({
-        endpoint,
-        table: "maps",
-        identityKey: "source_id",
-        // Default ordering: newest source_id first. Because this is the
-        // identity key's own default direction (not an active sort), it doesn't
-        // appear as a removable tag in the sort/filter bar.
-        identityAscending: false,
-      }),
-    []
-  );
-
-  return h(
-    "div.data-panel-container",
-    h(DataPanel<IngestMap>, {
-      provider,
-      columnSpec,
-      itemComponent: MapCard,
-      pageSize: 20,
-      autoLoadPages: 2,
-      itemLabel: "map",
-      className: "ingestion-panel",
-      statusBar: false,
-      enableSelection: SelectionInteractionStyle.MODAL,
-      toolbarStyle: "floating",
-      contentFooter: footer,
-      scrollBody: ScrollBody,
-    })
-  );
-}
-
-function ScrollBody({ children }: { children: ReactNode }) {
-  return h("div.data-scroll-body", children);
-}
+const endpoint = `${apiV3Prefix}/map-ingestion/pg`;
 
 /**
  * DataPanel is the card-list renderer over the same headless core as
@@ -80,10 +39,9 @@ function ScrollBody({ children }: { children: ReactNode }) {
  */
 
 // The PostgREST base; `.from("maps")` → `${endpoint}/maps`.
-const endpoint = `${apiV3Prefix}/map-ingestion/pg`;
 const TAGS_ENDPOINT = `${endpoint}/map_ingest_tags`;
 
-interface IngestMap {
+export interface IngestMap {
   source_id: number;
   slug: string;
   name: string;
@@ -274,7 +232,7 @@ const scaleFilter: TableFilter<
 
 // Facet capabilities are declared per-column, backend-agnostic. `FacetControls`
 // + the server provider read these to offer/apply filter & sort.
-const columnSpec: ColumnSpec[] = [
+export const columnSpec: ColumnSpec[] = [
   {
     key: "name",
     name: "Name",
@@ -353,7 +311,7 @@ function MapCardContent({ data, selectable }) {
   );
 }
 
-const MapCard = createDataCard(MapCardContent, {
+export const MapCard = createDataCard(MapCardContent, {
   className: h["map-card"],
 });
 

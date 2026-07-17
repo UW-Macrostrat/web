@@ -10,5 +10,6 @@ export * from "./expandable-panel";
 export * from "./base-layer-panel";
 export * from "./general";
 export * from "./form-controls";
+export * from "./infinite-scroll";
 export { buildCrossSectionLayers } from "~/_utils/map-layers";
 export { Footer } from "~/layouts/footer.ts";
