@@ -40,6 +40,7 @@ export function IngestTagDisplay({
   const [_ingestProcess, setIngestProcess] = useState<IngestProcess>(
     data ?? ingestProcess
   );
+  console.log(data, ingestProcess, _ingestProcess);
   const [tagToDelete, setTagToDelete] = useState<string | null>(null);
   const { id } = _ingestProcess;
   const tags = _ingestProcess.tags ?? [];
