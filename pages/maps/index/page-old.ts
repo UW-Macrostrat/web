@@ -9,8 +9,6 @@ import {
 import { useState } from "react";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
-import { IDTag } from "~/components/general";
-import { useData } from "vike-react/useData";
 
 const PAGE_SIZE = 20;
 
@@ -86,29 +84,4 @@ export function Page() {
       ),
     ]),
   ]);
-}
-
-function SourceItem({ data }) {
-  const { source_id, name, ref_title, url, scale, ref_year, ref_source } = data;
-  const href = `/maps/${source_id}`;
-
-  return h(
-    LinkCard,
-    {
-      href,
-      title: h("div.title", [
-        h("h2", name),
-        h("div", { className: "size " + scale }, scale),
-      ]),
-    },
-    [
-      h("div.content", [
-        h("div.source", [
-          h("span", ref_source + ": " + ref_title + " (" + ref_year + ") "),
-          h("a", { href: url, target: "_self" }, h(Icon, { icon: "link" })),
-        ]),
-        h("div.tags", [h(IDTag, { id: source_id })]),
-      ]),
-    ]
-  );
 }

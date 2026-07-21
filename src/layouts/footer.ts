@@ -12,7 +12,7 @@ const rockdIcon = h(Image, {
   width: "18px",
 });
 
-export function Footer() {
+export function Footer({ className }) {
   const metaItems = [
     { href: "/about", text: "About", icon: "info-sign" },
     { href: "/people", text: "People", icon: "people" },
@@ -61,7 +61,7 @@ export function Footer() {
     },
   ];
 
-  return h("div.footer", [
+  return h("div.footer", { className }, [
     h("a.homepage-link", { href: "/" }, [
       h("h3", "Macrostrat"),
       h(MacrostratIcon, { className: "footer-logo" }),

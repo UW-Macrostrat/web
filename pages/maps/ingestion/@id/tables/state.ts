@@ -8,17 +8,24 @@
  *
  * View state (filters / sort / group / hidden columns) lives in atoms so the
  * contextual column header and toolbar actions can read and mutate it without
- * prop-threading. The loader's private fetch bookkeeping stays local to the
- * `useIngestData` hook.
+ * prop-threading. The data-sheet `TableDataProvider` (`makeIngestProvider`)
+ * reads that view state from the store at fetch time; the library owns the
+ * windowed loading itself.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
-import { atom, useAtom, useAtomValue, useStore } from "jotai";
+import { useEffect, useRef } from "react";
+import { atom, createStore, useAtom, useStore } from "jotai";
 import { useAsyncEffect } from "@macrostrat/ui-components";
-import { addFilterToURL, createFiltersKey, Filter } from "../utils";
+import type { TableDataProvider } from "@macrostrat/data-sheet";
+import { addFilterToURL, Filter } from "../utils";
 import { Interval } from "../components";
 import { postgrest } from "~/_providers";
 
+type JotaiStore = ReturnType<typeof createStore>;
+
 export const PAGE_SIZE = 100;
+
+/** The fixed system column — always pinned first and not reorderable. */
+export const SYSTEM_COLUMN = "source_layer";
 
 /** A single-column sort request, mapped to the server's `order_by.<dir>`. */
 export interface ColumnSort {
@@ -26,16 +33,10 @@ export interface ColumnSort {
   ascending: boolean;
 }
 
-/** Default filter set: hide omitted rows. */
-export function defaultFilters(): Record<string, Filter> {
-  return { omit: new Filter("omit", "is_distinct_from", "true") };
+/** The server filter that hides omitted rows — the default view. */
+export function omitFilter(): Filter {
+  return new Filter("omit", "is_distinct_from", "true");
 }
-
-/** Active per-column filters, keyed by column name (mirrors `DataParameters.filter`). */
-export const filtersAtom = atom<Record<string, Filter>>(defaultFilters());
-
-/** Active single-column sort (server-side), or null for default `_pkid` order. */
-export const sortAtom = atom<ColumnSort | null>(null);
 
 /** Column the table is currently grouped (aggregated) by, server-side. */
 export const groupAtom = atom<string | undefined>(undefined);
@@ -60,10 +61,19 @@ export const saveProgressAtom = atom<{ text: string; value: number } | null>(
   null,
 );
 
-/** Whether omitted rows are currently shown (drives the `omit` filter). */
-export const showOmittedAtom = atom(
-  (get) => get(filtersAtom)["omit"]?.is_valid() !== true,
-);
+/** Bumped to force the data-sheet provider to re-fetch from scratch (e.g. after
+ * a save). Fed into DataSheet's `refreshToken` alongside the query key. */
+export const reloadNonceAtom = atom(0);
+
+/** Whether omitted rows are currently shown. Default `false` = hidden (the
+ * provider injects the `omit` filter unless this is on). */
+export const showOmittedAtom = atom(false);
+
+/** Mirror of the library's active column filters, translated to server
+ * `Filter[]`, maintained by `ViewStateSync`. Lets the whole-column-copy action
+ * scope its server-side copy to the current filtered view (the library owns the
+ * filter state now, so the page reads it from here rather than an atom). */
+export const activeServerFiltersAtom = atom<Filter[]>([]);
 
 /** Build a query URL against the polymorphic ingestion endpoint.
  *
@@ -75,7 +85,7 @@ export const showOmittedAtom = atom(
 export function buildIngestURL(
   baseURL: string,
   params: {
-    filters: Record<string, Filter>;
+    filters: Filter[];
     sort: ColumnSort | null;
     group: string | undefined;
     page: number;
@@ -103,120 +113,93 @@ export function buildIngestURL(
   url.searchParams.append("page", page.toString());
   url.searchParams.append("page_size", pageSize.toString());
 
-  for (const filter of Object.values(filters)) {
+  for (const filter of filters) {
     url = addFilterToURL(url, filter);
   }
 
   return url;
 }
 
+/** Map a library filter operator to the ingestion server's operator set. */
+const LIBRARY_TO_SERVER_OPERATOR: Record<string, string> = {
+  eq: "eq",
+  neq: "ne",
+  gt: "gt",
+  lt: "lt",
+  gte: "ge",
+  lte: "le",
+  like: "like",
+  ilike: "like",
+  is: "is",
+};
+
+/** Translate one library column filter (`columnKey` + `{ operator, value }`
+ * state) into a server `Filter`, or `null` if it carries no constraint. */
+export function libraryFilterToServer(
+  columnKey: string | undefined,
+  state: any,
+): Filter | null {
+  if (columnKey == null || state == null) return null;
+  const { operator, value } = state;
+  if (value === "" || value == null) return null;
+  const op = LIBRARY_TO_SERVER_OPERATOR[operator] ?? "eq";
+  return new Filter(columnKey, op as any, value);
+}
+
 async function fetchIngestPage(
   baseURL: string,
   params: Parameters<typeof buildIngestURL>[1],
+  signal?: AbortSignal,
 ): Promise<{ data: any[]; total: number | null }> {
   const url = buildIngestURL(baseURL, params);
   const response = await fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
+    signal,
   });
   const data = await response.json();
   const totalHeader = parseInt(response.headers.get("X-Total-Count") ?? "");
   return { data, total: Number.isNaN(totalHeader) ? null : totalHeader };
 }
 
-export interface IngestData {
-  /** Rows loaded so far (grows as the user scrolls). */
-  data: any[];
-  /** Total row count for the current query, from `X-Total-Count`. */
-  total: number | null;
-  loading: boolean;
-  /** True once the last page has been loaded (no more rows to fetch). */
-  done: boolean;
-  /** Load the next page (no-op while loading or once exhausted). */
-  loadMore: () => void;
-  /** Discard loaded rows and re-fetch from the first page. */
-  reload: () => void;
-}
-
-/** Lazy, filter/sort/group-aware loader for a single ingestion feature table.
+/** The data-sheet `TableDataProvider` for a feature table. The library owns
+ * windowed loading (scroll + progress); this only translates a requested
+ * window into the ingestion server's `page` / `page_size` vocabulary and reads
+ * the active filters / sort / group from the store at call time (so a query
+ * change + a `refreshToken` bump re-fetches with the current view state).
  *
- * Resets and re-fetches whenever the active query (filters/sort/group) changes,
- * and appends further pages on demand via `loadMore`.
+ * `identity` is `_pkid`; there are no `saveRows` / `deleteRows` — persistence
+ * is the page's own ops-stack Save (see `actions.ts`), which reloads via
+ * `reloadNonceAtom` → `refreshToken`.
  */
-export function useIngestData(url: string): IngestData {
-  const filters = useAtomValue(filtersAtom);
-  const sort = useAtomValue(sortAtom);
-  const group = useAtomValue(groupAtom);
-
-  const [data, setData] = useState<any[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-
-  // Private cursor bookkeeping — refs so the load callback stays stable
-  const loadingRef = useRef(false);
-  const doneRef = useRef(false);
-  const pageRef = useRef(0);
-
-  const queryKey = [
-    createFiltersKey(Object.values(filters)),
-    sort ? `${sort.key}.${sort.ascending ? "asc" : "desc"}` : "",
-    group ?? "",
-  ].join("|");
-
-  const load = useCallback(
-    async (reset: boolean) => {
-      if (loadingRef.current) return;
-      if (!reset && doneRef.current) return;
-
-      loadingRef.current = true;
-      setLoading(true);
-      const page = reset ? 0 : pageRef.current;
-
-      try {
-        const { data: rows, total: newTotal } = await fetchIngestPage(url, {
-          filters,
-          sort,
-          group,
-          page,
-          pageSize: PAGE_SIZE,
-        });
-        doneRef.current = rows.length < PAGE_SIZE;
-        setDone(doneRef.current);
-        pageRef.current = page + 1;
-        if (newTotal != null) setTotal(newTotal);
-        setData((prev) =>
-          reset ? rows : [...prev.filter((r) => r != null), ...rows],
-        );
-      } finally {
-        loadingRef.current = false;
-        setLoading(false);
-      }
+export function makeIngestProvider(
+  baseURL: string,
+  store: JotaiStore,
+): TableDataProvider {
+  return {
+    identity: (row: any) => row?._pkid,
+    async fetchData({ offset, limit, signal, sorts, filters }) {
+      // Sort/filter are owned by the library store (passed here); group and the
+      // omit view-toggle stay page-side (read from atoms at fetch time).
+      const group = store.get(groupAtom);
+      const showOmitted = store.get(showOmittedAtom);
+      const serverFilters = filters
+        .map((f) => libraryFilterToServer(f.columnKey, f.state))
+        .filter((x): x is Filter => x != null);
+      if (!showOmitted) serverFilters.push(omitFilter());
+      const sort =
+        sorts.length > 0
+          ? { key: sorts[0].key, ascending: sorts[0].ascending }
+          : null;
+      const page = Math.floor(offset / limit);
+      const { data, total } = await fetchIngestPage(
+        baseURL,
+        { filters: serverFilters, sort, group, page, pageSize: limit },
+        signal,
+      );
+      return { rows: data, totalCount: total };
     },
-    [url, filters, sort, group],
-  );
-
-  // Reset and reload whenever the query changes
-  useEffect(() => {
-    doneRef.current = false;
-    setDone(false);
-    pageRef.current = 0;
-    setData([]);
-    setTotal(null);
-    load(true);
-    // `load` changes exactly when the query does, so keying on it is sufficient
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryKey]);
-
-  const loadMore = useCallback(() => load(false), [load]);
-  const reload = useCallback(() => {
-    doneRef.current = false;
-    setDone(false);
-    pageRef.current = 0;
-    load(true);
-  }, [load]);
-
-  return { data, total, loading, done, loadMore, reload };
+  };
 }
 
 /** Reset the (default-store) view-state atoms when the active table changes,
@@ -228,11 +211,12 @@ export function useIngestData(url: string): IngestData {
 export function useResetIngestState(url: string) {
   const store = useStore();
   useEffect(() => {
-    store.set(filtersAtom, defaultFilters());
-    store.set(sortAtom, null);
     store.set(groupAtom, undefined);
+    store.set(showOmittedAtom, false);
     store.set(hiddenColumnsAtom, []);
     store.set(columnOrderAtom, null);
+    // Sort/filter live in the data-sheet's own store now (reset when the table
+    // remounts on route change), so they aren't reset here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 }

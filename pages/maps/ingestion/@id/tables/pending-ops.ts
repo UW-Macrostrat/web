@@ -16,7 +16,6 @@
  * overlay) without changing its shape.
  */
 import { atom } from "jotai";
-import { TableElementStatus } from "@macrostrat/data-sheet";
 import { Filter, rowPassesFilters, submitChange, type DataParameters } from "../utils";
 import { submitColumnCopy, toBoolean } from "../components";
 
@@ -44,6 +43,11 @@ export interface PendingOp {
 }
 
 export const opsAtom = atom<PendingOp[]>([]);
+
+/** First-class row status for omitted rows (a `RowStatusValue` in data-sheet
+ * v4.1). Distinct from a staged delete — omit is a view/export flag — so it
+ * gets its own styling + row-header treatment rather than the delete look. */
+export const OMITTED_STATUS = "omitted";
 
 const isEmpty = (v: any) => v == null || v === "";
 
@@ -83,13 +87,15 @@ export function makeCellOp(
 export function makeColumnCopyOp(
   source: string,
   target: string,
-  viewFilters: Record<string, Filter>,
+  viewFilters: Filter[],
   batchId: string = nextBatch(),
 ): PendingOp {
   return {
     id: nextId(),
     batchId,
-    match: { ...viewFilters },
+    // Keyed by column so `match` stays a `Record<string, Filter>` (consumed by
+    // `applyOps` and the server column-copy on Save).
+    match: Object.fromEntries(viewFilters.map((f) => [f.column_name, f])),
     column: target,
     source,
     label: `Copy ${source} → ${target}`,
@@ -120,7 +126,7 @@ export function applyOps(
   for (let i = 0; i < base.length; i++) {
     if (base[i] == null) continue;
     if (toBoolean(overlay[i]?.omit ?? base[i]?.omit) === true) {
-      rowStatus[i] = TableElementStatus.DELETED;
+      rowStatus[i] = OMITTED_STATUS;
     }
   }
   return { updatedData: overlay, rowStatus };

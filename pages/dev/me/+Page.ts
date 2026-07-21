@@ -4,11 +4,7 @@ import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { usePostgresQuery } from "#/integrations/xdd/extractions/data-service";
 
 export function Page() {
-  return h(DocumentationPage, { title: "Login" }, [
-    h(UserIdentity),
-    h(UserIdentityPostgrest),
-    h(AuthStatus),
-  ]);
+  return h([h(UserIdentity), h(UserIdentityPostgrest), h(AuthStatus)]);
 }
 
 function UserIdentity() {

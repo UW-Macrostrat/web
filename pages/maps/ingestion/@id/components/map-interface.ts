@@ -14,6 +14,7 @@ import {
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyle, StyleFragment } from "@macrostrat/map-styles";
 import {
+  ErrorBoundary,
   NullableSlider,
   useDarkMode,
   useStoredState,
@@ -25,6 +26,7 @@ import { boundingGeometryMapStyle } from "~/map-styles";
 import { MapboxMapProvider } from "@macrostrat/mapbox-react";
 import { baseElements, buildBasicStyle } from "../utils";
 import h from "./main.module.sass";
+import { compose } from "@macrostrat/hyper";
 
 function rasterURL(source_id) {
   // Placeholder for figuring out a better version of this.
@@ -78,7 +80,9 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export function MapInterface({
+export const MapInterface = compose(ErrorBoundary, _MapInterface);
+
+function _MapInterface({
   map,
   slug,
   className,

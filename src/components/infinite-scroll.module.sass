@@ -1,0 +1,40 @@
+.page
+  display: flex
+  flex-direction: column
+  align-items: center
+  height: 100vh
+  width: 100vw
+
+.page-header
+  margin: 2em auto 1em
+  width: var(--qz-main-content-width)
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+
+.footer-panel, .load-progress
+  display: flex
+  flex-direction: column
+  align-items: center
+
+.footer-panel
+  margin: 2em auto
+  gap: 2em
+
+.load-progress
+  min-height: 100px
+  justify-content: center
+
+.page-footer
+  width: 100%
+  margin-bottom: 4em
+
+.data-panel-container
+  position: relative
+  display: flex
+  flex-direction: column
+  height: 100vh
+  width: 100%
+
+.ingestion-panel
+  --data-panel-content-width: var(--qz-main-content-width) !important

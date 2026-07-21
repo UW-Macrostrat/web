@@ -17,14 +17,12 @@ const COMMON_OVERRIDES: Record<string, Partial<ColumnSpec> | string> = {
   // Long free-text columns get a multi-line popover editor.
   descrip: { name: "Description", dataEditor: EditableTextArea },
   comments: { name: "Comments", dataEditor: EditableTextArea },
-  // Grey via a valueRenderer span rather than `style`: data-sheet mutates the
-  // shared `col.style` object when styling deleted/omitted rows, which would
-  // otherwise strike through the whole column.
+  // data-sheet v4 clones `col.style` before styling deleted/omitted rows, so a
+  // plain column `style` no longer leaks the strike-through to the whole column.
   source_layer: {
     name: "Source layer",
     editable: false,
-    valueRenderer: (v: any) =>
-      h("span", { style: { color: "#8a8a8a" } }, v ?? ""),
+    style: { color: "#8a8a8a" },
   },
 };
 
