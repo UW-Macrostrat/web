@@ -325,7 +325,13 @@ export function TableInterface({
         // the gutter) — distinct from a staged delete.
         rowStatusStyles: ROW_STATUS_STYLES,
         rowHeaderRenderer: renderIngestRowHeader,
+        // CELLS must be present for editing to be enabled: data-sheet's
+        // `resolveInteractionOptions` forces `enableEditing = false` when the
+        // table's `selectionModes` omit CELLS (even with `editable: true`). We
+        // also want column/row selection (group-by, omit, etc.), so include all
+        // three.
         selectionModes: [
+          RegionCardinality.CELLS,
           RegionCardinality.FULL_COLUMNS,
           RegionCardinality.FULL_ROWS,
         ],

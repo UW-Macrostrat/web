@@ -38,12 +38,12 @@ export function Header({
         title: refTitle,
         href: sourceURL,
       }),
-      // h("div", [
-      //   h(IngestTagDisplay, {
-      //     data: ingestProcess,
-      //     onUpdate: () => {},
-      //   }),
-      // ]),
+      h.if(_ingestProcess?.source_id != null)("div", [
+        h(IngestTagDisplay, {
+          data: _ingestProcess,
+          onUpdate: updateIngestProcess,
+        }),
+      ]),
       h("div.spacer"),
       h(
         ButtonGroup,

@@ -14,7 +14,13 @@
 import { Cell } from "@blueprintjs/table";
 import { Button, InputGroup, Menu, MenuItem } from "@blueprintjs/core";
 import { getDefaultStore, useAtomValue, useSetAtom } from "jotai";
-import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { getColorPair } from "@macrostrat/color-utils";
 import { apiV2Prefix } from "@macrostrat-web/settings";
@@ -68,20 +74,27 @@ export function IntervalCell({ value, children, interactive, style, ...rest }) {
   const inDarkMode = useInDarkMode();
   const interval = findInterval(intervals, value);
 
+  const colors = useMemo(() => {
+    return interval != null ? getColorPair(interval.color, inDarkMode) : null;
+  }, [interval, inDarkMode]);
+
   // While editing, data-sheet passes the popover editor as `children`.
   if (interactive) {
+    console.log(interactive, value, children, style);
     return h(Cell, { interactive, style, ...rest }, children);
   }
 
-  const colors =
-    interval != null ? getColorPair(interval.color, inDarkMode) : null;
   const content =
     interval?.name ?? (value == null || value === "" ? null : String(value));
 
   return h(
     Cell,
-    { interactive, style: colors != null ? { ...style, ...colors } : style, ...rest },
-    content,
+    {
+      interactive,
+      style: colors != null ? { ...style, ...colors } : style,
+      ...rest,
+    },
+    content
   );
 }
 
@@ -126,7 +139,10 @@ export function IntervalEditor({
         ? intervals.find((iv) => iv.int_id === selectedId)
         : null;
     if (selected != null) {
-      filtered = [selected, ...filtered.filter((iv) => iv.int_id !== selectedId)];
+      filtered = [
+        selected,
+        ...filtered.filter((iv) => iv.int_id !== selectedId),
+      ];
     }
     return filtered.slice(0, MAX_RESULTS);
   }, [intervals, query, selectedId]);
@@ -201,8 +217,8 @@ export function IntervalEditor({
             shouldDismissPopover: false,
             onClick: () => commit(iv),
           });
-        }),
+        })
       ),
-    ],
+    ]
   );
 }

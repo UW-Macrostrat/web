@@ -93,7 +93,7 @@ interface IntervalSelectionProps extends EditableCell2Props {
   onCopy: (e) => Promise<boolean>;
 }
 
-let IntervalSelection = ({
+function IntervalSelection({
   value,
   onConfirm,
   intent,
@@ -101,7 +101,7 @@ let IntervalSelection = ({
   onPaste,
   onCopy,
   ...props
-}: IntervalSelectionProps) => {
+}: IntervalSelectionProps) {
   const [active, setActive] = React.useState(false);
 
   const interval = useMemo(() => {
@@ -150,7 +150,7 @@ let IntervalSelection = ({
       ),
     ]
   );
-};
+}
 
 export function IntervalView({ interval, intent, setActive }) {
   const inDarkMode = useInDarkMode();
@@ -182,7 +182,7 @@ export function IntervalView({ interval, intent, setActive }) {
   );
 }
 
-IntervalSelection = memo(IntervalSelection);
+//IntervalSelection = memo(IntervalSelection);
 
 export default IntervalSelection;
 export { IntervalSelection };

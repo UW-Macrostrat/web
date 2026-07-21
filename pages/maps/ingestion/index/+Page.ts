@@ -7,7 +7,12 @@ import {
   createPostgRESTProvider,
   SelectionInteractionStyle,
 } from "@macrostrat/data-sheet";
-import { type IngestMap, columnSpec, MapCard } from "./ingestion-list.ts";
+import {
+  type IngestMap,
+  columnSpec,
+  MapCard,
+  tagEditAction,
+} from "./ingestion-list.ts";
 
 const endpoint = `${apiV3Prefix}/map-ingestion/pg`;
 
@@ -29,6 +34,8 @@ export function Page() {
     headerElements: h(LoginButton, { user, minimal: true }),
     itemComponent: MapCard,
     columnSpec,
+    // Selection-scoped bulk tag add/remove (appears once maps are selected).
+    actions: [tagEditAction],
     enableSelection: SelectionInteractionStyle.MODAL,
     scrollBody: ScrollBody,
   });

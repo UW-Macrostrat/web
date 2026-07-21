@@ -1,5 +1,6 @@
-import { InfiniteScrollPage } from "~/components";
+import { InfiniteScrollPage, DevLinkButton } from "~/components";
 import h from "./main.module.sass";
+import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { apiDomain } from "@macrostrat-web/settings";
 import {
   createPostgRESTProvider,
@@ -29,12 +30,27 @@ const provider = createPostgRESTProvider<any>({
 
 export function Page() {
   return h(InfiniteScrollPage, {
-    className: "ingestion-page",
+    className: "maps-list-page",
     provider,
+    headerElements: h(MapsNavLinks),
     itemComponent: MapCard,
     enableSelection: SelectionInteractionStyle.MODAL,
     scrollBody: ScrollBody,
   });
+}
+
+/** The navigation links the legacy `/maps` page kept in its sidebar — recreated
+ * as a header nav for parity with `/maps/ingestion`. */
+function MapsNavLinks() {
+  return h(ButtonGroup, { minimal: true, className: "maps-nav-links" }, [
+    h(
+      AnchorButton,
+      { icon: "flows", href: "/maps/ingestion" },
+      "Ingestion system"
+    ),
+    h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+    h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+  ]);
 }
 
 function ScrollBody({ children }) {
