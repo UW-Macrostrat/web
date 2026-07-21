@@ -1,3 +1,31 @@
+.data-scroll-body
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))
+  grid-auto-rows: minmax(80px, auto)
+  gap: 1em
+  // TODO: make this more flexible
+  --data-panel-card-padding: 0
+
+.map-card
+  height: 100%
+  position: relative
+
+.map-card-content
+  height: 100%
+  width: 100%
+  padding: 0.5em 1em
+
+.title
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+  align-items: baseline
+  h3
+    margin: 0
+    flex: 1
+    text-overflow: ellipsis
+    min-width: 0
+
 .flex-row
   display: flex
   flex-direction: row
