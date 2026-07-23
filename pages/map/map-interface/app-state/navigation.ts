@@ -14,7 +14,7 @@ import { buildHashString, getInitialStateFromHash } from "./hash-string";
 import { atom, useAtomValue } from "jotai";
 import partRegex from "part-regex";
 
-export const browserHistory = createBrowserHistory();
+const browserHistory = createBrowserHistory();
 // This sometimes gets called when the page isn't properly loaded yet,
 // so we have put in place a hacky guard...
 // We should do this within the component tree
@@ -30,6 +30,8 @@ export function startRecordingAppHistory() {
 }
 
 const historyAtom = atom(browserHistory);
+
+export { browserHistory };
 
 export const useHistory = () => useAtomValue(historyAtom);
 
