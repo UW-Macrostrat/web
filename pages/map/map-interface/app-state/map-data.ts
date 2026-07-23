@@ -14,10 +14,15 @@ interface KeyedMapQueryData extends MapQueryData {
   key: string;
 }
 
-const mapInfoDataAtom = atom<Promise<KeyedMapQueryData>>(
+const mapInfoDataAtom = atom<Promise<KeyedMapQueryData | null>>(
   async (get, { signal }) => {
     /** Atom to handle fetching of map data */
-    const { lng, lat, zoom } = get(infoMarkerPositionAtom);
+    const pos = get(infoMarkerPositionAtom);
+    if (pos == null) return null;
+    const { lng, lat } = pos;
+    // A marker restored from the URL (deep link / back-forward) carries no zoom,
+    // so fall back to the current map zoom rather than crashing on `zoom.toFixed`.
+    const zoom = pos.zoom ?? get(appStateAtom).mapPosition?.target?.zoom ?? 7;
     const params = {
       lng: formatCoordForZoomLevel(lng, zoom),
       lat: formatCoordForZoomLevel(lat, zoom),

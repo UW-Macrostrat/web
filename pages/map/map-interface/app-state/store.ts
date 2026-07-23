@@ -2,7 +2,9 @@ import { actionRunner } from "./handlers";
 import { useCallback } from "react";
 
 import { AppAction, AppState } from "./types";
-import { historyManager } from "./navigation";
+import { browserHistory } from "./navigation";
+import { syncStateToURL } from "~/_utils/url-state";
+import { mapURLAdapter } from "./map-url-adapter";
 import { coreReducer, createInitialState } from "./reducer";
 import { createStore } from "zustand/vanilla";
 import { devtools } from "zustand/middleware";
@@ -18,9 +20,10 @@ export function appReducer(
   // centralizes the logic in one place.
   const nextState = coreReducer(state, action);
   if (action.type == "set-location") {
+    // A URL-driven change; don't echo it back to the URL.
     return nextState;
   }
-  historyManager(state, nextState);
+  syncStateToURL(browserHistory, mapURLAdapter, state, nextState);
   return nextState;
 }
 
