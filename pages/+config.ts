@@ -25,6 +25,7 @@ export default {
     "routeParams",
     "user",
     "geo",
+    "canRefresh",
     "description",
     "title",
     "environment",
