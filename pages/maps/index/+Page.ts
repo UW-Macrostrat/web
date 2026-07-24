@@ -96,11 +96,12 @@ const scaleFilter: TableFilter<any, { operator: "eq"; value: string | null }> = 
     }),
 };
 
-// The facet columns. `search` is synthetic (carries the multi-field search);
-// `source_id` is sortable (ID ascending/descending); `scale` carries the scale
-// filter. The panel surfaces these through the standard filter/sort UI.
+// The facet columns: `source_id` sortable (ID asc/desc), `scale` carries the
+// scale filter. The multi-field search is NOT here — it's a sheet-level filter
+// (the `filters` prop below), since it spans several fields and maps to no
+// single column (a synthetic column whose key matches no data field isn't a
+// supported shape).
 const columnSpec: ColumnSpec[] = [
-  { key: "search", name: "Search", dataType: "text", filters: [searchFilter] },
   { key: "source_id", name: "ID", dataType: "integer", sortable: true },
   { key: "scale", name: "Scale", dataType: "string", filters: [scaleFilter] },
 ];
@@ -146,9 +147,11 @@ export function Page() {
     headerElements: h(MapsNavLinks),
     itemComponent: MapCard,
     columnSpec,
-    // Maps are browsed, not edited here — no selection, and a single search
-    // filter (inline where supported, else in the Filter menu) instead of the
-    // full per-column facet set.
+    // The multi-field search is a sheet-level filter (spans several columns).
+    filters: [searchFilter],
+    // Debounce the search → refetch so typing doesn't fire a request per key.
+    filterDebounce: 300,
+    // Maps are browsed, not edited here — no selection.
     enableSelection: SelectionInteractionStyle.NEVER,
     scrollBody: ScrollBody,
   });

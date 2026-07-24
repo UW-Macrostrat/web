@@ -21,7 +21,7 @@
 import hyper from "@macrostrat/hyper";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { Spacer, useDarkMode, ErrorCallout } from "@macrostrat/ui-components";
-import { removeMapLabels } from "@macrostrat/mapbox-utils";
+import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
 import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -48,8 +48,8 @@ import {
   Spinner,
 } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
-import { loadable } from "jotai/utils";
-import { atomWithLocation } from "jotai-location";
+import { atomWithStorage, loadable } from "jotai/utils";
+import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   Link,
   PageBreadcrumbsInternal,
@@ -92,27 +92,20 @@ const layersAtom = atom(async (get, { signal }): Promise<TopologyLayer[]> => {
 
 const layersLoadableAtom = loadable(layersAtom);
 
-/** Map state synced to the URL query string, so the current view (selected
- * layer, polygon overlay) can be recovered from a shared/bookmarked link. */
-const locationAtom = atomWithLocation({ replace: true });
-
-/** Derive a read/write atom backed by a single URL query parameter. Writing
- * null (or "") removes the parameter, keeping default views out of the URL. */
-function atomWithSearchParam(key: string) {
-  return atom(
-    (get) => get(locationAtom).searchParams?.get(key) ?? null,
-    (get, set, value: string | null) => {
-      const loc = get(locationAtom);
-      const searchParams = new URLSearchParams(loc.searchParams);
-      if (value == null || value === "") {
-        searchParams.delete(key);
-      } else {
-        searchParams.set(key, value);
-      }
-      set(locationAtom, { ...loc, searchParams });
-    }
-  );
-}
+/** The map camera, persisted to localStorage so revisiting the page restores
+ * your last view. Deliberately NOT synced to the URL: this is per-device
+ * "resume where I left off" convenience, not shareable link state. This is the
+ * localStorage sink for the feature area's last-viewed-location idea — a URL
+ * sink would instead encode position via applyMapPositionToHash /
+ * getMapPositionForHash. */
+const mapPositionAtom = atomWithStorage<MapPosition | null>(
+  "dev/topology:map-position",
+  null,
+  undefined,
+  // Client-only page: read the stored position on init so we restore the last
+  // view on first paint rather than flashing the default view then jumping.
+  { getOnInit: true }
+);
 
 /** The slug of the selected map layer, or null for the whole topology. */
 const selectedLayerSlugAtom = atomWithSearchParam("layer");
@@ -234,6 +227,9 @@ export function Page() {
   const basemap = useAtomValue(basemapAtom);
   const baseStyle = basemapStyle(basemap, isEnabled);
 
+  // Restore the last-viewed camera from localStorage, and persist it on move.
+  const [mapPosition, setMapPosition] = useAtom(mapPositionAtom);
+
   const [isOpen, setOpen] = useState(true);
 
   const [inspectPosition, setInspectPosition] =
@@ -284,6 +280,11 @@ export function Page() {
     setInspectPosition(position);
   }, []);
 
+  const onMapMoved = useCallback(
+    (pos: MapPosition) => setMapPosition(pos),
+    [setMapPosition]
+  );
+
   let detailElement = null;
   if (inspectPosition != null) {
     detailElement = h(
@@ -325,7 +326,8 @@ export function Page() {
       MapView,
       {
         style: baseStyle,
-        mapPosition: null,
+        mapPosition,
+        onMapMoved,
         projection: { name: "globe" },
         mapboxToken: mapboxAccessToken,
         overlayStyles,

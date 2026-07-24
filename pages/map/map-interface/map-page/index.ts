@@ -58,8 +58,6 @@ function MapPage({
   const navMenuPage = useAppState((s) => s.activeMenuPage);
 
   const ref = useRef<HTMLElement>(null);
-  //const [map, setMap] = useState(null);
-  //console.log("MapPage mounted", map);
 
   const contextPanelOpen = useContextPanelOpen(baseRoute);
   const contextClass = useContextClass(baseRoute);

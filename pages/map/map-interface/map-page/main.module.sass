@@ -125,7 +125,7 @@
 .macrostrat-map-container.searching
   .context-underlay
     background-color: var(--panel-background-color)
-    opacity: 0.5
+    opacity: 0.25
     pointer-events: all
 
   .map-view-container
@@ -151,6 +151,11 @@
 
     &.searching
       --map-context-stack-width: 24em
+      // Padding by which to shift the center of the map to the right
+      :global(.main-view)
+        // Fudge factor to keep map from shifting right on modal selection
+        // TODO: generalize this
+        margin-right: -8em !important
 
     &.layers, &.settings
       --map-context-stack-width: 18em
