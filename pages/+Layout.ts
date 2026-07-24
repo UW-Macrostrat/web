@@ -12,7 +12,7 @@ import h from "@macrostrat/hyper";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
-  const { exports = {}, config, user } = pageContext;
+  const { exports = {}, config, user, canRefresh } = pageContext;
   const pageBreadcrumbs = pageContext.exports.pageBreadcrumbs;
 
   const pageStyle = exports?.pageStyle ?? "content2";
@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return h(
     AuthProvider,
-    { user }, // Prefer detailed user if available
+    { user, canRefresh }, // Prefer detailed user if available
     h(DarkModeProvider, { followSystem: true }, h(layout, children))
   );
 }

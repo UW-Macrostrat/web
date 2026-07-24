@@ -42,6 +42,9 @@ declare global {
       pageInfo?: PageInfo;
       urlPathname: string;
       user?: User;
+      // Set server-side: access token gone/expired but a refresh token is
+      // present, so the client should attempt one silent refresh on load.
+      canRefresh?: boolean;
       breadcrumbs?: Item[];
       macrostratLogoFlavor?: string;
       mdxContent?: string;

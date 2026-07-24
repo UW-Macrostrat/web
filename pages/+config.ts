@@ -24,6 +24,7 @@ export default {
     "supportsDarkMode",
     "routeParams",
     "user",
+    "canRefresh",
     "description",
     "title",
     "environment",

@@ -8,6 +8,11 @@ export async function onCreatePageContext(pageContext: PageContextServer) {
 
   const cookies = getCookies(pageContext.headers);
   pageContext.user = await getUserFromCookie(cookies);
+  // If we couldn't establish a user but a refresh token is still present, the
+  // access token has expired (or was dropped by the browser at Max-Age) — signal
+  // the client to attempt one silent refresh on load.
+  pageContext.canRefresh =
+    pageContext.user == null && cookies?.["refresh_token"] != null;
   return pageContext;
 }
 
