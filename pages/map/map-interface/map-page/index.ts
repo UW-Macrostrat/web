@@ -8,13 +8,13 @@ import classNames from "classnames";
 import { useTransition } from "transition-hook";
 import {
   browserHistory,
-  readLastPosition,
   useAppActions,
   useAppState,
   useContextClass,
   useContextPanelOpen,
 } from "../app-state";
 import { hashHasMapPosition } from "../app-state/hash-string";
+import { readLastMapPosition } from "~/_utils/last-map-position";
 import { getMapPositionForHash } from "@macrostrat/map-interface";
 import { usePageContext } from "vike-react/usePageContext";
 import Searchbar from "../components/navbar";
@@ -58,7 +58,7 @@ function useSingleEffect(callback, dependencies) {
 function applyGeoDefault(geo, runAction) {
   if (geo == null) return;
   if (hashHasMapPosition(browserHistory.location.hash)) return;
-  if (readLastPosition() != null) return;
+  if (readLastMapPosition() != null) return;
   runAction({
     type: "map-moved",
     data: {

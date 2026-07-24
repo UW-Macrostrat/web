@@ -48,8 +48,9 @@ import {
   Spinner,
 } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
-import { atomWithStorage, loadable } from "jotai/utils";
+import { loadable } from "jotai/utils";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
+import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import {
   Link,
   PageBreadcrumbsInternal,
@@ -92,20 +93,12 @@ const layersAtom = atom(async (get, { signal }): Promise<TopologyLayer[]> => {
 
 const layersLoadableAtom = loadable(layersAtom);
 
-/** The map camera, persisted to localStorage so revisiting the page restores
- * your last view. Deliberately NOT synced to the URL: this is per-device
- * "resume where I left off" convenience, not shareable link state. This is the
- * localStorage sink for the feature area's last-viewed-location idea — a URL
- * sink would instead encode position via applyMapPositionToHash /
- * getMapPositionForHash. */
-const mapPositionAtom = atomWithStorage<MapPosition | null>(
-  "dev/topology:map-position",
-  null,
-  undefined,
-  // Client-only page: read the stored position on init so we restore the last
-  // view on first paint rather than flashing the default view then jumping.
-  { getOnInit: true }
-);
+/** The map camera. Uses the shared last-viewed-location atom
+ * (`~/_utils/last-map-position`), so the view is carried across all map pages
+ * (e.g. from the main /map) and restored on revisit — deliberately NOT synced to
+ * the URL (per-device "resume where I left off", not shareable link state), and
+ * ignored once stale (see the atom's staleness rule). */
+const mapPositionAtom = lastMapPositionAtom;
 
 /** The slug of the selected map layer, or null for the whole topology. */
 const selectedLayerSlugAtom = atomWithSearchParam("layer");

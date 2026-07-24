@@ -22,8 +22,8 @@ import {
   MapLayer,
   useAppActions,
   useAppState,
-  writeLastPosition,
 } from "#/map/map-interface/app-state";
+import { writeLastMapPosition } from "~/_utils/last-map-position";
 import { CrossSectionLine } from "./cross-section";
 import {
   FlyToPlaceManager,
@@ -122,8 +122,8 @@ export default function MainMapView(props) {
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
   const onMapMoved = useCallback((pos, map) => {
-    // Persist the settled camera as the per-device last-viewed location.
-    writeLastPosition(pos);
+    // Persist the settled camera as the shared last-viewed location.
+    writeLastMapPosition(pos);
     runAction({ type: "map-moved", data: { mapPosition: pos } });
   }, []);
 

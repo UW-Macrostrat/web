@@ -3,7 +3,7 @@ import update, { Spec } from "immutability-helper";
 import { FilterData } from "./handlers/filters";
 import { browserHistory, updateStateFromLocation } from "./navigation";
 import { hashHasMapPosition } from "./hash-string";
-import { readLastPosition } from "./last-position";
+import { readLastMapPosition } from "~/_utils/last-map-position";
 
 export { MapLayer };
 
@@ -70,7 +70,7 @@ export function createInitialState() {
     typeof window !== "undefined" &&
     !hashHasMapPosition(browserHistory.location.hash)
   ) {
-    const last = readLastPosition();
+    const last = readLastMapPosition();
     if (last != null) {
       return { ...state, mapPosition: last };
     }
