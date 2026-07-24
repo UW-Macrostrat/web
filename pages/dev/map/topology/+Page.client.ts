@@ -21,7 +21,7 @@
 import hyper from "@macrostrat/hyper";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { Spacer, useDarkMode, ErrorCallout } from "@macrostrat/ui-components";
-import { removeMapLabels } from "@macrostrat/mapbox-utils";
+import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
 import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -49,7 +49,8 @@ import {
 } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { loadable } from "jotai/utils";
-import { atomWithLocation } from "jotai-location";
+import { atomWithSearchParam } from "~/_utils/url-atoms";
+import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import {
   Link,
   PageBreadcrumbsInternal,
@@ -92,27 +93,12 @@ const layersAtom = atom(async (get, { signal }): Promise<TopologyLayer[]> => {
 
 const layersLoadableAtom = loadable(layersAtom);
 
-/** Map state synced to the URL query string, so the current view (selected
- * layer, polygon overlay) can be recovered from a shared/bookmarked link. */
-const locationAtom = atomWithLocation({ replace: true });
-
-/** Derive a read/write atom backed by a single URL query parameter. Writing
- * null (or "") removes the parameter, keeping default views out of the URL. */
-function atomWithSearchParam(key: string) {
-  return atom(
-    (get) => get(locationAtom).searchParams?.get(key) ?? null,
-    (get, set, value: string | null) => {
-      const loc = get(locationAtom);
-      const searchParams = new URLSearchParams(loc.searchParams);
-      if (value == null || value === "") {
-        searchParams.delete(key);
-      } else {
-        searchParams.set(key, value);
-      }
-      set(locationAtom, { ...loc, searchParams });
-    }
-  );
-}
+/** The map camera. Uses the shared last-viewed-location atom
+ * (`~/_utils/last-map-position`), so the view is carried across all map pages
+ * (e.g. from the main /map) and restored on revisit — deliberately NOT synced to
+ * the URL (per-device "resume where I left off", not shareable link state), and
+ * ignored once stale (see the atom's staleness rule). */
+const mapPositionAtom = lastMapPositionAtom;
 
 /** The slug of the selected map layer, or null for the whole topology. */
 const selectedLayerSlugAtom = atomWithSearchParam("layer");
@@ -234,6 +220,9 @@ export function Page() {
   const basemap = useAtomValue(basemapAtom);
   const baseStyle = basemapStyle(basemap, isEnabled);
 
+  // Restore the last-viewed camera from localStorage, and persist it on move.
+  const [mapPosition, setMapPosition] = useAtom(mapPositionAtom);
+
   const [isOpen, setOpen] = useState(true);
 
   const [inspectPosition, setInspectPosition] =
@@ -284,6 +273,11 @@ export function Page() {
     setInspectPosition(position);
   }, []);
 
+  const onMapMoved = useCallback(
+    (pos: MapPosition) => setMapPosition(pos),
+    [setMapPosition]
+  );
+
   let detailElement = null;
   if (inspectPosition != null) {
     detailElement = h(
@@ -325,7 +319,8 @@ export function Page() {
       MapView,
       {
         style: baseStyle,
-        mapPosition: null,
+        mapPosition,
+        onMapMoved,
         projection: { name: "globe" },
         mapboxToken: mapboxAccessToken,
         overlayStyles,

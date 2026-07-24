@@ -24,6 +24,7 @@ export default {
     "supportsDarkMode",
     "routeParams",
     "user",
+    "geo",
     "canRefresh",
     "description",
     "title",

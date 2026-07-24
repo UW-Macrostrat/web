@@ -1,11 +1,11 @@
 import h from "@macrostrat/hyper";
 
-import "./searchbar.styl";
+//import "./searchbar.styl";
 
 import { startRecordingAppHistory, useAppActions } from "./app-state";
 import MapPage from "./map-page";
-import type { Update } from "history";
 import { browserHistory } from "./app-state";
+import { isExternalHistoryChange } from "~/_utils/url-state";
 import { useEffect } from "react";
 
 /** Redux is used only for the main map applicaton. This heavy state-management approach is
@@ -13,24 +13,15 @@ import { useEffect } from "react";
  * state management solutions that work on individual pages.
  */
 
-function isAppUpdate(event: Update) {
-  const { action, location } = event;
-  if (action == "POP") return false;
-  if (location.state?.managed == true) return true;
-  return false;
-}
-
 export default function MapApp() {
   const runAction = useAppActions();
   useEffect(() => {
-    console.log("Starting app history recording");
     startRecordingAppHistory();
-    browserHistory.listen((event) => {
-      // Most location changes should be driven directly by the app.
-      console.log(event);
-      if (isAppUpdate(event)) return;
-      const { location } = event;
-      // Respond to unmanaged changes by updating app state to match new values
+    return browserHistory.listen(({ action, location }) => {
+      // Ignore history changes the app drove itself; respond only to external
+      // ones (browser back/forward, or unmanaged programmatic navigation) by
+      // reconstructing app state from the new URL.
+      if (!isExternalHistoryChange(action, location)) return;
       runAction({ type: "set-location", location });
     });
   }, []);

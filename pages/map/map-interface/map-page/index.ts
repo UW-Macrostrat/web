@@ -7,11 +7,16 @@ import { MapAreaContainer, FossilCollections } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useTransition } from "transition-hook";
 import {
+  browserHistory,
   useAppActions,
   useAppState,
   useContextClass,
   useContextPanelOpen,
 } from "../app-state";
+import { hashHasMapPosition } from "../app-state/hash-string";
+import { readLastMapPosition } from "~/_utils/last-map-position";
+import { getMapPositionForHash } from "@macrostrat/map-interface";
+import { usePageContext } from "vike-react/usePageContext";
 import Searchbar from "../components/navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
@@ -45,6 +50,26 @@ function useSingleEffect(callback, dependencies) {
   }, dependencies);
 }
 
+/** Ordered-sinks resolver, part 2 (GeoIP). Centers the map on the server-derived
+ * GeoIP default, but ONLY when neither the URL nor a stored last-viewed position
+ * applies — it ranks below both. (Part 1, last-viewed, is handled at store
+ * creation in `createInitialState`.) Runs once at mount, since `pageContext.geo`
+ * isn't available synchronously when the store is first built. */
+function applyGeoDefault(geo, runAction) {
+  if (geo == null) return;
+  if (hashHasMapPosition(browserHistory.location.hash)) return;
+  if (readLastMapPosition() != null) return;
+  runAction({
+    type: "map-moved",
+    data: {
+      mapPosition: getMapPositionForHash(
+        { x: String(geo.lng), y: String(geo.lat), z: String(geo.zoom) },
+        { lng: geo.lng, lat: geo.lat }
+      ),
+    },
+  });
+}
+
 function MapPage({
   baseRoute = "/",
   menuPage = null,
@@ -58,15 +83,16 @@ function MapPage({
   const navMenuPage = useAppState((s) => s.activeMenuPage);
 
   const ref = useRef<HTMLElement>(null);
-  //const [map, setMap] = useState(null);
-  //console.log("MapPage mounted", map);
 
   const contextPanelOpen = useContextPanelOpen(baseRoute);
   const contextClass = useContextClass(baseRoute);
   const loaded = useAppState((s) => s.initialLoadComplete);
 
+  const geo = usePageContext()?.geo;
+
   useSingleEffect(() => {
     runAction({ type: "get-initial-map-state" });
+    applyGeoDefault(geo, runAction);
   }, []);
 
   const onMouseDown = useCallback(

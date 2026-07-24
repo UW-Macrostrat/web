@@ -5,16 +5,11 @@ import { AppState, MenuPage } from "./types";
 import { createBrowserHistory, type To, type Location } from "history";
 import { useCallback } from "react";
 import h from "@macrostrat/hyper";
-import {
-  buildPathName,
-  mayHaveHashChange,
-  mayHavePathNameChange,
-} from "./pathname";
-import { buildHashString, getInitialStateFromHash } from "./hash-string";
+import { getInitialStateFromHash } from "./hash-string";
 import { atom, useAtomValue } from "jotai";
 import partRegex from "part-regex";
 
-export const browserHistory = createBrowserHistory();
+const browserHistory = createBrowserHistory();
 // This sometimes gets called when the page isn't properly loaded yet,
 // so we have put in place a hacky guard...
 // We should do this within the component tree
@@ -30,6 +25,8 @@ export function startRecordingAppHistory() {
 }
 
 const historyAtom = atom(browserHistory);
+
+export { browserHistory };
 
 export const useHistory = () => useAtomValue(historyAtom);
 
@@ -54,7 +51,7 @@ export function Link({ to, ...rest }: { to: To; children: React.ReactNode }) {
 
 export function updateStateFromLocation(
   baseState: AppState,
-  location?: Location | null
+  location?: Pick<Location, "pathname" | "hash"> | null
 ): AppState {
   const { pathname, hash } = location ?? browserHistory.location;
   const isOpen = contextPanelIsInitiallyOpen(pathname);
@@ -76,32 +73,6 @@ export function updateStateFromLocation(
     isShowingColumnPage,
     activeMenuPage,
   };
-}
-
-export function historyManager(prevState: AppState, nextState: AppState): void {
-  /** Manages history for a given app state change */
-  if (prevState == undefined) return;
-
-  // check if they match current params
-  let to: To = {
-    pathname: browserHistory.location.pathname,
-    hash: browserHistory.location.hash,
-  };
-
-  if (mayHavePathNameChange(prevState, nextState)) {
-    to.pathname = buildPathName(nextState);
-  }
-  if (mayHaveHashChange(prevState, nextState) && !nextState.mapIsMoving) {
-    to.hash = buildHashString(nextState);
-  }
-
-  // If only the hash changed, replace state
-  if (to.pathname != browserHistory.location.pathname) {
-    browserHistory.push(to, { managed: true });
-  } else if (to.hash != browserHistory.location.hash) {
-    // Replace hash directly to avoid pushing to history stack
-    browserHistory.push(to, { managed: true });
-  }
 }
 
 export function isDetailPanelRouteInternal(pathname: string) {
@@ -197,7 +168,13 @@ export function setInfoMarkerPosition(
     const [_, lng, lat] = match;
     return {
       ...s1,
-      infoMarkerPosition: { lng: Number(lng), lat: Number(lat) },
+      infoMarkerPosition: {
+        lng: Number(lng),
+        lat: Number(lat),
+        // The loc path doesn't encode zoom; carry the current map zoom so the
+        // shape matches `start-map-query` and the map-data query has a zoom.
+        zoom: s1.mapPosition?.target?.zoom,
+      },
       infoDrawerOpen: true,
     };
   }
@@ -226,5 +203,13 @@ export function setInfoMarkerPosition(
     }
   }
 
-  return state;
+  // The URL is a plain map route with no location or cross-section. Clear any
+  // stale detail-panel state so that back/forward navigation away from a
+  // /loc or /cross-section route actually closes the info drawer.
+  return {
+    ...s1,
+    infoMarkerPosition: null,
+    infoDrawerOpen: false,
+    crossSectionLine: null,
+  };
 }
