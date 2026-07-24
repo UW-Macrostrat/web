@@ -1,7 +1,7 @@
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import { ReactNode } from "react";
 
-import { AuthProvider, AuthRefreshGate } from "~/_providers/auth";
+import { AuthProvider } from "~/_providers/auth";
 import { usePageContext } from "vike-react/usePageContext";
 import { pageLayouts } from "~/layouts";
 
@@ -21,11 +21,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return h(
     AuthProvider,
-    { user }, // Prefer detailed user if available
-    h(
-      AuthRefreshGate,
-      { canRefresh },
-      h(DarkModeProvider, { followSystem: true }, h(layout, children))
-    )
+    { user, canRefresh }, // Prefer detailed user if available
+    h(DarkModeProvider, { followSystem: true }, h(layout, children))
   );
 }

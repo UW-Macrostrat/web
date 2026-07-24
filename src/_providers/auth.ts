@@ -4,9 +4,11 @@ import {
   AsyncAuthAction,
 } from "@macrostrat/form-components";
 import h from "@macrostrat/hyper";
-import { Fragment, ReactNode, useEffect, useRef } from "react";
-import { ingestPrefix } from "../../packages/settings";
+import { useEffect, useRef } from "react";
+import { authPrefix } from "../../packages/settings";
 import { isLocalTesting, mockUser } from "./localTestingAuth";
+import { reload } from 'vike/client/router'
+
 
 async function authTransformer(
   action: AuthAction | AsyncAuthAction
@@ -27,11 +29,11 @@ async function authTransformer(
       // Assemble the return URL on click based on the current page
       const return_url = window.location.origin + window.location.pathname;
       console.log("Returning to", return_url);
-      window.location.href = `${ingestPrefix}/security/login?return_url=${return_url}`;
+      window.location.href = `${authPrefix}/login?return_url=${return_url}`;
     case "logout":
       // Delete the token from the session
       try {
-        const response = await fetch(`${ingestPrefix}/security/logout`, {
+        const response = await fetch(`${authPrefix}/logout`, {
           method: "POST",
           credentials: "include",
         });
@@ -48,7 +50,15 @@ async function authTransformer(
   }
 }
 
-export function AuthProvider(props) {
+export function AuthProvider({
+  canRefresh = false,
+  ...props
+}: {
+  canRefresh?: boolean;
+  [key: string]: any;
+}) {
+  // Silently re-authenticate on load when the server says a refresh is possible.
+  useReactiveAuthRefresh(canRefresh);
   return h(BaseAuthProvider, {
     ...props,
     transformer: authTransformer,
@@ -65,7 +75,7 @@ export function AuthProvider(props) {
 async function refreshSession(): Promise<boolean> {
   if (isLocalTesting()) return false;
   try {
-    const response = await fetch(`${ingestPrefix}/security/refresh`, {
+    const response = await fetch(`${authPrefix}/refresh`, {
       method: "POST",
       credentials: "include",
     });
@@ -113,21 +123,9 @@ export function useReactiveAuthRefresh(canRefresh: boolean) {
   }, [canRefresh]);
 }
 
-/** Runs the reactive refresh; must render inside AuthProvider. */
-export function AuthRefreshGate({
-  canRefresh = false,
-  children,
-}: {
-  canRefresh?: boolean;
-  children: ReactNode;
-}) {
-  useReactiveAuthRefresh(canRefresh);
-  return h(Fragment, null, children);
-}
-
 export async function fetchUser() {
   if (isLocalTesting()) return mockUser;
-  const response = await fetch(`${ingestPrefix}/security/me`, {
+  const response = await fetch(`${authPrefix}/me`, {
     method: "GET",
     credentials: "include",
   });
