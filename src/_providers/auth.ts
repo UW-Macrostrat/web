@@ -4,6 +4,7 @@ import {
   AsyncAuthAction,
 } from "@macrostrat/form-components";
 import h from "@macrostrat/hyper";
+import { Fragment, ReactNode, useEffect, useRef } from "react";
 import { ingestPrefix } from "../../packages/settings";
 import { isLocalTesting, mockUser } from "./localTestingAuth";
 
@@ -55,6 +56,73 @@ export function AuthProvider(props) {
       return h("code", JSON.stringify(user));
     },
   });
+}
+
+/**
+ * Silently mint a new access token from the refresh-token cookie. The browser
+ * sends the refresh cookie and stores the new access cookie for us.
+ */
+async function refreshSession(): Promise<boolean> {
+  if (isLocalTesting()) return false;
+  try {
+    const response = await fetch(`${ingestPrefix}/security/refresh`, {
+      method: "POST",
+      credentials: "include",
+    });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
+
+// One-shot guard (survives the reload below) so a refresh that doesn't actually
+// restore a usable cookie can't cause a reload loop. Reset on any healthy load.
+const REFRESH_RELOAD_FLAG = "ms-auth-refresh-reloaded";
+
+/**
+ * When the server signals `canRefresh` (access token expired but a refresh
+ * token is still present), silently refresh on load and, on success, do a full
+ * reload.
+ *
+ * The reload — rather than an in-place `get-status` — is deliberate: only a
+ * reload re-runs SSR and re-issues *every* client fetch (the auth UI AND
+ * client-side PostgREST queries like `rpc/auth_status`) WITH the fresh cookie.
+ * An in-place update can't re-run PostgREST queries that already fired on mount
+ * without a cookie, so they'd stay stuck on `web_anon`.
+ */
+export function useReactiveAuthRefresh(canRefresh: boolean) {
+  const attempted = useRef(false);
+
+  useEffect(() => {
+    if (attempted.current) return;
+    attempted.current = true;
+
+    if (!canRefresh) {
+      // Healthy or anonymous load — clear the guard so a later expiry can refresh.
+      sessionStorage.removeItem(REFRESH_RELOAD_FLAG);
+      return;
+    }
+    // Already attempted this tab session: don't reload-loop if the refresh
+    // didn't yield a usable cookie.
+    if (sessionStorage.getItem(REFRESH_RELOAD_FLAG)) return;
+    sessionStorage.setItem(REFRESH_RELOAD_FLAG, "1");
+
+    refreshSession().then((ok) => {
+      if (ok) window.location.reload();
+    });
+  }, [canRefresh]);
+}
+
+/** Runs the reactive refresh; must render inside AuthProvider. */
+export function AuthRefreshGate({
+  canRefresh = false,
+  children,
+}: {
+  canRefresh?: boolean;
+  children: ReactNode;
+}) {
+  useReactiveAuthRefresh(canRefresh);
+  return h(Fragment, null, children);
 }
 
 export async function fetchUser() {

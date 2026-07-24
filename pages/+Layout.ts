@@ -1,7 +1,7 @@
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import { ReactNode } from "react";
 
-import { AuthProvider } from "~/_providers/auth";
+import { AuthProvider, AuthRefreshGate } from "~/_providers/auth";
 import { usePageContext } from "vike-react/usePageContext";
 import { pageLayouts } from "~/layouts";
 
@@ -12,7 +12,7 @@ import h from "@macrostrat/hyper";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
-  const { exports = {}, config, user } = pageContext;
+  const { exports = {}, config, user, canRefresh } = pageContext;
   const pageBreadcrumbs = pageContext.exports.pageBreadcrumbs;
 
   const pageStyle = exports?.pageStyle ?? "content2";
@@ -22,6 +22,10 @@ export default function Layout({ children }: { children: ReactNode }) {
   return h(
     AuthProvider,
     { user }, // Prefer detailed user if available
-    h(DarkModeProvider, { followSystem: true }, h(layout, children))
+    h(
+      AuthRefreshGate,
+      { canRefresh },
+      h(DarkModeProvider, { followSystem: true }, h(layout, children))
+    )
   );
 }
