@@ -1,7 +1,9 @@
 import { AppAction, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "./handlers/filters";
-import { updateStateFromLocation } from "./navigation";
+import { browserHistory, updateStateFromLocation } from "./navigation";
+import { hashHasMapPosition } from "./hash-string";
+import { readLastPosition } from "./last-position";
 
 export { MapLayer };
 
@@ -59,7 +61,21 @@ const defaultState: CoreState = {
 };
 
 export function createInitialState() {
-  return updateStateFromLocation(defaultState);
+  const state = updateStateFromLocation(defaultState);
+  // Ordered-sinks resolver, part 1 (last-viewed): only at store creation, and
+  // only when the URL itself carried no map position. NOT applied on
+  // set-location (back/forward), which must honor the URL as-is. The GeoIP sink
+  // is applied later, at mount, in MapApp — it ranks below last-viewed.
+  if (
+    typeof window !== "undefined" &&
+    !hashHasMapPosition(browserHistory.location.hash)
+  ) {
+    const last = readLastPosition();
+    if (last != null) {
+      return { ...state, mapPosition: last };
+    }
+  }
+  return state;
 }
 
 export function coreReducer(

@@ -18,6 +18,7 @@ import type {
 } from "vike/types";
 
 import { Item, PageInfo } from "~/_utils/breadcrumbs";
+import type { GeoLocation } from "~/_utils/geolocation";
 
 export type PageProps = Record<string, unknown>;
 export type PageStyle = "content" | "fullscreen";
@@ -42,6 +43,7 @@ declare global {
       pageInfo?: PageInfo;
       urlPathname: string;
       user?: User;
+      geo?: GeoLocation | null;
       breadcrumbs?: Item[];
       macrostratLogoFlavor?: string;
       mdxContent?: string;

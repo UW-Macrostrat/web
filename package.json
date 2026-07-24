@@ -130,6 +130,7 @@
     "jotai-location": "^0.6.2",
     "jotai-zustand": "^0.6.0",
     "mapbox-gl": "^3.13.0",
+    "maxmind": "^5.0.6",
     "new-github-issue-url": "^1.0.0",
     "part-regex": "^0.1.2",
     "prop-types": "^15.8.1",

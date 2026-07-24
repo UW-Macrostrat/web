@@ -22,6 +22,7 @@ import {
   MapLayer,
   useAppActions,
   useAppState,
+  writeLastPosition,
 } from "#/map/map-interface/app-state";
 import { CrossSectionLine } from "./cross-section";
 import {
@@ -121,6 +122,8 @@ export default function MainMapView(props) {
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
   const onMapMoved = useCallback((pos, map) => {
+    // Persist the settled camera as the per-device last-viewed location.
+    writeLastPosition(pos);
     runAction({ type: "map-moved", data: { mapPosition: pos } });
   }, []);
 
