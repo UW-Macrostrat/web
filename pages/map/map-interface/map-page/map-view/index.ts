@@ -1,13 +1,13 @@
 import { SETTINGS } from "@macrostrat-web/settings";
 import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
-  PositionFocusState,
   useMapLabelVisibility,
   useMapRef,
   useMapStyleOperator,
   MacrostratLineSymbolManager,
   MapSourcesLayer,
 } from "@macrostrat/mapbox-react";
+import { PositionFocusState } from "@macrostrat/mapbox-utils";
 import {
   getFocusState,
   getTerrainSourceID,
