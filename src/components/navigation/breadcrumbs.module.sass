@@ -1,9 +1,19 @@
 
 .breadcrumbs-root
-  display: inline-flex
+  display: flex
   align-items: center
-  gap: 0.5em
+  flex-direction: row
+  gap: 1em
+  flex: 1
+  min-width: 0
 
+  & > nav
+    display: flex
+    min-width: 0
+
+.breadcrumbs
+  flex: 1
+  min-width: 0
 
 .title-block
   display: flex
@@ -15,3 +25,4 @@
   .identifier
     color: var(--secondary-color)
     font-weight: 500
+

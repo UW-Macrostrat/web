@@ -303,14 +303,10 @@ export function Page() {
   return h(
     MapAreaContainer,
     {
-      navbar: h(
-        FloatingNavbar,
-        { className: styles["topology-navbar"], width: PANEL_WIDTH },
-        h(NavbarHeader, {
-          isOpen,
-          onToggle: () => setOpen(!isOpen),
-        })
-      ),
+      navbar: h(NavbarHeader, {
+        isOpen,
+        onToggle: () => setOpen(!isOpen),
+      }),
       contextPanel,
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
@@ -352,18 +348,28 @@ function NavbarHeader({
   // Drop the leaf (the current page) from the trail; it's shown as the title.
   const trail = usePageBreadcrumbs().slice(0, -1);
 
-  return h("div.navbar-header", [
-    h(PageBreadcrumbsInternal, {
-      items: trail,
-      showLogo: true,
-      separateTitle: false,
-    }),
-    h("div.title-row", [
-      h(PageTitle, { headingLevel: 2 }),
-      h(Spacer),
-      h(MapLoadingButton, { active: isOpen, onClick: onToggle, large: false }),
-    ]),
-  ]);
+  return h(
+    FloatingNavbar,
+    { className: styles["topology-navbar"], width: PANEL_WIDTH },
+    [
+      h("div.navbar-title-stack", [
+        h(PageBreadcrumbsInternal, {
+          items: trail,
+          showLogo: true,
+          separateTitle: false,
+        }),
+        h("div.title-row", [h(PageTitle, { headingLevel: 2 })]),
+      ]),
+      h(
+        "div.loading-button",
+        h(MapLoadingButton, {
+          active: isOpen,
+          onClick: onToggle,
+          large: true,
+        })
+      ),
+    ]
+  );
 }
 
 function LayerSelectorPanel() {

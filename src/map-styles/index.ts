@@ -2,13 +2,8 @@ import { burwellTileDomain } from "@macrostrat-web/settings";
 
 export function boundingGeometryMapStyle(
   darkMode: boolean,
-  mapSlug: string = null
+  url: string = "/maps/bounds"
 ): mapboxgl.Style {
-  let url = "/maps/bounds";
-  if (mapSlug != null) {
-    url += `/${mapSlug}`;
-  }
-
   const color = darkMode ? 255 : 20;
   return {
     version: 8,

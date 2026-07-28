@@ -130,19 +130,19 @@ export function PageBreadcrumbsInternal({
     ];
   }
 
+  let startItem = null;
   if (showLogo) {
-    itemsList[0] = {
-      text: h("span.breadcrumbs-root", [
-        h(MacrostratIcon, { iconStyle: "simple", small: true }),
-        "Macrostrat",
-      ]),
-      href: "/",
-    };
+    startItem = h(
+      "a.base",
+      { href: "/" },
+      h(MacrostratIcon, { iconStyle: "simple", small: true })
+    );
   }
 
-  const breadcrumbs = h(Breadcrumbs, {
-    items: itemsList,
-  });
+  const breadCrumbs = h("div.breadcrumbs-root", [
+    startItem,
+    h(Breadcrumbs, { className: "breadcrumbs", items: itemsList }),
+  ]);
 
-  return h("div.page-nav", [breadcrumbs, titleElement]);
+  return h("div.page-nav", [breadCrumbs, titleElement]);
 }

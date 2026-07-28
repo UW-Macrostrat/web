@@ -14,10 +14,14 @@ import {
   LocationPanel,
   MapView,
   FeatureSelectionHandler,
+  PanelCard,
 } from "@macrostrat/map-interface";
-import { NonIdealState } from "@blueprintjs/core";
+import { NonIdealState, Switch } from "@blueprintjs/core";
 import { Link } from "~/components";
 import { boundingGeometryMapStyle } from "~/map-styles";
+import { atom, useAtom } from "jotai";
+
+const showAllMapsAtom = atom(false);
 
 export function Page() {
   const dark = useDarkMode();
@@ -29,17 +33,19 @@ export function Page() {
 
   const [isOpen, setOpen] = useState(false);
 
+  const [isOn, setIsOn] = useAtom(showAllMapsAtom);
   const [actualStyle, setActualStyle] = useState(null);
 
   useEffect(() => {
-    const overlayStyle = boundingGeometryMapStyle(isEnabled);
+    const mapSlug = isOn ? "/ingestion/bounds" : "/maps/bounds";
+    const overlayStyle = boundingGeometryMapStyle(isEnabled, mapSlug);
 
     buildInspectorStyle(baseStyle, overlayStyle, {
       mapboxToken: mapboxAccessToken,
       inDarkMode: isEnabled,
       xRay: false,
     }).then(setActualStyle);
-  }, [isEnabled]);
+  }, [isEnabled, isOn]);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
@@ -64,6 +70,14 @@ export function Page() {
     );
   }
 
+  const contextPanel: React.ReactNode = h(PanelCard, [
+    h(Switch, {
+      isOn,
+      onChange: setIsOn,
+      label: "All maps",
+    }),
+  ]);
+
   if (actualStyle == null) {
     return null;
   }
@@ -79,7 +93,7 @@ export function Page() {
           onClick: () => setOpen(!isOpen),
         }),
       ]),
-      contextPanel: null,
+      contextPanel,
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
