@@ -78,23 +78,24 @@ const searchFilter: TableFilter<any, SearchState> = {
 // degrades to a submenu on older library versions.
 const SCALES = ["tiny", "small", "medium", "large"];
 
-const scaleFilter: TableFilter<any, { operator: "eq"; value: string | null }> = {
-  id: "scale-filter",
-  name: "Scale",
-  icon: "filter",
-  columnKey: "scale",
-  defaultState: { operator: "eq", value: null },
-  describeState: (s) => s?.value ?? null,
-  presentation: "menu-inline",
-  predicate: (row, s) => s?.value == null || row.scale === s.value,
-  filterForm: ({ state, setState }) =>
-    h(SegmentedControl, {
-      small: true,
-      options: SCALES.map((v) => ({ label: v, value: v })),
-      value: state?.value ?? "",
-      onValueChange: (value: string) => setState({ operator: "eq", value }),
-    }),
-};
+const scaleFilter: TableFilter<any, { operator: "eq"; value: string | null }> =
+  {
+    id: "scale-filter",
+    name: "Scale",
+    icon: "filter",
+    columnKey: "scale",
+    defaultState: { operator: "eq", value: null },
+    describeState: (s) => s?.value ?? null,
+    presentation: "menu-inline",
+    predicate: (row, s) => s?.value == null || row.scale === s.value,
+    filterForm: ({ state, setState }) =>
+      h(SegmentedControl, {
+        small: true,
+        options: SCALES.map((v) => ({ label: v, value: v })),
+        value: state?.value ?? "",
+        onValueChange: (value: string) => setState({ operator: "eq", value }),
+      }),
+  };
 
 // The facet columns: `source_id` sortable (ID asc/desc), `scale` carries the
 // scale filter. The multi-field search is NOT here — it's a sheet-level filter
@@ -108,7 +109,7 @@ const columnSpec: ColumnSpec[] = [
 
 const provider = createPostgRESTProvider<any>({
   endpoint,
-  table: "sources_metadata",
+  table: "maps",
   identityKey: "source_id",
   // Default ordering: newest source_id first. Because this is the
   // identity key's own default direction (not an active sort), it doesn't
@@ -120,7 +121,12 @@ const provider = createPostgRESTProvider<any>({
     if (f.id !== SEARCH_FILTER_ID) {
       const s = f.state;
       const key = f.columnKey ?? s?.key;
-      if (key != null && s?.operator != null && s?.value != null && s.value !== "") {
+      if (
+        key != null &&
+        s?.operator != null &&
+        s?.value != null &&
+        s.value !== ""
+      ) {
         return standardizeFilter({ key, operator: s.operator, value: s.value });
       }
       return null;

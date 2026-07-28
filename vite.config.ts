@@ -51,7 +51,7 @@ export default defineConfig({
     }),
   ],
   ssr: {
-    noExternal: macrostratPackages,
+    noExternal: [...macrostratPackages, "jotai"],
   },
   define: {
     // Cesium base URL
