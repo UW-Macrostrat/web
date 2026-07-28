@@ -7,14 +7,23 @@
     height: auto;
     // Tighter top/horizontal padding for a balanced result (slightly more
     // bottom room for the title's descenders).
-    --navbar-padding: 5px 9px 7px;
+    //--navbar-padding: 5px 9px 7px;
+  }
+
+  gap: 1em
+}
+
+.navbar-title-stack {
+  flex: 1;
+  min-width: 0;
+  :global(.bp6-breadcrumb) {
+    font-size: 1em;
   }
 }
 
 .navbar-header {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
   width: 100%;
   // Allow the breadcrumb OverflowList to measure a bounded width and collapse
   // its middle items instead of overflowing the fixed-width navbar.
@@ -23,29 +32,6 @@
   // Tight, quiet breadcrumb trail above the title.
   :global(.page-nav) {
     min-width: 0;
-  }
-
-  :global(.bp6-breadcrumbs) {
-    font-size: 12px;
-    min-width: 0;
-    min-height: 0;
-  }
-
-  .title-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5em;
-
-    :global(.title-block) {
-      min-width: 0;
-    }
-
-    h2 {
-      font-size: 1.3rem;
-      line-height: 1.2;
-      margin: 0;
-    }
   }
 }
 
