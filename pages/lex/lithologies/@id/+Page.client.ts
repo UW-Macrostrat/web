@@ -17,7 +17,10 @@ export function Page() {
   const { resData, colData, taxaData, refs, fossilsData, mapsData, unitsData } =
     useData();
 
-  const id = usePageContext().urlParsed.pathname.split("/")[3];
+  const id = usePageContext().routeParams.id;
+
+  console.log(colData);
+
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
@@ -31,16 +34,6 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(TextExtractions, {
-      lith_id: id,
-      href:
-        "autoselect=" +
-        resData?.name +
-        "&lith_id=" +
-        id +
-        "&color=" +
-        resData?.color,
-    }),
     h.if(unitsData?.length > 0)(Units, {
       href:
         "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name,
@@ -57,3 +50,14 @@ export function Page() {
 
   return LexItemPage({ children, id, refs, resData, siftLink: "lithology" });
 }
+
+// h(TextExtractions, {
+//   lith_id: id,
+//   href:
+//     "autoselect=" +
+//     resData?.name +
+//     "&lith_id=" +
+//     id +
+//     "&color=" +
+//     resData?.color,
+// }),

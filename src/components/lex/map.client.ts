@@ -23,7 +23,7 @@ const _macrostratStyle = buildMacrostratStyle({
   strokeOpacity: 0.1,
 }) as mapboxgl.Style;
 
-export function ColumnsMapContainer(props) {
+export function LexiconMap(props) {
   /* TODO: integrate this with shared web components */
   return h(ErrorBoundary, h(ColumnsMapInner, props));
 }
@@ -46,6 +46,8 @@ function ColumnsMapInner({
   const fossilClickRef = useRef(false);
   const hasFitted = useRef(false);
   const fossilsExist = fossilsData?.features?.length > 0;
+
+  console.log("Fossils exist", fossilsExist);
 
   function LexControls() {
     const handleFossils = () => {
@@ -100,9 +102,10 @@ function ColumnsMapInner({
         columns,
         accessToken: mapboxAccessToken,
         // `style` is the container's CSS (InsetMapProps.style: CSSProperties), NOT
-        // the map style — that's `mapStyle` below. A parent grid cell gives it no
-        // height, so pin a min-height or the map collapses to 0px and never renders.
-        style: { height: "100%", minHeight: "500px" },
+        // the map style — that's `mapStyle` below. The map needs a *definite*
+        // height (a percentage/min-height leaves the Mapbox canvas at 0px, since
+        // the grid cell has no resolvable height); fill the cell width.
+        style: { width: "100%", height: "500px" },
         onSelectColumn: (id) => {
           setTimeout(() => {
             if (!showFossils || !fossilClickRef.current) {

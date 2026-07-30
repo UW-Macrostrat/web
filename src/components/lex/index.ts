@@ -7,15 +7,8 @@ import {
   FlexRow,
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
-import {
-  Footer,
-  Link,
-  LithologyTag,
-  MacrostratLink,
-  PageBreadcrumbs,
-} from "~/components";
-import { Card, Divider, Popover } from "@blueprintjs/core";
-import { ContentPage } from "~/layouts";
+import { Link, LithologyTag, MacrostratLink } from "~/components";
+import { Card, Divider, Popover, Spinner } from "@blueprintjs/core";
 import {
   AlphaTag,
   BetaTag,
@@ -25,7 +18,6 @@ import {
 } from "~/components/general";
 import { useState, useMemo, useEffect } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { LinkCard } from "~/components/cards";
@@ -34,6 +26,7 @@ import { LexItemPageProps } from "~/types";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { ExpansionPanel } from "@macrostrat/data-components";
 import { fetchPGData } from "~/_utils";
+import { LexiconMap } from "./map.client";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -42,24 +35,6 @@ export function titleCase(str) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
-}
-
-function ColumnMapContainer(props) {
-  return h(
-    ClientOnly,
-    {
-      load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
-      fallback: h("div.loading", "Loading map..."),
-      deps: [
-        props.columns,
-        props.projectID,
-        props.fossilData,
-        props.filters,
-        props.mapUrl,
-      ],
-    },
-    (component) => h(component, props)
-  );
 }
 
 function ExpansionPanelContainer(props) {
@@ -107,41 +82,47 @@ function LexItemPageInner(props: LexItemPageProps) {
 }
 
 export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
-  if (!colData || !colData.features || colData.features.length === 0) return;
-  const summary = summarize(colData.features || []);
+  const hasColumns = colData?.features?.length > 0;
+  const summary = summarize(hasColumns ? colData.features : []);
+
+  // Hooks must run unconditionally and in a stable order, ahead of any early
+  // return (rules of hooks). `useAPIResult`/`getIntID` no-op on a null route, so
+  // pass null when the input is absent instead of skipping the hook.
+  const lithLegendIds = useAPIResult(
+    resData?.lith_id
+      ? apiV2Prefix + "/mobile/map_filter?lith_id=" + resData.lith_id
+      : null
+  );
+  const conceptLegendIds = useAPIResult(
+    resData?.concept_id
+      ? apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id
+      : null
+  );
+  const t_id = getIntID({ name: summary.t_int_name });
+  const b_id = getIntID({ name: summary.b_int_name });
+
+  if (!hasColumns) return null;
 
   let filters = [];
 
-  if (resData?.lith_id) {
-    const legend_ids = useAPIResult(
-      apiV2Prefix + "/mobile/map_filter?lith_id=" + resData.lith_id
-    );
-
-    if (legend_ids) {
-      filters.push({
-        category: "lithology",
-        type: "lithologies",
-        id: resData.lith_id,
-        name: resData.name,
-        legend_ids,
-      });
-    }
+  if (resData?.lith_id && lithLegendIds) {
+    filters.push({
+      category: "lithology",
+      type: "lithologies",
+      id: resData.lith_id,
+      name: resData.name,
+      legend_ids: lithLegendIds,
+    });
   }
 
-  if (resData?.concept_id) {
-    const legend_ids = useAPIResult(
-      apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id
-    );
-
-    if (legend_ids) {
-      filters.push({
-        category: "strat_name",
-        type: "strat_name_concepts",
-        id: resData.concept_id,
-        name: resData.name,
-        legend_ids,
-      });
-    }
+  if (resData?.concept_id && conceptLegendIds) {
+    filters.push({
+      category: "strat_name",
+      type: "strat_name_concepts",
+      id: resData.concept_id,
+      name: resData.name,
+      legend_ids: conceptLegendIds,
+    });
   }
 
   if (resData?.int_id) {
@@ -154,7 +135,7 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
     });
   }
 
-  const { b_age, t_age } = resData;
+  const { b_age, t_age } = resData ?? {};
 
   const {
     t_units,
@@ -168,9 +149,6 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
 
   const area = parseInt(col_area.toString().split(".")[0]);
 
-  const t_id = getIntID({ name: t_int_name });
-  const b_id = getIntID({ name: b_int_name });
-
   return h("div.table", [
     h("div.table-content", [
       h("div.packages", t_sections.toLocaleString() + " packages"),
@@ -178,9 +156,17 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
       h("div.units", t_units.toLocaleString() + " units"),
       h(Divider, { className: "divider" }),
       h("div.interval", [
-        h(MacrostratLink, { item: { int_id: b_id } }, b_int_name.toLocaleString()),
+        h(
+          MacrostratLink,
+          { item: { int_id: b_id } },
+          b_int_name.toLocaleString()
+        ),
         " - ",
-        h(MacrostratLink, { item: { int_id: t_id } }, t_int_name.toLocaleString()),
+        h(
+          MacrostratLink,
+          { item: { int_id: t_id } },
+          t_int_name.toLocaleString()
+        ),
       ]),
       h.if(b_age && t_age)(Divider, { className: "divider" }),
       h.if(b_age && t_age)("div.age-range", [
@@ -194,13 +180,17 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
       h(Divider, { className: "divider" }),
       h("div.collections", pbdb_collections.toLocaleString() + " collections"),
     ]),
-    h(ColumnMapContainer, {
-      filters,
-      columns: colData,
-      className: "column-map-container",
-      fossilsData,
-      mapUrl,
-    }),
+    h(
+      ClientOnly,
+      { fallback: h(Spinner) },
+      h(LexiconMap, {
+        filters,
+        columns: colData,
+        className: "column-map-container",
+        fossilsData,
+        mapUrl,
+      })
+    ),
   ]);
 }
 
@@ -368,11 +358,11 @@ export function PrevalentTaxa({ taxaData }) {
         h("a", { href: pbdbDomain + "/#/" }, "PaleoBioDB"),
       ]),
     ]),
-    records?.map((record) => Taxa(record)),
+    records?.map((record) => h(Taxa, { key: record.oid, record })),
   ]);
 }
 
-function Taxa(record) {
+function Taxa({ record }) {
   const imgUrl = pbdbDomain + "/data1.2/taxa/thumb.png?id=";
   const isDarkMode = useDarkMode().isEnabled;
 
@@ -413,7 +403,7 @@ function ConceptHierarchy({ id }) {
 
 function getIntID({ name }) {
   const res = useAPIResult(
-    apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
+    name ? apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name) : null
   )?.success?.data;
 
   const id = res?.filter((d) => d.name === name)[0]?.int_id;

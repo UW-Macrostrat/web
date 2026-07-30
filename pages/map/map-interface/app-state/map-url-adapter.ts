@@ -6,7 +6,7 @@ import {
   mayHavePathNameChange,
 } from "./pathname";
 import { buildHashString } from "./hash-string";
-import { updateStateFromLocation } from "./navigation";
+import { updateStateFromLocation } from "./location-state";
 
 /**
  * The `/map` page's implementation of the generic URL⇄state contract. This is

@@ -23,7 +23,10 @@ import { MenuPage } from "./menu";
 import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
 
 import h from "./main.module.sass";
-import { MacrostratDataProvider } from "@macrostrat/data-provider";
+import {
+  MacrostratDataProvider,
+  useMacrostratDefs,
+} from "@macrostrat/data-provider";
 import InfoDrawer from "../components/info-drawer";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
