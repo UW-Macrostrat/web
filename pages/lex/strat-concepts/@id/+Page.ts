@@ -69,7 +69,6 @@ function ConceptBody({ concept_id }) {
     fetchAPIData(`/defs/strat_names`, { concept_id })
       .then((response) => {
         setData(response);
-        console.log("Linked strat names", response);
       })
       .catch((error) => {
         console.error("Error fetching strat names:", error);

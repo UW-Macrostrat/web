@@ -99,12 +99,14 @@ function ColumnsMapInner({
       {
         columns,
         accessToken: mapboxAccessToken,
-        style: { ..._macrostratStyle, height: "100%" },
+        // `style` is the container's CSS (InsetMapProps.style: CSSProperties), NOT
+        // the map style — that's `mapStyle` below. A parent grid cell gives it no
+        // height, so pin a min-height or the map collapses to 0px and never renders.
+        style: { height: "100%", minHeight: "500px" },
         onSelectColumn: (id) => {
           setTimeout(() => {
-            console.log("fossilClicked", fossilClickRef.current);
             if (!showFossils || !fossilClickRef.current) {
-              window.open(`/columns/${id}`, "_self");
+              navigate(`/columns/${id}`);
             }
           }, 0);
         },

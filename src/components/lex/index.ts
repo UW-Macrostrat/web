@@ -1,11 +1,19 @@
+export * from "./list-page";
 import h from "./main.module.sass";
+import { navigate } from "vike/client/router";
 import {
   useAPIResult,
   ErrorBoundary,
   FlexRow,
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
-import { Footer, Link, LithologyTag, PageBreadcrumbs } from "~/components";
+import {
+  Footer,
+  Link,
+  LithologyTag,
+  MacrostratLink,
+  PageBreadcrumbs,
+} from "~/components";
 import { Card, Divider, Popover } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
@@ -146,8 +154,6 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
     });
   }
 
-  console.log("Filters in ColumnsTable:", filters);
-
   const { b_age, t_age } = resData;
 
   const {
@@ -172,17 +178,9 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
       h("div.units", t_units.toLocaleString() + " units"),
       h(Divider, { className: "divider" }),
       h("div.interval", [
-        h(
-          Link,
-          { href: "/lex/intervals/" + b_id },
-          b_int_name.toLocaleString()
-        ),
+        h(MacrostratLink, { item: { int_id: b_id } }, b_int_name.toLocaleString()),
         " - ",
-        h(
-          Link,
-          { href: "/lex/intervals/" + t_id },
-          t_int_name.toLocaleString()
-        ),
+        h(MacrostratLink, { item: { int_id: t_id } }, t_int_name.toLocaleString()),
       ]),
       h.if(b_age && t_age)(Divider, { className: "divider" }),
       h.if(b_age && t_age)("div.age-range", [
@@ -206,6 +204,16 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
   ]);
 }
 
+export function navigateToInterval(clickData) {
+  /** Navigate to an interval's lex page from a Timescale click. The Timescale's
+   * onClick passes `{ age, interval }` (TimescaleClickData) — not the interval
+   * directly — and a click on empty axis area has no interval, so guard for it. */
+  const intId = clickData?.interval?.int_id;
+  if (intId != null) {
+    navigate("/lex/intervals/" + intId);
+  }
+}
+
 export function Intervals({ resData }) {
   const { b_age, t_age } = resData;
   return h(
@@ -215,7 +223,7 @@ export function Intervals({ resData }) {
       levels: [1, 5],
       ageRange: [b_age, t_age],
       absoluteAgeScale: true,
-      onClick: (e, d) => window.open("/lex/intervals/" + d.int_id, "_self"),
+      onClick: (e, d) => navigateToInterval(d),
     })
   );
 }
@@ -389,8 +397,6 @@ function ConceptHierarchy({ id }) {
   const url = apiV2Prefix + "/defs/strat_names?strat_name_concept_id=" + id;
   const data = useAPIResult(url)?.success?.data;
   if (!data) return h(Loading);
-
-  console.log("Concept Hierarchy Data:", data);
 
   return h("div.concept-hierarchy", [
     data.map((item) => {
@@ -899,7 +905,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
                   .split(" ")[1]
                   .split("-")[1];
                 const url = "/lex/" + route + "/" + id;
-                window.open(url, "_self");
+                navigate(url);
               },
             })
           )

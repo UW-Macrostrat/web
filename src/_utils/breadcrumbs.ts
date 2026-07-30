@@ -210,7 +210,6 @@ export const sitemap: Routes = {
         {
           param: "@id",
           name(urlPart, ctx) {
-            console.log("url part", urlPart, ctx.data);
             // Get the map slug from either JSON or GeoJSON
             return (
               ctx.pageProps?.map?.slug ??

@@ -1,6 +1,6 @@
 import h from "./main.module.sass";
-import { StickyHeader, LinkCard, PageBreadcrumbs, BetaTag } from "~/components";
-import { ContentPage } from "~/layouts";
+import { LinkCard, BetaTag } from "~/components";
+import { LexListPage } from "~/components/lex";
 import { useState, useEffect } from "react";
 import { fetchAPIData } from "~/_utils";
 import { usePageContext } from "vike-react/usePageContext";
@@ -12,12 +12,14 @@ export function Page() {
   const url = usePageContext().urlOriginal.split("?")[1];
 
   if (!url) {
-    return h(Base);
+    return h(BaseList);
   }
 
-  const [data, setData] = useState(null);
+  return h(UnitsForItem, { url });
+}
 
-  console.log(data);
+function UnitsForItem({ url }) {
+  const [data, setData] = useState(null);
 
   const params = getUrlParams(url);
   const idType = params.idType;
@@ -31,11 +33,9 @@ export function Page() {
     }).then((res) => setData(res));
   }, []);
 
-  return h(ContentPage, [
-    h(Header, { name, color, idType, id }),
-    h(GroupUnits, { data }),
-    h(Footer),
-  ]);
+  const description = h(Header, { name, color, idType, id });
+
+  return h(LexListPage, { description }, h(GroupUnits, { data }));
 }
 
 function GroupUnits({ data }) {
@@ -87,15 +87,11 @@ function Header({ name, color, idType, id }) {
     strat_name_id: "strat-names",
   };
 
-  return h(StickyHeader, { className: "header" }, [
-    h(PageBreadcrumbs, {
-      title: h(FlexRow, { gap: ".5em", alignItems: "center" }, [
-        h("p.title", "Units for "),
-        h(LithologyTag, {
-          data: { name, color },
-          href: `/lex/${map[idType]}/${id}`,
-        }),
-      ]),
+  return h(FlexRow, { gap: ".5em", alignItems: "center", className: "header" }, [
+    h("h2.title", "Units for "),
+    h(LithologyTag, {
+      data: { name, color },
+      href: `/lex/${map[idType]}/${id}`,
     }),
     h(BetaTag),
   ]);
@@ -116,13 +112,8 @@ function getUrlParams(urlString) {
   return result;
 }
 
-function Base() {
-  return h(ContentPage, { className: "page" }, [
-    h(
-      StickyHeader,
-      { className: "header" },
-      h(PageBreadcrumbs, { title: "Units" })
-    ),
+function BaseList() {
+  return h(LexListPage, [
     h(PostgRESTInfiniteScrollView, {
       route: postgrestPrefix + "/units",
       id_key: "id",

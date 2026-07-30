@@ -1,7 +1,8 @@
 import h from "./main.module.sass";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
-import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
+import { LinkCard } from "~/components";
+import { LexListPage } from "~/components/lex";
 import { useData } from "vike-react/useData";
 import { SearchBar } from "~/components/general";
 import { MultiSelect } from "@blueprintjs/select";
@@ -11,12 +12,7 @@ const PAGE_SIZE = 20;
 export function Page() {
   const { res } = useData();
 
-  return h([
-    h(StickyHeader, { className: "header" }, [
-      h(PageBreadcrumbs, {
-        title: "Minerals",
-      }),
-    ]),
+  return h(LexListPage, [
     h(PostgRESTInfiniteScrollView, {
       route: `${apiDomain}/api/pg/minerals`,
       initialItems: res,

@@ -38,7 +38,7 @@ function buildHrefForItem(item: MacrostratItemIdentifier) {
     return `/lex/environments/${item.environ_id}`;
   }
   if ("lith_att_id" in item) {
-    return `/lex/lithology-attributes/${item.lith_att_id}`;
+    return `/lex/lith-atts/${item.lith_att_id}`;
   }
   if ("strat_name_id" in item) {
     return `/lex/strat-names/${item.strat_name_id}`;

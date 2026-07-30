@@ -8,7 +8,6 @@ import {
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { useEffect, useState } from "react";
 import { useDarkMode, FlexRow } from "@macrostrat/ui-components";
-import { FullscreenPage } from "~/layouts";
 import { MultiSelect } from "@blueprintjs/select";
 import { MenuItem, Switch, Divider, Icon } from "@blueprintjs/core";
 import { tileserverDomain } from "@macrostrat-web/settings";
@@ -27,7 +26,7 @@ export function Page() {
       })
       .catch((err) => console.error("Error fetching data:", err));
   }, []);
-  return h(FullscreenPage, h(Map, { types }));
+  return h(Map, { types });
 }
 
 function Map({ types }) {

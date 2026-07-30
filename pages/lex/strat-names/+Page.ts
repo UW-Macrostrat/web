@@ -1,7 +1,7 @@
 import h from "./main.module.sass";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
-import { LinkCard, Link } from "~/components";
+import { LinkCard, MacrostratLink } from "~/components";
 import { Card } from "@blueprintjs/core";
 import { SearchBar, StratTag } from "~/components/general";
 import { useData } from "vike-react/useData";
@@ -93,7 +93,6 @@ function ConceptBody({ data, input }) {
   if (
     strats?.some((s) => s.name.toLowerCase().includes(input?.toLowerCase()))
   ) {
-    console.log("Filtering strats", strats, input);
     strats = strats.filter((s) =>
       s.name.toLowerCase().includes(input?.toLowerCase())
     );
@@ -108,8 +107,8 @@ function ConceptBody({ data, input }) {
       strats?.map(({ id, name, rank }) =>
         h("li.strat-name", [
           h(
-            Link,
-            { href: `/lex/strat-names/${id}` },
+            MacrostratLink,
+            { item: { strat_name_id: id } },
             `${name} ${rank} (#${id})`
           ),
           h(StratTag, { isConcept: false }),

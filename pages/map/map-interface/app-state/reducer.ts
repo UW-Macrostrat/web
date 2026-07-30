@@ -1,7 +1,8 @@
 import { AppAction, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "./handlers/filters";
-import { browserHistory, updateStateFromLocation } from "./navigation";
+import { updateStateFromLocation } from "./navigation";
+import { browserHistory } from "./browser-history";
 import { hashHasMapPosition } from "./hash-string";
 import { readLastMapPosition } from "~/_utils/last-map-position";
 

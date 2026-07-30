@@ -1,7 +1,7 @@
 import h from "./main.module.scss";
-import { LinkCard, PageBreadcrumbs, StickyHeader } from "~/components";
+import { LinkCard } from "~/components";
+import { LexListPage } from "~/components/lex";
 import { useState } from "react";
-import { ContentPage } from "~/layouts";
 import { useData } from "vike-react/useData";
 import { SearchBar } from "~/components/general";
 
@@ -24,14 +24,12 @@ export function Page() {
 
   const grouped = groupByClass(filtered);
 
-  return h(ContentPage, { className: "econ-list-page" }, [
-    h(StickyHeader, [
-      h(PageBreadcrumbs, { title: "Structures" }),
-      h(SearchBar, {
-        placeHolder: "Search structures...",
-        onChange: handleChange,
-      }),
-    ]),
+  const search = h(SearchBar, {
+    placeHolder: "Search structures...",
+    onChange: handleChange,
+  });
+
+  return h(LexListPage, { className: "econ-list-page", controls: search }, [
     h(
       "div.econ-list",
       Object.entries(grouped).map(([className, types]) =>

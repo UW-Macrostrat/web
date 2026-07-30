@@ -1,7 +1,7 @@
 import h from "./main.module.scss";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { Timescale } from "@macrostrat/timescale";
-import { titleCase } from "~/components/lex";
+import { titleCase, navigateToInterval } from "~/components/lex";
 import { useData } from "vike-react/useData";
 import { LithologyTag } from "@macrostrat/data-components";
 
@@ -33,7 +33,7 @@ export function Page() {
         ageRange: [min_age, max_age],
         orientation: "horizontal",
         absoluteAgeScale: true,
-        onClick: (e, d) => window.open(`/lex/intervals/${d.int_id}`, "_self"),
+        onClick: (e, d) => navigateToInterval(d),
         className: "timescale",
       })
     ),

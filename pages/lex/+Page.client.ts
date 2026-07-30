@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ExpansionPanel } from "~/components/lex/tag";
 import { Tag, Dialog, Icon } from "@blueprintjs/core";
 import { DocsVideo } from "#/map/map-interface/components/docs";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 export function Page() {
   const { res } = useData();
@@ -165,7 +166,7 @@ function SearchContainer({ setShowBody }) {
     id_key: "id",
     filterable: true,
     ascending: true,
-    route: "https://dev.macrostrat.org/api/pg/autocomplete",
+    route: `${postgrestPrefix}/autocomplete`,
     delay: 100,
     searchColumns: [{ value: "name", label: "Name" }],
     group_key: "type",

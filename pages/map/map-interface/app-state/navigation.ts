@@ -2,14 +2,14 @@ import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import classNames from "classnames";
 import { useAppState } from "./store.ts";
 import { AppState, MenuPage } from "./types";
-import { createBrowserHistory, type To, type Location } from "history";
+import { type To, type Location } from "history";
 import { useCallback } from "react";
 import h from "@macrostrat/hyper";
 import { getInitialStateFromHash } from "./hash-string";
 import { atom, useAtomValue } from "jotai";
 import partRegex from "part-regex";
+import { browserHistory } from "./browser-history";
 
-const browserHistory = createBrowserHistory();
 // This sometimes gets called when the page isn't properly loaded yet,
 // so we have put in place a hacky guard...
 // We should do this within the component tree
@@ -25,8 +25,6 @@ export function startRecordingAppHistory() {
 }
 
 const historyAtom = atom(browserHistory);
-
-export { browserHistory };
 
 export const useHistory = () => useAtomValue(historyAtom);
 

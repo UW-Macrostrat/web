@@ -2,7 +2,7 @@ import { actionRunner } from "./handlers";
 import { useCallback } from "react";
 
 import { AppAction, AppState } from "./types";
-import { browserHistory } from "./navigation";
+import { browserHistory } from "./browser-history";
 import { syncStateToURL } from "~/_utils/url-state";
 import { mapURLAdapter } from "./map-url-adapter";
 import { coreReducer, createInitialState } from "./reducer";

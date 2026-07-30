@@ -1,28 +1,31 @@
 import h from "./main.module.sass";
-import { StickyHeader, LinkCard, PageBreadcrumbs, BetaTag } from "~/components";
-import { ContentPage } from "~/layouts";
+import { LinkCard, BetaTag } from "~/components";
+import { LexListPage } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
-import { postgrestPrefix, apiDomain } from "@macrostrat-web/settings";
-import { LithologyTag, FlexRow, ExpansionPanel } from "~/components/lex/tag";
+import { postgrestPrefix } from "@macrostrat-web/settings";
+import { LithologyTag, FlexRow } from "~/components/lex/tag";
 
 export function Page() {
   const url = usePageContext().urlOriginal.split("?")[1];
 
   if (!url) {
-    return h(Base);
+    return h(BaseList);
   }
 
+  return h(LegendsForItem, { url });
+}
+
+function LegendsForItem({ url }) {
   const params = getUrlParams(url);
   const idType = params.idType;
   const id = params[idType];
   const color = params.color;
   const name = params.name;
 
-  return h(ContentPage, [
-    h(Header, { name, color, idType, id }),
-    h(FilterData),
-  ]);
+  const description = h(Header, { name, color, idType, id });
+
+  return h(LexListPage, { description }, h(FilterData, { id }));
 }
 
 function Header({ name, color, idType, id }) {
@@ -34,15 +37,11 @@ function Header({ name, color, idType, id }) {
     strat_name_id: "strat-names",
   };
 
-  return h(StickyHeader, { className: "header" }, [
-    h(PageBreadcrumbs, {
-      title: h(FlexRow, { gap: ".5em", alignItems: "center" }, [
-        h("p.title", "Legends for "),
-        h(LithologyTag, {
-          data: { name, color },
-          href: `/lex/${map[idType]}/${id}`,
-        }),
-      ]),
+  return h(FlexRow, { gap: ".5em", alignItems: "center", className: "header" }, [
+    h("h2.title", "Legends for "),
+    h(LithologyTag, {
+      data: { name, color },
+      href: `/lex/${map[idType]}/${id}`,
     }),
     h(BetaTag),
   ]);
@@ -63,13 +62,8 @@ function getUrlParams(urlString) {
   return result;
 }
 
-function Base() {
-  return h(ContentPage, { className: "page" }, [
-    h(
-      StickyHeader,
-      { className: "header" },
-      h(PageBreadcrumbs, { title: "Legends" })
-    ),
+function BaseList() {
+  return h(LexListPage, [
     h(PostgRESTInfiniteScrollView, {
       route: postgrestPrefix + "/legend_liths",
       id_key: "legend_id",
@@ -81,19 +75,7 @@ function Base() {
   ]);
 }
 
-function BaseUnitItem({ data }) {
-  const { id, col_id, strat_name } = data;
-
-  return h(LinkCard, {
-    href: `/columns/${col_id}#unit=${id}`,
-    title: strat_name,
-  });
-}
-
-function FilterData() {
-  const params = usePageContext().urlParsed.href.split("?")[1].split("=");
-  const id = params[1].split("&")[0];
-
+function FilterData({ id }) {
   return h(PostgRESTInfiniteScrollView, {
     route: postgrestPrefix + `/legend_liths`,
     id_key: "legend_id",

@@ -1,18 +1,13 @@
 import h from "./main.module.scss";
-import { PageBreadcrumbs, StickyHeader } from "~/components";
 import { useState } from "react";
-import { ContentPage } from "~/layouts";
+import { LexListPage } from "~/components/lex";
 import { useData } from "vike-react/useData";
 import { SearchBar } from "~/components/general";
 import { LexHierarchy } from "@macrostrat-web/lithology-hierarchy";
 import { navigate } from "vike/client/router";
 
 export function Page() {
-  const { res } = useData();  
-  return h(LexListPage, { res, title: "Economics", route: "economics", id: "econ_id" });
-}
-
-export function LexListPage({ res, title, route, id }) {
+  const { res } = useData();
   const [input, setInput] = useState("");
 
   const handleChange = (event) => {
@@ -28,14 +23,15 @@ export function LexListPage({ res, title, route, id }) {
     );
   });
 
-  return h(ContentPage, { className: "econ-list-page" }, [
-    h(StickyHeader, [
-      h(PageBreadcrumbs, { title }),
-      h(SearchBar, {
-        placeHolder: "Search economics...",
-        onChange: handleChange,
-      }),
-    ]),
-    h(LexHierarchy, { data: filtered, onClick: (e, item) => navigate(`/lex/${route}/${item[id]}`) }),
+  const search = h(SearchBar, {
+    placeHolder: "Search economics...",
+    onChange: handleChange,
+  });
+
+  return h(LexListPage, { className: "econ-list-page", controls: search }, [
+    h(LexHierarchy, {
+      data: filtered,
+      onClick: (e, item) => navigate(`/lex/economics/${item.econ_id}`),
+    }),
   ]);
 }
