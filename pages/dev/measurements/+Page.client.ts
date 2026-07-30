@@ -12,7 +12,7 @@ import { MultiSelect } from "@blueprintjs/select";
 import { MenuItem, Switch, Divider, Icon } from "@blueprintjs/core";
 import { tileserverDomain } from "@macrostrat-web/settings";
 import { fetchAPIV2Result, fetchPGData } from "~/_utils";
-import { Measurement } from "./measurement";
+import { Measurement } from "./measurement.ts";
 import { usePageContext } from "vike-react/usePageContext";
 import { Loading } from "~/components";
 

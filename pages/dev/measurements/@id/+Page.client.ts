@@ -2,7 +2,7 @@ import { useData } from "vike-react/useData";
 import h from "./main.module.sass";
 import { LexItemPage } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
-import { Measurement } from "../measurement";
+import { Measurement } from "../measurement.ts";
 
 export function Page() {
   const { resData } = useData();
