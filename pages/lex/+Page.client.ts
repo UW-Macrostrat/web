@@ -59,8 +59,13 @@ export function Page() {
       h("h2", "Dictionaries"),
       h(
         LinkCard,
-        { href: "/lex/strat-names", title: "Stratigraphic names" },
+        { href: "/lex/strat-names", title: "Geologic names" },
         "Names of rock units, organized hierarchically and concepts that capture relationships between differently-named rock units"
+      ),
+      h(
+        LinkCard,
+        { href: "/lex/lithologies", title: "Lithologies" },
+        "Names and hierarchies for geological materials"
       ),
 
       h(
@@ -72,11 +77,6 @@ export function Page() {
         LinkCard,
         { href: "/lex/timescales", title: "Timescales" },
         "Groups of intervals used together to span intervals of time"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/lithologies", title: "Lithologies" },
-        "Names and hierarchies for geological materials"
       ),
       h(
         LinkCard,
@@ -103,23 +103,15 @@ export function Page() {
         { href: "/lex/structures", title: "Structures" },
         "Names and descriptions of geologic structures"
       ),
-      h(
-        LinkCard,
-        { href: "/lex/units", title: "Units" },
-        "Lithologically and chronologically defined building blocks for columns, often representing a strat name"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/fossils", title: "Fossils" },
-        "Fossil taxonomic occurrences from the Paleobiology Database linked to Macrostrat units"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/measurements", title: "Measurements" },
-        "Measurement names and descriptions"
-      ),
       h("p", [
-        h("strong", h("a", { href: "/sift" }, "Sift")),
+        h(
+          "strong",
+          h(
+            "a",
+            { href: "https://macrostrat.org/sift/#", target: "_blank" },
+            "Sift"
+          )
+        ),
         ", Macrostrat's legacy lexicon app, is still available for use as it is gradually brought into this new framework.",
       ]),
       h(UpdatesExpandableDialog),

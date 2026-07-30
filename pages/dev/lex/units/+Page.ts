@@ -6,7 +6,7 @@ import { fetchAPIData } from "~/_utils";
 import { usePageContext } from "vike-react/usePageContext";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-import { LithologyTag, FlexRow, ExpansionPanel } from "~/components/lex/tag";
+import { LithologyTag, FlexRow, ExpansionPanel } from "~/components/lex/tag.ts";
 
 export function Page() {
   const url = usePageContext().urlOriginal.split("?")[1];
@@ -87,14 +87,18 @@ function Header({ name, color, idType, id }) {
     strat_name_id: "strat-names",
   };
 
-  return h(FlexRow, { gap: ".5em", alignItems: "center", className: "header" }, [
-    h("h2.title", "Units for "),
-    h(LithologyTag, {
-      data: { name, color },
-      href: `/lex/${map[idType]}/${id}`,
-    }),
-    h(BetaTag),
-  ]);
+  return h(
+    FlexRow,
+    { gap: ".5em", alignItems: "center", className: "header" },
+    [
+      h("h2.title", "Units for "),
+      h(LithologyTag, {
+        data: { name, color },
+        href: `/lex/${map[idType]}/${id}`,
+      }),
+      h(BetaTag),
+    ]
+  );
 }
 
 function getUrlParams(urlString) {

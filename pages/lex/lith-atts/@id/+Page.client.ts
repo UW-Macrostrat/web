@@ -10,10 +10,10 @@ export function Page() {
 
   const children = [
     h(LithologyAttributeDetails, { resData }),
-    h(TextExtractions, {
-      lith_att_id: id,
-      href: "autoselect=" + resData?.name + "&lith_att_id=" + id,
-    }),
+    // h(TextExtractions, {
+    //   lith_att_id: id,
+    //   href: "autoselect=" + resData?.name + "&lith_att_id=" + id,
+    // }),
   ];
 
   return h(
