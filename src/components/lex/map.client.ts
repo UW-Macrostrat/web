@@ -1,13 +1,9 @@
-import {
-  ColumnNavigationMap,
-  useMacrostratColumns,
-} from "@macrostrat/column-views";
+import { ColumnNavigationMap } from "@macrostrat/column-views";
 import h from "./map.module.sass";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
-import { ErrorBoundary, useDarkMode } from "@macrostrat/ui-components";
-import { ExpansionPanel } from "@macrostrat/data-components";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 import { Icon } from "@blueprintjs/core";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useMapStyleOperator } from "@macrostrat/mapbox-react";
 import { satelliteMapURL } from "@macrostrat-web/settings";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
@@ -25,15 +21,10 @@ const _macrostratStyle = buildMacrostratStyle({
 
 export function LexiconMap(props) {
   /* TODO: integrate this with shared web components */
-  return h(ErrorBoundary, h(ColumnsMapInner, props));
+  return h(ErrorBoundary, h(LexiconMapInner, props));
 }
 
-export function ExpansionPanelContainer(props) {
-  return h(ExpansionPanel, props);
-}
-
-function ColumnsMapInner({
-  columnIDs = null,
+function LexiconMapInner({
   className = "map-container",
   columns = null,
   fossilsData = [],
@@ -46,8 +37,6 @@ function ColumnsMapInner({
   const fossilClickRef = useRef(false);
   const hasFitted = useRef(false);
   const fossilsExist = fossilsData?.features?.length > 0;
-
-  console.log("Fossils exist", fossilsExist);
 
   function LexControls() {
     const handleFossils = () => {
@@ -95,6 +84,15 @@ function ColumnsMapInner({
     return col;
   });
 
+  let fossilsLayer = null;
+  if (fossilsExist) {
+    fossilsLayer = h(FossilsLayer, {
+      fossilsData,
+      showFossils,
+      fossilClickRef,
+    });
+  }
+
   return h("div", { className }, [
     h(
       ColumnNavigationMap,
@@ -117,9 +115,7 @@ function ColumnsMapInner({
         columnColor: showSatellite ? "#000" : null,
       },
       [
-        fossilsExist
-          ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef })
-          : null,
+        fossilsLayer,
         h(LexControls),
         !hasFitted.current
           ? h(FitBounds, { columnData: columns, hasFitted })

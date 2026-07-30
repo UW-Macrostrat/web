@@ -24,7 +24,7 @@ export function Page() {
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
-  const children = [
+  return h(LexItemPage, { id, refs, resData, siftLink: "lithology" }, [
     h(ColumnsTable, {
       resData,
       colData,
@@ -46,9 +46,7 @@ export function Page() {
       href:
         "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name,
     }),
-  ];
-
-  return LexItemPage({ children, id, refs, resData, siftLink: "lithology" });
+  ]);
 }
 
 // h(TextExtractions, {

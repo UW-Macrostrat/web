@@ -24,9 +24,9 @@ import { LinkCard } from "~/components/cards";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
 import { ClientOnly } from "vike-react/ClientOnly";
-import { ExpansionPanel } from "@macrostrat/data-components";
 import { fetchPGData } from "~/_utils";
 import { LexiconMap } from "./map.client";
+import { ExpansionPanel } from "@macrostrat/data-components";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -35,17 +35,6 @@ export function titleCase(str) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
-}
-
-function ExpansionPanelContainer(props) {
-  return h(
-    ClientOnly,
-    {
-      load: () => import("./map.client").then((d) => d.ExpansionPanelContainer),
-      fallback: h("div.loading", "Loading map..."),
-    },
-    (component) => h(component, props)
-  );
 }
 
 export function LexItemPage(props: LexItemPageProps) {
@@ -72,12 +61,12 @@ function LexItemPageInner(props: LexItemPageProps) {
   const { name, strat_name_long } = resData;
 
   return h("div", [
-    SiftLink({
+    children,
+    h(References, { refs }),
+    h(SiftLink, {
       id,
       siftLink,
     }),
-    children,
-    h(References, { refs }),
   ]);
 }
 
@@ -98,8 +87,8 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
       ? apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id
       : null
   );
-  const t_id = getIntID({ name: summary.t_int_name });
-  const b_id = getIntID({ name: summary.b_int_name });
+  const t_id = useIntervalID({ name: summary.t_int_name });
+  const b_id = useIntervalID({ name: summary.b_int_name });
 
   if (!hasColumns) return null;
 
@@ -315,7 +304,7 @@ function UpperCase(str) {
 export function Timescales({ timescales }) {
   return h.if(timescales?.length)("div.int-timescales", [
     h(
-      ExpansionPanelContainer,
+      ExpansionPanel,
       { title: "Timescales" },
       h(
         "ul",
@@ -401,7 +390,7 @@ function ConceptHierarchy({ id }) {
   ]);
 }
 
-function getIntID({ name }) {
+function useIntervalID({ name }) {
   const res = useAPIResult(
     name ? apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name) : null
   )?.success?.data;
