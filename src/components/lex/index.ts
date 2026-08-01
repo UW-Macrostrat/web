@@ -401,15 +401,16 @@ function useIntervalID({ name }) {
 }
 
 export function ConceptInfo({ concept_id, showHeader }) {
-  if (!concept_id) return;
-
+  // Hook must run unconditionally; pass a null route when there's no concept.
   const data = useAPIResult(
-    apiV2Prefix +
-      "/defs/strat_name_concepts?strat_name_concept_id=" +
-      concept_id
-  )?.success?.data[0];
+    concept_id
+      ? apiV2Prefix +
+          "/defs/strat_name_concepts?strat_name_concept_id=" +
+          concept_id
+      : null
+  )?.success?.data?.[0];
 
-  if (!data) return;
+  if (!data) return null;
 
   const { author, name, province, geologic_age, other, usage_notes, url } =
     data;

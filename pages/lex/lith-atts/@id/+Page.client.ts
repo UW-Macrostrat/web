@@ -1,20 +1,14 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
-import { LexItemPage, TextExtractions } from "~/components/lex";
+import { LexItemPage } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
   const { resData } = useData();
 
-  const id = usePageContext().urlParsed.pathname.split("/")[3];
+  const id = usePageContext().routeParams.id;
 
-  const children = [
-    h(LithologyAttributeDetails, { resData }),
-    // h(TextExtractions, {
-    //   lith_att_id: id,
-    //   href: "autoselect=" + resData?.name + "&lith_att_id=" + id,
-    // }),
-  ];
+  const children = [h(LithologyAttributeDetails, { resData })];
 
   return h(
     LexItemPage,

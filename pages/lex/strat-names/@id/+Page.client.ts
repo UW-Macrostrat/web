@@ -9,50 +9,56 @@ import {
   ConceptInfo,
   Units,
   Fossils,
-  Maps,
-  TextExtractions
 } from "~/components/lex";
+import {
+  useLexColumns,
+  useLexFossils,
+  useLexTaxa,
+  useLexUnits,
+} from "~/components/lex/item-atoms";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
 import { StratTag } from "~/components/general";
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, fossilsData, mapsData, unitsData } =
-    useData();
+  const { resData, refs } = useData();
+  const id = usePageContext().routeParams.id;
 
-  const id = usePageContext()?.urlPathname.split("/")?.[3] || [];
+  const itemRef = { type: "strat-names", id: Number(id) };
+  const colData = useLexColumns(itemRef);
+  const fossilsData = useLexFossils(itemRef);
+  const taxaData = useLexTaxa(itemRef);
+  const unitsData = useLexUnits(itemRef);
+
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
-
   const { strat_name_long } = resData || {};
 
   const children = [
-    h(ColumnsTable, {
-      resData,
-      colData,
-      fossilsData,
-    }),
+    h(ColumnsTable, { resData, colData, fossilsData }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h.if(unitsData.length > 0)(Units, { href: "strat_name_id=" + id + "&name=" + resData?.strat_name }),
-    // h.if(mapsData?.length > 0)(Maps, { href: "strat_name_id=" + id + "&name=" + resData?.name }), (add strat names to legends view first)
-    h.if(fossilsData.features.length > 0)(Fossils, { href: "strat_name_id=" + id + "&name=" + resData?.name }),
+    h.if(unitsData?.length > 0)(Units, {
+      href: "strat_name_id=" + id + "&name=" + resData?.strat_name,
+    }),
+    // h.if(mapsData?.length > 0)(Maps, ...) — add strat names to the legends view first
+    h.if(fossilsData?.features?.length > 0)(Fossils, {
+      href: "strat_name_id=" + id + "&name=" + resData?.name,
+    }),
     h(StratNameHierarchy, { id }),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
   ];
 
-  return h(LexItemPage, 
-    {
-      children,
-      id,
-      refs,
-      resData,
-      siftLink: "strat-name",
-      header: h("div.strat-header", [
-        h("h1.strat-title", strat_name_long),
-        h(StratTag, { isConcept: false, fontSize: "1.6em" }),
-      ]),
-    }
-  );
+  return h(LexItemPage, {
+    children,
+    id,
+    refs,
+    resData,
+    siftLink: "strat-name",
+    header: h("div.strat-header", [
+      h("h1.strat-title", strat_name_long),
+      h(StratTag, { isConcept: false, fontSize: "1.6em" }),
+    ]),
+  });
 }

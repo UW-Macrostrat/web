@@ -10,30 +10,41 @@ import {
   Units,
   Fossils,
 } from "~/components/lex";
+import {
+  useLexColumns,
+  useLexFossils,
+  useLexTaxa,
+  useLexUnits,
+} from "~/components/lex/item-atoms";
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, fossilsData, unitsData } =
-    useData();
+  const { resData, refs } = useData();
+  const id = usePageContext().routeParams.id;
 
-  const id = usePageContext().urlParsed.pathname.split("/")[3];
+  const itemRef = { type: "intervals", id: Number(id) };
+  const colData = useLexColumns(itemRef);
+  const fossilsData = useLexFossils(itemRef);
+  const taxaData = useLexTaxa(itemRef);
+  const unitsData = useLexUnits(itemRef);
+
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
+  const relatedHref =
+    "int_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name;
 
-  const children = [
+  return h(LexItemPage, { id, refs, resData, siftLink: "interval" }, [
     h(Intervals, { resData }),
     h(ColumnsTable, {
       resData,
       colData,
       fossilsData,
-      mapUrl: "intervals=" + id
+      mapUrl: "intervals=" + id,
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h.if(fossilsData.features.length > 0)(Fossils, { href: "int_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
-    h.if(unitsData.length > 0)(Units, { href: "int_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
-  ];
-
-  return LexItemPage({ children, id, refs, resData, siftLink: "interval" });
+    h.if(fossilsData?.features?.length > 0)(Fossils, { href: relatedHref }),
+    h.if(unitsData?.length > 0)(Units, { href: relatedHref }),
+  ]);
 }

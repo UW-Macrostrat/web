@@ -6,11 +6,11 @@ import { usePageContext } from "vike-react/usePageContext";
 export function Page() {
   const { resData } = useData();
 
-  const id = usePageContext().urlParsed.pathname.split("/")[3];
+  const id = usePageContext().routeParams.id;
 
   const children = [h(MineralDetails, { resData })];
 
-  return LexItemPage({
+  return h(LexItemPage, {
     children,
     id,
     refs: [],
@@ -32,15 +32,21 @@ function MineralDetails({ resData }) {
     lustre,
   } = resData || {};
 
+  let moreInfo = null;
+  if (url) {
+    moreInfo = h("a.mineral-url", { href: url, target: "_self" }, "More Info");
+  }
+
   return h("div.mineral-details", [
     h.if(mineral_type)("p.mineral-type", `Type: ${mineral_type}`),
     h.if(formula)("p.formula", `Formula: ${formula}`),
-    h.if(hardness_min || hardness_max)("p.hardness", `Hardness: ${hardness_min} - ${hardness_max}`),
+    h.if(hardness_min || hardness_max)(
+      "p.hardness",
+      `Hardness: ${hardness_min} - ${hardness_max}`
+    ),
     h.if(crystal_form)("p.crystal-form", `Crystal Form: ${crystal_form}`),
     h.if(mineral_color)("p.color", `Color: ${mineral_color}`),
     h.if(lustre)("p.lustre", `Lustre: ${lustre}`),
-    url
-      ? h("a.mineral-url", { href: url, target: "_self" }, "More Info")
-      : null,
+    moreInfo,
   ]);
 }

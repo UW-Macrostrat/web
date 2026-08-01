@@ -9,28 +9,35 @@ import {
   Units,
   Fossils,
 } from "~/components/lex";
+import {
+  useLexColumns,
+  useLexFossils,
+  useLexTaxa,
+  useLexUnits,
+} from "~/components/lex/item-atoms";
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, fossilsData, unitsData } =
-    useData();
+  const { resData, refs } = useData();
+  const id = usePageContext().routeParams.id;
 
-  const id = usePageContext().urlParsed.pathname.split("/")[3];
+  const itemRef = { type: "environments", id: Number(id) };
+  const colData = useLexColumns(itemRef);
+  const fossilsData = useLexFossils(itemRef);
+  const taxaData = useLexTaxa(itemRef);
+  const unitsData = useLexUnits(itemRef);
+
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
+  const relatedHref =
+    "environ_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name;
 
-  const children = [
-    h(ColumnsTable, {
-      resData,
-      colData,
-      fossilsData
-    }),
+  return h(LexItemPage, { id, refs, resData, siftLink: "environment" }, [
+    h(ColumnsTable, { resData, colData, fossilsData }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h.if(fossilsData?.features?.length > 0)(Fossils, { href: "environ_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
-    h.if(unitsData.length > 0)(Units, { href: "environ_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
-  ];
-
-  return LexItemPage({ children, id, refs, resData, siftLink: "environment" });
+    h.if(fossilsData?.features?.length > 0)(Fossils, { href: relatedHref }),
+    h.if(unitsData?.length > 0)(Units, { href: relatedHref }),
+  ]);
 }

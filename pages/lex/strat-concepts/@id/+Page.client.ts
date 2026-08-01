@@ -9,9 +9,13 @@ import {
   ConceptInfo,
   Units,
   Fossils,
-  Maps,
-  TextExtractions,
 } from "~/components/lex";
+import {
+  useLexColumns,
+  useLexFossils,
+  useLexTaxa,
+  useLexUnits,
+} from "~/components/lex/item-atoms";
 import { StratTag } from "~/components/general";
 import { LinkCard } from "~/components/cards";
 import { usePageContext } from "vike-react/usePageContext";
@@ -19,13 +23,19 @@ import { fetchAPIData } from "~/_utils";
 import { useEffect, useState } from "react";
 
 export function Page() {
-  const { resData, refs, fossilsData, colData, taxaData, unitsData } =
-    useData();
+  const { resData, refs } = useData();
+  const id = usePageContext().routeParams.id;
 
-  const id = usePageContext()?.urlPathname.split("/")?.[3] || [];
+  const itemRef = { type: "strat-concepts", id: Number(id) };
+  const colData = useLexColumns(itemRef);
+  const fossilsData = useLexFossils(itemRef);
+  const taxaData = useLexTaxa(itemRef);
+  const unitsData = useLexUnits(itemRef);
+
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
   const { name } = resData || {};
+  const relatedHref = "strat_name_concept_id=" + id + "&name=" + resData?.name;
 
   const children = [
     h(ConceptInfo, { concept_id: id, showHeader: false }),
@@ -39,15 +49,11 @@ export function Page() {
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h(ConceptBody, { concept_id: id }),
-    h.if(unitsData.length > 0)(Units, {
-      href: "strat_name_concept_id=" + id + "&name=" + resData?.name,
-    }),
-    h.if(fossilsData.length > 0)(Fossils, {
-      href: "strat_name_concept_id=" + id + "&name=" + resData?.name,
-    }),
+    h.if(unitsData?.length > 0)(Units, { href: relatedHref }),
+    h.if(fossilsData?.features?.length > 0)(Fossils, { href: relatedHref }),
   ];
 
-  return LexItemPage({
+  return h(LexItemPage, {
     children,
     id,
     refs,

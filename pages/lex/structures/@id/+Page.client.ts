@@ -6,11 +6,17 @@ import { usePageContext } from "vike-react/usePageContext";
 export function Page() {
   const { resData } = useData();
 
-  const id = usePageContext().urlParsed.pathname.split("/")[3];
+  const id = usePageContext().routeParams.id;
 
   const children = [h(StructureDetails, { resData })];
 
-  return LexItemPage({ children, id, refs: [], resData, siftLink: "structure" });
+  return h(LexItemPage, {
+    children,
+    id,
+    refs: [],
+    resData,
+    siftLink: "structure",
+  });
 }
 
 function StructureDetails({ resData }) {
