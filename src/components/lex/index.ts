@@ -1,4 +1,5 @@
 export * from "./list-page";
+export * from "./item-body-loader";
 import h from "./main.module.sass";
 import { navigate } from "vike/client/router";
 import {
@@ -23,9 +24,15 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import { LinkCard } from "~/components/cards";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
-import { ClientOnly } from "vike-react/ClientOnly";
+import { clientOnly } from "./client-only";
+// NOTE: do NOT statically import "./map.client" here — it pulls in mapbox-gl,
+// which touches `window` at module load and crashes SSR. `clientOnly()` dynamic-
+// imports it (below) so the barrel stays server-safe, and it renders `fallback`
+// on the server (no `<ClientOnly>` children-assert issue under hyperscript).
+const LexiconMapLazy = clientOnly(() =>
+  import("./map.client").then((m) => m.LexiconMap)
+);
 import { fetchPGData } from "~/_utils";
-import { LexiconMap } from "./map.client";
 import { ExpansionPanel } from "@macrostrat/data-components";
 
 export function titleCase(str) {
@@ -58,7 +65,8 @@ export function LexItemPage(props: LexItemPageProps) {
 function LexItemPageInner(props: LexItemPageProps) {
   const { children, siftLink, id, resData, refs = [], header } = props;
 
-  const { name, strat_name_long } = resData;
+  // Guard: this renders server-side now (SSR doesn't catch a null destructure).
+  const { name, strat_name_long } = resData || {};
 
   return h("div", [
     children,
@@ -169,17 +177,14 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
       h(Divider, { className: "divider" }),
       h("div.collections", pbdb_collections.toLocaleString() + " collections"),
     ]),
-    h(
-      ClientOnly,
-      { fallback: h(Spinner) },
-      h(LexiconMap, {
-        filters,
-        columns: colData,
-        className: "column-map-container",
-        fossilsData,
-        mapUrl,
-      })
-    ),
+    h(LexiconMapLazy, {
+      filters,
+      columns: colData,
+      className: "column-map-container",
+      fossilsData,
+      mapUrl,
+      fallback: h(Spinner),
+    }),
   ]);
 }
 
@@ -323,7 +328,7 @@ export function Timescales({ timescales }) {
   ]);
 }
 
-function References({ refs }) {
+export function References({ refs }) {
   return h.if(refs?.length != 0)("div.int-references", [
     h("h3", "Primary Sources"),
     h(Divider),

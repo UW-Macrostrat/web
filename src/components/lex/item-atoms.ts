@@ -5,6 +5,7 @@ import {
   fetchLexColumns,
   fetchLexFossils,
   fetchLexPrevalentTaxa,
+  fetchLexRefs,
   fetchLexUnits,
   fetchLexMaps,
 } from "./data-loaders";
@@ -83,12 +84,25 @@ const mapsAtom = atomFamily((key: string) =>
   })
 );
 
+// References are descriptive/SEO content, but the /columns + /fossils ref merge
+// is slow for high-cardinality items (it was blocking +data on the server). Load
+// it client-side for now; a future refs-improvement pass can move it back to a
+// fast server path. See [[Reference loading improvements]].
+const refsAtom = atomFamily((key: string) =>
+  atom(async () => {
+    const r = resolveConfig(key);
+    if (r == null) return [];
+    return fetchLexRefs(r.cfg, r.id);
+  })
+);
+
 // Loadable wrappers, memoized per key so they're stable across renders.
 const columnsLoadable = atomFamily((key: string) => loadable(columnsAtom(key)));
 const fossilsLoadable = atomFamily((key: string) => loadable(fossilsAtom(key)));
 const taxaLoadable = atomFamily((key: string) => loadable(taxaAtom(key)));
 const unitsLoadable = atomFamily((key: string) => loadable(unitsAtom(key)));
 const mapsLoadable = atomFamily((key: string) => loadable(mapsAtom(key)));
+const refsLoadable = atomFamily((key: string) => loadable(refsAtom(key)));
 
 function dataOrNull(state: any) {
   return state?.state === "hasData" ? state.data : null;
@@ -108,4 +122,7 @@ export function useLexUnits(ref: LexItemRef) {
 }
 export function useLexMaps(ref: LexItemRef) {
   return dataOrNull(useAtomValue(mapsLoadable(keyFor(ref))));
+}
+export function useLexRefs(ref: LexItemRef) {
+  return dataOrNull(useAtomValue(refsLoadable(keyFor(ref)))) ?? [];
 }

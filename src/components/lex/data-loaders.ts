@@ -54,6 +54,16 @@ export function lexTypeConfig(type: string): LexTypeConfig | null {
   return LEX_TYPE_CONFIG[type] ?? null;
 }
 
+/** Extract the numeric lex id from a page context in the `data()` hook.
+ * `routeParams` isn't reliably populated there on a direct/SSR request, so fall
+ * back to the URL path (`/lex/<type>/<id>`). */
+export function lexIdFromContext(pageContext: any): number {
+  const raw =
+    pageContext.routeParams?.id ??
+    pageContext.urlParsed?.pathname?.split("/")?.[3];
+  return parseInt(raw);
+}
+
 /** Core descriptive record (server-HTML / SEO). Throws on API failure so the
  * page's ErrorBoundary can surface a "doesn't exist" state. */
 export async function fetchLexCore(cfg: LexTypeConfig, id: number) {

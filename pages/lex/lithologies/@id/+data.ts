@@ -1,25 +1,25 @@
-import { fetchLexCore, fetchLexRefs, lexTypeConfig } from "~/components/lex/data-loaders";
+import {
+  fetchLexCore,
+  lexTypeConfig,
+  lexIdFromContext,
+} from "~/components/lex/data-loaders";
 
 /**
- * Server-side load for the lithology detail page: core descriptive record +
- * references only. Heavy/derived data (column & fossil GeoJSON, prevalent taxa,
- * related units/maps presence) is loaded client-side via loadable atoms — see
- * `~/components/lex/item-atoms`. Keeping this lean makes SSR fast and stops the
- * heavy GeoJSON from being serialized into `pageContext` on every navigation.
+ * Server-side load for the lithology detail page: the core descriptive record
+ * only. Everything else — references, column & fossil GeoJSON, taxa, related
+ * units/maps — loads client-side via loadable atoms (`~/components/lex/item-atoms`).
+ * References moved off the server because the `/columns`+`/fossils` ref merge is
+ * slow for high-cardinality items and was erroring `pageContext` generation; see
+ * [[Reference loading improvements]].
  */
 export async function data(pageContext) {
-  const id = parseInt(pageContext.routeParams.id);
-
+  const id = lexIdFromContext(pageContext);
   if (isNaN(id)) {
     throw new Error("Invalid lithology ID in URL.");
   }
 
   const cfg = lexTypeConfig("lithologies");
+  const resData = await fetchLexCore(cfg, id);
 
-  const [resData, refs] = await Promise.all([
-    fetchLexCore(cfg, id),
-    fetchLexRefs(cfg, id),
-  ]);
-
-  return { resData, refs };
+  return { resData };
 }
