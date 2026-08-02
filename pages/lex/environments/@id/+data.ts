@@ -1,12 +1,11 @@
 import {
   fetchLexCore,
-  fetchLexRefs,
   lexTypeConfig,
   lexIdFromContext,
 } from "~/components/lex/data-loaders";
 
-/** Core descriptive record + references only; heavy/derived data loads
- * client-side via `~/components/lex/item-atoms`. See [[Geologic lexicon pages]]. */
+/** Core descriptive record only; refs + heavy/derived data load client-side via
+ * `~/components/lex/item-atoms`. See [[Geologic lexicon pages]]. */
 export async function data(pageContext) {
   const id = lexIdFromContext(pageContext);
   if (isNaN(id)) {
@@ -14,10 +13,7 @@ export async function data(pageContext) {
   }
 
   const cfg = lexTypeConfig("environments");
-  const [resData, refs] = await Promise.all([
-    fetchLexCore(cfg, id),
-    fetchLexRefs(cfg, id),
-  ]);
+  const resData = await fetchLexCore(cfg, id);
 
-  return { resData, refs };
+  return { resData };
 }

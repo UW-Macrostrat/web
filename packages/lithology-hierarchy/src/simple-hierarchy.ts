@@ -25,7 +25,6 @@ function Tree({ data, level = 0 }: { data: TreeNodeData; level: number }) {
               data: d.lith ?? d,
               tooltip: true,
               tooltipProps: { showExternalLinks: true },
-              expandOnHover: true,
             }),
           ])
         )
