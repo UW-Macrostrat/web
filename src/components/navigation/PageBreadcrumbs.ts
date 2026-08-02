@@ -3,7 +3,7 @@ import { Breadcrumbs } from "@blueprintjs/core";
 import { ReactNode, useMemo } from "react";
 import { MacrostratIcon } from "~/components";
 import { buildBreadcrumbs, Item } from "~/_utils/breadcrumbs";
-import { PageContext } from "vike/types";
+import { Identifier } from "@macrostrat/data-components";
 
 import h from "./breadcrumbs.module.sass";
 
@@ -38,19 +38,9 @@ export function TitleBlock({
     h.if(identifier != null)(
       IdentifierTag,
       { className: "identifier" },
-      h(Identifier, { identifier })
+      h(Identifier, { id: identifier })
     ),
   ]);
-}
-
-export function Identifier({
-  identifier,
-  className,
-}: {
-  identifier: number;
-  className?: string;
-}) {
-  return h("code.identifier", { className }, ["#", identifier]);
 }
 
 export function usePageBreadcrumbs(): Item[] {

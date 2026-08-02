@@ -34,6 +34,9 @@ function buildHrefForItem(item: MacrostratItemIdentifier) {
   if ("lith_id" in item) {
     return `/lex/lithologies/${item.lith_id}`;
   }
+  if ("lith_att_id" in item) {
+    return `/lex/lith-att/${item.lith_att_id}`;
+  }
   if ("environ_id" in item) {
     return `/lex/environments/${item.environ_id}`;
   }

@@ -1,6 +1,7 @@
 import h from "./main.module.sass";
-import { Link, Identifier } from "~/components";
+import { Link } from "~/components";
 import { useData } from "vike-react/useData";
+import { Identifier } from "@macrostrat/data-components";
 
 /**
  * Jotai provides a composable approach to state management
@@ -55,7 +56,7 @@ function ColumnGroupCols({ data }) {
         name
       ),
       h(Identifier, {
-        identifier: data.col_group_id,
+        id: data.col_group_id,
         className: "group-identifier",
       }),
     ])

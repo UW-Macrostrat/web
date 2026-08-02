@@ -1,8 +1,7 @@
 import h from "@macrostrat/hyper";
-import { Identifier } from "~/components";
 import { useData } from "vike-react/useData";
 import { Hierarchy } from "@macrostrat-web/lithology-hierarchy";
-import { Tag } from "@macrostrat/data-components";
+import { Identifier, Tag } from "@macrostrat/data-components";
 
 import type { Data } from "./+data.ts";
 
@@ -19,7 +18,7 @@ function StructureItemComponent({ data }: { data: StructureItem }) {
     className: "structure-item",
     href: "/lex/structures/" + data.structure_id,
     name: data.name,
-    details: h(Identifier, { identifier: data.structure_id }),
+    details: h(Identifier, { id: data.structure_id }),
   });
 }
 

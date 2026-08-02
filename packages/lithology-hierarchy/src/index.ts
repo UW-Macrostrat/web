@@ -13,17 +13,27 @@ import {
 import { Hierarchy } from "./simple-hierarchy";
 import LexHierarchyInner from "./lex-hierarchy";
 import { LithologyTag } from "~/components";
-import { useInteractionProps, Tag } from "@macrostrat/data-components";
+import {
+  useInteractionProps,
+  Tag,
+  macrostratIdentifierFields,
+  Identifier,
+} from "@macrostrat/data-components";
 export { Hierarchy };
 
 export { nestItems, nestLithAttributes };
 
 export function MacrostratHierarchyItem({ data }) {
   const props = useInteractionProps(data);
-  const identifier = identifierFields(data);
+  const ident = macrostratIdentifierFields(data);
+  let details = null;
+  if (ident) {
+    details = h(Identifier, { id: ident[1] });
+  }
   return h(Tag, {
     name: data.name,
     color: data.color,
+    details,
     ...props,
   });
 }

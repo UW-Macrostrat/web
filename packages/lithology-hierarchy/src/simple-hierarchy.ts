@@ -1,10 +1,7 @@
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
+import h from "./main.module.sass";
 import { TreeNodeData } from "./nest-data";
 import { OverlaysProvider } from "@blueprintjs/core";
 import { ComponentType } from "react";
-
-const h = hyper.styled(styles);
 
 export interface HierarchyProps<T extends object = any> {
   data: TreeNodeData<T>;

@@ -1,5 +1,5 @@
 import h from "./main.module.sass";
-import { Identifier } from "~/components";
+import { Identifier } from "@macrostrat/data-components";
 import { Icon, Tag } from "@blueprintjs/core";
 import { createDataCard } from "@macrostrat/data-sheet";
 
@@ -17,7 +17,7 @@ function MapCardContent({ data }) {
         h("span", ref_source + ": " + ref_title + " (" + ref_year + ") "),
         h("a", { href: url, target: "_blank" }, h(Icon, { icon: "link" })),
       ]),
-      h("div.tags", [h(Identifier, { identifier: source_id })]),
+      h("div.tags", [h(Identifier, { id: source_id })]),
     ]),
   ]);
 }
