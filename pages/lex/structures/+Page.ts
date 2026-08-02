@@ -1,67 +1,32 @@
-import h from "./main.module.scss";
-import { LinkCard } from "~/components";
-import { LexListPage } from "~/components/lex";
-import { useState } from "react";
+import h from "@macrostrat/hyper";
+import { Identifier } from "~/components";
 import { useData } from "vike-react/useData";
-import { SearchBar } from "~/components/general";
+import { Hierarchy } from "@macrostrat-web/lithology-hierarchy";
+import { Tag } from "@macrostrat/data-components";
+
+import type { Data } from "./+data.ts";
+
+interface StructureItem {
+  name: string;
+  structure_id: number;
+  class: string;
+  group: string | null;
+  type: string;
+}
+
+function StructureItemComponent({ data }: { data: StructureItem }) {
+  return h(Tag, {
+    className: "structure-item",
+    href: "/lex/structures/" + data.structure_id,
+    name: data.name,
+    details: h(Identifier, { identifier: data.structure_id }),
+  });
+}
 
 export function Page() {
-  const [input, setInput] = useState("");
-  const { res } = useData();
-
-  const handleChange = (event) => {
-    setInput(event.toLowerCase());
-  };
-
-  const filtered = res.filter((d) => {
-    const name = d.name.toLowerCase();
-    const className = d.class.toLowerCase();
-    const type = d.type ? d.type.toLowerCase() : "";
-    return (
-      name.includes(input) || className.includes(input) || type.includes(input)
-    );
+  const { structuresTree } = useData<Data>();
+  return h(Hierarchy, {
+    data: structuresTree,
+    itemComponent: StructureItemComponent,
   });
-
-  const grouped = groupByClass(filtered);
-
-  const search = h(SearchBar, {
-    placeHolder: "Search structures...",
-    onChange: handleChange,
-  });
-
-  return h(LexListPage, { className: "econ-list-page", controls: search }, [
-    h(
-      "div.econ-list",
-      Object.entries(grouped).map(([className, types]) =>
-        h("div.econ-class-group", [
-          h("h2", UpperCase(className)),
-          h(
-            "div.econ-items",
-            types?.map((d) =>
-              h(
-                LinkCard,
-                { href: `/lex/structures/${d.structure_id}` },
-                UpperCase(d.name)
-              )
-            )
-          ),
-        ])
-      )
-    ),
-  ]);
-}
-
-function groupByClass(items) {
-  return items.reduce((acc, item) => {
-    const className = item.class.toLowerCase();
-    if (!acc[className]) {
-      acc[className] = [];
-    }
-    acc[className].push(item);
-    return acc;
-  }, {});
-}
-
-function UpperCase(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
 }

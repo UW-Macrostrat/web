@@ -14,6 +14,7 @@ import { Hierarchy } from "./simple-hierarchy";
 import LexHierarchyInner from "./lex-hierarchy";
 import { LithologyTag } from "~/components";
 import { useInteractionProps } from "@macrostrat/data-components";
+export { Hierarchy };
 
 export function MacrostratHierarchyItem({ data }) {
   const props = useInteractionProps(data);
@@ -71,6 +72,16 @@ export function EnvironmentsHierarchy() {
   });
 }
 
+/** LithAttHierarchyItem */
+function LithAttHierarchyItem({ data }) {
+  const href = "/lex/lith-atts/" + data.lith_att_id;
+  console.log(data);
+  return h(LithologyTag, {
+    data,
+    href,
+  });
+}
+
 export function LithAttsHierarchy() {
   const [error, setError] = useState(null);
   const res = useAPIResult(
@@ -87,9 +98,12 @@ export function LithAttsHierarchy() {
   if (res == null) {
     return h(Spinner);
   }
-  const liths: LithAttribute[] = res.success.data;
+  const atts: LithAttribute[] = res.success.data;
 
-  return h(Hierarchy, { data: nestLithAttributes(liths) });
+  return h(Hierarchy, {
+    data: nestLithAttributes(atts),
+    itemComponent: LithAttHierarchyItem,
+  });
 }
 
 export function LexHierarchy({
