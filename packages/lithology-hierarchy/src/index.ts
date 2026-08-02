@@ -13,38 +13,18 @@ import {
 import { Hierarchy } from "./simple-hierarchy";
 import LexHierarchyInner from "./lex-hierarchy";
 import { LithologyTag } from "~/components";
-import { useInteractionProps } from "@macrostrat/data-components";
+import { useInteractionProps, Tag } from "@macrostrat/data-components";
 export { Hierarchy };
+
+export { nestItems, nestLithAttributes };
 
 export function MacrostratHierarchyItem({ data }) {
   const props = useInteractionProps(data);
-  return h(LithologyTag, {
-    data,
+  const identifier = identifierFields(data);
+  return h(Tag, {
+    name: data.name,
+    color: data.color,
     ...props,
-  });
-}
-
-export function LithologyHierarchy() {
-  const [error, setError] = useState(null);
-  const res = useAPIResult(
-    `${apiV2Prefix}/defs/lithologies`,
-    {
-      all: true,
-    },
-    { onError: setError }
-  );
-
-  if (error != null) {
-    return h(ErrorCallout, { error });
-  }
-  if (res == null) {
-    return h(Spinner);
-  }
-  const liths: Lith[] = res.success.data;
-
-  return h(Hierarchy, {
-    data: nestLiths(liths),
-    itemComponent: MacrostratHierarchyItem,
   });
 }
 
