@@ -1,16 +1,27 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { TreeNodeData } from "./nest-data";
-import { LithologyTag } from "~/components";
 import { OverlaysProvider } from "@blueprintjs/core";
+import { ComponentType } from "react";
 
 const h = hyper.styled(styles);
 
-export default function Hierarchy({ data }: { data: TreeNodeData }) {
-  return h(OverlaysProvider, h(Tree, { data, level: 0 }));
+export interface HierarchyProps<T extends object = any> {
+  data: TreeNodeData<T>;
+  itemComponent: ComponentType<{ data: T }>;
 }
 
-function Tree({ data, level = 0 }: { data: TreeNodeData; level: number }) {
+export function Hierarchy<T extends object>(props: HierarchyProps<T>) {
+  return h(OverlaysProvider, h(Tree, { ...props, level: 0 }));
+}
+
+function Tree<T extends object>({
+  data,
+  level = 0,
+  itemComponent,
+}: HierarchyProps<T> & {
+  level: number;
+}) {
   const headerEl = "h" + (level + 2);
   const [subTrees, nodes] = divideChildren(data);
 
@@ -20,17 +31,13 @@ function Tree({ data, level = 0 }: { data: TreeNodeData; level: number }) {
       h.if(nodes.length > 0)(
         "ul.nodes",
         nodes.map((d) =>
-          h("li", { key: d.name }, [
-            h(LithologyTag, {
-              data: d.lith ?? d,
-              tooltip: true,
-              tooltipProps: { showExternalLinks: true },
-            }),
-          ])
+          h("li", { key: d.name }, h(itemComponent, { data: d.data }))
         )
       ),
     ]),
-    subTrees.map((d, i) => h(Tree, { key: i, data: d, level: level + 1 })),
+    subTrees.map((d, i) =>
+      h(Tree, { key: i, data: d, level: level + 1, itemComponent })
+    ),
   ]);
 }
 
@@ -38,7 +45,7 @@ function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function divideChildren(data: TreeNodeData) {
+function divideChildren<T extends object>(data: TreeNodeData<T>) {
   /** Divide children into terminal and non-terminal nodes */
   const terminal = [];
   const nonTerminal = [];

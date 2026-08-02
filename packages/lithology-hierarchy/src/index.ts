@@ -10,8 +10,18 @@ import {
   nestLithAttributes,
   LithAttribute,
 } from "./nest-data";
-import Hierarchy from "./simple-hierarchy";
+import { Hierarchy } from "./simple-hierarchy";
 import LexHierarchyInner from "./lex-hierarchy";
+import { LithologyTag } from "~/components";
+import { useInteractionProps } from "@macrostrat/data-components";
+
+export function MacrostratHierarchyItem({ data }) {
+  const props = useInteractionProps(data);
+  return h(LithologyTag, {
+    data,
+    ...props,
+  });
+}
 
 export function LithologyHierarchy() {
   const [error, setError] = useState(null);
@@ -31,7 +41,10 @@ export function LithologyHierarchy() {
   }
   const liths: Lith[] = res.success.data;
 
-  return h(Hierarchy, { data: nestLiths(liths) });
+  return h(Hierarchy, {
+    data: nestLiths(liths),
+    itemComponent: MacrostratHierarchyItem,
+  });
 }
 
 export function EnvironmentsHierarchy() {
@@ -52,7 +65,10 @@ export function EnvironmentsHierarchy() {
   }
   const environments: Lith[] = res.success.data;
 
-  return h(Hierarchy, { data: nestLiths(environments) });
+  return h(Hierarchy, {
+    data: nestLiths(environments),
+    itemComponent: MacrostratHierarchyItem,
+  });
 }
 
 export function LithAttsHierarchy() {
