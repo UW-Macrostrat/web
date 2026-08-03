@@ -1,6 +1,7 @@
 import { fetchAPIData, fetchAPIRefs, fetchPGData } from "~/_utils";
 import { getPrevalentTaxa } from "./data-helper";
 import { render } from "vike/abort";
+import { useData } from "vike-react/useData";
 import { MacrostratItemIdentifier } from "@macrostrat/data-components";
 
 /**
@@ -51,7 +52,7 @@ export const LEX_TYPE_CONFIG: Record<string, LexTypeConfig> = {
   "strat-names": {
     defsEndpoint: "/defs/strat_names",
     idParam: "strat_name_id",
-    siftLink: "stratigraphic_name",
+    siftLink: "strat_name",
   },
   minerals: { defsEndpoint: "/defs/minerals", idParam: "mineral_id" },
   structures: { defsEndpoint: "/defs/structures", idParam: "structure_id" },
@@ -63,6 +64,7 @@ export const LEX_TYPE_CONFIG: Record<string, LexTypeConfig> = {
     // Core comes from a PostgREST view, not a /defs/ route; everything else
     // (columns/fossils/units/refs) keys on strat_name_concept_id.
     idParam: "strat_name_concept_id",
+    siftLink: "strat_name_concept",
     coreLoader: (id) =>
       fetchPGData("/strat_concepts_with_names", {
         concept_id: "eq." + id,
@@ -98,6 +100,10 @@ export interface LexItemData {
 }
 
 const typeNames = Object.keys(LEX_TYPE_CONFIG);
+
+export function useLexItemData() {
+  return useData<LexItemData>();
+}
 
 export async function fetchLexData(
   pageContext: any,

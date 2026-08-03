@@ -72,7 +72,6 @@ export function LexItemBody(props: LexItemBodyProps) {
     h(ColumnsTable, { resData, colData, fossilsData, mapUrl }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
-    h(Timescales, { timescales }),
     h.if(showUnits && unitsData?.length > 0)(Units, { href: relatedHref }),
     h.if(showMaps && mapsData?.length > 0)(Maps, { href: relatedHref }),
     h.if(showFossils && fossilsData?.features?.length > 0)(Fossils, {

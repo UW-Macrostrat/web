@@ -255,10 +255,14 @@ function IntAbbrev({ abbrev, chromaColor, luminance }) {
 }
 
 function SiftLink({ id, siftLink }) {
-  return h.if(siftLink)("div.sift-link", [
+  if (siftLink == null) return null;
+  return h("div.sift-link", [
     h(
       "a",
-      { href: "/sift/" + siftLink + "/" + id, target: "_blank" },
+      {
+        href: "https://macrostrat.org/sift/#/" + siftLink + "/" + id,
+        target: "_blank",
+      },
       "View in Sift"
     ),
   ]);

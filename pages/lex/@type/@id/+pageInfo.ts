@@ -1,4 +1,4 @@
-import { lexPageInfo } from "~/components/lex/page-info";
+import { lexPageInfo } from "~/components/lex/page-info.ts";
 import { LexItemData } from "~/components/lex/data-loaders.ts";
 
 export function pageInfo(ctx: any) {

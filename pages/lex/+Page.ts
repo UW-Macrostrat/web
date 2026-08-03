@@ -12,6 +12,9 @@ export function Page() {
   const { res } = useData();
   const [showBody, setShowBody] = useState(true);
 
+  // Not sure why this is needed, but I digress...
+  if (res == null) return null;
+
   const seen = new Set();
   const stats = res.filter((project) => {
     if (seen.has(project.project_id)) return false;

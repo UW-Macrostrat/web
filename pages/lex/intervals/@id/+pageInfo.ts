@@ -1,11 +1,8 @@
-import { lexPageInfo, routeId } from "~/components/lex/page-info";
+import { lexPageInfo } from "~/components/lex/page-info";
+import { LexItemData } from "~/components/lex/data-loaders.ts";
 
 export function pageInfo(ctx: any) {
-  const r = ctx.data?.resData ?? {};
-  return lexPageInfo({
-    name: r.name,
-    color: r.color,
-    abbrev: r.abbrev,
-    identifier: routeId(ctx),
-  });
+  const data: LexItemData = ctx.data;
+  const r = data?.resData ?? {};
+  return lexPageInfo({ name: r.name, color: r.color, identifier: data.id });
 }

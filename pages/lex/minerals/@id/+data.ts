@@ -1,5 +1,4 @@
-import { pbdbDomain } from "@macrostrat-web/settings";
-import { fetchAPIData, fetchAPIRefs } from "~/_utils";
+import { fetchAPIData } from "~/_utils";
 
 export async function data(pageContext) {
   const mineral_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);

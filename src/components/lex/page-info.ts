@@ -33,6 +33,8 @@ export function lexPageInfo(opts: LexPageInfoOptions): PageInfo {
     info.identifier = identifier;
   }
 
+  console.log(info);
+
   return info as PageInfo;
 }
 
