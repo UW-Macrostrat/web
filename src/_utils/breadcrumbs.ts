@@ -1,8 +1,9 @@
-import type { PageContext } from "vike/types";
+import type { PageContextServer } from "vike/types";
 import type { ReactNode } from "react";
 
-export function buildBreadcrumbs(ctx: PageContext): Item[] {
+export function buildBreadcrumbs(ctx: PageContextServer): Item[] {
   const currentPath = ctx.urlPathname;
+
   const routes = sitemap;
   const parts = currentPath.split("/");
   const items: Item[] = [];
@@ -27,7 +28,25 @@ export function buildBreadcrumbs(ctx: PageContext): Item[] {
   }
 
   //console.log(v2);
-  const routeElements = ctx.pageId.replace(/^\/pages/, "").split("/");
+  let routeElements = ctx.pageId.replace(/^\/pages/, "").split("/");
+
+  if (ctx.is404) {
+    /** Find the longest matching URL to split into route elements, to give the user a potential
+     * path back to their starting point.
+     */
+    const matchPath = longestMatchingValue(
+      currentPath,
+      Object.values(ctx.pages).map((d) => d.route)
+    );
+    routeElements = matchPath.split("/").filter((p) => p !== "");
+    routeElements.push("Not found");
+  } else if (routeElements.length == 2 && routeElements[1] == "_error") {
+    // We have another type of error page, so we need to find an alternate way to represent the URI
+    // We're on an error page and need to find an alternate way to represent the URI
+    routeElements = currentPath.split("/").filter((p) => p !== "");
+    // Make sure the last element shows "Error"
+    routeElements[routeElements.length - 1] = "Error";
+  }
 
   if (routeElements[routeElements.length - 1] === "index") {
     // Remove the trailing index route
@@ -150,6 +169,18 @@ const columnsSubtree = {
     },
   ],
 };
+
+function longestMatchingValue(val1: string, values: string[]): string | null {
+  let result: string | null = null;
+  for (const val2 of values) {
+    if (val1.startsWith(val2)) {
+      if (result == null || val2.length > result.length) {
+        result = val2;
+      }
+    }
+  }
+  return result;
+}
 
 export const sitemap: Routes = {
   slug: "",

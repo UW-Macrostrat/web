@@ -80,7 +80,7 @@ export default {
     },
     pageBreadcrumbs: {
       env: {
-        client: true,
+        client: false,
         server: true,
       },
     },

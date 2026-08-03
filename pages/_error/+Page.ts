@@ -1,81 +1,60 @@
-import h from "./main.module.styl";
-import { CenteredContentPage } from "~/layouts";
-import { Link, PageHeader } from "~/components";
+import h from "./main.module.sass";
 import { usePageContext } from "vike-react/usePageContext";
-import { ClientOnly } from "vike-react/ClientOnly";
-import { Spinner, Button, Card } from "@blueprintjs/core";
-import { BlankImage } from "~/components/general";
-import { LinkCard } from "~/components";
-import { webAssetsPrefix } from "@macrostrat-web/settings";
+import {
+  Button,
+  NonIdealState,
+  ButtonGroup,
+  AnchorButton,
+} from "@blueprintjs/core";
+import { ReactNode } from "react";
+import { AuthStatus } from "@macrostrat/form-components";
+
+const authActions = [
+  h(AuthStatus),
+  h(AnchorButton, { icon: "home", href: "/" }, "Go home"),
+];
 
 export function Page() {
   const ctx = usePageContext();
-  const is404 = ctx.is404;
-  if (is404) {
-    return h("div.error404", [
-      h(BlankImage, {
-        src: webAssetsPrefix + "/earth-crust.jpg",
-        className: "error-image",
-        width: "100%",
-        height: "100%",
-      }),
-      h("div.error-text", [
-        h("h1", "404"),
-        h("h2", "The rock you are looking for doesn't exist. Keep digging."),
-        h("div.buttons", [
-          h(
-            LinkCard,
-            { className: "btn", onClick: () => history.back() },
-            "Go back"
-          ),
-          h(LinkCard, { className: "btn", href: "/" }, "Go home"),
-        ]),
-      ]),
-    ]);
-  }
-
-  return h(CenteredContentPage, [h(PageHeader), h(PageContent)]);
-}
-
-function PageContent() {
-  const ctx = usePageContext();
-  const is404 = ctx.is404;
-  const path = ctx.urlPathname;
-  const statusCode = ctx.abortStatusCode;
-  const reason = ctx.abortReason;
-
-  if (statusCode == 401) {
-    return h([
-      h("h1", [h("code.bp6-code", "401"), " Unauthorized"]),
-      h("p", [reason]),
-      h(LoginButton),
-    ]);
-  } else {
-    return h([
-      h("h1", "Internal Error"),
-      h("p", ["Something went wrong."]),
-      h("p", ["Code: ", h("code", "500")]),
-    ]);
-  }
-}
-
-function LoginButton() {
-  /** For now, the login button only loads on the client side */
-  return h(ClientOnly, {
-    load: async () => {
-      const res = await import("@macrostrat/form-components");
-      return res.AuthStatus;
-    },
-    fallback: h(
+  let title = "Internal error";
+  let description = ctx.abortReason;
+  let actions: ReactNode[] = [
+    h(
       Button,
       {
-        disabled: true,
-        icon: h(Spinner, { size: 16 }),
-        minimal: true,
-        large: true,
+        icon: "arrow-left",
+        onClick() {
+          window.history.back();
+        },
       },
-      "Not logged in"
+      "Go back"
     ),
-    children: (component) => h(component),
+    h(AnchorButton, { icon: "home", href: "/" }, "Go home"),
+  ];
+
+  if (ctx.abortStatusCode == 401) {
+    title = "Unauthorized";
+    description ??= "You are not authorized to view this page.";
+    actions = authActions;
+  }
+
+  if (ctx.abortStatusCode == 403) {
+    title = "Forbidden";
+    description ??= "You do not have permission to view this page.";
+    actions = authActions;
+  }
+
+  if (ctx.is404) {
+    title = "Page Not Found";
+    description ??= "The page you are looking for does not exist.";
+  }
+
+  description ??= "An error occurred while retrieving the page.";
+
+  return h(NonIdealState, {
+    title,
+    icon: "warning-sign",
+    description,
+    action: h(ButtonGroup, { minimal: true, large: true }, actions),
   });
 }

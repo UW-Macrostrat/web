@@ -13,7 +13,6 @@ import h from "@macrostrat/hyper";
 export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
   const { exports = {}, config, user, canRefresh } = pageContext;
-  const pageBreadcrumbs = pageContext.exports.pageBreadcrumbs;
 
   const pageStyle = exports?.pageStyle ?? "content2";
 

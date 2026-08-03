@@ -6,15 +6,20 @@ import {
 import h from "./theme-button.module.sass";
 import { Button, Icon } from "@blueprintjs/core";
 import classNames from "classnames";
+import { useEffect, useMemo, useState } from "react";
 
 export function ThemeButton({ className, vertical = false }) {
   const darkMode = useDarkMode();
   const update = darkModeUpdater();
-  const icon = darkMode.isAutoset ? "tick" : "desktop";
 
-  const darkModeText = darkMode.isEnabled
-    ? "Turn on the lights"
-    : "Turn off the lights";
+  /** The button reacts to Dark Mode only after the component is mounted to avoid hydration errors */
+  const mounted = useIsMounted();
+  const isEnabled = darkMode.isEnabled && mounted;
+  const isAutoset = darkMode.isAutoset && mounted;
+
+  const icon = isAutoset ? "tick" : "desktop";
+
+  const darkModeText = isEnabled ? "Turn on the lights" : "Turn off the lights";
   return h(
     "div.dark-mode-controls",
     { className: classNames(className, { vertical }) },
@@ -26,13 +31,13 @@ export function ThemeButton({ className, vertical = false }) {
         Button,
         {
           minimal: true,
-          active: darkMode.isAutoset,
+          active: isAutoset,
           icon: h(Icon, { icon, size: 12 }),
-          intent: darkMode.isAutoset ? "success" : "primary",
+          intent: isAutoset ? "success" : "primary",
           className: "auto-button sub-button",
           small: true,
           onClick(evt) {
-            if (darkMode.isAutoset) return;
+            if (isAutoset) return;
             evt.stopPropagation();
             update(null);
           },
@@ -42,4 +47,14 @@ export function ThemeButton({ className, vertical = false }) {
       ),
     ]
   );
+}
+
+function useIsMounted(): boolean {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  return isMounted;
 }
