@@ -49,6 +49,9 @@ function buildHrefForItem(item: MacrostratItemIdentifier) {
   if ("concept_id" in item) {
     return `/lex/strat-concepts/${item.concept_id}`;
   }
+  if ("econ_id" in item) {
+    return `/lex/economics/${item.econ_id}`;
+  }
   if ("int_id" in item) {
     return `/lex/intervals/${item.int_id}`;
   }

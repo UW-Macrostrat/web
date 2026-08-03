@@ -1,22 +1,26 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
 import { LexItemPage, LexItemBodyClient } from "~/components/lex";
-import { usePageContext } from "vike-react/usePageContext";
+import { LexItemData } from "~/components/lex/data-loaders.ts";
 
 export function Page() {
-  const { resData } = useData();
-
-  const id = usePageContext().routeParams.id;
+  const { resData, id, type, config } = useData<LexItemData>();
 
   const relatedHref =
-    "environ_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name;
+    config.idParam +
+    "=" +
+    id +
+    "&color=" +
+    resData?.color +
+    "&name=" +
+    resData?.name;
 
-  return h(LexItemPage, { id, resData, siftLink: "environment" }, [
+  return h(LexItemPage, { id, resData, siftLink: config.siftLink }, [
     h(LexItemBodyClient, {
-      type: "environments",
+      type,
       id,
       resData,
-      mapURL: "environments=" + id,
+      mapUrl: type + "=" + id,
       relatedHref,
       showUnits: true,
       showMaps: true,

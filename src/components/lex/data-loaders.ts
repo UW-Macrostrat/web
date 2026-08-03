@@ -1,5 +1,7 @@
 import { fetchAPIData, fetchAPIRefs, fetchPGData } from "~/_utils";
 import { getPrevalentTaxa } from "./data-helper";
+import { render } from "vike/abort";
+import { MacrostratItemIdentifier } from "@macrostrat/data-components";
 
 /**
  * Portable, run-location-agnostic loaders for lexicon detail data.
@@ -21,17 +23,35 @@ export interface LexTypeConfig {
   idParam: string;
   /** Override for the core record load when it isn't a plain `/defs/` route. */
   coreLoader?: (id: number) => Promise<any>;
+  siftLink?: string;
 }
 
 /** Keyed by the URL type segment (`/lex/<type>/<id>`). */
 export const LEX_TYPE_CONFIG: Record<string, LexTypeConfig> = {
-  lithologies: { defsEndpoint: "/defs/lithologies", idParam: "lith_id" },
-  intervals: { defsEndpoint: "/defs/intervals", idParam: "int_id" },
-  environments: { defsEndpoint: "/defs/environments", idParam: "environ_id" },
-  economics: { defsEndpoint: "/defs/econs", idParam: "econ_id" },
+  lithologies: {
+    defsEndpoint: "/defs/lithologies",
+    idParam: "lith_id",
+    siftLink: "lithology",
+  },
+  intervals: {
+    defsEndpoint: "/defs/intervals",
+    idParam: "int_id",
+    siftLink: "interval",
+  },
+  environments: {
+    defsEndpoint: "/defs/environments",
+    idParam: "environ_id",
+    siftLink: "environment",
+  },
+  economics: {
+    defsEndpoint: "/defs/econs",
+    idParam: "econ_id",
+    siftLink: "economy",
+  },
   "strat-names": {
     defsEndpoint: "/defs/strat_names",
     idParam: "strat_name_id",
+    siftLink: "stratigraphic_name",
   },
   minerals: { defsEndpoint: "/defs/minerals", idParam: "mineral_id" },
   structures: { defsEndpoint: "/defs/structures", idParam: "structure_id" },
@@ -58,9 +78,7 @@ export function lexTypeConfig(type: string): LexTypeConfig | null {
  * `routeParams` isn't reliably populated there on a direct/SSR request, so fall
  * back to the URL path (`/lex/<type>/<id>`). */
 export function lexIdFromContext(pageContext: any): number {
-  const raw =
-    pageContext.routeParams?.id ??
-    pageContext.urlParsed?.pathname?.split("/")?.[3];
+  const raw = pageContext.routeParams?.id;
   return parseInt(raw);
 }
 
@@ -70,6 +88,44 @@ export async function fetchLexCore(cfg: LexTypeConfig, id: number) {
   if (cfg.coreLoader != null) return cfg.coreLoader(id);
   const res = await fetchAPIData(cfg.defsEndpoint, { [cfg.idParam]: id });
   return res?.[0] ?? null;
+}
+
+export interface LexItemData {
+  resData: any;
+  id: number;
+  type: string;
+  config: LexTypeConfig;
+}
+
+const typeNames = Object.keys(LEX_TYPE_CONFIG);
+
+export async function fetchLexData(
+  pageContext: any,
+  type: string
+): Promise<LexItemData> {
+  /** Lex data fetcher for use in Vike, with semantic
+   * error handling
+   */
+  if (type == null || !typeNames.includes(type)) {
+    throw render(404, "Invalid lexicon type");
+  }
+
+  const id = lexIdFromContext(pageContext);
+  if (isNaN(id)) {
+    throw render(404, "ID must be a number");
+  }
+  const cfg = lexTypeConfig(type);
+  const resData = await fetchLexCore(cfg, id);
+  if (resData == null) {
+    throw render(404, `${type} not found`);
+  }
+
+  return {
+    type,
+    id,
+    resData,
+    config: cfg,
+  };
 }
 
 /** Merged references from the fossils + columns endpoints (server-HTML).
