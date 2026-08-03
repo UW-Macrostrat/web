@@ -1,4 +1,4 @@
-import { lexPageInfo, routeId } from "~/components/lex/page-info";
+import { lexPageInfo, routeId } from "~/components/lex/page-info.ts";
 
 export function pageInfo(ctx: any) {
   const id = routeId(ctx);

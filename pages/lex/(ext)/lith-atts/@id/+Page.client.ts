@@ -16,7 +16,6 @@ export function Page() {
       id,
       refs: [],
       resData,
-      siftLink: "lithology-attribute",
     },
     children
   );

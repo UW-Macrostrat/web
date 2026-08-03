@@ -1,7 +1,7 @@
 import { useData } from "vike-react/useData";
 import h from "./main.module.sass";
 import { LexItemPage, ConceptInfo, LexItemBodyClient } from "~/components/lex";
-import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
+import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy.ts";
 import { StratTag } from "~/components/general";
 import { LexItemData } from "~/components/lex/data-loaders.ts";
 
