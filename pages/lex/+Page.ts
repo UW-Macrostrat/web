@@ -6,7 +6,6 @@ import { SearchBar } from "~/components/general";
 import { useState } from "react";
 import { ExpansionPanel } from "~/components/lex/tag";
 import { Tag, Dialog, Icon } from "@blueprintjs/core";
-import { DocsVideo } from "#/map/map-interface/components/docs";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 
 export function Page() {
@@ -231,10 +230,10 @@ function Updates({ setUpdateOpen }) {
             h("h3.title", update.title),
             h(Tag, { intent: "success" }, `v${update.version}`),
           ]),
-          h("div.description", [
-            h(DocsVideo, { slug: update.slug }),
-            h("p", update.description),
-          ]),
+          // h("div.description", [
+          //   h(DocsVideo, { slug: update.slug }),
+          //   h("p", update.description),
+          // ]),
         ])
       ),
     ]),
