@@ -12,6 +12,7 @@ export function buildBreadcrumbs(ctx: PageContextServer): Item[] {
 
   // Assemble pageInfo lookup table
   const values = ctx.sources.pageInfo[0].values;
+
   const cfgIndex = new Map<string, PageInfo>();
   for (const item of values) {
     let configFileLocation = item.definedAt.split(" > ")?.[0];

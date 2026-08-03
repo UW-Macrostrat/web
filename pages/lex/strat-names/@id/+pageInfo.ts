@@ -1,10 +1,8 @@
-import { PageInfo } from "~/_utils/breadcrumbs.ts";
+import { lexPageInfo } from "~/components/lex/page-info.ts";
+import { LexItemData } from "~/components/lex/data-loaders.ts";
 
-export function pageInfo(pageContext: any): PageInfo {
-  const { data } = pageContext;
-  const { resData } = data;
-  return {
-    name: resData.strat_name_long,
-    identifier: resData.strat_name_id,
-  };
+export function pageInfo(ctx: any) {
+  const data: LexItemData = ctx.data;
+  const r = data?.resData ?? {};
+  return lexPageInfo({ name: r.name, color: r.color, identifier: data.id });
 }

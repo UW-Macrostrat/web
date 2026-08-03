@@ -1,23 +1,7 @@
-import {
-  fetchLexCore,
-  fetchLexRefs,
-  lexTypeConfig,
-  lexIdFromContext,
-} from "~/components/lex/data-loaders";
+import { fetchLexData } from "~/components/lex/data-loaders.ts";
 
-/** Core descriptive record + references only; heavy/derived data loads
- * client-side via `~/components/lex/item-atoms`. See [[Geologic lexicon pages]]. */
+/** Core descriptive record only; refs + heavy/derived data load client-side via
+ * `~/components/lex/item-atoms`. See [[Geologic lexicon pages]]. */
 export async function data(pageContext) {
-  const id = lexIdFromContext(pageContext);
-  if (isNaN(id)) {
-    throw new Error("Invalid stratigraphic name ID in URL.");
-  }
-
-  const cfg = lexTypeConfig("strat-names");
-  const [resData, refs] = await Promise.all([
-    fetchLexCore(cfg, id),
-    fetchLexRefs(cfg, id),
-  ]);
-
-  return { resData, refs };
+  return await fetchLexData(pageContext, "strat-names");
 }

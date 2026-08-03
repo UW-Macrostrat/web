@@ -96,7 +96,7 @@ export interface LexItemData {
   resData: any;
   id: number;
   type: string;
-  config: LexTypeConfig;
+  config: Omit<LexTypeConfig, "coreLoader">;
 }
 
 const typeNames = Object.keys(LEX_TYPE_CONFIG);
@@ -126,11 +126,17 @@ export async function fetchLexData(
     throw render(404, `${type} not found`);
   }
 
+  console.log(resData);
+
   return {
     type,
     id,
     resData,
-    config: cfg,
+    config: {
+      defsEndpoint: cfg.defsEndpoint,
+      idParam: cfg.idParam,
+      siftLink: cfg.siftLink,
+    },
   };
 }
 

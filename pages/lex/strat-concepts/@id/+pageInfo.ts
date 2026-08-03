@@ -1,5 +1,8 @@
-export function pageInfo(pageContext: any) {
-  const { data } = pageContext;
-  const { resData } = data;
-  return { name: resData.name, identifier: resData.concept_id };
+import { lexPageInfo } from "~/components/lex/page-info.ts";
+import { LexItemData } from "~/components/lex/data-loaders.ts";
+
+export function pageInfo(ctx: any) {
+  const data: LexItemData = ctx.data;
+  const r = data?.resData ?? {};
+  return lexPageInfo({ name: r.name, color: r.color, identifier: data.id });
 }
