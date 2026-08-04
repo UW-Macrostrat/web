@@ -1,5 +1,5 @@
 export default {
   data: "import:./data:data",
   Page: "import:./Page:Page",
-  pageInfo: "import:./+pageInfo:pageInfo",
+  pageInfo: "import:./pageInfo:pageInfo",
 };
