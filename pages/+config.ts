@@ -34,6 +34,7 @@ export default {
     "pageStyle",
     "parentData",
     "pageInfo",
+    "breadcrumbs",
   ],
   clientRouting: true,
   supportsDarkMode: true,
@@ -76,7 +77,7 @@ export default {
         client: true,
         server: true,
       },
-      cumulative: true,
+      eager: true,
     },
     pageBreadcrumbs: {
       env: {

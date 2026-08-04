@@ -1,9 +1,62 @@
-import type { PageContextServer } from "vike/types";
+import type { PageContext } from "vike/types";
 import type { ReactNode } from "react";
 
-export function buildBreadcrumbs(ctx: PageContextServer): Item[] {
-  const currentPath = ctx.urlPathname;
+export function buildBreadcrumbs(ctx: PageContext): Item[] {
+  const breadcrumbs = ctx.breadcrumbs;
 
+  let errorText: string | null = null;
+  if (ctx.is404) {
+    /** Find the longest matching URL to split into route elements, to give the user a potential
+     * path back to their starting point.
+     */
+    errorText = "Not found";
+  } else if (ctx.abortReason != null) {
+    errorText = "Error";
+  }
+  if (errorText != null) {
+    // Replace the last matched path with an error
+    breadcrumbs.pop();
+    breadcrumbs.push({ slug: errorText });
+  }
+
+  return breadcrumbs.map((breadcrumbItem, i) => {
+    let slug = breadcrumbItem.slug;
+
+    let pageInfo: PageInfo | null = null;
+    if (breadcrumbItem.pageId != null) {
+      let pageConfig = ctx.pages[breadcrumbItem.pageId].config;
+
+      pageInfo = pageConfig.pageInfo;
+      if (typeof pageInfo === "function") {
+        pageInfo = pageInfo(ctx);
+      }
+    }
+
+    const name = pageInfo?.name ?? slug;
+    //
+    let text = typeof name === "function" ? name(slug, ctx) : name;
+    // // Capitalize th text if it's not a parameter
+    if (text == slug) {
+      text = text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    if (i == 0 && slug == "") {
+      text = "Macrostrat";
+    }
+
+    return {
+      href: breadcrumbItem.url,
+      ...pageInfo,
+      name: text,
+      slug,
+    };
+  });
+}
+
+export async function buildBreadcrumbsOld(
+  ctx: PageContextServer
+): Promise<Item[]> {
+  const currentPath = ctx.urlPathname;
   const routes = sitemap;
   const parts = currentPath.split("/");
   const items: Item[] = [];

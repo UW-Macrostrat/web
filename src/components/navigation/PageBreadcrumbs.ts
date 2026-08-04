@@ -2,17 +2,13 @@ import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
 import { ReactNode, useMemo } from "react";
 import { MacrostratIcon } from "~/components";
-import { buildBreadcrumbs, Item } from "~/_utils/breadcrumbs";
+import { buildBreadcrumbs, Item } from "~/_utils/breadcrumbs/helpers";
 import { Identifier } from "@macrostrat/data-components";
 
 import h from "./breadcrumbs.module.sass";
 
 export function PageBreadcrumbs({ showLogo = true, separateTitle = true }) {
-  const ctx = usePageContext();
-  const breadcrumbs = useMemo(() => {
-    return buildBreadcrumbs(ctx);
-  }, [ctx]);
-
+  const breadcrumbs = usePageBreadcrumbs();
   return h(PageBreadcrumbsInternal, {
     showLogo,
     separateTitle,
@@ -46,7 +42,9 @@ export function TitleBlock({
 export function usePageBreadcrumbs(): Item[] {
   const ctx = usePageContext();
   return useMemo(() => {
-    return buildBreadcrumbs(ctx);
+    const breadcrumbs = buildBreadcrumbs(ctx);
+    console.log(breadcrumbs);
+    return breadcrumbs;
   }, [ctx]);
 }
 
@@ -74,6 +72,8 @@ export function PageTitle({
 }
 
 function __PageTitle({ item, ...rest }: { item: Item } & PageTitleProps) {
+  console.log("PageTitle", item, rest);
+
   let titleContent: ReactNode = item.name;
   if (typeof item.title === "string") {
     titleContent = item.title;

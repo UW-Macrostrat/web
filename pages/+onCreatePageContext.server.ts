@@ -3,6 +3,8 @@ import * as jose from "jose";
 import { PageContextServer } from "vike/types";
 import maxmind, { type CityResponse, type Reader } from "maxmind";
 import type { GeoLocation } from "~/_utils/geolocation";
+import { buildBreadcrumbs } from "~/_utils/breadcrumbs/helpers.ts";
+import { getBreadcrumbs } from "~/_utils/breadcrumbs/server.ts";
 
 // This hook is called upon new incoming HTTP requests
 export async function onCreatePageContext(pageContext: PageContextServer) {
@@ -29,6 +31,10 @@ export async function onCreatePageContext(pageContext: PageContextServer) {
   // the client to attempt one silent refresh on load.
   pageContext.canRefresh =
     pageContext.user == null && cookies?.["refresh_token"] != null;
+
+  // Breadcrumb data
+  pageContext.breadcrumbs = await getBreadcrumbs(pageContext);
+
   return pageContext;
 }
 
@@ -45,7 +51,7 @@ function openGeoipReader(): Promise<Reader<CityResponse> | null> {
       warnedGeoip = true;
       console.warn(
         "[geoip] GEOIP_DB_PATH is not set; skipping GeoIP default location. " +
-          "Point it at a GeoLite2-City .mmdb to enable.",
+          "Point it at a GeoLite2-City .mmdb to enable."
       );
     }
     return Promise.resolve(null);
@@ -53,14 +59,17 @@ function openGeoipReader(): Promise<Reader<CityResponse> | null> {
   return maxmind.open<CityResponse>(path).catch((e: any) => {
     if (!warnedGeoip) {
       warnedGeoip = true;
-      console.warn(`[geoip] Could not open GeoIP DB at ${path}:`, e?.message ?? e);
+      console.warn(
+        `[geoip] Could not open GeoIP DB at ${path}:`,
+        e?.message ?? e
+      );
     }
     return null;
   });
 }
 
 async function getGeoLocation(
-  headers: Record<string, string>,
+  headers: Record<string, string>
 ): Promise<GeoLocation | null> {
   const ip = getClientIP(headers);
   if (ip == null) return null;
@@ -133,7 +142,7 @@ async function getUserFromCookie(cookies: Record<string, string>) {
         "[auth] SECRET_KEY is not set in the web server environment. The web " +
           "app cannot verify the auth JWT minted by api_v3, so login will not " +
           "work. Add SECRET_KEY to your web .env, set to the SAME value api_v3 " +
-          "uses.",
+          "uses."
       );
     }
     return null;
@@ -163,7 +172,7 @@ async function getUserFromCookie(cookies: Record<string, string>) {
         console.error(
           "[auth] Auth token signature verification failed — the web " +
             "SECRET_KEY does not match the SECRET_KEY api_v3 used to sign the " +
-            "JWT. Set both to the same value.",
+            "JWT. Set both to the same value."
         );
       }
       return null;

@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { Tag } from "@macrostrat/data-components";
-import type { PageInfo } from "~/_utils/breadcrumbs";
+import type { PageInfo } from "~/_utils/helpers.ts";
 
 export interface LexPageInfoOptions {
   /** Human-readable item name (breadcrumb + title). */
@@ -32,8 +32,6 @@ export function lexPageInfo(opts: LexPageInfoOptions): PageInfo {
   if (identifier != null) {
     info.identifier = identifier;
   }
-
-  console.log(info);
 
   return info as PageInfo;
 }

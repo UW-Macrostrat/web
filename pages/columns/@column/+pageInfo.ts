@@ -1,4 +1,4 @@
-import type { PageInfo } from "~/_utils/breadcrumbs.ts";
+import type { PageInfo } from "~/_utils/helpers.ts";
 
 export function pageInfo(pageContext: any): PageInfo {
   return {
