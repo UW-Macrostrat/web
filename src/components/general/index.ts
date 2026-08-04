@@ -46,8 +46,8 @@ export function MacrostratIcon({
     iconStyle != null
       ? `macrostrat-icon-${iconStyle}.svg`
       : "macrostrat-icon.svg";
-  return h("img.macrostrat-logo" + (small ? ".small" : ""), {
-    className,
+  return h("img.macrostrat-logo", {
+    className: classNames(className, { small }),
     src: `${webAssetsPrefix}/macrostrat-icons/${iconFile}`,
   });
 }

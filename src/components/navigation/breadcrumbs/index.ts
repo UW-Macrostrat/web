@@ -2,8 +2,9 @@ import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
 import { ReactNode, useMemo } from "react";
 import { MacrostratIcon } from "~/components";
-import { buildBreadcrumbs, Item } from "~/_utils/breadcrumbs/helpers";
+import { buildBreadcrumbs, Item } from "./utils";
 import { Identifier } from "@macrostrat/data-components";
+import { isValidElement } from "react";
 
 import h from "./breadcrumbs.module.sass";
 
@@ -60,10 +61,7 @@ export function PageTitle({
   className?: string;
   headingLevel?: number;
 }) {
-  const ctx = usePageContext();
-  const breadcrumbs = useMemo(() => {
-    return buildBreadcrumbs(ctx);
-  }, [ctx]);
+  const breadcrumbs = usePageBreadcrumbs();
   const item = breadcrumbs[breadcrumbs.length - 1];
   if (item == null) {
     return null;
@@ -72,17 +70,8 @@ export function PageTitle({
 }
 
 function __PageTitle({ item, ...rest }: { item: Item } & PageTitleProps) {
-  console.log("PageTitle", item, rest);
-
-  let titleContent: ReactNode = item.name;
-  if (typeof item.title === "string") {
-    titleContent = item.title;
-  } else if (item.title != null) {
-    titleContent = h(item.title);
-  }
-
   return h(TitleBlock, {
-    title: titleContent,
+    title: nameForItem(item, false),
     identifier: item.identifier,
     ...rest,
   });
@@ -90,7 +79,8 @@ function __PageTitle({ item, ...rest }: { item: Item } & PageTitleProps) {
 
 export function usePageTitle(): string | null {
   const breadcrumbs = usePageBreadcrumbs();
-  return ctx?.pageInfo?.name ?? ctx?.title;
+  const item = breadcrumbs[breadcrumbs.length - 1];
+  return nameForItem(item, false);
 }
 
 export function PageBreadcrumbsInternal({
@@ -105,17 +95,19 @@ export function PageBreadcrumbsInternal({
     titleElement = h(__PageTitle, { item });
   }
 
-  let itemsList = baseItems.map((item) => {
+  let itemsList = baseItems.map((item, i) => {
     return {
-      text: item.name,
+      children: nameForItem(item, true),
       href: item.href,
+      current: i === items.length - 1,
     };
   });
   if (itemsList.length === 0) {
     itemsList = [
       {
-        text: h("span.breadcrumbs-root", "Macrostrat"),
+        children: h("span.breadcrumbs-root", "Macrostrat"),
         href: "/",
+        current: true,
       },
     ];
   }
@@ -123,7 +115,7 @@ export function PageBreadcrumbsInternal({
   let startItem = null;
   if (showLogo) {
     startItem = h(
-      "a.base",
+      "a.base.logo-container",
       { href: "/" },
       h(MacrostratIcon, { iconStyle: "simple", small: true })
     );
@@ -135,4 +127,14 @@ export function PageBreadcrumbsInternal({
   ]);
 
   return h("div.page-nav", [breadCrumbs, titleElement]);
+}
+
+function nameForItem(item: Item, short: boolean = true): ReactNode {
+  const titleVal = short ? item.shortTitle : item.title;
+  if (typeof titleVal === "string" || isValidElement(titleVal)) {
+    return titleVal;
+  } else if (titleVal != null) {
+    return h(titleVal);
+  }
+  return item.name;
 }

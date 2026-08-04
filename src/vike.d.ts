@@ -38,7 +38,7 @@ declare global {
       supportsDarkMode?: boolean;
       scripts?: string[];
     }
-    interface PageContext {
+    interface PageContext extends PageContextClient {
       pageProps?: PageProps;
       pageInfo?: PageInfo;
       urlPathname: string;

@@ -79,15 +79,9 @@ export default {
       },
       eager: true,
     },
-    pageBreadcrumbs: {
-      env: {
-        client: false,
-        server: true,
-      },
-    },
     breadcrumbs: {
       env: {
-        client: true,
+        client: false,
         server: true,
       },
     },
