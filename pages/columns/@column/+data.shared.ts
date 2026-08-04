@@ -6,6 +6,7 @@ import {
   ColumnSummary,
 } from "#/map/map-interface/app-state/columns/utils";
 import { fetchProjectData, getAndUnwrap } from "~/_utils";
+import { render } from "vike/abort";
 
 export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
@@ -13,12 +14,20 @@ export async function data(pageContext) {
   // In cases where we are in a project context, we need to fetch the project data
   const project_id = pageContext.routeParams.project;
 
+  // Check whether a map ID is structurally valid (a number).
+  if (isNaN(parseInt(col_id))) {
+    throw render(404, "Map IDs must be numbers.");
+  }
+
   // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long
   const linkPrefix = project_id == null ? "/" : `/projects/${project_id}/`;
 
   let projectID = null;
   if (project_id != null) {
     projectID = parseInt(project_id);
+    if (isNaN(projectID)) {
+      throw render(404, "Project IDs must be numbers.");
+    }
   }
 
   /** This is a hack to make sure that all requisite data is on the table. */

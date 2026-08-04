@@ -1,0 +1,38 @@
+import h from "./main.module.sass";
+import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
+import { apiDomain } from "@macrostrat-web/settings";
+import { LinkCard } from "~/components";
+import { LexListPage } from "~/components/lex";
+import { useData } from "vike-react/useData";
+import { SearchBar } from "~/components/general";
+import { MultiSelect } from "@blueprintjs/select";
+
+const PAGE_SIZE = 20;
+
+export function Page() {
+  const { res } = useData();
+
+  return h(LexListPage, [
+    h(PostgRESTInfiniteScrollView, {
+      route: `${apiDomain}/api/pg/minerals`,
+      initialItems: res,
+      itemComponent: MineralItem,
+      filterable: true,
+      id_key: "id",
+      limit: PAGE_SIZE,
+      searchColumns: [{ label: "Mineral", value: "mineral" }],
+      SearchBarComponent: SearchBar,
+      MultiSelectComponent: MultiSelect,
+    }),
+  ]);
+}
+
+function MineralItem({ data }) {
+  const { id, mineral } = data;
+
+  return h(LinkCard, {
+    href: `/lex/minerals/${id}`,
+    className: "mineral-item",
+    title: mineral,
+  });
+}

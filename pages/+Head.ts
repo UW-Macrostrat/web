@@ -40,6 +40,8 @@ export default function Head() {
     h("link", { rel: "manifest", href: "/site.webmanifest" }),
     h(GoogleFonts),
     h("meta", { name: "description", content: "Macrostrat" }),
+    // Disable darkreader in favor of native dark mode
+    h("meta", { name: "darkreader-lock" }),
     h("script", {
       type: "text/javascript",
       dangerouslySetInnerHTML: {

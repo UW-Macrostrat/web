@@ -17,7 +17,7 @@ import type {
   SourcesConfigCumulative,
 } from "vike/types";
 
-import { Item, PageInfo } from "~/_utils/breadcrumbs";
+import { Item, PageInfo } from "~/_utils/helpers.ts";
 import type { GeoLocation } from "~/_utils/geolocation";
 
 export type PageProps = Record<string, unknown>;
@@ -38,7 +38,7 @@ declare global {
       supportsDarkMode?: boolean;
       scripts?: string[];
     }
-    interface PageContext {
+    interface PageContext extends PageContextClient {
       pageProps?: PageProps;
       pageInfo?: PageInfo;
       urlPathname: string;

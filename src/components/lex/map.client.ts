@@ -1,13 +1,9 @@
-import {
-  ColumnNavigationMap,
-  useMacrostratColumns,
-} from "@macrostrat/column-views";
+import { ColumnNavigationMap } from "@macrostrat/column-views";
 import h from "./map.module.sass";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
-import { ErrorBoundary, useDarkMode } from "@macrostrat/ui-components";
-import { ExpansionPanel } from "@macrostrat/data-components";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 import { Icon } from "@blueprintjs/core";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useMapStyleOperator } from "@macrostrat/mapbox-react";
 import { satelliteMapURL } from "@macrostrat-web/settings";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
@@ -23,17 +19,12 @@ const _macrostratStyle = buildMacrostratStyle({
   strokeOpacity: 0.1,
 }) as mapboxgl.Style;
 
-export function ColumnsMapContainer(props) {
+export function LexiconMap(props) {
   /* TODO: integrate this with shared web components */
-  return h(ErrorBoundary, h(ColumnsMapInner, props));
+  return h(ErrorBoundary, h(LexiconMapInner, props));
 }
 
-export function ExpansionPanelContainer(props) {
-  return h(ExpansionPanel, props);
-}
-
-function ColumnsMapInner({
-  columnIDs = null,
+function LexiconMapInner({
   className = "map-container",
   columns = null,
   fossilsData = [],
@@ -93,18 +84,30 @@ function ColumnsMapInner({
     return col;
   });
 
+  let fossilsLayer = null;
+  if (fossilsExist) {
+    fossilsLayer = h(FossilsLayer, {
+      fossilsData,
+      showFossils,
+      fossilClickRef,
+    });
+  }
+
   return h("div", { className }, [
     h(
       ColumnNavigationMap,
       {
         columns,
         accessToken: mapboxAccessToken,
-        style: { ..._macrostratStyle, height: "100%" },
+        // `style` is the container's CSS (InsetMapProps.style: CSSProperties), NOT
+        // the map style — that's `mapStyle` below. The map needs a *definite*
+        // height (a percentage/min-height leaves the Mapbox canvas at 0px, since
+        // the grid cell has no resolvable height); fill the cell width.
+        style: { width: "100%", height: "500px" },
         onSelectColumn: (id) => {
           setTimeout(() => {
-            console.log("fossilClicked", fossilClickRef.current);
             if (!showFossils || !fossilClickRef.current) {
-              window.open(`/columns/${id}`, "_self");
+              navigate(`/columns/${id}`);
             }
           }, 0);
         },
@@ -112,9 +115,7 @@ function ColumnsMapInner({
         columnColor: showSatellite ? "#000" : null,
       },
       [
-        fossilsExist
-          ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef })
-          : null,
+        fossilsLayer,
         h(LexControls),
         !hasFitted.current
           ? h(FitBounds, { columnData: columns, hasFitted })

@@ -10,10 +10,13 @@ export function LithologyTag({
   tooltip = null,
   tooltipProps = {},
   expandOnHover = false,
+  href = null,
 }) {
   const darkMode = useInDarkMode();
   const luminance = darkMode ? 0.9 : 0.4;
   const color = asChromaColor(data.color);
+  const tag = href == null ? "span" : "a";
+
   const contents = h(
     Tag,
     {
@@ -25,7 +28,7 @@ export function LithologyTag({
         backgroundColor: color?.luminance(1 - luminance).hex(),
       },
     },
-    h("span.contents", [
+    h(tag, { className: "contents", href }, [
       h("span.name", data.name),
       h.if(expandOnHover)("code.lithology-id", `${data.lith_id}`),
     ])
