@@ -80,7 +80,9 @@ export function lexTypeConfig(type: string): LexTypeConfig | null {
  * `routeParams` isn't reliably populated there on a direct/SSR request, so fall
  * back to the URL path (`/lex/<type>/<id>`). */
 export function lexIdFromContext(pageContext: any): number {
-  const raw = pageContext.routeParams?.id;
+  const raw =
+    pageContext.routeParams?.id ??
+    pageContext.urlParsed?.pathname?.split("/")[3];
   return parseInt(raw);
 }
 
@@ -125,8 +127,6 @@ export async function fetchLexData(
   if (resData == null) {
     throw render(404, `${type} not found`);
   }
-
-  console.log(resData);
 
   return {
     type,

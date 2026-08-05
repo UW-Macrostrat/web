@@ -1,16 +1,12 @@
 import { LinkCard, StickyHeader } from "~/components";
-import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
 import { useData } from "vike-react/useData";
-import { SearchBar } from "~/components/general";
 import { useState } from "react";
-import { ExpansionPanel } from "~/components/lex/tag";
 import { Tag, Dialog, Icon } from "@blueprintjs/core";
-import { postgrestPrefix } from "@macrostrat-web/settings";
+import { LexSearchPrompt } from "~/components/lex/search-omnibar";
 
 export function Page() {
   const { res } = useData();
-  const [showBody, setShowBody] = useState(true);
 
   // Not sure why this is needed, but I digress...
   if (res == null) return null;
@@ -56,8 +52,8 @@ export function Page() {
       h("p.stat", `${formatNumber(units)} units`),
       h("p.stat", `${formatNumber(measurements)} measurements`),
     ]),
-    h(SearchContainer, { setShowBody }),
-    h.if(showBody)("div.body-content", [
+    h(LexSearchPrompt),
+    h("div.body-content", [
       h("h2", "Dictionaries"),
       h(
         LinkCard,
@@ -123,61 +119,6 @@ export function Page() {
 
 function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-const groups = [
-  { value: "econs", label: "Economics", href: "/lex/economics" },
-  { value: "maps", label: "Maps", href: "/maps" },
-  { value: "environments", label: "Environments", href: "/lex/environments" },
-  { value: "groups", label: "Column groups", href: "/columns/groups" },
-  { value: "columns", label: "Columns", href: "/columns" },
-  { value: "intervals", label: "Intervals", href: "/lex/intervals" },
-  { value: "lithologies", label: "Lithologies", href: "/lex/lithologies" },
-  {
-    value: "lithology_attributes",
-    label: "Lithology attributes",
-    href: "/lex/lith-atts",
-  },
-  { value: "projects", label: "Projects", href: "/projects" },
-  {
-    value: "strat_name_concepts",
-    label: "Strat name concepts",
-    href: "/lex/strat-concepts",
-  },
-  { value: "strat_name", label: "Strat names", href: "/lex/strat-names" },
-  { value: "structures", label: "Structures", href: "/lex/structures" },
-  { value: "minerals", label: "Minerals", href: "/lex/minerals" },
-];
-
-function OpenPanel(props) {
-  const { title, children } = props;
-  return h(ExpansionPanel, { title, expanded: true }, children);
-}
-
-function SearchContainer({ setShowBody }) {
-  return h(PostgRESTInfiniteScrollView, {
-    limit: 20,
-    id_key: "id",
-    filterable: true,
-    ascending: true,
-    route: `${postgrestPrefix}/autocomplete`,
-    delay: 100,
-    searchColumns: [{ value: "name", label: "Name" }],
-    group_key: "type",
-    groups,
-    itemComponent: LexCard,
-    SearchBarComponent: SearchBar,
-    GroupingComponent: OpenPanel,
-    filter_threshold: 2,
-  });
-}
-
-function LexCard({ data }) {
-  const type = data.type || "other";
-  const href =
-    groups.find((group) => group.value === type)?.href + "/" + data.id;
-
-  return h("div", h("a", { href }, data.name));
 }
 
 function UpdatesExpandableDialog() {
