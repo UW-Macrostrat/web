@@ -10,7 +10,7 @@ import {
   References,
 } from "./index";
 import {
-  useLexColumns,
+  useLexColumnsState,
   useLexFossils,
   useLexTaxa,
   useLexUnits,
@@ -57,7 +57,10 @@ export function LexItemBody(props: LexItemBodyProps) {
   } = props;
 
   const itemRef = { type, id: Number(id) };
-  const colData = useLexColumns(itemRef);
+  // The columns' *load state* matters here, not just the data: the column block
+  // reserves its space (keeping the shared map in place) while they load.
+  const { data: colData, loading: columnsLoading } =
+    useLexColumnsState(itemRef);
   const fossilsData = useLexFossils(itemRef);
   const taxaData = useLexTaxa(itemRef);
   const unitsData = useLexUnits(itemRef);
@@ -69,7 +72,16 @@ export function LexItemBody(props: LexItemBodyProps) {
 
   return h([
     topExtra,
-    h(ColumnsTable, { resData, colData, fossilsData, mapUrl }),
+    // `targetKey` identifies this item to the shared (layout-owned) map, which
+    // re-targets rather than remounting as the user navigates between items.
+    h(ColumnsTable, {
+      resData,
+      colData,
+      fossilsData,
+      mapUrl,
+      targetKey: `${type}:${id}`,
+      loading: columnsLoading,
+    }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h.if(showUnits && unitsData?.length > 0)(Units, { href: relatedHref }),

@@ -111,6 +111,14 @@ function dataOrNull(state: any) {
 export function useLexColumns(ref: LexItemRef) {
   return dataOrNull(useAtomValue(columnsLoadable(keyFor(ref))));
 }
+
+/** Columns *with* their load state. The column block reserves its space (and
+ * keeps the shared map mounted) while this is loading, instead of appearing only
+ * once data arrives — see [[Geologic lexicon pages]] (Layer E). */
+export function useLexColumnsState(ref: LexItemRef) {
+  const state: any = useAtomValue(columnsLoadable(keyFor(ref)));
+  return { data: dataOrNull(state), loading: state?.state === "loading" };
+}
 export function useLexFossils(ref: LexItemRef) {
   return dataOrNull(useAtomValue(fossilsLoadable(keyFor(ref))));
 }

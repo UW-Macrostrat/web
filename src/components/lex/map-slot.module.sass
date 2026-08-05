@@ -1,0 +1,26 @@
+// The page-side placeholder for the shared lexicon map. Mapbox needs a
+// *definite* height (a percentage against a grid cell with no resolvable height
+// collapses the canvas to 0px), so the height lives here — the map node itself
+// just fills the slot. The space is reserved as soon as the page renders, before
+// column data arrives, so the map neither jumps nor blinks on navigation.
+.lex-map-slot
+  position: relative
+  width: 100%
+  height: 500px
+
+.map-mount
+  width: 100%
+  height: 100%
+
+// Shown while the next item's columns load. The map underneath keeps its
+// previous view — dimmed, so it reads as "updating" rather than as data about
+// the item now on screen.
+.map-loading-overlay
+  position: absolute
+  inset: 0
+  display: flex
+  align-items: center
+  justify-content: center
+  background-color: var(--panel-background-color)
+  opacity: 0.6
+  pointer-events: none

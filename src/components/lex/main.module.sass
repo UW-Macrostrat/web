@@ -36,6 +36,11 @@
     justify-content: space-between
     gap: .5em
 
+    // Placeholder while column data loads — the frame holds its shape (and the
+    // shared map stays mounted) rather than appearing once data arrives.
+    .stats-loading
+      margin: auto
+
 .int-page
   display: flex
   flex-direction: column
