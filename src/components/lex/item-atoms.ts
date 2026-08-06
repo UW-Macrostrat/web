@@ -8,6 +8,7 @@ import {
   fetchLexRefs,
   fetchLexUnits,
   fetchLexMaps,
+  fetchLexDefs,
 } from "./data-loaders";
 
 /**
@@ -96,6 +97,13 @@ const refsAtom = atomFamily((key: string) =>
   })
 );
 
+// The full definition list for a *type* (not an item) — the hierarchy view's
+// input. Keyed by type, so one fetch serves every item of that type for the rest
+// of the session.
+const defsAtom = atomFamily((type: string) =>
+  atom(async () => fetchLexDefs(type))
+);
+
 // Loadable wrappers, memoized per key so they're stable across renders.
 const columnsLoadable = atomFamily((key: string) => loadable(columnsAtom(key)));
 const fossilsLoadable = atomFamily((key: string) => loadable(fossilsAtom(key)));
@@ -103,6 +111,7 @@ const taxaLoadable = atomFamily((key: string) => loadable(taxaAtom(key)));
 const unitsLoadable = atomFamily((key: string) => loadable(unitsAtom(key)));
 const mapsLoadable = atomFamily((key: string) => loadable(mapsAtom(key)));
 const refsLoadable = atomFamily((key: string) => loadable(refsAtom(key)));
+const defsLoadable = atomFamily((type: string) => loadable(defsAtom(type)));
 
 function dataOrNull(state: any) {
   return state?.state === "hasData" ? state.data : null;
@@ -131,6 +140,11 @@ export function useLexUnits(ref: LexItemRef) {
 export function useLexMaps(ref: LexItemRef) {
   return dataOrNull(useAtomValue(mapsLoadable(keyFor(ref))));
 }
+/** All definitions of a lexicon type, for the hierarchy view. */
+export function useLexDefs(type: string) {
+  return dataOrNull(useAtomValue(defsLoadable(type)));
+}
+
 export function useLexRefs(ref: LexItemRef) {
   return dataOrNull(useAtomValue(refsLoadable(keyFor(ref)))) ?? [];
 }

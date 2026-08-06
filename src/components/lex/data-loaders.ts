@@ -140,6 +140,26 @@ export async function fetchLexData(
   };
 }
 
+/**
+ * Types whose `/defs` records carry a `class` → `type` (→ `group`) hierarchy, so a
+ * detail page can show where the item sits and link to its parents and siblings.
+ * Intervals and stratigraphic names have their own bespoke hierarchy views.
+ */
+export const LEX_HIERARCHY_TYPES = ["lithologies", "economics", "environments"];
+
+export function lexTypeHasHierarchy(type: string): boolean {
+  return LEX_HIERARCHY_TYPES.includes(type);
+}
+
+/** Every definition of a type (`?all`), the input to the hierarchy view. These
+ * lists are small — 214 lithologies, 87 environments, 23 economic uses — and are
+ * fetched once per type per session (see `useLexDefs`). */
+export async function fetchLexDefs(type: string) {
+  const cfg = lexTypeConfig(type);
+  if (cfg?.defsEndpoint == null) return null;
+  return fetchAPIData(cfg.defsEndpoint, { all: true });
+}
+
 /** Merged references from the fossils + columns endpoints (server-HTML).
  * Per-source failures degrade to an empty list rather than failing the page. */
 export async function fetchLexRefs(cfg: LexTypeConfig, id: number) {

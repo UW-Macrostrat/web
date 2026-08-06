@@ -1,0 +1,41 @@
+// Hierarchy navigation on a lexicon detail page: the item's ancestry, its direct
+// siblings, and one level of children. Items are the shared hierarchy tag
+// (`MacrostratHierarchyItem`); this only lays the rows out.
+.lex-hierarchy
+  margin: 1em 0
+
+.relation-row
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  gap: 1em
+  margin: 0.25em 0
+
+.relation-label
+  flex-shrink: 0
+  min-width: 5em
+  color: var(--secondary-color)
+  font-size: 0.9em
+
+.relation-items
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  align-items: baseline
+  gap: 0.5em
+
+.path-separator
+  color: var(--secondary-color)
+
+// A stripped level (`organic`, `sandstones`) has no record to link to, so its
+// members hide behind a chip until asked for — they're one level further out than
+// the immediate children and shouldn't read as peers of them.
+.group-chip
+  text-transform: capitalize
+
+.group-row
+  margin-left: 1em
+
+  .relation-label
+    text-transform: capitalize
+    font-style: italic
