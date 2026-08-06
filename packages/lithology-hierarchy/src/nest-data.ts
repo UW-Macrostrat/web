@@ -169,10 +169,9 @@ export function nestItems(liths: Lith[]): TreeNodeData<Lith> {
   }
 
   for (let lith of liths) {
-    if (lith.class == null || lith.type == null)
-      console.error(lith, "Class and type should never be null");
-    if (lith.class == null) console.log(lith.name, "Class is null");
-    if (lith.type == null) console.log(lith.name, "Type is null");
+    if (lith.class == null) {
+      console.error(lith, "Class should never be null");
+    }
 
     // Create a class if it doesn't exist
     if (lith.class != null) {
@@ -186,6 +185,16 @@ export function nestItems(liths: Lith[]): TreeNodeData<Lith> {
     } else {
       if (!root.children.has(lith.name)) {
         root.children.set(lith.name, { name: lith.name, data: lith });
+      }
+    }
+
+    // An item with a class but no type hangs directly off its class rather than
+    // being dropped from the tree — e.g. the environments named "marine" and
+    // "marginal marine", which are classes in their own right.
+    if (lith.class != null && lith.type == null) {
+      const parent = root.children.get(lith.class);
+      if (!parent.children.has(lith.name)) {
+        parent.children.set(lith.name, { name: lith.name, data: lith });
       }
     }
 

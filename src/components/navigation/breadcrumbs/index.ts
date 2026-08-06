@@ -43,9 +43,7 @@ export function TitleBlock({
 export function usePageBreadcrumbs(): Item[] {
   const ctx = usePageContext();
   return useMemo(() => {
-    const breadcrumbs = buildBreadcrumbs(ctx);
-    console.log(breadcrumbs);
-    return breadcrumbs;
+    return buildBreadcrumbs(ctx);
   }, [ctx]);
 }
 

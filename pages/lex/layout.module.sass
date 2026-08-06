@@ -1,0 +1,21 @@
+// Frame for the /lex subtree. The toolbar is pinned to the top-right of the
+// content frame (`.content-page-inner` is the positioned ancestor), so it sits
+// in the breadcrumb row's empty right-hand space rather than pushing content
+// down.
+
+.lex-layout
+  display: flex
+  flex-direction: column
+  gap: 1em
+
+.lex-toolbar
+  position: absolute
+  top: 0
+  right: 0
+  z-index: 5
+  display: flex
+  align-items: center
+  gap: 0.5em
+
+  @media only screen and (max-width: 900px)
+    right: 1em

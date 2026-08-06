@@ -1,0 +1,58 @@
+// Cross-lexicon omnibar search: the results list, the header button, and the
+// homepage search prompt.
+
+.lex-search-results
+  max-height: 60vh
+  overflow-y: auto
+
+.lex-search-row
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  justify-content: space-between
+  gap: 1em
+  width: 100%
+
+  .result-name
+    flex: 1
+    min-width: 0
+
+  .result-details
+    margin-left: 0.5em
+    color: var(--secondary-color)
+
+  // The ID sits on the right of every row, in the same place regardless of
+  // whether the label is a tag or plain text.
+  .result-id
+    flex-shrink: 0
+    color: var(--secondary-color)
+    font-family: var(--monospace-font)
+    font-size: 0.9em
+
+// Buttons that open the omnibar.
+.lex-search-control,
+.lex-search-prompt
+  .hotkey
+    margin-left: 0.5em
+    color: var(--secondary-color)
+    font-family: var(--monospace-font)
+    font-size: 0.9em
+
+.lex-search-control
+  display: flex
+  justify-content: flex-end
+
+// The homepage's central call to action.
+.lex-search-prompt
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 0.5em
+  padding: 1.5em 0
+
+  .search-hint
+    margin: 0
+    max-width: 34em
+    text-align: center
+    color: var(--secondary-color)
+    font-size: 0.9em

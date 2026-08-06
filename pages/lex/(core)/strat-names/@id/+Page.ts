@@ -8,8 +8,6 @@ import { LexItemData } from "~/components/lex/data-loaders.ts";
 export function Page() {
   const { resData, id, type, config } = useData<LexItemData>();
 
-  console.log(resData, id, type, config);
-
   const relatedHref =
     config.idParam +
     "=" +

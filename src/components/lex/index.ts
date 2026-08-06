@@ -27,11 +27,15 @@ import { LexItemPageProps } from "~/types";
 import { clientOnly } from "./client-only";
 // NOTE: do NOT statically import "./map.client" here — it pulls in mapbox-gl,
 // which touches `window` at module load and crashes SSR. `clientOnly()` dynamic-
-// imports it (below) so the barrel stays server-safe, and it renders `fallback`
-// on the server (no `<ClientOnly>` children-assert issue under hyperscript).
+// imports it (below) so the barrel stays server-safe.
+//
+// This local instance is the fallback for consumers *outside* `/lex` (e.g. the
+// project column-group page). Lexicon pages pass a `targetKey` and get the
+// single shared map instance instead — see `./map-target`.
 const LexiconMapLazy = clientOnly(() =>
   import("./map.client").then((m) => m.LexiconMap)
 );
+import { LexMapSlot } from "./map-target";
 import { fetchPGData } from "~/_utils";
 import { ExpansionPanel } from "@macrostrat/data-components";
 
@@ -78,7 +82,14 @@ function LexItemPageInner(props: LexItemPageProps) {
   ]);
 }
 
-export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
+export function ColumnsTable({
+  resData,
+  colData,
+  fossilsData,
+  mapUrl,
+  targetKey = "",
+  loading = false,
+}) {
   const hasColumns = colData?.features?.length > 0;
   const summary = summarize(hasColumns ? colData.features : []);
 
@@ -98,7 +109,10 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
   const t_id = useIntervalID({ name: summary.t_int_name });
   const b_id = useIntervalID({ name: summary.b_int_name });
 
-  if (!hasColumns) return null;
+  // Nothing to show only once we *know* there are no columns. While they load,
+  // fall through and render the frame — that reserves the space and keeps the
+  // shared map mounted, so navigation doesn't make it blink out and back.
+  if (!hasColumns && !loading) return null;
 
   let filters = [];
 
@@ -146,8 +160,32 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
 
   const area = parseInt(col_area.toString().split(".")[0]);
 
-  return h("div.table", [
-    h("div.table-content", [
+  // A `targetKey` means the caller is inside `/lex`, where one map instance is
+  // mounted by the layout: render the slot it moves into (no map of our own).
+  // Everywhere else, mount a local instance as before.
+  const mapProps = {
+    filters,
+    columns: colData,
+    className: "column-map-container",
+    fossilsData,
+    mapUrl,
+  };
+  let mapElement = null;
+  if (targetKey !== "") {
+    mapElement = h(LexMapSlot, {
+      targetKey,
+      loading: !hasColumns,
+      ...mapProps,
+    });
+  } else {
+    mapElement = h(LexiconMapLazy, { ...mapProps, fallback: h(Spinner) });
+  }
+
+  // While columns load, the stats are all zeros — show a placeholder instead, so
+  // the frame holds its shape without asserting numbers we don't have yet.
+  let statsContent: any = h("div.stats-loading", h(Spinner, { size: 24 }));
+  if (hasColumns) {
+    statsContent = [
       h("div.packages", t_sections.toLocaleString() + " packages"),
       h(Divider, { className: "divider" }),
       h("div.units", t_units.toLocaleString() + " units"),
@@ -176,16 +214,10 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
       h("div.thickness", "≤ " + max_thick.toLocaleString() + "m thick"),
       h(Divider, { className: "divider" }),
       h("div.collections", pbdb_collections.toLocaleString() + " collections"),
-    ]),
-    h(LexiconMapLazy, {
-      filters,
-      columns: colData,
-      className: "column-map-container",
-      fossilsData,
-      mapUrl,
-      fallback: h(Spinner),
-    }),
-  ]);
+    ];
+  }
+
+  return h("div.table", [h("div.table-content", statsContent), mapElement]);
 }
 
 export function navigateToInterval(clickData) {

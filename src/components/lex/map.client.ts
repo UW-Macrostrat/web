@@ -3,8 +3,8 @@ import h from "./map.module.sass";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { Icon } from "@blueprintjs/core";
-import { useState, useRef } from "react";
-import { useMapStyleOperator } from "@macrostrat/mapbox-react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useMapStyleOperator, useMapRef } from "@macrostrat/mapbox-react";
 import { satelliteMapURL } from "@macrostrat-web/settings";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
 import mapboxgl from "mapbox-gl";
@@ -24,10 +24,19 @@ export function LexiconMap(props) {
   return h(ErrorBoundary, h(LexiconMapInner, props));
 }
 
+/**
+ * The lexicon map's contents. Mounted **once** for the whole `/lex` subtree (see
+ * `./persistent-map`) and re-targeted as the user navigates: every prop below can
+ * change in place, and `targetKey` identifies the item so the view can be re-fit.
+ * Because the instance outlives the page, anything derived from a target must be
+ * cleared when it goes away — a layer left behind is a previous item's data
+ * showing on the current one.
+ */
 function LexiconMapInner({
-  className = "map-container",
+  className,
+  targetKey = null,
   columns = null,
-  fossilsData = [],
+  fossilsData = null,
   filters = [],
   mapUrl = "",
 }) {
@@ -35,106 +44,130 @@ function LexiconMapInner({
   const [showFossils, setShowFossils] = useState(false);
   const [showOutcrop, setShowOutcrop] = useState(false);
   const fossilClickRef = useRef(false);
-  const hasFitted = useRef(false);
   const fossilsExist = fossilsData?.features?.length > 0;
 
-  function LexControls() {
-    const handleFossils = () => {
-      setShowFossils(!showFossils);
-    };
-
-    const handleSatellite = () => {
-      setShowSatellite(!showSatellite);
-    };
-
-    const handleOutcrop = () => {
-      setShowOutcrop(!showOutcrop);
-    };
-
-    const map = "/map/layers#" + mapUrl;
-
-    return h("div.lex-controls", [
-      h.if(mapUrl !== "")(
-        "div.btn",
-        { onClick: () => navigate(map) },
-        h(Icon, { icon: "map", className: "icon" })
-      ),
-      h.if(fossilsExist)(
-        "div." + (showFossils ? "selected" : "btn"),
-        { onClick: handleFossils },
-        h(Icon, { icon: "mountain", className: "icon" })
-      ),
-      h.if(filters.length > 0)(
-        "div." + (showOutcrop ? "selected" : "btn"),
-        { onClick: handleOutcrop },
-        h(Icon, { icon: "excavator", className: "icon" })
-      ),
-      h(
-        "div." + (showSatellite ? "selected" : "btn"),
-        { onClick: handleSatellite },
-        h(Icon, { icon: "satellite", className: "icon" })
-      ),
-    ]);
-  }
-
-  columns = columns.features;
-
-  columns = columns.map((col) => {
-    col.id = col.properties.col_id;
-    return col;
-  });
-
-  let fossilsLayer = null;
-  if (fossilsExist) {
-    fossilsLayer = h(FossilsLayer, {
-      fossilsData,
-      showFossils,
-      fossilClickRef,
+  // Memoized: a fresh array identity would re-run the column layer's
+  // `setGeoJSON` (and the navigation store's update) on every unrelated
+  // re-render, e.g. a basemap toggle.
+  const columnFeatures = useMemo(() => {
+    return (columns?.features ?? []).map((col) => {
+      col.id = col.properties.col_id;
+      return col;
     });
-  }
+  }, [columns]);
 
-  return h("div", { className }, [
+  // A toggle from a previous item shouldn't stay lit for one that can't honor it.
+  useEffect(() => {
+    if (!fossilsExist) setShowFossils(false);
+    if (filters.length === 0) setShowOutcrop(false);
+  }, [targetKey, fossilsExist, filters.length]);
+
+  const onSelectColumn = (id) => {
+    setTimeout(() => {
+      if (!showFossils || !fossilClickRef.current) {
+        navigate(`/columns/${id}`);
+      }
+    }, 0);
+  };
+
+  return h("div.map-wrapper", { className }, [
     h(
       ColumnNavigationMap,
       {
-        columns,
+        columns: columnFeatures,
         accessToken: mapboxAccessToken,
         // `style` is the container's CSS (InsetMapProps.style: CSSProperties), NOT
-        // the map style — that's `mapStyle` below. The map needs a *definite*
-        // height (a percentage/min-height leaves the Mapbox canvas at 0px, since
-        // the grid cell has no resolvable height); fill the cell width.
-        style: { width: "100%", height: "500px" },
-        onSelectColumn: (id) => {
-          setTimeout(() => {
-            if (!showFossils || !fossilClickRef.current) {
-              navigate(`/columns/${id}`);
-            }
-          }, 0);
-        },
+        // the map style — that's `mapStyle` below. The definite height lives on
+        // the page-side slot (`.lex-map-slot`); fill it.
+        style: { width: "100%", height: "100%" },
+        onSelectColumn,
         mapStyle: showSatellite ? satelliteMapURL : null,
         columnColor: showSatellite ? "#000" : null,
       },
       [
-        fossilsLayer,
-        h(LexControls),
-        !hasFitted.current
-          ? h(FitBounds, { columnData: columns, hasFitted })
-          : null,
+        h(FossilsLayer, {
+          fossilsData,
+          showFossils: showFossils && fossilsExist,
+          fossilClickRef,
+        }),
+        h(LexControls, {
+          mapUrl,
+          fossilsExist,
+          hasFilters: filters.length > 0,
+          showFossils,
+          setShowFossils,
+          showOutcrop,
+          setShowOutcrop,
+          showSatellite,
+          setShowSatellite,
+        }),
+        h(FitBounds, { columnData: columnFeatures, targetKey }),
         h(OutcropLayer, { showOutcrop, filters }),
+        h(MapDisposer),
       ]
     ),
   ]);
 }
 
+function LexControls({
+  mapUrl,
+  fossilsExist,
+  hasFilters,
+  showFossils,
+  setShowFossils,
+  showOutcrop,
+  setShowOutcrop,
+  showSatellite,
+  setShowSatellite,
+}) {
+  return h("div.lex-controls", [
+    h.if(mapUrl !== "")(
+      "div.btn",
+      { onClick: () => navigate("/map/layers#" + mapUrl) },
+      h(Icon, { icon: "map", className: "icon" })
+    ),
+    h.if(fossilsExist)(
+      "div." + (showFossils ? "selected" : "btn"),
+      { onClick: () => setShowFossils(!showFossils) },
+      h(Icon, { icon: "mountain", className: "icon" })
+    ),
+    h.if(hasFilters)(
+      "div." + (showOutcrop ? "selected" : "btn"),
+      { onClick: () => setShowOutcrop(!showOutcrop) },
+      h(Icon, { icon: "excavator", className: "icon" })
+    ),
+    h(
+      "div." + (showSatellite ? "selected" : "btn"),
+      { onClick: () => setShowSatellite(!showSatellite) },
+      h(Icon, { icon: "satellite", className: "icon" })
+    ),
+  ]);
+}
+
+/** Destroy the GL context if the map tree ever does unmount (leaving `/lex`).
+ * `MapView` never removes the map itself, so without this the instance would be
+ * orphaned along with its canvas. */
+function MapDisposer() {
+  const mapRef = useMapRef();
+  useEffect(() => {
+    return () => {
+      mapRef.current?.remove();
+    };
+  }, []);
+  return null;
+}
+
 function OutcropLayer({ showOutcrop, filters }) {
   useMapStyleOperator(
     (map) => {
-      if (map == null || filters.length === 0) return;
+      if (map == null) return;
 
       const macrostratLayers = _macrostratStyle.layers;
       const macrostratSources = _macrostratStyle.sources;
 
-      if (!showOutcrop) {
+      // The map persists across items, so "no filters" must actively tear the
+      // overlay down — otherwise the previous item's outcrop stays on screen.
+      if (!showOutcrop || filters.length === 0) {
         macrostratLayers?.forEach((lyr) => {
           if (map.getLayer(lyr.id)) {
             map.removeLayer(lyr.id);
@@ -170,12 +203,14 @@ function OutcropLayer({ showOutcrop, filters }) {
   return null;
 }
 
+const EMPTY_FEATURES = { type: "FeatureCollection", features: [] };
+
 function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   useMapStyleOperator(
     (map) => {
-      if (fossilsData == null) return;
-
-      setGeoJSON(map, "points", fossilsData);
+      // Write an empty collection rather than bailing out: on a persistent map,
+      // returning early would leave the previous item's collections displayed.
+      setGeoJSON(map, "points", fossilsData ?? EMPTY_FEATURES);
 
       if (showFossils) {
         if (map.getLayer("minimal-layer")) {
@@ -263,42 +298,54 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   return null;
 }
 
-function FitBounds({ columnData, hasFitted }) {
-  useMapStyleOperator((map) => {
-    if (!map || !Array.isArray(columnData) || columnData.length === 0) return;
+/** Fit the view to the current item's columns — once per item. Keyed on
+ * `targetKey` rather than "first run": the map persists, so each new item needs a
+ * fit, but a style reload (satellite toggle) re-runs this operator and must not
+ * throw away the user's pan/zoom. */
+function FitBounds({ columnData, targetKey }) {
+  const fittedKey = useRef<string | null>(null);
 
-    hasFitted.current = true;
-
-    // Flatten all polygon coordinates (assumes Polygon or MultiPolygon)
-    const coordinates = columnData
-      .flatMap((col) => {
-        const geom = col.geometry;
-        if (!geom || !geom.coordinates) return [];
-
-        // Handle Polygon or MultiPolygon
-        if (geom.type === "Polygon") {
-          return geom.coordinates[0]; // outer ring
-        } else if (geom.type === "MultiPolygon") {
-          return geom.coordinates.flat(1)[0]; // first outer ring
-        }
-
-        return [];
-      })
-      .filter(Boolean); // remove invalid entries
-
-    if (coordinates.length === 0) return;
-
-    // Calculate bounds
-    const bounds = coordinates.reduce(
-      (b, coord) => b.extend(coord),
-      new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
-    );
-
-    map.fitBounds(bounds, {
-      padding: 50,
-      duration: 0,
-    });
-  }, []);
+  useMapStyleOperator(
+    (map) => {
+      if (!map || !Array.isArray(columnData) || columnData.length === 0) return;
+      if (fittedKey.current === targetKey) return;
+      fittedKey.current = targetKey;
+      fitToColumns(map, columnData);
+    },
+    [targetKey, columnData]
+  );
 
   return null;
+}
+
+function fitToColumns(map, columnData) {
+  // Flatten all polygon coordinates (assumes Polygon or MultiPolygon)
+  const coordinates = columnData
+    .flatMap((col) => {
+      const geom = col.geometry;
+      if (!geom || !geom.coordinates) return [];
+
+      // Handle Polygon or MultiPolygon
+      if (geom.type === "Polygon") {
+        return geom.coordinates[0]; // outer ring
+      } else if (geom.type === "MultiPolygon") {
+        return geom.coordinates.flat(1)[0]; // first outer ring
+      }
+
+      return [];
+    })
+    .filter(Boolean); // remove invalid entries
+
+  if (coordinates.length === 0) return;
+
+  // Calculate bounds
+  const bounds = coordinates.reduce(
+    (b, coord) => b.extend(coord),
+    new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
+  );
+
+  map.fitBounds(bounds, {
+    padding: 50,
+    duration: 0,
+  });
 }
