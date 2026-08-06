@@ -11,19 +11,26 @@
  *
  * The wrinkle is that `class` / `type` / `group` are *strings on each record*, not
  * entities — a level is navigable only when some item is named after it (`type:
- * "plutonic"` has a lithology called "plutonic"; `group: "felsic"` has none). So a
- * level with no eponymous item is **stripped**: it never appears as a link, and
- * items beneath it are treated as children of the nearest level that does have
- * one. Items are rendered with the shared `MacrostratHierarchyItem`, so they link
- * through the ambient `MacrostratInteractionProvider` like every other lexicon
- * link. See [[Geologic lexicon pages]].
+ * "plutonic"` has a lithology called "plutonic"; `group: "felsic"` has none). Such
+ * a level can't be a **link**, but it is still shown: the ancestry path renders it
+ * as plain text, because it's part of where the item sits (`peritidal` is a marine
+ * *carbonate* environment even with no record named "carbonate"). For relations,
+ * though, it is stripped — descendants below it belong to the nearest level that
+ * does have a record, gathered behind that level's name.
+ *
+ * Presentation is a **single inline strip of tags** — `Parents a › b   Siblings …
+ * Children …` — quiet labels as the section cues, a hairline before the
+ * descendants, and long runs capped so they slide out inline instead of growing
+ * the page. Only one expansion is open at a time. Links resolve through the
+ * ambient `MacrostratInteractionProvider` like every other lexicon link. See
+ * [[Geologic lexicon pages]].
  */
 import hyper from "@macrostrat/hyper";
 import styles from "./hierarchy.module.sass";
 import { useMemo, useState } from "react";
-import { Button } from "@blueprintjs/core";
-import { MacrostratHierarchyItem } from "@macrostrat-web/lithology-hierarchy";
-import { ExpansionPanel } from "@macrostrat/data-components";
+import { Icon } from "@blueprintjs/core";
+import type { ReactNode } from "react";
+import { Tag, TagSize, useInteractionProps } from "@macrostrat/data-components";
 import { lexTypeConfig, lexTypeHasHierarchy } from "./data-loaders";
 import { useLexDefs } from "./item-atoms";
 
@@ -77,13 +84,26 @@ function itemForLevel(defs: any[], item: any, index: number): any | null {
   );
 }
 
-/** Ancestors that exist as records, outermost first. Levels with no eponymous
- * record are skipped rather than rendered as dead text. */
-function ancestorsOf(defs: any[], item: any): any[] {
-  const out = [];
+export interface LexAncestor {
+  /** The level's value (`"sedimentary"`, `"carbonate"`). */
+  name: string;
+  /** The record that *is* this level, or `null` when nothing is named after it. */
+  record: any | null;
+}
+
+/**
+ * The full ancestry, outermost first — **including levels with no record of their
+ * own**. Those can't be links, but leaving them out would misrepresent where the
+ * item sits: `peritidal` is a marine *carbonate* environment even though no record
+ * is named "carbonate".
+ */
+function ancestorPath(defs: any[], item: any): LexAncestor[] {
+  const path = levelPath(item);
+  const out: LexAncestor[] = [];
   for (let i = 0; i < levelOf(item); i++) {
-    const ancestor = itemForLevel(defs, item, i);
-    if (ancestor != null) out.push(ancestor);
+    const name = path[i];
+    if (name == null) continue;
+    out.push({ name, record: itemForLevel(defs, item, i) });
   }
   return out;
 }
@@ -91,8 +111,8 @@ function ancestorsOf(defs: any[], item: any): any[] {
 /** The nearest ancestor that exists as a record — the item's parent once
  * non-navigable levels are stripped. */
 function parentOf(defs: any[], item: any): any | null {
-  const ancestors = ancestorsOf(defs, item);
-  return ancestors[ancestors.length - 1] ?? null;
+  const withRecords = ancestorPath(defs, item).filter((a) => a.record != null);
+  return withRecords[withRecords.length - 1]?.record ?? null;
 }
 
 export interface LexChildGroup {
@@ -102,8 +122,8 @@ export interface LexChildGroup {
 }
 
 export interface LexHierarchyRelations {
-  /** Outermost → nearest; only levels that exist as records. */
-  ancestors: any[];
+  /** Outermost → nearest, including levels that have no record of their own. */
+  ancestors: LexAncestor[];
   /** Records at the item's own level under the same immediate ancestry. */
   siblings: any[];
   /** Immediate children: nothing stripped between them and the item. */
@@ -176,7 +196,7 @@ export function lexHierarchyRelations(
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return {
-    ancestors: ancestorsOf(defs, item),
+    ancestors: ancestorPath(defs, item),
     siblings,
     children,
     childGroups,
@@ -190,6 +210,20 @@ interface LexItemHierarchyProps {
   resData: any;
 }
 
+/** Above this many peers, the list is capped and the rest slide out on demand. */
+const OVERFLOW_THRESHOLD = 8;
+/** How many stay visible when capped. */
+const COLLAPSED_COUNT = 5;
+
+/**
+ * The hierarchy strip: `Parents  a › b   Siblings  …   Children  …`, all in one
+ * wrapping inline flow. Every tag, label, and control is a direct child of the
+ * flex container — no per-section wrappers — so a long list fills the line and
+ * wraps tag by tag instead of breaking as a block.
+ *
+ * At most one expansion is open at a time (`openSection`), so the strip never
+ * balloons in two places at once.
+ */
 export function LexItemHierarchy(props: LexItemHierarchyProps) {
   const { type, id, resData } = props;
   const hasHierarchy = lexTypeHasHierarchy(type);
@@ -197,6 +231,7 @@ export function LexItemHierarchy(props: LexItemHierarchyProps) {
   const defs = useLexDefs(hasHierarchy ? type : "");
   const idField = lexTypeConfig(type)?.idParam;
   const activeId = Number(id);
+  const [openSection, setOpenSection] = useState<string | null>(null);
 
   // Prefer the definition-list copy of the record, so identity comparisons below
   // are against the same objects the relations are computed from.
@@ -218,104 +253,205 @@ export function LexItemHierarchy(props: LexItemHierarchyProps) {
     childGroups.length === 0;
   if (isEmpty) return null;
 
-  return h(
-    "div.lex-hierarchy",
-    h(ExpansionPanel, { title: "Hierarchy", expanded: true }, [
-      h(RelationRow, { label: "Parents", items: ancestors, separator: true }),
-      h(RelationRow, { label: "Siblings", items: siblings }),
-      h(ChildrenRows, { children, childGroups }),
-    ])
-  );
-}
-
-/** The children row, plus a collapsed chip per stripped level. Those groups are a
- * level further out than the immediate children, so they're revealed on demand
- * instead of flattening the distinction away. */
-function ChildrenRows({
-  children,
-  childGroups,
-}: {
-  children: any[];
-  childGroups: LexChildGroup[];
-}) {
-  const [expanded, setExpanded] = useState<string[]>([]);
-
-  if (children.length === 0 && childGroups.length === 0) return null;
-
-  function toggle(name: string) {
-    setExpanded((prev) => {
-      if (prev.includes(name)) return prev.filter((n) => n !== name);
-      return [...prev, name];
+  function toggle(key: string) {
+    setOpenSection((current) => {
+      if (current === key) return null;
+      return key;
     });
   }
 
-  const groupChips = childGroups.map((group) => {
-    const isOpen = expanded.includes(group.name);
-    let icon = "caret-right";
-    if (isOpen) icon = "caret-down";
-    return h(
-      Button,
-      {
-        key: group.name,
-        minimal: true,
-        small: true,
-        active: isOpen,
-        rightIcon: icon,
-        className: "group-chip",
-        onClick: () => toggle(group.name),
-      },
-      `${group.name} (${group.items.length})`
-    );
-  });
+  const nodes = [];
 
-  const openGroups = childGroups
-    .filter((group) => expanded.includes(group.name))
-    .map((group) =>
-      h(RelationRow, {
-        key: group.name,
-        label: group.name,
-        items: group.items,
-        className: "group-row",
-      })
-    );
+  // No "Parents" label: a `›`-separated path leading into the item's peers reads
+  // as ancestry on its own.
+  if (ancestors.length > 0) {
+    nodes.push(ancestorNodes(ancestors));
+  }
 
-  return h("div.children-block", [
-    h("div.relation-row", [
-      h("div.relation-label", "Children"),
-      h("div.relation-items", [
-        children.map((data, i) => h(MacrostratHierarchyItem, { key: i, data })),
-        groupChips,
-      ]),
-    ]),
-    openGroups,
-  ]);
+  if (siblings.length > 0) {
+    nodes.push(h("span.relation-label", { key: "l-siblings" }, "Siblings"));
+    nodes.push(
+      peerNodes("siblings", siblings, openSection === "siblings", toggle)
+    );
+  }
+
+  if (children.length > 0 || childGroups.length > 0) {
+    nodes.push(
+      h("span.relation-label.leads", { key: "l-children" }, "Children")
+    );
+    nodes.push(
+      peerNodes("children", children, openSection === "children", toggle)
+    );
+    childGroups.forEach((group) => {
+      nodes.push(groupNodes(group, openSection === groupKey(group), toggle));
+    });
+  }
+
+  return h("div.lex-hierarchy", nodes);
 }
 
-/** One labeled row of hierarchy items. `separator` renders the ancestry as a
- * path (outermost first) rather than an unordered set. */
-function RelationRow({
-  label,
-  items,
-  separator = false,
-  className,
-}: {
-  label: string;
-  items: any[];
-  separator?: boolean;
-  className?: string;
-}) {
-  if (items.length === 0) return null;
+function groupKey(group: LexChildGroup): string {
+  return `group:${group.name}`;
+}
 
+/** The ancestry as a `›`-separated path. Levels with no record of their own are
+ * still shown — as plain text rather than a link — because they're what locates
+ * the item (`marine › carbonate`, even though no record is named "carbonate"). */
+function ancestorNodes(ancestors: LexAncestor[]) {
   const nodes = [];
-  items.forEach((data, i) => {
-    if (separator && i > 0) {
-      nodes.push(h("span.path-separator", { key: `sep-${i}` }, "›"));
+  ancestors.forEach((ancestor, i) => {
+    if (i > 0) nodes.push(h("span.path-separator", { key: `sep-${i}` }, "›"));
+    if (ancestor.record == null) {
+      nodes.push(h("span.unfilled-level", { key: `anc-${i}` }, ancestor.name));
+    } else {
+      nodes.push(h(HierarchyTag, { key: `anc-${i}`, data: ancestor.record }));
     }
-    nodes.push(h(MacrostratHierarchyItem, { key: i, data }));
+  });
+  return nodes;
+}
+
+/** A run of peer tags, capped once the list gets long: the first
+ * `COLLAPSED_COUNT` stay visible and the rest slide out inline from a `+N`
+ * button, rather than pushing the page down. */
+function peerNodes(
+  key: string,
+  items: any[],
+  isOpen: boolean,
+  toggle: (key: string) => void
+) {
+  if (items.length === 0) return null;
+  const overflows = items.length > OVERFLOW_THRESHOLD;
+
+  let visible = items;
+  if (overflows && !isOpen) {
+    visible = items.slice(0, COLLAPSED_COUNT);
+  }
+
+  const nodes = visible.map((data, i) => {
+    // Only the items past the cap animate in; the always-visible ones must not,
+    // or they'd re-animate on every toggle. The stagger counts from the first
+    // revealed item, so the unfurl starts at the button.
+    const isRevealed = isOpen && i >= COLLAPSED_COUNT;
+    return h(HierarchyTag, {
+      key: `${key}-${i}`,
+      data,
+      revealed: isRevealed,
+      index: i - COLLAPSED_COUNT,
+    });
   });
 
-  return h("div.relation-row", { className }, [
-    h("div.relation-label", label),
-    h("div.relation-items", nodes),
-  ]);
+  if (overflows && !isOpen) {
+    nodes.push(
+      h(TextControl, {
+        key: `${key}-toggle`,
+        onClick: () => toggle(key),
+        children: `and ${items.length - COLLAPSED_COUNT} more…`,
+      })
+    );
+  }
+
+  if (overflows && isOpen) {
+    nodes.push(
+      h(CollapseControl, { key: `${key}-collapse`, onClick: () => toggle(key) })
+    );
+  }
+
+  return nodes;
+}
+
+/** A stripped level: an italic text label whose members slide out beside it. Flat
+ * nodes, not a wrapper, so the members share the strip's flow. */
+function groupNodes(
+  group: LexChildGroup,
+  isOpen: boolean,
+  toggle: (key: string) => void
+) {
+  const key = groupKey(group);
+  const nodes = [
+    h(TextControl, {
+      key: `${key}-chip`,
+      active: isOpen,
+      onClick: () => toggle(key),
+      children: group.name,
+    }),
+  ];
+
+  if (!isOpen) return nodes;
+
+  group.items.forEach((data, i) => {
+    nodes.push(
+      h(HierarchyTag, { key: `${key}-${i}`, data, revealed: true, index: i })
+    );
+  });
+  nodes.push(
+    h(CollapseControl, { key: `${key}-collapse`, onClick: () => toggle(key) })
+  );
+
+  return nodes;
+}
+
+/**
+ * A control that reads as text, not as a button: no background, no border, italic
+ * and secondary, so the strip stays a list of tags with quiet asides in it. Used
+ * for "and N more…" and for a stripped level's name — clicking is the affordance,
+ * which is why neither needs an icon.
+ */
+function TextControl({
+  onClick,
+  children,
+  active = false,
+}: {
+  onClick: () => void;
+  children: ReactNode;
+  active?: boolean;
+}) {
+  // Class names go in the tag string so `hyper.styled` scopes them; passed as a
+  // `className` prop they'd stay unscoped and match nothing here.
+  let tag = "button.text-control";
+  if (active) tag = "button.text-control.is-active";
+  return h(tag, { type: "button", onClick }, children);
+}
+
+/** Icon-only control that closes an expanded run, sitting after its last item. */
+function CollapseControl({ onClick }: { onClick: () => void }) {
+  return h(
+    "button.text-control.collapse-control",
+    { type: "button", onClick, "aria-label": "Collapse" },
+    h(Icon, { icon: "chevron-left", size: 12 })
+  );
+}
+
+/**
+ * A hierarchy item as a plain tag: the item's color, its name, and nothing else —
+ * no identifier, since a dozen of these in a row is a navigation aid, not a data
+ * table. Links resolve through the ambient `MacrostratInteractionProvider`.
+ */
+function HierarchyTag({
+  data,
+  revealed = false,
+  index = 0,
+}: {
+  data: any;
+  revealed?: boolean;
+  index?: number;
+}) {
+  const interactionProps = useInteractionProps(data);
+  const tag = h(Tag, {
+    name: data.name,
+    color: data.color,
+    size: TagSize.Small,
+    ...interactionProps,
+  });
+
+  if (!revealed) {
+    return h("span.tag-holder", tag);
+  }
+
+  // Stagger the slide-out slightly so a long run reads as unfurling.
+  const step = Math.max(0, Math.min(index, 12));
+  return h(
+    "span.tag-holder.revealed",
+    { style: { animationDelay: `${step * 25}ms` } },
+    tag
+  );
 }

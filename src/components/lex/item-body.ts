@@ -63,8 +63,10 @@ export function LexItemBody(props: LexItemBodyProps) {
     useLexColumnsState(itemRef);
   const fossilsData = useLexFossils(itemRef);
   const taxaData = useLexTaxa(itemRef);
-  const unitsData = useLexUnits(itemRef);
-  const mapsData = useLexMaps(itemRef);
+  // Paused with the beta cards below — these are their only consumers, and with
+  // the cards hidden they'd be two fetches per item for nothing.
+  // const unitsData = useLexUnits(itemRef);
+  // const mapsData = useLexMaps(itemRef);
   const refs = useLexRefs(itemRef);
 
   const features = colData?.features || [];
@@ -84,11 +86,16 @@ export function LexItemBody(props: LexItemBodyProps) {
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
-    h.if(showUnits && unitsData?.length > 0)(Units, { href: relatedHref }),
-    h.if(showMaps && mapsData?.length > 0)(Maps, { href: relatedHref }),
-    h.if(showFossils && fossilsData?.features?.length > 0)(Fossils, {
-      href: relatedHref,
-    }),
+    // The beta "Columns" / "Map Legends" / "Fossils" cards are held back for now
+    // (per Daven) — the pages they link to aren't ready to show. Kept here rather
+    // than deleted, along with the `showUnits`/`showMaps`/`showFossils` props and
+    // the atoms that feed them, so restoring them is uncommenting three lines.
+    //
+    // h.if(showUnits && unitsData?.length > 0)(Units, { href: relatedHref }),
+    // h.if(showMaps && mapsData?.length > 0)(Maps, { href: relatedHref }),
+    // h.if(showFossils && fossilsData?.features?.length > 0)(Fossils, {
+    //   href: relatedHref,
+    // }),
     bottomExtra,
     h(References, { refs }),
   ]);

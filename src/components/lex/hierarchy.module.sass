@@ -1,41 +1,84 @@
-// Hierarchy navigation on a lexicon detail page: the item's ancestry, its direct
-// siblings, and one level of children. Items are the shared hierarchy tag
-// (`MacrostratHierarchyItem`); this only lays the rows out.
+// Hierarchy navigation on a lexicon detail page: ancestry, direct siblings, and
+// one level of children, rendered as a single inline strip of tags. Every tag,
+// label, and control is a *direct* child of this flex container — no per-section
+// wrappers — so long lists fill the line and wrap tag by tag rather than breaking
+// as a block.
+//
+// The ancestry carries no label (a `›` path implies it); the "Siblings" and
+// "Children" labels are set off by space rather than by weight or caps.
+
 .lex-hierarchy
-  margin: 1em 0
-
-.relation-row
-  display: flex
-  flex-direction: row
-  align-items: baseline
-  gap: 1em
-  margin: 0.25em 0
-
-.relation-label
-  flex-shrink: 0
-  min-width: 5em
-  color: var(--secondary-color)
-  font-size: 0.9em
-
-.relation-items
   display: flex
   flex-direction: row
   flex-wrap: wrap
   align-items: baseline
-  gap: 0.5em
+  gap: 0.4em
+  margin: 0.5em 0 1em
+
+// Quiet section cues. Contrast comes from the space in front of them, not from
+// capitalization or weight.
+.relation-label
+  color: var(--secondary-color)
+  font-size: 0.8em
+  letter-spacing: 0.03em
+  margin-left: 1.4em
+
+// The descendants read as a separate movement from the peers around the item.
+.leads
+  padding-left: 1em
+  border-left: 1px solid var(--tertiary-color)
 
 .path-separator
   color: var(--secondary-color)
 
-// A stripped level (`organic`, `sandstones`) has no record to link to, so its
-// members hide behind a chip until asked for — they're one level further out than
-// the immediate children and shouldn't read as peers of them.
-.group-chip
-  text-transform: capitalize
+// A hierarchy level with no record of its own: shown for placement, but there's
+// nothing to navigate to. Smaller than a tag, since it isn't one.
+.unfilled-level
+  font-style: italic
+  font-size: 0.85em
+  color: var(--secondary-color)
 
-.group-row
-  margin-left: 1em
+.tag-holder
+  display: inline-flex
 
-  .relation-label
-    text-transform: capitalize
-    font-style: italic
+// Controls that read as text rather than as buttons — "and 12 more…", a stripped
+// level's name, the collapse chevron. Clicking is the only affordance they need.
+.text-control
+  appearance: none
+  background: none
+  border: none
+  padding: 0
+  margin: 0
+  cursor: pointer
+  font-family: inherit
+  font-style: italic
+  font-size: 0.85em
+  color: var(--secondary-color)
+  text-decoration: none
+
+  &:hover
+    color: var(--text-emphasized-color)
+    text-decoration: underline
+
+  &.is-active
+    color: var(--text-emphasized-color)
+
+.collapse-control
+  display: inline-flex
+  align-items: center
+
+  &:hover
+    text-decoration: none
+
+// Items revealed by an expansion slide out from where the control was, instead of
+// the list jumping to its full height.
+.revealed
+  animation: slide-out-inline 180ms ease-out both
+
+@keyframes slide-out-inline
+  from
+    opacity: 0
+    transform: translateX(-0.75em) scaleX(0.9)
+  to
+    opacity: 1
+    transform: none
