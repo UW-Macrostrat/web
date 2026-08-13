@@ -10,15 +10,14 @@ import hyper from "@macrostrat/hyper";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { Spacer, useDarkMode } from "@macrostrat/ui-components";
 import { useMapClickHandler, useMapRef } from "@macrostrat/mapbox-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef } from "react";
 import {
-  FloatingNavbar,
   MapAreaContainer,
   MapLoadingButton,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtomValue, useSetAtom } from "jotai";
 import {
   basemapStyle,
   PageBreadcrumbsInternal,
@@ -27,10 +26,8 @@ import {
 } from "~/components";
 import {
   basemapAtom,
-  type Bbox,
   bboxFeature,
   bboxFromScreenRect,
-  buildInvalidationBody,
   buildOverlayStyles,
   ensureExpireBboxLayer,
   EXPIRE_BBOX_SOURCE,
@@ -41,13 +38,14 @@ import {
   selectedMapFromFeature,
   selectedMapsAtom,
   showCartoAtom,
-  useTileInvalidation,
   viewportBboxAtom,
   zoomAtom,
   zoomOffsetAtom,
 } from "./lib";
 import styles from "./main.module.scss";
 import { CachePanel } from "./cache-panel.ts";
+import { Divider } from "@blueprintjs/core";
+import { StyleFragment } from "@macrostrat/map-styles";
 
 const h = hyper.styled(styles);
 
@@ -57,74 +55,20 @@ export function Page() {
   const dark = useDarkMode();
   const basemap = useAtomValue(basemapAtom);
   const baseStyle = basemapStyle(basemap, dark?.isEnabled);
-  const [isOpen, setOpen] = useState(true);
 
-  const mode = useAtomValue(expireModeAtom);
-  const showCarto = useAtomValue(showCartoAtom);
-  const [selectedMaps, setSelectedMaps] = useAtom(selectedMapsAtom);
-  const footprintMode = useAtomValue(footprintModeAtom);
-  const dz = useAtomValue(zoomOffsetAtom);
-  // Viewport-mode targets the on-screen cache rectangle: its geographic bbox is
-  // recomputed in the background as the map moves; zoom drives the scale band.
-  const setExpireBbox = useSetAtom(viewportBboxAtom);
-  const setZoom = useSetAtom(zoomAtom);
-
-  const selectedIds = useMemo(
-    () => selectedMaps.map((m) => m.source_id),
-    [selectedMaps]
-  );
-
-  const overlayStyles = useMemo(
-    () => buildOverlayStyles({ showCarto, footprintMode, dz, selectedIds }),
-    [showCarto, footprintMode, dz, selectedIds]
-  );
-
-  // Toggle a clicked map in/out of the selection (clicking empty space is a no-op).
-  const toggleMap = useCallback((map: SelectedMap | null) => {
-    if (map == null) return;
-    setSelectedMaps((prev) => {
-      const exists = prev.some((m) => m.source_id === map.source_id);
-      return exists
-        ? prev.filter((m) => m.source_id !== map.source_id)
-        : [...prev, map];
-    });
-  }, []);
-
-  const onMapMoved = useCallback((_pos, map: mapboxgl.Map) => {
-    setZoom(map.getZoom());
-  }, []);
-
-  // Inset the cache rectangle to clear the floating panel on the left.
-  const rectInset = { left: isOpen ? PANEL_WIDTH + 24 : 24 };
-
-  const contextPanel = h(
-    PanelCard,
-    { style: { width: PANEL_WIDTH } },
-    h(CachePanel)
-  );
-
-  const mapChildren = [
-    h(MapSelectionHandler, {
-      enabled: mode === "map",
-      onSelect: toggleMap,
-    }),
-  ];
-  if (mode === "viewport") {
-    mapChildren.push(
-      h(CacheRectangle, { inset: rectInset, onBboxChange: setExpireBbox })
-    );
-  }
+  const overlayStyles = useAtomValue(overlayStylesAtom);
+  const onMapMoved = useSetAtom(mapMovedHandlerAtom);
+  const mapChildren = useAtomValue(mapChildrenAtom);
 
   return h(
     MapAreaContainer,
     {
-      navbar: h(
-        FloatingNavbar,
-        { className: styles["cache-navbar"], width: PANEL_WIDTH },
-        h(NavbarHeader, { isOpen, onToggle: () => setOpen(!isOpen) })
-      ),
-      contextPanel,
-      contextPanelOpen: isOpen,
+      contextPanel: h(PanelCard, { style: { width: PANEL_WIDTH } }, [
+        h(NavbarHeader),
+        h(Divider),
+        h(CachePanel),
+      ]),
+      contextPanelOpen: true,
     },
     h(
       MapView,
@@ -141,6 +85,33 @@ export function Page() {
   );
 }
 
+const mapMovedHandlerAtom = atom(
+  null,
+  (get, set, _pos: any, map: mapboxgl.Map) => {
+    set(zoomAtom, map.getZoom());
+  }
+);
+
+const mapChildrenAtom = atom<ReactNode>((get) => {
+  const mode = get(expireModeAtom);
+  if (mode === "viewport") {
+    return h(CacheRectangle);
+  }
+  if (mode === "map") {
+    return h(MapSelectionHandler);
+  }
+  return null;
+});
+
+const overlayStylesAtom = atom<StyleFragment[]>((get) => {
+  const showCarto = get(showCartoAtom);
+  const footprintMode = get(footprintModeAtom);
+  const dz = get(zoomOffsetAtom);
+  const selectedMaps = get(selectedMapsAtom);
+  const selectedIds = selectedMaps.map((m) => m.source_id);
+  return buildOverlayStyles({ showCarto, footprintMode, dz, selectedIds });
+});
+
 /** A fixed on-screen rectangle marking the viewport-expiry region. It does not
  * move with the map; instead its geographic bbox is recomputed (by unprojecting
  * its corners) whenever the map settles, reported via onBboxChange, and drawn as
@@ -149,15 +120,17 @@ export function Page() {
  * The faint polygon is drawn imperatively (setData) rather than via overlay
  * styles, because changing overlay styles re-runs map.setStyle() — too costly
  * per move. It's re-added on `style.load` so it survives overlay-driven restyles. */
-function CacheRectangle({
-  inset,
-  onBboxChange,
-}: {
-  inset: { left: number };
-  onBboxChange: (bbox: Bbox) => void;
-}) {
+function CacheRectangle() {
   const mapRef = useMapRef();
   const rectRef = useRef<HTMLDivElement>(null);
+
+  // Viewport-mode targets the on-screen cache rectangle: its geographic bbox is
+  // recomputed in the background as the map moves; zoom drives the scale band.
+  const onBboxChange = useSetAtom(viewportBboxAtom);
+
+  // Inset the cache rectangle to clear the floating panel on the left.
+  // TODO: could do this with map padding
+  const inset = { left: PANEL_WIDTH + 24 };
 
   useEffect(() => {
     const map = mapRef.current;
@@ -194,35 +167,40 @@ function CacheRectangle({
 
 /** Selects a constituent map by clicking its footprint (map mode only). Lives
  * inside MapView so it has the map context; clicking empty space clears. */
-function MapSelectionHandler({
-  enabled,
-  onSelect,
-}: {
-  enabled: boolean;
-  onSelect: (map: SelectedMap | null) => void;
-}) {
+function MapSelectionHandler() {
+  const setSelectedMaps = useSetAtom(selectedMapsAtom);
+
+  // Toggle a clicked map in/out of the selection (clicking empty space is a no-op).
+  const onSelect = useCallback((map: SelectedMap | null) => {
+    if (map == null) return;
+    setSelectedMaps((prev) => {
+      const exists = prev.some((m) => m.source_id === map.source_id);
+      return exists
+        ? prev.filter((m) => m.source_id !== map.source_id)
+        : [...prev, map];
+    });
+  }, []);
+
   useMapClickHandler(
     (e) => {
-      if (!enabled) return;
       const map = e.target;
       const features = map.queryRenderedFeatures(e.point, {
         layers: ["footprints-hit"],
       });
       onSelect(selectedMapFromFeature(features[0]));
     },
-    [enabled, onSelect]
+    [onSelect]
   );
   return null;
 }
 
-// ─── Navbar header ────────────────────────────────────────────────────────────
-
+// ─── Navbar header (trying to be a shared component) ────────────────────────────────────────────────────────────
 function NavbarHeader({
   isOpen,
   onToggle,
 }: {
-  isOpen: boolean;
-  onToggle: () => void;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }) {
   const trail = usePageBreadcrumbs().slice(0, -1);
   return h("div.navbar-header", [
@@ -233,8 +211,14 @@ function NavbarHeader({
     }),
     h("div.title-row", [
       h(PageTitle, { headingLevel: 2 }),
-      h(Spacer),
-      h(MapLoadingButton, { active: isOpen, onClick: onToggle, large: false }),
+      h.if(onToggle != null)([
+        h(Spacer),
+        h(MapLoadingButton, {
+          active: isOpen ?? false,
+          onClick: onToggle,
+          large: false,
+        }),
+      ]),
     ]),
   ]);
 }
