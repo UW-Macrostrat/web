@@ -7,6 +7,7 @@ import { useCallback, useState } from "react";
 import { atom } from "jotai";
 import { atomWithLocation } from "jotai-location";
 import { Basemap } from "~/components";
+import { loadable } from "jotai/utils";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -67,8 +68,19 @@ export function bandForScale(scale: string | null): ScaleBand {
 /** Band visible at a given map zoom (clamps to the largest-scale band). */
 export function bandForZoom(zoom: number): ScaleBand {
   const z = Math.floor(zoom);
-  return SCALE_BANDS.find((b) => z >= b.minZoom && z <= b.maxZoom) ?? SCALE_BANDS[3];
+  return (
+    SCALE_BANDS.find((b) => z >= b.minZoom && z <= b.maxZoom) ?? SCALE_BANDS[3]
+  );
 }
+
+export const selectedMapsAtom = atom<SelectedMap[]>([]);
+
+export const footprintModeAtom = atom<FootprintMode>("all");
+export const zoomOffsetAtom = atom(1);
+// Viewport-mode targets the on-screen cache rectangle: its geographic bbox is
+// recomputed in the background as the map moves; zoom drives the scale band.
+export const viewportBboxAtom = atom<Bbox | null>(null);
+export const zoomAtom = atom<number | null>(null);
 
 // ─── URL-synced state atoms ───────────────────────────────────────────────────
 
@@ -122,6 +134,29 @@ export const showCartoAtom = atom(
 );
 
 // ─── Invalidation request ─────────────────────────────────────────────────────
+
+const invalidateBodyAtom = atom<{ body?: InvalidationBody; error?: string }>(
+  (get) => {
+    return buildInvalidationBody({
+      mode: get(expireModeAtom),
+      selectedMaps: get(selectedMapsAtom),
+      expireBbox: get(viewportBboxAtom),
+      zoom: get(zoomAtom),
+    });
+  }
+);
+
+const invalidateRequestAtom = atom(async (get, { signal }) => {
+  const { body, error } = get(invalidateBodyAtom);
+  if (error) throw error;
+  const resp = await fetch(`${burwellTileDomain}/cache/invalidate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) throw new Error(await resp.text());
+  return await resp.json();
+});
 
 /** Encapsulates the POST /cache/invalidate request and its result/error state. */
 export function useTileInvalidation() {
@@ -358,7 +393,8 @@ export function ensureExpireBboxLayer(map: mapboxgl.Map) {
 }
 
 export function removeExpireBboxLayer(map: mapboxgl.Map) {
-  if (map.getLayer(EXPIRE_BBOX_LAYER) != null) map.removeLayer(EXPIRE_BBOX_LAYER);
+  if (map.getLayer(EXPIRE_BBOX_LAYER) != null)
+    map.removeLayer(EXPIRE_BBOX_LAYER);
   if (map.getSource(EXPIRE_BBOX_SOURCE) != null) {
     map.removeSource(EXPIRE_BBOX_SOURCE);
   }
