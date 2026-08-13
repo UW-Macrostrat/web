@@ -7,6 +7,7 @@ import { useCallback, useState } from "react";
 import { atom } from "jotai";
 import { atomWithLocation } from "jotai-location";
 import { Basemap } from "~/components";
+import { loadable } from "jotai/utils";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -133,6 +134,29 @@ export const showCartoAtom = atom(
 );
 
 // ─── Invalidation request ─────────────────────────────────────────────────────
+
+const invalidateBodyAtom = atom<{ body?: InvalidationBody; error?: string }>(
+  (get) => {
+    return buildInvalidationBody({
+      mode: get(expireModeAtom),
+      selectedMaps: get(selectedMapsAtom),
+      expireBbox: get(viewportBboxAtom),
+      zoom: get(zoomAtom),
+    });
+  }
+);
+
+const invalidateRequestAtom = atom(async (get, { signal }) => {
+  const { body, error } = get(invalidateBodyAtom);
+  if (error) throw error;
+  const resp = await fetch(`${burwellTileDomain}/cache/invalidate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) throw new Error(await resp.text());
+  return await resp.json();
+});
 
 /** Encapsulates the POST /cache/invalidate request and its result/error state. */
 export function useTileInvalidation() {

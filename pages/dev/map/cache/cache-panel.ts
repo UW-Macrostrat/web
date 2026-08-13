@@ -29,20 +29,9 @@ import {
 import { useCallback } from "react";
 import { BaseLayerForm } from "~/components";
 import h from "./main.module.scss";
-import { Atom, PrimitiveAtom, useAtom, useAtomValue } from "jotai";
+import { PrimitiveAtom, useAtom, useAtomValue } from "jotai";
 
-interface CachePanelProps {
-  zoom: number | null;
-  footprintMode: FootprintMode;
-  onFootprintModeChange: (m: FootprintMode) => void;
-  dz: number;
-  onDzChange: (dz: number) => void;
-  showCarto: boolean;
-  onShowCartoChange: (v: boolean) => void;
-  error: string | null;
-}
-
-export function CachePanel(props: CachePanelProps) {
+export function CachePanel() {
   const [mode, setMode] = useAtom(expireModeAtom);
   const [selectedMaps, setSelectedMaps] = useAtom(selectedMapsAtom);
   const expireBbox = useAtomValue(viewportBboxAtom);
