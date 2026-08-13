@@ -12,8 +12,12 @@ import h from "@macrostrat/hyper";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import { useAtomValue } from "jotai";
-import { LexiconMap } from "./map.client";
 import { getLexMapNode, lexMapTargetAtom } from "./map-target";
+import { lazy } from "react";
+
+const LexiconMap = lazy(() =>
+  import("./map.client").then((mod) => ({ default: mod.LexiconMap }))
+);
 
 export function LexPersistentMap() {
   const target = useAtomValue(lexMapTargetAtom);
