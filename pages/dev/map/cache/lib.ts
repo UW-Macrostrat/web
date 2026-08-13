@@ -67,8 +67,19 @@ export function bandForScale(scale: string | null): ScaleBand {
 /** Band visible at a given map zoom (clamps to the largest-scale band). */
 export function bandForZoom(zoom: number): ScaleBand {
   const z = Math.floor(zoom);
-  return SCALE_BANDS.find((b) => z >= b.minZoom && z <= b.maxZoom) ?? SCALE_BANDS[3];
+  return (
+    SCALE_BANDS.find((b) => z >= b.minZoom && z <= b.maxZoom) ?? SCALE_BANDS[3]
+  );
 }
+
+export const selectedMapsAtom = atom<SelectedMap[]>([]);
+
+export const footprintModeAtom = atom<FootprintMode>("all");
+export const zoomOffsetAtom = atom(1);
+// Viewport-mode targets the on-screen cache rectangle: its geographic bbox is
+// recomputed in the background as the map moves; zoom drives the scale band.
+export const viewportBboxAtom = atom<Bbox | null>(null);
+export const zoomAtom = atom<number | null>(null);
 
 // ─── URL-synced state atoms ───────────────────────────────────────────────────
 
@@ -358,7 +369,8 @@ export function ensureExpireBboxLayer(map: mapboxgl.Map) {
 }
 
 export function removeExpireBboxLayer(map: mapboxgl.Map) {
-  if (map.getLayer(EXPIRE_BBOX_LAYER) != null) map.removeLayer(EXPIRE_BBOX_LAYER);
+  if (map.getLayer(EXPIRE_BBOX_LAYER) != null)
+    map.removeLayer(EXPIRE_BBOX_LAYER);
   if (map.getSource(EXPIRE_BBOX_SOURCE) != null) {
     map.removeSource(EXPIRE_BBOX_SOURCE);
   }

@@ -52,6 +52,13 @@ import {
  * tileserver as `/rasters/<slug>`). */
 const RASTER_LAYER = "emit-minerals";
 
+/** titiler 1.x makes the tile matrix set explicit in every tile path. */
+const TMS = "WebMercatorQuad";
+
+/** MVT layer name emitted by `raster_layers.footprint_tile` — a cross-repo
+ * contract with the tileserver's SQL. */
+const FOOTPRINTS_SOURCE_LAYER = "raster_footprints";
+
 /** Sentinel for "show the whole mosaic" in the dataset selector. */
 const MOSAIC = "mosaic";
 
@@ -82,6 +89,7 @@ export function Page() {
   const basemap = useAtomValue(basemapAtom);
   const showLabels = useAtomValue(showLabelsAtom);
   const showGeology = useAtomValue(showGeologyAtom);
+  const showFootprints = useAtomValue(showFootprintsAtom);
   const mapBounds = useAtomValue(mapBoundsAtom);
   const rasterOverlayStyle = useAtomValue(mapOverlayStyleAtom);
 
@@ -95,8 +103,12 @@ export function Page() {
       // Geology sits beneath the mineral maps, as context rather than subject.
       styles.unshift(macrostratStyle);
     }
+    if (showFootprints) {
+      // Outlines go on top, so coverage stays visible over the imagery.
+      styles.push(footprintsStyle());
+    }
     return styles;
-  }, [rasterOverlayStyle, showGeology]);
+  }, [rasterOverlayStyle, showGeology, showFootprints]);
 
   // Labels are removed from the resolved style rather than toggled per-layer.
   const transformStyle = useCallback(
@@ -198,6 +210,18 @@ const showGeologyAtom = atom(
   }
 );
 
+/** Whether to outline the rasters backing the mosaic. Off by default; "on" is
+ * stored in the URL. */
+const footprintsParamAtom = atomWithSearchParam("footprints");
+const showFootprintsAtom = atom(
+  (get) => get(footprintsParamAtom) === "on",
+  (get, set, value: boolean) => {
+    let param: string | null = null;
+    if (value) param = "on";
+    set(footprintsParamAtom, param);
+  }
+);
+
 const rasterOpacityAtom = atom(0.8);
 const selectedMineralClassAtom = atom<number>();
 
@@ -234,7 +258,7 @@ const layerInfoLoadableAtom = loadable(layerInfoAtom);
  * FeatureCollection means the index has no rasters for this layer, which is the
  * expected state until they're added. */
 const footprintsAtom = atom(async (get, { signal }) => {
-  const response = await fetch(`${mosaicBaseURL}/assets`, { signal });
+  const response = await fetch(`${mosaicBaseURL}/footprints`, { signal });
   if (!response.ok) {
     throw new Error(`Failed to fetch mosaic footprints: ${response.statusText}`);
   }
@@ -326,16 +350,44 @@ const mapOverlayStyleAtom = atom((get) => {
  * a colormap, so isolating a class is a one-entry colormap: every other class
  * falls out of the lookup table and renders transparent. */
 function mosaicTileURL(mineralClass: number | undefined): string {
-  const url = `${mosaicBaseURL}/tiles/{z}/{x}/{y}@2x.png`;
+  const url = `${mosaicBaseURL}/tiles/${TMS}/{z}/{x}/{y}@2x.png`;
   if (mineralClass == null) return url;
   const colormap = JSON.stringify({ [mineralClass]: [255, 0, 0, 255] });
   return `${url}?colormap=${encodeURIComponent(colormap)}`;
 }
 
 function cogTileURL(url: string): string {
-  return `${cogBaseURL}/tiles/{z}/{x}/{y}@2x?resampling=nearest&url=${encodeURIComponent(
+  return `${cogBaseURL}/tiles/${TMS}/{z}/{x}/{y}@2x?resampling=nearest&url=${encodeURIComponent(
     url
   )}`;
+}
+
+/** Outlines of every raster backing the mosaic, from the index's vector-tile
+ * footprints layer. Coverage without reading a single pixel — the raster
+ * counterpart to the map-footprints layer. */
+function footprintsStyle() {
+  return {
+    version: 8,
+    sources: {
+      "raster-footprints": {
+        type: "vector",
+        tiles: [`${mosaicBaseURL}/footprints/{z}/{x}/{y}`],
+      },
+    },
+    layers: [
+      {
+        id: "raster-footprints-outline",
+        type: "line",
+        source: "raster-footprints",
+        "source-layer": FOOTPRINTS_SOURCE_LAYER,
+        paint: {
+          "line-color": "#3b82f6",
+          "line-width": 1.5,
+          "line-dasharray": [3, 2],
+        },
+      },
+    ],
+  };
 }
 
 /** Class isolation for raw `/cog` tiles, whose red channel carries the class
@@ -370,6 +422,7 @@ function MapSelectorPanel() {
   const [basemap, setBasemap] = useAtom(basemapAtom);
   const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
   const [showGeology, setShowGeology] = useAtom(showGeologyAtom);
+  const [showFootprints, setShowFootprints] = useAtom(showFootprintsAtom);
 
   return h("div.map-selector-panel", [
     h(
@@ -384,6 +437,11 @@ function MapSelectorPanel() {
       label: "Geologic map",
       checked: showGeology,
       onChange: (evt) => setShowGeology(evt.currentTarget.checked),
+    }),
+    h(Switch, {
+      label: "Coverage footprints",
+      checked: showFootprints,
+      onChange: (evt) => setShowFootprints(evt.currentTarget.checked),
     }),
     h(LayerErrorReporter),
     h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),

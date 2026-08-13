@@ -13,51 +13,41 @@ import { useMapClickHandler, useMapRef } from "@macrostrat/mapbox-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FloatingNavbar,
-  MapLoadingButton,
   MapAreaContainer,
+  MapLoadingButton,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
-  FormGroup,
-  Button,
-  SegmentedControl,
-  Callout,
-  Intent,
-  Tag,
-  Switch,
-  NumericInput,
-} from "@blueprintjs/core";
-import { useAtom, useAtomValue } from "jotai";
-import {
+  basemapStyle,
   PageBreadcrumbsInternal,
   PageTitle,
   usePageBreadcrumbs,
-  BaseLayerForm,
-  basemapStyle,
 } from "~/components";
 import {
-  expireModeAtom,
   basemapAtom,
-  showCartoAtom,
-  useTileInvalidation,
+  type Bbox,
+  bboxFeature,
+  bboxFromScreenRect,
   buildInvalidationBody,
   buildOverlayStyles,
-  bboxFromScreenRect,
-  bboxFeature,
   ensureExpireBboxLayer,
-  removeExpireBboxLayer,
   EXPIRE_BBOX_SOURCE,
-  selectedMapFromFeature,
-  bandForScale,
-  bandForZoom,
-  type Bbox,
-  type ExpireMode,
-  type FootprintMode,
+  expireModeAtom,
+  footprintModeAtom,
+  removeExpireBboxLayer,
   type SelectedMap,
-  type InvalidationResult,
+  selectedMapFromFeature,
+  selectedMapsAtom,
+  showCartoAtom,
+  useTileInvalidation,
+  viewportBboxAtom,
+  zoomAtom,
+  zoomOffsetAtom,
 } from "./lib";
 import styles from "./main.module.scss";
+import { CachePanel } from "./cache-panel.ts";
 
 const h = hyper.styled(styles);
 
@@ -69,15 +59,15 @@ export function Page() {
   const baseStyle = basemapStyle(basemap, dark?.isEnabled);
   const [isOpen, setOpen] = useState(true);
 
-  const [mode, setMode] = useAtom(expireModeAtom);
-  const [showCarto, setShowCarto] = useAtom(showCartoAtom);
-  const [selectedMaps, setSelectedMaps] = useState<SelectedMap[]>([]);
-  const [footprintMode, setFootprintMode] = useState<FootprintMode>("all");
-  const [dz, setDz] = useState(1);
+  const mode = useAtomValue(expireModeAtom);
+  const showCarto = useAtomValue(showCartoAtom);
+  const [selectedMaps, setSelectedMaps] = useAtom(selectedMapsAtom);
+  const footprintMode = useAtomValue(footprintModeAtom);
+  const dz = useAtomValue(zoomOffsetAtom);
   // Viewport-mode targets the on-screen cache rectangle: its geographic bbox is
   // recomputed in the background as the map moves; zoom drives the scale band.
-  const [expireBbox, setExpireBbox] = useState<Bbox | null>(null);
-  const [zoom, setZoom] = useState<number | null>(null);
+  const setExpireBbox = useSetAtom(viewportBboxAtom);
+  const setZoom = useSetAtom(zoomAtom);
 
   const selectedIds = useMemo(
     () => selectedMaps.map((m) => m.source_id),
@@ -100,32 +90,6 @@ export function Page() {
     });
   }, []);
 
-  // Switching to viewport mode clears the map selection.
-  const changeMode = useCallback(
-    (next: ExpireMode) => {
-      if (next === "viewport") setSelectedMaps([]);
-      setMode(next);
-    },
-    [setMode]
-  );
-
-  const { invalidate, running, result, error, reportError } =
-    useTileInvalidation();
-
-  const handleExpire = useCallback(() => {
-    const { body, error } = buildInvalidationBody({
-      mode,
-      selectedMaps,
-      expireBbox,
-      zoom,
-    });
-    if (body == null) {
-      reportError(error ?? "Invalid selection");
-      return;
-    }
-    invalidate(body);
-  }, [mode, selectedMaps, expireBbox, zoom, invalidate, reportError]);
-
   const onMapMoved = useCallback((_pos, map: mapboxgl.Map) => {
     setZoom(map.getZoom());
   }, []);
@@ -136,23 +100,7 @@ export function Page() {
   const contextPanel = h(
     PanelCard,
     { style: { width: PANEL_WIDTH } },
-    h(CachePanel, {
-      mode,
-      onModeChange: changeMode,
-      selectedMaps,
-      onClearSelection: () => setSelectedMaps([]),
-      zoom,
-      footprintMode,
-      onFootprintModeChange: setFootprintMode,
-      dz,
-      onDzChange: setDz,
-      showCarto,
-      onShowCartoChange: setShowCarto,
-      onExpire: handleExpire,
-      running,
-      result,
-      error,
-    })
+    h(CachePanel)
   );
 
   const mapChildren = [
@@ -223,7 +171,9 @@ function CacheRectangle({
       onBboxChange(bbox);
       if (!map.isStyleLoaded()) return;
       ensureExpireBboxLayer(map);
-      const source = map.getSource(EXPIRE_BBOX_SOURCE) as mapboxgl.GeoJSONSource;
+      const source = map.getSource(
+        EXPIRE_BBOX_SOURCE
+      ) as mapboxgl.GeoJSONSource;
       source?.setData(bboxFeature(bbox));
     };
 
@@ -290,204 +240,3 @@ function NavbarHeader({
 }
 
 // ─── Side panel ──────────────────────────────────────────────────────────────
-
-interface CachePanelProps {
-  mode: ExpireMode;
-  onModeChange: (m: ExpireMode) => void;
-  selectedMaps: SelectedMap[];
-  onClearSelection: () => void;
-  zoom: number | null;
-  footprintMode: FootprintMode;
-  onFootprintModeChange: (m: FootprintMode) => void;
-  dz: number;
-  onDzChange: (dz: number) => void;
-  showCarto: boolean;
-  onShowCartoChange: (v: boolean) => void;
-  onExpire: () => void;
-  running: boolean;
-  result: InvalidationResult | null;
-  error: string | null;
-}
-
-function CachePanel(props: CachePanelProps) {
-  const { mode, onModeChange, selectedMaps, zoom, onExpire, running } = props;
-
-  let target = null;
-  if (mode === "map") {
-    target = h(SelectedMapsList, {
-      selectedMaps,
-      onClear: props.onClearSelection,
-    });
-  } else {
-    target = h(ViewportTargetInfo, { zoom });
-  }
-
-  let resultCallout = null;
-  if (props.result != null) {
-    resultCallout = h(InvalidationResultCallout, { result: props.result });
-  }
-
-  let errorCallout = null;
-  if (props.error != null) {
-    errorCallout = h(
-      Callout,
-      { className: "result-callout", intent: Intent.DANGER, title: "Error" },
-      h("p", props.error)
-    );
-  }
-
-  const canExpire =
-    mode === "map" ? selectedMaps.length > 0 : zoom != null;
-
-  return h("div.cache-panel", [
-    h(
-      FormGroup,
-      { label: "Target", className: "field" },
-      h(SegmentedControl, {
-        fill: true,
-        small: true,
-        options: [
-          { label: "Viewport", value: "viewport" },
-          { label: "Map", value: "map" },
-        ],
-        value: mode,
-        onValueChange: (v) => onModeChange(v as ExpireMode),
-      })
-    ),
-    target,
-    h(
-      Button,
-      {
-        intent: Intent.DANGER,
-        fill: true,
-        loading: running,
-        disabled: running || !canExpire,
-        onClick: onExpire,
-      },
-      "Expire tiles"
-    ),
-    resultCallout,
-    errorCallout,
-    h(FootprintControls, {
-      footprintMode: props.footprintMode,
-      onFootprintModeChange: props.onFootprintModeChange,
-      dz: props.dz,
-      onDzChange: props.onDzChange,
-    }),
-    h(Switch, {
-      className: "carto-toggle",
-      label: "Macrostrat map",
-      checked: props.showCarto,
-      onChange: (e) => props.onShowCartoChange(e.currentTarget.checked),
-    }),
-    h(BaseLayerForm),
-  ]);
-}
-
-/** Band summary like "small layer · zoom 3–5". */
-function bandLabel(scale: string, minZoom: number, maxZoom: number): string {
-  return `${scale} layer · zoom ${minZoom}–${maxZoom}`;
-}
-
-/** Selected maps, each with its scale band, plus a clear button at top right. */
-function SelectedMapsList({
-  selectedMaps,
-  onClear,
-}: {
-  selectedMaps: SelectedMap[];
-  onClear: () => void;
-}) {
-  if (selectedMaps.length === 0) {
-    return h(
-      Callout,
-      { className: "target-info", intent: Intent.PRIMARY, icon: "select" },
-      "Click map footprints to select them. Click again to deselect."
-    );
-  }
-
-  const items = selectedMaps.map((m) => {
-    const band = bandForScale(m.scale);
-    return h("li.map-item", { key: m.source_id }, [
-      h("span.map-name", m.name || m.slug),
-      h(Tag, { minimal: true, className: "map-band" }, band.scale),
-    ]);
-  });
-
-  return h("div.target-info", [
-    h("div.list-header", [
-      h("span", `${selectedMaps.length} map(s) selected`),
-      h(Button, {
-        minimal: true,
-        small: true,
-        icon: "cross",
-        onClick: onClear,
-        title: "Clear selection",
-      }),
-    ]),
-    h("ul.map-list", items),
-  ]);
-}
-
-function ViewportTargetInfo({ zoom }: { zoom: number | null }) {
-  if (zoom == null) return h("p.target-info", "Waiting for the map…");
-
-  const band = bandForZoom(zoom);
-  return h("div.target-info", [
-    h("p", "Expires the highlighted region for the carto layer at this zoom:"),
-    h(Tag, { minimal: true }, bandLabel(band.scale, band.minZoom, band.maxZoom)),
-  ]);
-}
-
-/** Controls for the footprints overlay: full maps vs. realized faces, and how
- * many zoom levels early to show footprints (dz). */
-function FootprintControls({
-  footprintMode,
-  onFootprintModeChange,
-  dz,
-  onDzChange,
-}: {
-  footprintMode: FootprintMode;
-  onFootprintModeChange: (m: FootprintMode) => void;
-  dz: number;
-  onDzChange: (dz: number) => void;
-}) {
-  return h("div.footprint-controls", [
-    h(
-      FormGroup,
-      { label: "Footprints", className: "field" },
-      h(SegmentedControl, {
-        fill: true,
-        small: true,
-        options: [
-          { label: "All maps", value: "all" },
-          { label: "Active faces", value: "active" },
-        ],
-        value: footprintMode,
-        onValueChange: (v) => onFootprintModeChange(v as FootprintMode),
-      })
-    ),
-    h(
-      FormGroup,
-      { label: "Show earlier by (zoom levels)", className: "field" },
-      h(NumericInput, {
-        value: dz,
-        min: 0,
-        max: 4,
-        fill: true,
-        onValueChange: (v) => onDzChange(Number.isNaN(v) ? 0 : v),
-      })
-    ),
-  ]);
-}
-
-function InvalidationResultCallout({ result }: { result: InvalidationResult }) {
-  const l1 = result.flushed_l1 ? "carto cache flushed" : "flush not applied";
-  return h(
-    Callout,
-    { className: "result-callout", intent: Intent.SUCCESS, title: "Tiles expired" },
-    [
-      h("p", `L2 database: ${result.deleted_l2} tile(s) deleted`),
-      h("p", `L1 Varnish: ${l1}`),
-    ]
-  );
-}
