@@ -15,6 +15,7 @@ import {
   DataSheet,
   generateColumnSpec,
   useSelector,
+  useStoreAPI,
   type ColumnSpec,
   type EditEvent,
 } from "@macrostrat/data-sheet";
@@ -341,6 +342,7 @@ export function TableInterface({
       [
         h(StoreSync, { key: "store-sync" }),
         h(ViewStateSync, { key: "view-sync" }),
+        h(FillCapture, { key: "fill-sync" }),
       ]
     ),
   ]);
@@ -363,6 +365,51 @@ function StoreSync(): null {
         : keys
     );
   }, [columnSpec, setColumnOrder]);
+
+  return null;
+}
+
+// Capture fill-handle drags so Save would otherwise miss them.
+function FillCapture(): null {
+  const storeAPI = useStoreAPI();
+
+  useEffect(() => {
+    const onMouseUp = () => {
+      const state: any = storeAPI.getState();
+      const base = state.fillValueBaseCell;
+      if (base == null) return;
+      // Clear the anchor so a later plain mouse-up can't re-capture this fill.
+      storeAPI.setState({ fillValueBaseCell: null });
+
+      const { selection, columnSpec, data, updatedData, filteredRowIndices } =
+        state;
+      const key = columnSpec?.[base.col]?.key;
+      if (key == null) return;
+
+      const toDataRow = (visibleRow: number) =>
+        filteredRowIndices != null
+          ? filteredRowIndices[visibleRow] ?? visibleRow
+          : visibleRow;
+      const baseRow = toDataRow(base.row);
+      const value = updatedData[baseRow]?.[key] ?? data[baseRow]?.[key];
+
+      const cells: { row: any; column: string; value: any }[] = [];
+      const seen = new Set<number>();
+      for (const region of selection ?? []) {
+        const rows = region?.rows;
+        if (rows == null) continue;
+        for (let v = rows[0]; v <= rows[1]; v++) {
+          const r = toDataRow(v);
+          if (r === baseRow || seen.has(r)) continue;
+          seen.add(r);
+          if (data[r] != null) cells.push({ row: data[r], column: key, value });
+        }
+      }
+      if (cells.length > 0) state.onEdit?.({ type: "setCells", cells });
+    };
+    window.addEventListener("mouseup", onMouseUp);
+    return () => window.removeEventListener("mouseup", onMouseUp);
+  }, [storeAPI]);
 
   return null;
 }

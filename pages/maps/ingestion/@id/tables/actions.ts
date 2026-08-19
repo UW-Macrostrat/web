@@ -46,17 +46,9 @@ function isOmitted(state: any, i: number): boolean {
 
 type JotaiStore = ReturnType<typeof createStore>;
 
-/** In-app clipboard buffer, populated by the in-table copy / cut actions. Used
- * as a fallback when the browser blocks `navigator.clipboard.readText()` —
- * Chrome throws "Read permission denied" when the `clipboard-read` permission
- * isn't granted (writing during copy is allowed on a user gesture, so a copy
- * succeeds but the matching paste fails). Buffering the copied text here lets a
- * copy → paste *within* the sheet work regardless of that permission. Module
- * scope (not an atom) so it survives the `makeIngestActions` `useMemo`. */
+// Fallback clipboard used when the browser blocks `clipboard-read`
 const inAppClipboard: { text: string | null } = { text: null };
 
-/** Parse tab-separated clipboard text into a row-major grid (mirrors the
- * data-sheet library's own `parseTSV`). */
 function parseTSV(text: string): string[][] {
   return text
     .trim()
@@ -64,11 +56,8 @@ function parseTSV(text: string): string[][] {
     .map((row) => row.split("\t"));
 }
 
-/** Reimplements the data-sheet library's Excel-style paste tiling (its
- * `buildPasteEdits` is not exported) so we can paste from our own text buffer
- * without calling `navigator.clipboard.readText()`. Single-cell selections
- * expand from the anchor; a selection matching or larger than the data tiles to
- * fill it; a smaller selection truncates the data. Clips at the table edges. */
+// Reimplements the library's excel-style paste tiling so we can
+// paste from our own buffer
 function buildPasteEdits(
   ctx: any,
   text: string,
@@ -336,11 +325,7 @@ export function makeIngestActions({
     },
   };
 
-  // Copy / cut: serialize the selection to TSV, mirror it to the system
-  // clipboard (best-effort — writing is allowed on a user gesture), and stash
-  // it in the in-app buffer so a subsequent in-sheet paste works even when the
-  // browser blocks clipboard *reads*. The proxy still drives the whole-column
-  // server-side copy path below.
+
   const captureSelection = async (ctx: any) => {
     const { text, proxy } = serializeSelectionToTSV(ctx);
     inAppClipboard.text = text;
@@ -348,8 +333,8 @@ export function makeIngestActions({
     try {
       await navigator.clipboard.writeText(text);
     } catch {
-      // Clipboard write blocked (e.g. permission denied); the in-app buffer
-      // above still makes an in-sheet paste work.
+      // if the clipboard write is blocked then the buffer
+      // above still makes the paste work
     }
   };
 
@@ -368,10 +353,6 @@ export function makeIngestActions({
     },
   };
 
-  // Whole-column copy: pasting a copied full column onto other column(s) appends
-  // a `setColumn` copy op (a revertible rule → server-side copy on Save, scoped
-  // to the current filtered view). Any other paste writes cells locally (those
-  // overlay writes are captured back into the ops stack via `onEdit`).
   const pasteHijack: TableAction = {
     ...pasteAction,
     targets: [],
@@ -400,10 +381,8 @@ export function makeIngestActions({
         }
       }
 
-      // Prefer the real system clipboard (so pastes from other apps work); when
-      // the browser denies clipboard-read, fall back to the in-app buffer
-      // populated by an in-sheet copy/cut. This is what fixes the
-      // "Read permission denied" error on copy → paste between cells.
+      // Prefer the real clipboard (so long as the browser does not block it)
+      // if blocked, fall back to the buffer.
       let text: string | null = null;
       try {
         text = await navigator.clipboard.readText();
