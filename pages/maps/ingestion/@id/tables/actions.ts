@@ -16,6 +16,7 @@ import {
   getSelectedColumnKeys,
   getSelectedRowIndices,
   pasteAction,
+  serializeSelectionToTSV,
   TableAction,
 } from "@macrostrat/data-sheet";
 import type { OverlayToaster } from "@blueprintjs/core";
@@ -44,6 +45,103 @@ function isOmitted(state: any, i: number): boolean {
 }
 
 type JotaiStore = ReturnType<typeof createStore>;
+
+// Fallback clipboard used when the browser blocks `clipboard-read`
+const inAppClipboard: { text: string | null } = { text: null };
+
+function parseTSV(text: string): string[][] {
+  return text
+    .trim()
+    .split("\n")
+    .map((row) => row.split("\t"));
+}
+
+// Reimplements the library's excel-style paste tiling so we can
+// paste from our own buffer
+function buildPasteEdits(
+  ctx: any,
+  text: string,
+): { rowIndex: number; column: string; value: string }[] {
+  const parsed = parseTSV(text);
+  if (parsed.length === 0) return [];
+
+  const cardinality = ctx.selectionCardinality ?? RegionCardinality.FULL_TABLE;
+  const numDataRows = Math.max(ctx.data.length, ctx.updatedData.length);
+  const numCols = ctx.columnSpec.length;
+  const rowIndices = ctx.getSelectedRowIndices();
+  const columnKeys = ctx.getSelectedColumnKeys();
+  const colIdxOf = (key: string) =>
+    ctx.columnSpec.findIndex((c: any) => c.key === key);
+
+  let startRow: number;
+  let startColIdx: number;
+  let targetRowCount: number;
+  let targetColCount: number;
+  switch (cardinality) {
+    case RegionCardinality.CELLS:
+      startRow = rowIndices[0] ?? 0;
+      startColIdx = columnKeys.length > 0 ? colIdxOf(columnKeys[0]) : 0;
+      targetRowCount = rowIndices.length;
+      targetColCount = columnKeys.length;
+      break;
+    case RegionCardinality.FULL_ROWS:
+      startRow = rowIndices[0] ?? 0;
+      startColIdx = 0;
+      targetRowCount = rowIndices.length;
+      targetColCount = numCols;
+      break;
+    case RegionCardinality.FULL_COLUMNS:
+      startRow = 0;
+      startColIdx = columnKeys.length > 0 ? colIdxOf(columnKeys[0]) : 0;
+      targetRowCount = numDataRows;
+      targetColCount = columnKeys.length;
+      break;
+    default:
+      startRow = 0;
+      startColIdx = 0;
+      targetRowCount = numDataRows;
+      targetColCount = numCols;
+  }
+  if (startColIdx < 0) startColIdx = 0;
+
+  const dataRows = parsed.length;
+  const dataCols = Math.max(...parsed.map((r) => r.length));
+  const isSingleCell = targetRowCount === 1 && targetColCount === 1;
+
+  let pasteRows: number;
+  let pasteCols: number;
+  if (isSingleCell) {
+    // Expand from the anchor to fit the data, clipped at the table edge.
+    pasteRows = Math.min(dataRows, numDataRows - startRow);
+    pasteCols = Math.min(dataCols, numCols - startColIdx);
+  } else if (dataRows > targetRowCount || dataCols > targetColCount) {
+    // Data larger than the selection: clip to the data extent.
+    pasteRows = Math.min(dataRows, targetRowCount);
+    pasteCols = Math.min(dataCols, targetColCount);
+  } else {
+    // Exact or smaller: fill the selection (tiling via the modulo below).
+    pasteRows = targetRowCount;
+    pasteCols = targetColCount;
+  }
+
+  const edits: { rowIndex: number; column: string; value: string }[] = [];
+  for (let r = 0; r < pasteRows; r++) {
+    const dataRow = startRow + r;
+    if (dataRow >= numDataRows) break;
+    const row = parsed[dataRows > 0 ? r % dataRows : 0];
+    if (row == null) continue;
+    for (let c = 0; c < pasteCols; c++) {
+      const colIdx = startColIdx + c;
+      if (colIdx >= numCols) break;
+      edits.push({
+        rowIndex: dataRow,
+        column: ctx.columnSpec[colIdx].key,
+        value: row[dataCols > 0 ? c % dataCols : 0] ?? "",
+      });
+    }
+  }
+  return edits;
+}
 
 const ALL_CARDINALITIES: TableAction["targets"] = [
   "none",
@@ -227,10 +325,34 @@ export function makeIngestActions({
     },
   };
 
-  // Whole-column copy: pasting a copied full column onto other column(s) appends
-  // a `setColumn` copy op (a revertible rule → server-side copy on Save, scoped
-  // to the current filtered view). Everything else falls through to the built-in
-  // paste, whose local overlay writes are captured back into the ops stack.
+
+  const captureSelection = async (ctx: any) => {
+    const { text, proxy } = serializeSelectionToTSV(ctx);
+    inAppClipboard.text = text;
+    ctx.setClipboardProxy(proxy ?? null);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // if the clipboard write is blocked then the buffer
+      // above still makes the paste work
+    }
+  };
+
+  const copyHijack: TableAction = {
+    ...copyAction,
+    targets: [],
+    run: (ctx) => captureSelection(ctx),
+  };
+
+  const cutHijack: TableAction = {
+    ...cutAction,
+    targets: [],
+    async run(ctx) {
+      await captureSelection(ctx);
+      ctx.clearSelection();
+    },
+  };
+
   const pasteHijack: TableAction = {
     ...pasteAction,
     targets: [],
@@ -258,7 +380,26 @@ export function makeIngestActions({
           return;
         }
       }
-      await pasteAction.run(ctx);
+
+      // Prefer the real clipboard (so long as the browser does not block it)
+      // if blocked, fall back to the buffer.
+      let text: string | null = null;
+      try {
+        text = await navigator.clipboard.readText();
+      } catch {
+        text = inAppClipboard.text;
+        if (text == null) {
+          notify(
+            "The browser blocked reading the clipboard. Copy within the table, then paste.",
+            "danger",
+          );
+          return;
+        }
+      }
+      if (!text) return;
+
+      const edits = buildPasteEdits(ctx, text);
+      if (edits.length > 0) ctx.editCells(edits);
     },
   };
 
@@ -269,8 +410,8 @@ export function makeIngestActions({
     restoreRowsAction,
     groupByAction,
     hideColumnAction,
-    { ...copyAction, targets: [] },
-    { ...cutAction, targets: [] },
+    copyHijack,
+    cutHijack,
     pasteHijack,
   ];
 }
