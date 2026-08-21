@@ -221,18 +221,14 @@ export function useResetIngestState(url: string) {
   }, [url]);
 }
 
-/** Persist hidden columns + column order per ingest process / feature type to
- * `map_ingest_metadata.{feature}_state`, so they survive reloads. Loads on
- * mount (and when the process/feature changes) and saves (debounced) on change.
- */
 export function useTableStatePersistence(
-  ingestProcessId: number,
+  sourceId: number,
   featureType: string,
 ) {
   const [hidden, setHidden] = useAtom(hiddenColumnsAtom);
   const [order, setOrder] = useAtom(columnOrderAtom);
   const columnName = `${featureType}_state`;
-  // Only save once we've loaded state for *this* process, so the reset-on-mount
+  // Only save once we've loaded state for *this* source, so the reset-on-mount
   // and cross-feature switches don't clobber stored state before it loads.
   const loadedForRef = useRef<number | null>(null);
 
@@ -240,9 +236,9 @@ export function useTableStatePersistence(
     loadedForRef.current = null;
     try {
       const res = await postgrest
-        .from("map_ingest_metadata")
+        .from("map_ingest")
         .select(columnName)
-        .eq("id", ingestProcessId)
+        .eq("source_id", sourceId)
         .maybeSingle();
       const state = (res.data?.[columnName] ?? {}) as any;
       setHidden(Array.isArray(state.hiddenColumns) ? state.hiddenColumns : []);
@@ -250,35 +246,35 @@ export function useTableStatePersistence(
     } catch (err) {
       console.error("Failed to load table state", err);
     }
-    loadedForRef.current = ingestProcessId;
-  }, [ingestProcessId, featureType]);
+    loadedForRef.current = sourceId;
+  }, [sourceId, featureType]);
 
   useEffect(() => {
-    if (loadedForRef.current !== ingestProcessId) return;
+    if (loadedForRef.current !== sourceId) return;
     const value = { hiddenColumns: hidden, columnOrder: order };
     const timer = setTimeout(async () => {
       // Update the existing row; `.select` tells us whether a row matched.
       // postgrest resolves with `{ data, error }` (it does not reject on API
       // errors), so we must inspect `error` explicitly.
       const { data, error } = await postgrest
-        .from("map_ingest_metadata")
+        .from("map_ingest")
         .update({ [columnName]: value })
-        .eq("id", ingestProcessId)
-        .select("id");
+        .eq("source_id", sourceId)
+        .select("source_id");
       if (error) {
         console.error("Failed to save table state", error);
         return;
       }
       if (data == null || data.length === 0) {
-        // No metadata row for this ingest process yet — create it.
+        // No ingest_process row for this source yet — create it.
         const { error: insertError } = await postgrest
-          .from("map_ingest_metadata")
-          .upsert({ id: ingestProcessId, [columnName]: value });
+          .from("map_ingest")
+          .upsert({ source_id: sourceId, [columnName]: value });
         if (insertError) {
           console.error("Failed to create table state row", insertError);
         }
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [hidden, order, ingestProcessId, columnName]);
+  }, [hidden, order, sourceId, columnName]);
 }

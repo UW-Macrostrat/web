@@ -167,7 +167,8 @@ function useToasterInstance(): OverlayToaster | null {
 
 export interface EditTableProps {
   url: string;
-  ingestProcessId: number;
+  /** Identity of the ingest process — its `source_id` primary key. */
+  sourceId: number;
   featureType: FeatureType;
   /** Columns considered "final" / harmonized (starred in the header). */
   finalColumns: string[];
@@ -177,13 +178,13 @@ export interface EditTableProps {
 
 export function TableInterface({
   url,
-  ingestProcessId,
+  sourceId,
   featureType,
   finalColumns,
   overrides = {},
 }: EditTableProps) {
   useResetIngestState(url);
-  useTableStatePersistence(ingestProcessId, featureType);
+  useTableStatePersistence(sourceId, featureType);
   const store = useStore();
   const toaster = useToasterInstance();
   const hiddenColumns = useAtomValue(hiddenColumnsAtom);

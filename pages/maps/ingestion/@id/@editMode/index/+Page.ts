@@ -43,7 +43,6 @@ export function Page() {
   const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
 
   let url = sourcePrefix + `/${editMode}`;
-  const ingestProcessId = ingestProcess.id;
   let tableComponent = routeMap[editMode];
 
   const [showMap, setShowMap] = useStoredState(
@@ -75,7 +74,7 @@ export function Page() {
                 separateTitle: false,
               },
               [
-                h(SourceActions, { ingestProcessId }),
+                h(SourceActions, { sourceId: source_id }),
                 h(ShowMapButton, { showMap, setShowMap }),
               ]
             ),
@@ -83,7 +82,7 @@ export function Page() {
               h(ErrorBoundary, [
                 h(tableComponent, {
                   url,
-                  ingestProcessId,
+                  sourceId: source_id,
                 }),
               ]),
             ]),
@@ -116,10 +115,10 @@ export function Page() {
 /** Source-level actions (top page header): download source files and
  * generate map. These operate on the whole ingest process, so they live on
  * the page rather than in the per-column data-sheet toolbar. */
-function SourceActions({ ingestProcessId }) {
+function SourceActions({ sourceId }) {
   async function onGenerateMap() {
     const res = await secureFetch(
-      `${ingestPrefix}/ingest-process/${ingestProcessId}`,
+      `${ingestPrefix}/ingest-process/${sourceId}`,
       {
         method: "PATCH",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
@@ -135,7 +134,7 @@ function SourceActions({ ingestProcessId }) {
       {
         minimal: true,
         icon: "download",
-        onClick: () => downloadSourceFiles(ingestProcessId),
+        onClick: () => downloadSourceFiles(sourceId),
       },
       "Download sources"
     ),

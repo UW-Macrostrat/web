@@ -43,7 +43,7 @@ const INTERVAL_OVERRIDES: Record<string, Partial<ColumnSpec>> = {
   },
 };
 
-export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
+export function PolygonsTable({ url, sourceId }: CustomTableProps) {
   useLoadIntervals();
 
   const FINAL_POLYGON_COLUMNS = [
@@ -59,14 +59,14 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
 
   return h(TableInterface, {
     url,
-    ingestProcessId,
+    sourceId,
     featureType: "polygon",
     finalColumns: FINAL_POLYGON_COLUMNS,
     overrides: { ...COMMON_OVERRIDES, ...INTERVAL_OVERRIDES },
   });
 }
 
-export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
+export function LinesTable({ url, sourceId }: CustomTableProps) {
   const FINAL_LINE_COLUMNS = [
     ...COMMON_COLUMNS,
     "name",
@@ -77,14 +77,14 @@ export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
 
   return h(TableInterface, {
     url,
-    ingestProcessId,
+    sourceId,
     featureType: "line",
     finalColumns: FINAL_LINE_COLUMNS,
     overrides: COMMON_OVERRIDES,
   });
 }
 
-export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
+export function PointsTable({ url, sourceId }: CustomTableProps) {
   const FINAL_POINT_COLUMNS = [
     ...COMMON_COLUMNS,
     "comments",
@@ -97,7 +97,7 @@ export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
 
   return h(TableInterface, {
     url,
-    ingestProcessId,
+    sourceId,
     featureType: "point",
     finalColumns: FINAL_POINT_COLUMNS,
     overrides: COMMON_OVERRIDES,

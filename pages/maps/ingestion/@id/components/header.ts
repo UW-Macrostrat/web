@@ -26,7 +26,7 @@ export function Header({
 
   const updateIngestProcess = useCallback(async () => {
     const response = await fetch(
-      `${ingestPrefix}/ingest-process/${ingestProcess.id}`
+      `${ingestPrefix}/ingest-process/${ingestProcess.source_id}`
     );
     setIngestProcess(await response.json());
   }, []);
