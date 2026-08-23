@@ -40,6 +40,7 @@ import {
   ControlGroup,
   FormGroup,
   HTMLSelect,
+  Intent,
   Slider,
   Switch,
   Tag,
@@ -48,7 +49,12 @@ import { loadable } from "jotai/utils";
 import { useMapEaseTo } from "@macrostrat/mapbox-react";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
-import { BaseLayerForm, Basemap, basemapStyle } from "~/components";
+import {
+  BaseLayerForm,
+  Basemap,
+  basemapStyle,
+  ExpandablePanel,
+} from "~/components";
 import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import styles from "./main.module.sass";
@@ -378,7 +384,9 @@ const layerInfoLoadableAtom = loadable(layerInfoAtom);
 const footprintsAtom = atom(async (get, { signal }) => {
   const response = await fetch(`${mosaicBaseURL}/footprints`, { signal });
   if (!response.ok) {
-    throw new Error(`Failed to fetch mosaic footprints: ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch mosaic footprints: ${response.statusText}`
+    );
   }
   return response.json();
 });
@@ -546,7 +554,8 @@ const mapBoundsAtom = atom((get) => {
 
   const layerInfo = get(layerInfoLoadableAtom);
   if (layerInfo.state === "loading") return null;
-  if (layerInfo.state === "hasData") return layerInfo.data?.bounds ?? DEFAULT_BOUNDS;
+  if (layerInfo.state === "hasData")
+    return layerInfo.data?.bounds ?? DEFAULT_BOUNDS;
   return DEFAULT_BOUNDS;
 });
 
@@ -846,26 +855,32 @@ function MineralClassSelector() {
   }
 
   return h(FormGroup, { label: "Mineral classes" }, [
-    h("div.mineral-classes", [
-      h(
-        "div.class-list",
-        classes.map((d) =>
-          h(MineralClassRow, {
-            key: d.name,
-            mineralClass: d,
-            checked: selected.includes(d.name),
-            focused: d.name === focused,
-            onChange: toggle,
-          })
-        )
-      ),
-      h(MineralClassActions, {
-        selectedCount: selected.length,
-        totalCount: classes.length,
-        onClear: () => setSelected([]),
-      }),
-      note,
-    ]),
+    h(
+      ExpandablePanel,
+      { icon: "filter", title: "Mineral classes", isOpen: true },
+      [
+        h("div.mineral-classes", [
+          h(
+            "div.class-list",
+            classes.map((d) =>
+              h(MineralClassRow, {
+                key: d.name,
+                mineralClass: d,
+                checked: selected.includes(d.name),
+                focused: d.name === focused,
+                onChange: toggle,
+              })
+            )
+          ),
+          h(MineralClassActions, {
+            selectedCount: selected.length,
+            totalCount: classes.length,
+            onClear: () => setSelected([]),
+          }),
+          note,
+        ]),
+      ]
+    ),
   ]);
 }
 
@@ -879,21 +894,10 @@ function MineralClassSelector() {
  * A focused row (the class under the cursor) scrolls itself into view: with ~40
  * classes the one you just clicked on the map is usually outside the viewport.
  */
-function MineralClassRow({ mineralClass, checked, focused, onChange }) {
+function MineralClassRow({ mineralClass, checked, onChange }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!focused) return;
-    // `nearest` so a class already on screen doesn't cause a jump.
-    ref.current?.scrollIntoView({ block: "nearest" });
-  }, [focused]);
-
-  let itemClass = "div.class-item";
-  if (focused) {
-    itemClass = "div.class-item.focused";
-  }
-
-  return h(itemClass, { ref }, [
+  return h("div.class-item", { ref, className: checked ? "selected" : null }, [
     h(Checkbox, {
       checked,
       onChange: (evt) => onChange(mineralClass.name, evt.currentTarget.checked),
@@ -923,6 +927,7 @@ function MineralClassActions({ selectedCount, totalCount, onClear }) {
       disabled: selectedCount === 0,
       text: "Clear",
       onClick: onClear,
+      intent: selectedCount === 0 ? null : Intent.DANGER,
     }),
   ]);
 }
@@ -1069,9 +1074,11 @@ function IsolateClassButton({ reading, selected, setSelected }) {
   // contradiction.
   let icon = "filter";
   let title = `Show only ${name}`;
+  let intent = null;
   if (isolated) {
     icon = "filter-remove";
     title = "Show all classes";
+    intent = Intent.DANGER;
   }
 
   const onClick = () => {
@@ -1088,6 +1095,7 @@ function IsolateClassButton({ reading, selected, setSelected }) {
     minimal: true,
     title,
     "aria-label": title,
+    intent,
     onClick,
   });
 }
@@ -1160,7 +1168,9 @@ function featureCollectionBounds(
   let north = -Infinity;
 
   for (const feature of collection.features ?? []) {
-    for (const [lng, lat] of flattenCoordinates(feature.geometry?.coordinates)) {
+    for (const [lng, lat] of flattenCoordinates(
+      feature.geometry?.coordinates
+    )) {
       west = Math.min(west, lng);
       south = Math.min(south, lat);
       east = Math.max(east, lng);

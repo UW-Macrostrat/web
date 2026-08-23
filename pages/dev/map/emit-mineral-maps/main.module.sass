@@ -12,8 +12,9 @@
     overflow-y: auto
     // Negate the form group's label spacing so the scroll area reads as one
     // block rather than a floating list.
-    margin: 2px 0
-    padding-right: 4px
+    margin: -1em -1em 0
+    padding: 0 0.5em
+    border-bottom: 1px solid var(--panel-rule-color)
 
   .class-item
     display: flex
@@ -21,17 +22,14 @@
     gap: 4px
     padding: 1px 2px
     border-radius: 3px
-    // Blueprint checkboxes carry their own bottom margin, which is too much
-    // for a 40-row list, and no label means no reason to reserve space after it.
-    :global(.bp6-control)
-      margin-bottom: 0
-      margin-right: 0
 
     // The class under the cursor. An outline rather than a background, so it
     // doesn't compete with the tag's own class color.
-    &.focused
-      outline: 2px solid var(--accent-color, #4c90f0)
-      outline-offset: 1px
+    &.selected
+      font-weight: bold
+
+    :global(.bp6-checkbox)
+      margin: 0
 
     // The tag is the row's label, so it takes the width the name would have.
     // Grown as a flex *item* rather than by overriding the package's
@@ -52,9 +50,11 @@
   .class-actions
     display: flex
     align-items: center
+    justify-content: space-between
     gap: 8px
     font-size: 11px
     opacity: 0.7
+    margin-bottom: -0.5em // counteract expandable panel margin
 
   .single-dataset-note
     margin: 0
