@@ -7,6 +7,8 @@ The site is built with **Vike + React + Mapbox GL**. Pages live under `pages/`; 
 ## Workflow
 
 - Assume the user is already viewing the hot-reloading dev UI. Unless explicitly asked, don't start a dev server or offer to verify changes in the browser — the user will interject if the functionality isn't working.
+- **Where it's served.** Usually `https://dev.macrostrat.local`, when the local container stack is up — that's the address to reach for first. The Vike dev server is also directly available at `http://localhost:3000` (**http**, not https).
+- If you do need to check a server-side failure (an SSR 500, a module-resolution error), curl the running server rather than starting your own — `yarn dev` will just fail with `EADDRINUSE` against the one the user already has open.
 
 ## UI authoring
 

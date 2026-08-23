@@ -1,0 +1,26 @@
+// Local fixes for a FloatingNavbar carrying two rows of content. Ideally
+// map-interface (FloatingNavbar) and PageBreadcrumbs would expose these knobs
+// directly.
+.map-page-navbar
+  gap: 1em
+
+  // The navbar is a Blueprint Navbar with a fixed 50px height, so taller
+  // (two-row) content overflows. Let it grow with its contents instead.
+  :global(.bp6-navbar)
+    height: auto
+
+.navbar-title-stack
+  flex: 1
+  // Allows the breadcrumb OverflowList to measure a bounded width and collapse
+  // its middle items rather than overflowing the navbar.
+  min-width: 0
+
+  :global(.bp6-breadcrumb)
+    font-size: 1em
+
+  // Tight, quiet breadcrumb trail above the title.
+  :global(.page-nav)
+    min-width: 0
+
+  h1
+    font-size: 1.2em

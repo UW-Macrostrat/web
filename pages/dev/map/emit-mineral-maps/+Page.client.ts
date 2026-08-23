@@ -11,42 +11,53 @@
  *   in the bucket. Kept for comparison and for debugging a single dataset.
  *
  * Mineral-class isolation works differently in each, because the two routes
- * hand back different pixels: the mosaic applies a colormap server-side (so we
- * isolate a class by *sending* a one-entry colormap), while `/cog` returns raw
- * class indices (so we isolate in the Mapbox paint expression).
+ * hand back different pixels. The mosaic filters **by class name**, server-side
+ * (`?algorithm=classes`), against the vocabulary the raster index stores for the
+ * layer — so any number of classes can be shown at once, each keeping its own
+ * palette color. The generic `/cog` route knows nothing about that vocabulary
+ * and returns raw class indices, so it still isolates one class at a time in the
+ * Mapbox paint expression.
  */
 
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
-import { Box, Spacer, useDarkMode } from "@macrostrat/ui-components";
-import { removeMapLabels } from "@macrostrat/mapbox-utils";
-import { useCallback, useMemo, useState } from "react";
+import { Box, useDarkMode } from "@macrostrat/ui-components";
+import { Tag as ClassTag, TagSize } from "@macrostrat/data-components";
+import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  FloatingNavbar,
-  MapLoadingButton,
+  LocationPanel,
   MapAreaContainer,
+  MapMarker,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
 import { atom, useAtom, useAtomValue } from "jotai";
 import {
+  Button,
   Callout,
+  Checkbox,
   ControlGroup,
   FormGroup,
   HTMLSelect,
   Slider,
   Switch,
+  Tag,
 } from "@blueprintjs/core";
 import { loadable } from "jotai/utils";
 import { useMapEaseTo } from "@macrostrat/mapbox-react";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
-import {
-  BaseLayerForm,
-  Basemap,
-  basemapStyle,
-  NullableDropdown,
-} from "~/components";
+import { BaseLayerForm, Basemap, basemapStyle } from "~/components";
+import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
+import { lastMapPositionAtom } from "~/_utils/last-map-position";
+import styles from "./main.module.sass";
+
+const h = hyper.styled(styles);
+
+/** Shared width for the floating navbar and the context panel below it, so the
+ * two read as one column — the same arrangement as the topology page. */
+const PANEL_WIDTH = 320;
 
 /** The layer slug registered in the raster index (and mounted by the
  * tileserver as `/rasters/<slug>`). */
@@ -86,14 +97,23 @@ export function Page() {
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode();
 
+  const [inspectPosition, setInspectPosition] = useAtom(inspectPositionAtom);
+  // Shared across every Macrostrat map page, so arriving here lands wherever the
+  // last one was left.
+  const [mapPosition, setMapPosition] = useAtom(lastMapPositionAtom);
+
   const basemap = useAtomValue(basemapAtom);
   const showLabels = useAtomValue(showLabelsAtom);
   const showGeology = useAtomValue(showGeologyAtom);
   const showFootprints = useAtomValue(showFootprintsAtom);
-  const mapBounds = useAtomValue(mapBoundsAtom);
   const rasterOverlayStyle = useAtomValue(mapOverlayStyleAtom);
 
   const baseStyle = basemapStyle(basemap, dark?.isEnabled);
+
+  const onMapMoved = useCallback(
+    (pos: MapPosition) => setMapPosition(pos),
+    [setMapPosition]
+  );
 
   // Memoized so a re-render doesn't hand MapView a new array and force the
   // overlay styles to be re-applied.
@@ -119,23 +139,32 @@ export function Page() {
     [showLabels]
   );
 
+  let detailPanel = null;
+  if (inspectPosition != null) {
+    detailPanel = h(
+      LocationPanel,
+      {
+        position: { lng: inspectPosition[0], lat: inspectPosition[1] },
+        onClose: () => setInspectPosition(null),
+      },
+      h(PointDetails)
+    );
+  }
+
   return h(
     MapAreaContainer,
     {
-      navbar: h(FloatingNavbar, { width: 300 }, [
-        h("h2", "EMIT mineral maps"),
-        h(Spacer),
-        h(MapLoadingButton, {
-          active: isOpen,
-          onClick: () => setOpen(!isOpen),
-        }),
-      ]),
+      navbar: h(MapPageNavbar, {
+        isOpen,
+        onToggle: () => setOpen(!isOpen),
+        width: PANEL_WIDTH,
+      }),
       contextPanel: h(
         PanelCard,
-        { style: { width: "300px" } },
+        { style: { width: `${PANEL_WIDTH}px` } },
         h(MapSelectorPanel)
       ),
-      detailPanel: null,
+      detailPanel,
       contextPanelOpen: isOpen,
     },
     h(
@@ -144,12 +173,20 @@ export function Page() {
         style: baseStyle,
         overlayStyles,
         transformStyle,
-        mapPosition: null,
+        mapPosition,
+        onMapMoved,
         projection: { name: "globe" },
         mapboxToken: mapboxAccessToken,
-        bounds: mapBounds,
       },
-      [h(FlyToMapManager)]
+      [
+        h(FlyToMapManager),
+        // Click-to-inspect: the marker owns the click handler, and the panel
+        // follows from the position it sets.
+        h(MapMarker, {
+          position: inspectPosition,
+          setPosition: setInspectPosition,
+        }),
+      ]
     )
   );
 }
@@ -223,7 +260,55 @@ const showFootprintsAtom = atom(
 );
 
 const rasterOpacityAtom = atom(0.8);
-const selectedMineralClassAtom = atom<number>();
+
+/** The mineral classes to show, by name. Empty means "all of them".
+ *
+ * Names rather than class indices, because names are what the tile request now
+ * takes and what a shared link should read as. Comma-joined in the URL. */
+const classesParamAtom = atomWithSearchParam("classes");
+const selectedClassesAtom = atom(
+  (get): string[] => {
+    const value = get(classesParamAtom);
+    if (value == null || value === "") return [];
+    return value.split(",").filter((d) => d !== "");
+  },
+  (get, set, value: string[]) => {
+    let param: string | null = value.join(",");
+    if (value.length === 0) param = null;
+    set(classesParamAtom, param);
+  }
+);
+
+/** The inspected point, if any. Shareable — a link to "what's here?" is worth
+ * sending — so it lives in the URL, rounded to something readable. */
+const pointParamAtom = atomWithSearchParam("point");
+const inspectPositionAtom = atom(
+  (get): [number, number] | null => {
+    const value = get(pointParamAtom);
+    if (value == null) return null;
+    const [lng, lat] = value.split(",").map(Number);
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+    return [lng, lat];
+  },
+  (get, set, value: mapboxgl.LngLatLike | null) => {
+    if (value == null) {
+      set(pointParamAtom, null);
+      return;
+    }
+    const [lng, lat] = lngLatArray(value);
+    set(pointParamAtom, `${round5(lng)},${round5(lat)}`);
+  }
+);
+
+/** Mapbox hands positions back in several shapes depending on the caller. */
+function lngLatArray(value: mapboxgl.LngLatLike): [number, number] {
+  if (Array.isArray(value)) return [value[0], value[1]];
+  return [value.lng, value.lat];
+}
+
+function round5(value: number): number {
+  return Math.round(value * 1e5) / 1e5;
+}
 
 /* -- Data ----------------------------------------------------------------- */
 
@@ -234,14 +319,47 @@ const cogURLAtom = atom((get) => {
   return `${bucketURL}${dataset}.tif`;
 });
 
-/** A dataset to read the mineral-class list from. All of these maps share one
- * classification scheme, so in mosaic mode any of them will do. */
+/** What the indexed layer is: its palette and its class vocabulary.
+ *
+ * The vocabulary is resolved once at ingest and stored on the layer, so this is
+ * a single request that reads no pixels — no reference COG, and no parsing GDAL
+ * metadata in the browser. */
+const mosaicLayerAtom = atom(async (get, { signal }) => {
+  const response = await fetch(`${mosaicBaseURL}/layer`, { signal });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch layer metadata: ${response.statusText}`);
+  }
+  return response.json();
+});
+
+const mosaicLayerLoadableAtom = loadable(mosaicLayerAtom);
+
+/** Whether a COG has to be read to recover the class names.
+ *
+ * Only when the indexed layer has no vocabulary of its own — the state before
+ * `macrostrat raster set-categories` has been run. Otherwise no COG is fetched
+ * at all, which was the point of putting the vocabulary in the index. */
+const needsCogFallbackAtom = atom((get) => {
+  const layer = get(mosaicLayerLoadableAtom);
+  if (layer.state !== "hasData") return false;
+  return (layer.data.categories ?? []).length === 0;
+});
+
+/** A dataset to read the mineral-class list from when the index has none.
+ * All of these maps share one classification scheme, so any of them will do. */
 const referenceCogURLAtom = atom((get) => {
   return get(cogURLAtom) ?? `${bucketURL}${datasetOptions[0].key}.tif`;
 });
 
+/** `/cog/info` for the dataset in view, or for the reference COG when the class
+ * names have to come from a header. Null when neither is needed. */
 const layerInfoAtom = atom(async (get, { signal }) => {
-  const url = get(referenceCogURLAtom);
+  let url = get(cogURLAtom);
+  if (url == null && get(needsCogFallbackAtom)) {
+    url = get(referenceCogURLAtom);
+  }
+  if (url == null) return null;
+
   const layerInfoURL = `${cogBaseURL}/info?url=${encodeURIComponent(url)}`;
   const response = await fetch(layerInfoURL, { signal });
   if (!response.ok) {
@@ -273,19 +391,145 @@ const mosaicIsEmptyAtom = atom((get) => {
   return (footprints.data.features?.length ?? 0) === 0;
 });
 
-const mineralClassesAtom = atom((get) => {
+/** What every contributing raster reads at the inspected point.
+ *
+ * The mosaic's `/point` route answers per raster, which is exactly the "which
+ * datasets are under the cursor" question — including rasters that cover the
+ * point but hold nodata there, which a rendered tile can't tell you. */
+const pointDataAtom = atom(async (get, { signal }) => {
+  const position = get(inspectPositionAtom);
+  if (position == null) return null;
+
+  const [lng, lat] = position;
+  const cogURL = get(cogURLAtom);
+
+  let url = `${mosaicBaseURL}/point/${lng},${lat}`;
+  if (cogURL != null) {
+    url = `${cogBaseURL}/point/${lng},${lat}?url=${encodeURIComponent(cogURL)}`;
+  }
+
+  const response = await fetch(url, { signal });
+  // Outside coverage the mosaic answers 204 with no body, so this has to be
+  // checked before parsing — `json()` on an empty body throws.
+  if (response.status === 204) return { assets: [] };
+  if (!response.ok) {
+    throw new Error(`Point query failed: ${response.statusText}`);
+  }
+  return normalizePointResponse(await response.json(), cogURL);
+});
+
+const pointDataLoadableAtom = loadable(pointDataAtom);
+
+/** One shape for both routes.
+ *
+ * The mosaic reports one entry per contributing raster; the generic `/cog` route
+ * reports a single set of values for the file it was handed. Folding the latter
+ * into the former keeps the panel from caring which mode it's in. */
+function normalizePointResponse(data, cogURL: string | null) {
+  if (data.assets != null) return { assets: data.assets };
+  return {
+    assets: [
+      {
+        name: cogURL,
+        values: data.values,
+        band_descriptions: data.band_descriptions,
+      },
+    ],
+  };
+}
+
+interface PointReading {
+  dataset: string;
+  href: string;
+  value: number | null;
+  mineralClass: MineralClass | null;
+}
+
+/** The readings at the inspected point, in compositing order.
+ *
+ * The same order the tile read them in, so the first entry with a value is the
+ * one whose pixel is actually visible. */
+const pointReadingsAtom = atom((get): PointReading[] => {
+  const loaded = get(pointDataLoadableAtom);
+  if (loaded.state !== "hasData" || loaded.data == null) return [];
+
+  const byValue = new Map(get(mineralClassesAtom).map((d) => [d.value, d]));
+
+  return loaded.data.assets.map((asset) => {
+    let value: number | null = null;
+    if (asset.values?.[0] != null) {
+      value = Number(asset.values[0]);
+    }
+    let mineralClass: MineralClass | null = null;
+    if (value != null) {
+      mineralClass = byValue.get(value) ?? null;
+    }
+    return {
+      dataset: datasetName(asset.name),
+      href: asset.name,
+      value,
+      mineralClass,
+    };
+  });
+});
+
+/** The reading that supplies the visible pixel, if any raster has data here. */
+const visibleReadingAtom = atom((get): PointReading | null => {
+  return get(pointReadingsAtom).find((d) => d.value != null) ?? null;
+});
+
+/** The class under the cursor, highlighted in the selector so the sidebar and
+ * the map agree on what you're looking at.
+ *
+ * Derived rather than stored: it can't drift out of step with the inspected
+ * point, and closing the inspector clears it for free. */
+const focusedClassAtom = atom((get): string | null => {
+  return get(visibleReadingAtom)?.mineralClass?.name ?? null;
+});
+
+/** A raster's name for display: the file's stem, which is also its slug in the
+ * index and in the footprints layer. */
+function datasetName(href: string | null): string {
+  if (href == null) return "unknown";
+  const file = href.split("?")[0].split("/").pop() ?? href;
+  return file.replace(/\.tiff?$/i, "");
+}
+
+/** The classification scheme: a value, a name, and the color it's drawn in.
+ *
+ * The index is the source of truth — `macrostrat raster set-categories` resolves
+ * the vocabulary from the rasters' own metadata at ingest. Parsing it out of a
+ * COG header is kept only as a fallback for a layer that hasn't been given one
+ * yet, which is also the state in which single-dataset mode is most useful. */
+const mineralClassesAtom = atom((get): MineralClass[] => {
+  const layer = get(mosaicLayerLoadableAtom);
+  if (layer.state === "hasData") {
+    const categories = layer.data.categories ?? [];
+    if (categories.length > 0) {
+      return categories.map((d) => ({
+        value: d.value,
+        name: d.label,
+        color: hexColor(d.color),
+      }));
+    }
+  }
   const layerInfo = get(layerInfoLoadableAtom);
   if (layerInfo.state !== "hasData") return [];
-  try {
-    const val = layerInfo.data.band_metadata[0][1]["MINERAL_CLASSES"];
-    const v1 = val.replace("{", "").replace("}", "").replace(/'/g, "");
-    return v1.split(",").map((d) => {
-      const [k, v] = d.split(":");
-      return { id: Number(k.trim()), name: v.trim() };
-    });
-  } catch (e) {
-    return [];
-  }
+  return parseClassMetadata(layerInfo.data);
+});
+
+interface MineralClass {
+  value: number;
+  name: string;
+  color: string | null;
+}
+
+/** The class values behind the selected names, for the paint-expression path. */
+const selectedClassValuesAtom = atom((get): number[] => {
+  const selected = new Set(get(selectedClassesAtom));
+  return get(mineralClassesAtom)
+    .filter((d) => selected.has(d.name))
+    .map((d) => d.value);
 });
 
 /** Where to fly. The mosaic uses the extent of its registered footprints; a
@@ -302,9 +546,43 @@ const mapBoundsAtom = atom((get) => {
 
   const layerInfo = get(layerInfoLoadableAtom);
   if (layerInfo.state === "loading") return null;
-  if (layerInfo.state === "hasData") return layerInfo.data.bounds;
+  if (layerInfo.state === "hasData") return layerInfo.data?.bounds ?? DEFAULT_BOUNDS;
   return DEFAULT_BOUNDS;
 });
+
+/** A `[r,g,b,a]` color from the index as a hex string.
+ *
+ * Hex rather than `rgba()` because `Tag` hands the value to chroma to derive a
+ * text/background pair, and an `rgba()` string with alpha is a poor input for
+ * that.
+ * A fully transparent entry (the palette's nodata slot) has no color to show. */
+function hexColor(color: number[] | null | undefined): string | null {
+  if (color == null) return null;
+  const [r, g, b, a = 255] = color;
+  if (a === 0) return null;
+  const hex = [r, g, b]
+    .map((v) => Math.max(0, Math.min(255, v)).toString(16).padStart(2, "0"))
+    .join("");
+  return `#${hex}`;
+}
+
+/** Class names from a COG's band metadata — the fallback path.
+ *
+ * GDAL stores the vocabulary as a stringified Python dict, which is why this is
+ * a fallback: `set-categories` parses it properly at ingest. */
+function parseClassMetadata(layerInfo): MineralClass[] {
+  if (layerInfo == null) return [];
+  try {
+    const val = layerInfo.band_metadata[0][1]["MINERAL_CLASSES"];
+    const v1 = val.replace("{", "").replace("}", "").replace(/'/g, "");
+    return v1.split(",").map((d) => {
+      const [k, v] = d.split(":");
+      return { value: Number(k.trim()), name: v.trim(), color: null };
+    });
+  } catch (e) {
+    return [];
+  }
+}
 
 /* -- Map styles ----------------------------------------------------------- */
 
@@ -316,16 +594,18 @@ const macrostratStyle = buildMacrostratStyle({
 
 const mapOverlayStyleAtom = atom((get) => {
   const opacity = get(rasterOpacityAtom);
-  const mineralClass = get(selectedMineralClassAtom);
+  const classes = get(selectedClassesAtom);
 
   let tileURL: string;
   let paint: object;
   if (get(showingMosaicAtom)) {
-    tileURL = mosaicTileURL(mineralClass);
+    tileURL = mosaicTileURL(classes);
     paint = { "raster-opacity": opacity };
   } else {
+    // Raw class indices, and one class at a time — see `cogIsolationPaint`.
+    const values = get(selectedClassValuesAtom);
     tileURL = cogTileURL(get(cogURLAtom));
-    paint = { "raster-opacity": opacity, ...cogIsolationPaint(mineralClass) };
+    paint = { "raster-opacity": opacity, ...cogIsolationPaint(values[0]) };
   }
 
   return {
@@ -346,14 +626,30 @@ const mapOverlayStyleAtom = atom((get) => {
   };
 });
 
-/** Mosaic tiles. The layer's own palette is applied server-side unless we send
- * a colormap, so isolating a class is a one-entry colormap: every other class
- * falls out of the lookup table and renders transparent. */
-function mosaicTileURL(mineralClass: number | undefined): string {
+/** Mosaic tiles, optionally filtered to named mineral classes.
+ *
+ * Filtering happens server-side, *after* the mosaic is composited, so excluded
+ * classes are masked and the layer's own palette still colors what survives —
+ * several classes at once, each in its own color, named rather than numbered.
+ *
+ * `?classes=` is the tileserver's shorthand for titiler's generic
+ * `?algorithm=classes&algorithm_params={"classes":[...]}` (both produce
+ * identical tiles). The shorthand is used here deliberately: these URLs are the
+ * ones people copy out of the network tab and edit by hand, and it's the form
+ * worth discovering. The cost is that a tileserver without the shorthand ignores
+ * the parameter and returns every class instead of failing — so if this page
+ * ever shows an unfiltered mosaic, suspect a tileserver older than the
+ * `?classes=` overlay before suspecting the selection.
+ *
+ * Either way the parameter is a cross-repo contract with the tileserver. */
+function mosaicTileURL(classes: string[]): string {
   const url = `${mosaicBaseURL}/tiles/${TMS}/{z}/{x}/{y}@2x.png`;
-  if (mineralClass == null) return url;
-  const colormap = JSON.stringify({ [mineralClass]: [255, 0, 0, 255] });
-  return `${url}?colormap=${encodeURIComponent(colormap)}`;
+  if (classes.length === 0) return url;
+  // Built by hand rather than with URLSearchParams, which percent-encodes the
+  // separator (`classes=A%2CB`) and undoes the readability this is here for. The
+  // names themselves are still encoded — several contain spaces.
+  const names = classes.map(encodeURIComponent).join(",");
+  return `${url}?classes=${names}`;
 }
 
 function cogTileURL(url: string): string {
@@ -392,7 +688,11 @@ function footprintsStyle() {
 
 /** Class isolation for raw `/cog` tiles, whose red channel carries the class
  * index. A narrow ramp around the target value keeps that one class opaque and
- * drops everything else. */
+ * drops everything else.
+ *
+ * One class only. The generic `/cog` route has no access to the layer's class
+ * vocabulary, so this stays the index-based hack it always was; the mosaic is
+ * where multi-class selection belongs. */
 function cogIsolationPaint(mineralClass: number | undefined) {
   if (mineralClass == null) return {};
   return {
@@ -431,7 +731,7 @@ function MapSelectorPanel() {
     ),
     h(SelectedMapControl),
     h(MosaicStatus),
-    h(MineralClassDropdown),
+    h(MineralClassSelector),
     h(RasterOpacitySlider),
     h(Switch, {
       label: "Geologic map",
@@ -516,27 +816,115 @@ function MosaicStatus() {
   );
 }
 
-function MineralClassDropdown() {
-  const [mineralClass, setMineralClass] = useAtom(selectedMineralClassAtom);
+/** The class selector, which doubles as the legend.
+ *
+ * A checkbox per class with the color it is drawn in: with the mosaic filtering
+ * by name and preserving the palette, "which classes are shown" and "what do
+ * these colors mean" are the same question. */
+function MineralClassSelector() {
   const classes = useAtomValue(mineralClassesAtom);
+  const [selected, setSelected] = useAtom(selectedClassesAtom);
+  const showingMosaic = useAtomValue(showingMosaicAtom);
+  const focused = useAtomValue(focusedClassAtom);
 
-  return h(
-    FormGroup,
-    { label: "Mineral class" },
-    h(NullableDropdown, {
-      options: classes.map((d) => ({ label: d.name, value: d.id })),
-      placeholder: "All classes",
-      value: mineralClass,
-      onChange: (value) => {
-        // The dropdown clears to null; anything else is a class index.
-        if (value == null) {
-          setMineralClass(undefined);
-        } else {
-          setMineralClass(Number(value));
-        }
-      },
-    })
-  );
+  if (classes.length === 0) return null;
+
+  const toggle = (name: string, checked: boolean) => {
+    let next = selected.filter((d) => d !== name);
+    if (checked) {
+      next = [...selected, name];
+    }
+    setSelected(next);
+  };
+
+  let note = null;
+  if (!showingMosaic && selected.length > 1) {
+    note = h(
+      "p.single-dataset-note",
+      `A single dataset is served as raw class indices, so only ${selected[0]} is isolated here. Switch to the mosaic to show several at once.`
+    );
+  }
+
+  return h(FormGroup, { label: "Mineral classes" }, [
+    h("div.mineral-classes", [
+      h(
+        "div.class-list",
+        classes.map((d) =>
+          h(MineralClassRow, {
+            key: d.name,
+            mineralClass: d,
+            checked: selected.includes(d.name),
+            focused: d.name === focused,
+            onChange: toggle,
+          })
+        )
+      ),
+      h(MineralClassActions, {
+        selectedCount: selected.length,
+        totalCount: classes.length,
+        onClear: () => setSelected([]),
+      }),
+      note,
+    ]),
+  ]);
+}
+
+/** One class: a checkbox for whether it's shown, and a `Tag` carrying the name
+ * and the color together.
+ *
+ * The Tag is the row's label rather than a swatch beside text, because on a
+ * classification map the color *is* the identity — and it fills the row so the
+ * list reads as a legend at a glance. Clicking it toggles, same as the checkbox.
+ *
+ * A focused row (the class under the cursor) scrolls itself into view: with ~40
+ * classes the one you just clicked on the map is usually outside the viewport.
+ */
+function MineralClassRow({ mineralClass, checked, focused, onChange }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!focused) return;
+    // `nearest` so a class already on screen doesn't cause a jump.
+    ref.current?.scrollIntoView({ block: "nearest" });
+  }, [focused]);
+
+  let itemClass = "div.class-item";
+  if (focused) {
+    itemClass = "div.class-item.focused";
+  }
+
+  return h(itemClass, { ref }, [
+    h(Checkbox, {
+      checked,
+      onChange: (evt) => onChange(mineralClass.name, evt.currentTarget.checked),
+      "aria-label": mineralClass.name,
+    }),
+    h(ClassTag, {
+      name: mineralClass.name,
+      color: mineralClass.color ?? undefined,
+      className: "class-tag",
+      onClick: () => onChange(mineralClass.name, !checked),
+    }),
+  ]);
+}
+
+function MineralClassActions({ selectedCount, totalCount, onClear }) {
+  let summary = `All ${totalCount} classes`;
+  if (selectedCount > 0) {
+    summary = `${selectedCount} of ${totalCount} shown`;
+  }
+
+  return h("div.class-actions", [
+    h("span", summary),
+    h(Button, {
+      icon: "cross",
+      minimal: true,
+      small: true,
+      disabled: selectedCount === 0,
+      text: "Clear",
+      onClick: onClear,
+    }),
+  ]);
 }
 
 function RasterOpacitySlider() {
@@ -558,23 +946,202 @@ function RasterOpacitySlider() {
   );
 }
 
+/** Reports on whichever metadata source the current mode depends on.
+ *
+ * Mode-aware so that mosaic mode doesn't fetch (or report on) a COG it has no
+ * need for — the indexed layer answers for itself. */
 function LayerErrorReporter() {
-  const layerInfo = useAtomValue(layerInfoLoadableAtom);
+  const showingMosaic = useAtomValue(showingMosaicAtom);
+  const mosaicLayer = useAtomValue(mosaicLayerLoadableAtom);
+  const cogInfo = useAtomValue(layerInfoLoadableAtom);
 
-  if (layerInfo.state === "hasError") {
+  let source = cogInfo;
+  if (showingMosaic) {
+    source = mosaicLayer;
+  }
+
+  if (source.state === "hasError") {
     return h("div.layer-error", [
       h("h3", "Error loading layer info"),
-      h("p", String(layerInfo.error)),
+      h("p", String(source.error)),
     ]);
   }
-  if (layerInfo.state === "loading") {
+  if (source.state === "loading") {
     return h("div.layer-loading", [h("h3", "Loading layer info...")]);
   }
   return null;
 }
 
+/* -- Point inspector ------------------------------------------------------ */
+
+/** What's under the cursor: the class you can see, and every dataset that had
+ * something to say about the point.
+ *
+ * The per-dataset breakdown is the part a rendered tile can't give you. A raster
+ * may cover the point and hold nodata there, and several may overlap with only
+ * the first contributing a pixel — both are worth seeing when you're deciding
+ * whether a mosaic is compositing the way you meant. */
+function PointDetails() {
+  const state = useAtomValue(pointDataLoadableAtom);
+  const readings = useAtomValue(pointReadingsAtom);
+  const visible = useAtomValue(visibleReadingAtom);
+
+  if (state.state === "loading") {
+    return h("p.point-status", "Reading rasters…");
+  }
+  if (state.state === "hasError") {
+    return h(
+      Callout,
+      { intent: "danger", icon: "error", title: "Point query failed" },
+      h("p", String(state.error))
+    );
+  }
+  if (readings.length === 0) {
+    return h("p.point-status", "No raster coverage at this point.");
+  }
+
+  return h("div.point-details", [
+    h(VisibleClass, { reading: visible }),
+    h(DatasetReadings, { readings, visible }),
+  ]);
+}
+
+/** The class actually drawn at the point, with a note when the current
+ * selection is hiding it — otherwise "the map shows nothing here" and "this
+ * class is filtered out" look identical. */
+function VisibleClass({ reading }) {
+  const [selected, setSelected] = useAtom(selectedClassesAtom);
+
+  if (reading == null) {
+    return h(
+      "div.visible-class",
+      h("p.point-status", "Covered, but no data at this point.")
+    );
+  }
+
+  const label = reading.mineralClass?.name ?? `Class ${reading.value}`;
+
+  let hidden = null;
+  const isHidden = selected.length > 0 && !selected.includes(label);
+  if (isHidden) {
+    hidden = h(
+      "p.hidden-note",
+      "Hidden by the current class selection — the map is showing other classes here."
+    );
+  }
+
+  return h("div.visible-class", [
+    h("div.class-heading", [
+      h(ClassTag, {
+        name: label,
+        color: reading.mineralClass?.color ?? undefined,
+        details: `${reading.value}`,
+        // Sized through the component's own API rather than a CSS override: the
+        // package sets `font-size` on `.tag` at the same specificity anything
+        // here could reach, so overriding it would depend on stylesheet order.
+        size: TagSize.Large,
+      }),
+      h(IsolateClassButton, { reading, selected, setSelected }),
+    ]),
+    hidden,
+  ]);
+}
+
+/** "Show only this class" — the point of identifying a class in the first place.
+ *
+ * Clicking a mineral on the map and then hunting for it in an 80-row list is the
+ * long way round, so the answer to "what is this?" carries the action straight
+ * to the map. A second click goes back to showing everything, making it a round
+ * trip rather than a one-way door.
+ *
+ * Only offered for a class the layer's vocabulary actually names: filtering is
+ * by name, so an unnamed value has nothing to send and the tileserver would
+ * answer 400. */
+function IsolateClassButton({ reading, selected, setSelected }) {
+  const name = reading.mineralClass?.name;
+  if (name == null) return null;
+
+  const isolated = selected.length === 1 && selected[0] === name;
+
+  // The icon names the action, not the state: once the map is filtered to this
+  // one class, the only thing left to do is clear it. That also makes `active`
+  // redundant — a pressed-looking button next to a "clear" icon reads as a
+  // contradiction.
+  let icon = "filter";
+  let title = `Show only ${name}`;
+  if (isolated) {
+    icon = "filter-remove";
+    title = "Show all classes";
+  }
+
+  const onClick = () => {
+    if (isolated) {
+      setSelected([]);
+      return;
+    }
+    setSelected([name]);
+  };
+
+  return h(Button, {
+    className: "isolate-button",
+    icon,
+    minimal: true,
+    title,
+    "aria-label": title,
+    onClick,
+  });
+}
+
+/** Every raster covering the point, in the order the mosaic read them. */
+function DatasetReadings({ readings, visible }) {
+  return h("div.dataset-readings", [
+    h("h4", `Datasets (${readings.length})`),
+    h(
+      "ul.reading-list",
+      readings.map((reading) =>
+        h(DatasetReading, {
+          key: reading.href,
+          reading,
+          isVisible: reading === visible,
+        })
+      )
+    ),
+  ]);
+}
+
+function DatasetReading({ reading, isVisible }) {
+  let value = h("span.no-data", "no data");
+  if (reading.value != null) {
+    const label = reading.mineralClass?.name ?? `Class ${reading.value}`;
+    value = h("span.class-name", `${label} (${reading.value})`);
+  }
+
+  let tag = null;
+  if (isVisible) {
+    tag = h(Tag, { minimal: true, intent: "primary" }, "drawn");
+  }
+
+  return h("li.reading-item", [
+    h("span.dataset-name", reading.dataset),
+    value,
+    tag,
+  ]);
+}
+
+/** Frames the data on a first visit.
+ *
+ * Only when there's no remembered position — otherwise this would yank the map
+ * away from wherever the last session left it, which is the opposite of what
+ * restoring it is for. */
 function FlyToMapManager() {
-  const bounds = useAtomValue(mapBoundsAtom);
+  const rememberedPosition = useAtomValue(lastMapPositionAtom);
+  const dataBounds = useAtomValue(mapBoundsAtom);
+
+  let bounds = dataBounds;
+  if (rememberedPosition != null) {
+    bounds = null;
+  }
+
   useMapEaseTo({ bounds, padding: 50 });
   return null;
 }

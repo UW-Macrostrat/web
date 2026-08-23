@@ -1,0 +1,133 @@
+// Mineral-class selector: a scrollable list of the layer's classes, each drawn
+// as a Tag in the color it renders in, so the panel doubles as the legend.
+.mineral-classes
+  display: flex
+  flex-direction: column
+  gap: 4px
+
+  .class-list
+    display: flex
+    flex-direction: column
+    max-height: 240px
+    overflow-y: auto
+    // Negate the form group's label spacing so the scroll area reads as one
+    // block rather than a floating list.
+    margin: 2px 0
+    padding-right: 4px
+
+  .class-item
+    display: flex
+    align-items: center
+    gap: 4px
+    padding: 1px 2px
+    border-radius: 3px
+    // Blueprint checkboxes carry their own bottom margin, which is too much
+    // for a 40-row list, and no label means no reason to reserve space after it.
+    :global(.bp6-control)
+      margin-bottom: 0
+      margin-right: 0
+
+    // The class under the cursor. An outline rather than a background, so it
+    // doesn't compete with the tag's own class color.
+    &.focused
+      outline: 2px solid var(--accent-color, #4c90f0)
+      outline-offset: 1px
+
+    // The tag is the row's label, so it takes the width the name would have.
+    // Grown as a flex *item* rather than by overriding the package's
+    // `display: inline-flex` — that rule has the same specificity as anything
+    // written here, so which one won would come down to stylesheet order.
+    .class-tag
+      flex: 1
+      min-width: 0
+      cursor: pointer
+
+      // `name` is the one class the Tag emits unhashed, so it can be reached
+      // from here; long mineral names ellipsize rather than wrap the row.
+      :global(.name)
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+  .class-actions
+    display: flex
+    align-items: center
+    gap: 8px
+    font-size: 11px
+    opacity: 0.7
+
+  .single-dataset-note
+    margin: 0
+    font-size: 11px
+    line-height: 1.3
+    opacity: 0.6
+
+// Point inspector: what's under the cursor, and which datasets said so.
+.point-details
+  // TODO: ideally inspector content should get its own padding
+  padding: 1em 0
+  display: flex
+  flex-direction: column
+  gap: 12px
+
+.point-status
+  margin: 0
+  opacity: 0.7
+
+.visible-class
+  display: flex
+  flex-direction: column
+  align-items: flex-start
+  gap: 4px
+
+  // The identified class, with the action that acts on it beside it.
+  .class-heading
+    display: flex
+    align-items: center
+    gap: 8px
+    // The tag can be wide (some class names are long); the button never shrinks.
+    max-width: 100%
+
+    .isolate-button
+      flex: 0 0 auto
+
+  .hidden-note
+    margin: 4px 0 0
+    font-size: 11px
+    line-height: 1.3
+    opacity: 0.7
+
+.dataset-readings
+  h4
+    margin: 0 0 4px
+
+  .reading-list
+    margin: 0
+    padding: 0
+    list-style: none
+
+  .reading-item
+    display: flex
+    align-items: baseline
+    gap: 6px
+    padding: 2px 0
+
+    & + .reading-item
+      border-top: 1px solid rgba(128, 128, 128, 0.2)
+
+    .dataset-name
+      font-family: var(--code-font-family, monospace)
+      font-size: 0.85em
+
+    .class-name
+      margin-left: auto
+      text-align: right
+
+    .no-data
+      margin-left: auto
+      opacity: 0.5
+      font-style: italic
+
+    // Marks the raster whose pixel actually won compositing.
+    :global(.bp6-tag)
+      align-self: center
