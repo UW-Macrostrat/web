@@ -184,7 +184,7 @@ export function makeIngestActions({
 
   const appendOps = (ops: PendingOp[]) =>
     store.set(opsAtom, collapseAppend(store.get(opsAtom), ops));
-  
+
   const retireOps = (saved: PendingOp[]) => {
     if (saved.length === 0) return;
     const savedIds = new Set(saved.map((op) => op.id));
