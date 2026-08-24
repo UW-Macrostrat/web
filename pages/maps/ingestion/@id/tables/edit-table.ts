@@ -22,6 +22,7 @@ import {
 import { createAppToaster } from "@macrostrat/ui-components";
 import { FeatureType } from "./defs";
 import {
+  appendOps,
   applyOps,
   makeCellOp,
   nextBatch,
@@ -252,7 +253,9 @@ export function TableInterface({
             );
           }
         }
-        return additions.length > 0 ? [...next, ...additions] : next;
+        // `appendOps` supersedes any pending op writing the same cells, so
+        // re-editing a cell replaces its op instead of queueing a second one.
+        return appendOps(next, additions);
       });
     },
     [group, setOps]

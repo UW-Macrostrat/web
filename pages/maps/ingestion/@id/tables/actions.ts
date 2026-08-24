@@ -30,11 +30,13 @@ import {
   SYSTEM_COLUMN,
 } from "./state";
 import {
+  appendOps as collapseAppend,
   makeCellOp,
   makeColumnCopyOp,
   nextBatch,
   opsAtom,
   saveOps,
+  SaveOpsError,
   type PendingOp,
 } from "./pending-ops";
 
@@ -181,7 +183,16 @@ export function makeIngestActions({
     toaster?.show({ message, intent });
 
   const appendOps = (ops: PendingOp[]) =>
-    store.set(opsAtom, [...store.get(opsAtom), ...ops]);
+    store.set(opsAtom, collapseAppend(store.get(opsAtom), ops));
+  
+  const retireOps = (saved: PendingOp[]) => {
+    if (saved.length === 0) return;
+    const savedIds = new Set(saved.map((op) => op.id));
+    store.set(
+      opsAtom,
+      store.get(opsAtom).filter((op) => !savedIds.has(op.id)),
+    );
+  };
 
   const saveAction: TableAction = {
     id: "save-changes",
@@ -204,13 +215,24 @@ export function makeIngestActions({
           );
         });
         store.set(saveProgressAtom, null);
-        store.set(opsAtom, []);
+        retireOps(ops);
         reload();
         notify(`Saved ${n} change${n === 1 ? "" : "s"}`, "success");
       } catch (err) {
         store.set(saveProgressAtom, null);
         console.error(err);
-        notify("Failed to save", "danger");
+        // Drop whatever landed before the failure. These ops are not
+        // idempotent — replaying them would match rows they already changed,
+        // which the API rejects — so keeping them would wedge every retry.
+        let message = "Failed to save";
+        if (err instanceof SaveOpsError) {
+          retireOps(ops.slice(0, err.applied));
+          if (err.applied > 0) reload();
+          message = `${err.message} — ${err.applied} of ${ops.length} change${
+            ops.length === 1 ? "" : "s"
+          } saved`;
+        }
+        notify(message, "danger");
       }
     },
   };
