@@ -26,8 +26,6 @@ import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MapMarker,
-  FloatingNavbar,
-  MapLoadingButton,
   MapAreaContainer,
   LocationPanel,
   MapView,
@@ -53,14 +51,12 @@ import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import {
   Link,
-  PageBreadcrumbsInternal,
-  PageTitle,
-  usePageBreadcrumbs,
   BaseLayerForm,
   Basemap,
   basemapStyle,
   NullableDropdown,
 } from "~/components";
+import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
 import styles from "./main.module.scss";
 
 const h = hyper.styled(styles);
@@ -303,9 +299,10 @@ export function Page() {
   return h(
     MapAreaContainer,
     {
-      navbar: h(NavbarHeader, {
+      navbar: h(MapPageNavbar, {
         isOpen,
         onToggle: () => setOpen(!isOpen),
+        width: PANEL_WIDTH,
       }),
       contextPanel,
       detailPanel: detailElement,
@@ -333,42 +330,6 @@ export function Page() {
         }),
       ]
     )
-  );
-}
-
-/** Navbar header: a collapsing breadcrumb trail on top, with the page title
- * and the panel toggle on a row below it. */
-function NavbarHeader({
-  isOpen,
-  onToggle,
-}: {
-  isOpen: boolean;
-  onToggle: () => void;
-}) {
-  // Drop the leaf (the current page) from the trail; it's shown as the title.
-  const trail = usePageBreadcrumbs().slice(0, -1);
-
-  return h(
-    FloatingNavbar,
-    { className: styles["topology-navbar"], width: PANEL_WIDTH },
-    [
-      h("div.navbar-title-stack", [
-        h(PageBreadcrumbsInternal, {
-          items: trail,
-          showLogo: true,
-          separateTitle: false,
-        }),
-        h("div.title-row", [h(PageTitle, { headingLevel: 2 })]),
-      ]),
-      h(
-        "div.loading-button",
-        h(MapLoadingButton, {
-          active: isOpen,
-          onClick: onToggle,
-          large: true,
-        })
-      ),
-    ]
   );
 }
 

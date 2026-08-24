@@ -1,25 +1,4 @@
-// Temporary local fixes for the floating navbar header. Ideally map-interface
-// (FloatingNavbar) and PageBreadcrumbs would expose these knobs directly.
-.topology-navbar {
-  // The panel is a Blueprint Navbar with a fixed 50px height, so taller
-  // (two-row) content overflows. Let it grow with its contents instead.
-  :global(.bp6-navbar) {
-    height: auto;
-    // Tighter top/horizontal padding for a balanced result (slightly more
-    // bottom room for the title's descenders).
-    //--navbar-padding: 5px 9px 7px;
-  }
-
-  gap: 1em
-}
-
-.navbar-title-stack {
-  flex: 1;
-  min-width: 0;
-  :global(.bp6-breadcrumb) {
-    font-size: 1em;
-  }
-}
+// Navbar styles now live with the shared `MapPageNavbar` component.
 
 .navbar-header {
   display: flex;
