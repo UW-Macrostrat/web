@@ -17,7 +17,7 @@ import { hashHasMapPosition } from "../app-state/hash-string";
 import { readLastMapPosition } from "~/_utils/last-map-position";
 import { getMapPositionForHash } from "@macrostrat/map-interface";
 import { usePageContext } from "vike-react/usePageContext";
-import { Searchbar } from "./navbar";
+import { MapPageNavbar } from "./navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
 import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
@@ -116,7 +116,7 @@ function MapPage({
     h(
       MapAreaContainer,
       {
-        navbar: h(Searchbar, { className: "searchbar" }),
+        navbar: h(MapPageNavbar),
         contextPanel: h(Menu, {
           className: "context-panel",
           menuPage: navMenuPage,

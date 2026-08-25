@@ -74,7 +74,7 @@ function ResultList({ searchResults }) {
   ]);
 }
 
-function SearchResults({ className }) {
+export function SearchResults({ className }) {
   const searchResults = useAppState((s) => s.searchResults);
   className = classNames(className, "search-results-card");
 
@@ -101,7 +101,18 @@ type AnyChildren = React.ReactNode | React.ReactFragment;
 
 const filterPanelElement = h(FilterPanel);
 
-function Searchbar({ className }) {
+export function MapPageNavbar() {
+  return h("div.navbar", [
+    h("div.navbar-link-container", [
+      h(MacrostratLogoLink, {
+        className: "navbar-logo",
+      }),
+    ]),
+    h(Searchbar),
+  ]);
+}
+
+export function Searchbar({ className }) {
   const runAction = useAppActions();
   const term = useAppState((s) => s.term);
   const searchResults = useAppState((s) => s.searchResults);
@@ -142,12 +153,6 @@ function Searchbar({ className }) {
     FloatingNavbar,
     { statusElement: filterPanelElement, className: "map-navbar" },
     [
-      h("div.navbar-link-container", [
-        h(MacrostratLogoLink, {
-          logoStyle: "frameless-simple",
-          className: "navbar-logo",
-        }),
-      ]),
       h(InputGroup, {
         large: true,
         onChange: handleSearchInput,
@@ -172,6 +177,3 @@ function SearchGuidance() {
     ]),
   ]);
 }
-
-export { Searchbar };
-export { SearchResults };
