@@ -1,19 +1,11 @@
 import { useCallback, useEffect } from "react";
 import { InputGroup, Card } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
-import {
-  useAppActions,
-  useAppState,
-  useContextPanelOpen,
-} from "../../app-state";
-import { FilterPanel } from "../filter-panel";
-import styles from "./navbar.module.sass";
+import { useAppActions, useAppState, useContextPanelOpen } from "../app-state";
+import { FilterPanel, useAdmoinshments } from "./filter-panel";
+import h from "./navbar.module.sass";
 import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
 import classNames from "classnames";
-import { useAdmoinshments } from "../filter-panel/admonishments";
 import { MacrostratLogoLink } from "~/components";
-
-const h = hyper.styled(styles);
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -101,6 +93,7 @@ function MenuButton() {
     icon: "menu",
     onClick,
     active: menuOpen,
+    large: false,
   });
 }
 
@@ -180,5 +173,5 @@ function SearchGuidance() {
   ]);
 }
 
-export default Searchbar;
+export { Searchbar };
 export { SearchResults };

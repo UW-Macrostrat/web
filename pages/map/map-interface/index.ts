@@ -1,7 +1,5 @@
 import h from "@macrostrat/hyper";
 
-//import "./searchbar.styl";
-
 import { startRecordingAppHistory, useAppActions } from "./app-state";
 import MapPage from "./map-page";
 import { browserHistory } from "./app-state";

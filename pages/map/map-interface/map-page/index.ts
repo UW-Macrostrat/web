@@ -17,7 +17,7 @@ import { hashHasMapPosition } from "../app-state/hash-string";
 import { readLastMapPosition } from "~/_utils/last-map-position";
 import { getMapPositionForHash } from "@macrostrat/map-interface";
 import { usePageContext } from "vike-react/usePageContext";
-import Searchbar from "../components/navbar";
+import { Searchbar } from "./navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
 import { ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
@@ -31,7 +31,6 @@ import InfoDrawer from "../components/info-drawer";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const Menu = loadable(() => import("./menu"));
-//const InfoDrawer = loadable(() => import("../components/info-drawer"));
 
 function MapView(props) {
   return h(
