@@ -135,4 +135,4 @@ function Admonishments({
   return h("div.admonishments", admonishments);
 }
 
-export { FilterPanel };
+export { FilterPanel, useAdmoinshments };

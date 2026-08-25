@@ -31,7 +31,7 @@ import ColumnIcon from "../components/icons/ColumnIcon";
 import ElevationIcon from "../components/icons/ElevationIcon";
 import FossilIcon from "../components/icons/FossilIcon";
 import LineIcon from "../components/icons/LineIcon";
-import { SearchResults } from "../components/navbar";
+import { SearchResults } from "./navbar.ts";
 import UsageText from "../usage.mdx";
 import { ExperimentsPanel, SettingsPanel } from "./settings-panel";
 import h from "./main.module.sass";
