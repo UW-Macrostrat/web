@@ -1,0 +1,115 @@
+// The hybrid page frame.
+//
+// Two altitudes of chrome collapse using the *same* mechanism: animate a grid
+// track from its reserved size down to zero, and cross-fade a floating
+// stand-in into the space. App header/footer do it at the frame level; the
+// page bar does it inside the body.
+
+.hybrid-page
+  // Frame-level tokens. Weak names, so a consuming page can re-point any of
+  // them without touching the global Paleozoic contract.
+  --hybrid-transition-duration: 220ms
+  --hybrid-app-header-height: 2.75rem
+  --hybrid-app-footer-height: 2.25rem
+  --hybrid-page-bar-height: 2.5rem
+  --hybrid-assistant-width: clamp(260px, 26vw, 360px)
+  --hybrid-embedded-assistant-max-height: 45%
+  --hybrid-floating-assistant-max-height: 60%
+
+  --app-header-track: var(--hybrid-app-header-height)
+  --app-footer-track: var(--hybrid-app-footer-height)
+  --page-bar-track: var(--hybrid-page-bar-height)
+
+  position: relative
+  display: grid
+  grid-template-rows: var(--app-header-track) 1fr var(--app-footer-track)
+  height: 100%
+  min-height: 0
+  overflow: hidden
+  background-color: var(--pz-background-color, var(--background-color))
+  color: var(--pz-text-color, var(--text-color))
+  transition: grid-template-rows var(--hybrid-transition-duration) ease
+
+.chrome-collapsed
+  --app-header-track: 0px
+  --app-footer-track: 0px
+  --page-bar-track: 0px
+  --hybrid-body-inset-top: var(--hybrid-page-bar-height)
+
+.app-header-row,
+.app-footer-row
+  min-height: 0
+  overflow: hidden
+
+.body
+  position: relative
+  display: grid
+  grid-template-rows: var(--page-bar-track) 1fr
+  min-height: 0
+  min-width: 0
+  overflow: hidden
+  transition: grid-template-rows var(--hybrid-transition-duration) ease
+
+.page-bar
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  padding: 0 var(--pz-space-3, 0.75rem)
+  height: var(--hybrid-page-bar-height)
+  min-width: 0
+  overflow: hidden
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  border-bottom: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
+  transition: background-color var(--hybrid-transition-duration) ease, border-color var(--hybrid-transition-duration) ease
+
+.page-title
+  font-family: var(--pz-heading-font, var(--header-font))
+  font-size: 1rem
+  font-weight: 600
+  line-height: 1
+  margin: 0
+  color: var(--pz-text-emphasized-color, var(--text-emphasized-color))
+  white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
+
+.page-actions
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  min-width: 0
+
+.layout-controls
+  margin-left: auto
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  flex: 0 0 auto
+
+.chrome-collapsed
+  .page-bar
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    z-index: 10
+    background-color: var(--pz-overlay-background-color, var(--translucent-panel-background-color))
+    backdrop-filter: blur(8px)
+    border-bottom-color: transparent
+
+.body-content
+  position: relative
+  min-height: 0
+  min-width: 0
+  overflow: hidden
+
+// Narrow viewports: a three-track grid is unworkable, so the frame degrades to
+// a single pane. `content-primary` becomes content, `map-primary` becomes map;
+// the assistant is always the floating panel.
+@media (max-width: 700px)
+  .hybrid-page
+    --hybrid-assistant-width: min(320px, calc(100vw - 1.5rem))
+    --hybrid-floating-assistant-max-height: 70%

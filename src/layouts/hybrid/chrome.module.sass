@@ -1,0 +1,113 @@
+.app-header-bar,
+.app-footer-bar
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  padding: 0 var(--pz-space-3, 0.75rem)
+  height: 100%
+  min-height: 0
+  overflow: hidden
+  background-color: var(--pz-background-color, var(--background-color))
+
+.app-header-bar
+  border-bottom: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
+
+.app-footer-bar
+  border-top: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
+  justify-content: space-between
+
+.header-actions
+  margin-left: auto
+  display: flex
+  align-items: center
+
+.brand
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.4rem
+  flex: 0 0 auto
+  text-decoration: none
+
+  :global(.macrostrat-logo)
+    height: 1.6rem
+    width: auto
+
+  h1
+    font-family: var(--pz-heading-font, var(--header-font))
+    font-size: 1.05rem
+    line-height: 1
+    margin: 0
+    color: var(--pz-text-color, var(--text-color))
+
+  &:hover
+    text-decoration: none
+
+.brand-compact
+  h1
+    display: none
+
+  :global(.macrostrat-logo)
+    height: 1.4rem
+
+.nav-link-row
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.1rem
+  min-width: 0
+  overflow: hidden
+
+  .nav-link-button
+    flex: 0 0 auto
+
+.footer-sheet-trigger
+  flex: 0 0 auto
+
+  &.floating
+    position: absolute
+    left: 50%
+    bottom: var(--pz-space-3, 0.75rem)
+    transform: translateX(-50%)
+    z-index: 6
+    border-radius: 999px
+    background-color: var(--pz-overlay-background-color, var(--translucent-panel-background-color))
+    backdrop-filter: blur(6px)
+    border: 1px solid var(--pz-border-color, var(--panel-rule-color))
+    box-shadow: var(--pz-shadow-md)
+
+.footer-sheet-scrim
+  position: absolute
+  inset: 0
+  z-index: 20
+  background-color: var(--pz-shadow-color, rgba(0, 0, 0, 0.35))
+  opacity: 0
+  pointer-events: none
+  transition: opacity var(--hybrid-transition-duration) ease
+
+  &.open
+    opacity: 1
+    pointer-events: auto
+
+.footer-sheet
+  position: absolute
+  left: 0
+  right: 0
+  bottom: 0
+  max-height: 80%
+  overflow: auto
+  padding: var(--pz-content-padding, 1rem)
+  background-color: var(--pz-background-color, var(--background-color))
+  border-top: 1px solid var(--pz-border-color, var(--panel-rule-color))
+  border-radius: var(--pz-radius-lg, 10px) var(--pz-radius-lg, 10px) 0 0
+  box-shadow: var(--pz-shadow-lg)
+  transform: translateY(100%)
+  transition: transform var(--hybrid-transition-duration) ease
+
+  .open &
+    transform: translateY(0)
+
+.sheet-footer
+  border-top: none
+  padding-top: 0

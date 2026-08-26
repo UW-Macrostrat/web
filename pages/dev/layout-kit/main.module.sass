@@ -1,0 +1,97 @@
+// Demo-only content for the hybrid layout frame. The frame itself lives in
+// `~/layouts/hybrid`; everything here is a stand-in for real page content.
+
+.item-list
+  display: flex
+  flex-direction: column
+  gap: 2px
+  padding: var(--pz-space-2, 0.5rem)
+
+.item-row
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  padding: 0.35rem 0.5rem
+  border: 1px solid transparent
+  border-radius: var(--pz-radius-sm, 4px)
+  cursor: pointer
+
+  &:hover
+    background-color: var(--pz-hover-background-color, var(--secondary-background))
+
+  &.selected
+    background-color: var(--pz-selected-background-color, var(--tertiary-background))
+    border-color: var(--pz-border-color, var(--panel-rule-color))
+    color: var(--pz-selected-text-color, var(--text-emphasized-color))
+
+  .item-name
+    flex: 1 1 auto
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.status-dot
+  flex: 0 0 auto
+  width: 8px
+  height: 8px
+  border-radius: 50%
+  background-color: var(--status-color, var(--pz-secondary-color))
+
+.status-active
+  --status-color: var(--pz-intent-success)
+
+.status-paused
+  --status-color: var(--pz-secondary-color, var(--secondary-color))
+
+.status-flagged
+  --status-color: var(--pz-intent-warning)
+
+.map-placeholder
+  position: absolute
+  inset: 0
+  overflow: hidden
+  background-color: var(--pz-panel-secondary-background-color, var(--secondary-background))
+  background-image: linear-gradient(to right, var(--pz-panel-rule-color, var(--panel-rule-color)) 1px, transparent 1px), linear-gradient(to bottom, var(--pz-panel-rule-color, var(--panel-rule-color)) 1px, transparent 1px)
+  background-size: 40px 40px
+
+.map-marker
+  position: absolute
+  width: 10px
+  height: 10px
+  margin: -5px 0 0 -5px
+  border-radius: 50%
+  border: 2px solid var(--pz-background-color, var(--background-color))
+  background-color: var(--status-color, var(--pz-secondary-color))
+  cursor: pointer
+  transition: transform 120ms ease
+
+  &.selected
+    transform: scale(1.5)
+    border-color: var(--pz-accent-color)
+
+.map-note
+  position: absolute
+  left: var(--pz-space-2, 0.5rem)
+  bottom: var(--pz-space-2, 0.5rem)
+  margin: 0
+  font-size: 0.8rem
+  color: var(--pz-secondary-color, var(--secondary-color))
+
+.assistant
+  padding: var(--pz-content-padding, 1rem)
+
+  h2
+    font-size: 1rem
+    margin: 0 0 var(--pz-heading-spacing, 0.5em)
+
+  p
+    margin: 0 0 var(--pz-paragraph-spacing, 0.75em)
+
+.content-header
+  padding: var(--pz-content-padding, 1rem) var(--pz-content-padding, 1rem) 0
+
+  p
+    color: var(--pz-secondary-color, var(--secondary-color))
+    margin: 0

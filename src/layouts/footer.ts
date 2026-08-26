@@ -12,25 +12,38 @@ const rockdIcon = h(Image, {
   width: "18px",
 });
 
+export interface NavLinkItem {
+  href: string;
+  text: string;
+  icon?: any;
+}
+
+/** The site's canonical link sets, exported so that compact chrome (e.g. the
+ * hybrid map/content page frame) can present the same links without forking
+ * the list. Anything that shows navigation should draw from these. */
+export const dataNavItems: NavLinkItem[] = [
+  { href: "/map/#3/40.78/-94.13", text: "Map", icon: "globe" },
+  { href: "/columns", text: "Columns", icon: "layers" },
+  { href: "/maps", text: "Map sources", icon: "map" },
+  { href: "/lex", text: "Lexicon", icon: "book" },
+  { href: "/projects", text: "Projects", icon: "briefcase" },
+  { href: "/docs", text: "Documentation", icon: "manual" },
+];
+
+export const platformNavItems: NavLinkItem[] = [
+  { href: "/about", text: "About", icon: "info-sign" },
+  { href: "/people", text: "People", icon: "people" },
+  { href: "/publications", text: "Publications", icon: "book" },
+  { href: "/support", text: "Support", icon: "office" },
+  { href: "/heatmap", text: "Heatmap", icon: "geosearch" },
+];
+
+const repoURL = "https://github.com/UW-Macrostrat/web";
+
 export function Footer({ className }) {
-  const metaItems = [
-    { href: "/about", text: "About", icon: "info-sign" },
-    { href: "/people", text: "People", icon: "people" },
-    { href: "/publications", text: "Publications", icon: "book" },
-    { href: "/support", text: "Support", icon: "office" },
-    { href: "/heatmap", text: "Heatmap", icon: "geosearch" },
-  ];
+  const metaItems = platformNavItems;
+  const navItems = dataNavItems;
 
-  const navItems = [
-    { href: "/map/#3/40.78/-94.13", text: "Map", icon: "globe" },
-    { href: "/columns", text: "Columns", icon: "layers" },
-    { href: "/maps", text: "Map sources", icon: "map" },
-    { href: "/lex", text: "Lexicon", icon: "book" },
-    { href: "/projects", text: "Projects", icon: "briefcase" },
-    { href: "/docs", text: "Documentation", icon: "manual" },
-  ];
-
-  const repoURL = "https://github.com/UW-Macrostrat/web";
   const editHref = repoURL + "/edit";
 
   const externalLinks = [

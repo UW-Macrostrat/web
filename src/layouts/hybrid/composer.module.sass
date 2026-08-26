@@ -1,0 +1,118 @@
+// Content/map/assistant composer. Component-local tokens (weak names) default
+// to Paleozoic globals, per the design-system sync pattern.
+
+.composer
+  position: relative
+  height: 100%
+  min-height: 0
+  min-width: 0
+
+.grid
+  // Three tracks always, so the track *count* never changes and
+  // `grid-template-columns` can actually interpolate between modes.
+  --content-track: 3fr
+  --map-track: 2fr
+  --assistant-track: 0px
+
+  display: grid
+  grid-template-columns: var(--content-track) var(--map-track) var(--assistant-track)
+  height: 100%
+  min-height: 0
+  transition: grid-template-columns var(--hybrid-transition-duration) ease
+
+.mode-content-only
+  --content-track: 1fr
+  --map-track: 0fr
+
+.mode-content-primary
+  --content-track: 3fr
+  --map-track: 2fr
+
+.mode-map-primary
+  --content-track: 2fr
+  --map-track: 3fr
+
+.mode-map-only
+  --content-track: 0fr
+  --map-track: 1fr
+
+.assistant-column
+  --assistant-track: var(--hybrid-assistant-width)
+
+.content-column,
+.map-column,
+.assistant-slot,
+.assistant-column-content
+  min-width: 0
+  min-height: 0
+  overflow: hidden
+
+.assistant-slot
+  display: flex
+
+  > *
+    flex: 1 1 auto
+    min-width: 0
+
+.content-column
+  display: flex
+  flex-direction: column
+  overflow: auto
+
+.content-column,
+.assistant-column-content
+  border-color: var(--pz-panel-rule-color, var(--panel-rule-color))
+
+.content-column
+  border-right: 1px solid transparent
+
+.map-column
+  display: flex
+  flex-direction: column
+
+  .map-region
+    flex: 1 1 auto
+    min-height: 0
+    position: relative
+
+  .embedded-assistant
+    flex: 0 1 auto
+    min-height: 0
+    max-height: var(--hybrid-embedded-assistant-max-height)
+    overflow: auto
+    border-top: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
+
+.assistant-column-content
+  overflow: auto
+  border-left: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
+
+// Only draw the interior rules when both sides of them are actually visible;
+// a collapsed 0fr track shouldn't leave an orphan hairline behind.
+.has-content.has-map
+  .content-column
+    border-right-color: var(--pz-panel-rule-color, var(--panel-rule-color))
+
+.floating-assistant
+  position: absolute
+  top: calc(var(--hybrid-body-inset-top, 0px) + var(--pz-space-3, 0.75rem))
+  right: var(--pz-space-3, 0.75rem)
+  width: var(--hybrid-assistant-width)
+  max-height: var(--hybrid-floating-assistant-max-height)
+  overflow: auto
+  z-index: 5
+
+  background-color: var(--pz-overlay-background-color, var(--translucent-panel-background-color))
+  backdrop-filter: blur(6px)
+  border: 1px solid var(--pz-border-color, var(--panel-rule-color))
+  border-radius: var(--pz-radius-md, 6px)
+  box-shadow: var(--pz-shadow-md)
+
+  opacity: 0
+  transform: translateX(0.75rem)
+  pointer-events: none
+  transition: opacity var(--hybrid-transition-duration) ease, transform var(--hybrid-transition-duration) ease, top var(--hybrid-transition-duration) ease
+
+  &.visible
+    opacity: 1
+    transform: translateX(0)
+    pointer-events: auto
