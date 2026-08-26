@@ -7,11 +7,15 @@ import {
   DataPanel,
   SelectionInteractionStyle,
 } from "@macrostrat/data-sheet";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { Button, InputGroup } from "@blueprintjs/core";
-
+import { ReactNode } from "react";
+import { Button } from "@blueprintjs/core";
 
 const PAGE_SIZE = 20;
+/** Pages auto-loaded per burst before the inline footer's "Load more" takes
+ * over. Deep results are reached by scrolling (and, more usefully, by narrowing
+ * the search) — so this is set high enough that the footer is a checkpoint
+ * rather than a speed bump. */
+const AUTO_LOAD_PAGES = 10;
 
 export function InfiniteScrollPage<T>({
   className,
@@ -27,12 +31,15 @@ export function InfiniteScrollPage<T>({
       "div.data-panel-container",
       h(DataPanel<T>, {
         pageSize: PAGE_SIZE,
-        autoLoadPages: 2,
+        autoLoadPages: AUTO_LOAD_PAGES,
         className: "ingestion-panel",
         statusBar: false,
         enableSelection: SelectionInteractionStyle.MODAL,
         toolbarStyle: "floating",
         contentFooter: h(InfiniteScrollFooter),
+        // Typing in a text filter shouldn't fire a request per keystroke; the
+        // input stays instant, only the fetch waits for the view to settle.
+        filterDebounce: 300,
         ...rest,
       })
     ),
@@ -60,92 +67,9 @@ export function InfiniteScrollFooter({ className }) {
   }
 
   return h("div.footer-panel", { className }, [
-    h("div.load-progress", { key: "lp" }, [
-      h("div.load-progress-content", { key: "content" }, content),
-      h(PageJumpControl, { key: "jump" }),
-    ]),
+    h("div.load-progress", { key: "lp" }, content),
     h(Footer, { key: "footer", className: "page-footer" }),
   ]);
-}
-
-
-function PageJumpControl() {
-  const { loaded, total, loading, hasMore, advance } = useLoadControls();
-  const [value, setValue] = useState("");
-  const [target, setTarget] = useState<number | null>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  const totalPages = total != null ? Math.ceil(total / PAGE_SIZE) : null;
-
-  const scrollToPage = useCallback((pageNum: number) => {
-    const items = rootRef.current
-      ?.closest(".data-panel")
-      ?.querySelectorAll(".data-panel-item-container:not(.is-skeleton)");
-    if (items == null || items.length === 0) return;
-    const idx = Math.min((pageNum - 1) * PAGE_SIZE, items.length - 1);
-    items[Math.max(idx, 0)]?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }, []);
-
-  // Step one page per load until the target page is loaded (or the data runs out)
-  useEffect(() => {
-    if (target == null) return;
-    if (loaded >= target * PAGE_SIZE || !hasMore) {
-      scrollToPage(target);
-      setTarget(null);
-    } else if (!loading) {
-      advance();
-    }
-  }, [target, loaded, loading, hasMore, advance, scrollToPage]);
-
-  if (totalPages == null || totalPages <= 1) return null;
-
-  const submit = () => {
-    const n = parseInt(value, 10);
-    if (Number.isNaN(n)) return;
-    setTarget(Math.max(1, Math.min(n, totalPages)));
-  };
-
-  let content: ReactNode;
-  if (target != null) {
-    content = h(
-      "span.page-jump-status",
-      `Loading page ${target} of ${totalPages}…`
-    );
-  } else {
-    content = [
-      h("span.page-jump-label", { key: "label" }, "Go to page"),
-      h(InputGroup, {
-        key: "input",
-        small: true,
-        type: "number",
-        min: 1,
-        max: totalPages,
-        value,
-        onValueChange: setValue,
-        onKeyDown: (e) => {
-          if (e.key === "Enter") submit();
-        },
-        style: { width: "5em" },
-      }),
-      h("span.page-jump-total", { key: "total" }, `/ ${totalPages}`),
-      h(
-        Button,
-        {
-          key: "go",
-          small: true,
-          intent: "primary",
-          disabled: value === "",
-          onClick: submit,
-        },
-        "Go"
-      ),
-    ];
-  }
-
-  return h("div.page-jump", { ref: rootRef }, content);
 }
 
 interface InfiniteScrollProps<T> extends DataPanelProps<T> {
