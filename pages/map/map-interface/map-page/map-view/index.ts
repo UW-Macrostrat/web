@@ -1,13 +1,13 @@
 import { SETTINGS } from "@macrostrat-web/settings";
 import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
-  PositionFocusState,
   useMapLabelVisibility,
   useMapRef,
   useMapStyleOperator,
   MacrostratLineSymbolManager,
   MapSourcesLayer,
 } from "@macrostrat/mapbox-react";
+import { PositionFocusState } from "@macrostrat/mapbox-utils";
 import {
   getFocusState,
   getTerrainSourceID,
@@ -23,6 +23,7 @@ import {
   useAppActions,
   useAppState,
 } from "#/map/map-interface/app-state";
+import { writeLastMapPosition } from "~/_utils/last-map-position";
 import { CrossSectionLine } from "./cross-section";
 import {
   FlyToPlaceManager,
@@ -121,6 +122,8 @@ export default function MainMapView(props) {
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
   const onMapMoved = useCallback((pos, map) => {
+    // Persist the settled camera as the shared last-viewed location.
+    writeLastMapPosition(pos);
     runAction({ type: "map-moved", data: { mapPosition: pos } });
   }, []);
 

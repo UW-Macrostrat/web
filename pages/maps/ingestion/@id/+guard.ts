@@ -1,14 +1,18 @@
 import { redirect } from "vike/abort";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import type { PageContext } from "vike/types";
-import { isLocalTesting } from "~/_providers/localTestingAuth";
 
 export default function guard(pageContext: PageContext) {
-  if (isLocalTesting()) return;
+  const { id } = pageContext.routeParams;
+
+  if (!id || isNaN(Number(id))) {
+    throw redirect(`$/maps/ingestion`);
+  }
 
   const user = pageContext?.user;
 
   if (user == null) {
+    // Redirect to the login page
     throw redirect(
       `${ingestPrefix}/security/login?return_url=${encodeURIComponent(
         pageContext.urlOriginal

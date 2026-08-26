@@ -1,16 +1,7 @@
 // Settings panel for the map
 
 // TODO: re-integrate LinkButton to @macrostrat/router-components
-import {
-  AnchorButton,
-  Button,
-  Callout,
-  Collapse,
-  IconName,
-  Intent,
-  Switch,
-  Tag,
-} from "@blueprintjs/core";
+import { AnchorButton, Button, Switch, Tag } from "@blueprintjs/core";
 import { applyMapPositionToHash } from "@macrostrat/map-interface";
 import { buildQueryString } from "@macrostrat/ui-components";
 import { useEffect, useState } from "react";
@@ -22,6 +13,7 @@ import {
 
 import h from "./settings-panel.module.sass";
 import { ThemeButton } from "~/components/theme-button.ts";
+import { ExpandablePanel } from "~/components";
 
 const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
@@ -57,7 +49,7 @@ const SettingsPanel = (props) => {
     h(LabelsButton),
     h(ThemeButton),
     h(
-      CalloutPanel,
+      ExpandablePanel,
       {
         icon: "clean",
         isOpen: showExperiments,
@@ -110,48 +102,6 @@ function PaleogeographyButton() {
     },
     "Paleogeography"
   );
-}
-
-function CalloutPanel({
-  isOpen,
-  setIsOpen,
-  children,
-  icon,
-  intent = Intent.PRIMARY,
-  title,
-}: {
-  isOpen: boolean;
-  setIsOpen: (v: boolean) => void;
-  children: any;
-  icon: IconName;
-  intent?: Intent;
-  title: string;
-}) {
-  return h("div.callout-panel", { className: isOpen ? "expanded" : null }, [
-    h("div.callout-header", [
-      h(
-        Button,
-        {
-          minimal: true,
-          icon,
-          active: isOpen,
-          intent: "warning",
-          onClick() {
-            setIsOpen(!isOpen);
-          },
-        },
-        title
-      ),
-    ]),
-    h(
-      Collapse,
-      {
-        isOpen: isOpen,
-        className: "callout-content",
-      },
-      h(Callout, { intent, icon: null }, [children])
-    ),
-  ]);
 }
 
 function LineSymbolsControl() {

@@ -5,6 +5,8 @@ import type { PageContext } from "vike/types";
 export async function guard(pageContext: PageContext) {
   const { user } = pageContext;
 
+  console.log(user);
+
   if (user === undefined) {
     // Render the login page while preserving the URL. (This is novel technique
     // which we explain down below.)

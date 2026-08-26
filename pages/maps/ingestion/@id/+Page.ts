@@ -71,10 +71,9 @@ export function Page() {
     h("div", { style: { position: "relative" } }, [
     h(Header, {
       ...headerProps,
-      key: `${currentIngestProcess?.id}-${currentIngestProcess?.state}`,
+      key: `${currentIngestProcess?.source_id}-${currentIngestProcess?.state}`,
     }),
       h(StatusDropdown, {
-      ingestProcessId: currentIngestProcess?.id,
       sourceId: source_id,
       value: ingestState,
       onChange: setIngestState,
@@ -112,13 +111,11 @@ export function Page() {
 
 
 function StatusDropdown({
-  ingestProcessId,
   sourceId,
   value,
   onChange,
   onUpdateIngestProcess,
 }: {
-  ingestProcessId?: number;
   sourceId?: number;
   value: string;
   onChange: (value: string) => void;
@@ -131,10 +128,7 @@ function StatusDropdown({
   const updateStatus = async () => {
     if (draftValue === "") return;
 
-    const idFilter =
-      ingestProcessId != null
-        ? `id=eq.${ingestProcessId}`
-        : `source_id=eq.${sourceId}`;
+    const idFilter = `source_id=eq.${sourceId}`;
 
     setIsSubmitting(true);
 

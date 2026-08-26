@@ -1,0 +1,173 @@
+// Mineral-class selector: a scrollable list of the layer's classes, each drawn
+// as a Tag in the color it renders in, so the panel doubles as the legend.
+.mineral-classes
+  display: flex
+  flex-direction: column
+  gap: 4px
+
+  .class-list
+    display: flex
+    flex-direction: column
+    max-height: 240px
+    overflow-y: auto
+    // Negate the form group's label spacing so the scroll area reads as one
+    // block rather than a floating list.
+    margin: -1em -1em 0
+    padding: 0 0.5em
+    border-bottom: 1px solid var(--panel-rule-color)
+
+  .class-item
+    display: flex
+    align-items: center
+    gap: 4px
+    padding: 1px 2px
+    border-radius: 3px
+
+    // A class that is currently being shown.
+    &.selected
+      font-weight: bold
+
+    // The class under the cursor, in the point inspector. An outline rather than
+    // a background, so it doesn't compete with the tag's own class color — and
+    // it reads independently of `.selected`, which is a different fact.
+    &.focused
+      outline: 2px solid var(--accent-color, #4c90f0)
+      outline-offset: 1px
+
+    :global(.bp6-checkbox)
+      margin: 0
+
+    // The tag is the row's label, so it takes the width the name would have.
+    // Grown as a flex *item* rather than by overriding the package's
+    // `display: inline-flex` — that rule has the same specificity as anything
+    // written here, so which one won would come down to stylesheet order.
+    .class-tag
+      flex: 1
+      min-width: 0
+      cursor: pointer
+
+      // `name` is the one class the Tag emits unhashed, so it can be reached
+      // from here; long mineral names ellipsize rather than wrap the row.
+      :global(.name)
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+  .class-actions
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 8px
+    font-size: 11px
+    opacity: 0.7
+    margin-bottom: -0.5em // counteract expandable panel margin
+
+// The focused dataset, and the hint shown when there isn't one.
+.dataset-hint
+  margin: 0 0 8px
+  font-size: 11px
+  line-height: 1.3
+  opacity: 0.6
+
+.focused-dataset
+  display: flex
+  align-items: center
+  gap: 4px
+
+  .dataset-name
+    flex: 1
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+// Point inspector: what's under the cursor, and which datasets said so.
+.point-details
+  // TODO: ideally inspector content should get its own padding
+  padding: 1em 0
+  display: flex
+  flex-direction: column
+  gap: 12px
+
+.point-status
+  margin: 0
+  opacity: 0.7
+
+.visible-class
+  display: flex
+  flex-direction: column
+  align-items: flex-start
+  gap: 4px
+
+  // The identified class, with the action that acts on it beside it.
+  .class-heading
+    display: flex
+    align-items: center
+    gap: 8px
+    // The tag can be wide (some class names are long); the button never shrinks.
+    max-width: 100%
+
+    .isolate-button
+      flex: 0 0 auto
+
+  .hidden-note
+    margin: 4px 0 0
+    font-size: 11px
+    line-height: 1.3
+    opacity: 0.7
+
+.dataset-readings
+  h4
+    margin: 0 0 4px
+
+  .reading-list
+    margin: 0
+    padding: 0
+    list-style: none
+
+  .reading-item
+    display: flex
+    align-items: baseline
+    gap: 6px
+    padding: 2px 0
+
+    & + .reading-item
+      border-top: 1px solid rgba(128, 128, 128, 0.2)
+
+    // A button, not a label: this row is how a dataset gets focused. Styled
+    // back down to text so the list still reads as a list.
+    .dataset-name
+      font-family: var(--code-font-family, monospace)
+      font-size: 0.85em
+      background: none
+      border: none
+      padding: 0
+      color: inherit
+      cursor: pointer
+      text-align: left
+
+      &:hover
+        text-decoration: underline
+
+    .class-name
+      margin-left: auto
+      text-align: right
+
+    .no-data
+      margin-left: auto
+      opacity: 0.5
+      font-style: italic
+
+    // Marks the raster whose pixel won compositing, and the focused one.
+    :global(.bp6-tag)
+      align-self: center
+
+  .reading-item.focused
+    .dataset-name
+      font-weight: 600
+
+  .reading-hint
+    margin: 6px 0 0
+    font-size: 11px
+    line-height: 1.3
+    opacity: 0.6

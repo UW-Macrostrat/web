@@ -1,0 +1,8 @@
+// The disclosed controls inside the panel: basemap radios, labels switch,
+// dark-mode button.
+.base-layer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}

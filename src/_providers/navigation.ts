@@ -34,17 +34,21 @@ function buildHrefForItem(item: MacrostratItemIdentifier) {
   if ("lith_id" in item) {
     return `/lex/lithologies/${item.lith_id}`;
   }
+  // The route is `/lex/lith-atts/` — a singular `/lex/lith-att/` 404s.
+  if ("lith_att_id" in item) {
+    return `/lex/lith-atts/${item.lith_att_id}`;
+  }
   if ("environ_id" in item) {
     return `/lex/environments/${item.environ_id}`;
-  }
-  if ("lith_att_id" in item) {
-    return `/lex/lithology-attributes/${item.lith_att_id}`;
   }
   if ("strat_name_id" in item) {
     return `/lex/strat-names/${item.strat_name_id}`;
   }
   if ("concept_id" in item) {
     return `/lex/strat-concepts/${item.concept_id}`;
+  }
+  if ("econ_id" in item) {
+    return `/lex/economics/${item.econ_id}`;
   }
   if ("int_id" in item) {
     return `/lex/intervals/${item.int_id}`;

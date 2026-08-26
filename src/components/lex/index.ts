@@ -1,13 +1,15 @@
+export * from "./list-page";
+export * from "./item-body-loader";
 import h from "./main.module.sass";
+import { navigate } from "vike/client/router";
 import {
   useAPIResult,
   ErrorBoundary,
   FlexRow,
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
-import { Footer, Link, LithologyTag, PageBreadcrumbs } from "~/components";
-import { Card, Divider, Popover } from "@blueprintjs/core";
-import { ContentPage } from "~/layouts";
+import { Link, LithologyTag, MacrostratLink } from "~/components";
+import { Card, Divider, Popover, Spinner } from "@blueprintjs/core";
 import {
   AlphaTag,
   BetaTag,
@@ -17,15 +19,25 @@ import {
 } from "~/components/general";
 import { useState, useMemo, useEffect } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { LinkCard } from "~/components/cards";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
-import { ClientOnly } from "vike-react/ClientOnly";
-import { ExpansionPanel } from "@macrostrat/data-components";
+import { clientOnly } from "./client-only";
+// NOTE: do NOT statically import "./map.client" here — it pulls in mapbox-gl,
+// which touches `window` at module load and crashes SSR. `clientOnly()` dynamic-
+// imports it (below) so the barrel stays server-safe.
+//
+// This local instance is the fallback for consumers *outside* `/lex` (e.g. the
+// project column-group page). Lexicon pages pass a `targetKey` and get the
+// single shared map instance instead — see `./map-target`.
+const LexiconMapLazy = clientOnly(() =>
+  import("./map.client").then((m) => m.LexiconMap)
+);
+import { LexMapSlot } from "./map-target";
 import { fetchPGData } from "~/_utils";
+import { ExpansionPanel } from "@macrostrat/data-components";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -34,35 +46,6 @@ export function titleCase(str) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
-}
-
-function ColumnMapContainer(props) {
-  return h(
-    ClientOnly,
-    {
-      load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
-      fallback: h("div.loading", "Loading map..."),
-      deps: [
-        props.columns,
-        props.projectID,
-        props.fossilData,
-        props.filters,
-        props.mapUrl,
-      ],
-    },
-    (component) => h(component, props)
-  );
-}
-
-function ExpansionPanelContainer(props) {
-  return h(
-    ClientOnly,
-    {
-      load: () => import("./map.client").then((d) => d.ExpansionPanelContainer),
-      fallback: h("div.loading", "Loading map..."),
-    },
-    (component) => h(component, props)
-  );
 }
 
 export function LexItemPage(props: LexItemPageProps) {
@@ -86,54 +69,71 @@ export function LexItemPage(props: LexItemPageProps) {
 function LexItemPageInner(props: LexItemPageProps) {
   const { children, siftLink, id, resData, refs = [], header } = props;
 
-  const { name, strat_name_long } = resData;
+  // Guard: this renders server-side now (SSR doesn't catch a null destructure).
+  const { name, strat_name_long } = resData || {};
 
   return h("div", [
-    SiftLink({
+    children,
+    h(References, { refs }),
+    h(SiftLink, {
       id,
       siftLink,
     }),
-    children,
-    h(References, { refs }),
   ]);
 }
 
-export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
-  if (!colData || !colData.features || colData.features.length === 0) return;
-  const summary = summarize(colData.features || []);
+export function ColumnsTable({
+  resData,
+  colData,
+  fossilsData,
+  mapUrl,
+  targetKey = "",
+  loading = false,
+}) {
+  const hasColumns = colData?.features?.length > 0;
+  const summary = summarize(hasColumns ? colData.features : []);
+
+  // Hooks must run unconditionally and in a stable order, ahead of any early
+  // return (rules of hooks). `useAPIResult`/`getIntID` no-op on a null route, so
+  // pass null when the input is absent instead of skipping the hook.
+  const lithLegendIds = useAPIResult(
+    resData?.lith_id
+      ? apiV2Prefix + "/mobile/map_filter?lith_id=" + resData.lith_id
+      : null
+  );
+  const conceptLegendIds = useAPIResult(
+    resData?.concept_id
+      ? apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id
+      : null
+  );
+  const t_id = useIntervalID({ name: summary.t_int_name });
+  const b_id = useIntervalID({ name: summary.b_int_name });
+
+  // Nothing to show only once we *know* there are no columns. While they load,
+  // fall through and render the frame — that reserves the space and keeps the
+  // shared map mounted, so navigation doesn't make it blink out and back.
+  if (!hasColumns && !loading) return null;
 
   let filters = [];
 
-  if (resData?.lith_id) {
-    const legend_ids = useAPIResult(
-      apiV2Prefix + "/mobile/map_filter?lith_id=" + resData.lith_id
-    );
-
-    if (legend_ids) {
-      filters.push({
-        category: "lithology",
-        type: "lithologies",
-        id: resData.lith_id,
-        name: resData.name,
-        legend_ids,
-      });
-    }
+  if (resData?.lith_id && lithLegendIds) {
+    filters.push({
+      category: "lithology",
+      type: "lithologies",
+      id: resData.lith_id,
+      name: resData.name,
+      legend_ids: lithLegendIds,
+    });
   }
 
-  if (resData?.concept_id) {
-    const legend_ids = useAPIResult(
-      apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id
-    );
-
-    if (legend_ids) {
-      filters.push({
-        category: "strat_name",
-        type: "strat_name_concepts",
-        id: resData.concept_id,
-        name: resData.name,
-        legend_ids,
-      });
-    }
+  if (resData?.concept_id && conceptLegendIds) {
+    filters.push({
+      category: "strat_name",
+      type: "strat_name_concepts",
+      id: resData.concept_id,
+      name: resData.name,
+      legend_ids: conceptLegendIds,
+    });
   }
 
   if (resData?.int_id) {
@@ -146,9 +146,7 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
     });
   }
 
-  console.log("Filters in ColumnsTable:", filters);
-
-  const { b_age, t_age } = resData;
+  const { b_age, t_age } = resData ?? {};
 
   const {
     t_units,
@@ -162,25 +160,46 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
 
   const area = parseInt(col_area.toString().split(".")[0]);
 
-  const t_id = getIntID({ name: t_int_name });
-  const b_id = getIntID({ name: b_int_name });
+  // A `targetKey` means the caller is inside `/lex`, where one map instance is
+  // mounted by the layout: render the slot it moves into (no map of our own).
+  // Everywhere else, mount a local instance as before.
+  const mapProps = {
+    filters,
+    columns: colData,
+    className: "column-map-container",
+    fossilsData,
+    mapUrl,
+  };
+  let mapElement = null;
+  if (targetKey !== "") {
+    mapElement = h(LexMapSlot, {
+      targetKey,
+      loading: !hasColumns,
+      ...mapProps,
+    });
+  } else {
+    mapElement = h(LexiconMapLazy, { ...mapProps, fallback: h(Spinner) });
+  }
 
-  return h("div.table", [
-    h("div.table-content", [
+  // While columns load, the stats are all zeros — show a placeholder instead, so
+  // the frame holds its shape without asserting numbers we don't have yet.
+  let statsContent: any = h("div.stats-loading", h(Spinner, { size: 24 }));
+  if (hasColumns) {
+    statsContent = [
       h("div.packages", t_sections.toLocaleString() + " packages"),
       h(Divider, { className: "divider" }),
       h("div.units", t_units.toLocaleString() + " units"),
       h(Divider, { className: "divider" }),
       h("div.interval", [
         h(
-          Link,
-          { href: "/lex/intervals/" + b_id },
+          MacrostratLink,
+          { item: { int_id: b_id } },
           b_int_name.toLocaleString()
         ),
         " - ",
         h(
-          Link,
-          { href: "/lex/intervals/" + t_id },
+          MacrostratLink,
+          { item: { int_id: t_id } },
           t_int_name.toLocaleString()
         ),
       ]),
@@ -195,15 +214,20 @@ export function ColumnsTable({ resData, colData, fossilsData, mapUrl }) {
       h("div.thickness", "≤ " + max_thick.toLocaleString() + "m thick"),
       h(Divider, { className: "divider" }),
       h("div.collections", pbdb_collections.toLocaleString() + " collections"),
-    ]),
-    h(ColumnMapContainer, {
-      filters,
-      columns: colData,
-      className: "column-map-container",
-      fossilsData,
-      mapUrl,
-    }),
-  ]);
+    ];
+  }
+
+  return h("div.table", [h("div.table-content", statsContent), mapElement]);
+}
+
+export function navigateToInterval(clickData) {
+  /** Navigate to an interval's lex page from a Timescale click. The Timescale's
+   * onClick passes `{ age, interval }` (TimescaleClickData) — not the interval
+   * directly — and a click on empty axis area has no interval, so guard for it. */
+  const intId = clickData?.interval?.int_id;
+  if (intId != null) {
+    navigate("/lex/intervals/" + intId);
+  }
 }
 
 export function Intervals({ resData }) {
@@ -215,7 +239,7 @@ export function Intervals({ resData }) {
       levels: [1, 5],
       ageRange: [b_age, t_age],
       absoluteAgeScale: true,
-      onClick: (e, d) => window.open("/lex/intervals/" + d.int_id, "_self"),
+      onClick: (e, d) => navigateToInterval(d),
     })
   );
 }
@@ -263,10 +287,14 @@ function IntAbbrev({ abbrev, chromaColor, luminance }) {
 }
 
 function SiftLink({ id, siftLink }) {
-  return h.if(siftLink)("div.sift-link", [
+  if (siftLink == null) return null;
+  return h("div.sift-link", [
     h(
       "a",
-      { href: "/sift/" + siftLink + "/" + id, target: "_blank" },
+      {
+        href: "https://macrostrat.org/sift/#/" + siftLink + "/" + id,
+        target: "_blank",
+      },
       "View in Sift"
     ),
   ]);
@@ -317,7 +345,7 @@ function UpperCase(str) {
 export function Timescales({ timescales }) {
   return h.if(timescales?.length)("div.int-timescales", [
     h(
-      ExpansionPanelContainer,
+      ExpansionPanel,
       { title: "Timescales" },
       h(
         "ul",
@@ -336,7 +364,7 @@ export function Timescales({ timescales }) {
   ]);
 }
 
-function References({ refs }) {
+export function References({ refs }) {
   return h.if(refs?.length != 0)("div.int-references", [
     h("h3", "Primary Sources"),
     h(Divider),
@@ -360,11 +388,11 @@ export function PrevalentTaxa({ taxaData }) {
         h("a", { href: pbdbDomain + "/#/" }, "PaleoBioDB"),
       ]),
     ]),
-    records?.map((record) => Taxa(record)),
+    records?.map((record) => h(Taxa, { key: record.oid, record })),
   ]);
 }
 
-function Taxa(record) {
+function Taxa({ record }) {
   const imgUrl = pbdbDomain + "/data1.2/taxa/thumb.png?id=";
   const isDarkMode = useDarkMode().isEnabled;
 
@@ -390,8 +418,6 @@ function ConceptHierarchy({ id }) {
   const data = useAPIResult(url)?.success?.data;
   if (!data) return h(Loading);
 
-  console.log("Concept Hierarchy Data:", data);
-
   return h("div.concept-hierarchy", [
     data.map((item) => {
       const { t_units, strat_name, rank } = item;
@@ -405,9 +431,9 @@ function ConceptHierarchy({ id }) {
   ]);
 }
 
-function getIntID({ name }) {
+function useIntervalID({ name }) {
   const res = useAPIResult(
-    apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
+    name ? apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name) : null
   )?.success?.data;
 
   const id = res?.filter((d) => d.name === name)[0]?.int_id;
@@ -416,15 +442,16 @@ function getIntID({ name }) {
 }
 
 export function ConceptInfo({ concept_id, showHeader }) {
-  if (!concept_id) return;
-
+  // Hook must run unconditionally; pass a null route when there's no concept.
   const data = useAPIResult(
-    apiV2Prefix +
-      "/defs/strat_name_concepts?strat_name_concept_id=" +
-      concept_id
-  )?.success?.data[0];
+    concept_id
+      ? apiV2Prefix +
+          "/defs/strat_name_concepts?strat_name_concept_id=" +
+          concept_id
+      : null
+  )?.success?.data?.[0];
 
-  if (!data) return;
+  if (!data) return null;
 
   const { author, name, province, geologic_age, other, usage_notes, url } =
     data;
@@ -899,7 +926,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
                   .split(" ")[1]
                   .split("-")[1];
                 const url = "/lex/" + route + "/" + id;
-                window.open(url, "_self");
+                navigate(url);
               },
             })
           )

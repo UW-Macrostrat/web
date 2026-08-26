@@ -8,21 +8,21 @@ export interface Lith {
   fill?: number;
 }
 
-export interface TreeNodeData {
+export interface TreeNodeData<T extends object> {
   name: string;
-  lith?: Lith;
+  data: T;
   isExpanded?: boolean;
-  children?: TreeNodeData[];
+  children?: TreeNodeData<T>[];
 }
 
-interface TreeNodeMap {
+interface TreeNodeMap<T extends object> {
   name: string;
-  lith?: Lith;
-  children?: Map<string, TreeNodeMap>;
+  data?: T;
+  children?: Map<string, TreeNodeMap<T>>;
 }
 
-export function nestLiths(liths: Lith[]): TreeNodeData {
-  const root: TreeNodeMap = { name: "Rocks", children: new Map() };
+export function nestLiths(liths: Lith[]): TreeNodeData<Lith> {
+  const root: TreeNodeMap<Lith> = { name: "Rocks", children: new Map() };
   // Ensure that empty strings are treated as null
   for (let lith of liths) {
     for (const key of ["type", "group", "class"]) {
@@ -41,8 +41,8 @@ export function nestLiths(liths: Lith[]): TreeNodeData {
       if (!root.children.has(lith.class)) {
         root.children.set(lith.class, {
           name: lith.class,
-          lith,
-          children: new Map<string, TreeNodeMap>(),
+          data: lith,
+          children: new Map<string, TreeNodeMap<Lith>>(),
         });
       }
     } else {
@@ -57,8 +57,8 @@ export function nestLiths(liths: Lith[]): TreeNodeData {
       if (!parent.children.has(lith.type)) {
         parent.children.set(lith.type, {
           name: lith.type,
-          children: new Map<string, TreeNodeMap>(),
-          lith,
+          children: new Map<string, TreeNodeMap<Lith>>(),
+          data: lith,
         });
       }
     }
@@ -71,14 +71,15 @@ export function nestLiths(liths: Lith[]): TreeNodeData {
         if (!grandparent.children.has(lith.group)) {
           grandparent.children.set(lith.group, {
             name: lith.group,
-            children: new Map<string, TreeNodeMap>(),
+            children: new Map<string, TreeNodeMap<Lith>>(),
+            data: lith,
           });
         }
       } else {
         const parent = root.children.get(lith.class);
         const grandparent = parent.children.get(lith.type);
         if (!grandparent.children.has(lith.name)) {
-          grandparent.children.set(lith.name, { name: lith.name, lith });
+          grandparent.children.set(lith.name, { name: lith.name, data: lith });
         }
       }
     }
@@ -95,8 +96,8 @@ export function nestLiths(liths: Lith[]): TreeNodeData {
       const greatgrandparent = grandparent.children.get(lith.group);
       greatgrandparent.children.set(lith.name, {
         name: lith.name,
-        lith,
-        children: new Map<string, TreeNodeMap>(),
+        data: lith,
+        children: new Map<string, TreeNodeMap<Lith>>(),
       });
     }
   }
@@ -105,13 +106,13 @@ export function nestLiths(liths: Lith[]): TreeNodeData {
   return convert(root);
 }
 
-function convert(data: TreeNodeMap): TreeNodeData {
+function convert<T extends object>(data: TreeNodeMap<T>): TreeNodeData<T> {
   if (data.children == null) {
-    return { name: data.name, lith: data.lith };
+    return { name: data.name, data: data.data };
   }
   return {
     name: data.name,
-    lith: data.lith,
+    data: data.data,
     children: Array.from(data.children.values()).map(convert),
   };
 }
@@ -134,30 +135,32 @@ export interface LithAttribute {
   type: string;
 }
 
-export function nestLithAttributes(lithAtts: LithAttribute[]): TreeNodeData {
-  const root: TreeNodeMap = { name: "Lith attributes", children: new Map() };
+export function nestLithAttributes(
+  lithAtts: LithAttribute[]
+): TreeNodeData<LithAttribute> {
+  const root: TreeNodeMap<LithAttribute> = {
+    name: "Lith attributes",
+    data: null,
+    children: new Map(),
+  };
   for (let att of lithAtts) {
     if (!root.children.has(att.type)) {
       root.children.set(att.type, {
         name: att.type,
-        children: new Map<string, TreeNodeMap>(),
+        children: new Map<string, TreeNodeMap<LithAttribute>>(),
       });
     }
     const parent = root.children.get(att.type);
     parent.children.set(att.name, {
       name: att.name,
-      lith: {
-        id: att.lith_att_id,
-        lith_id: att.lith_att_id,
-        name: att.name,
-      },
+      data: att,
     });
   }
   return convert(root);
 }
 
-export function nestItems(liths: Lith[]): TreeNodeData {
-  const root: TreeNodeMap = { name: "Rocks", children: new Map() };
+export function nestItems(liths: Lith[]): TreeNodeData<Lith> {
+  const root: TreeNodeMap<Lith> = { name: "Rocks", children: new Map() };
   // Ensure that empty strings are treated as null
   for (let lith of liths) {
     for (const key of ["type", "group", "class"]) {
@@ -166,23 +169,32 @@ export function nestItems(liths: Lith[]): TreeNodeData {
   }
 
   for (let lith of liths) {
-    if (lith.class == null || lith.type == null)
-      console.error(lith, "Class and type should never be null");
-    if (lith.class == null) console.log(lith.name, "Class is null");
-    if (lith.type == null) console.log(lith.name, "Type is null");
+    if (lith.class == null) {
+      console.error(lith, "Class should never be null");
+    }
 
     // Create a class if it doesn't exist
     if (lith.class != null) {
       if (!root.children.has(lith.class)) {
         root.children.set(lith.class, {
           name: lith.class,
-          lith,
-          children: new Map<string, TreeNodeMap>(),
+          data: lith,
+          children: new Map<string, TreeNodeMap<Lith>>(),
         });
       }
     } else {
       if (!root.children.has(lith.name)) {
-        root.children.set(lith.name, { name: lith.name, lith });
+        root.children.set(lith.name, { name: lith.name, data: lith });
+      }
+    }
+
+    // An item with a class but no type hangs directly off its class rather than
+    // being dropped from the tree — e.g. the environments named "marine" and
+    // "marginal marine", which are classes in their own right.
+    if (lith.class != null && lith.type == null) {
+      const parent = root.children.get(lith.class);
+      if (!parent.children.has(lith.name)) {
+        parent.children.set(lith.name, { name: lith.name, data: lith });
       }
     }
 
@@ -192,8 +204,8 @@ export function nestItems(liths: Lith[]): TreeNodeData {
       if (!parent.children.has(lith.type)) {
         parent.children.set(lith.type, {
           name: lith.type,
-          children: new Map<string, TreeNodeMap>(),
-          lith,
+          children: new Map<string, TreeNodeMap<Lith>>(),
+          data: lith,
         });
       }
     }
@@ -206,14 +218,15 @@ export function nestItems(liths: Lith[]): TreeNodeData {
         if (!grandparent.children.has(lith.group)) {
           grandparent.children.set(lith.group, {
             name: lith.group,
-            children: new Map<string, TreeNodeMap>(),
+            data: lith,
+            children: new Map<string, TreeNodeMap<Lith>>(),
           });
         }
       } else {
         const parent = root.children.get(lith.class);
         const grandparent = parent.children.get(lith.type);
         if (!grandparent.children.has(lith.name)) {
-          grandparent.children.set(lith.name, { name: lith.name, lith });
+          grandparent.children.set(lith.name, { name: lith.name, data: lith });
         }
       }
     }
@@ -230,8 +243,8 @@ export function nestItems(liths: Lith[]): TreeNodeData {
       const greatgrandparent = grandparent.children.get(lith.group);
       greatgrandparent.children.set(lith.name, {
         name: lith.name,
-        lith,
-        children: new Map<string, TreeNodeMap>(),
+        data: lith,
+        children: new Map<string, TreeNodeMap<Lith>>(),
       });
     }
   }

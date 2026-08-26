@@ -162,6 +162,17 @@ function layerDescriptionToLayers(
   return validateLayers(layers);
 }
 
+/** Whether the URL hash carries an explicit map position (x/y coords). Used to
+ * decide when to fall back to a last-viewed or GeoIP default instead. */
+export function hashHasMapPosition(hashString: string): boolean {
+  try {
+    const hashData = getHashString(hashString) ?? {};
+    return hashData.x != null || hashData.y != null;
+  } catch {
+    return false;
+  }
+}
+
 export function updateMapPositionForHash(
   state: CoreState,
   hashString: string

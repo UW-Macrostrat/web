@@ -59,7 +59,7 @@ const postIngestProcess = async (data: any) => {
 };
 
 const postIngestProcessObject = async (
-  ingestProcessId: number,
+  sourceId: number,
   files: FileList
 ) => {
   if (files.length == 0) {
@@ -72,7 +72,7 @@ const postIngestProcessObject = async (
   });
 
   const response = await fetch(
-    `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`,
+    `${ingestPrefix}/ingest-process/${sourceId}/objects`,
     {
       method: "POST",
       body: data,
@@ -182,7 +182,7 @@ const AddSourceForm = () => {
 
       setProgress({ text: "Uploading Files", value: 0.66 });
       const ingestProcessObject = await postIngestProcessObject(
-        ingestProcess.id,
+        ingestProcess.source_id,
         files
       );
 

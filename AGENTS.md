@@ -7,6 +7,8 @@ The site is built with **Vike + React + Mapbox GL**. Pages live under `pages/`; 
 ## Workflow
 
 - Assume the user is already viewing the hot-reloading dev UI. Unless explicitly asked, don't start a dev server or offer to verify changes in the browser — the user will interject if the functionality isn't working.
+- **Where it's served.** Usually `https://dev.macrostrat.local`, when the local container stack is up — that's the address to reach for first. The Vike dev server is also directly available at `http://localhost:3000` (**http**, not https).
+- If you do need to check a server-side failure (an SSR 500, a module-resolution error), curl the running server rather than starting your own — `yarn dev` will just fail with `EADDRINUSE` against the one the user already has open.
 
 ## UI authoring
 
@@ -28,8 +30,20 @@ The site is built with **Vike + React + Mapbox GL**. Pages live under `pages/`; 
 ## Code style
 
 - **Avoid inline conditionals.** Don't render `cond ? h(...) : null` or select values with inline ternaries; hoist the result to a named `let` resolved with `if`/`else` before the return. Null-safety operators (`?.`, `??`) are fine — the rule targets conditional *selection* of a value or component.
+- **Avoid deep nesting.** Keep components and functions flat. Extract data-fetching, imperative map actions, and multi-step async logic into named custom hooks (`useThing`) or helpers rather than inlining large `useEffect`/`useCallback` bodies in a component. Prefer early returns over nested `if`/`else`, and lift derived values out of the render body. A component's top level should read as a short list of named pieces.
+
+## Stylesheets
+
+Use SASS modules (`.module.sass`) for component-specific styles. Prefer sass to scss. Attempt to reuse existing shared styles and css variables where possible.
 
 ## Typechecking
 
 - Typechecks can be run with `yarn tsc --noEmit -p tsconfig.json`. Note that the codebase carries pre-existing type errors in unrelated files, so filter the output to the files you touched.
 - Type errors at the boundary of newly added functionality are generally considered unimportant. Don't churn on satisfying the type checker — only act on errors that reveal major, obvious broken JavaScript (e.g. a real undefined reference or a malformed call), not incidental type-shape mismatches.
+
+## Build tooling & gotchas
+
+- **Yarn only, and this is a Yarn PnP repo.** Use `yarn ...` for everything (`yarn tsc`, `yarn add`); `npx tsc` resolves a decoy package. There is **no `node_modules`** — dependencies are zips under `.yarn/cache/`. To inspect a dependency's built source, `unzip -p .yarn/cache/<pkg>-*.zip <path/inside>` (paths are `node_modules/<pkg>/dist/...` inside the zip); `ls node_modules/...` will look empty.
+- **`@macrostrat/*` packages resolve to their published dist**, NOT the sibling source in `Software/web-components`. Editing web-components source has **no effect** on this app's dev server until that package is released and the version bumped here. `vite.config.ts` marks these `noExternal` + `dedupe`, so they're bundled from the cached dist. Work within the installed package's current API; land library changes as a separate release.
+- **CSS-module class names become JS bindings.** Vite emits a named export per class in a `.module.sass`, so a class named after a reserved/global identifier — notably `.name` — throws `TypeError: "name" is read-only` when the compiled style module loads. Avoid `.name` (use e.g. `.col-name`); the same caution applies to other global-ish identifiers.
+- **Source-map attribution to a `.module.sass` is misleading.** Since `hyper.styled(styles)` binds the style module, a runtime error whose stack points at `*.module.sass?t=...` usually originates in *some component that imports that shared `h`*, not the stylesheet itself — check all consumers of that `h`.

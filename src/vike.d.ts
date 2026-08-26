@@ -17,7 +17,8 @@ import type {
   SourcesConfigCumulative,
 } from "vike/types";
 
-import { Item, PageInfo } from "~/_utils/breadcrumbs";
+import { Item, PageInfo } from "~/_utils/helpers.ts";
+import type { GeoLocation } from "~/_utils/geolocation";
 
 export type PageProps = Record<string, unknown>;
 export type PageStyle = "content" | "fullscreen";
@@ -37,11 +38,15 @@ declare global {
       supportsDarkMode?: boolean;
       scripts?: string[];
     }
-    interface PageContext {
+    interface PageContext extends PageContextClient {
       pageProps?: PageProps;
       pageInfo?: PageInfo;
       urlPathname: string;
       user?: User;
+      geo?: GeoLocation | null;
+      // Set server-side: access token gone/expired but a refresh token is
+      // present, so the client should attempt one silent refresh on load.
+      canRefresh?: boolean;
       breadcrumbs?: Item[];
       macrostratLogoFlavor?: string;
       mdxContent?: string;

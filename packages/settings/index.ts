@@ -51,6 +51,12 @@ export const ingestPrefix = getRuntimeConfig(
   apiV3Prefix
 );
 
+//update to /auth down the road in v3
+export const authPrefix = getRuntimeConfig(
+  "MACROSTRAT_AUTH_API",
+  apiV3Prefix + "/security"
+);
+
 export const webAssetsPrefix = getRuntimeConfig(
   "MACROSTRAT_WEB_ASSETS_PREFIX",
   "https://storage.macrostrat.org/assets/web"

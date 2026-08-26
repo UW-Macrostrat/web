@@ -26,7 +26,7 @@ export function Header({
 
   const updateIngestProcess = useCallback(async () => {
     const response = await fetch(
-      `${ingestPrefix}/ingest-process/${ingestProcess.id}`
+      `${ingestPrefix}/ingest-process/${ingestProcess.source_id}`
     );
     setIngestProcess(await response.json());
   }, []);
@@ -38,10 +38,10 @@ export function Header({
         title: refTitle,
         href: sourceURL,
       }),
-      h("div", [
+      h.if(_ingestProcess?.source_id != null)("div", [
         h(IngestTagDisplay, {
-          ingestProcess: ingestProcess,
-          onUpdate: () => {},
+          data: _ingestProcess,
+          onUpdate: updateIngestProcess,
         }),
       ]),
       h("div.spacer"),

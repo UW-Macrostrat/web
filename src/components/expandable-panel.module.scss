@@ -1,0 +1,33 @@
+// A collapsible panel whose header button sits flush atop a Blueprint Callout
+// body; the Callout's `intent` colors the whole thing (warning = orange,
+// none = light grey, etc.). Ported from the map settings "Experiments" panel.
+.expandable-panel {
+  border-radius: 3px;
+  overflow: hidden;
+
+  .panel-header {
+    :global(.bp6-button) {
+      width: 100%;
+    }
+  }
+
+  // When open, square off the seam between the header button and the callout.
+  &.expanded {
+    .panel-header {
+      :global(.bp6-button) {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  :global(.bp6-callout) {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+
+    & > :last-child {
+      margin-bottom: 0;
+    }
+  }
+}

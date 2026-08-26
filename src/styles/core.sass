@@ -2,6 +2,7 @@
 @use "@blueprintjs/core/lib/css/blueprint.css"
 @use "@macrostrat/style-system/src/main.sass"
 @use "./colors" as colorOverrides
+@use "@blueprintjs/core/lib/scss/variables" as pt
 
 :root
   @each $name, $color in colorOverrides.$colors
@@ -11,6 +12,10 @@
   --serif-font: "PT Serif", serif
   // Use system fonts as default sans-serif font for better performance
   --sans-serif-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+
+  --qz-main-content-width: 970px
+
+  --monospace-font: "Fira Mono", monospace
 
 
 .secondary

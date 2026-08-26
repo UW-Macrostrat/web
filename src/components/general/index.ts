@@ -1,19 +1,9 @@
-import hyper from "@macrostrat/hyper";
-import {
-  Card,
-  Icon,
-  InputGroup,
-  Popover,
-  Spinner,
-  Tag,
-} from "@blueprintjs/core";
+import { InputGroup, Popover, Spinner, Tag } from "@blueprintjs/core";
 import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { postgrestPrefix, webAssetsPrefix } from "@macrostrat-web/settings";
-import styles from "./layout.module.sass";
+import h from "./layout.module.sass";
 import type { ReactNode } from "react";
-
-const h = hyper.styled(styles);
 
 export function Image({ src, className, width, height }: any) {
   const srcWithAddedPrefix = webAssetsPrefix + "/main-page/" + src;
@@ -56,8 +46,8 @@ export function MacrostratIcon({
     iconStyle != null
       ? `macrostrat-icon-${iconStyle}.svg`
       : "macrostrat-icon.svg";
-  return h("img.macrostrat-logo" + (small ? ".small" : ""), {
-    className,
+  return h("img.macrostrat-logo", {
+    className: classNames(className, { small }),
     src: `${webAssetsPrefix}/macrostrat-icons/${iconFile}`,
   });
 }

@@ -20,15 +20,17 @@ const IngestNavbar = ({ user }) => {
   ]);
 };
 
-export function LoginButton({ user }) {
+export function LoginButton({ user, minimal = false }) {
   return h(
     Tooltip,
     { content: user == undefined ? "Log In" : "Logged In" },
     h(AnchorButton, {
+      minimal,
       icon: user == undefined ? "blocked-person" : "user",
       intent: user == undefined ? "primary" : "success",
       large: true,
       onClick() {
+        if (user != null) return;
         // Assemble the return URL on click based on the current page
         const return_url = window.location.origin + window.location.pathname;
         const url = `${ingestPrefix}/security/login`;

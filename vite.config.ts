@@ -51,7 +51,7 @@ export default defineConfig({
     }),
   ],
   ssr: {
-    noExternal: macrostratPackages,
+    noExternal: [...macrostratPackages, "jotai"],
   },
   define: {
     // Cesium base URL
@@ -60,6 +60,13 @@ export default defineConfig({
   },
   server: {
     allowedHosts: ["localhost", "dev.macrostrat.local"],
+    hmr: {
+      // Basic setup for hot module reloading that bypasses local reverse proxy
+      protocol: "ws", // Use 'wss' for secure connections over HTTPS
+      host: "localhost", // The hostname your client connects to
+      port: 5173, // The WebSocket port
+      path: "__hmr", // Customizes the URL path suffix
+    },
   },
   css: {
     preprocessorOptions: {

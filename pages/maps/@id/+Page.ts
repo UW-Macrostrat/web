@@ -445,36 +445,39 @@ function MapLegendPanel(params: MapData["mapInfo"]) {
     InfoDrawerContainer,
     h(
       "div.map-legend-container",
-      h("div.map-legend", [
-        h(PageBreadcrumbs, { title: params.name }),
-        h("div.legend-header", [
-          h(ErrorBoundary, [
-            h(MapReference, { reference: params, showSourceID: false }),
+      h(
+        ErrorBoundary,
+        h("div.map-legend", [
+          h(PageBreadcrumbs, { title: params.name }),
+          h("div.legend-header", [
+            h(ErrorBoundary, [
+              h(MapReference, { reference: params, showSourceID: false }),
+            ]),
+            // h(
+            //   "a.global-link",
+            //   { href: "/map/dev/sources/" + params.slug, target: "_blank" },
+            //   "View on global map"
+            // ),
           ]),
-          // h(
-          //   "a.global-link",
-          //   { href: "/map/dev/sources/" + params.slug, target: "_blank" },
-          //   "View on global map"
-          // ),
-        ]),
-        h("div.dev-links", [
-          h(
-            DevLink,
-            // Not sure why we have to fully construct the URL here, vs. constructing a relative route.
-            // Probably lack of a trailing slash in the main page?
-            { href: `/maps/${params.source_id}/legend` },
-            "Legend table"
-          ),
-          h(
-            DevLink,
-            { href: `/maps/${params.source_id}/correlation` },
-            "Correlation of units"
-          ),
-        ]),
-        h.if(params.description != null)("p", params.description),
-        h(MenuButtons),
-        mainPanel,
-      ])
+          h("div.dev-links", [
+            h(
+              DevLink,
+              // Not sure why we have to fully construct the URL here, vs. constructing a relative route.
+              // Probably lack of a trailing slash in the main page?
+              { href: `/maps/${params.source_id}/legend` },
+              "Legend table"
+            ),
+            h(
+              DevLink,
+              { href: `/maps/${params.source_id}/correlation` },
+              "Correlation of units"
+            ),
+          ]),
+          h.if(params.description != null)("p", params.description),
+          h(MenuButtons),
+          mainPanel,
+        ])
+      )
     )
   );
 }

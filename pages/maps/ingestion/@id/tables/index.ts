@@ -1,10 +1,51 @@
-import { useCallback } from "react";
 import { CustomTableProps } from "./defs";
 import h from "../hyper";
 import { TableInterface } from "./edit-table";
-import { ColumnConfig, ColumnConfigGenerator, COMMON_COLUMNS } from "./defs";
+import { COMMON_COLUMNS } from "./defs";
+import { EditableTextArea, type ColumnSpec } from "@macrostrat/data-sheet";
+import {
+  IntervalCell,
+  IntervalEditor,
+  renderIntervalName,
+  useLoadIntervals,
+} from "./interval-editor";
 
-export function PolygonsTable({ url }: CustomTableProps) {
+/** Column display-name / read-only overrides shared by all feature tables. */
+const COMMON_OVERRIDES: Record<string, Partial<ColumnSpec> | string> = {
+  orig_id: "Original ID",
+  name: "Name",
+  // Long free-text columns get a multi-line popover editor.
+  descrip: { name: "Description", dataEditor: EditableTextArea },
+  comments: { name: "Comments", dataEditor: EditableTextArea },
+  // data-sheet v4 clones `col.style` before styling deleted/omitted rows, so a
+  // plain column `style` no longer leaks the strike-through to the whole column.
+  source_layer: {
+    name: "Source layer",
+    editable: false,
+    style: { color: "#8a8a8a" },
+  },
+};
+
+const INTERVAL_OVERRIDES: Record<string, Partial<ColumnSpec>> = {
+  t_interval: {
+    name: "Top interval",
+    cellComponent: IntervalCell,
+    dataEditor: IntervalEditor,
+    valueRenderer: renderIntervalName,
+    width: 200,
+  },
+  b_interval: {
+    name: "Bottom interval",
+    cellComponent: IntervalCell,
+    dataEditor: IntervalEditor,
+    valueRenderer: renderIntervalName,
+    width: 200,
+  },
+};
+
+export function PolygonsTable({ url, sourceId }: CustomTableProps) {
+  useLoadIntervals();
+
   const FINAL_POLYGON_COLUMNS = [
     ...COMMON_COLUMNS,
     "name",
@@ -18,12 +59,14 @@ export function PolygonsTable({ url }: CustomTableProps) {
 
   return h(TableInterface, {
     url,
+    sourceId,
     featureType: "polygon",
-    columns: FINAL_POLYGON_COLUMNS,
+    finalColumns: FINAL_POLYGON_COLUMNS,
+    overrides: { ...COMMON_OVERRIDES, ...INTERVAL_OVERRIDES },
   });
 }
 
-export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
+export function LinesTable({ url, sourceId }: CustomTableProps) {
   const FINAL_LINE_COLUMNS = [
     ...COMMON_COLUMNS,
     "name",
@@ -32,25 +75,16 @@ export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
     "direction",
   ];
 
-  const linesColumnGenerator = useCallback(
-    ({ sharedColumnConfig }: ColumnConfigGenerator): ColumnConfig => {
-      return {
-        ...sharedColumnConfig,
-      };
-    },
-    []
-  );
-
   return h(TableInterface, {
-    url: url,
-    ingestProcessId: ingestProcessId,
-    columns: FINAL_LINE_COLUMNS,
-    columnGenerator: linesColumnGenerator,
+    url,
+    sourceId,
     featureType: "line",
+    finalColumns: FINAL_LINE_COLUMNS,
+    overrides: COMMON_OVERRIDES,
   });
 }
 
-export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
+export function PointsTable({ url, sourceId }: CustomTableProps) {
   const FINAL_POINT_COLUMNS = [
     ...COMMON_COLUMNS,
     "comments",
@@ -61,18 +95,11 @@ export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
     "certainty",
   ];
 
-  const pointColumnGenerator = useCallback(
-    ({ sharedColumnConfig }: ColumnConfigGenerator): ColumnConfig => {
-      return sharedColumnConfig;
-    },
-    []
-  );
-
   return h(TableInterface, {
-    url: url,
-    ingestProcessId: ingestProcessId,
-    columns: FINAL_POINT_COLUMNS,
-    columnGenerator: pointColumnGenerator,
+    url,
+    sourceId,
     featureType: "point",
+    finalColumns: FINAL_POINT_COLUMNS,
+    overrides: COMMON_OVERRIDES,
   });
 }

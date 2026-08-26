@@ -8,7 +8,8 @@ export default function title(pageContext) {
 
 function getPageName(pageContext): string | null {
   const { pageInfo } = pageContext.config;
-  const firstPageInfoEntry = pageInfo?.[0];
+  console.log("pageInfo", pageInfo);
+  const firstPageInfoEntry = pageInfo;
   if (firstPageInfoEntry == null) return null;
   if (typeof firstPageInfoEntry === "string") return firstPageInfoEntry;
   let pageInfoEntry = null;
@@ -18,5 +19,11 @@ function getPageName(pageContext): string | null {
   if (typeof firstPageInfoEntry === "object") {
     pageInfoEntry = firstPageInfoEntry;
   }
-  return pageInfoEntry.shortName ?? pageInfoEntry.name;
+  const res = pageInfoEntry.shortName ?? pageInfoEntry.name;
+  return capitalize(res);
+}
+
+function capitalize(str: string | null) {
+  if (str == null) return null;
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }

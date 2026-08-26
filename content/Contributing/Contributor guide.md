@@ -11,7 +11,7 @@
   way to keep it maintainable.
 - Extract logic into hooks or utility functions to keep components
   straightforward.
-- Generally, try to make sure folders have an `index.ts` file that exports all
+- Generally, try to make sure folders have an `navbar.ts` file that exports all
   the files that might be used from the outside.
 - Put the most important function in the file first, and the least important
   (ex., utility functions) last.

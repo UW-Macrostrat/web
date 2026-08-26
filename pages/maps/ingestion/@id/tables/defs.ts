@@ -60,7 +60,7 @@ export type ColumnConfig = {
 
 export interface CustomTableProps {
   url: string;
-  ingestProcessId: number;
+  sourceId: number;
 }
 
 export const COMMON_COLUMNS = [

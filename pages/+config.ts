@@ -24,6 +24,8 @@ export default {
     "supportsDarkMode",
     "routeParams",
     "user",
+    "geo",
+    "canRefresh",
     "description",
     "title",
     "environment",
@@ -32,6 +34,7 @@ export default {
     "pageStyle",
     "parentData",
     "pageInfo",
+    "breadcrumbs",
   ],
   clientRouting: true,
   supportsDarkMode: true,
@@ -74,17 +77,11 @@ export default {
         client: true,
         server: true,
       },
-      cumulative: true,
-    },
-    pageBreadcrumbs: {
-      env: {
-        client: true,
-        server: true,
-      },
+      eager: true,
     },
     breadcrumbs: {
       env: {
-        client: true,
+        client: false,
         server: true,
       },
     },

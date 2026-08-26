@@ -1,6 +1,7 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { Link } from "~/components/navigation/Link";
+import classNames from "classnames";
 
 const h = hyper.styled(styles);
 
@@ -17,7 +18,7 @@ export function LinkCard(props: LinkCardProps) {
   return h(
     Link,
     {
-      className: `link-card bp6-card ${className}`,
+      className: classNames("link-card bp6-card", className),
       href,
     },
     [h("h3", title), children]
