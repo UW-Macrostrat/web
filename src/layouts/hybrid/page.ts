@@ -1,11 +1,14 @@
 /** `HybridPage` — a configurable frame for pages that balance a primary
  * content view against a map, with contextual "assistant" content alongside.
  *
- * Compose it inside a page declaring `pageStyle: "fullscreen"`, which supplies
- * the viewport-locked container this frame fills.
+ * Two presentations (see `./state`): `content` renders as a closed-form
+ * content page in normal document flow, and `fullscreen` renders as a
+ * viewport-locked app frame. The frame supplies its own containment for both,
+ * so host it under a page style that doesn't impose one — `pageStyle: "hybrid"`.
  *
- * Everything derives from one scalar (`layoutMode`, see `./state`); pages
- * narrow what's on offer through `capabilities`.
+ * Chrome is deliberately thin: one full-width top toolbar (fullscreen only,
+ * carrying breadcrumbs + the actions panel), and the page's own header inside
+ * the content pane rather than a second full-width bar.
  */
 
 import { useMemo, type ReactNode } from "react";
@@ -13,31 +16,30 @@ import { Provider, useAtomValue } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import classNames from "classnames";
 
+import { PageBreadcrumbs, PageTitle } from "~/components";
+
 import h from "./page.module.sass";
-import {
-  AppFooterBar,
-  AppHeaderBar,
-  BrandMark,
-  FooterSheet,
-  FooterSheetTrigger,
-} from "./chrome";
+import { FooterLinksButton, FooterOverlayTrigger, TopToolbar } from "./chrome";
 import { LayoutComposer } from "./composer";
-import { AssistantToggle, LayoutModeControl } from "./controls";
+import { ActionsPanel } from "./controls";
 import {
   buildCapabilities,
   capabilitiesAtom,
   chromeModeAtom,
+  resolvedPresentationAtom,
   type LayoutCapabilities,
 } from "./state";
 
 export interface HybridPageProps {
-  title?: ReactNode;
-  /** Page-specific controls, shown left of the layout controls. */
+  /** Page-specific controls, shown left of the frame's own layout controls. */
   actions?: ReactNode;
   capabilities?: Partial<LayoutCapabilities>;
   content?: ReactNode;
   map?: ReactNode;
   assistant?: ReactNode;
+  /** Optional persistent bottom strip (fullscreen only). There is no default
+   * one — the site footer arrives as a dismissable panel instead. */
+  bottomBar?: ReactNode;
   className?: string;
 }
 
@@ -57,7 +59,10 @@ function HybridLayoutProvider({ capabilities, children }) {
     () => buildCapabilities(capabilities),
     [capabilities]
   );
-  return h(Provider, h(HydrateCapabilities, { capabilities: resolved }, children));
+  return h(
+    Provider,
+    h(HydrateCapabilities, { capabilities: resolved }, children)
+  );
 }
 
 function HydrateCapabilities({ capabilities, children }) {
@@ -66,53 +71,90 @@ function HydrateCapabilities({ capabilities, children }) {
 }
 
 function HybridPageInner({
-  title,
   actions,
   content,
   map,
   assistant,
+  bottomBar,
   className,
 }: HybridPageProps) {
+  const presentation = useAtomValue(resolvedPresentationAtom);
   const chromeMode = useAtomValue(chromeModeAtom);
-  const reserved = chromeMode === "reserved";
+
+  const composer = h(LayoutComposer, {
+    content,
+    contentHeader: h(PanelHeader, { actions, presentation }),
+    map,
+    assistant,
+  });
+
+  if (presentation === "content") {
+    // The footer is at the end of a document that can be thousands of rows
+    // long, so it also gets an overlay route in — the same popover, reachable
+    // without scrolling to the bottom.
+    return h("div.hybrid-frame.presentation-content", { className }, [
+      composer,
+      h(FooterOverlayTrigger, { key: "footer-affordance" }),
+    ]);
+  }
+
+  let bottomBarRow = null;
+  if (bottomBar != null) {
+    bottomBarRow = h("div.bottom-bar-row", bottomBar);
+  }
 
   return h(
-    "div.hybrid-page",
-    { className: classNames(className, `chrome-${chromeMode}`) },
+    "div.hybrid-frame.presentation-fullscreen",
+    {
+      className: classNames(className, `chrome-${chromeMode}`, {
+        "has-bottom-bar": bottomBar != null,
+      }),
+    },
     [
-      h("div.app-header-row", { key: "header" }, [
-        h.if(reserved)(AppHeaderBar),
+      h("div.toolbar-row", { key: "toolbar" }, [
+        h(TopToolbar, {
+          // No footer to scroll to in this frame, so the site links live with
+          // the rest of the chrome rather than as bottom overlay.
+          actions: [
+            h(ActionsPanel, { key: "actions" }),
+            h(FooterLinksButton, { key: "site-links" }),
+          ],
+          floating: chromeMode === "collapsed",
+        }),
       ]),
-      h("div.body", { key: "body" }, [
-        h(PageBar, { title, actions, showBrand: !reserved }),
-        h(
-          "div.body-content",
-          h(LayoutComposer, { content, map, assistant })
-        ),
-        h.if(!reserved)(FooterSheetTrigger, { floating: true }),
-      ]),
-      h("div.app-footer-row", { key: "footer" }, [
-        h.if(reserved)(AppFooterBar),
-      ]),
-      h(FooterSheet, { key: "sheet" }),
+      h("div.body", { key: "body" }, composer),
+      bottomBarRow,
     ]
   );
 }
 
-/** Page-level chrome: what am I doing right now. Distinct from the app-level
- * bar above it (what app is this) — except when app chrome collapses, at which
- * point this bar absorbs the brand mark and floats over the content, so a
- * map-dominant view is never a dead end. */
-function PageBar({ title, actions, showBrand }) {
-  let titleElement = null;
-  if (title != null) {
-    titleElement = h("h1.page-title", title);
+/** The page's own header, inside the content pane.
+ *
+ * In the content presentation it is the site's standard breadcrumbs + title
+ * block, exactly as a content page renders it. In the fullscreen presentation
+ * the breadcrumbs already live in the toolbar, so only the title shows — and
+ * page actions ride along, since there's no second full-width bar for them. */
+function PanelHeader({ actions, presentation }) {
+  let titling = h(PageTitle, { headingLevel: 1, className: "panel-title" });
+  if (presentation === "content") {
+    titling = h(PageBreadcrumbs, { showLogo: true, separateTitle: true });
   }
 
-  return h("div.page-bar", [
-    h.if(showBrand)(BrandMark),
-    titleElement,
-    h("div.page-actions", actions),
-    h("div.layout-controls", [h(AssistantToggle), h(LayoutModeControl)]),
+  let actionsRegion = null;
+  if (actions != null) {
+    actionsRegion = h("div.panel-actions", actions);
+  }
+
+  // In the content presentation the frame has no toolbar, so the layout
+  // controls join the page header.
+  let layoutControls = null;
+  if (presentation === "content") {
+    layoutControls = h("div.panel-layout-controls", h(ActionsPanel));
+  }
+
+  return h("div.panel-header-inner", { className: `header-${presentation}` }, [
+    h("div.panel-titling", titling),
+    actionsRegion,
+    layoutControls,
   ]);
 }

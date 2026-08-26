@@ -1,6 +1,9 @@
 export default {
   title: "Layout kit",
-  pageStyle: "fullscreen",
+  pageStyle: "hybrid",
+  pageInfo: {
+    name: "Layout kit",
+  },
   meta: {
     Page: {
       env: {

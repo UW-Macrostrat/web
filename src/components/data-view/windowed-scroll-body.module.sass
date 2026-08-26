@@ -1,0 +1,30 @@
+.windowed-body
+  position: relative
+  width: 100%
+
+  &.unwindowed
+    display: flex
+    flex-direction: column
+
+.windowed-row,
+.windowed-group-header
+  position: absolute
+  left: 0
+  right: 0
+  overflow: hidden
+
+.windowed-body.unwindowed
+  .windowed-row,
+  .windowed-group-header
+    position: static
+
+.windowed-group-header
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  padding: 0 var(--pz-space-2, 0.5rem)
+  font-family: var(--pz-heading-font, var(--header-font))
+  color: var(--pz-text-emphasized-color, var(--text-emphasized-color))
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  border-bottom: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))

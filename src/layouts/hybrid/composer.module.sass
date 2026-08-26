@@ -1,5 +1,84 @@
-// Content/map/assistant composer. Component-local tokens (weak names) default
-// to Paleozoic globals, per the design-system sync pattern.
+// Content/map/assistant composer, in both presentations. Component-local
+// tokens (weak names) default to Paleozoic globals, per the design-system sync
+// pattern.
+
+/* ============================== content frame ============================ */
+
+.content-frame
+  display: flex
+  flex-direction: column
+  min-height: 100vh
+  padding: var(--hybrid-content-frame-padding) 0
+
+.content-frame-inner
+  width: 100%
+  max-width: var(--hybrid-content-width)
+  margin: 0 auto
+  display: flex
+  flex-direction: column
+  flex-grow: 1
+  gap: var(--pz-section-gap, 1.5rem)
+
+  @media (max-width: 900px)
+    padding: 0 1em
+
+.content-flow
+  display: flex
+  flex-direction: row
+  gap: var(--pz-section-gap, 1.5rem)
+  flex-grow: 1
+  min-width: 0
+
+.content-flow-main
+  flex: 1 1 0
+  min-width: 0
+
+  // Content presentation is one document scroll. `DataPanel` cooperates
+  // without help: its body is `flex: 1 1 auto` inside an auto-height parent
+  // here, so it grows into the flow rather than opening its own scroller.
+
+.content-sidebar
+  flex: 1 1 0
+  min-width: 0
+
+.sidebar-inner
+  position: sticky
+  top: var(--pz-space-3, 0.75rem)
+  display: flex
+  flex-direction: column
+  gap: var(--pz-stack-gap, 1rem)
+
+// Let the sidebar overhang the content measure on wide viewports, so the
+// primary content keeps a comfortable width rather than being squeezed by the
+// map. Below the breakpoint the sidebar stays inside the measure.
+@media (min-width: 1100px)
+  .content-flow.has-sidebar
+    margin-right: calc(-1 * var(--hybrid-content-overhang))
+
+  .content-flow.mode-content-primary
+    .content-flow-main
+      flex: 3 1 0
+    .content-sidebar
+      flex: 2 1 0
+      max-width: calc(50% - var(--hybrid-content-overhang) / 2)
+
+.sidebar-map
+  position: relative
+  width: 100%
+  aspect-ratio: 4 / 3
+  overflow: hidden
+  border-radius: var(--pz-radius-md, 6px)
+
+// Single-column below the sidebar breakpoint: a sticky map next to a narrow
+// content measure is worse than stacking.
+@media (max-width: 800px)
+  .content-flow
+    flex-direction: column
+
+  .sidebar-inner
+    position: static
+
+/* ============================ fullscreen frame =========================== */
 
 .composer
   position: relative
@@ -58,13 +137,17 @@
   display: flex
   flex-direction: column
   overflow: auto
-
-.content-column,
-.assistant-column-content
-  border-color: var(--pz-panel-rule-color, var(--panel-rule-color))
-
-.content-column
   border-right: 1px solid transparent
+
+  .panel-header
+    position: sticky
+    top: 0
+    z-index: 2
+    flex: 0 0 auto
+
+  .content-pane
+    flex: 1 1 auto
+    min-height: 0
 
 .map-column
   display: flex
@@ -86,8 +169,8 @@
   overflow: auto
   border-left: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
 
-// Only draw the interior rules when both sides of them are actually visible;
-// a collapsed 0fr track shouldn't leave an orphan hairline behind.
+// Only draw the interior rule when both sides of it are actually visible; a
+// collapsed 0fr track shouldn't leave an orphan hairline behind.
 .has-content.has-map
   .content-column
     border-right-color: var(--pz-panel-rule-color, var(--panel-rule-color))

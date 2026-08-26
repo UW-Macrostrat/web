@@ -97,8 +97,21 @@ export function IndexPage({ children, className, ...rest }) {
   ]);
 }
 
+/** Host for the hybrid content/map frame (`~/layouts/hybrid`). Deliberately
+ * bare: that frame supplies its own containment — normal document flow in its
+ * content presentation, a fixed viewport-locked grid in its fullscreen one —
+ * so imposing `fit-viewport` here would break the scrolling case. */
+export function HybridFramePage({ children, className, ...rest }) {
+  return h(
+    BasePage,
+    { className: classNames("hybrid-frame-page", className), ...rest },
+    h(NavigationLinkProvider, children)
+  );
+}
+
 export const pageLayouts = {
   fullscreen: FullscreenPage,
+  hybrid: HybridFramePage,
   content: ContentPage,
   content2: ContentPage,
   index: IndexPage,

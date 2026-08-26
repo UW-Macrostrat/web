@@ -1,5 +1,15 @@
+.actions-panel
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+
+.forced-label
+  font-size: 0.75rem
+  color: var(--pz-secondary-color, var(--secondary-color))
+
 // The mode switcher degrades to icons on narrow viewports rather than wrapping
-// or scrolling the page bar.
+// or scrolling the toolbar.
 @media (max-width: 900px)
   .mode-label,
   .toggle-label

@@ -1,112 +1,102 @@
-/** App-level chrome for the hybrid frame — brand, global nav, footer.
+/** Chrome for the hybrid frame.
  *
- * These are compact, app-shaped counterparts to the site's content-page
- * chrome. They draw their link data from `~/layouts/footer` rather than
- * forking it, and the full site footer is always exactly one interaction
- * away (via the sheet) in *both* chrome modes — so collapsing chrome never
- * means some navigation becomes unreachable.
+ * There is exactly *one* full-width bar: the top toolbar, which carries the
+ * app's own `PageBreadcrumbs` (logo included) on the left and the actions
+ * panel on the right. Page-level titling lives in the content panel's own
+ * header, not in a second full-width bar.
  *
- * Note: the site's `Navbar` is deliberately not reused here. It wraps
- * `StickyHeader`, whose scroll-driven `position: fixed` backdrop is sized to
- * the viewport — wrong inside a viewport-locked frame that never scrolls.
+ * The footer is the site's real `Footer`, unmodified, presented in a popover.
+ * In the content frame you scroll to it — and, once it's out of sight, reach it
+ * from a right-aligned overlay button in footer position. In the fullscreen
+ * frame, where there is no footer to scroll to, the same button sits in the top
+ * toolbar's actions. There is deliberately no persistent footer bar; pages that
+ * want a bottom strip pass their own via `HybridPage`'s `bottomBar`.
  */
 
-import { AnchorButton, Button } from "@blueprintjs/core";
+import { Button, Popover } from "@blueprintjs/core";
 import { useAtom } from "jotai";
 import classNames from "classnames";
+import type { ReactNode } from "react";
 
-import { MacrostratIconStyle } from "~/components/general";
-import { SiteTitle } from "~/components";
-import { ThemeButton } from "~/components/theme-button";
-import { Footer, dataNavItems, type NavLinkItem } from "~/layouts/footer";
+import { PageBreadcrumbs } from "~/components";
+import { Footer } from "~/layouts/footer";
 
 import h from "./chrome.module.sass";
-import { footerSheetOpenAtom } from "./state";
+import { useShowFooterAffordance } from "./scroll";
+import { footerLinksOpenAtom } from "./state";
 
-export function AppHeaderBar() {
-  return h("div.app-header-bar", [
-    h(SiteTitle, {
-      logoStyle: MacrostratIconStyle.SIMPLE,
-      className: "brand",
-    }),
-    h(NavLinkRow, { items: dataNavItems }),
-    h("div.header-actions", [h(ThemeButton)]),
+export function TopToolbar({
+  actions,
+  floating = false,
+}: {
+  actions?: ReactNode;
+  floating?: boolean;
+}) {
+  return h("div.top-toolbar", { className: classNames({ floating }) }, [
+    h(
+      "div.toolbar-nav",
+      h(PageBreadcrumbs, { showLogo: true, separateTitle: false })
+    ),
+    h("div.toolbar-actions", actions),
   ]);
 }
 
-/** The compact brand mark shown in the page bar when app chrome is collapsed,
- * so there's always a way back out of a map-dominant view. */
-export function BrandMark() {
-  return h(SiteTitle, {
-    logoStyle: MacrostratIconStyle.SIMPLE,
-    className: "brand brand-compact",
+/** The site footer, verbatim, in a popover.
+ *
+ * `floating` styles the trigger as a pill for the content frame's overlay
+ * placement and flips the popover to open upward; the toolbar placement opens
+ * downward. Open state lives in an atom so a scroll-gated wrapper can keep the
+ * trigger visible while its popover is up. */
+export function FooterLinksButton({ floating = false }) {
+  const [open, setOpen] = useAtom(footerLinksOpenAtom);
+
+  let placement = "bottom-end";
+  if (floating) {
+    placement = "top-end";
+  }
+
+  let text = null;
+  if (floating) {
+    text = "Site links";
+  }
+
+  return h(Popover, {
+    minimal: true,
+    placement,
+    isOpen: open,
+    onInteraction: (next: boolean) => setOpen(next),
+    content: h("div.footer-popover", h(Footer, { className: "popover-footer" })),
+    // `renderTarget` rather than a child element, so Blueprint owns the target
+    // ref directly instead of cloning a child to attach it.
+    renderTarget: ({ isOpen, ...targetProps }) =>
+      h(
+        Button,
+        {
+          ...targetProps,
+          className: classNames("footer-links-button", { floating }),
+          minimal: !floating,
+          small: true,
+          active: isOpen,
+          icon: "menu",
+          title: "Site links",
+        },
+        text
+      ),
   });
 }
 
-function NavLinkRow({ items }: { items: NavLinkItem[] }) {
-  return h(
-    "nav.nav-link-row",
-    items.map((item) =>
-      h(
-        AnchorButton,
-        {
-          key: item.href,
-          href: item.href,
-          icon: item.icon,
-          minimal: true,
-          small: true,
-          className: "nav-link-button",
-        },
-        item.text
-      )
-    )
-  );
-}
-
-export function AppFooterBar() {
-  return h("div.app-footer-bar", [
-    h(NavLinkRow, { items: dataNavItems }),
-    h(FooterSheetTrigger, { className: "footer-bar-trigger" }),
-  ]);
-}
-
-/** Opens the full site footer. Rendered in the footer bar when chrome is
- * reserved, and as a floating pill when it's collapsed. */
-export function FooterSheetTrigger({ className = null, floating = false }) {
-  const [open, setOpen] = useAtom(footerSheetOpenAtom);
-
-  let text = "More";
-  if (open) {
-    text = "Close";
-  }
+/** Footer-position affordance for the long-scrolling content frame, where the
+ * real footer can be thousands of rows away. Right-aligned, and shown only once
+ * you've scrolled far enough to have lost sight of a footer — hiding again as
+ * the real one comes into range. */
+export function FooterOverlayTrigger() {
+  const scrolledAway = useShowFooterAffordance();
+  const [open] = useAtom(footerLinksOpenAtom);
+  const visible = scrolledAway || open;
 
   return h(
-    Button,
-    {
-      className: classNames("footer-sheet-trigger", className, { floating }),
-      minimal: !floating,
-      small: true,
-      rightIcon: open ? "chevron-down" : "chevron-up",
-      onClick: () => setOpen(!open),
-    },
-    text
-  );
-}
-
-export function FooterSheet() {
-  const [open, setOpen] = useAtom(footerSheetOpenAtom);
-
-  return h(
-    "div.footer-sheet-scrim",
-    {
-      className: classNames({ open }),
-      "aria-hidden": !open,
-      onClick: () => setOpen(false),
-    },
-    h(
-      "div.footer-sheet",
-      { onClick: (evt) => evt.stopPropagation() },
-      h(Footer, { className: "sheet-footer" })
-    )
+    "div.footer-overlay",
+    { className: classNames({ visible }), "aria-hidden": !visible },
+    h(FooterLinksButton, { floating: true })
   );
 }
