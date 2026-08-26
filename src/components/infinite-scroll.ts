@@ -5,6 +5,7 @@ import {
   LoadProgressIndicator,
   DataPanelProps,
   DataPanel,
+  DataPanelToolbarStyle,
   SelectionInteractionStyle,
 } from "@macrostrat/data-sheet";
 import { ReactNode } from "react";
@@ -35,7 +36,7 @@ export function InfiniteScrollPage<T>({
         className: "ingestion-panel",
         statusBar: false,
         enableSelection: SelectionInteractionStyle.MODAL,
-        toolbarStyle: "floating",
+        toolbarStyle: DataPanelToolbarStyle.FLOATING,
         contentFooter: h(InfiniteScrollFooter),
         // Typing in a text filter shouldn't fire a request per keystroke; the
         // input stays instant, only the fetch waits for the view to settle.

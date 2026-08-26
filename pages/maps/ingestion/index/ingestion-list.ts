@@ -1,21 +1,15 @@
 import h from "./ingestion-list.module.sass";
-import { Intent, Menu, Tag } from "@blueprintjs/core";
+import { Intent, Tag } from "@blueprintjs/core";
 import {
-  ALL_CARDINALITIES,
   type ColumnSpec,
-  ColumnFilterMenuItem,
-  ColumnSortMenu,
   createDataCard,
   ctx,
   type FetchDataFilter,
-  InlineFilterControl,
-  MenuInlineFilterItem,
   type PostgrestFilter,
   standardizeFilter,
   storeAtom,
   TableAction,
   TableFilter,
-  useSelector,
 } from "@macrostrat/data-sheet";
 import { RegionCardinality } from "@blueprintjs/table";
 import classNames from "classnames";
@@ -29,7 +23,6 @@ import {
 import {
   CheckboxSetControl,
   ColoredTag,
-  ControlsPopover,
   isSearchEmpty,
   OpenSearchControl,
   type SearchValue,
@@ -39,34 +32,26 @@ import {
   type YearValue,
 } from "../components/controls";
 import {
-  activeFilterIdsAtom,
-  activeSortCountAtom,
-  clearSelectionAtom,
-  clearSortsAtom,
   ingestStatesAtom,
   ingestYearsAtom,
   NO_STATUS,
   refreshRowsAtom,
-  removeFiltersAtom,
   selectedMapsAtom,
-  selectModeAtom,
-  viewKeyAtom,
 } from "./view-state";
 import { atom, useAtomValue } from "jotai";
-import { useEffect, useRef } from "react";
 
 /**
- * The map-ingestion queue list: view definition (columns, filters, sorts), the
- * toolbar's view controls, and the card renderer for `/maps/ingestion`, over the
- * `pg/maps` PostgREST route.
+ * The map-ingestion queue list: view definition (columns, filters, sorts) and
+ * the card renderer for `/maps/ingestion`, over the `pg/maps` PostgREST route.
  *
  * The filter surface is deliberately *not* the generic operator forms: an
  * always-visible **open search** carries the common case (free text across
  * name / slug / id, plus a tag picker in the same control), and the remaining
- * facets are compact pickers in the Filter menu. Everything still flows through
- * the standard filter model — store `activeFilters` → the provider's
- * `translateFilter` — so the server does the work, and `urlBindings` makes any
- * particular view linkable.
+ * facets are compact pickers in the Filter menu. The panel builds the toolbar
+ * from these declarations and stands them down while selecting; everything
+ * flows through the standard filter model — store `activeFilters` → the
+ * provider's `translateFilter` — so the server does the work, and `urlBindings`
+ * makes any particular view linkable.
  *
  * The presentational controls live in `../components/controls` (fully
  * controlled, no store access) and the coupled state in `./view-state` (jotai
@@ -266,23 +251,37 @@ function YearFilterForm({
   return h(YearSelector, { years: options, value: state, onChange: setState });
 }
 
-/** Every filter this page offers, in toolbar order. */
-export const ingestFilters: TableFilter<IngestMap>[] = [
-  searchFilter,
-  statusFilter,
-  scaleFilter,
-  yearFilter,
-];
+/** Filters that span more than one column — passed as the panel's `filters`.
+ * The open search is `presentation: "inline"`, so the panel puts it straight in
+ * the toolbar. */
+export const tableFilters: TableFilter<IngestMap>[] = [searchFilter];
 
-// Columns declare only what the *server* and the sort menu need. Filters are
-// not declared here (nor passed as the panel's `filters`): this page renders its
-// own view-control surface — see `ViewControls` — so the built-in Filter/Sort
-// menus would only duplicate it.
+// Facets are declared per column and the panel builds the Filter/Sort menus
+// from them. `name` carries no filter (the search bar covers it); each of the
+// others supplies a purpose-built control rather than the generic operator form.
 export const columnSpec: ColumnSpec[] = [
   { key: "name", name: "Name", dataType: "text", sortable: true },
-  { key: "state", name: "Status", dataType: "string", sortable: true },
-  { key: "scale", name: "Scale", dataType: "string", sortable: true },
-  { key: "ref_year", name: "Year", dataType: "integer", sortable: true },
+  {
+    key: "state",
+    name: "Status",
+    dataType: "string",
+    filters: [statusFilter],
+    sortable: true,
+  },
+  {
+    key: "scale",
+    name: "Scale",
+    dataType: "string",
+    filters: [scaleFilter],
+    sortable: true,
+  },
+  {
+    key: "ref_year",
+    name: "Year",
+    dataType: "integer",
+    filters: [yearFilter],
+    sortable: true,
+  },
   { key: "source_id", name: "Source ID", dataType: "integer", sortable: true },
   { key: "tags", name: "Tags", dataType: "array" },
 ];
@@ -455,192 +454,10 @@ export const urlBindings: FilterURLBinding[] = [
   },
 ];
 
-// ---- View controls (filter + sort), modal on selection ----
-
-const MENU_FILTERS = ingestFilters.filter(
-  (f) => (f.presentation ?? "menu") !== "inline"
-);
-const INLINE_FILTERS = ingestFilters.filter(
-  (f) => (f.presentation ?? "menu") === "inline"
-);
-const MENU_FILTER_IDS = MENU_FILTERS.map((f) => f.id);
-
-function FilterMenuItems() {
-  return MENU_FILTERS.map((filter) => {
-    if ((filter.presentation ?? "menu") === "menu-inline") {
-      return h(MenuInlineFilterItem, {
-        key: filter.id,
-        filter,
-        label: filter.name,
-      });
-    }
-    return h(ColumnFilterMenuItem, {
-      key: filter.id,
-      filter,
-      label: filter.name,
-    });
-  });
-}
-
-function SortMenuItems() {
-  const columnSpec = useSelector((s: any) => s.columnSpec);
-  return columnSpec
-    .filter((col: ColumnSpec) => col.sortable)
-    .map((col: ColumnSpec) =>
-      h(ColumnSortMenu, { key: col.key, columnKey: col.key, text: col.name })
-    );
-}
-
-/** A "Filter"/"Sort" dropdown tag, active when it has something set. */
-function ViewStateTag({ icon, label, count, onClear, content }) {
-  const active = count > 0;
-  let rightIcon: "caret-down" | undefined = "caret-down";
-  let onRemove: any = undefined;
-  if (active) {
-    rightIcon = undefined;
-    onRemove = (event: any) => {
-      onClear();
-      event.stopPropagation();
-    };
-  }
-  let intent: Intent = "none";
-  if (active) intent = "primary";
-
-  return h(
-    ControlsPopover,
-    { content },
-    h(
-      Tag,
-      {
-        minimal: true,
-        large: true,
-        interactive: true,
-        icon,
-        intent,
-        rightIcon,
-        onRemove,
-      },
-      label
-    )
-  );
-}
-
-/**
- * The page's own filter/sort surface, in place of the panel's built-in menus —
- * because it is **modal on selection**. Browsing, the controls are laid out in
- * the toolbar (open search + Filter + Sort). Once select mode is on, the
- * toolbar belongs to the selection and its actions, so the same controls
- * collapse behind one button — still reachable in a click, but no longer
- * competing with "3 maps · Tags" for attention or space.
- */
-function ViewControls() {
-  const selectMode = ctx.useValue(selectModeAtom);
-  const setSelectMode = ctx.useSet(selectModeAtom);
-  const activeFilterIds = ctx.useValue(activeFilterIdsAtom);
-  const activeSorts = ctx.useValue(activeSortCountAtom);
-  const removeFilters = ctx.useSet(removeFiltersAtom);
-  const clearSorts = ctx.useSet(clearSortsAtom);
-
-  const filterCount = MENU_FILTER_IDS.filter((id) =>
-    activeFilterIds.includes(id)
-  ).length;
-
-  // Selecting: the toolbar belongs to the selection, and changing the view would
-  // invalidate it anyway (rows are addressed by index). So the whole control set
-  // becomes one affordance that leaves select mode — "Filter" describes where it
-  // takes you, which is the only reason you'd want it here.
-  if (selectMode) {
-    return h(
-      Tag,
-      {
-        minimal: true,
-        large: true,
-        interactive: true,
-        icon: "filter",
-        title: "Filter and sort (leaves select mode)",
-        onClick: () => setSelectMode(false),
-      },
-      "Filter"
-    );
-  }
-
-  const inlineControls = INLINE_FILTERS.map((filter) =>
-    h(InlineFilterControl, { key: filter.id, filter })
-  );
-
-  return h("div.view-controls", [
-    ...inlineControls,
-    h(ViewStateTag, {
-      key: "filter",
-      icon: "filter",
-      label: "Filter",
-      count: filterCount,
-      onClear: () => removeFilters(MENU_FILTER_IDS),
-      content: h(Menu, h(FilterMenuItems)),
-    }),
-    h(ViewStateTag, {
-      key: "sort",
-      icon: "sort",
-      label: "Sort",
-      count: activeSorts,
-      onClear: clearSorts,
-      content: h(Menu, h(SortMenuItems)),
-    }),
-  ]);
-}
-
-/** The view controls, as the toolbar action that replaces the built-in pair. */
-export const viewControlsAction: TableAction<IngestMap> = {
-  id: "view-controls",
-  name: "View",
-  icon: "filter-list",
-  targets: ALL_CARDINALITIES,
-  requiresEditable: false,
-  render: () => h(ViewControls),
-};
-
-/** Suppresses the panel's built-in Sort menu (`ViewControls` renders its own).
- * Merging is by id, consumer-first, so this replaces it. */
-export const suppressBuiltinSortAction: TableAction<IngestMap> = {
-  id: "sort",
-  name: "Sort",
-  targets: ALL_CARDINALITIES,
-  requiresEditable: false,
-  render: () => null,
-};
-
-/**
- * A selection must not outlive the view it was made against: rows are addressed
- * by *index*, so a re-filter or re-sort leaves "rows 3–5" pointing at different
- * maps, and a bulk tag write would hit the wrong ones. The page's own controls
- * can't change the view while selecting (see `ViewControls`), but a linked or
- * back/forward navigation can — `ViewStateURLSync` applies it straight to the
- * store.
- *
- * `@macrostrat/data-sheet` 4.4.0 does this in the store for every consumer;
- * delete this once the app is on it.
- */
-function SelectionViewGuard() {
-  const viewKey = ctx.useValue(viewKeyAtom);
-  const clearSelection = ctx.useSet(clearSelectionAtom);
-  const previous = useRef(viewKey);
-
-  useEffect(() => {
-    if (previous.current === viewKey) return;
-    previous.current = viewKey;
-    clearSelection();
-  }, [viewKey, clearSelection]);
-
-  return null;
-}
-
-/** The page's in-provider effects: URL sync plus the selection guard. Mounted
+/** The page's in-provider effects: mirroring view state into the URL. Mounted
  * as the data view's `children`, which render inside its provider. */
 export function IngestListEffects() {
-  return h([
-    h(ViewStateURLSync, { key: "url", bindings: urlBindings }),
-    h(SelectionViewGuard, { key: "guard" }),
-  ]);
+  return h(ViewStateURLSync, { bindings: urlBindings });
 }
 
 // ---- Cards ----
@@ -656,21 +473,15 @@ const STATE_INTENT: Record<string, Intent> = {
   abandoned: "none",
 };
 
-function MapCardContent({ data, selectable, onSelect }) {
-  // Cmd/ctrl-click enters select mode and picks this map — the familiar list
-  // idiom, and the way into a bulk action without first finding the toolbar's
-  // Select control. In select mode the card is not a link at all
-  // (`pointer-events: none` on the anchor), so this only fires while browsing.
-  const setSelectMode = ctx.useSet(selectModeAtom);
+function MapCardContent({ data, selectable }) {
   const toggleSearchTag = ctx.useSet(toggleSearchTagAtom);
+  // Cmd/ctrl-click enters select mode and picks the map — the panel does that
+  // itself (data-sheet 4.4.0). All the card owes it is *not navigating*: the
+  // card is an anchor, and a cmd-click on a link opens a new tab. The event is
+  // left to bubble to the panel's own select handler.
   const onClick = (event: any) => {
     if (!(event.metaKey || event.ctrlKey)) return;
     event.preventDefault();
-    // Without this the click also reaches the card wrapper's own select
-    // handler, which would toggle the row straight back off.
-    event.stopPropagation();
-    setSelectMode(true);
-    onSelect({ additive: true });
   };
 
   return h(

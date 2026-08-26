@@ -12,10 +12,9 @@ import {
   columnSpec,
   IngestListEffects,
   MapCard,
-  suppressBuiltinSortAction,
+  tableFilters,
   tagEditAction,
   translateIngestFilter,
-  viewControlsAction,
 } from "./ingestion-list.ts";
 
 const endpoint = `${apiV3Prefix}/map-ingestion/pg`;
@@ -45,19 +44,16 @@ export function Page() {
     // Rows are maps — names the selection ("3 maps"), counters, and labels.
     itemLabel: "map",
     name: "Maps",
-    actions: [
-      // Selection-scoped bulk tag add/remove (appears once maps are selected).
-      tagEditAction,
-      // This page renders its own filter/sort surface (modal on selection), so
-      // it also suppresses the built-in Sort menu that would duplicate it.
-      viewControlsAction,
-      suppressBuiltinSortAction,
-    ],
+    // The open search spans several columns, so it's a table-level filter; the
+    // per-column facets are declared on `columnSpec`. The panel builds the
+    // toolbar from both, and stands them down while selecting.
+    filters: tableFilters,
+    // Selection-scoped bulk tag add/remove (appears once maps are selected).
+    actions: [tagEditAction],
     enableSelection: SelectionInteractionStyle.MODAL,
     scrollBody: ScrollBody,
     // Renders inside the data view's provider: mirrors filters + sorts into the
-    // query string (so a particular set of maps is a link), and keeps a
-    // selection from outliving the view it was made against.
+    // query string, so a particular set of maps is a link.
     children: h(IngestListEffects),
   });
 }

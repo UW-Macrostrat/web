@@ -16,7 +16,6 @@ import {
   HTMLSelect,
   InputGroup,
   MenuItem,
-  PopoverNext,
   SegmentedControl,
   Tag,
 } from "@blueprintjs/core";
@@ -220,55 +219,6 @@ export function OpenSearchControl({
     popoverTargetProps: { onKeyDown },
     noResults: h(MenuItem, { disabled: true, text: noResultsText }),
   });
-}
-
-/**
- * A dropdown holding arbitrary controls (not just menu items).
- *
- * Deliberately **not** focus-trapping: these panels contain text inputs whose
- * own typeahead popovers render in a separate portal, and a focus trap on the
- * outer popover yanks focus back out of them — which is what makes a nested
- * filter submenu feel flighty.
- */
-export function ControlsPopover({
-  content,
-  children,
-  placement = "bottom-start",
-}: {
-  content: ReactNode;
-  children: ReactNode;
-  placement?: any;
-}) {
-  return h(
-    PopoverNext,
-    {
-      content,
-      placement,
-      minimal: true,
-      arrow: false,
-      enforceFocus: false,
-      autoFocus: false,
-    },
-    children
-  );
-}
-
-/**
- * A titled block inside a Blueprint `Menu` holding an arbitrary form (rather
- * than a menu item that opens a submenu). Keeps a control one click away
- * instead of two, with no nested popover to lose focus to.
- */
-export function MenuFormItem({
-  title,
-  children,
-}: {
-  title?: ReactNode;
-  children: ReactNode;
-}) {
-  return h("li.menu-form-item", [
-    h.if(title != null)("div.menu-form-title", title),
-    h("div.menu-form-body", children),
-  ]);
 }
 
 // ---- Small filter forms ----
