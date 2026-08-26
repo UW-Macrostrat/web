@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useAtom } from "jotai";
 import {
+  type ActiveFilterEntry,
   type ColumnSort,
   type TableFilter,
   useSelector,
@@ -118,6 +119,48 @@ export function ViewStateURLSync({
   }, [fromStore, fromURL, store, bindings, sortParam, writeURL]);
 
   return null;
+}
+
+/**
+ * The same bindings read *once*, for a view's `initialFilters` / `initialSorts`.
+ *
+ * `ViewStateURLSync` can only apply URL state after mount, which means the view
+ * fetches unfiltered first and immediately supersedes it. Passing the result of
+ * this to the data view instead applies the restored view when the store is
+ * *created*, so a linked view issues one correct request; the sync component then
+ * has nothing to do on mount and takes over for later changes and back/forward.
+ *
+ * Pass `search` explicitly when the caller has it (a server render); otherwise
+ * it reads the current location, and returns nothing when there is no window.
+ */
+export function initialViewStateFromURL(
+  bindings: FilterURLBinding[],
+  { sortParam = "sort", search }: InitialViewStateOptions = {}
+): { initialFilters: ActiveFilterEntry[]; initialSorts: ColumnSort[] } {
+  let query = search;
+  if (query == null && typeof window !== "undefined") {
+    query = window.location.search;
+  }
+  if (query == null) return { initialFilters: [], initialSorts: [] };
+
+  const params = new URLSearchParams(query);
+  const initialFilters: ActiveFilterEntry[] = [];
+  for (const binding of bindings) {
+    const state = binding.fromParams(readParams(params, binding.params));
+    if (state == null) continue;
+    initialFilters.push({ filter: binding.filter, state });
+  }
+
+  let initialSorts: ColumnSort[] = [];
+  if (sortParam != null) initialSorts = parseSorts(params.get(sortParam));
+
+  return { initialFilters, initialSorts };
+}
+
+export interface InitialViewStateOptions {
+  sortParam?: string | null;
+  /** Query string to read instead of the current location. */
+  search?: string;
 }
 
 // ---- Sorts ----

@@ -10,6 +10,7 @@ import {
   storeAtom,
   TableAction,
   TableFilter,
+  useDistinctValues,
 } from "@macrostrat/data-sheet";
 import { RegionCardinality } from "@blueprintjs/table";
 import classNames from "classnames";
@@ -31,14 +32,8 @@ import {
   YearSelector,
   type YearValue,
 } from "../components/controls";
-import {
-  ingestStatesAtom,
-  ingestYearsAtom,
-  NO_STATUS,
-  refreshRowsAtom,
-  selectedMapsAtom,
-} from "./view-state";
-import { atom, useAtomValue } from "jotai";
+import { NO_STATUS, refreshRowsAtom, selectedMapsAtom } from "./view-state";
+import { atom } from "jotai";
 
 /**
  * The map-ingestion queue list: view definition (columns, filters, sorts) and
@@ -148,22 +143,27 @@ function StatusFilterForm({
   state: StatusState;
   setState: (s: StatusState | null) => void;
 }) {
-  const states = useAtomValue(ingestStatesAtom);
-  let options: string[] = [NO_STATUS];
-  if (states.state === "hasData") options = states.data;
+  // The statuses the column actually holds, with their frequencies — one grouped
+  // query, cached per view by the library. A null `state` is a real (and common)
+  // condition rather than a value, so it becomes the `NO_STATUS` option.
+  const { values } = useDistinctValues<string | null>("state");
+
+  const options = values.map(({ value, count }) => {
+    let label = "no status";
+    if (value != null) label = value.replace(/_/g, " ");
+    if (count != null) label = `${label} (${count})`;
+    return { value: value ?? NO_STATUS, label };
+  });
 
   return h(CheckboxSetControl, {
-    options: options.map((value) => ({
-      value,
-      label: value.replace(/_/g, " "),
-    })),
+    options,
     value: state?.values ?? [],
-    onChange: (values) => {
-      if (values == null) {
+    onChange: (next) => {
+      if (next == null) {
         setState(null);
         return;
       }
-      setState({ values });
+      setState({ values: next });
     },
   });
 }
@@ -245,10 +245,15 @@ function YearFilterForm({
   state: YearValue;
   setState: (s: YearValue | null) => void;
 }) {
-  const years = useAtomValue(ingestYearsAtom);
-  let options: string[] = [];
-  if (years.state === "hasData") options = years.data;
-  return h(YearSelector, { years: options, value: state, onChange: setState });
+  const { values } = useDistinctValues<string | null>("ref_year");
+  // `ref_year` is a text column carrying some junk (the literal string "None",
+  // a stray 2106), so the picker keeps four-digit values, newest first.
+  const years = values
+    .map(({ value }) => value)
+    .filter((year): year is string => year != null && /^\d{4}$/.test(year))
+    .sort()
+    .reverse();
+  return h(YearSelector, { years, value: state, onChange: setState });
 }
 
 /** Filters that span more than one column — passed as the panel's `filters`.

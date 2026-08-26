@@ -1,5 +1,5 @@
 import { useAuth } from "@macrostrat/form-components";
-import { InfiniteScrollPage } from "~/components";
+import { InfiniteScrollPage, initialViewStateFromURL } from "~/components";
 import { LoginButton } from "../components/navbar.ts";
 import h from "./+Page.module.sass";
 import { apiV3Prefix } from "@macrostrat-web/settings";
@@ -15,6 +15,7 @@ import {
   tableFilters,
   tagEditAction,
   translateIngestFilter,
+  urlBindings,
 } from "./ingestion-list.ts";
 
 const endpoint = `${apiV3Prefix}/map-ingestion/pg`;
@@ -35,6 +36,11 @@ const provider = createPostgRESTProvider<IngestMap>({
 
 export function Page() {
   const { user } = useAuth();
+  // A linked view (`?q=…&status=…&sort=…`) is applied when the store is created,
+  // so the first request is the right one — rather than fetching the unfiltered
+  // queue and immediately superseding it. `IngestListEffects` keeps the two in
+  // sync from there.
+  const { initialFilters, initialSorts } = initialViewStateFromURL(urlBindings);
   return h(InfiniteScrollPage, {
     className: "ingestion-page",
     provider,
@@ -48,6 +54,8 @@ export function Page() {
     // per-column facets are declared on `columnSpec`. The panel builds the
     // toolbar from both, and stands them down while selecting.
     filters: tableFilters,
+    initialFilters,
+    initialSorts,
     // Selection-scoped bulk tag add/remove (appears once maps are selected).
     actions: [tagEditAction],
     enableSelection: SelectionInteractionStyle.MODAL,
