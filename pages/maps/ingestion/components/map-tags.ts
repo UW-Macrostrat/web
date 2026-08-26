@@ -1,7 +1,7 @@
 /**
  * Source-keyed tag editing for map ingestion.
  *
- * A single, reusable multi-select tag control that targets the tag API keyed on
+ * A single, reusable tag-list control that targets the tag API keyed on
  * **`source_id`** (every map has one; we're moving off the legacy
  * `ingest_process_id` key). It's decoupled from any table/store: the caller
  * passes the set of maps it applies to (`{ source_id, tags }`) plus an
@@ -23,10 +23,12 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { Button, PopoverNext } from "@blueprintjs/core";
 import { useToaster } from "@macrostrat/ui-components";
-import { TagEditor } from "@macrostrat/data-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { atomWithRefresh, loadable } from "jotai/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import h from "@macrostrat/hyper";
+import { TagListControl } from "./controls";
 
 /** The tag resource, keyed on `(source_id, tag)`. See the API assumption note. */
 const TAGS_BASE = postgrestPrefix;
@@ -68,22 +70,31 @@ export function textColorFor(hex: string): string {
 
 // ---- API (source_id-keyed) ----
 
-// The universe of defined tag names — deduped, session-cached. Invalidated on
-// any write so a newly created tag shows up in later editor sessions.
-let _definedTags: string[] | null = null;
-
-export async function fetchDefinedTags(): Promise<string[]> {
-  if (_definedTags != null) return _definedTags;
+/**
+ * The universe of defined tag names, as a jotai atom — one fetch per session,
+ * shared by every consumer (the list's search bar, the tag editors), and
+ * refreshable so a newly created tag shows up everywhere at once. This replaces
+ * a module-level cache plus a `useState`/`useEffect` pair per consumer.
+ */
+const definedTagsSourceAtom = atomWithRefresh(async (): Promise<string[]> => {
   const { data, error } = await tagsTable().select("tag");
   if (error != null) throw error;
-  _definedTags = [
-    ...new Set((data ?? []).map((r: any) => r.tag as string)),
-  ].sort();
-  return _definedTags;
-}
+  return [...new Set((data ?? []).map((r: any) => r.tag as string))].sort();
+});
 
-export function invalidateDefinedTags() {
-  _definedTags = null;
+/** Non-suspending view of the defined tags. */
+export const definedTagsAtom = loadable(definedTagsSourceAtom);
+
+/** Write-only: re-read the defined tags (after a create, say). */
+export const refreshDefinedTagsAtom = atom(null, (_get, set) => {
+  set(definedTagsSourceAtom);
+});
+
+/** The defined tags, with a flag for a failed read (so a caller can degrade). */
+export function useDefinedTags(): { tags: string[]; failed: boolean } {
+  const state = useAtomValue(definedTagsAtom);
+  if (state.state === "hasData") return { tags: state.data, failed: false };
+  return { tags: [], failed: state.state === "hasError" };
 }
 
 /** Add `tag` to every source in `sourceIds` (existing pairs are left alone). */
@@ -109,7 +120,10 @@ export async function removeTagFromSources(sourceIds: number[], tag: string) {
 /** Current tags for a single source, fetched by `source_id`. Lets a per-map
  * surface work from just a `source_id` (no need for the parent to supply the
  * live tag array); `refresh` re-reads after an edit. */
-export function useSourceTags(sourceId: number | undefined, initial?: string[]) {
+export function useSourceTags(
+  sourceId: number | undefined,
+  initial?: string[]
+) {
   const [tags, setTags] = useState<string[]>(initial ?? []);
   const refresh = useCallback(async () => {
     if (sourceId == null) return;
@@ -138,21 +152,20 @@ export interface MapTagControlProps {
 }
 
 /**
- * The tag editor body: a searchable list of every defined tag, each showing its
- * tri-state usage across `maps` (all / some / none of the selection have it).
- * Clicking toggles the tag across the whole set; a new tag can be created
- * inline. Immediate-mode — each click writes and refreshes.
+ * The tag editor body: **one Blueprint tag list** over the whole target set.
+ * The chips are the tags the set carries — removable in place — the dropdown is
+ * the rest of the vocabulary, and a tag held by only some of the selection
+ * reads as a `minimal` chip labelled with its share. So adding, removing, and
+ * *seeing* what the selection is tagged with are the same control, rather than
+ * a checkbox list you have to open and read down.
+ *
+ * Immediate-mode: each click writes and refreshes.
  */
 export function MapTagControl({ maps, onChanged }: MapTagControlProps) {
   const toaster = useToaster();
-  const [available, setAvailable] = useState<string[]>([]);
+  const { tags: available } = useDefinedTags();
+  const refreshDefinedTags = useSetAtom(refreshDefinedTagsAtom);
   const [created, setCreated] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetchDefinedTags()
-      .then(setAvailable)
-      .catch(() => {});
-  }, []);
 
   const sourceIds = useMemo(() => maps.map((m) => m.source_id), [maps]);
 
@@ -170,13 +183,10 @@ export function MapTagControl({ maps, onChanged }: MapTagControlProps) {
   );
 
   const usage = useCallback(
-    (tag: string) => {
-      if (maps.length === 0) return "none" as const;
-      const n = maps.filter((m) => m.tags?.includes(tag)).length;
-      if (n === 0) return "none" as const;
-      if (n === maps.length) return "all" as const;
-      return "partial" as const;
-    },
+    (tag: string) => ({
+      count: maps.filter((m) => m.tags?.includes(tag)).length,
+      total: maps.length,
+    }),
     [maps]
   );
 
@@ -185,7 +195,7 @@ export function MapTagControl({ maps, onChanged }: MapTagControlProps) {
       try {
         if (add) await addTagToSources(sourceIds, tag);
         else await removeTagFromSources(sourceIds, tag);
-        invalidateDefinedTags();
+        refreshDefinedTags();
         onChanged?.();
       } catch (e: any) {
         toaster?.show?.({
@@ -194,38 +204,41 @@ export function MapTagControl({ maps, onChanged }: MapTagControlProps) {
         });
       }
     },
-    [sourceIds, onChanged, toaster]
+    [sourceIds, onChanged, toaster, refreshDefinedTags]
   );
 
   const onCreate = useCallback(
     (tag: string) => {
+      if (tag === "") return;
       setCreated((c) => [...new Set([...c, tag])]);
       apply(tag, true);
     },
     [apply]
   );
 
-  return h(TagEditor, {
+  return h(TagListControl, {
     tags: allTags,
     usage,
-    onChange: apply,
+    onToggle: apply,
     onCreate,
     colorForTag: tagColor,
   });
 }
 
 export interface MapTagControlButtonProps extends MapTagControlProps {
-  /** Button label; defaults to "Tags (N)". */
+  /** Button label; defaults to "Tags". */
   label?: string;
   minimal?: boolean;
   small?: boolean;
 }
 
-/** A popover-triggering button wrapping `MapTagControl`, for toolbars/headers. */
+/** A popover-triggering button wrapping `MapTagControl`, for toolbars/headers.
+ * The label carries no count — the selection indicator beside it already says
+ * how many maps are selected. */
 export function MapTagControlButton({
   maps,
   onChanged,
-  label,
+  label = "Tags",
   minimal = true,
   small = true,
 }: MapTagControlButtonProps) {
@@ -235,14 +248,20 @@ export function MapTagControlButton({
       placement: "bottom-start",
       content: h(
         "div",
-        { style: { padding: "6px", width: "260px" } },
+        { style: { padding: "8px", width: "320px" } },
         h(MapTagControl, { maps, onChanged })
       ),
     },
     h(
       Button,
-      { minimal, small, icon: "tag", rightIcon: "caret-down" },
-      label ?? `Tags (${maps.length})`
+      {
+        minimal,
+        small,
+        icon: "tag",
+        rightIcon: "caret-down",
+        disabled: maps.length === 0,
+      },
+      label
     )
   );
 }

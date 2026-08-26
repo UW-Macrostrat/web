@@ -1,38 +1,56 @@
 import h from "./ingestion-list.module.sass";
-import { useEffect, useMemo, useState } from "react";
-import { Intent, MenuItem, SegmentedControl, Tag } from "@blueprintjs/core";
-import { MultiSelect } from "@blueprintjs/select";
-import "@blueprintjs/select/lib/css/blueprint-select.css";
+import { Intent, Tag } from "@blueprintjs/core";
 import {
   type ColumnSpec,
   createDataCard,
-  getSelectedRowIndices,
+  ctx,
+  type FetchDataFilter,
+  type PostgrestFilter,
+  standardizeFilter,
+  storeAtom,
   TableAction,
   TableFilter,
-  useSelector,
-  useStoreAPI,
+  useDistinctValues,
 } from "@macrostrat/data-sheet";
 import { RegionCardinality } from "@blueprintjs/table";
-import { apiV3Prefix } from "@macrostrat-web/settings";
 import classNames from "classnames";
+import { type FilterURLBinding, ViewStateURLSync } from "~/components";
 import {
-  fetchDefinedTags,
-  MapTagControlButton,
+  MapTagControl,
   tagColor,
-  textColorFor,
+  useDefinedTags,
   type TaggableMap,
 } from "../components/map-tags";
-const endpoint = `${apiV3Prefix}/map-ingestion/pg`;
+import {
+  CheckboxSetControl,
+  ColoredTag,
+  isSearchEmpty,
+  OpenSearchControl,
+  type SearchValue,
+  SegmentedChoiceControl,
+  YEAR_COMPARISONS,
+  YearSelector,
+  type YearValue,
+} from "../components/controls";
+import { NO_STATUS, refreshRowsAtom, selectedMapsAtom } from "./view-state";
+import { atom } from "jotai";
 
 /**
- * DataPanel is the card-list renderer over the same headless core as
- * `DataSheet` (loader + view state + selection + actions). This story drives it
- * live against Macrostrat's map-ingestion queue — a **standard PostgREST route**
- * (`/api/v3/map-ingestion/pg/maps`), so the exact same provider that will back
- * the production page runs here in the library. Server-side filter / sort /
- * paginate all work against real data.
+ * The map-ingestion queue list: view definition (columns, filters, sorts) and
+ * the card renderer for `/maps/ingestion`, over the `pg/maps` PostgREST route.
  *
- * Requires the local Macrostrat stack (`macrostrat.local`).
+ * The filter surface is deliberately *not* the generic operator forms: an
+ * always-visible **open search** carries the common case (free text across
+ * name / slug / id, plus a tag picker in the same control), and the remaining
+ * facets are compact pickers in the Filter menu. The panel builds the toolbar
+ * from these declarations and stands them down while selecting; everything
+ * flows through the standard filter model — store `activeFilters` → the
+ * provider's `translateFilter` — so the server does the work, and `urlBindings`
+ * makes any particular view linkable.
+ *
+ * The presentational controls live in `../components/controls` (fully
+ * controlled, no store access) and the coupled state in `./view-state` (jotai
+ * atoms over the data-sheet store); this file is the wiring between them.
  */
 
 export interface IngestMap {
@@ -46,130 +64,139 @@ export interface IngestMap {
   tags: string[];
 }
 
-// ---- Tags ----
-// Color helpers, the defined-tag fetch, and the write path live in the shared
-// `map-tags` module (source_id-keyed, reused by the per-map page). This file
-// keeps only the list-specific bits: the card tag chips and the filter UI.
+// ---- Open search: free text + tags, one control ----
 
-function TagItem({
-  name,
-  interactive,
-  onRemove,
-}: {
-  name: string;
-  interactive?: boolean;
-  onRemove?: () => void;
-}) {
-  const bg = tagColor(name);
-  return h(
-    Tag,
-    {
-      interactive,
-      onRemove,
-      style: { backgroundColor: bg, color: textColorFor(bg) },
-    },
-    name
-  );
-}
+export const SEARCH_FILTER_ID = "map-search";
 
-interface TagFilterState {
-  operator: "ov";
-  value: string;
-}
-
-// A richer, "lifelike" tag selector: preloads the defined tags from the API and
-// presents a colored typeahead multi-select. State stays the `{ operator, value }`
-// shape (`ov` + a comma-joined set), so it translates server-side to
-// `tags=ov.{…}` ("has any of") via the standard array-operator contract.
-function TagFilterForm({
+function MapSearchForm({
   state,
   setState,
 }: {
-  state: TagFilterState;
-  setState: (s: TagFilterState) => void;
+  state: SearchValue;
+  setState: (s: SearchValue | null) => void;
 }) {
-  const [all, setAll] = useState<string[]>([]);
-  const [failed, setFailed] = useState(false);
-  useEffect(() => {
-    fetchDefinedTags()
-      .then(setAll)
-      .catch(() => setFailed(true));
-  }, []);
-
-  const selected = (state?.value ?? "").split(",").filter(Boolean);
-  const commit = (next: string[]) =>
-    setState({ operator: "ov", value: next.join(",") });
-  const toggle = (tag: string) =>
-    commit(
-      selected.includes(tag)
-        ? selected.filter((t) => t !== tag)
-        : [...selected, tag]
-    );
-
-  return h(MultiSelect<string>, {
-    items: all,
-    selectedItems: selected,
-    fill: true,
-    resetOnSelect: true,
-    placeholder: failed ? "Couldn't load tags" : "Filter by tag…",
-    itemPredicate: (q: string, tag: string) =>
-      tag.toLowerCase().includes(q.toLowerCase()),
-    itemRenderer: (tag: string, { handleClick, modifiers }: any) =>
-      modifiers.matchesPredicate
-        ? h(MenuItem, {
-            key: tag,
-            active: modifiers.active,
-            icon: selected.includes(tag) ? "tick" : "blank",
-            text: h(TagItem, { name: tag }),
-            shouldDismissPopover: false,
-            onClick: handleClick,
-          })
-        : null,
-    tagRenderer: (tag: string) => tag,
-    onItemSelect: toggle,
-    onRemove: (tag: string) => toggle(tag),
-    tagInputProps: {
-      tagProps: (_node: any, index: number) => {
-        const bg = tagColor(selected[index]);
-        return { style: { backgroundColor: bg, color: textColorFor(bg) } };
-      },
-    },
-    popoverProps: { minimal: true },
-    noResults: h(MenuItem, {
-      disabled: true,
-      text: failed ? "Failed to load tags" : "No matching tags",
-    }),
+  const { tags, failed } = useDefinedTags();
+  let placeholder = "Search maps by name, ID, or tag…";
+  let noResultsText = "No matching tags";
+  if (failed) {
+    placeholder = "Search maps by name or ID…";
+    noResultsText = "Couldn't load tags";
+  }
+  return h(OpenSearchControl, {
+    value: state,
+    onChange: setState,
+    tags,
+    colorForTag: tagColor,
+    placeholder,
+    noResultsText,
   });
 }
 
-const tagsFilter: TableFilter<IngestMap, TagFilterState> = {
-  id: "tags-filter",
-  name: "Tags",
-  icon: "tag",
-  columnKey: "tags",
-  defaultState: { operator: "ov", value: "" },
+export const searchFilter: TableFilter<IngestMap, SearchValue> = {
+  id: SEARCH_FILTER_ID,
+  name: "Search",
+  icon: "search",
+  defaultState: { text: "", tags: [] },
+  presentation: "inline",
   describeState: (s) => {
-    const v = (s?.value ?? "").split(",").filter(Boolean);
-    return v.length === 0 ? null : v.length === 1 ? v[0] : `${v.length} tags`;
+    const parts: string[] = [];
+    if ((s?.text ?? "").trim() !== "") parts.push(s.text.trim());
+    const n = s?.tags?.length ?? 0;
+    if (n === 1) parts.push(s.tags[0]);
+    if (n > 1) parts.push(`${n} tags`);
+    if (parts.length === 0) return null;
+    return parts.join(" + ");
   },
+  filterForm: MapSearchForm,
+  // Client-side predicate, for an in-memory source; the live page filters
+  // server-side via `translateFilter`.
   predicate: (row, s) => {
-    const want = (s?.value ?? "").split(",").filter(Boolean);
-    return (
-      want.length === 0 ||
-      (Array.isArray(row.tags) && want.some((t) => row.tags.includes(t)))
-    );
+    const q = (s?.text ?? "").trim().toLowerCase();
+    const tags = s?.tags ?? [];
+    const textOK =
+      q === "" ||
+      [row?.name, row?.slug, String(row?.source_id ?? "")].some((v) =>
+        v?.toLowerCase?.().includes(q)
+      );
+    const tagsOK =
+      tags.length === 0 ||
+      (Array.isArray(row?.tags) && tags.some((t) => row.tags.includes(t)));
+    return textOK && tagsOK;
   },
-  filterForm: TagFilterForm,
 };
 
-// A custom filter for `scale`: a fixed enum with only four values, so a
-// segmented control fits better than the generic operator+text form. Its state
-// is still the `{ operator, value }` shape, so the provider's default
-// translation turns it into `scale=eq.<value>` server-side — a custom *UI* over
-// the standard server contract, no custom `translateFilter` needed.
+// ---- Status (`state`) ----
+// The queue's primary triage facet. Its values come from the live route (see
+// `ingestStatesAtom`), not a hard-coded enum, and a quarter of the queue has no
+// status at all — so "(none)" is an explicit option.
+
+export const STATUS_FILTER_ID = "map-status";
+
+interface StatusState {
+  values: string[];
+}
+
+function StatusFilterForm({
+  state,
+  setState,
+}: {
+  state: StatusState;
+  setState: (s: StatusState | null) => void;
+}) {
+  // The statuses the column actually holds, with their frequencies — one grouped
+  // query, cached per view by the library. A null `state` is a real (and common)
+  // condition rather than a value, so it becomes the `NO_STATUS` option.
+  const { values } = useDistinctValues<string | null>("state");
+
+  const options = values.map(({ value, count }) => {
+    let label = "no status";
+    if (value != null) label = value.replace(/_/g, " ");
+    if (count != null) label = `${label} (${count})`;
+    return { value: value ?? NO_STATUS, label };
+  });
+
+  return h(CheckboxSetControl, {
+    options,
+    value: state?.values ?? [],
+    onChange: (next) => {
+      if (next == null) {
+        setState(null);
+        return;
+      }
+      setState({ values: next });
+    },
+  });
+}
+
+export const statusFilter: TableFilter<IngestMap, StatusState> = {
+  id: STATUS_FILTER_ID,
+  name: "Status",
+  icon: "flow-review",
+  columnKey: "state",
+  defaultState: { values: [] },
+  presentation: "menu-inline",
+  describeState: (s) => {
+    const n = s?.values?.length ?? 0;
+    if (n === 0) return null;
+    if (n === 1) return s.values[0];
+    return `${n} statuses`;
+  },
+  predicate: (row, s) => {
+    const values = s?.values ?? [];
+    if (values.length === 0) return true;
+    if (row?.state == null) return values.includes(NO_STATUS);
+    return values.includes(row.state);
+  },
+  filterForm: StatusFilterForm,
+};
+
+// ---- Scale ----
+// A fixed four-value enum, so a segmented control beats the operator form. The
+// state is still `{ operator, value }`, so the provider's default translation
+// turns it into `scale=eq.<value>` — a custom *UI* over the standard contract.
 const SCALES = ["tiny", "small", "medium", "large"];
 
-const scaleFilter: TableFilter<
+export const scaleFilter: TableFilter<
   IngestMap,
   { operator: "eq"; value: string | null }
 > = {
@@ -178,35 +205,74 @@ const scaleFilter: TableFilter<
   icon: "filter",
   columnKey: "scale",
   defaultState: { operator: "eq", value: null },
+  presentation: "menu-inline",
   describeState: (s) => s?.value ?? null,
   predicate: (row, s) => s?.value == null || row.scale === s.value,
   filterForm: ({ state, setState }) =>
-    h(SegmentedControl, {
-      small: true,
-      options: SCALES.map((v) => ({ label: v, value: v })),
-      value: state?.value ?? "",
-      onValueChange: (value: string) => setState({ operator: "eq", value }),
+    h(SegmentedChoiceControl, {
+      options: SCALES.map((value) => ({ value })),
+      value: state?.value ?? null,
+      onChange: (value) => setState({ operator: "eq", value }),
     }),
 };
 
-// Facet capabilities are declared per-column, backend-agnostic. `FacetControls`
-// + the server provider read these to offer/apply filter & sort.
-export const columnSpec: ColumnSpec[] = [
-  {
-    key: "name",
-    name: "Name",
-    dataType: "text",
-    filterable: true,
-    sortable: true,
+// ---- Year ----
+// A comparison, but a trivial one — and worth keeping honest: `ref_year` is a
+// text column carrying some junk, so the picker offers only years that actually
+// occur in the data, with the comparison in plain words ("since 2015").
+export const YEAR_FILTER_ID = "year-filter";
+
+export const yearFilter: TableFilter<IngestMap, YearValue> = {
+  id: YEAR_FILTER_ID,
+  name: "Year",
+  icon: "calendar",
+  columnKey: "ref_year",
+  defaultState: { operator: "eq", year: "" },
+  presentation: "menu-inline",
+  describeState: (s) => {
+    if (s?.year == null || s.year === "") return null;
+    const label = YEAR_COMPARISONS.find((c) => c.value === s.operator)?.label;
+    return `${label ?? s.operator} ${s.year}`;
   },
+  predicate: () => true,
+  filterForm: YearFilterForm,
+};
+
+function YearFilterForm({
+  state,
+  setState,
+}: {
+  state: YearValue;
+  setState: (s: YearValue | null) => void;
+}) {
+  const { values } = useDistinctValues<string | null>("ref_year");
+  // `ref_year` is a text column carrying some junk (the literal string "None",
+  // a stray 2106), so the picker keeps four-digit values, newest first.
+  const years = values
+    .map(({ value }) => value)
+    .filter((year): year is string => year != null && /^\d{4}$/.test(year))
+    .sort()
+    .reverse();
+  return h(YearSelector, { years, value: state, onChange: setState });
+}
+
+/** Filters that span more than one column — passed as the panel's `filters`.
+ * The open search is `presentation: "inline"`, so the panel puts it straight in
+ * the toolbar. */
+export const tableFilters: TableFilter<IngestMap>[] = [searchFilter];
+
+// Facets are declared per column and the panel builds the Filter/Sort menus
+// from them. `name` carries no filter (the search bar covers it); each of the
+// others supplies a purpose-built control rather than the generic operator form.
+export const columnSpec: ColumnSpec[] = [
+  { key: "name", name: "Name", dataType: "text", sortable: true },
   {
     key: "state",
     name: "Status",
     dataType: "string",
-    filterable: true,
+    filters: [statusFilter],
     sortable: true,
   },
-  // Custom filter UI (segmented) instead of the generic operator form.
   {
     key: "scale",
     name: "Scale",
@@ -217,32 +283,218 @@ export const columnSpec: ColumnSpec[] = [
   {
     key: "ref_year",
     name: "Year",
-    dataType: "string",
-    filterable: true,
+    dataType: "integer",
+    filters: [yearFilter],
     sortable: true,
   },
   { key: "source_id", name: "Source ID", dataType: "integer", sortable: true },
-  // Array column with a rich, preloaded tag selector (`tagsFilter`) over the
-  // `dataType: "array"` operator family → PostgREST `tags=ov.{…}` ("has any of").
-  { key: "tags", name: "Tags", dataType: "array", filters: [tagsFilter] },
+  { key: "tags", name: "Tags", dataType: "array" },
 ];
+
+// ---- Server translation ----
+
+/**
+ * Toggle a tag in the open search's tag set. Clicking a tag on a card is the
+ * fastest way to ask "what else looks like this?", so a card's chips drive the
+ * same filter state the search bar's chips do — one place, either way in.
+ */
+export const toggleSearchTagAtom = atom(null, (get, _set, tag: string) => {
+  const store = get(storeAtom);
+  if (store == null) return;
+  const current: SearchValue = store.activeFilters.get(SEARCH_FILTER_ID)
+    ?.state ?? { text: "", tags: [] };
+  const tags = current.tags.includes(tag)
+    ? current.tags.filter((t) => t !== tag)
+    : [...current.tags, tag];
+  const next: SearchValue = { ...current, tags };
+  if (isSearchEmpty(next)) {
+    store.removeFilter(SEARCH_FILTER_ID);
+    return;
+  }
+  store.setFilter(SEARCH_FILTER_ID, searchFilter, next);
+});
+
+/** Quote a value for use inside a PostgREST logic tree (`or=(…)`). */
+function quoteLogicValue(value: string): string {
+  return `"${String(value).replace(/"/g, "")}"`;
+}
+
+/**
+ * Translate this page's filters into PostgREST query conditions. Only the two
+ * filters that don't fit the scalar `columnKey=op.value` shape need a case; the
+ * rest fall through to the standard translation.
+ */
+export function translateIngestFilter(
+  f: FetchDataFilter
+): PostgrestFilter | null {
+  if (f.id === SEARCH_FILTER_ID) return translateSearch(f.state);
+  if (f.id === STATUS_FILTER_ID) return translateStatus(f.state);
+  if (f.id === YEAR_FILTER_ID) return translateYear(f.state);
+  const s = f.state;
+  const key = f.columnKey ?? s?.key;
+  if (
+    key == null ||
+    s?.operator == null ||
+    s?.value == null ||
+    s.value === ""
+  ) {
+    return null;
+  }
+  return standardizeFilter({ key, operator: s.operator, value: s.value });
+}
+
+/** Free text → `or=(name.ilike.*q*, slug.ilike.*q*, source_id.eq.q)`;
+ * tags → `tags=ov.{…}` ("has any of"). Both apply together (AND). */
+function translateSearch(state: SearchValue): PostgrestFilter | null {
+  const q = (state?.text ?? "").trim();
+  const tags = state?.tags ?? [];
+  if (q === "" && tags.length === 0) return null;
+  return {
+    type: "filter",
+    apply: (req) => {
+      let out = req;
+      if (q !== "") {
+        const like = quoteLogicValue(`*${q}*`);
+        const parts = [`name.ilike.${like}`, `slug.ilike.${like}`];
+        // A purely numeric query also matches an exact source_id.
+        if (/^\d+$/.test(q)) parts.push(`source_id.eq.${q}`);
+        out = out.or(parts.join(","));
+      }
+      if (tags.length > 0) out = out.overlaps("tags", tags);
+      return out;
+    },
+  };
+}
+
+/** A year comparison → `ref_year=<op>.<year>`. */
+function translateYear(state: YearValue): PostgrestFilter | null {
+  if (state?.year == null || state.year === "") return null;
+  if (!YEAR_COMPARISONS.some((c) => c.value === state.operator)) return null;
+  return standardizeFilter({
+    key: "ref_year",
+    operator: state.operator as any,
+    value: state.year,
+  });
+}
+
+/** A set of statuses → `state=in.(…)`, with the null case folded in via `or`. */
+function translateStatus(state: StatusState): PostgrestFilter | null {
+  const values = state?.values ?? [];
+  if (values.length === 0) return null;
+  const named = values.filter((v) => v !== NO_STATUS);
+  const includeNull = values.includes(NO_STATUS);
+  return {
+    type: "filter",
+    apply: (req) => {
+      if (!includeNull) return req.in("state", named);
+      if (named.length === 0) return req.is("state", null);
+      const list = named.map(quoteLogicValue).join(",");
+      return req.or(`state.in.(${list}),state.is.null`);
+    },
+  };
+}
+
+// ---- URL bindings ----
+// Filter + sort state is mirrored into the query string, so a particular view
+// ("failed maps tagged Arizona AZGS, newest first") is a link. Empty values are
+// omitted, keeping a default view's URL clean.
+
+export const urlBindings: FilterURLBinding[] = [
+  {
+    filter: searchFilter,
+    params: ["q", "tags"],
+    toParams: (s: SearchValue) => ({
+      q: s?.text?.trim() || null,
+      tags: (s?.tags ?? []).join(",") || null,
+    }),
+    fromParams: ({ q, tags }) => {
+      const state: SearchValue = {
+        text: q ?? "",
+        tags: (tags ?? "").split(",").filter(Boolean),
+      };
+      if (isSearchEmpty(state)) return null;
+      return state;
+    },
+  },
+  {
+    filter: statusFilter,
+    params: ["status"],
+    toParams: (s: StatusState) => ({
+      status: (s?.values ?? []).join(",") || null,
+    }),
+    fromParams: ({ status }) => {
+      const values = (status ?? "").split(",").filter(Boolean);
+      if (values.length === 0) return null;
+      return { values };
+    },
+  },
+  {
+    filter: scaleFilter,
+    params: ["scale"],
+    toParams: (s) => ({ scale: s?.value || null }),
+    fromParams: ({ scale }) => {
+      if (scale == null || scale === "") return null;
+      return { operator: "eq", value: scale };
+    },
+  },
+  {
+    filter: yearFilter,
+    params: ["year"],
+    toParams: (s: YearValue) => {
+      if (s?.year == null || s.year === "") return { year: null };
+      return { year: `${s.operator}.${s.year}` };
+    },
+    fromParams: ({ year }) => {
+      if (year == null || year === "") return null;
+      const idx = year.indexOf(".");
+      if (idx < 0) return { operator: "eq", year };
+      const operator = year.slice(0, idx);
+      // A hand-edited URL shouldn't be able to send a junk operator to the
+      // server; anything unrecognized falls back to equality.
+      if (!YEAR_COMPARISONS.some((c) => c.value === operator)) {
+        return { operator: "eq", year };
+      }
+      return { operator, year: year.slice(idx + 1) };
+    },
+  },
+];
+
+/** The page's in-provider effects: mirroring view state into the URL. Mounted
+ * as the data view's `children`, which render inside its provider. */
+export function IngestListEffects() {
+  return h(ViewStateURLSync, { bindings: urlBindings });
+}
+
+// ---- Cards ----
 
 const STATE_INTENT: Record<string, Intent> = {
   failed: "danger",
   pending: "warning",
   processing: "primary",
+  post_harmonization: "primary",
+  "needs review": "warning",
+  ingested: "success",
   succeeded: "success",
   abandoned: "none",
 };
 
 function MapCardContent({ data, selectable }) {
-  // `onSelect` reads shift / cmd / ctrl straight from the click event — wiring
-  // it as the root `onClick` gives range- and toggle-select for free.
+  const toggleSearchTag = ctx.useSet(toggleSearchTagAtom);
+  // Cmd/ctrl-click enters select mode and picks the map — the panel does that
+  // itself (data-sheet 4.4.0). All the card owes it is *not navigating*: the
+  // card is an anchor, and a cmd-click on a link opens a new tab. The event is
+  // left to bubble to the panel's own select handler.
+  const onClick = (event: any) => {
+    if (!(event.metaKey || event.ctrlKey)) return;
+    event.preventDefault();
+  };
+
   return h(
     "a.map-card-content",
     {
       href: `/maps/ingestion/${data.source_id}`,
       className: classNames({ selectable }),
+      onClick,
     },
     [
       h("div.card-header", [
@@ -264,7 +516,20 @@ function MapCardContent({ data, selectable }) {
       ]),
       h.if(Array.isArray(data.tags) && data.tags.length > 0)(
         "div.tags",
-        (data.tags ?? []).map((t) => h(TagItem, { key: t, name: t }))
+        (data.tags ?? []).map((t) =>
+          h(ColoredTag, {
+            key: t,
+            name: t,
+            color: tagColor(t),
+            title: `Filter by "${t}"`,
+            onClick: (event: any) => {
+              // The card is a link; a tag click filters instead of navigating.
+              event.preventDefault();
+              event.stopPropagation();
+              toggleSearchTag(t);
+            },
+          })
+        )
       ),
     ]
   );
@@ -274,39 +539,29 @@ export const MapCard = createDataCard(MapCardContent, {
   className: h["map-card"],
 });
 
-// Bridge the data-panel store to the shared, store-agnostic tag control: pull
-// the selected maps out of the store and hand them + a refresh to
-// `MapTagControlButton`. All the API/edit logic (source_id-keyed) lives in
-// `map-tags`, so the per-map page reuses the exact same write path.
-function SelectionTagButton() {
-  const selection = useSelector((s: any) => s.selection);
-  const data = useSelector((s: any) => s.data);
-  const storeAPI = useStoreAPI();
-
-  const maps = useMemo(
-    () =>
-      getSelectedRowIndices(selection)
-        .map((i) => data[i] as TaggableMap)
-        .filter(Boolean),
-    [selection, data]
+/**
+ * Selection-scoped tag action: select maps (cmd/shift-click, or the toolbar's
+ * Select control), open **Tags** → one Blueprint tag list showing what the
+ * selection carries, with add/remove in place. Writes go to the source_id-keyed
+ * tag API (see `map-tags`) and re-fetch the queue.
+ */
+function SelectionTagControl() {
+  const maps = ctx.useValue(selectedMapsAtom) as TaggableMap[];
+  const refreshRows = ctx.useSet(refreshRowsAtom);
+  // Presented inline rather than behind a button: while selecting, this *is*
+  // what the toolbar is for, and the chips double as the read-out of what the
+  // selection currently carries.
+  return h(
+    "div.selection-tags",
+    h(MapTagControl, { maps, onChanged: refreshRows })
   );
-
-  const onChanged = () => storeAPI.getState().rowEditing?.refresh?.();
-
-  return h(MapTagControlButton, { maps, onChanged });
 }
 
-/**
- * Selection-scoped tag action for the ingestion list: select maps (shift/cmd),
- * open **Tags** → the shared multi-select `TagEditor`, each tag showing its
- * usage across the selection. Add/remove writes to the source_id-keyed tag API
- * (see `map-tags`) and re-fetches the queue.
- */
 export const tagEditAction: TableAction<IngestMap> = {
   id: "edit-tags",
   name: "Tags",
   icon: "tag",
   targets: [RegionCardinality.FULL_ROWS],
   requiresEditable: false,
-  render: () => h(SelectionTagButton),
+  render: () => h(SelectionTagControl),
 };
