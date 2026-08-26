@@ -24,7 +24,7 @@ import {
 } from "@macrostrat/ui-components";
 import { useState } from "react";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
-import { knowledgeGraphAPIURL, xDDapiDomain } from "@macrostrat-web/settings";
+// import { xDDapiDomain } from "@macrostrat-web/settings";
 import { OverlayToaster } from "@blueprintjs/core";
 import { fetchPGData } from "~/_utils";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
@@ -32,6 +32,8 @@ import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useEffect } from "react"
+
+const xDDapiDomain = "http://localhost:9543";
 
 /**
  * Get a single text window for feedback purposes
@@ -187,6 +189,8 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
 
   console.log(window);
   console.log(Array.from(entityTypes.values()));
+
+  console.log("entities:", entities);
   
   return h(FeedbackComponent, {
     entities,
@@ -195,9 +199,15 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
     entityTypes,
     matchComponent: MatchedEntityLink,
     matchLinks: {
-      lithology: "/lex/lithologies",
-      lith_att: "/lex/lith-atts",
-      strat_name: "/lex/strat-names",
+      location: "/lex/location",
+      minerals: "/lex/minerals",
+      intervals: "/lex/intervals",
+      tectonics: "/lex/tectonics",
+      structure_atts: "/lex/structure-atts",
+      structures: "/lex/structures",
+      lith_atts: "/lex/lith-atts",
+      environs: "/lex/environs",
+      strat_names: "/lex/strat-names",
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
@@ -205,15 +215,29 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
     autoSelect,
     onSave: wrapWithToaster(
       async (tree) => {
-        const data = prepareDataForServer(tree, window.source_text, [
-          window.model_run,
-        ], model_id, version_id);
-        await postDataToServer(data, customFeedback, selectedFeedbackType);
+        console.log("Preparing to save feedback for model run:", tree);
+
+        const data = prepareDataForServer(
+          tree,
+          window.source_text,
+          [window.model_run],
+          model_id,
+          version_id
+        );
+
+        console.log("Data prepared for server:", data);
+
+        await postDataToServer(
+          data,
+          customFeedback,
+          selectedFeedbackType
+        );
       },
       AppToasterPromise,
       {
-        success: "Model information saved",
-        error: "Failed to save model information",
+        loading: "Saving feedback...",
+        success: "Feedback saved",
+        error: "Failed to save feedback",
       }
     ),
   });
@@ -302,17 +326,30 @@ function wrapWithToaster(
   return async (...args: any[]) => {
     const toaster = await toasterPromise;
 
+    const loadingKey = toaster.show({
+      message: messages.loading,
+      intent: "primary",
+      icon: "cloud-upload",
+      timeout: 0, // persist until dismissed
+    });
+
     try {
       await fn(...args);
+
+      toaster.dismiss(loadingKey);
+
       toaster.show({
         message: messages.success,
         intent: "success",
+        icon: "tick-circle",
       });
     } catch (e) {
-      console.error(e);
+      toaster.dismiss(loadingKey);
+
       toaster.show({
-        message: messages.error + ": " + e.message,
-        intent: "danger",
+        message: `${messages.error}: ${e.message}`,
+        intent: "warning",
+        icon: "warning-sign",
       });
     }
   };
@@ -335,6 +372,7 @@ function prepareDataForServer(
 
   // Prepare match for server
   const normalizedNodes = nodes.map((d) => {
+    console.log("Nodes before normalization:", nodes);
     return {
       ...d,
       match: normalizeMatch(d.match),
@@ -356,15 +394,8 @@ function prepareDataForServer(
 type MatchInfo = { type: "lith" | "lith_att" | "strat_name"; id: number };
 
 function normalizeMatch(match: any): MatchInfo | null {
-  if (match == null) return null;
-  if (match.lith_id) return { type: "lith", id: match.lith_id };
-  if (match.lith_att_id) {
-    return { type: "lith_att", id: match.lith_att_id };
-  }
-  if (match.strat_name_id) {
-    return { type: "strat_name", id: match.strat_name_id };
-  }
-  return null;
+  // TODO
+  return match;
 }
 
 // function FeedbackDevTool() {

@@ -1563,6 +1563,55 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dnd-kit/accessibility@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "@dnd-kit/accessibility@npm:3.1.1"
+  dependencies:
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10c0/be0bf41716dc58f9386bc36906ec1ce72b7b42b6d1d0e631d347afe9bd8714a829bd6f58a346dd089b1519e93918ae2f94497411a61a4f5e4d9247c6cfd1fef8
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/core@npm:^6.3.1":
+  version: 6.3.1
+  resolution: "@dnd-kit/core@npm:6.3.1"
+  dependencies:
+    "@dnd-kit/accessibility": "npm:^3.1.1"
+    "@dnd-kit/utilities": "npm:^3.2.2"
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 10c0/196db95d81096d9dc248983533eab91ba83591770fa5c894b1ac776f42af0d99522b3fd5bb3923411470e4733fcfa103e6ee17adc17b9b7eb54c7fbec5ff7c52
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/sortable@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@dnd-kit/sortable@npm:10.0.0"
+  dependencies:
+    "@dnd-kit/utilities": "npm:^3.2.2"
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    "@dnd-kit/core": ^6.3.0
+    react: ">=16.8.0"
+  checksum: 10c0/37ee48bc6789fb512dc0e4c374a96d19abe5b2b76dc34856a5883aaa96c3297891b94cc77bbc409e074dcce70967ebcb9feb40cd9abadb8716fc280b4c7f99af
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/utilities@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "@dnd-kit/utilities@npm:3.2.2"
+  dependencies:
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10c0/9aa90526f3e3fd567b5acc1b625a63177b9e8d00e7e50b2bd0e08fa2bf4dba7e19529777e001fdb8f89a7ce69f30b190c8364d390212634e0afdfa8c395e85a0
+  languageName: node
+  linkType: hard
+
 "@emnapi/core@npm:1.11.1":
   version: 1.11.1
   resolution: "@emnapi/core@npm:1.11.1"
@@ -2578,6 +2627,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat/data-components@npm:^1.5.1":
+  version: 1.5.1
+  resolution: "@macrostrat/data-components@npm:1.5.1"
+  dependencies:
+    "@blueprintjs/core": "npm:^6.14.0"
+    "@dnd-kit/core": "npm:^6.3.1"
+    "@dnd-kit/sortable": "npm:^10.0.0"
+    "@macrostrat/color-utils": "npm:^1.2.2"
+    "@macrostrat/hyper": "npm:^3.1.1"
+    "@macrostrat/mapbox-utils": "npm:^1.8.0"
+    "@macrostrat/scoped-store": "npm:^1.0.1"
+    "@macrostrat/stratigraphy-utils": "npm:^1.3.0"
+    "@macrostrat/ui-components": "npm:^5.1.0"
+    "@types/d3-array": "npm:^3.2.1"
+    "@visx/axis": "npm:^3.12.0"
+    "@visx/gradient": "npm:^3.12.0"
+    "@visx/scale": "npm:^3.12.0"
+    "@visx/shape": "npm:^3.12.0"
+    axios: "npm:^1.13.2"
+    classnames: "npm:^2.5.1"
+    cross-fetch: "npm:^4.1.0"
+    d3-array: "npm:^3.2.4"
+    jotai: "npm:^2.20.0"
+    jotai-scope: "npm:^0.11.0"
+    mapbox-gl: "npm:^3.0.0"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+  checksum: 10c0/ef0119c94687e6e6cfef8e9a23a6516bcef6774750ecd724c9c7a05b47a551ff52fefa45c2491c0f7d1fba8c35f4fbf49f40916d4512a461dbb605379313f04e
+  languageName: node
+  linkType: hard
+
 "@macrostrat/data-provider@npm:^1.0.4, @macrostrat/data-provider@npm:^1.1.0":
   version: 1.1.0
   resolution: "@macrostrat/data-provider@npm:1.1.0"
@@ -2620,17 +2700,40 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/feedback-components@npm:^2.1.3":
-  version: 2.1.3
-  resolution: "@macrostrat/feedback-components@npm:2.1.3"
+"@macrostrat/data-sheet@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "@macrostrat/data-sheet@npm:4.5.0"
+  dependencies:
+    "@blueprintjs/core": "npm:^6.14.0"
+    "@blueprintjs/table": "npm:^6.1.0"
+    "@macrostrat/color-utils": "npm:^1.2.2"
+    "@macrostrat/data-components": "npm:^1.5.1"
+    "@macrostrat/hyper": "npm:^3.1.1"
+    "@macrostrat/scoped-store": "npm:^1.0.1"
+    "@macrostrat/ui-components": "npm:^5.2.0"
+    "@supabase/postgrest-js": "npm:^1.17.7"
+    "@types/underscore": "npm:^1.13.0"
+    classnames: "npm:^2.5.1"
+    immutability-helper: "npm:^3.1.1"
+    jotai: "npm:^2.20.0"
+    underscore: "npm:^1.13.7"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+  checksum: 10c0/758ee83a2b2a08f7d784baab49ed24cd46bf345193d91e8edca594426b5856e89588c3ca47b2a801771b2e8b5193870865c998fddb69aef58c7096c1bdefdeb7
+  languageName: node
+  linkType: hard
+
+"@macrostrat/feedback-components@npm:^2.2.5":
+  version: 2.2.5
+  resolution: "@macrostrat/feedback-components@npm:2.2.5"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@blueprintjs/select": "npm:^6.2.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
-    "@macrostrat/data-components": "npm:^1.1.10"
-    "@macrostrat/data-sheet": "npm:^4.0.0-dev3"
+    "@macrostrat/data-components": "npm:^1.5.1"
+    "@macrostrat/data-sheet": "npm:^4.5.0"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/ui-components": "npm:^5.0.10"
+    "@macrostrat/ui-components": "npm:^5.2.0"
     classnames: "npm:^2.5.1"
     d3-force: "npm:^3.0.0"
     immutability-helper: "npm:^3.1.1"
@@ -2640,7 +2743,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
     react-dom: ^18.0.0||^19.0.0
-  checksum: 10c0/c03dbf24f8f1939f65cfcdb1f63267185ffcffc0803f9f48422ac0441e175c5693b8be46b8620d9dcf845b51a344221d2ca8f4ab46ec1200c43aacefcfa54147
+  checksum: 10c0/039cee7a3761b288e251307a981f0a38e031fc1b30dad39bf4bd6ec249ab0e291cd959f050c7f30631384ce2a322047b734bb7e7c718967e107ff6f8b05a35d4
   languageName: node
   linkType: hard
 
@@ -2762,12 +2865,38 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat/mapbox-utils@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "@macrostrat/mapbox-utils@npm:1.8.0"
+  dependencies:
+    "@turf/bbox": "npm:^7.3.2"
+    axios: "npm:^1.13.2"
+    mapbox-gl: "npm:^3.0.0"
+  checksum: 10c0/ca1bc9f68246dacef6c05495957176de8a99996f0a3ada6f87148781f595aac45247da960696e5f8f4df0660560b92e96768384e708c3512bacd8f931a126460
+  languageName: node
+  linkType: hard
+
 "@macrostrat/revision-info-webpack@npm:^1.0.0":
   version: 1.0.0
   resolution: "@macrostrat/revision-info-webpack@npm:1.0.0"
   dependencies:
     git-revision-webpack-plugin: "npm:^3.0.6"
   checksum: 10c0/99c78439569cfce3fc8c622eae30a094e3b11925adfbf1eb541fb4b415d1646b243b64441b42392fa3ba48d847b58d4126a6ee18251458fab576699e372a5575
+  languageName: node
+  linkType: hard
+
+"@macrostrat/scoped-store@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@macrostrat/scoped-store@npm:1.0.1"
+  dependencies:
+    "@macrostrat/hyper": "npm:^3.1.1"
+    jotai: "npm:^2.20.0"
+    jotai-scope: "npm:^0.11.0"
+    jotai-zustand: "npm:^0.6.0"
+    zustand: "npm:^5.0.2"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+  checksum: 10c0/9e4d654befedd588a0ea127d77198387d48e33a00be03b35b668fa66eafebabe6808ff06b882b92b7e72ee2dcbd80366983f3d7f45dae2dc07012a1f70df3c10
   languageName: node
   linkType: hard
 
@@ -2930,6 +3059,38 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat/ui-components@npm:^5.1.0, @macrostrat/ui-components@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "@macrostrat/ui-components@npm:5.2.0"
+  dependencies:
+    "@blueprintjs/core": "npm:^6.14.0"
+    "@blueprintjs/datetime": "npm:^6.1.0"
+    "@blueprintjs/select": "npm:^6.2.0"
+    "@macrostrat/hyper": "npm:^3.1.1"
+    "@types/react": "npm:^19.2.14"
+    "@types/react-dom": "npm:^18"
+    "@uiw/react-color": "npm:^2.9.2"
+    axios: "npm:^1.13.2"
+    chroma-js: "npm:^3.2.0"
+    classnames: "npm:^2.5.1"
+    d3-array: "npm:^3.2.4"
+    immutability-helper: "npm:^3.1.1"
+    query-string: "npm:^9.0.0"
+    react-dropzone: "npm:^11.4.2"
+    react-intersection-observer: "npm:^8.32.1"
+    react-json-tree: "npm:^0.19.0"
+    ui-box: "npm:^5.4.1"
+    underscore: "npm:^1.13.7"
+    use-async-effect: "npm:^2.2.1"
+    use-element-dimensions: "npm:^2.1.3"
+    zustand: "npm:^5.0.3"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+    react-dom: ^18.0.0||^19.0.0
+  checksum: 10c0/611e4a45b73b3f3d66b8f1f3adc8ae8add806bd6c1d2119e7f6161210b88591a55217da669cf4faa36a75bba475ca03aa99fdf3b8831fa788a60cfef7c22ee1d
+  languageName: node
+  linkType: hard
+
 "@macrostrat/vite-plugin-hyperstyles@npm:^2.0.2":
   version: 2.0.2
   resolution: "@macrostrat/vite-plugin-hyperstyles@npm:2.0.2"
@@ -2971,7 +3132,7 @@ __metadata:
     "@macrostrat/data-components": "npm:^1.1.10"
     "@macrostrat/data-provider": "npm:^1.0.4"
     "@macrostrat/data-sheet": "npm:^4.0.0-dev3"
-    "@macrostrat/feedback-components": "npm:^2.1.3"
+    "@macrostrat/feedback-components": "npm:^2.2.5"
     "@macrostrat/form-components": "npm:^1.0.9"
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/map-interface": "npm:^2.2.7"
