@@ -1,45 +1,24 @@
 /** Chrome for the hybrid frame.
  *
- * There is exactly *one* full-width bar: the top toolbar, which carries the
- * app's own `PageBreadcrumbs` (logo included) on the left and the actions
- * panel on the right. Page-level titling lives in the content panel's own
- * header, not in a second full-width bar.
+ * The frame's header lives in `page.ts` (it differs per shell). What's here is
+ * the site footer's routes in.
  *
  * The footer is the site's real `Footer`, unmodified, presented in a popover.
- * In the content frame you scroll to it — and, once it's out of sight, reach it
- * from a right-aligned overlay button in footer position. In the fullscreen
- * frame, where there is no footer to scroll to, the same button sits in the top
- * toolbar's actions. There is deliberately no persistent footer bar; pages that
- * want a bottom strip pass their own via `HybridPage`'s `bottomBar`.
+ * In the content shell you scroll to it — and, once it's out of sight, reach it
+ * from a right-aligned overlay button in footer position. In the map shell,
+ * where there is no footer to scroll to, the same button sits in the navbar's
+ * controls. There is deliberately no persistent footer bar.
  */
 
 import { Button, Popover } from "@blueprintjs/core";
 import { useAtom } from "jotai";
 import classNames from "classnames";
-import type { ReactNode } from "react";
 
-import { PageBreadcrumbs } from "~/components";
 import { Footer } from "~/layouts/footer";
 
 import h from "./chrome.module.sass";
 import { useShowFooterAffordance } from "./scroll";
 import { footerLinksOpenAtom } from "./state";
-
-export function TopToolbar({
-  actions,
-  floating = false,
-}: {
-  actions?: ReactNode;
-  floating?: boolean;
-}) {
-  return h("div.top-toolbar", { className: classNames({ floating }) }, [
-    h(
-      "div.toolbar-nav",
-      h(PageBreadcrumbs, { showLogo: true, separateTitle: false })
-    ),
-    h("div.toolbar-actions", actions),
-  ]);
-}
 
 /** The site footer, verbatim, in a popover.
  *

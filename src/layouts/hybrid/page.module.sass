@@ -1,110 +1,28 @@
-// The hybrid page frame.
-//
 // Frame-level tokens live here. Weak names, so a consuming page can re-point
 // any of them without touching the global Paleozoic contract.
 
 .hybrid-frame
   --hybrid-transition-duration: 220ms
-  --hybrid-toolbar-height: 2.75rem
-  --hybrid-assistant-width: clamp(260px, 26vw, 360px)
-  --hybrid-embedded-assistant-max-height: 45%
-  --hybrid-floating-assistant-max-height: 60%
-  --hybrid-bottom-bar-height: 2.25rem
+  --hybrid-sticky-offset: 3.5rem
 
-  // Content presentation carries the app's content measure, plus the amount
-  // the sidebar is allowed to overhang it on wide viewports.
+  // The app content measure the list is sized to, the width the map/assistant
+  // column takes beside it, and the overall shell bound.
   --hybrid-content-width: var(--qz-main-content-width, 970px)
-  --hybrid-content-overhang: 200px
-  --hybrid-content-frame-padding: 3em
+  --hybrid-sidebar-width: clamp(280px, 28vw, 420px)
+  --hybrid-shell-width: var(--qz-main-content-width, 970px)
 
   background-color: var(--pz-background-color, var(--background-color))
   color: var(--pz-text-color, var(--text-color))
 
-/* ============================== content frame ============================ */
-
-// Normal document flow: the page scrolls, and the real site footer sits at the
-// end of it. No frame-level chrome at all.
-.presentation-content
-  display: block
-
-/* ============================ fullscreen frame =========================== */
-
-.presentation-fullscreen
-  --toolbar-track: var(--hybrid-toolbar-height)
-  --bottom-bar-track: 0px
-
+// Both shells are viewport-locked. The content shell hands scrolling to the
+// data panel (as `InfiniteScrollPage` does); the map shell locks the viewport
+// itself via `MapAreaContainer`'s `fitViewport`.
+.shell-content
   position: fixed
   inset: 0
-  display: grid
-  grid-template-rows: var(--toolbar-track) 1fr var(--bottom-bar-track)
-  min-height: 0
-  overflow: hidden
-  transition: grid-template-rows var(--hybrid-transition-duration) ease
-
-  &.has-bottom-bar
-    --bottom-bar-track: var(--hybrid-bottom-bar-height)
-
-// Full-bleed map: hand the toolbar's row back to the content and float the
-// toolbar over it instead. Same mechanism as the composer's track collapse.
-.chrome-collapsed
-  --toolbar-track: 0px
-  --hybrid-body-inset-top: var(--hybrid-toolbar-height)
-
-  .toolbar-row
-    position: absolute
-    top: 0
-    left: 0
-    right: 0
-    height: var(--hybrid-toolbar-height)
-    z-index: 10
-
-.toolbar-row,
-.bottom-bar-row
-  min-height: 0
   overflow: hidden
 
-.bottom-bar-row
-  border-top: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
-
-.body
-  position: relative
-  min-height: 0
-  min-width: 0
+.shell-map
+  position: fixed
+  inset: 0
   overflow: hidden
-
-/* ============================== panel header ============================= */
-
-.panel-header-inner
-  display: flex
-  flex-direction: row
-  align-items: baseline
-  gap: var(--pz-inline-gap, 0.5rem)
-  min-width: 0
-
-.panel-titling
-  flex: 1 1 auto
-  min-width: 0
-
-  .panel-title
-    margin: 0
-
-    h1
-      font-size: 1.1rem
-      margin: 0
-      white-space: nowrap
-      overflow: hidden
-      text-overflow: ellipsis
-
-.panel-actions,
-.panel-layout-controls
-  flex: 0 0 auto
-  align-self: center
-
-// Fullscreen: the header is a compact bar pinned to the top of the scrolling
-// content pane, so it needs its own background to sit over content.
-.panel-header-inner.header-fullscreen
-  align-items: center
-  height: var(--hybrid-panel-header-height, 2.25rem)
-  padding: 0 var(--pz-space-3, 0.75rem)
-  background-color: var(--pz-panel-background-color, var(--panel-background-color))
-  border-bottom: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))

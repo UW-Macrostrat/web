@@ -18,12 +18,8 @@ import {
   capabilitiesAtom,
   layoutModeAtom,
   layoutModeLabel,
-  presentationAtom,
-  presentationLabel,
-  resolvedPresentationAtom,
   showAssistantAtom,
   type LayoutMode,
-  type Presentation,
 } from "./state";
 
 const modeIcons: Record<LayoutMode, string> = {
@@ -31,11 +27,6 @@ const modeIcons: Record<LayoutMode, string> = {
   "content-primary": "list-detail-view",
   "map-primary": "map",
   "map-only": "globe",
-};
-
-const presentationIcons: Record<Presentation, string> = {
-  content: "document",
-  fullscreen: "fullscreen",
 };
 
 export function LayoutModeControl({ className = null, showLabels = false }) {
@@ -71,6 +62,7 @@ export function LayoutModeControl({ className = null, showLabels = false }) {
 export function ActionsPanel({ children }: { children?: ReactNode }) {
   return h("div.actions-panel", [
     children,
+    h(AssistantToggle),
     h(LayoutModeControl),
     h(Popover, {
       minimal: true,
@@ -95,30 +87,10 @@ export function ActionsPanel({ children }: { children?: ReactNode }) {
 }
 
 function ViewMenu() {
-  const { presentations, hasAssistant } = useAtomValue(capabilitiesAtom);
-  const [presentation, setPresentation] = useAtom(presentationAtom);
-  const resolved = useAtomValue(resolvedPresentationAtom);
+  const { hasAssistant } = useAtomValue(capabilitiesAtom);
   const [showAssistant, setShowAssistant] = useAtom(showAssistantAtom);
 
   const items: ReactNode[] = [];
-
-  if (presentations.length > 1) {
-    items.push(h(MenuDivider, { key: "framing", title: "Framing" }));
-    for (const p of presentations) {
-      // `resolved` can differ from the choice when a map-dominant mode forces
-      // the fullscreen frame; show what's actually rendering.
-      items.push(
-        h(MenuItem, {
-          key: p,
-          icon: presentationIcons[p],
-          text: presentationLabel(p),
-          selected: resolved === p,
-          labelElement: forcedLabel(p, presentation, resolved),
-          onClick: () => setPresentation(p),
-        })
-      );
-    }
-  }
 
   if (hasAssistant) {
     items.push(h(MenuDivider, { key: "panels", title: "Panels" }));
@@ -134,15 +106,6 @@ function ViewMenu() {
   }
 
   return h(Menu, items);
-}
-
-function forcedLabel(
-  option: Presentation,
-  chosen: Presentation,
-  resolved: Presentation
-): ReactNode {
-  if (option !== resolved || resolved === chosen) return null;
-  return h("span.forced-label", "map view");
 }
 
 export function AssistantToggle({ className = null }) {

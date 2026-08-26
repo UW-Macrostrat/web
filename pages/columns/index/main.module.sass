@@ -1,182 +1,140 @@
-.flex-row
+// Column list page content. The frame itself lives in `~/layouts/hybrid`.
+
+// Must match ROW_HEIGHT / GROUP_HEIGHT in `+Page.ts` — the windowed scroll body
+// positions rows absolutely, so it can't measure them.
+$row-height: 30px
+$group-height: 34px
+
+.column-panel
+  height: 100%
+  min-height: 0
+
+
+.list-loading
+  display: flex
+  justify-content: center
+  padding: 3em 0
+
+/* ------------------------------------------------------------------- rows */
+
+.column-row
   display: flex
   flex-direction: row
-  position: relative
-  gap: 2em
-
-.main, .sidebar
-  flex: 1
-
-:root
-  --main-extra-width: 200px
-
-
-@media (min-width: 1100px)
-  .flex-row
-    margin-right: calc(-1 * var(--main-extra-width))
-
-  .sidebar
-    max-width: calc(50% - var(--main-extra-width) / 2)
-
-.sidebar-content
-  padding-top: 2em
-  position: sticky
-  top: 0
-  display: flex
-  flex-direction: column
-  gap: 1em
-
-.column-map-container
-  position: relative
-  min-height: 300px
-  width: 100%
-  aspect-ratio: 1/1
-
-.column-group-header
-  display: flex
-  justify-content: space-between
   align-items: center
-
-.column-group
+  gap: var(--pz-inline-gap, 0.5rem)
+  height: $row-height
+  padding: 0 var(--pz-space-2, 0.5rem)
+  border-radius: var(--pz-radius-sm, 4px)
   cursor: pointer
+  user-select: none
 
-.column-groups
-  display: flex
-  flex-direction: column
-  gap: 10px
+  &:hover
+    background-color: var(--pz-hover-background-color, var(--secondary-background))
 
-.search-bar
+  &.selected
+    background-color: var(--pz-selected-background-color, var(--tertiary-background))
+    color: var(--pz-selected-text-color, var(--text-emphasized-color))
+
+.col-id
+  flex: 0 0 auto
+  min-width: 3.5em
+  color: var(--pz-secondary-color, var(--secondary-color))
+  font-family: var(--monospace-font)
+  font-size: 0.8rem
+
+.col-name
+  flex: 1 1 auto
+  min-width: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+/* --------------------------------------------------------------- controls */
+
+.list-controls
   display: flex
   flex-direction: row
-  gap: 5px
   align-items: center
-  justify-content: center
-  margin: 1em 0
+  gap: var(--pz-section-gap, 1rem)
+  flex-wrap: wrap
+  min-width: 0
 
-.active,
-.inprocess,
-.obsolete
-  place-self: end start
-  padding: 0.5em
-  margin: 0.2em 0
-  border-radius: 0.2em
-  font-weight: bold
-
-.active
-  background-color: green
-  color: white
-
-.column-list table
-  width: 100%
-  position: relative
-
-  th
-    text-align: left
-    background-color: var(--panel-background-color)
-
-  tr
-    align-items: baseline
-
-    &:hover
-      background-color: var(--tertiary-background)
-
-  td.col-id
-    width: 60px
-
-  td.col-name
-    max-width: 60%
-
-  .col-status
-    text-align: right
-
-.inprocess
-  background-color: yellow
-  color: black
-
-.obsolete
-  background-color: red
-  color: white
-
-
-.popup
-  padding: 1em
-
-  h3
-    font-size: 1.5em
-    text-align: center
-    margin: 0
-
-.mapboxgl-popup-close-button
-  padding: 0.5em
-  margin: 0
-  font-size: 1.5em
+.view-filters,
+.source-switches
   display: flex
-  justify-content: center
+  flex-direction: row
   align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  flex-wrap: wrap
 
-.search-bar
-  flex: 1 1 0
+  :global(.bp6-control)
+    margin-bottom: 0
 
-.switches
-  flex: 0 0 auto
+.search-input
+  min-width: 12rem
+
+.lex-suggestions
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  flex-wrap: wrap
+
+.filter-note
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.35em
+  padding: 0.2em 0.4em
+  color: var(--pz-secondary-color, var(--secondary-color))
+  font-size: 0.85rem
+  white-space: nowrap
 
 .lex-filters
   display: flex
-  flex-direction: column
-  gap: .5em
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  flex-wrap: wrap
+
+.lex-filter-item
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.2em
 
 .close-btn
   cursor: pointer
 
-.filters
-  display: flex
-  gap: 1em
-  align-items: center
-
-.filter
-  margin: 0
-
-.autocomplete
-  height: 30vh
-  position: absolute
-  background-color: var(--background-color)
-  width: 100%
-
-.search
-  width: 80%
-  position: relative
-
 .lith-tag
-  background-color: var(--tertiary-color)
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.3em
+  background-color: var(--pz-panel-secondary-background-color, var(--tertiary-color))
   border-radius: .2em
   padding-right: .5em
-  margin: .5em 0
   cursor: pointer
 
 .label
-  color: var(--text-emphasized-color)
+  color: var(--pz-text-emphasized-color, var(--text-emphasized-color))
   margin: 0
 
-.suggested-items
-  padding: .5em
+/* -------------------------------------------------------------- assistant */
 
-.content-area
-  position: relative
+.assistant
+  padding: var(--pz-content-padding, 1rem)
 
-.loading-overlay
-  position: absolute
-  top: 0
-  left: 0
-  width: 100%
-  height: 100%
-  background-color: var(--background-color)
-  opacity: 0.5
-  display: flex
-  justify-content: center
-  align-items: center
-  z-index: 10
+  h2
+    font-size: 1rem
+    margin: 0 0 var(--pz-heading-spacing, 0.5em)
 
-.loading-spinner
-  position: sticky
-  top: 50%
-  bottom: 50%
+.assistant-empty
+  color: var(--pz-secondary-color, var(--secondary-color))
+  margin: 0
+
+.assistant-link
+  margin: var(--pz-paragraph-spacing, 0.75em) 0 0
+
+.assistant-links
+  margin-top: var(--pz-stack-gap, 1rem)

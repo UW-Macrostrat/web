@@ -1,32 +1,29 @@
-/** `HybridPage` — a configurable frame for pages that balance a primary
- * content view against a map, with contextual "assistant" content alongside.
+/** `HybridPage` — a frame for pages that balance a primary content view against
+ * a map, with contextual "assistant" content alongside.
  *
- * Two presentations (see `./state`): `content` renders as a closed-form
- * content page in normal document flow, and `fullscreen` renders as a
- * viewport-locked app frame. The frame supplies its own containment for both,
- * so host it under a page style that doesn't impose one — `pageStyle: "hybrid"`.
+ * It is a sliding scale between two existing endmembers rather than a layout of
+ * its own: the site's scrolling content page at one end, `MapAreaContainer`
+ * (`@macrostrat/map-interface`) at the other. `layoutMode` picks the shell and
+ * how open its panels are; see `./composer` for the slot mapping.
  *
- * Chrome is deliberately thin: one full-width top toolbar (fullscreen only,
- * carrying breadcrumbs + the actions panel), and the page's own header inside
- * the content pane rather than a second full-width bar.
+ * Host it under `pageStyle: "hybrid"`, which imposes no containment of its own —
+ * the content shell scrolls with the document, the map shell locks the viewport.
  */
 
 import { useMemo, type ReactNode } from "react";
-import { Provider, useAtomValue } from "jotai";
+import { OverlaysProvider } from "@blueprintjs/core";
+import { Provider, useAtomValue, type WritableAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
-import classNames from "classnames";
-
-import { PageBreadcrumbs, PageTitle } from "~/components";
+import { PageBreadcrumbs } from "~/components";
 
 import h from "./page.module.sass";
-import { FooterLinksButton, FooterOverlayTrigger, TopToolbar } from "./chrome";
-import { LayoutComposer } from "./composer";
+import { FooterLinksButton, FooterOverlayTrigger } from "./chrome";
+import { LayoutShellView } from "./composer";
 import { ActionsPanel } from "./controls";
 import {
   buildCapabilities,
   capabilitiesAtom,
-  chromeModeAtom,
-  resolvedPresentationAtom,
+  layoutShellAtom,
   type LayoutCapabilities,
 } from "./state";
 
@@ -37,36 +34,47 @@ export interface HybridPageProps {
   content?: ReactNode;
   map?: ReactNode;
   assistant?: ReactNode;
-  /** Optional persistent bottom strip (fullscreen only). There is no default
-   * one — the site footer arrives as a dismissable panel instead. */
-  bottomBar?: ReactNode;
+  /** Page-owned atoms to seed inside the frame's jotai scope. The frame creates
+   * its own `Provider`, which isolates *every* atom read below it — so a page
+   * can't hydrate its state in an outer provider and expect the slots to see
+   * it. Pass the seed values here instead. */
+  initialAtoms?: [WritableAtom<any, any, any>, any][];
   className?: string;
 }
 
 export function HybridPage(props: HybridPageProps) {
-  const { capabilities, ...rest } = props;
+  const { capabilities, initialAtoms, ...rest } = props;
   return h(
     HybridLayoutProvider,
-    { capabilities },
+    { capabilities, initialAtoms },
     h(HybridPageInner, rest as HybridPageProps)
   );
 }
 
 /** Scopes layout state to this page instance, so two frames on one route (or a
  * frame under a page that owns other jotai state) can't collide. */
-function HybridLayoutProvider({ capabilities, children }) {
+function HybridLayoutProvider({ capabilities, initialAtoms, children }) {
   const resolved = useMemo(
     () => buildCapabilities(capabilities),
     [capabilities]
   );
+  const atoms = useMemo(
+    () => [[capabilitiesAtom, resolved], ...(initialAtoms ?? [])],
+    [resolved, initialAtoms]
+  );
+
+  // `OverlaysProvider` is required for Blueprint overlays (popovers, dialogs)
+  // to position correctly — without it a popover's popper reference goes
+  // unmeasured and it parks at the viewport's top-left. Scoped to the frame
+  // rather than the app root so no existing page's overlay behavior changes.
   return h(
     Provider,
-    h(HydrateCapabilities, { capabilities: resolved }, children)
+    h(HydrateAtoms, { atoms }, h(OverlaysProvider, children))
   );
 }
 
-function HydrateCapabilities({ capabilities, children }) {
-  useHydrateAtoms([[capabilitiesAtom, capabilities]]);
+function HydrateAtoms({ atoms, children }) {
+  useHydrateAtoms(atoms);
   return children;
 }
 
@@ -75,86 +83,40 @@ function HybridPageInner({
   content,
   map,
   assistant,
-  bottomBar,
   className,
 }: HybridPageProps) {
-  const presentation = useAtomValue(resolvedPresentationAtom);
-  const chromeMode = useAtomValue(chromeModeAtom);
+  const shell = useAtomValue(layoutShellAtom);
 
-  const composer = h(LayoutComposer, {
+  const shellView = h(LayoutShellView, {
     content,
-    contentHeader: h(PanelHeader, { actions, presentation }),
+    breadcrumbs: h(PageBreadcrumbs, { showLogo: true, separateTitle: false }),
+    controls: h(HeaderControls, { actions }),
     map,
     assistant,
   });
 
-  if (presentation === "content") {
-    // The footer is at the end of a document that can be thousands of rows
-    // long, so it also gets an overlay route in — the same popover, reachable
-    // without scrolling to the bottom.
-    return h("div.hybrid-frame.presentation-content", { className }, [
-      composer,
-      h(FooterOverlayTrigger, { key: "footer-affordance" }),
-    ]);
+  if (shell === "map") {
+    return h(
+      "div.hybrid-frame.shell-map",
+      { className },
+      shellView
+    );
   }
 
-  let bottomBarRow = null;
-  if (bottomBar != null) {
-    bottomBarRow = h("div.bottom-bar-row", bottomBar);
-  }
-
-  return h(
-    "div.hybrid-frame.presentation-fullscreen",
-    {
-      className: classNames(className, `chrome-${chromeMode}`, {
-        "has-bottom-bar": bottomBar != null,
-      }),
-    },
-    [
-      h("div.toolbar-row", { key: "toolbar" }, [
-        h(TopToolbar, {
-          // No footer to scroll to in this frame, so the site links live with
-          // the rest of the chrome rather than as bottom overlay.
-          actions: [
-            h(ActionsPanel, { key: "actions" }),
-            h(FooterLinksButton, { key: "site-links" }),
-          ],
-          floating: chromeMode === "collapsed",
-        }),
-      ]),
-      h("div.body", { key: "body" }, composer),
-      bottomBarRow,
-    ]
-  );
+  // The site footer belongs at the end of the panel's scroll content, not the
+  // frame — pages pass `HybridContentFooter` as the panel's `contentFooter`,
+  // mirroring `InfiniteScrollPage`. The overlay button stays as a shortcut to
+  // the same links from anywhere in a long list.
+  return h("div.hybrid-frame.shell-content", { className }, [
+    shellView,
+    h(FooterOverlayTrigger, { key: "footer-affordance" }),
+  ]);
 }
 
-/** The page's own header, inside the content pane.
- *
- * In the content presentation it is the site's standard breadcrumbs + title
- * block, exactly as a content page renders it. In the fullscreen presentation
- * the breadcrumbs already live in the toolbar, so only the title shows — and
- * page actions ride along, since there's no second full-width bar for them. */
-function PanelHeader({ actions, presentation }) {
-  let titling = h(PageTitle, { headingLevel: 1, className: "panel-title" });
-  if (presentation === "content") {
-    titling = h(PageBreadcrumbs, { showLogo: true, separateTitle: true });
-  }
-
-  let actionsRegion = null;
-  if (actions != null) {
-    actionsRegion = h("div.panel-actions", actions);
-  }
-
-  // In the content presentation the frame has no toolbar, so the layout
-  // controls join the page header.
-  let layoutControls = null;
-  if (presentation === "content") {
-    layoutControls = h("div.panel-layout-controls", h(ActionsPanel));
-  }
-
-  return h("div.panel-header-inner", { className: `header-${presentation}` }, [
-    h("div.panel-titling", titling),
-    actionsRegion,
-    layoutControls,
-  ]);
+/** The layout controls, plus whatever the page contributes. Shells place these
+ * themselves — a sticky bar in the content shell, `MapAreaContainer`'s floating
+ * navbar in the map shell — which is why they're handed down as a part rather
+ * than an assembled header. */
+function HeaderControls({ actions }) {
+  return h([actions, h(ActionsPanel), h(FooterLinksButton)]);
 }

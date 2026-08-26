@@ -1,27 +1,21 @@
 export { HybridPage, type HybridPageProps } from "./page";
 export { ActionsPanel, AssistantToggle, LayoutModeControl } from "./controls";
 export { FooterLinksButton } from "./chrome";
+export { HybridContentFooter } from "./content-footer";
 export {
   allLayoutModes,
-  allPresentations,
   buildCapabilities,
   capabilitiesAtom,
-  chromeModeAtom,
-  defaultAssistantPlacement,
   defaultCapabilities,
-  defaultChromeMode,
   hasContentPane,
   hasMapPane,
-  isMapDominant,
   layoutModeAtom,
   layoutModeLabel,
-  presentationAtom,
-  presentationLabel,
-  resolvedPresentationAtom,
+  layoutShellAtom,
+  shellForMode,
   showAssistantAtom,
   type AssistantPlacement,
-  type ChromeMode,
   type LayoutCapabilities,
   type LayoutMode,
-  type Presentation,
+  type LayoutShell,
 } from "./state";
