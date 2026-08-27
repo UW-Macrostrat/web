@@ -27,8 +27,16 @@ export type LayoutMode =
   | "map-primary"
   | "map-only";
 
-/** Which endmember shell a mode renders in. */
-export type LayoutShell = "content" | "map";
+/** Which shell a mode renders in.
+ *
+ *  - `content` — a scrolling content page (the list endmember).
+ *  - `split`   — viewport-locked: a fixed left panel with the map filling the
+ *                entire right of the screen.
+ *  - `map`     — `MapAreaContainer`, i.e. the map page exactly.
+ *
+ * Only `map-only` follows the map page; `map-primary` is the split view, whose
+ * point is a full-bleed map beside a list rather than panels floating over one. */
+export type LayoutShell = "content" | "split" | "map";
 
 /** Where the assistant renders inside the content shell. (In the map shell it
  * is always `MapAreaContainer`'s detail panel.) */
@@ -53,12 +61,12 @@ export function layoutModeLabel(mode: LayoutMode): string {
 }
 
 export function shellForMode(mode: LayoutMode): LayoutShell {
-  if (mode === "map-primary" || mode === "map-only") return "map";
+  if (mode === "map-only") return "map";
+  if (mode === "map-primary") return "split";
   return "content";
 }
 
-/** Whether the list is on screen. In the map shell this is the context panel's
- * open state, which `MapAreaContainer` animates for us. */
+/** Whether the list is on screen. */
 export function hasContentPane(mode: LayoutMode): boolean {
   return mode !== "map-only";
 }
@@ -125,21 +133,11 @@ export const layoutShellAtom = atom<LayoutShell>((get) =>
   shellForMode(get(layoutModeAtom))
 );
 
-const assistantParam = atomWithSearchParam("assistant");
-
+/** Whether the assistant slot renders. A page-level capability rather than a
+ * user toggle: switching to the list-only mode is the clearer way to say "just
+ * the list", and in the list+map mode the sidebar has room for it regardless. */
 export const showAssistantAtom = atom(
-  (get): boolean => {
-    if (!get(capabilitiesAtom).hasAssistant) return false;
-    return get(assistantParam) !== "hidden";
-  },
-  (get, set, show: boolean) => {
-    if (!get(capabilitiesAtom).hasAssistant) return;
-    let value: string | null = null;
-    if (!show) {
-      value = "hidden";
-    }
-    set(assistantParam, value);
-  }
+  (get): boolean => get(capabilitiesAtom).hasAssistant
 );
 
 /** Open state of the site-links footer popover. Ephemeral, so it stays out of

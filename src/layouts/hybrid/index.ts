@@ -1,5 +1,5 @@
 export { HybridPage, type HybridPageProps } from "./page";
-export { ActionsPanel, AssistantToggle, LayoutModeControl } from "./controls";
+export { ActionsPanel, LayoutModeControl } from "./controls";
 export { FooterLinksButton } from "./chrome";
 export { HybridContentFooter } from "./content-footer";
 export {

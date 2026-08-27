@@ -8,6 +8,14 @@ $group-height: 34px
 .column-panel
   height: 100%
   min-height: 0
+  min-width: 0
+
+  // `.data-panel-main` is a flex item with the default `min-width: auto`, so in
+  // a fixed-width panel (the split shell's left column) its min-content width
+  // pushes the scroll body wider than its container. Targeted structurally
+  // because the class is CSS-module-scoped inside `data-sheet`.
+  > div
+    min-width: 0
 
 
 .list-loading
@@ -35,12 +43,22 @@ $group-height: 34px
     background-color: var(--pz-selected-background-color, var(--tertiary-background))
     color: var(--pz-selected-text-color, var(--text-emphasized-color))
 
-.col-id
+// Identifiers are right-aligned at every level of the list — project, group,
+// column — so the eye can read names down the left and ids down the right.
+.col-identifier,
+.header-identifier
   flex: 0 0 auto
-  min-width: 3.5em
+  margin-left: auto
+  padding-left: var(--pz-inline-gap, 0.5rem)
   color: var(--pz-secondary-color, var(--secondary-color))
   font-family: var(--monospace-font)
   font-size: 0.8rem
+
+.header-name
+  min-width: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
 
 .col-name
   flex: 1 1 auto
@@ -51,24 +69,21 @@ $group-height: 34px
 
 /* --------------------------------------------------------------- controls */
 
-.list-controls
+.source-facets
   display: flex
-  flex-direction: row
-  align-items: center
-  gap: var(--pz-section-gap, 1rem)
-  flex-wrap: wrap
-  min-width: 0
-
-.view-filters,
-.source-switches
-  display: flex
-  flex-direction: row
-  align-items: center
-  gap: var(--pz-inline-gap, 0.5rem)
-  flex-wrap: wrap
+  flex-direction: column
+  gap: var(--pz-space-2, 0.5rem)
+  padding: var(--pz-space-3, 0.75rem)
+  min-width: 16rem
+  max-width: 24rem
 
   :global(.bp6-control)
     margin-bottom: 0
+
+.filter-label
+  margin: 0
+  color: var(--pz-secondary-color, var(--secondary-color))
+  font-size: 0.8rem
 
 .search-input
   min-width: 12rem

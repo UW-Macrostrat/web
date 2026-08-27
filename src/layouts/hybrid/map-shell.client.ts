@@ -55,10 +55,15 @@ export function MapShell({
   return h(
     MapAreaContainer,
     {
-      className: classNames("map-shell", `mode-${mode}`),
+      className: classNames(`mode-${mode}`),
       navbar,
       contextPanel,
       contextPanelOpen,
+      // `ContextStack` is a flex column of [navbar, panel holder, spacer], and
+      // the holder is content-sized by default — fine for the `PanelCard`s this
+      // container was built for, fatal for a data panel that needs a definite
+      // height to scroll in. Claiming the stack lets us give the holder one.
+      contextStackProps: { className: "hybrid-context-stack" },
       detailPanel,
       detailPanelOpen: showAssistant,
       detailPanelStyle: DetailPanelStyle.FLOATING,

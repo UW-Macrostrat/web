@@ -14,10 +14,11 @@ import { useMemo, type ReactNode } from "react";
 import { OverlaysProvider } from "@blueprintjs/core";
 import { Provider, useAtomValue, type WritableAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
+import classNames from "classnames";
 import { PageBreadcrumbs } from "~/components";
 
 import h from "./page.module.sass";
-import { FooterLinksButton, FooterOverlayTrigger } from "./chrome";
+import { FooterOverlayTrigger } from "./chrome";
 import { LayoutShellView } from "./composer";
 import { ActionsPanel } from "./controls";
 import {
@@ -95,10 +96,10 @@ function HybridPageInner({
     assistant,
   });
 
-  if (shell === "map") {
+  if (shell !== "content") {
     return h(
-      "div.hybrid-frame.shell-map",
-      { className },
+      "div.hybrid-frame",
+      { className: classNames(className, `shell-${shell}`) },
       shellView
     );
   }
@@ -118,5 +119,5 @@ function HybridPageInner({
  * navbar in the map shell — which is why they're handed down as a part rather
  * than an assembled header. */
 function HeaderControls({ actions }) {
-  return h([actions, h(ActionsPanel), h(FooterLinksButton)]);
+  return h([actions, h(ActionsPanel)]);
 }

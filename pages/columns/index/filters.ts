@@ -11,7 +11,7 @@
  * filter defined by the selection self-destroying.
  */
 
-import { Icon, InputGroup, Switch } from "@blueprintjs/core";
+import { Icon, InputGroup } from "@blueprintjs/core";
 import type { TableFilter } from "@macrostrat/data-sheet";
 
 import h from "./main.module.sass";
@@ -122,26 +122,3 @@ export const columnTableFilters: TableFilter<ColumnRow, any>[] = [
   onlySelectedFilter,
   inMapAreaFilter,
 ];
-
-/** Toggle switches for the two view-scoped filters, for a page that wants them
- * as direct controls rather than only in the Filter menu. */
-export function ViewFilterSwitches({
-  onlySelected,
-  inMapArea,
-  setOnlySelected,
-  setInMapArea,
-  selectedCount,
-}) {
-  return h("div.view-filters", [
-    h(Switch, {
-      checked: onlySelected,
-      label: `Only selected (${selectedCount})`,
-      onChange: () => setOnlySelected(!onlySelected),
-    }),
-    h(Switch, {
-      checked: inMapArea,
-      label: "Only in map area",
-      onChange: () => setInMapArea(!inMapArea),
-    }),
-  ]);
-}

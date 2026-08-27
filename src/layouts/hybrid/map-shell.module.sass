@@ -1,17 +1,52 @@
-// `MapAreaContainer` owns this shell's layout; these only size the slot
-// contents, which are ours.
+// `MapAreaContainer` owns this shell's layout; what follows sizes the slot
+// contents (which are ours) and gives the context-panel holder a definite
+// height, which the container doesn't since it expects content-sized cards.
+
+.hybrid-context-stack
+  // On desktop the container sizes the context stack to `fit-content`, which is
+  // right for the small cards it was built for and wrong for a data list. These
+  // are the container's own override tokens.
+  --map-context-stack-width: 30em
+  --map-context-stack-max-width: 34em
+  --map-context-min-width: 20em
+
+  display: flex
+  flex-direction: column
+  height: 100%
+  min-height: 0
+
+  // `ContextStack` renders exactly [navbar-holder, context-panel-holder,
+  // spacer]. Positional rather than by class name, because the holder's class
+  // is CSS-module-scoped inside `map-interface` and so isn't addressable here.
+  > div:nth-child(2)
+    flex: 1 1 auto
+    min-height: 0
+    display: flex
+    flex-direction: column
+
+  > div:last-child
+    flex: 0 0 auto
 
 .map-context-panel
   display: flex
   flex-direction: column
+  flex: 1 1 auto
+  width: 100%
   min-height: 0
   height: 100%
   overflow: hidden
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  border-radius: var(--map-panel-border-radius, 4px)
 
 .map-detail-panel
+  display: flex
+  flex-direction: column
   min-width: 0
+  min-height: 0
   max-height: 100%
   overflow: auto
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  border-radius: var(--map-panel-border-radius, 4px)
 
 .navbar-controls
   display: flex

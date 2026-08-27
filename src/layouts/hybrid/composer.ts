@@ -46,6 +46,9 @@ export function LayoutShellView(props: ShellProps) {
   if (shell === "map") {
     return h(MapShell, { ...props, mode, showAssistant });
   }
+  if (shell === "split") {
+    return h(SplitShell, { ...props, showAssistant });
+  }
   return h(ContentShell, { ...props, mode, showAssistant });
 }
 
@@ -98,4 +101,38 @@ function ContentShell({
       ]),
     ]
   );
+}
+
+/* -------------------------------------------------------------- split shell */
+
+/** A fixed left panel with the map filling the entire right of the screen.
+ *
+ * The page header sits at the top of the *panel* rather than spanning the
+ * window, so the map really does reach the top and right edges. The assistant
+ * floats over the map instead of taking a third column, which would leave the
+ * list too narrow to read.
+ */
+function SplitShell({
+  content,
+  breadcrumbs,
+  controls,
+  map,
+  assistant,
+  showAssistant,
+}: ShellProps & { showAssistant: boolean }) {
+  let assistantPanel = null;
+  if (showAssistant) {
+    assistantPanel = h("div.split-assistant", assistant);
+  }
+
+  return h("div.split-shell", [
+    h("div.split-panel", [
+      h("header.split-header", [
+        h("div.header-titling", breadcrumbs),
+        h("div.header-controls", controls),
+      ]),
+      h("div.split-list", content),
+    ]),
+    h("div.split-map", [map, assistantPanel]),
+  ]);
 }

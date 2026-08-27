@@ -102,3 +102,70 @@
   .content-shell.has-sidebar
     .content-sidebar
       display: none
+
+/* ================================ split shell ============================ */
+
+.split-shell
+  display: grid
+  grid-template-columns: var(--hybrid-split-panel-width) 1fr
+  height: 100%
+  min-height: 0
+  overflow: hidden
+
+.split-panel
+  display: flex
+  flex-direction: column
+  min-width: 0
+  min-height: 0
+  overflow: hidden
+  border-right: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
+  background-color: var(--pz-background-color, var(--background-color))
+
+.split-header
+  flex: 0 0 auto
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  padding: var(--pz-space-2, 0.5rem) var(--pz-space-3, 0.75rem)
+  min-width: 0
+  border-bottom: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
+
+.split-list
+  flex: 1 1 auto
+  min-height: 0
+  // Without this the panel's rows set a min-content floor and the scroll body
+  // overflows the fixed panel width.
+  min-width: 0
+  overflow: hidden
+  display: flex
+  flex-direction: column
+
+.split-map
+  position: relative
+  min-width: 0
+  min-height: 0
+  overflow: hidden
+
+// Floats over the map rather than claiming a third column, which would leave
+// the list too narrow.
+.split-assistant
+  position: absolute
+  top: var(--pz-space-3, 0.75rem)
+  right: var(--pz-space-3, 0.75rem)
+  width: var(--hybrid-sidebar-width)
+  max-height: calc(100% - 2 * var(--pz-space-3, 0.75rem))
+  overflow: auto
+  z-index: 5
+  background-color: var(--pz-overlay-background-color, var(--translucent-panel-background-color))
+  backdrop-filter: blur(6px)
+  border: 1px solid var(--pz-border-color, var(--panel-rule-color))
+  border-radius: var(--pz-radius-md, 6px)
+  box-shadow: var(--pz-shadow-md)
+
+@media (max-width: 900px)
+  .split-shell
+    grid-template-columns: 1fr
+
+  .split-map
+    display: none

@@ -44,6 +44,8 @@ export interface ColumnRow {
   refs: number[];
   t_units: number;
   t_sections: number;
+  /** Resolved from the project definitions, for the list's section headers. */
+  project_name: string;
 }
 
 export type MapBounds = [[number, number], [number, number]];
@@ -53,6 +55,18 @@ export type MapBounds = [[number, number], [number, number]];
 export const projectIDAtom = atom<number | null>(null);
 export const initialDataAtom = atom<ColumnGroup[] | null>(null);
 export const linkPrefixAtom = atom<string>("/");
+
+/** Project definitions, loaded in `+data.ts` so a project section header has a
+ * name on the first paint rather than a bare id. */
+export const projectsAtom = atom<{ project_id: number; project: string }[]>([]);
+
+export const projectNamesAtom = atom<Map<number, string>>((get) => {
+  const map = new Map<number, string>();
+  for (const project of get(projectsAtom)) {
+    map.set(project.project_id, project.project);
+  }
+  return map;
+});
 
 /* ------------------------------------------------------ server-side filters */
 
@@ -127,11 +141,14 @@ export const isLoadingAtom = atom((get) => get(downloadedGroupsAtom).loading);
  * the filtered view and we mirror it back out (`visibleRowsAtom`). */
 export const allRowsAtom = atom<ColumnRow[]>((get) => {
   const groups = get(downloadedGroupsAtom).data ?? get(initialDataAtom) ?? [];
+  const projectNames = get(projectNamesAtom);
   return groups.flatMap((group) =>
     group.columns.map((col) => ({
       ...col,
       col_group: group.name,
       col_group_id: group.id,
+      project_name:
+        projectNames.get(col.project_id) ?? `Project ${col.project_id}`,
     }))
   ) as ColumnRow[];
 });
@@ -202,27 +219,34 @@ export const selectColumnAtom = atom(
   }
 );
 
-/** Selection updates coming *from* the map, which echoes its `selectedColumn`
- * prop back through `onSelectColumn`. Re-selecting what's already leading must
- * be a no-op, or a multi-row selection collapses to one every time the map
- * re-syncs. */
-export const selectFromMapAtom = atom(
-  null,
-  (get, set, colID: number | null) => {
-    const current = get(selectedColumnsAtom);
-    const leading = current.length > 0 ? current[0] : null;
-    if (colID === leading) return;
-    if (colID == null) {
-      set(selectedColumnsAtom, []);
-      return;
-    }
-    set(selectedColumnsAtom, [colID]);
-    set(selectionAnchorAtom, colID);
-  }
-);
+/** Selection is *modal*, and the mode is shared with the map: while it's off a
+ * click — in the list or on a footprint — navigates to the column; while it's on
+ * a click selects or deselects. One mode for both views, so the two never
+ * disagree about what a click means. */
+export const selectionModeAtom = atom(false);
 
-export const onlySelectedAtom = atom(false);
-export const onlyInMapAreaAtom = atom(false);
+/** Toggle one column in or out of the selection. The map's click path, and the
+ * list's when a modifier isn't held. */
+export const toggleColumnAtom = atom(null, (get, set, colID: number) => {
+  const current = get(selectedColumnsAtom);
+  if (current.includes(colID)) {
+    set(
+      selectedColumnsAtom,
+      current.filter((id) => id !== colID)
+    );
+    return;
+  }
+  set(selectedColumnsAtom, [...current, colID]);
+  set(selectionAnchorAtom, colID);
+});
+
+export const clearSelectionAtom = atom(null, (_get, set) => {
+  set(selectedColumnsAtom, []);
+  set(selectionAnchorAtom, null);
+});
+
+/** The map viewport, republished on every settled move. Read by the
+ * "only in map area" filter while it's active. */
 export const mapBoundsAtom = atom<MapBounds | null>(null);
 
 export function withinBounds(row: ColumnRow, bounds: MapBounds): boolean {
