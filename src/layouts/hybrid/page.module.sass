@@ -1,0 +1,30 @@
+// Frame-level tokens live here. Weak names, so a consuming page can re-point
+// any of them without touching the global Paleozoic contract.
+
+.hybrid-frame
+  --hybrid-transition-duration: 220ms
+  --hybrid-sticky-offset: 3.5rem
+
+  // The app content measure the list is sized to, the width the map/assistant
+  // column takes beside it, and the overall shell bound.
+  --hybrid-content-width: var(--qz-main-content-width, 970px)
+  --hybrid-sidebar-width: clamp(280px, 28vw, 420px)
+  --hybrid-split-panel-width: clamp(22rem, 32vw, 34rem)
+  --hybrid-shell-width: var(--qz-main-content-width, 970px)
+
+  background-color: var(--pz-background-color, var(--background-color))
+  color: var(--pz-text-color, var(--text-color))
+
+// Both shells are viewport-locked. The content shell hands scrolling to the
+// data panel (as `InfiniteScrollPage` does); the map shell locks the viewport
+// itself via `MapAreaContainer`'s `fitViewport`.
+.shell-content
+  position: fixed
+  inset: 0
+  overflow: hidden
+
+.shell-split,
+.shell-map
+  position: fixed
+  inset: 0
+  overflow: hidden
