@@ -145,9 +145,6 @@ function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, sel
 
   const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
 
-
-  console.log("Entities going into FeedbackComponent:", currentData.entities);
-
   return h("div.feedback-interface", [
     h.if(baseData.length > 1)([
       h(NonIdealState, {
@@ -176,9 +173,7 @@ function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, sel
 
 const AppToasterPromise = OverlayToaster.create();
 
-function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedback, selectedFeedbackType }) {
-  console.log("FeedbackInterface data:", data);
-  
+function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedback, selectedFeedbackType }) {  
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model, version_id } = window;
   const { user } = useAuth();
@@ -186,8 +181,6 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
 
   console.log(window);
   console.log(Array.from(entityTypes.values()));
-
-  console.log("ENTITIES:", entities);
   
   return h(FeedbackComponent, {
     entities,
@@ -214,21 +207,10 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
       async (tree) => {
         console.log("Preparing to save feedback for model run:", tree);
 
-        const data = prepareDataForServer(
-          tree,
-          window.source_text,
-          [window.model_run],
-          model_id,
-          version_id
-        );
-
-        console.log("Data prepared for server:", data);
-
-        await postDataToServer(
-          data,
-          customFeedback,
-          selectedFeedbackType
-        );
+        const data = prepareDataForServer(tree, window.source_text, [
+          window.model_run,
+        ], model_id, version_id);
+        await postDataToServer(data, customFeedback, selectedFeedbackType);
       },
       AppToasterPromise,
       {
@@ -367,32 +349,14 @@ function prepareDataForServer(
   /** This function should be used before sending the data to the server */
   const { nodes, edges } = treeToGraph(tree);
 
-  // Prepare match for server
-  const normalizedNodes = nodes.map((d) => {
-    console.log("Nodes before normalization:", nodes);
-    return {
-      ...d,
-      match: normalizeMatch(d.match),
-    };
-  });
-
   return {
-    nodes: normalizedNodes,
+    nodes,
     edges,
     sourceTextId: sourceTextID,
     supersedesRunIds: supersedesRunIDs ?? [],
     model_id: model_id,
     version_id: version_id
   };
-}
-
-// We will extend this in the future, probably,
-// to handle ages and other things
-type MatchInfo = { type: "lith" | "lith_att" | "strat_name"; id: number };
-
-function normalizeMatch(match: any): MatchInfo | null {
-  // TODO
-  return match;
 }
 
 // function FeedbackDevTool() {
