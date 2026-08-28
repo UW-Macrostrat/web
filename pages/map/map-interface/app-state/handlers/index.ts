@@ -51,6 +51,7 @@ export async function actionRunner(
       return action;
     case "toggle-menu": {
       const state = getState();
+      console.log("toggle menu 0", state.menuOpen);
       // Push the menu onto the history stack
       let activePage = state.activeMenuPage;
       // If input is focused we want to open the menu if clicked, not run the toggle action.

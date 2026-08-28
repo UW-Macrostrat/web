@@ -30,8 +30,13 @@
 .right-panel
   width: 24em
 
+//:global(.main-view)
+//  overflow: hidden
+//  position: relative !important
+
 .menu-card:global(.bp6-card)
   padding: 0
+  width: 100%
 
 // Menu
 .buttons
@@ -113,7 +118,6 @@
   hr
     width: 100%
 
-
 .macrostrat-map-container
   --navbar-padding: 5px 6px
 
@@ -144,21 +148,25 @@
   to handle a two-column layout. */
 @media screen and (min-width: 768px)
   .macrostrat-map-container
-    --map-context-stack-width: 18em
+    --map-context-stack-width: 18rem
 
     &.context-open
-      --map-context-stack-width: 34em
+      --map-context-stack-width: 34rem
 
     &.searching
-      --map-context-stack-width: 24em
+      --map-context-stack-width: 24rem
       // Padding by which to shift the center of the map to the right
       :global(.main-view)
         // Fudge factor to keep map from shifting right on modal selection
         // TODO: generalize this
-        margin-right: -8em !important
+        margin-left: -24rem !important
+        //margin-right: -8em !important
+
 
     &.layers, &.settings
-      --map-context-stack-width: 18em
+      --map-context-stack-width: 18rem
+      :global(.main-view)
+        margin-right: -6rem !important
 
 .fossil-container
   background-color: var(--background-color)

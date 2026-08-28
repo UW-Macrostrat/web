@@ -41,6 +41,8 @@ export default function MainMapView(props) {
   const mapPosition = useAppState((state) => state.mapPosition);
   const infoMarkerPosition = useAppState((state) => state.infoMarkerPosition);
 
+  const { children } = props;
+
   let mapRef = useMapRef();
   const isDarkMode = useInDarkMode();
 
@@ -148,6 +150,7 @@ export default function MainMapView(props) {
       onMapMoved,
     },
     [
+      children,
       h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
       h(MapMarker, {
         position: infoMarkerPosition,

@@ -2731,7 +2731,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-interface@npm:^2.3.1, @macrostrat/map-interface@npm:^2.3.2":
+"@macrostrat/map-interface@npm:^2.3.1":
   version: 2.3.2
   resolution: "@macrostrat/map-interface@npm:2.3.2"
   dependencies:
@@ -2758,6 +2758,36 @@ __metadata:
     react: ^18.0.0||^19.0.0
     react-dom: ^18.0.0||^19.0.0
   checksum: 10c0/f41ca8469d95d0cb24b5f6f6a2eb134e4882ae17db67a46a3119ce3a3752ba5441501eb1092306ae88d027c7c1d9e02dfb7b504549126024eb7cd66bf3b1cd09
+  languageName: node
+  linkType: hard
+
+"@macrostrat/map-interface@npm:^2.3.3":
+  version: 2.3.3
+  resolution: "@macrostrat/map-interface@npm:2.3.3"
+  dependencies:
+    "@blueprintjs/core": "npm:^6.14.0"
+    "@macrostrat/color-utils": "npm:^1.2.2"
+    "@macrostrat/data-components": "npm:^1.5.1"
+    "@macrostrat/hyper": "npm:^3.1.1"
+    "@macrostrat/mapbox-react": "npm:^3.3.3"
+    "@macrostrat/mapbox-utils": "npm:^1.8.0"
+    "@macrostrat/ui-components": "npm:^5.2.0"
+    "@mapbox/tilebelt": "npm:^2.0.0"
+    "@visx/axis": "npm:^3.12.0"
+    "@visx/scale": "npm:^3.12.0"
+    chroma-js: "npm:^3.2.0"
+    classnames: "npm:^2.5.1"
+    d3-array: "npm:^3.2.4"
+    d3-format: "npm:^3.1.2"
+    mapbox-gl: "npm:^3.0.0"
+    query-string: "npm:^9.0.0"
+    transition-hook: "npm:^1.5.2"
+    underscore: "npm:^1.13.7"
+    use-resize-observer: "npm:^9.1.0"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+    react-dom: ^18.0.0||^19.0.0
+  checksum: 10c0/b1638bf983985e123c18a2420a7176219d349590c8512937bf62fae44bfea48b06b3e83d10376e094717d93192f05a76e07dc7125f07d4ffa676fe5d96ab9058
   languageName: node
   linkType: hard
 
@@ -3044,7 +3074,7 @@ __metadata:
     "@macrostrat/feedback-components": "npm:^2.2.6"
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/map-interface": "npm:^2.3.2"
+    "@macrostrat/map-interface": "npm:^2.3.3"
     "@macrostrat/map-styles": "npm:^2.2.7"
     "@macrostrat/mapbox-react": "npm:^3.3.3"
     "@macrostrat/mapbox-utils": "npm:^1.8.0"

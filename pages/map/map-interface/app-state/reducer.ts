@@ -108,6 +108,7 @@ export function coreReducer(
         pbdbData,
       };
     case "toggle-menu":
+      console.log("toggle-menu", state.menuOpen);
       const shouldOpen = state.inputFocus || !state.menuOpen;
 
       return {
