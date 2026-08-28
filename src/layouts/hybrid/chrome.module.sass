@@ -1,0 +1,36 @@
+.footer-overlay
+  position: fixed
+  right: var(--pz-space-4, 1rem)
+  bottom: var(--pz-space-4, 1rem)
+  z-index: 21
+  opacity: 0
+  transform: translateY(0.5rem)
+  pointer-events: none
+  transition: opacity var(--hybrid-transition-duration) ease, transform var(--hybrid-transition-duration) ease
+
+  &.visible
+    opacity: 1
+    transform: translateY(0)
+    pointer-events: auto
+
+.footer-links-button
+  &.floating
+    border-radius: 999px
+    background-color: var(--pz-overlay-background-color, var(--translucent-panel-background-color))
+    backdrop-filter: blur(6px)
+    border: 1px solid var(--pz-border-color, var(--panel-rule-color))
+    box-shadow: var(--pz-shadow-md)
+
+.footer-popover
+  // The site footer is a four-column block built for a page-width container, so
+  // the popover gets a comparable measure rather than the width of its trigger.
+  width: min(var(--qz-main-content-width, 970px), calc(100vw - 2rem))
+  max-height: min(70vh, 32rem)
+  overflow: auto
+  padding: var(--pz-content-padding, 1rem)
+
+.popover-footer
+  // Reused verbatim; only its page-level top rule is redundant inside a
+  // popover, which carries its own edge.
+  border-top: none
+  padding-top: 0

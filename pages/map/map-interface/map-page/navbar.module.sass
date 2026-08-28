@@ -1,12 +1,34 @@
 .navbar
   display: flex
   flex-direction: row
-  align-items: center
+  align-items: start
   gap: 0.5em
+  --navbar-padding: 2px 2px 2px 20px
+  :global(.bp6-navbar)
+    z-index: 10
+    height: 45px
+    margin-right: -26px
+
+.map-navbar
+  flex: 1
+
+.navbar-logo
+  //margin: -8px -15px -8px -15px
+  //margin-right: -10px
+  //border: 1px solid var(--panel-rule-color)
+  z-index: 20
+  margin: -2.5px -26px 0 -5px
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))
+  --macrostrat-logo-size: 50px
+
+
+.navbar-link-container
+  z-index: 20
 
 .search-results-card:global(.bp6-card)
   padding: 0
   overflow-y: scroll
+  flex: 1
 
 .search-results
   padding: 0
@@ -54,10 +76,3 @@
 
 .map-navbar :global(.bp6-navbar)
   overflow: hidden
-
-.navbar-logo
-  //margin: -8px -15px -8px -15px
-  //margin-right: -10px
-  //border: 1px solid var(--panel-rule-color)
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))
-  --macrostrat-logo-size: 50px

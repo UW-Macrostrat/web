@@ -1,0 +1,63 @@
+.windowed-root
+  position: relative
+  width: 100%
+
+// The outer-section context bar. Always mounted (never windowed), so the
+// section you're inside stays named however deep you scroll. Sticks at the top
+// of the scroll container; the inner group headers stack beneath it.
+.windowed-context-bar
+  position: sticky
+  // `top: 0` is already below the floating toolbar's mask band: sticky offsets
+  // are measured from the scrollport's *padding* edge, and the floating style
+  // pads the scroll body by exactly `--data-panel-top-margin` (the masked
+  // height). Adding that token here double-counted it and parked both header
+  // levels 64px too low.
+  top: 0
+  z-index: 4
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  padding: 0 var(--pz-space-2, 0.5rem)
+  font-family: var(--pz-heading-font, var(--header-font))
+  font-weight: 600
+  color: var(--pz-text-emphasized-color, var(--text-emphasized-color))
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  border-bottom: 1px solid var(--pz-border-color, var(--panel-rule-color))
+
+.windowed-body
+  position: relative
+  width: 100%
+  display: flex
+  flex-direction: column
+
+  &.unwindowed
+    display: flex
+    flex-direction: column
+
+.windowed-spacer
+  flex: 0 0 auto
+
+.windowed-row
+  flex: 0 0 auto
+  overflow: hidden
+
+.windowed-group-header
+  flex: 0 0 auto
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  padding: 0 var(--pz-space-2, 0.5rem)
+  overflow: hidden
+  background-color: var(--pz-background-color, var(--background-color))
+
+// Inner group headers stick beneath the context bar. The window start snaps
+// back to include the enclosing one, so there is always something to stick.
+.windowed-group-header
+  position: sticky
+  top: var(--windowed-context-height, 1.75rem)
+  z-index: 3
+  font-family: var(--pz-heading-font, var(--header-font))
+  color: var(--pz-secondary-color, var(--secondary-color))
+  border-bottom: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))

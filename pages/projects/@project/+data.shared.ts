@@ -16,6 +16,9 @@ export async function data(pageContext) {
 
   return {
     allColumnGroups,
+    // The list's project section headers read names from here; a single-project
+    // route still supplies its own so the header isn't a bare id.
+    projects: [project],
     project,
     project_id,
     linkPrefix: `/projects/${project_id}/`,
