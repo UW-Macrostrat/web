@@ -19,21 +19,16 @@ import {
   ErrorBoundary,
   FlexRow,
   Pagination,
-  Spacer,
-  SaveButton,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
-import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
-// import { xDDapiDomain } from "@macrostrat-web/settings";
+import { xDDapiDomain } from "@macrostrat-web/settings";
 import { OverlayToaster } from "@blueprintjs/core";
 import { fetchPGData } from "~/_utils";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MultiSelect } from "@blueprintjs/select"
-import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
+import { MenuItem, TextArea } from "@blueprintjs/core";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useEffect } from "react"
-
-const xDDapiDomain = "http://localhost:9543";
 
 /**
  * Get a single text window for feedback purposes
@@ -182,6 +177,8 @@ function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, sel
 const AppToasterPromise = OverlayToaster.create();
 
 function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedback, selectedFeedbackType }) {
+  console.log("FeedbackInterface data:", data);
+  
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model, version_id } = window;
   const { user } = useAuth();
@@ -190,14 +187,13 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
   console.log(window);
   console.log(Array.from(entityTypes.values()));
 
-  console.log("entities:", entities);
+  console.log("ENTITIES:", entities);
   
   return h(FeedbackComponent, {
     entities,
     text: paragraph_text,
     model,
     entityTypes,
-    matchComponent: MatchedEntityLink,
     matchLinks: {
       location: "/lex/location",
       minerals: "/lex/minerals",
@@ -209,6 +205,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedba
       environs: "/lex/environs",
       strat_names: "/lex/strat-names",
       concept: "/lex/strat-concepts",
+      liths: "/lex/lithologies",
     },
     lineHeight: 3,
     // view: user === null,    TODO: Enable view mode for non-logged in users

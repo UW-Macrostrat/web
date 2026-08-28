@@ -11,15 +11,12 @@ import {
   useModelIndex,
 } from "../../../extractions/data-service";
 import {
-  NonIdealState,
   OverlaysProvider,
   Spinner,
-  Button,
   Divider,
 } from "@blueprintjs/core";
 import { ErrorBoundary, FlexRow, Pagination } from "@macrostrat/ui-components";
 import { useState, useEffect } from "react";
-import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { fetchPGData } from "~/_utils";
 
 /**
@@ -119,22 +116,27 @@ function MultiFeedbackInterface({
   ]);
 }
 
-function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
+function FeedbackInterface({ data, models, entityTypes, autoSelect }) {  
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
 
   return h(FeedbackComponent, {
-    key: data?.model_run,
     entities,
     text: paragraph_text,
     model,
     entityTypes,
-    matchComponent: MatchedEntityLink,
     matchLinks: {
-      lithology: "/lex/lithologies",
-      lith_att: "/lex/lith-atts",
-      strat_name: "/lex/strat-names",
+      location: "/lex/location",
+      minerals: "/lex/minerals",
+      intervals: "/lex/intervals",
+      tectonics: "/lex/tectonics",
+      structure_atts: "/lex/structure-atts",
+      structures: "/lex/structures",
+      lith_atts: "/lex/lith-atts",
+      environs: "/lex/environs",
+      strat_names: "/lex/strat-names",
       concept: "/lex/strat-concepts",
+      liths: "/lex/lithologies",
     },
     lineHeight: 3,
     view: true,
