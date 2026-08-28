@@ -1211,7 +1211,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/core@npm:^5.10.2, @blueprintjs/core@npm:^5.16.6, @blueprintjs/core@npm:^5.19.1":
+"@blueprintjs/core@npm:^5.10.2, @blueprintjs/core@npm:^5.19.1":
   version: 5.19.1
   resolution: "@blueprintjs/core@npm:5.19.1"
   dependencies:
@@ -1239,12 +1239,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/core@npm:^6.14.0":
-  version: 6.14.0
-  resolution: "@blueprintjs/core@npm:6.14.0"
+"@blueprintjs/core@npm:^6.0.0, @blueprintjs/core@npm:^6.14.0":
+  version: 6.18.0
+  resolution: "@blueprintjs/core@npm:6.18.0"
   dependencies:
     "@blueprintjs/colors": "npm:^5.1.16"
-    "@blueprintjs/icons": "npm:^6.10.0"
+    "@blueprintjs/icons": "npm:^6.13.0"
     "@floating-ui/react": "npm:^0.27.13"
     "@popperjs/core": "npm:^2.11.8"
     classnames: "npm:^2.3.1"
@@ -1253,16 +1253,16 @@ __metadata:
     react-transition-group: "npm:^4.4.5"
     tslib: "npm:~2.6.2"
   peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
+    "@types/react": 18 || 19
+    react: 18 || 19
+    react-dom: 18 || 19
   peerDependenciesMeta:
     "@types/react":
       optional: true
   bin:
     upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
     upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
-  checksum: 10c0/4da15de0970ab1bd1c822f9715af85dc0574fddeb027ccafe12d7663365cd306a36ac2ea411cded5e7f3c295870d1f7966ed0db673b53b359c1ed9e7c93ab311
+  checksum: 10c0/b770fb1d83a731e51407834bc88c3089028b788261979578cc03d819715c900d23e1c8cfabde0c55a37533cdf74874c3a6978482b8e2d78aadea9482936d5f0d
   languageName: node
   linkType: hard
 
@@ -1354,21 +1354,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/icons@npm:^6.10.0":
-  version: 6.10.0
-  resolution: "@blueprintjs/icons@npm:6.10.0"
+"@blueprintjs/icons@npm:^6.10.0, @blueprintjs/icons@npm:^6.13.0":
+  version: 6.13.0
+  resolution: "@blueprintjs/icons@npm:6.13.0"
   dependencies:
     change-case: "npm:^4.1.2"
     classnames: "npm:^2.3.1"
     tslib: "npm:~2.6.2"
   peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
+    "@types/react": 18 || 19
+    react: 18 || 19
+    react-dom: 18 || 19
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/1111739e69a1ca4273c988d75236e9f2e3cf5b297bda90a74568fcb8edf39eae71dad57ae5d892b303dff28f93e5bb17f575670c1a30245ccb8a458480c60484
+  checksum: 10c0/7a2f6a05f7f24c06e9e86f2d099ebbdadec4462fc36fd50cd9bc0a334949055b6d800c9b294fea8f44e2c3ca43a8c1e1d264d39c74844fb1df4f53665f48c2ed
   languageName: node
   linkType: hard
 
@@ -1469,19 +1469,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cesium/engine@npm:^22.2.0":
-  version: 22.2.0
-  resolution: "@cesium/engine@npm:22.2.0"
+"@cesium/engine@npm:^26.2.0":
+  version: 26.2.0
+  resolution: "@cesium/engine@npm:26.2.0"
   dependencies:
     "@cesium/wasm-splats": "npm:^0.1.0-alpha.2"
-    "@spz-loader/core": "npm:0.3.0"
+    "@spz-loader/core": "npm:0.3.1"
     "@tweenjs/tween.js": "npm:^25.0.0"
     "@zip.js/zip.js": "npm:^2.8.1"
     autolinker: "npm:^4.0.0"
     bitmap-sdf: "npm:^1.0.3"
     dompurify: "npm:^3.3.0"
     draco3d: "npm:^1.5.1"
-    earcut: "npm:^3.0.0"
+    earcut: "npm:3.0.2"
     grapheme-splitter: "npm:^1.0.4"
     jsep: "npm:^1.3.8"
     kdbush: "npm:^4.0.1"
@@ -1489,12 +1489,12 @@ __metadata:
     lerc: "npm:^2.0.0"
     mersenne-twister: "npm:^1.1.0"
     meshoptimizer: "npm:^1.0.1"
-    pako: "npm:^2.0.4"
-    protobufjs: "npm:^8.0.0"
+    pako: "npm:^3.0.0"
+    protobufjs: "npm:^8.6.5"
     rbush: "npm:^4.0.1"
     topojson-client: "npm:^3.1.0"
     urijs: "npm:^1.19.7"
-  checksum: 10c0/331fff971e0cb9977745b48c57cb1f8787e337db1e188c5d2a6af6c8a359b0fd70db3d04b895c03dcccf2aff6054a1886562acace04c7c802015745e10d8861d
+  checksum: 10c0/4b5d40949ae590713d91c43c2d8f8b63166543b54f1c8c7e4f8b49ab73583f52fd767d30b813e82c98abae5007fda8af9b3571a5c58cfd7149c3a80dce981611
   languageName: node
   linkType: hard
 
@@ -1505,13 +1505,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cesium/widgets@npm:^14.2.0":
-  version: 14.2.0
-  resolution: "@cesium/widgets@npm:14.2.0"
+"@cesium/widgets@npm:^16.1.1":
+  version: 16.1.1
+  resolution: "@cesium/widgets@npm:16.1.1"
   dependencies:
-    "@cesium/engine": "npm:^22.2.0"
+    "@cesium/engine": "npm:^26.2.0"
     nosleep.js: "npm:^0.12.0"
-  checksum: 10c0/7b0d9bdad53a65d3c8cb77a44c1e1bd3b7c18ad243643798c53a2eb433b8d4c78a2f503bdab31f8d9c10d4ad0c8140668ccea3a6d5748b751b1286f822cf48c6
+  checksum: 10c0/51906f7807b2453eff89af87bebc457a73345f1330449e55e46013f7076e62d24a5b52af95506efcdf5e0248aec9ecd0016dd23a7aa0c23090f16801297bce76
   languageName: node
   linkType: hard
 
@@ -2323,7 +2323,7 @@ __metadata:
   dependencies:
     "@macrostrat/cesium-martini": "npm:^1.6.0"
     "@macrostrat/cesium-vector-provider": "npm:^2.0.2"
-    "@macrostrat/cesium-viewer": "npm:^1.3.0"
+    "@macrostrat/cesium-viewer": "npm:^1.4.0"
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/mapbox-react": "npm:^3.3.3"
     "@macrostrat/mapbox-utils": "npm:^1.8.0"
@@ -2481,24 +2481,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/cesium-viewer@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@macrostrat/cesium-viewer@npm:1.3.0"
+"@macrostrat/cesium-viewer@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@macrostrat/cesium-viewer@npm:1.4.0"
   dependencies:
-    "@blueprintjs/core": "npm:^5.16.6"
+    "@blueprintjs/core": "npm:^6.0.0"
     "@macrostrat/cesium-martini": "npm:^1.6.0"
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/mapbox-utils": "npm:^1.6.1"
-    cesium: "npm:^1.137.0"
+    "@macrostrat/hyper": "npm:^3.1.1"
+    "@macrostrat/mapbox-utils": "npm:^1.8.0"
+    cesium: "npm:^1.144.0"
     cesium-navigation-es6: "npm:^3.0.9"
-    d3-format: "npm:^3.1.0"
     gl-matrix: "npm:^3.4.3"
     regl: "npm:^2.1.0"
-    resium: "npm:^1.19.2"
+    resium: "npm:^1.25.0"
   peerDependencies:
     react: ^16||^17||^18||^19
     react-dom: ^16||^17||^18||^19
-  checksum: 10c0/00fe4ceca81bd22cc85fe3b1883eefd2ce55fde588cf47105075f19b8e26631c98b373593cac03133ef335b639343a86de2db92d1581527e66b96139677ab9a4
+  checksum: 10c0/7a265537f87993f714cdbd3aa51e8aea864a7b8a937ea8211af4ef8ae3a24776748ca46adcd3536440aef4d090e687e557b3474a1c3a90166d5c1c3f9d93848f
   languageName: node
   linkType: hard
 
@@ -2801,7 +2800,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/mapbox-utils@npm:^1.6.1, @macrostrat/mapbox-utils@npm:^1.8.0":
+"@macrostrat/mapbox-utils@npm:^1.8.0":
   version: 1.8.0
   resolution: "@macrostrat/mapbox-utils@npm:1.8.0"
   dependencies:
@@ -3924,79 +3923,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@protobufjs/aspromise@npm:^1.1.1, @protobufjs/aspromise@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "@protobufjs/aspromise@npm:1.1.2"
-  checksum: 10c0/a83343a468ff5b5ec6bff36fd788a64c839e48a07ff9f4f813564f58caf44d011cd6504ed2147bf34835bd7a7dd2107052af755961c6b098fd8902b4f6500d0f
-  languageName: node
-  linkType: hard
-
-"@protobufjs/base64@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "@protobufjs/base64@npm:1.1.2"
-  checksum: 10c0/eec925e681081af190b8ee231f9bad3101e189abbc182ff279da6b531e7dbd2a56f1f306f37a80b1be9e00aa2d271690d08dcc5f326f71c9eed8546675c8caf6
-  languageName: node
-  linkType: hard
-
-"@protobufjs/codegen@npm:^2.0.4":
-  version: 2.0.4
-  resolution: "@protobufjs/codegen@npm:2.0.4"
-  checksum: 10c0/26ae337c5659e41f091606d16465bbcc1df1f37cc1ed462438b1f67be0c1e28dfb2ca9f294f39100c52161aef82edf758c95d6d75650a1ddf31f7ddee1440b43
-  languageName: node
-  linkType: hard
-
-"@protobufjs/eventemitter@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@protobufjs/eventemitter@npm:1.1.0"
-  checksum: 10c0/1eb0a75180e5206d1033e4138212a8c7089a3d418c6dfa5a6ce42e593a4ae2e5892c4ef7421f38092badba4040ea6a45f0928869989411001d8c1018ea9a6e70
-  languageName: node
-  linkType: hard
-
-"@protobufjs/fetch@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@protobufjs/fetch@npm:1.1.0"
-  dependencies:
-    "@protobufjs/aspromise": "npm:^1.1.1"
-    "@protobufjs/inquire": "npm:^1.1.0"
-  checksum: 10c0/cda6a3dc2d50a182c5865b160f72077aac197046600091dbb005dd0a66db9cce3c5eaed6d470ac8ed49d7bcbeef6ee5f0bc288db5ff9a70cbd003e5909065233
-  languageName: node
-  linkType: hard
-
-"@protobufjs/float@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@protobufjs/float@npm:1.0.2"
-  checksum: 10c0/18f2bdede76ffcf0170708af15c9c9db6259b771e6b84c51b06df34a9c339dbbeec267d14ce0bddd20acc142b1d980d983d31434398df7f98eb0c94a0eb79069
-  languageName: node
-  linkType: hard
-
-"@protobufjs/inquire@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@protobufjs/inquire@npm:1.1.0"
-  checksum: 10c0/64372482efcba1fb4d166a2664a6395fa978b557803857c9c03500e0ac1013eb4b1aacc9ed851dd5fc22f81583670b4f4431bae186f3373fedcfde863ef5921a
-  languageName: node
-  linkType: hard
-
-"@protobufjs/path@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "@protobufjs/path@npm:1.1.2"
-  checksum: 10c0/cece0a938e7f5dfd2fa03f8c14f2f1cf8b0d6e13ac7326ff4c96ea311effd5fb7ae0bba754fbf505312af2e38500250c90e68506b97c02360a43793d88a0d8b4
-  languageName: node
-  linkType: hard
-
-"@protobufjs/pool@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@protobufjs/pool@npm:1.1.0"
-  checksum: 10c0/eda2718b7f222ac6e6ad36f758a92ef90d26526026a19f4f17f668f45e0306a5bd734def3f48f51f8134ae0978b6262a5c517c08b115a551756d1a3aadfcf038
-  languageName: node
-  linkType: hard
-
-"@protobufjs/utf8@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@protobufjs/utf8@npm:1.1.0"
-  checksum: 10c0/a3fe31fe3fa29aa3349e2e04ee13dc170cc6af7c23d92ad49e3eeaf79b9766264544d3da824dba93b7855bd6a2982fb40032ef40693da98a136d835752beb487
-  languageName: node
-  linkType: hard
-
 "@radix-ui/number@npm:0.1.0":
   version: 0.1.0
   resolution: "@radix-ui/number@npm:0.1.0"
@@ -4882,10 +4808,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@spz-loader/core@npm:0.3.0":
-  version: 0.3.0
-  resolution: "@spz-loader/core@npm:0.3.0"
-  checksum: 10c0/aa8aa13369bd324c787c39ed441ffacd6ee6b7555de866710c5b8ba8d60228398498c6ce2c59ec710c62dc6a8bd841a4f913f6dc5517ae4e72ebc25e9aad5068
+"@spz-loader/core@npm:0.3.1":
+  version: 0.3.1
+  resolution: "@spz-loader/core@npm:0.3.1"
+  checksum: 10c0/5cc2ebae5862a9860088edaa53e64bc86804c23276fa84924e7ced1c4d74ca4ec0822226c6ce8454c359352ee3c8cf8e56a88fdfb28ca955b897b459385f2b70
   languageName: node
   linkType: hard
 
@@ -6509,7 +6435,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=13.7.0":
+"@types/node@npm:*":
   version: 25.0.10
   resolution: "@types/node@npm:25.0.10"
   dependencies:
@@ -8937,13 +8863,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cesium@npm:^1.135.0, cesium@npm:^1.137.0, cesium@npm:^1.81.0, cesium@npm:^1.88":
-  version: 1.137.0
-  resolution: "cesium@npm:1.137.0"
+"cesium@npm:^1.135.0, cesium@npm:^1.137.0, cesium@npm:^1.144.0, cesium@npm:^1.81.0, cesium@npm:^1.88":
+  version: 1.144.0
+  resolution: "cesium@npm:1.144.0"
   dependencies:
-    "@cesium/engine": "npm:^22.2.0"
-    "@cesium/widgets": "npm:^14.2.0"
-  checksum: 10c0/cb99c508f501789a1ebf474eddb425f0495a3a8785970cc68ad3736919c703825bf026098ea3562a171cb6ddc5514abce45fb44faf8942cb92e853e06ad3df63
+    "@cesium/engine": "npm:^26.2.0"
+    "@cesium/widgets": "npm:^16.1.1"
+    protobufjs: "npm:^8.6.5"
+  checksum: 10c0/dc3d4727e6331e10f0da9d6a3529efc1a830f214ee071d2eed9fc7160cceac192668df9cfa7864d3875cf73331c104b3d92da94ddf4c83085e1aa216c66b61ea
   languageName: node
   linkType: hard
 
@@ -10735,7 +10662,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"earcut@npm:^3.0.0, earcut@npm:^3.0.1, earcut@npm:^3.0.2":
+"earcut@npm:3.0.2, earcut@npm:^3.0.1, earcut@npm:^3.0.2":
   version: 3.0.2
   resolution: "earcut@npm:3.0.2"
   checksum: 10c0/3d76da3d8a935244d59713edc70de71cdb5326a80b31c5c5cb96bc5b61f56b86ed35f032fffb66be7a4558e06efe1e94934f43ba6ca1b6c2af1420e87dd7ad71
@@ -14096,7 +14023,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"long@npm:^5.0.0":
+"long@npm:^5.3.2":
   version: 5.3.2
   resolution: "long@npm:5.3.2"
   checksum: 10c0/7130fe1cbce2dca06734b35b70d380ca3f70271c7f8852c922a7c62c86c4e35f0c39290565eca7133c625908d40e126ac57c02b1b1a4636b9457d77e1e60b981
@@ -15830,10 +15757,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pako@npm:^2.0.4":
-  version: 2.1.0
-  resolution: "pako@npm:2.1.0"
-  checksum: 10c0/8e8646581410654b50eb22a5dfd71159cae98145bd5086c9a7a816ec0370b5f72b4648d08674624b3870a521e6a3daffd6c2f7bc00fdefc7063c9d8232ff5116
+"pako@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "pako@npm:3.0.1"
+  checksum: 10c0/1292b2ffcbdf42f95be5519ffc11c4cb8daf065f7681936a5b0fe2028753396fbaea0c22cb22e54a4f12bb0c3217513f6b2261fa77e4dbf8c9bd76efe3eca2cc
   languageName: node
   linkType: hard
 
@@ -16306,23 +16233,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "protobufjs@npm:8.0.0"
+"protobufjs@npm:^8.6.5":
+  version: 8.8.0
+  resolution: "protobufjs@npm:8.8.0"
   dependencies:
-    "@protobufjs/aspromise": "npm:^1.1.2"
-    "@protobufjs/base64": "npm:^1.1.2"
-    "@protobufjs/codegen": "npm:^2.0.4"
-    "@protobufjs/eventemitter": "npm:^1.1.0"
-    "@protobufjs/fetch": "npm:^1.1.0"
-    "@protobufjs/float": "npm:^1.0.2"
-    "@protobufjs/inquire": "npm:^1.1.0"
-    "@protobufjs/path": "npm:^1.1.2"
-    "@protobufjs/pool": "npm:^1.1.0"
-    "@protobufjs/utf8": "npm:^1.1.0"
-    "@types/node": "npm:>=13.7.0"
-    long: "npm:^5.0.0"
-  checksum: 10c0/6fb29ca3c6abc2095a777407750f6094448b7b68bbf04147ec49ee442f85f151592338449f56d19883ea67c39ce915e3d47ec6c5c92f0bcac1eaba1841ab84ff
+    long: "npm:^5.3.2"
+  checksum: 10c0/2aa7fc766dce41858ce45ad750d9bfb2d30e9121f8c4f581ee3e5deda21440cae6bb23f41ec599d33b34963164e85f38eace687ba025d804fe926ab057c05703
   languageName: node
   linkType: hard
 
@@ -17859,14 +17775,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resium@npm:^1.19.0, resium@npm:^1.19.2":
-  version: 1.19.3
-  resolution: "resium@npm:1.19.3"
+"resium@npm:^1.19.0, resium@npm:^1.25.0":
+  version: 1.25.0
+  resolution: "resium@npm:1.25.0"
   peerDependencies:
     cesium: 1.x
     react: ">=18.2.0"
     react-dom: ">=18.2.0"
-  checksum: 10c0/7e0b6693293bce088adf086acf947cfa8d581fe47c543ebfae2838eec333de45febf2563cab63a5dbc4f3e24c05a512b8c2f0a9328199452c61fd8aa69cd00cc
+  checksum: 10c0/8f072bb255c23afe3defc2ee25913d3d548f2b5fc8c0da3704741015a636ad30ea437fee58dd82c758a0f69393bd47385fdb6ec920384e9b218378dea8857eba
   languageName: node
   linkType: hard
 
