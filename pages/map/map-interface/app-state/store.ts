@@ -11,7 +11,7 @@ import { devtools } from "zustand/middleware";
 import { useStore as useStoreInternal } from "zustand/react";
 import { atomWithStore } from "jotai-zustand";
 import { atom } from "jotai";
-import mapboxgl from "mapbox-gl";
+import type mapboxgl from "mapbox-gl";
 
 export function appReducer(
   state: AppState | null | undefined,
