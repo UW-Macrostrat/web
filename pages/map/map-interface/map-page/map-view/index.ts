@@ -19,10 +19,11 @@ import { useInDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  mapInstanceAtom,
   MapLayer,
   useAppActions,
   useAppState,
-} from "#/map/map-interface/app-state";
+} from "../../app-state";
 import { writeLastMapPosition } from "~/_utils/last-map-position";
 import { CrossSectionLine } from "./cross-section";
 import {
@@ -33,6 +34,7 @@ import {
 import { getBaseMapStyle } from "@macrostrat-web/map-utils";
 import { buildOverlayStyle } from "../map-styles";
 import h from "../main.module.sass";
+import { useSetAtom } from "jotai";
 
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
@@ -40,8 +42,8 @@ export default function MainMapView(props) {
   const mapLayers = useAppState((state) => state.mapLayers);
   const mapPosition = useAppState((state) => state.mapPosition);
   const infoMarkerPosition = useAppState((state) => state.infoMarkerPosition);
-
   const { children } = props;
+  const setMapInstance = useSetAtom(mapInstanceAtom);
 
   let mapRef = useMapRef();
   const isDarkMode = useInDarkMode();
@@ -94,6 +96,8 @@ export default function MainMapView(props) {
   const onMapLoaded = useCallback((map) => {
     // disable shift-key zooming so we can use shift to make cross-sections
     map.boxZoom.disable();
+    // Connect the map instance to Jotai state management
+    setMapInstance(map);
 
     /* If we have an initially loaded info marker, we need to make sure
     that it is actually visible on the map, and move to it if not.

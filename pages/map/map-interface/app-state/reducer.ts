@@ -107,7 +107,7 @@ export function coreReducer(
         columnInfo,
         pbdbData,
       };
-    case "menu-button-clicked":
+    case "menu-button-clicked": {
       console.log("toggle menu 2", state.menuOpen);
       const shouldOpen = state.inputFocus || !state.menuOpen;
 
@@ -119,6 +119,7 @@ export function coreReducer(
         isSearching: false,
         inputFocus: false,
       };
+    }
     case "stop-searching":
     case "context-outside-click":
       if (state.inputFocus) {
