@@ -600,10 +600,10 @@ function ErrorFeaturesCallout({ features }) {
     seen.add(p.id);
     items.push(
       h("li.error-item", { key: p.id }, [
-        h(Link, { href: `/maps/${p.map_id}` }, [
+        h(Link, { href: `/maps/${p.source_id}` }, [
           h("span.name", p.name),
           " ",
-          h("code.id", p.map_id),
+          h("code.id", p.source_id),
         ]),
         h("p.error-message", p.topology_error),
       ])
