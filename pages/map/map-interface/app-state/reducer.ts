@@ -171,10 +171,6 @@ export function coreReducer(
     case "clear-filters":
       return { ...state, filters: [] };
     case "start-map-query":
-      // if (state.inputFocus) {
-      //   return { ...state, inputFocus: false };
-      // }
-      console.log("Starting map query", action);
       return {
         ...state,
         infoMarkerPosition: {
@@ -222,6 +218,7 @@ export function coreReducer(
         ...state,
         isSearching: true,
         searchCancelToken: action.cancelToken,
+        term: action.term,
       };
     case "received-search-query":
       return {

@@ -126,11 +126,12 @@ export function Searchbar({ className }) {
 
   const handleSearchInput = useCallback(
     (event) => {
-      runAction({ type: "set-search-term", term: event.target.value });
-      if (event.target.value.length <= 2) {
-        return;
-      }
-      runAction({ type: "fetch-search-query", term: term });
+      const term = event.target.value;
+      // runAction({ type: "set-search-term", term });
+      // if (term.length <= 2) {
+      //   return;
+      // }
+      runAction({ type: "fetch-search-query", term });
     },
     [runAction]
   );
