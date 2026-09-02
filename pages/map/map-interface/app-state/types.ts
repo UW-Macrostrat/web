@@ -254,7 +254,12 @@ export type InfoMarkerPosition = {
   zoom: number;
 } | null;
 
-export type MenuAction = { type: "set-menu-page"; page: MenuPage | null };
+export type MenuAction =
+  | { type: "set-menu-page"; page: MenuPage | null }
+  | {
+      type: "menu-button-clicked";
+      page: MenuPage | null;
+    };
 
 export enum MenuPage {
   LAYERS = "layers",
