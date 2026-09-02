@@ -26,7 +26,11 @@
  */
 
 import hyper from "@macrostrat/hyper";
-import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
+import {
+  burwellTileDomain,
+  emitMineralsToken,
+  mapboxAccessToken,
+} from "@macrostrat-web/settings";
 import { Box, useDarkMode } from "@macrostrat/ui-components";
 import { Tag as ClassTag, TagSize } from "@macrostrat/data-components";
 import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
@@ -87,6 +91,20 @@ const FOOTPRINTS_SOURCE_LAYER = "raster_footprints";
 const cogBaseURL = `${burwellTileDomain}/cog`;
 const mosaicBaseURL = `${burwellTileDomain}/rasters/${RASTER_LAYER}`;
 
+/** Every route under `/rasters/emit-minerals` requires a delegated token — the
+ * tiles, but also `/layer`, `/footprints` and `/point`. So the token goes on
+ * this layer's own requests, in a header rather than the query string (a tile
+ * URL ends up in access logs, history and `Referer`).
+ *
+ * `/cog` is not guarded, so `cogBaseURL` requests use plain `fetch`. */
+function mosaicFetch(url: string, init: RequestInit = {}) {
+  const headers = new Headers(init.headers);
+  if (emitMineralsToken) {
+    headers.set("Authorization", `Bearer ${emitMineralsToken}`);
+  }
+  return fetch(url, { ...init, headers });
+}
+
 /** Fallback view: the conterminous US, where most of the datasets sit. */
 const DEFAULT_BOUNDS = [-125, 24, -66, 49];
 
@@ -136,6 +154,17 @@ export function Page() {
     [showLabels]
   );
 
+  // Mapbox fetches the raster tiles and the footprints MVT itself, so the
+  // delegated token has to be attached here rather than at a call site. Scoped
+  // to this layer's prefix so no token is sent to any other tileserver route.
+const transformRequest = useCallback(
+  (url: string) => {
+    if (!emitMineralsToken || !url.startsWith(mosaicBaseURL)) return { url };
+    return { url, headers: { Authorization: `Bearer ${emitMineralsToken}` } };
+  },
+  [emitMineralsToken]
+);
+
   let detailPanel = null;
   if (inspectPosition != null) {
     detailPanel = h(
@@ -170,6 +199,7 @@ export function Page() {
         style: baseStyle,
         overlayStyles,
         transformStyle,
+        transformRequest,
         mapPosition,
         onMapMoved,
         projection: { name: "globe" },
@@ -311,7 +341,7 @@ function round5(value: number): number {
  * a single request that reads no pixels — no reference COG, and no parsing GDAL
  * metadata in the browser. */
 const mosaicLayerAtom = atom(async (get, { signal }) => {
-  const response = await fetch(`${mosaicBaseURL}/layer`, { signal });
+  const response = await mosaicFetch(`${mosaicBaseURL}/layer`, { signal });
   if (!response.ok) {
     throw new Error(`Failed to fetch layer metadata: ${response.statusText}`);
   }
@@ -358,7 +388,7 @@ const layerInfoLoadableAtom = loadable(layerInfoAtom);
  * FeatureCollection means the index has no rasters for this layer, which is the
  * expected state until they're added. */
 const footprintsAtom = atom(async (get, { signal }) => {
-  const response = await fetch(`${mosaicBaseURL}/footprints`, { signal });
+  const response = await mosaicFetch(`${mosaicBaseURL}/footprints`, { signal });
   if (!response.ok) {
     throw new Error(
       `Failed to fetch mosaic footprints: ${response.statusText}`
@@ -390,7 +420,7 @@ const pointDataAtom = atom(async (get, { signal }) => {
   // map is showing one raster. The focused one is marked in the panel instead.
   const url = `${mosaicBaseURL}/point/${lng},${lat}`;
 
-  const response = await fetch(url, { signal });
+  const response = await mosaicFetch(url, { signal });
   // Outside coverage the mosaic answers 204 with no body, so this has to be
   // checked before parsing — `json()` on an empty body throws.
   if (response.status === 204) return { assets: [] };

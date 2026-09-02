@@ -23,6 +23,20 @@ export const pbdbDomain = "https://paleobiodb.org";
 
 export const mapboxAccessToken = getRuntimeConfig("MAPBOX_API_TOKEN");
 
+/** Delegated token for the guarded `rasters/emit-minerals` tileserver routes.
+ *
+ * Public by design, in the same way a Mapbox `pk.*` token is: it reaches the
+ * browser via `window.env`, so anyone can read it from the page. Its value is
+ * that it identifies our app as the consumer and can be revoked without a code
+ * change (`macrostrat auth revoke-token`, or the /dev/me page) — not that it is
+ * secret.
+ *
+ * Long-lived (~2 years) so the page keeps working; third parties get their own
+ * shorter-lived tokens for using the API directly. */
+export const emitMineralsToken = getRuntimeConfig(
+  "MACROSTRAT_EMIT_MINERALS_TOKEN"
+);
+
 export const baseURL = getRuntimeConfig("BASE_URL", "/");
 
 export const apiV2Prefix = getRuntimeConfig(
