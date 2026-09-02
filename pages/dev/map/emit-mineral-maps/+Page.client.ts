@@ -98,11 +98,9 @@ const mosaicBaseURL = `${burwellTileDomain}/rasters/${RASTER_LAYER}`;
  *
  * `/cog` is not guarded, so `cogBaseURL` requests use plain `fetch`. */
 function mosaicFetch(url: string, init: RequestInit = {}) {
-  const headers: Record<string, string> = {
-    ...((init.headers as Record<string, string>) ?? {}),
-  };
+  const headers = new Headers(init.headers);
   if (emitMineralsToken) {
-    headers.Authorization = `Bearer ${emitMineralsToken}`;
+    headers.set("Authorization", `Bearer ${emitMineralsToken}`);
   }
   return fetch(url, { ...init, headers });
 }
@@ -159,10 +157,13 @@ export function Page() {
   // Mapbox fetches the raster tiles and the footprints MVT itself, so the
   // delegated token has to be attached here rather than at a call site. Scoped
   // to this layer's prefix so no token is sent to any other tileserver route.
-  const transformRequest = useCallback((url: string) => {
+const transformRequest = useCallback(
+  (url: string) => {
     if (!emitMineralsToken || !url.startsWith(mosaicBaseURL)) return { url };
     return { url, headers: { Authorization: `Bearer ${emitMineralsToken}` } };
-  }, []);
+  },
+  [emitMineralsToken]
+);
 
   let detailPanel = null;
   if (inspectPosition != null) {

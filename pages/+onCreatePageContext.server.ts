@@ -38,10 +38,6 @@ export async function onCreatePageContext(pageContext: PageContextServer) {
   return pageContext;
 }
 
-
-//TODO hash api key using SECRET here. scopes: rasters/emit-minerals/, label: MACROSTRAT_EMITMIN_KEY
-//have web_admins create token on dev/me page (verify jwt), revoke
-
 // --- GeoIP ------------------------------------------------------------------
 
 // The reader is opened once per server process and reused (mmap-backed, fast).
