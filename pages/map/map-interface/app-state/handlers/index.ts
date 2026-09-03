@@ -61,7 +61,7 @@ export async function actionRunner(
       }
       return await actionRunner(
         getState,
-        { type: "set-menu-page", page: activePage },
+        { type: "menu-button-clicked", page: activePage },
         dispatch
       );
     }
@@ -87,6 +87,9 @@ export async function actionRunner(
     }
     case "fetch-search-query":
       const { term } = action;
+      if (term.length <= 2) {
+        return { type: "set-search-term", term };
+      }
       let CancelToken = axios.CancelToken;
       let source = CancelToken.source();
       dispatch({

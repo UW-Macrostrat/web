@@ -1,7 +1,8 @@
 import { atom } from "jotai";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { appStateAtom } from "./store.ts";
+import { appStateAtom, mapInstanceAtom } from "./store.ts";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
+import {} from "@macrostrat/mapbox-react";
 import { loadable } from "jotai/utils";
 import mapboxgl from "mapbox-gl";
 
@@ -16,13 +17,16 @@ interface KeyedMapQueryData extends MapQueryData {
 
 const mapInfoDataAtom = atom<Promise<KeyedMapQueryData | null>>(
   async (get, { signal }) => {
+    const map = get(mapInstanceAtom);
+    if (map == null) return null;
     /** Atom to handle fetching of map data */
     const pos = get(infoMarkerPositionAtom);
     if (pos == null) return null;
     const { lng, lat } = pos;
     // A marker restored from the URL (deep link / back-forward) carries no zoom,
-    // so fall back to the current map zoom rather than crashing on `zoom.toFixed`.
-    const zoom = pos.zoom ?? get(appStateAtom).mapPosition?.target?.zoom ?? 7;
+    // so fall back to the current map zoom rather than crashing on `zoom.toFixed`
+    const zoom = map.getZoom() ?? 7;
+
     const params = {
       lng: formatCoordForZoomLevel(lng, zoom),
       lat: formatCoordForZoomLevel(lat, zoom),

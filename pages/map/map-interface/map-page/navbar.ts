@@ -126,11 +126,12 @@ export function Searchbar({ className }) {
 
   const handleSearchInput = useCallback(
     (event) => {
-      runAction({ type: "set-search-term", term: event.target.value });
-      if (event.target.value.length <= 2) {
-        return;
-      }
-      runAction({ type: "fetch-search-query", term: term });
+      const term = event.target.value;
+      // runAction({ type: "set-search-term", term });
+      // if (term.length <= 2) {
+      //   return;
+      // }
+      runAction({ type: "fetch-search-query", term });
     },
     [runAction]
   );
@@ -156,6 +157,15 @@ export function Searchbar({ className }) {
       h(InputGroup, {
         large: true,
         onChange: handleSearchInput,
+        onKeyDown: (e) => {
+          console.log("event", e);
+          if (e.key === "Escape") {
+            runAction({ type: "set-input-focus", inputFocus: false });
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+        },
         onClick: gainInputFocus,
         rightElement: h(MenuButton),
         placeholder: "Search Macrostrat...",

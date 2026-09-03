@@ -79,6 +79,8 @@ export default function Menu(props: MenuProps) {
     return h(SearchResults, { className });
   }
 
+  if (menuPage == null) return null;
+
   className = classNames(
     className,
     "menu-card",

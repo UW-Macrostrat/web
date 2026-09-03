@@ -1844,10 +1844,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/aix-ppc64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/aix-ppc64@npm:0.27.2"
+  conditions: os=aix & cpu=ppc64
+  languageName: node
+  linkType: hard
+
 "@esbuild/aix-ppc64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/aix-ppc64@npm:0.28.2"
   conditions: os=aix & cpu=ppc64
+  languageName: node
+  linkType: hard
+
+"@esbuild/android-arm64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/android-arm64@npm:0.27.2"
+  conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -1858,10 +1872,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/android-arm@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/android-arm@npm:0.27.2"
+  conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
 "@esbuild/android-arm@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/android-arm@npm:0.28.2"
   conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@esbuild/android-x64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/android-x64@npm:0.27.2"
+  conditions: os=android & cpu=x64
   languageName: node
   linkType: hard
 
@@ -1872,10 +1900,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/darwin-arm64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/darwin-arm64@npm:0.27.2"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
 "@esbuild/darwin-arm64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/darwin-arm64@npm:0.28.2"
   conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/darwin-x64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/darwin-x64@npm:0.27.2"
+  conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
@@ -1886,10 +1928,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/freebsd-arm64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/freebsd-arm64@npm:0.27.2"
+  conditions: os=freebsd & cpu=arm64
+  languageName: node
+  linkType: hard
+
 "@esbuild/freebsd-arm64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/freebsd-arm64@npm:0.28.2"
   conditions: os=freebsd & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/freebsd-x64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/freebsd-x64@npm:0.27.2"
+  conditions: os=freebsd & cpu=x64
   languageName: node
   linkType: hard
 
@@ -1900,10 +1956,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-arm64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/linux-arm64@npm:0.27.2"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
 "@esbuild/linux-arm64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/linux-arm64@npm:0.28.2"
   conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-arm@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/linux-arm@npm:0.27.2"
+  conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
@@ -1914,10 +1984,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-ia32@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/linux-ia32@npm:0.27.2"
+  conditions: os=linux & cpu=ia32
+  languageName: node
+  linkType: hard
+
 "@esbuild/linux-ia32@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/linux-ia32@npm:0.28.2"
   conditions: os=linux & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-loong64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/linux-loong64@npm:0.27.2"
+  conditions: os=linux & cpu=loong64
   languageName: node
   linkType: hard
 
@@ -1928,10 +2012,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-mips64el@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/linux-mips64el@npm:0.27.2"
+  conditions: os=linux & cpu=mips64el
+  languageName: node
+  linkType: hard
+
 "@esbuild/linux-mips64el@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/linux-mips64el@npm:0.28.2"
   conditions: os=linux & cpu=mips64el
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-ppc64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/linux-ppc64@npm:0.27.2"
+  conditions: os=linux & cpu=ppc64
   languageName: node
   linkType: hard
 
@@ -1942,10 +2040,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-riscv64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/linux-riscv64@npm:0.27.2"
+  conditions: os=linux & cpu=riscv64
+  languageName: node
+  linkType: hard
+
 "@esbuild/linux-riscv64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/linux-riscv64@npm:0.28.2"
   conditions: os=linux & cpu=riscv64
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-s390x@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/linux-s390x@npm:0.27.2"
+  conditions: os=linux & cpu=s390x
   languageName: node
   linkType: hard
 
@@ -1956,10 +2068,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/linux-x64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/linux-x64@npm:0.27.2"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@esbuild/linux-x64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/linux-x64@npm:0.28.2"
   conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/netbsd-arm64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/netbsd-arm64@npm:0.27.2"
+  conditions: os=netbsd & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -1970,10 +2096,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/netbsd-x64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/netbsd-x64@npm:0.27.2"
+  conditions: os=netbsd & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@esbuild/netbsd-x64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/netbsd-x64@npm:0.28.2"
   conditions: os=netbsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/openbsd-arm64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/openbsd-arm64@npm:0.27.2"
+  conditions: os=openbsd & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -1984,10 +2124,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/openbsd-x64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/openbsd-x64@npm:0.27.2"
+  conditions: os=openbsd & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@esbuild/openbsd-x64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/openbsd-x64@npm:0.28.2"
   conditions: os=openbsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/openharmony-arm64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/openharmony-arm64@npm:0.27.2"
+  conditions: os=openharmony & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -1998,10 +2152,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/sunos-x64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/sunos-x64@npm:0.27.2"
+  conditions: os=sunos & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@esbuild/sunos-x64@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/sunos-x64@npm:0.28.2"
   conditions: os=sunos & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/win32-arm64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/win32-arm64@npm:0.27.2"
+  conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
@@ -2012,10 +2180,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@esbuild/win32-ia32@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/win32-ia32@npm:0.27.2"
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
 "@esbuild/win32-ia32@npm:0.28.2":
   version: 0.28.2
   resolution: "@esbuild/win32-ia32@npm:0.28.2"
   conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"@esbuild/win32-x64@npm:0.27.2":
+  version: 0.27.2
+  resolution: "@esbuild/win32-x64@npm:0.27.2"
+  conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
@@ -2294,7 +2476,7 @@ __metadata:
     "@macrostrat/cesium-vector-provider": "npm:^2.0.2"
     "@macrostrat/cesium-viewer": "npm:^1.4.0"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/mapbox-react": "npm:^3.3.3"
+    "@macrostrat/mapbox-react": "npm:^3.4.0"
     "@macrostrat/mapbox-utils": "npm:^1.8.0"
     cesium: "npm:^1.135.0"
     resium: "npm:^1.19.0"
@@ -2419,6 +2601,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat/api-types@npm:1.3.0, @macrostrat/api-types@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@macrostrat/api-types@npm:1.3.0"
+  dependencies:
+    "@types/geojson": "npm:^7946.0.16"
+  checksum: 10c0/d37cd7b5d47c713bc379d636935f9acd4c4f62270352cd53f24edc749a5947f1378eafe77980c54232a3cc99a33be55ab9dfd4216f6c505f6ade2825bbac7204
+  languageName: node
+  linkType: hard
+
 "@macrostrat/api-types@npm:^1.2.0":
   version: 1.2.0
   resolution: "@macrostrat/api-types@npm:1.2.0"
@@ -2510,58 +2701,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^3.9.0":
-  version: 3.9.0
-  resolution: "@macrostrat/column-views@npm:3.9.0"
+"@macrostrat/column-views@npm:^3.10.0":
+  version: 3.10.0
+  resolution: "@macrostrat/column-views@npm:3.10.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
-    "@macrostrat/api-types": "npm:^1.2.0"
+    "@macrostrat/api-types": "npm:^1.3.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/column-components": "npm:^2.1.0"
     "@macrostrat/data-components": "npm:^1.5.1"
     "@macrostrat/data-provider": "npm:^1.2.0"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/map-interface": "npm:^2.3.1"
-    "@macrostrat/map-styles": "npm:^2.2.7"
-    "@macrostrat/mapbox-react": "npm:^3.3.3"
-    "@macrostrat/mapbox-utils": "npm:^1.8.0"
-    "@macrostrat/scoped-store": "npm:^1.0.1"
-    "@macrostrat/stratigraphy-utils": "npm:^1.3.0"
-    "@macrostrat/svg-map-components": "npm:^2.0.3"
+    "@macrostrat/map-views": "npm:^1.0.0"
+    "@macrostrat/scoped-store": "npm:^1.1.0"
+    "@macrostrat/stratigraphy-utils": "npm:^1.4.0"
     "@macrostrat/timescale": "npm:^3.2.0"
     "@macrostrat/ui-components": "npm:^5.2.0"
-    "@turf/boolean-point-in-polygon": "npm:^7.3.2"
-    "@turf/buffer": "npm:^7.3.2"
-    "@turf/centroid": "npm:^7.3.2"
-    "@turf/distance": "npm:^7.3.2"
-    "@turf/line-intersect": "npm:^7.3.2"
-    "@turf/nearest-point-on-line": "npm:^7.3.2"
     "@types/chroma-js": "npm:^3.1.1"
     "@types/d3-format": "npm:^3.0.4"
-    "@types/d3-geo": "npm:^3.1.0"
     "@types/d3-shape": "npm:^3.1.7"
-    "@types/topojson-client": "npm:^3.1.5"
     "@visx/axis": "npm:^3.12.0"
     chroma-js: "npm:^3.2.0"
     classnames: "npm:^2.5.1"
-    cross-fetch: "npm:^4.1.0"
     d3-array: "npm:^3.2.4"
     d3-format: "npm:^3.1.2"
-    d3-geo: "npm:^3.1.1"
-    d3-geo-voronoi: "npm:^2.1.0"
     d3-path: "npm:^3.1.0"
     d3-scale: "npm:^4.0.2"
     d3-shape: "npm:^3.2.0"
     jotai: "npm:^2.20.0"
-    mapbox-gl: "npm:^3.0.0"
-    p-map: "npm:^7.0.4"
-    react-spring: "npm:^9.7.5"
-    topojson-client: "npm:^3.1.0"
-    zustand: "npm:^5.0.3"
-    zustand-computed: "npm:^2.0.2"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/e4a38406e5bd2dacfa610656ff7333a2d24f6693b3438701020544dbce8f8ffbc0ca4f93b23695053984a25c8905837542a34720b050985b16bd0bb9aa396e02
+  checksum: 10c0/d60557b618336b1951cf68592fd57f884ebda5c191143972aab6b9072be956ce5d471b03b07cb4d73efce43a17ad94e3c7c71cd54ef099b6f72401914e34d4f7
   languageName: node
   linkType: hard
 
@@ -2614,16 +2784,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/data-sheet@npm:^4.5.0, @macrostrat/data-sheet@npm:^4.5.2":
-  version: 4.5.2
-  resolution: "@macrostrat/data-sheet@npm:4.5.2"
+"@macrostrat/data-sheet@npm:^4.5.0, @macrostrat/data-sheet@npm:^4.6.0":
+  version: 4.6.0
+  resolution: "@macrostrat/data-sheet@npm:4.6.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@blueprintjs/table": "npm:^6.1.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/data-components": "npm:^1.5.1"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/scoped-store": "npm:^1.0.1"
+    "@macrostrat/scoped-store": "npm:^1.1.0"
     "@macrostrat/ui-components": "npm:^5.2.0"
     "@supabase/postgrest-js": "npm:^1.17.7"
     "@types/underscore": "npm:^1.13.0"
@@ -2633,7 +2803,7 @@ __metadata:
     underscore: "npm:^1.13.7"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/77c1ff62cecb018b5cd78d88a424e46604293dd4004c6e13da20ef478c567e5b87824e7fe084fad1624dcddadec58b50ff91031ac1bcfcb0e0952bc8e4b4f959
+  checksum: 10c0/274402c231e9fc36b45fb56e6947b7743b1f88559b806537b3509fcd67ba3233f0f0643ede6c5c2e2839c93269effc4f833a3c0c03d5039ce859dd4961429e0f
   languageName: node
   linkType: hard
 
@@ -2700,20 +2870,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-interface@npm:^2.3.1, @macrostrat/map-interface@npm:^2.3.2":
-  version: 2.3.3
-  resolution: "@macrostrat/map-interface@npm:2.3.3"
+"@macrostrat/map-interface@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "@macrostrat/map-interface@npm:2.4.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/data-components": "npm:^1.5.1"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/mapbox-react": "npm:^3.3.3"
+    "@macrostrat/mapbox-react": "npm:^3.4.0"
     "@macrostrat/mapbox-utils": "npm:^1.8.0"
     "@macrostrat/ui-components": "npm:^5.2.0"
     "@mapbox/tilebelt": "npm:^2.0.0"
     "@visx/axis": "npm:^3.12.0"
     "@visx/scale": "npm:^3.12.0"
+    allotment: "npm:^1.20.5"
     chroma-js: "npm:^3.2.0"
     classnames: "npm:^2.5.1"
     d3-array: "npm:^3.2.4"
@@ -2726,11 +2897,11 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
     react-dom: ^18.0.0||^19.0.0
-  checksum: 10c0/b1638bf983985e123c18a2420a7176219d349590c8512937bf62fae44bfea48b06b3e83d10376e094717d93192f05a76e07dc7125f07d4ffa676fe5d96ab9058
+  checksum: 10c0/a3674d7883d9b4b26d0653314a746be75fd5f96b50227554c306710b4f83a93823e76bca2d5df0187e8eedf3813e9ec9f70e218e68845f05750d63680edc0b9a
   languageName: node
   linkType: hard
 
-"@macrostrat/map-styles@npm:^2.2.6, @macrostrat/map-styles@npm:^2.2.7":
+"@macrostrat/map-styles@npm:^2.2.7":
   version: 2.2.7
   resolution: "@macrostrat/map-styles@npm:2.2.7"
   dependencies:
@@ -2746,16 +2917,59 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/mapbox-react@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@macrostrat/mapbox-react@npm:3.3.3"
+"@macrostrat/map-views@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@macrostrat/map-views@npm:1.0.0"
+  dependencies:
+    "@blueprintjs/core": "npm:^6.14.0"
+    "@macrostrat/api-types": "npm:^1.3.0"
+    "@macrostrat/color-utils": "npm:^1.2.2"
+    "@macrostrat/data-provider": "npm:^1.2.0"
+    "@macrostrat/hyper": "npm:^3.1.1"
+    "@macrostrat/map-interface": "npm:^2.4.0"
+    "@macrostrat/map-styles": "npm:^2.2.7"
+    "@macrostrat/mapbox-react": "npm:^3.4.0"
+    "@macrostrat/mapbox-utils": "npm:^1.8.0"
+    "@macrostrat/scoped-store": "npm:^1.1.0"
+    "@macrostrat/stratigraphy-utils": "npm:^1.4.0"
+    "@macrostrat/svg-map-components": "npm:^2.0.3"
+    "@macrostrat/ui-components": "npm:^5.2.0"
+    "@turf/boolean-point-in-polygon": "npm:^7.3.2"
+    "@turf/buffer": "npm:^7.3.2"
+    "@turf/centroid": "npm:^7.3.2"
+    "@turf/distance": "npm:^7.3.2"
+    "@turf/line-intersect": "npm:^7.3.2"
+    "@turf/nearest-point-on-line": "npm:^7.3.2"
+    "@types/chroma-js": "npm:^3.1.1"
+    "@types/d3-geo": "npm:^3.1.0"
+    "@types/topojson-client": "npm:^3.1.5"
+    chroma-js: "npm:^3.2.0"
+    classnames: "npm:^2.5.1"
+    d3-format: "npm:^3.1.2"
+    d3-geo: "npm:^3.1.1"
+    d3-geo-voronoi: "npm:^2.1.0"
+    mapbox-gl: "npm:^3.0.0"
+    p-map: "npm:^7.0.4"
+    react-spring: "npm:^9.7.5"
+    topojson-client: "npm:^3.1.0"
+    zustand: "npm:^5.0.3"
+    zustand-computed: "npm:^2.0.2"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+  checksum: 10c0/6f8f1a3d64df5c13a38888ac80c25abd5d5a0f91d716ae0ca6b03ef7317f76970d9cb7000a3654f153b3cd8e107be3f25aaf65524d6cc7e482b7bd7f7db5b0c3
+  languageName: node
+  linkType: hard
+
+"@macrostrat/mapbox-react@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "@macrostrat/mapbox-react@npm:3.4.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/map-styles": "npm:^2.2.6"
+    "@macrostrat/map-styles": "npm:^2.2.7"
     "@macrostrat/mapbox-utils": "npm:^1.8.0"
-    "@macrostrat/scoped-store": "npm:^1.0.1"
-    "@macrostrat/ui-components": "npm:^5.1.0"
+    "@macrostrat/scoped-store": "npm:^1.1.0"
+    "@macrostrat/ui-components": "npm:^5.2.0"
     "@turf/centroid": "npm:^7.3.2"
     classnames: "npm:^2.5.1"
     immutability-helper: "npm:^3.1.1"
@@ -2765,7 +2979,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
     react-dom: ^18.0.0||^19.0.0
-  checksum: 10c0/519f6def4716060eec0f8224913ac7c13d5803495d1463f3bd637e0357045d55cb0e83cc5666f648a99d25d8f9e7a15b8bee57ab37c7f74ef0d61e70bf3a7256
+  checksum: 10c0/0ccadaceee8ed1b7eb962cbef891a3e79dd9f78d9bfc1070af50fc259ac855db1e6faba3d09ae8d9e0d621e9f441bbb08949c192ded59906ba35d3bd3913aaa4
   languageName: node
   linkType: hard
 
@@ -2789,9 +3003,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/scoped-store@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@macrostrat/scoped-store@npm:1.0.1"
+"@macrostrat/scoped-store@npm:^1.0.1, @macrostrat/scoped-store@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@macrostrat/scoped-store@npm:1.1.0"
   dependencies:
     "@macrostrat/hyper": "npm:^3.1.1"
     jotai: "npm:^2.20.0"
@@ -2800,14 +3014,17 @@ __metadata:
     zustand: "npm:^5.0.2"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/9e4d654befedd588a0ea127d77198387d48e33a00be03b35b668fa66eafebabe6808ff06b882b92b7e72ee2dcbd80366983f3d7f45dae2dc07012a1f70df3c10
+  checksum: 10c0/b16585c55e21baead9c2a737c52b8af4c1699e782742632a41854c0ae27614a8816553366ac415b91560f19c3c8cd2060269e40c00599e29395352ee537ebf87
   languageName: node
   linkType: hard
 
-"@macrostrat/stratigraphy-utils@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@macrostrat/stratigraphy-utils@npm:1.3.0"
-  checksum: 10c0/fcfa0b75e4fa73f66a55761def355f199d75898c1b235b3f75fbe8dea84f022a57944d824663fe187ef182f5b6b772680f5401e5b4890b8530cf2ea29cc3e8a1
+"@macrostrat/stratigraphy-utils@npm:^1.3.0, @macrostrat/stratigraphy-utils@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@macrostrat/stratigraphy-utils@npm:1.4.0"
+  dependencies:
+    "@macrostrat/api-types": "npm:1.3.0"
+    chroma-js: "npm:^3.2.0"
+  checksum: 10c0/295cdcfabe0e572f169c92d88d30bdf7e93305c8c1601621cd3684e8f4eb65198d6ac523ef4200b10a3ec43cb2ef159d4ece7b71505ff0819f7341c7d1786868
   languageName: node
   linkType: hard
 
@@ -3003,22 +3220,22 @@ __metadata:
     "@macrostrat-web/sift": "workspace:*"
     "@macrostrat-web/text-toolchain": "workspace:*"
     "@macrostrat-web/utility-functions": "workspace:*"
-    "@macrostrat/api-types": "npm:^1.2.0"
+    "@macrostrat/api-types": "npm:^1.3.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/column-components": "npm:^2.1.0"
-    "@macrostrat/column-views": "npm:^3.9.0"
+    "@macrostrat/column-views": "npm:^3.10.0"
     "@macrostrat/data-components": "npm:^1.5.1"
     "@macrostrat/data-provider": "npm:^1.2.0"
-    "@macrostrat/data-sheet": "npm:^4.5.2"
+    "@macrostrat/data-sheet": "npm:^4.6.0"
     "@macrostrat/feedback-components": "npm:^2.2.6"
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/map-interface": "npm:^2.3.2"
+    "@macrostrat/map-interface": "npm:^2.4.0"
     "@macrostrat/map-styles": "npm:^2.2.7"
-    "@macrostrat/mapbox-react": "npm:^3.3.3"
+    "@macrostrat/mapbox-react": "npm:^3.4.0"
     "@macrostrat/mapbox-utils": "npm:^1.8.0"
     "@macrostrat/revision-info-webpack": "npm:^1.0.0"
-    "@macrostrat/scoped-store": "npm:^1.0.1"
+    "@macrostrat/scoped-store": "npm:^1.1.0"
     "@macrostrat/style-system": "npm:^1.0.0"
     "@macrostrat/svg-map-components": "npm:^2.0.3"
     "@macrostrat/timescale": "npm:^3.2.0"
@@ -5532,7 +5749,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@turf/boolean-point-in-polygon@npm:7.4.0, @turf/boolean-point-in-polygon@npm:^7.3.2":
+"@turf/boolean-point-in-polygon@npm:7.4.0":
   version: 7.4.0
   resolution: "@turf/boolean-point-in-polygon@npm:7.4.0"
   dependencies:
@@ -5542,6 +5759,19 @@ __metadata:
     point-in-polygon-hao: "npm:^1.1.0"
     tslib: "npm:^2.8.1"
   checksum: 10c0/c4d92534d6e2de4602a6507bf35626a2fc825bb0edb7643908978d98069a14aee1e9cce41812a0575fc08039716b2c74def3bb6f530121f54d86fc2062964b84
+  languageName: node
+  linkType: hard
+
+"@turf/boolean-point-in-polygon@npm:^7.3.2":
+  version: 7.3.3
+  resolution: "@turf/boolean-point-in-polygon@npm:7.3.3"
+  dependencies:
+    "@turf/helpers": "npm:7.3.3"
+    "@turf/invariant": "npm:7.3.3"
+    "@types/geojson": "npm:^7946.0.10"
+    point-in-polygon-hao: "npm:^1.1.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/28705a89779b7d769a18f5407cee8565a1c5bb2bfdbc9f32ca2aac4adf60f58691c44f6001ffe7c6341e75ea66d715ecece9b7f79085045c65bac67712f23cc0
   languageName: node
   linkType: hard
 
@@ -5619,6 +5849,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/distance@npm:7.3.3":
+  version: 7.3.3
+  resolution: "@turf/distance@npm:7.3.3"
+  dependencies:
+    "@turf/helpers": "npm:7.3.3"
+    "@turf/invariant": "npm:7.3.3"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/5e214b9f395df8dc8f4f29474656f6b4bf78daecb541bfb3cb59a0aa835e43c5e49c69fbc339e78552a96531b4ea19500fda1766f595f2e5f38ad0ab175e2101
+  languageName: node
+  linkType: hard
+
 "@turf/distance@npm:7.4.0, @turf/distance@npm:^7.0.0, @turf/distance@npm:^7.3.2":
   version: 7.4.0
   resolution: "@turf/distance@npm:7.4.0"
@@ -5645,6 +5887,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/helpers@npm:7.3.3":
+  version: 7.3.3
+  resolution: "@turf/helpers@npm:7.3.3"
+  dependencies:
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/dd4ea19b6d6f93bb268a46846ecb731f731b1a8a0bc2e864dd9a74ac5aee6ba72cab34202d6ef4394793464aa5dc0c21a99aa12832a72e29150536a98bf18bce
+  languageName: node
+  linkType: hard
+
 "@turf/helpers@npm:7.4.0":
   version: 7.4.0
   resolution: "@turf/helpers@npm:7.4.0"
@@ -5659,6 +5911,17 @@ __metadata:
   version: 6.5.0
   resolution: "@turf/helpers@npm:6.5.0"
   checksum: 10c0/786cbe0c0027f85db286fb3a0b7be04bb29bd63ec07760a49735ef32e9c5b4a7c059a8f691fafa31c7e0e9be34c281e014dc24077438bae01a09b492a680fb6f
+  languageName: node
+  linkType: hard
+
+"@turf/invariant@npm:7.3.3":
+  version: 7.3.3
+  resolution: "@turf/invariant@npm:7.3.3"
+  dependencies:
+    "@turf/helpers": "npm:7.3.3"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/c64c13637b947afaeb7465c91cbb2dd920e397409e4183883996d59d32bc5cf773dbd02c42a5293a6d483b14a511fda6db642a1d4a02ac6e924d9d4556f3739f
   languageName: node
   linkType: hard
 
@@ -5691,7 +5954,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@turf/line-intersect@npm:7.4.0, @turf/line-intersect@npm:^7.3.2":
+"@turf/line-intersect@npm:7.4.0":
   version: 7.4.0
   resolution: "@turf/line-intersect@npm:7.4.0"
   dependencies:
@@ -5701,6 +5964,18 @@ __metadata:
     tinyqueue: "npm:^2.0.3"
     tslib: "npm:^2.8.1"
   checksum: 10c0/02945aab639a8ae3b735f9d68dcf2a0b4885ceac95ec9dc6d34b5311e4771041ed133e2aeb0d4cf848b2839403a7059df639761a9f675315ae2fa190046912c3
+  languageName: node
+  linkType: hard
+
+"@turf/line-intersect@npm:^7.3.2":
+  version: 7.3.3
+  resolution: "@turf/line-intersect@npm:7.3.3"
+  dependencies:
+    "@turf/helpers": "npm:7.3.3"
+    "@types/geojson": "npm:^7946.0.10"
+    sweepline-intersections: "npm:^1.5.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/18ea90420f41b2d4cfb93eea125d5f02e40ab1d78baf98aac879305dcc36157b290112388f94ffcd9ac5b57385b23e9c0647cbe19c15d8a86c1f956d08de418b
   languageName: node
   linkType: hard
 
@@ -5736,6 +6011,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/meta@npm:7.3.3":
+  version: 7.3.3
+  resolution: "@turf/meta@npm:7.3.3"
+  dependencies:
+    "@turf/helpers": "npm:7.3.3"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/4b8824dff1f3d9d7511989e2176ba53a8b21723e959b508fe46ad35d2619513b558d6b159ef5acdfbadde30230be9a7f02ee04f4fb0161122cceb5dc3be63f7b
+  languageName: node
+  linkType: hard
+
 "@turf/meta@npm:7.4.0":
   version: 7.4.0
   resolution: "@turf/meta@npm:7.4.0"
@@ -5756,7 +6042,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@turf/nearest-point-on-line@npm:7.4.0, @turf/nearest-point-on-line@npm:^7.3.2":
+"@turf/nearest-point-on-line@npm:7.4.0":
   version: 7.4.0
   resolution: "@turf/nearest-point-on-line@npm:7.4.0"
   dependencies:
@@ -5767,6 +6053,20 @@ __metadata:
     "@types/geojson": "npm:^7946.0.10"
     tslib: "npm:^2.8.1"
   checksum: 10c0/e610757bbdc83f74830dc3c130d0e5bd20144a1e2a3183264896e6fec83d571e44fc4f38b18cef4bb4be4627a964420b75c9c8e7e13d9e164b067d6ec18d3c23
+  languageName: node
+  linkType: hard
+
+"@turf/nearest-point-on-line@npm:^7.3.2":
+  version: 7.3.3
+  resolution: "@turf/nearest-point-on-line@npm:7.3.3"
+  dependencies:
+    "@turf/distance": "npm:7.3.3"
+    "@turf/helpers": "npm:7.3.3"
+    "@turf/invariant": "npm:7.3.3"
+    "@turf/meta": "npm:7.3.3"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10c0/b370fa8883a014cefcd527fca00ced0022fcfdda4afaf986c0100af81688ac13d4d1d1a874917fd5e2596a919c589888b2455f9b34c09bab63185f634482ca05
   languageName: node
   linkType: hard
 
@@ -6816,6 +7116,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@uiw/color-convert@npm:2.10.1":
+  version: 2.10.1
+  resolution: "@uiw/color-convert@npm:2.10.1"
+  peerDependencies:
+    "@babel/runtime": ">=7.19.0"
+  checksum: 10c0/2e846a1d430787368944bd4f8b3273b6e5ca07ad8d57cd24d07c88a3c0f4ce6d6d218cf2b346c5464654db21cec22fda67a787b5500f5577e7b29519f4f43bb5
+  languageName: node
+  linkType: hard
+
 "@uiw/color-convert@npm:2.10.3":
   version: 2.10.3
   resolution: "@uiw/color-convert@npm:2.10.3"
@@ -6831,6 +7140,20 @@ __metadata:
   peerDependencies:
     "@babel/runtime": ">=7.19.0"
   checksum: 10c0/91e4065b57ab014cd0a373f15f804e5600bb573fe5f7d56b5faea327a65f426ab6ae1c59a78a5083ad034664fd5eb1806d88f3eeeae4d82d4f730b979f03d30a
+  languageName: node
+  linkType: hard
+
+"@uiw/react-color-alpha@npm:2.10.1":
+  version: 2.10.1
+  resolution: "@uiw/react-color-alpha@npm:2.10.1"
+  dependencies:
+    "@uiw/color-convert": "npm:2.10.1"
+    "@uiw/react-drag-event-interactive": "npm:2.10.1"
+  peerDependencies:
+    "@babel/runtime": ">=7.19.0"
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 10c0/ec314e4120af9262529cb2b19097b55c9cc720ae7e10686cc819e7fa20c6412cfc36e56117d8cf632c617baa3bc45f8f2c2787ebef5a117c2ee9d519238e69ea
   languageName: node
   linkType: hard
 
@@ -7052,6 +7375,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@uiw/react-color-editable-input-rgba@npm:2.10.1":
+  version: 2.10.1
+  resolution: "@uiw/react-color-editable-input-rgba@npm:2.10.1"
+  dependencies:
+    "@uiw/color-convert": "npm:2.10.1"
+    "@uiw/react-color-editable-input": "npm:2.10.1"
+  peerDependencies:
+    "@babel/runtime": ">=7.19.0"
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 10c0/c4d354616322dd7239b526240f6e8b5b9bafbcb745b337cc021bb96be651e0723555c7e8079476b66026027567dac6ec63a7dea370e98737599d6c2ed8358d13
+  languageName: node
+  linkType: hard
+
 "@uiw/react-color-editable-input-rgba@npm:2.10.3":
   version: 2.10.3
   resolution: "@uiw/react-color-editable-input-rgba@npm:2.10.3"
@@ -7077,6 +7414,17 @@ __metadata:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
   checksum: 10c0/aa6326df86a0c8c6974c1bdbd6fd10ed4d8ab9249ad9d00956a8a0380f5606540e1775c71afafa7b0ff64602d2a36eb2561696d14a5ba1d2b5fec487fc3408bd
+  languageName: node
+  linkType: hard
+
+"@uiw/react-color-editable-input@npm:2.10.1":
+  version: 2.10.1
+  resolution: "@uiw/react-color-editable-input@npm:2.10.1"
+  peerDependencies:
+    "@babel/runtime": ">=7.19.0"
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 10c0/1cb2171facbb2ccda7e198ab86c0b34993fb7c7d121ca1d4e92748df6a8f34fa1273c82020b8dc8853a0871c6bdd000c64354440f3e9ba20d0efe12c02d8634c
   languageName: node
   linkType: hard
 
@@ -7127,6 +7475,20 @@ __metadata:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
   checksum: 10c0/c14557d6e18579df6e2d4c5c8b4a45d97bb28e73f81859725bb2452bac79e48a4dbbbc0e605663cd8307815f3ead5059116c6b44b13f6e7fd7ee0d567a845b06
+  languageName: node
+  linkType: hard
+
+"@uiw/react-color-hue@npm:2.10.1":
+  version: 2.10.1
+  resolution: "@uiw/react-color-hue@npm:2.10.1"
+  dependencies:
+    "@uiw/color-convert": "npm:2.10.1"
+    "@uiw/react-color-alpha": "npm:2.10.1"
+  peerDependencies:
+    "@babel/runtime": ">=7.19.0"
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 10c0/2fa17f558e5ee90bb7c57f5c66dccdbe78036a272eef2b208748e34df0447c14d38cea59d357ebced62aafae0b388d55e3a83413c0b4f498d29c4d14facf7d2c
   languageName: node
   linkType: hard
 
@@ -7212,6 +7574,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@uiw/react-color-saturation@npm:2.10.1":
+  version: 2.10.1
+  resolution: "@uiw/react-color-saturation@npm:2.10.1"
+  dependencies:
+    "@uiw/color-convert": "npm:2.10.1"
+    "@uiw/react-drag-event-interactive": "npm:2.10.1"
+  peerDependencies:
+    "@babel/runtime": ">=7.19.0"
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 10c0/6f563fbe965e021a61fcf8584be0425bb55d6dd219942888228e46c7e388e2aaf16b3a8abaf0ffd3a450de6d1ae817eec6eeb2810450b9017b3a6972531a4c02
+  languageName: node
+  linkType: hard
+
 "@uiw/react-color-saturation@npm:2.10.3":
   version: 2.10.3
   resolution: "@uiw/react-color-saturation@npm:2.10.3"
@@ -7268,7 +7644,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@uiw/react-color-sketch@npm:2.10.3, @uiw/react-color-sketch@npm:^2.9.2":
+"@uiw/react-color-sketch@npm:2.10.3":
   version: 2.10.3
   resolution: "@uiw/react-color-sketch@npm:2.10.3"
   dependencies:
@@ -7306,6 +7682,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@uiw/react-color-sketch@npm:^2.9.2":
+  version: 2.10.1
+  resolution: "@uiw/react-color-sketch@npm:2.10.1"
+  dependencies:
+    "@uiw/color-convert": "npm:2.10.1"
+    "@uiw/react-color-alpha": "npm:2.10.1"
+    "@uiw/react-color-editable-input": "npm:2.10.1"
+    "@uiw/react-color-editable-input-rgba": "npm:2.10.1"
+    "@uiw/react-color-hue": "npm:2.10.1"
+    "@uiw/react-color-saturation": "npm:2.10.1"
+    "@uiw/react-color-swatch": "npm:2.10.1"
+  peerDependencies:
+    "@babel/runtime": ">=7.19.0"
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 10c0/8c62f4a57c61c813f36017fcdc6d0ecf67109601a10b7ac47334523391888508008538d408e3d1b6cb35ec36acf6591e51be44d8d8fabd4591e457f0c636e7d3
+  languageName: node
+  linkType: hard
+
 "@uiw/react-color-slider@npm:2.10.3":
   version: 2.10.3
   resolution: "@uiw/react-color-slider@npm:2.10.3"
@@ -7331,6 +7726,19 @@ __metadata:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
   checksum: 10c0/374a77ba02e46d0897da674574d466dedccaf98fd1b58c8ecb50a48314180ceb3805165b5cbe13aa844a798967e46372f07a172fe084317d895f833cd086d7b4
+  languageName: node
+  linkType: hard
+
+"@uiw/react-color-swatch@npm:2.10.1":
+  version: 2.10.1
+  resolution: "@uiw/react-color-swatch@npm:2.10.1"
+  dependencies:
+    "@uiw/color-convert": "npm:2.10.1"
+  peerDependencies:
+    "@babel/runtime": ">=7.19.0"
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 10c0/cd22b8753c3d3be605a6925b387290e4feee82af3eeb6f948b01a9ffd4349e1f364ac7bba1bc6117e3c6981bf529d7e5879cebd744097301758072a5e45aec19
   languageName: node
   linkType: hard
 
@@ -7449,6 +7857,17 @@ __metadata:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
   checksum: 10c0/bc31cdeca42fe1e3f9abf089a9e72d127ae1d6ffbabd2e9111b29d2a540b74e9ae28e97c18562f459cd294bd811286e74b49c4998cb3052fdd7360ce25bc3b85
+  languageName: node
+  linkType: hard
+
+"@uiw/react-drag-event-interactive@npm:2.10.1":
+  version: 2.10.1
+  resolution: "@uiw/react-drag-event-interactive@npm:2.10.1"
+  peerDependencies:
+    "@babel/runtime": ">=7.19.0"
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 10c0/848da990b84d33b7a764d71893a7ff1185c1c8110cd69d42cebd468fb2341b86396bb94a037e9c7d5203391e751c2a7b948289e8b3f5b10aa9f3d274e820f00a
   languageName: node
   linkType: hard
 
@@ -8208,7 +8627,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"allotment@npm:^1.20.2":
+"allotment@npm:^1.20.2, allotment@npm:^1.20.5":
   version: 1.20.5
   resolution: "allotment@npm:1.20.5"
   dependencies:
@@ -11099,7 +11518,96 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:>=0.19.0, esbuild@npm:^0.27.0 || ^0.28.0, esbuild@npm:~0.28.0":
+"esbuild@npm:>=0.19.0":
+  version: 0.27.2
+  resolution: "esbuild@npm:0.27.2"
+  dependencies:
+    "@esbuild/aix-ppc64": "npm:0.27.2"
+    "@esbuild/android-arm": "npm:0.27.2"
+    "@esbuild/android-arm64": "npm:0.27.2"
+    "@esbuild/android-x64": "npm:0.27.2"
+    "@esbuild/darwin-arm64": "npm:0.27.2"
+    "@esbuild/darwin-x64": "npm:0.27.2"
+    "@esbuild/freebsd-arm64": "npm:0.27.2"
+    "@esbuild/freebsd-x64": "npm:0.27.2"
+    "@esbuild/linux-arm": "npm:0.27.2"
+    "@esbuild/linux-arm64": "npm:0.27.2"
+    "@esbuild/linux-ia32": "npm:0.27.2"
+    "@esbuild/linux-loong64": "npm:0.27.2"
+    "@esbuild/linux-mips64el": "npm:0.27.2"
+    "@esbuild/linux-ppc64": "npm:0.27.2"
+    "@esbuild/linux-riscv64": "npm:0.27.2"
+    "@esbuild/linux-s390x": "npm:0.27.2"
+    "@esbuild/linux-x64": "npm:0.27.2"
+    "@esbuild/netbsd-arm64": "npm:0.27.2"
+    "@esbuild/netbsd-x64": "npm:0.27.2"
+    "@esbuild/openbsd-arm64": "npm:0.27.2"
+    "@esbuild/openbsd-x64": "npm:0.27.2"
+    "@esbuild/openharmony-arm64": "npm:0.27.2"
+    "@esbuild/sunos-x64": "npm:0.27.2"
+    "@esbuild/win32-arm64": "npm:0.27.2"
+    "@esbuild/win32-ia32": "npm:0.27.2"
+    "@esbuild/win32-x64": "npm:0.27.2"
+  dependenciesMeta:
+    "@esbuild/aix-ppc64":
+      optional: true
+    "@esbuild/android-arm":
+      optional: true
+    "@esbuild/android-arm64":
+      optional: true
+    "@esbuild/android-x64":
+      optional: true
+    "@esbuild/darwin-arm64":
+      optional: true
+    "@esbuild/darwin-x64":
+      optional: true
+    "@esbuild/freebsd-arm64":
+      optional: true
+    "@esbuild/freebsd-x64":
+      optional: true
+    "@esbuild/linux-arm":
+      optional: true
+    "@esbuild/linux-arm64":
+      optional: true
+    "@esbuild/linux-ia32":
+      optional: true
+    "@esbuild/linux-loong64":
+      optional: true
+    "@esbuild/linux-mips64el":
+      optional: true
+    "@esbuild/linux-ppc64":
+      optional: true
+    "@esbuild/linux-riscv64":
+      optional: true
+    "@esbuild/linux-s390x":
+      optional: true
+    "@esbuild/linux-x64":
+      optional: true
+    "@esbuild/netbsd-arm64":
+      optional: true
+    "@esbuild/netbsd-x64":
+      optional: true
+    "@esbuild/openbsd-arm64":
+      optional: true
+    "@esbuild/openbsd-x64":
+      optional: true
+    "@esbuild/openharmony-arm64":
+      optional: true
+    "@esbuild/sunos-x64":
+      optional: true
+    "@esbuild/win32-arm64":
+      optional: true
+    "@esbuild/win32-ia32":
+      optional: true
+    "@esbuild/win32-x64":
+      optional: true
+  bin:
+    esbuild: bin/esbuild
+  checksum: 10c0/cf83f626f55500f521d5fe7f4bc5871bec240d3deb2a01fbd379edc43b3664d1167428738a5aad8794b35d1cca985c44c375b1cd38a2ca613c77ced2c83aafcd
+  languageName: node
+  linkType: hard
+
+"esbuild@npm:^0.27.0 || ^0.28.0, esbuild@npm:~0.28.0":
   version: 0.28.2
   resolution: "esbuild@npm:0.28.2"
   dependencies:
@@ -14213,9 +14721,9 @@ __metadata:
   linkType: hard
 
 "lru-cache@npm:^11.0.0":
-  version: 11.5.2
-  resolution: "lru-cache@npm:11.5.2"
-  checksum: 10c0/ece1ad731f5b655e85d67047d04bfc13823dc77aa61c5454924a9869ba600a0104e39cc33d726021feef812bc347ca34a5608a5eb1972a5dd0870b7ecd42c3f2
+  version: 11.2.5
+  resolution: "lru-cache@npm:11.2.5"
+  checksum: 10c0/cc98958d25dddf1c8a8cbdc49588bd3b24450e8dfa78f32168fd188a20d4a0331c7406d0f3250c86a46619ee288056fd7a1195e8df56dc8a9592397f4fbd8e1d
   languageName: node
   linkType: hard
 
@@ -15169,6 +15677,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nanoid@npm:^3.3.11":
+  version: 3.3.11
+  resolution: "nanoid@npm:3.3.11"
+  bin:
+    nanoid: bin/nanoid.cjs
+  checksum: 10c0/40e7f70b3d15f725ca072dfc4f74e81fcf1fbb02e491cf58ac0c79093adc9b0a73b152bcde57df4b79cd097e13023d7504acb38404a4da7bc1cd8e887b82fe0b
+  languageName: node
+  linkType: hard
+
 "nanoid@npm:^3.3.17":
   version: 3.3.18
   resolution: "nanoid@npm:3.3.18"
@@ -15270,12 +15787,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-addon-api@npm:^8.0.0, node-addon-api@npm:^8.2.2, node-addon-api@npm:^8.3.0, node-addon-api@npm:^8.3.1":
+"node-addon-api@npm:^8.0.0":
   version: 8.9.2
   resolution: "node-addon-api@npm:8.9.2"
   dependencies:
     node-gyp: "npm:latest"
   checksum: 10c0/5cf5231e0da22b22862e6b593982a0e390ca89d022a9ac666c83deceecf20378cb8afe47c456ac1a58a9f62ef60099c950aec05814a287fdfd751d9d154fb12d
+  languageName: node
+  linkType: hard
+
+"node-addon-api@npm:^8.2.2, node-addon-api@npm:^8.3.0, node-addon-api@npm:^8.3.1":
+  version: 8.5.0
+  resolution: "node-addon-api@npm:8.5.0"
+  dependencies:
+    node-gyp: "npm:latest"
+  checksum: 10c0/e4de0b4e70998fed7ef41933946f60565fc3a17cb83b7d626a0c0bb1f734cf7852e0e596f12681e7c8ed424163ee3cdbb4f0abaa9cc269d03f48834c263ba162
   languageName: node
   linkType: hard
 
@@ -16109,7 +16635,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.5.26, postcss@npm:^8.5.6":
+"postcss@npm:^8.5.26":
   version: 8.5.26
   resolution: "postcss@npm:8.5.26"
   dependencies:
@@ -16117,6 +16643,17 @@ __metadata:
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
   checksum: 10c0/2bdafc00d96bd57b6649a52e458864a4bf58ee56cfdbe4aea1472b5cccc127e6c1ad653bd0bec50d211e650eb0b9270c80e1e72aff2e2fa40d9e7363234d6e43
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.5.6":
+  version: 8.5.8
+  resolution: "postcss@npm:8.5.8"
+  dependencies:
+    nanoid: "npm:^3.3.11"
+    picocolors: "npm:^1.1.1"
+    source-map-js: "npm:^1.2.1"
+  checksum: 10c0/dd918f7127ee7c60a0295bae2e72b3787892296e1d1c3c564d7a2a00c68d8df83cadc3178491259daa19ccc54804fb71ed8c937c6787e08d8bd4bedf8d17044c
   languageName: node
   linkType: hard
 
@@ -16426,14 +16963,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"range-parser@npm:^1.2.1":
-  version: 1.3.0
-  resolution: "range-parser@npm:1.3.0"
-  checksum: 10c0/295494bb6685f9ab50f41a5f4fa5ce445aeeb9673b491bf178460fcc3a812dcf0d164cf1c83074f13a71a87d91ead5e097afd53e0630bc49a5101ed60f2a7529
-  languageName: node
-  linkType: hard
-
-"range-parser@npm:~1.2.1":
+"range-parser@npm:^1.2.1, range-parser@npm:~1.2.1":
   version: 1.2.1
   resolution: "range-parser@npm:1.2.1"
   checksum: 10c0/96c032ac2475c8027b7a4e9fe22dc0dfe0f6d90b85e496e0f016fbdb99d6d066de0112e680805075bd989905e2123b3b3d002765149294dce0c1f7f01fcc2ea0
@@ -17839,16 +18369,15 @@ __metadata:
   linkType: hard
 
 "resolve@npm:^1.1.5, resolve@npm:^1.12.0, resolve@npm:^1.22.0, resolve@npm:^1.22.11":
-  version: 1.22.12
-  resolution: "resolve@npm:1.22.12"
+  version: 1.22.11
+  resolution: "resolve@npm:1.22.11"
   dependencies:
-    es-errors: "npm:^1.3.0"
     is-core-module: "npm:^2.16.1"
     path-parse: "npm:^1.0.7"
     supports-preserve-symlinks-flag: "npm:^1.0.0"
   bin:
     resolve: bin/resolve
-  checksum: 10c0/b16dc9b537c02e8c3388f7d3dcff9741d3071625f9a97ac1c885f2b0ca51e78df22328fb6d6ef214dd9101fb7cfc19aa2836fe3410402a94f3f7b8639c7149bf
+  checksum: 10c0/f657191507530f2cbecb5815b1ee99b20741ea6ee02a59c57028e9ec4c2c8d7681afcc35febbd554ac0ded459db6f2d8153382c53a2f266cee2575e512674409
   languageName: node
   linkType: hard
 
@@ -17869,16 +18398,15 @@ __metadata:
   linkType: hard
 
 "resolve@patch:resolve@npm%3A^1.1.5#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.12.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.0#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.11#optional!builtin<compat/resolve>":
-  version: 1.22.12
-  resolution: "resolve@patch:resolve@npm%3A1.22.12#optional!builtin<compat/resolve>::version=1.22.12&hash=c3c19d"
+  version: 1.22.11
+  resolution: "resolve@patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=c3c19d"
   dependencies:
-    es-errors: "npm:^1.3.0"
     is-core-module: "npm:^2.16.1"
     path-parse: "npm:^1.0.7"
     supports-preserve-symlinks-flag: "npm:^1.0.0"
   bin:
     resolve: bin/resolve
-  checksum: 10c0/fc6519984ae1f894d877c0060ba8b1f5ba3bc0e85a02f74e141929c118c23d74d9735619a9cc2965397387e514884245c65d72a40731dcb6cfc84c7bcdc8321e
+  checksum: 10c0/ee5b182f2e37cb1165465e58c6abc797fec0a80b5ba3231607beb4677db0c9291ac010c47cf092b6daa2b7f518d69a0e21888e7e2b633f68d501a874212a8c63
   languageName: node
   linkType: hard
 
@@ -19319,14 +19847,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"supports-color@npm:*":
-  version: 11.0.0
-  resolution: "supports-color@npm:11.0.0"
-  checksum: 10c0/f89d815d18d5508da54db73d762fa6d6418bced383694a4e05a56331075069010d9f501e6755b14617a00317553a498f07281933be72428eff136dbfe6a80128
-  languageName: node
-  linkType: hard
-
-"supports-color@npm:^10.2.2":
+"supports-color@npm:*, supports-color@npm:^10.2.2":
   version: 10.2.2
   resolution: "supports-color@npm:10.2.2"
   checksum: 10c0/fb28dd7e0cdf80afb3f2a41df5e068d60c8b4f97f7140de2eaed5b42e075d82a0e980b20a2c0efd2b6d73cfacb55555285d8cc719fa0472220715aefeaa1da7c
@@ -19500,6 +20021,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sweepline-intersections@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "sweepline-intersections@npm:1.5.0"
+  dependencies:
+    tinyqueue: "npm:^2.0.0"
+  checksum: 10c0/587a597c75b787e61054ef88b98463af47f60855265b7829fa8acc5ebe68fb4bc3d148a80e9f72c69c16a0241bfed38d3fbbe93a735ea5a2276c00116adc5283
+  languageName: node
+  linkType: hard
+
 "sync-child-process@npm:^1.0.2":
   version: 1.0.2
   resolution: "sync-child-process@npm:1.0.2"
@@ -19530,7 +20060,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^7.4.0, tar@npm:^7.5.3, tar@npm:^7.5.4":
+"tar@npm:^7.4.0, tar@npm:^7.5.4":
+  version: 7.5.6
+  resolution: "tar@npm:7.5.6"
+  dependencies:
+    "@isaacs/fs-minipass": "npm:^4.0.0"
+    chownr: "npm:^3.0.0"
+    minipass: "npm:^7.1.2"
+    minizlib: "npm:^3.1.0"
+    yallist: "npm:^5.0.0"
+  checksum: 10c0/08af3807035957650ad5f2a300c49ca4fe0566ac0ea5a23741a5b5103c6da42891a9eeaed39bc1fbcf21c5cac4dc846828a004727fb08b9d946322d3144d1fd2
+  languageName: node
+  linkType: hard
+
+"tar@npm:^7.5.3":
   version: 7.5.22
   resolution: "tar@npm:7.5.22"
   dependencies:
@@ -19633,7 +20176,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinyqueue@npm:^2.0.3":
+"tinyqueue@npm:^2.0.0, tinyqueue@npm:^2.0.3":
   version: 2.0.3
   resolution: "tinyqueue@npm:2.0.3"
   checksum: 10c0/d7b590088f015a94a17132fa209c2f2a80c45158259af5474901fdf5932e95ea13ff6f034bcc725a6d5f66d3e5b888b048c310229beb25ad5bebb4f0a635abf2
