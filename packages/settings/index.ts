@@ -90,9 +90,14 @@ export const cdrAPIKey = getRuntimeConfig("CDR_API_KEY");
 export const mapPagePrefix = "/map";
 export const routerBasename = "/map";
 
+/** Base URL of the knowledge-graph (xDD extraction) API that records feedback
+ * runs. `XDD_KNOWLEDGE_GRAPH_API_URL` is the canonical setting; the older
+ * `MACROSTRAT_KG_API_DOMAIN` is honored as a fallback so existing deployments
+ * keep working. Both the extraction pages and the feedback editor read this one
+ * value — they used to read different settings for the same service. */
 export const knowledgeGraphAPIURL = getRuntimeConfig(
   "XDD_KNOWLEDGE_GRAPH_API_URL",
-  apiDomain + "/api/knowledge-graph"
+  xDDapiDomain ?? apiDomain + "/api/knowledge-graph"
 );
 
 export const macrostratInstance = getRuntimeConfig("MACROSTRAT_INSTANCE");

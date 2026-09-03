@@ -1,7 +1,8 @@
 import h from "@macrostrat/hyper";
 import { DocumentationPage } from "~/layouts";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
-import { usePostgresQuery } from "#/integrations/xdd/extractions/data-service";
+import { useAPIResult } from "@macrostrat/ui-components";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 export function Page() {
   return h([h(UserIdentity), h(UserIdentityPostgrest), h(AuthStatus)]);
@@ -17,7 +18,7 @@ function UserIdentity() {
 }
 
 function UserIdentityPostgrest() {
-  const res = usePostgresQuery("rpc/auth_status");
+  const res = useAPIResult(`${postgrestPrefix}/rpc/auth_status`);
 
   if (res == null) {
     return h("div", "No Postgrest auth status");

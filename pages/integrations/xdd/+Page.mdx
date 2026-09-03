@@ -1,13 +1,12 @@
-export { DocumentationPage as default } from "~/layouts";
-
 Macrostrat maintains a strong integration with [xDD](https://xdd.wisc.edu/), a platform
-for discovering data from the scientific literature.
+for discovering data from the scientific literature. Machine-learning models extract
+geologic entities (stratigraphic names, lithologies, intervals, …) from paper text
+into Macrostrat's knowledge graph, and reviewers correct those extractions here.
 
 ## Capabilities
 
 - Stratigraphic units linked to papers in Rockd and Macrostrat
-- Extracting [structured data](/integrations/xdd/extractions) from papers
-- [Data types](/integrations/xdd/types) for feedback
-- [Model runs](/integrations/xdd/runs)
-- [Feedback](/integrations/xdd/feedback) on extractions
-- Training machine learning models for [Map legend affinity](/dev/legend-affinity)
+- [Extractions](/integrations/xdd/extractions) — papers with structured data extracted from their text
+- [Feedback](/integrations/xdd/feedback) — review and correct extractions, one source text at a time
+- [Model runs](/integrations/xdd/runs) and [entity types](/integrations/xdd/types)
+- Training machine learning models for [Map legend affinity](/dev/map/legend-affinity)

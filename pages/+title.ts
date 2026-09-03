@@ -25,5 +25,7 @@ function getPageName(pageContext): string | null {
 
 function capitalize(str: string | null) {
   if (str == null) return null;
+  // A name that already carries capitals is deliberate (e.g. "xDD").
+  if (/[A-Z]/.test(str)) return str;
   return str.charAt(0).toUpperCase() + str.slice(1);
 }

@@ -1,6 +1,6 @@
 export default {
-  pageInfo: { name: "Model runs" },
-  // The table fills the viewport; breadcrumbs are rendered in-page.
+  pageInfo: { name: "Entity types" },
+  // The editable table fills the viewport; breadcrumbs are rendered in-page.
   pageStyle: "fullscreen",
   meta: {
     Page: {

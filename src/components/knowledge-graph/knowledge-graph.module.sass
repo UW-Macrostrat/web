@@ -1,0 +1,130 @@
+// Shared styles for the knowledge-graph extraction and feedback pages.
+
+.kg-toolbar
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  justify-content: space-between
+  gap: 0.5em 1em
+  margin-bottom: 1em
+
+.kg-toolbar-group
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.5em
+
+.citation
+  display: flex
+  flex-direction: column
+  gap: 0.25em
+
+  .citation-title
+    margin: 0
+
+  .citation-journal
+    margin: 0
+    color: var(--text-subtle-color)
+
+  .citation-authors
+    margin: 0
+
+.identifier-label
+  color: var(--text-dim-color)
+  margin-right: 0.5em
+
+.run-meta
+  display: flex
+  flex-wrap: wrap
+  gap: 0 1.5em
+  align-items: baseline
+
+.run-header
+  display: flex
+  flex-wrap: wrap
+  justify-content: space-between
+  align-items: baseline
+  gap: 0.5em 1em
+  margin-top: 1.5em
+
+  h3
+    margin: 0
+
+.run-switcher
+  display: flex
+  align-items: center
+  gap: 0.5em
+  margin-bottom: 0.5em
+
+  .run-switcher-label
+    color: var(--text-subtle-color)
+
+.feedback-editor
+  display: flex
+  flex-direction: column
+  gap: 1em
+
+.feedback-notes
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+
+  h4
+    margin: 0
+
+.feedback-notes-list
+  margin: 0.5em 0 0
+  padding-left: 1.25em
+
+// Cards on the paper and source-text lists
+.paper-card, .source-text-card
+  height: 100%
+  position: relative
+
+.paper-card-content, .source-text-card-content
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+  padding: 0.5em 1em
+  height: 100%
+
+.card-title
+  display: flex
+  justify-content: space-between
+  align-items: baseline
+  gap: 1em
+
+  h3
+    margin: 0
+    flex: 1
+    min-width: 0
+
+.card-footer
+  display: flex
+  justify-content: space-between
+  align-items: center
+  gap: 1em
+  color: var(--text-subtle-color)
+
+.card-stats
+  display: flex
+  flex-wrap: wrap
+  gap: 0.25em 1em
+  font-size: 0.9em
+
+.paragraph-preview
+  margin: 0
+  display: -webkit-box
+  -webkit-box-orient: vertical
+  -webkit-line-clamp: 4
+  line-clamp: 4
+  overflow: hidden
+
+.data-scroll-body
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))
+  gap: 1em
+  --data-panel-card-padding: 0
+
+.source-text-body
+  margin: 1em 0

@@ -1,106 +1,105 @@
-import h from "@macrostrat/hyper";
-
-import { ContentPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/components";
-import { usePageContext } from "vike-react/usePageContext";
+import hyper from "@macrostrat/hyper";
+import styles from "~/components/knowledge-graph/knowledge-graph.module.sass";
+import { useData } from "vike-react/useData";
+import { AnchorButton, ButtonGroup, NonIdealState } from "@blueprintjs/core";
+import { AuthStatus } from "@macrostrat/form-components";
+import { Identifier } from "@macrostrat/data-components";
 import {
-  ExtractionContext,
-  enhanceData,
-  FeedbackComponent
-} from "@macrostrat/feedback-components";
-import {
-  useEntityTypeIndex,
-  useModelIndex,
-  usePostgresQuery,
-} from "../data-service";
-import { AuthStatus, useAuth } from "@macrostrat/form-components";
-import { DataField } from "~/components/unit-details";
-import { FlexRow, SaveButton } from "@macrostrat/ui-components";
-import { MultiSelect } from "@blueprintjs/select"
-import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
-import { useState } from "react";
+  ExtractionViewClient,
+  KGToolbar,
+  type KGRun,
+  paperSourceTextsHref,
+  plural,
+  PublicationCitation,
+  sourceTextHref,
+  xddRoot,
+} from "~/components/knowledge-graph";
+import type { PaperPageData } from "./+data";
 
+const h = hyper.styled(styles);
+
+/** All model extractions for one paper, grouped by source text. The layout
+ * (`pageStyle: "content"`) owns breadcrumbs, title, and footer. */
 export function Page() {
-  return h(ContentPage, [h(PageBreadcrumbs), h(PageMain)]);
-}
-
-function PageMain() {
-  return h("div", [h(ExtractionIndex)]);
-}
-
-function ExtractionIndex() {
-  const { routeParams } = usePageContext();
-  const { paperId } = routeParams;
-
-  const models = useModelIndex();
-  const entityTypes = useEntityTypeIndex();
-
-  const filters = {
-    subject: "paper_id",
-    predicate: paperId,
-  };
-
-  const paper = usePostgresQuery("kg_publication_entities", filters)?.[0];
-
-  const data = usePostgresQuery("kg_context_entities", filters);
-
-  if (data == null || models == null || paper == null || entityTypes == null) {
-    return h("div", "Loading...");
-  }
-
-  const lexURL = "/lex"
+  const { publication, runs, lookups } = useData<PaperPageData>();
 
   return h([
-    h(FlexRow, { justifyContent: "space-between", alignItems: "center" }, [
-      h(
-        'h3',
-        "Extraction feedback"
-      ),
-      h(AuthStatus)
-    ]),
-    h("h1", paper.citation?.title ?? "Model extractions"),
-    data.map((d) => {
-      const data = enhanceData(d, models, entityTypes)
-
-      const { entities = [], paragraph_text, model, model_run, source_text, version_id } = data;
-
-      return h([
-        h(FlexRow, { justifyContent: "space-between", alignItems: "center" }, [
-          h("a", { href: `../feedback/${d.source_text}` }, h('h2', "View feedback")),
-          h('div.data', [
-            h(DataField, {
-              label: "Model run",
-              value: "#" + model_run,
-            }),
-            h(DataField, {
-              label: "Version",
-              value: "#" + version_id,
-            }),
-            h(DataField, {
-              label: "Date",
-              value: new Date(model.first_run).toLocaleDateString(),
-            }),
-          ]),
-        ]),
-
-        h(FeedbackComponent, {
-          entities,
-          text: paragraph_text,
-          model,
-          entityTypes,
-          sourceTextID: source_text,
-          runID: model_run,
-          allowOverlap: true,
-          view: true,
-          matchLinks: {
-            lithology: `${lexURL}/lithologies`,
-            strat_name: `${lexURL}/strat-names`,
-            lith_att: `${lexURL}/lith-atts`,
-            concept: `${lexURL}/strat-concepts`,
-            interval: `${lexURL}/intervals`,
+    h(KGToolbar, { right: h(AuthStatus, { large: false }) }, [
+      h(ButtonGroup, { minimal: true }, [
+        h(
+          AnchorButton,
+          { icon: "arrow-left", href: `${xddRoot}/extractions` },
+          "All papers"
+        ),
+        h(
+          AnchorButton,
+          {
+            icon: "annotation",
+            href: paperSourceTextsHref(publication.paper_id),
           },
-        }),
-      ]);
+          "Review source texts"
+        ),
+      ]),
+    ]),
+    h(PublicationCitation, {
+      citation: publication.citation,
+      headingLevel: 2,
+      showTitle: false,
+    }),
+    h(SourceTextSections, { runs, lookups }),
+  ]);
+}
+
+function groupBySourceText(runs: KGRun[]): Map<number, KGRun[]> {
+  const groups = new Map<number, KGRun[]>();
+  for (const run of runs) {
+    const list = groups.get(run.source_text) ?? [];
+    list.push(run);
+    groups.set(run.source_text, list);
+  }
+  return groups;
+}
+
+function SourceTextSections({ runs, lookups }) {
+  if (runs.length === 0) {
+    return h(NonIdealState, {
+      icon: "search-text",
+      title: "No extractions yet",
+      description: "No model has been run over this paper's text.",
+    });
+  }
+  const groups = groupBySourceText(runs);
+  return h(
+    "div.source-text-sections",
+    Array.from(groups.entries(), ([sourceTextId, textRuns]) =>
+      h(SourceTextSection, { key: sourceTextId, sourceTextId, runs: textRuns, lookups })
+    )
+  );
+}
+
+function SourceTextSection({ sourceTextId, runs, lookups }) {
+  const runLabel = plural(runs.length, "model run");
+  return h("section.source-text-body", [
+    h("div.run-header", [
+      h("h3", ["Source text ", h(Identifier, { id: sourceTextId })]),
+      h("div.kg-toolbar-group", [
+        h("span.bp6-text-muted", runLabel),
+        h(
+          AnchorButton,
+          {
+            href: sourceTextHref(sourceTextId),
+            icon: "edit",
+            minimal: true,
+            small: true,
+          },
+          "Give feedback"
+        ),
+      ]),
+    ]),
+    h(ExtractionViewClient, {
+      runs,
+      models: lookups.models,
+      entityTypes: lookups.entityTypes,
     }),
   ]);
 }

@@ -1,4 +1,3 @@
-import { FullscreenPage } from "~/layouts";
 import h from "@macrostrat/hyper";
 import { PageBreadcrumbs } from "~/components";
 import {
@@ -24,10 +23,12 @@ const colorField = {
   cellComponent: ColorCell,
 };
 
+/** Editable table of entity types. The `fullscreen` layout has no chrome of its
+ * own, so breadcrumbs are rendered here; editing goes through PostgREST with
+ * the site session. */
 export function Page() {
-  return h(FullscreenPage, { className: "main" }, [
-    h(PageBreadcrumbs),
-    h("div.header", [h("h1", "Entity types"), h("div.spacer"), h(AuthStatus)]),
+  return h("div.main", [
+    h("div.header", [h(PageBreadcrumbs, { separateTitle: false }), h(AuthStatus)]),
     h(PostgRESTTableView, {
       endpoint: postgrestPrefix,
       table: "kg_entity_type",

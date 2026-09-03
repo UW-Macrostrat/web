@@ -1,16 +1,17 @@
-import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { PageBreadcrumbs } from "~/components";
 import { PostgRESTTableView } from "@macrostrat/data-sheet";
 import { postgrestPrefix } from "@macrostrat-web/settings";
+import { formatDate, sourceTextHref } from "~/components/knowledge-graph";
 
 const h = hyper.styled(styles);
 
+/** Every model run, newest first. The `fullscreen` layout has no chrome of its
+ * own, so breadcrumbs are rendered here. */
 export function Page() {
-  return h(FullscreenPage, { className: "main" }, [
-    h(PageBreadcrumbs),
-    h("h1", "Model runs"),
+  return h("div.main", [
+    h(PageBreadcrumbs, { separateTitle: false }),
     h(PostgRESTTableView, {
       endpoint: postgrestPrefix,
       table: "kg_model_run",
@@ -22,19 +23,11 @@ export function Page() {
   ]);
 }
 
-function prettyDate(value) {
-  // Timestamp to pretty date
-  return new Date(value).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
-
 const columnOptions = {
   overrides: {
     timestamp: {
       name: "Time",
-      valueRenderer: prettyDate,
+      valueRenderer: formatDate,
     },
     source_text_id: {
       name: "Source text",
@@ -44,9 +37,5 @@ const columnOptions = {
 };
 
 function sourceTextRenderer(value) {
-  return h(
-    "a",
-    { href: `/integrations/xdd/feedback/${value}` },
-    h("code", value)
-  );
+  return h("a", { href: sourceTextHref(value) }, h("code", value));
 }
