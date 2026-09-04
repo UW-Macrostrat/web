@@ -26,7 +26,6 @@ export const dataNavItems: NavLinkItem[] = [
   { href: "/columns", text: "Columns", icon: "layers" },
   { href: "/maps", text: "Map sources", icon: "map" },
   { href: "/lex", text: "Lexicon", icon: "book" },
-  { href: "/knowledge-graph", text: "Knowledge graph", icon: "graph" },
   { href: "/projects", text: "Projects", icon: "briefcase" },
   { href: "/docs", text: "Documentation", icon: "manual" },
 ];

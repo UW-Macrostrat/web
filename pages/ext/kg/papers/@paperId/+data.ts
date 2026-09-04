@@ -20,10 +20,10 @@ export interface PaperPageData {
 
 /** A summary of the paper: citation plus one row per source text. Papers can
  * have tens of paragraphs, so the entity trees are not loaded here; the
- * per-paragraph page (`/knowledge-graph/source-texts/<id>`) shows and edits them. */
+ * per-paragraph page (`/ext/kg/source-texts/<id>`) shows and edits them. */
 export async function data(pageContext): Promise<PaperPageData> {
-  // `/knowledge-graph/papers/<paperId>`
-  const paperId = routeSegment(pageContext, "paperId", 2);
+  // `/ext/kg/papers/<paperId>`
+  const paperId = routeSegment(pageContext, "paperId", 3);
   if (paperId == null) {
     throw render(404, "No paper specified");
   }

@@ -25,7 +25,7 @@ const h = hyper.styled(styles);
 // is a one-line edit and no page composes hrefs from `urlPathname` or with
 // relative paths.
 
-export const kgRoot = "/knowledge-graph";
+export const kgRoot = "/ext/kg";
 
 export function paperHref(paperId: string) {
   return `${kgRoot}/papers/${encodeURIComponent(paperId)}`;
