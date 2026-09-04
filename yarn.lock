@@ -2624,7 +2624,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/data-sheet@npm:^4.5.0, @macrostrat/data-sheet@npm:^4.6.0":
+"@macrostrat/data-sheet@npm:^4.6.0":
   version: 4.6.0
   resolution: "@macrostrat/data-sheet@npm:4.6.0"
   dependencies:
@@ -2647,15 +2647,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/feedback-components@npm:^2.2.6":
-  version: 2.2.6
-  resolution: "@macrostrat/feedback-components@npm:2.2.6"
+"@macrostrat/feedback-components@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "@macrostrat/feedback-components@npm:2.3.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@blueprintjs/select": "npm:^6.2.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/data-components": "npm:^1.5.1"
-    "@macrostrat/data-sheet": "npm:^4.5.0"
+    "@macrostrat/data-sheet": "npm:^4.6.0"
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/ui-components": "npm:^5.2.0"
     classnames: "npm:^2.5.1"
@@ -2667,7 +2667,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
     react-dom: ^18.0.0||^19.0.0
-  checksum: 10c0/4fc5abb8574beed361feebbbbb6385c430996f891ca17e4a49e73f100fb94447fd2acefbbb971d2eb23d6267826daaccd8c6fbbda49e4ebfce9128a94c3396c1
+  checksum: 10c0/44cdddd80f4cd730822d210163295639e62d22860bc5dd3159faa7c807e11f4329be864faea9573999c5380ac99f7139eae1f6e6076d39751c8af70f89a89e29
   languageName: node
   linkType: hard
 
@@ -3067,7 +3067,7 @@ __metadata:
     "@macrostrat/data-components": "npm:^1.5.1"
     "@macrostrat/data-provider": "npm:^1.2.0"
     "@macrostrat/data-sheet": "npm:^4.6.0"
-    "@macrostrat/feedback-components": "npm:^2.2.6"
+    "@macrostrat/feedback-components": "npm:^2.3.0"
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/map-interface": "npm:^2.4.0"

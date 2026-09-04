@@ -19,6 +19,7 @@ import {
   TextArea,
 } from "@blueprintjs/core";
 import { MultiSelect } from "@blueprintjs/select";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchFeedbackTypes, indexById } from "./api";
@@ -31,6 +32,11 @@ import {
 import type { KGEntityType, KGFeedbackType, KGModel, KGRun } from "./types";
 
 const h = hyper.styled(styles);
+
+/** The terms view the editor's "Add match" search queries. Passed explicitly so
+ * the search follows this deployment's API rather than the library's
+ * development-database default. */
+const TERMS_ENDPOINT = `${postgrestPrefix}/kg_macrostrat_terms`;
 
 export interface RunViewProps {
   run: KGRun;
@@ -60,20 +66,17 @@ export function ExtractionView({
   const { data, entityTypeIndex } = useEnhancedRun(run, models, entityTypes);
   return h(
     OverlaysProvider,
-    h(
-      "div.extraction-view",
-      h(FeedbackComponent, {
-        key: run.model_run,
-        entities: data.entities ?? [],
-        text: data.paragraph_text,
-        model: data.model,
-        entityTypes: entityTypeIndex,
-        matchLinks: MATCH_LINKS,
-        allowOverlap: true,
-        view: true,
-        autoSelect,
-      })
-    )
+    h(FeedbackComponent, {
+      entities: data.entities ?? [],
+      text: data.paragraph_text,
+      model: data.model,
+      entityTypes: entityTypeIndex,
+      matchLinks: MATCH_LINKS,
+      termsEndpoint: TERMS_ENDPOINT,
+      allowOverlap: true,
+      view: true,
+      autoSelect,
+    })
   );
 }
 
@@ -144,12 +147,12 @@ function EditableRun({
   return h(OverlaysProvider, [
     h("div.feedback-editor", [
       h(FeedbackComponent, {
-        key: run.model_run,
         entities: data.entities ?? [],
         text: data.paragraph_text,
         model: data.model,
         entityTypes: entityTypeIndex,
         matchLinks: MATCH_LINKS,
+        termsEndpoint: TERMS_ENDPOINT,
         allowOverlap: true,
         autoSelect,
         onSave,
