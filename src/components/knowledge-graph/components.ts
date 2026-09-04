@@ -3,7 +3,9 @@
  * touches the browser, so pages can render them during SSR. */
 import hyper from "@macrostrat/hyper";
 import styles from "./knowledge-graph.module.sass";
-import { AnchorButton, Tag } from "@blueprintjs/core";
+import { Tag } from "@blueprintjs/core";
+import { navigate } from "vike/client/router";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { Identifier } from "@macrostrat/data-components";
 import { DataField } from "@macrostrat/ui-components";
 import { createDataCard } from "@macrostrat/data-sheet";
@@ -43,6 +45,21 @@ export function reviewsHref(id: number) {
 /** The source-text queue, filtered to one paper. */
 export function paperSourceTextsHref(paperId: string) {
   return `${kgRoot}/source-texts?paper=${encodeURIComponent(paperId)}`;
+}
+
+/** Click handler that opens `href` from anywhere on a card, while leaving
+ * links and buttons inside the card — and modified clicks (new tab) — to the
+ * browser. */
+export function openOnClick(href: string) {
+  return (event: ReactMouseEvent) => {
+    if (event.defaultPrevented) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0)
+      return;
+    const target = event.target as HTMLElement;
+    if (target.closest("a, button, input, textarea")) return;
+    event.preventDefault();
+    navigate(href);
+  };
 }
 
 // ---- Page chrome ----------------------------------------------------------
@@ -172,9 +189,9 @@ function PaperCardContent({ data }: { data: KGPublication }) {
       plural(data.n_matches, "stratigraphic name match", "stratigraphic name matches"),
     ]);
   }
-  return h("div.paper-card-content", [
+  return h("div.paper-card-content.clickable", { onClick: openOnClick(href) }, [
     h(PublicationCitation, { citation: data.citation, href, headingLevel: 3 }),
-    h("div.card-footer", [matches, h(AnchorButton, { href, minimal: true, small: true, rightIcon: "arrow-right" }, "Extractions")]),
+    h("div.card-footer", [matches]),
   ]);
 }
 
@@ -184,7 +201,7 @@ export const PaperCard = createDataCard<KGPublication>(PaperCardContent, {
 
 function SourceTextCardContent({ data }: { data: KGSourceText }) {
   const href = sourceTextHref(data.id);
-  return h("div.source-text-card-content", [
+  return h("div.source-text-card-content.clickable", { onClick: openOnClick(href) }, [
     h("div.card-title", [
       h("h3", h("a", { href }, `Source text`)),
       h(Identifier, { id: data.id }),
@@ -196,10 +213,7 @@ function SourceTextCardContent({ data }: { data: KGSourceText }) {
       h(DataField, { label: "Matches", value: data.n_matches, inline: true }),
       h(DataField, { label: "Strat. names", value: data.n_strat_names, inline: true }),
     ]),
-    h("div.card-footer", [
-      h("span", formatDate(data.last_update)),
-      h(AnchorButton, { href, minimal: true, small: true, rightIcon: "arrow-right" }, "Review"),
-    ]),
+    h("div.card-footer", [h("span", formatDate(data.last_update))]),
   ]);
 }
 

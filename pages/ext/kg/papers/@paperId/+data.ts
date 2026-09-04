@@ -8,14 +8,17 @@ import {
   routeSegment,
 } from "~/components/knowledge-graph";
 
+/** A source text row with its review count folded in. */
+export interface PaperSourceText extends KGSourceText {
+  n_reviews: number;
+}
+
 export interface PaperPageData {
   paperId: string;
   publication: KGPublication;
   /** The paper's source texts with run statistics — no entity trees. Each
-   * row links to its own paragraph view/editor. */
-  sourceTexts: KGSourceText[];
-  /** Human feedback runs per source text id. */
-  humanRunCounts: Record<number, number>;
+   * row opens its own paragraph view/editor. */
+  sourceTexts: PaperSourceText[];
 }
 
 /** A summary of the paper: citation plus one row per source text. Papers can
@@ -40,6 +43,10 @@ export async function data(pageContext): Promise<PaperPageData> {
   const humanRunCounts = await fetchHumanRunCounts(
     sourceTexts.map((d) => d.id)
   );
+  const rows = sourceTexts.map((d) => ({
+    ...d,
+    n_reviews: humanRunCounts[d.id] ?? 0,
+  }));
 
-  return { paperId, publication, sourceTexts, humanRunCounts };
+  return { paperId, publication, sourceTexts: rows };
 }

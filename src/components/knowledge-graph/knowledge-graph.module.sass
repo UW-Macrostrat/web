@@ -143,16 +143,30 @@
   gap: 0.75em
   margin-top: 1em
 
+.clickable
+  cursor: pointer
+
 .source-text-row
   display: grid
   grid-template-columns: minmax(0, 1fr) auto
   gap: 0.5em 1.5em
   padding: 0.75em 1em
-  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.3))
-  border-radius: 6px
+  cursor: pointer
+  border-left: 4px solid transparent
 
   &.reviewed
-    border-left: 4px solid var(--pz-intent-success, #0f9960)
+    border-left-color: var(--pz-intent-success, #0f9960)
+
+.paper-header
+  display: flex
+  flex-direction: column
+  align-items: flex-end
+  gap: 0.25em
+  text-align: right
+  max-width: 50%
+
+  .citation
+    align-items: flex-end
 
 .source-text-row-main
   min-width: 0
@@ -178,6 +192,12 @@
 .paragraph-preview.expanded
   -webkit-line-clamp: unset
   line-clamp: unset
+
+.paper-scroll-body
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+  --data-panel-card-padding: 0
 
 // Workaround for @macrostrat/feedback-components <= 2.2.6: `.entity-panel` has
 // no definite height, but the tree inside is sized from a border-box
