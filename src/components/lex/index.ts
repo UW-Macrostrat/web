@@ -1124,7 +1124,7 @@ function Match({ data, href }) {
   return h("div", { class: "match-item" }, [
     h.if(isDev)(
       "a",
-      { href: "/integrations/xdd/sources/" + source + "?" + href },
+      { href: "/ext/kg/source-texts/" + source + "?" + href },
       "View source"
     ),
     h(FlexRow, { className: "match-text", alignItems: "center" }, [

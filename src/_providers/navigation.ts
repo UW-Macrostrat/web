@@ -4,7 +4,7 @@ import {
   MacrostratItemIdentifier,
 } from "@macrostrat/data-components";
 
-function buildHrefForItem(item: MacrostratItemIdentifier) {
+export function buildHrefForItem(item: MacrostratItemIdentifier) {
   if (!item) return null;
   if ("col_id" in item) {
     let link = `/columns/${item.col_id}`;
