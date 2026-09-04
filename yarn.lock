@@ -2647,9 +2647,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/feedback-components@npm:^2.3.0":
-  version: 2.3.0
-  resolution: "@macrostrat/feedback-components@npm:2.3.0"
+"@macrostrat/feedback-components@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "@macrostrat/feedback-components@npm:2.3.1"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@blueprintjs/select": "npm:^6.2.0"
@@ -2667,7 +2667,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
     react-dom: ^18.0.0||^19.0.0
-  checksum: 10c0/44cdddd80f4cd730822d210163295639e62d22860bc5dd3159faa7c807e11f4329be864faea9573999c5380ac99f7139eae1f6e6076d39751c8af70f89a89e29
+  checksum: 10c0/29b404835df58aedad1cd01a127d990c477f667f81835ee05425201510bfd001223caee94c198dc95fb2338fa6a73200567660b8f2767320ebd177eeef188c82
   languageName: node
   linkType: hard
 
@@ -3067,7 +3067,7 @@ __metadata:
     "@macrostrat/data-components": "npm:^1.5.1"
     "@macrostrat/data-provider": "npm:^1.2.0"
     "@macrostrat/data-sheet": "npm:^4.6.0"
-    "@macrostrat/feedback-components": "npm:^2.3.0"
+    "@macrostrat/feedback-components": "npm:^2.3.1"
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/map-interface": "npm:^2.4.0"
