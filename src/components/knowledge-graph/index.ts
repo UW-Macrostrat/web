@@ -1,5 +1,5 @@
-/** Shared code for the knowledge-graph extraction and feedback pages under
- * `/integrations/xdd`. This barrel is server-safe: the interactive editor
+/** Shared code for the knowledge-graph pages under `/knowledge-graph`
+ * (papers, source texts, reviews, runs, entity types). This barrel is server-safe: the interactive editor
  * (which pulls in `@macrostrat/feedback-components`) is exposed only through
  * `clientOnly()` islands, so pages can import from here in SSR modules. */
 import { clientOnly } from "~/components/lex/client-only";

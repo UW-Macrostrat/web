@@ -26,8 +26,8 @@ export interface SourceTextPageData {
 }
 
 export async function data(pageContext): Promise<SourceTextPageData> {
-  // `/integrations/xdd/feedback/<id>`
-  const id = numericRouteSegment(pageContext, "sourceTextID", 3);
+  // `/knowledge-graph/source-texts/<id>`
+  const id = numericRouteSegment(pageContext, "sourceTextID", 2);
   if (id == null) {
     throw render(404, "Source text ids are numbers");
   }

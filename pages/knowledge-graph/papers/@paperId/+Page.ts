@@ -20,7 +20,7 @@ import {
   plural,
   PublicationCitation,
   sourceTextHref,
-  xddRoot,
+  kgRoot,
 } from "~/components/knowledge-graph";
 import type { PaperPageData } from "./+data";
 
@@ -38,7 +38,7 @@ export function Page() {
       h(ButtonGroup, { minimal: true }, [
         h(
           AnchorButton,
-          { icon: "arrow-left", href: `${xddRoot}/extractions` },
+          { icon: "arrow-left", href: `${kgRoot}/papers` },
           "All papers"
         ),
         h(

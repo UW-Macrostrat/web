@@ -21,8 +21,8 @@ export interface HumanFeedbackPageData {
 }
 
 export async function data(pageContext): Promise<HumanFeedbackPageData> {
-  // `/integrations/xdd/feedback/<id>/human`
-  const id = numericRouteSegment(pageContext, "sourceTextID", 3);
+  // `/knowledge-graph/source-texts/<id>/reviews`
+  const id = numericRouteSegment(pageContext, "sourceTextID", 2);
   if (id == null) {
     throw render(404, "Source text ids are numbers");
   }

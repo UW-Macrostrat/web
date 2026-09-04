@@ -25,23 +25,24 @@ const h = hyper.styled(styles);
 // is a one-line edit and no page composes hrefs from `urlPathname` or with
 // relative paths.
 
-export const xddRoot = "/integrations/xdd";
+export const kgRoot = "/knowledge-graph";
 
 export function paperHref(paperId: string) {
-  return `${xddRoot}/extractions/${encodeURIComponent(paperId)}`;
+  return `${kgRoot}/papers/${encodeURIComponent(paperId)}`;
 }
 
 export function sourceTextHref(id: number) {
-  return `${xddRoot}/feedback/${id}`;
+  return `${kgRoot}/source-texts/${id}`;
 }
 
-export function humanFeedbackHref(id: number) {
-  return `${sourceTextHref(id)}/human`;
+/** Reviewer-corrected runs for a source text. */
+export function reviewsHref(id: number) {
+  return `${sourceTextHref(id)}/reviews`;
 }
 
-/** The feedback list, filtered to one paper's source texts. */
+/** The source-text queue, filtered to one paper. */
 export function paperSourceTextsHref(paperId: string) {
-  return `${xddRoot}/feedback?paper=${encodeURIComponent(paperId)}`;
+  return `${kgRoot}/source-texts?paper=${encodeURIComponent(paperId)}`;
 }
 
 // ---- Page chrome ----------------------------------------------------------

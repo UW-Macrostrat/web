@@ -41,7 +41,7 @@ function HumanRuns({ humanRuns, notesByRun, lookups }) {
   if (humanRuns.length === 0) {
     return h(NonIdealState, {
       icon: "people",
-      title: "No human feedback yet",
+      title: "No reviews yet",
       description: "Nobody has reviewed this source text.",
     });
   }
@@ -63,7 +63,7 @@ function HumanRuns({ humanRuns, notesByRun, lookups }) {
 function HumanRun({ run, model, notes, lookups }) {
   return h("section.source-text-body", [
     h("div.run-header", [
-      h("h3", ["Feedback run ", `#${run.model_run}`]),
+      h("h3", ["Review ", `#${run.model_run}`]),
       h("span.bp6-text-muted", formatDate(notes?.date)),
     ]),
     h(RunMeta, { run, model }),

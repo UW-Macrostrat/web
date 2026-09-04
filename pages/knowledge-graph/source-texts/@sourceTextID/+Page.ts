@@ -8,12 +8,12 @@ import { AuthStatus } from "@macrostrat/form-components";
 import {
   autoSelectFromSearch,
   FeedbackEditorClient,
-  humanFeedbackHref,
   KGToolbar,
   paperHref,
   PublicationCitation,
+  reviewsHref,
   sourceTextHref,
-  xddRoot,
+  kgRoot,
 } from "~/components/knowledge-graph";
 import type { SourceTextPageData } from "./+data";
 
@@ -59,12 +59,12 @@ function SourceTextToolbar({ data }: { data: SourceTextPageData }) {
     );
   }
 
-  let humanFeedbackLink = null;
+  let reviewsLink = null;
   if (humanRunCount > 0) {
-    humanFeedbackLink = h(
+    reviewsLink = h(
       AnchorButton,
-      { icon: "people", href: humanFeedbackHref(sourceText.id) },
-      `Human feedback (${humanRunCount})`
+      { icon: "people", href: reviewsHref(sourceText.id) },
+      `Reviews (${humanRunCount})`
     );
   }
 
@@ -87,13 +87,17 @@ function SourceTextToolbar({ data }: { data: SourceTextPageData }) {
 
   return h(KGToolbar, { right: h(AuthStatus, { large: false }) }, [
     h(ButtonGroup, { minimal: true }, [
-      h(AnchorButton, { icon: "list", href: `${xddRoot}/feedback` }, "Queue"),
+      h(
+        AnchorButton,
+        { icon: "list", href: `${kgRoot}/source-texts` },
+        "All source texts"
+      ),
       paperLink,
       previous,
       next,
     ]),
     position,
-    humanFeedbackLink,
+    reviewsLink,
   ]);
 }
 
@@ -111,8 +115,8 @@ function Editor({ modelRuns, lookups, autoSelect }) {
     models: lookups.models,
     entityTypes: lookups.entityTypes,
     autoSelect,
-    // A saved correction is a new human run: refresh the page data so the
-    // "Human feedback" count and link reflect it.
+    // A saved correction is a new reviewer run: refresh the page data so the
+    // "Reviews" count and link reflect it.
     onSaved: () => reload(),
   });
 }

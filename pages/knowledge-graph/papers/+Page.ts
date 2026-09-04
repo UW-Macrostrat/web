@@ -13,7 +13,7 @@ import {
   type KGPublication,
   PaperCard,
   PUBLICATION_COLUMNS,
-  xddRoot,
+  kgRoot,
 } from "~/components/knowledge-graph";
 
 const h = hyper.styled(styles);
@@ -85,7 +85,7 @@ const provider = createPostgRESTProvider<KGPublication>({
 
 export function Page() {
   return h(InfiniteScrollPage, {
-    className: "extractions-list-page",
+    className: "papers-list-page",
     provider,
     headerElements: h(HeaderLinks),
     itemComponent: PaperCard,
@@ -103,10 +103,10 @@ function HeaderLinks() {
     h(ButtonGroup, { minimal: true }, [
       h(
         AnchorButton,
-        { icon: "annotation", href: `${xddRoot}/feedback` },
+        { icon: "annotation", href: `${kgRoot}/source-texts` },
         "Review source texts"
       ),
-      h(AnchorButton, { icon: "history", href: `${xddRoot}/runs` }, "Model runs"),
+      h(AnchorButton, { icon: "history", href: `${kgRoot}/runs` }, "Model runs"),
     ]),
     h(AuthStatus, { large: false }),
   ]);

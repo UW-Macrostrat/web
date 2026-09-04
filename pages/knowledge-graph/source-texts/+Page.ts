@@ -20,7 +20,7 @@ import {
 import {
   type KGSourceText,
   SourceTextCard,
-  xddRoot,
+  kgRoot,
 } from "~/components/knowledge-graph";
 
 const h = hyper.styled(styles);
@@ -148,7 +148,7 @@ export function Page() {
   });
 
   return h(InfiniteScrollPage, {
-    className: "feedback-list-page",
+    className: "source-text-list-page",
     provider,
     headerElements: h(HeaderLinks),
     itemComponent: SourceTextCard,
@@ -170,10 +170,10 @@ function HeaderLinks() {
     h(ButtonGroup, { minimal: true }, [
       h(
         AnchorButton,
-        { icon: "document", href: `${xddRoot}/extractions` },
+        { icon: "document", href: `${kgRoot}/papers` },
         "Papers"
       ),
-      h(AnchorButton, { icon: "history", href: `${xddRoot}/runs` }, "Model runs"),
+      h(AnchorButton, { icon: "history", href: `${kgRoot}/runs` }, "Model runs"),
     ]),
     h(AuthStatus, { large: false }),
   ]);
