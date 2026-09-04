@@ -1,13 +1,21 @@
 import hyper from "@macrostrat/hyper";
 import styles from "~/components/knowledge-graph/knowledge-graph.module.sass";
 import { useData } from "vike-react/useData";
-import { AnchorButton, ButtonGroup, NonIdealState } from "@blueprintjs/core";
+import { useState } from "react";
+import {
+  AnchorButton,
+  Button,
+  ButtonGroup,
+  NonIdealState,
+  Tag,
+} from "@blueprintjs/core";
 import { AuthStatus } from "@macrostrat/form-components";
 import { Identifier } from "@macrostrat/data-components";
+import classNames from "classnames";
 import {
-  ExtractionViewClient,
+  formatDate,
   KGToolbar,
-  type KGRun,
+  type KGSourceText,
   paperSourceTextsHref,
   plural,
   PublicationCitation,
@@ -18,10 +26,12 @@ import type { PaperPageData } from "./+data";
 
 const h = hyper.styled(styles);
 
-/** All model extractions for one paper, grouped by source text. The layout
+/** Summary of one paper's extractions: the citation, totals, and one row per
+ * source text that descends into that paragraph's view/editor. The layout
  * (`pageStyle: "content"`) owns breadcrumbs, title, and footer. */
 export function Page() {
-  const { publication, runs, lookups } = useData<PaperPageData>();
+  const { publication, sourceTexts, humanRunCounts } =
+    useData<PaperPageData>();
 
   return h([
     h(KGToolbar, { right: h(AuthStatus, { large: false }) }, [
@@ -37,7 +47,7 @@ export function Page() {
             icon: "annotation",
             href: paperSourceTextsHref(publication.paper_id),
           },
-          "Review source texts"
+          "Open in review queue"
         ),
       ]),
     ]),
@@ -46,60 +56,104 @@ export function Page() {
       headingLevel: 2,
       showTitle: false,
     }),
-    h(SourceTextSections, { runs, lookups }),
+    h(PaperSummary, { sourceTexts, humanRunCounts }),
+    h(SourceTextList, { sourceTexts, humanRunCounts }),
   ]);
 }
 
-function groupBySourceText(runs: KGRun[]): Map<number, KGRun[]> {
-  const groups = new Map<number, KGRun[]>();
-  for (const run of runs) {
-    const list = groups.get(run.source_text) ?? [];
-    list.push(run);
-    groups.set(run.source_text, list);
-  }
-  return groups;
+function sum(rows: KGSourceText[], key: keyof KGSourceText): number {
+  return rows.reduce((total, row) => total + (Number(row[key]) || 0), 0);
 }
 
-function SourceTextSections({ runs, lookups }) {
-  if (runs.length === 0) {
+function PaperSummary({ sourceTexts, humanRunCounts }) {
+  const reviewed = sourceTexts.filter((d) => humanRunCounts[d.id] > 0).length;
+  return h("div.paper-summary", [
+    h("span", plural(sourceTexts.length, "source text")),
+    h("span", plural(sum(sourceTexts, "n_entities"), "entity", "entities")),
+    h("span", plural(sum(sourceTexts, "n_matches"), "lexicon match", "lexicon matches")),
+    h("span", `${reviewed} reviewed`),
+  ]);
+}
+
+function SourceTextList({ sourceTexts, humanRunCounts }) {
+  if (sourceTexts.length === 0) {
     return h(NonIdealState, {
       icon: "search-text",
       title: "No extractions yet",
       description: "No model has been run over this paper's text.",
     });
   }
-  const groups = groupBySourceText(runs);
   return h(
-    "div.source-text-sections",
-    Array.from(groups.entries(), ([sourceTextId, textRuns]) =>
-      h(SourceTextSection, { key: sourceTextId, sourceTextId, runs: textRuns, lookups })
+    "div.source-text-list",
+    sourceTexts.map((sourceText: KGSourceText, i: number) =>
+      h(SourceTextRow, {
+        key: sourceText.id,
+        sourceText,
+        position: i + 1,
+        humanRuns: humanRunCounts[sourceText.id] ?? 0,
+      })
     )
   );
 }
 
-function SourceTextSection({ sourceTextId, runs, lookups }) {
-  const runLabel = plural(runs.length, "model run");
-  return h("section.source-text-body", [
-    h("div.run-header", [
-      h("h3", ["Source text ", h(Identifier, { id: sourceTextId })]),
-      h("div.kg-toolbar-group", [
-        h("span.bp6-text-muted", runLabel),
+function SourceTextRow({
+  sourceText,
+  position,
+  humanRuns,
+}: {
+  sourceText: KGSourceText;
+  position: number;
+  humanRuns: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const href = sourceTextHref(sourceText.id);
+  const reviewed = humanRuns > 0;
+
+  let reviewedTag = null;
+  if (reviewed) {
+    reviewedTag = h(
+      Tag,
+      { minimal: true, intent: "success", icon: "tick" },
+      plural(humanRuns, "review")
+    );
+  }
+
+  let toggleLabel = "Show full text";
+  if (expanded) toggleLabel = "Collapse";
+
+  return h("div.source-text-row", { className: classNames({ reviewed }) }, [
+    h("div.source-text-row-main", [
+      h("div.source-text-row-header", [
+        h("span", `Text ${position}`),
+        h(Identifier, { id: sourceText.id }),
+        h("span", formatDate(sourceText.last_update)),
+      ]),
+      h(
+        "p.paragraph-preview",
+        { className: classNames({ expanded }) },
+        sourceText.paragraph_text
+      ),
+      h("div.card-stats", [
+        h("span", plural(sourceText.n_runs, "run")),
+        h("span", plural(sourceText.n_entities, "entity", "entities")),
+        h("span", plural(sourceText.n_matches, "match", "matches")),
+        h("span", plural(sourceText.n_strat_names, "strat. name")),
+      ]),
+    ]),
+    h("div.source-text-row-aside", [
+      reviewedTag,
+      h(ButtonGroup, { minimal: true }, [
+        h(
+          Button,
+          { small: true, onClick: () => setExpanded(!expanded) },
+          toggleLabel
+        ),
         h(
           AnchorButton,
-          {
-            href: sourceTextHref(sourceTextId),
-            icon: "edit",
-            minimal: true,
-            small: true,
-          },
-          "Give feedback"
+          { small: true, intent: "primary", rightIcon: "arrow-right", href },
+          "Open"
         ),
       ]),
     ]),
-    h(ExtractionViewClient, {
-      runs,
-      models: lookups.models,
-      entityTypes: lookups.entityTypes,
-    }),
   ]);
 }

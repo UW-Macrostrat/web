@@ -1,25 +1,26 @@
 import { render } from "vike/abort";
 import {
-  fetchKGLookups,
+  fetchHumanRunCounts,
   fetchPublication,
-  fetchRuns,
-  type KGLookups,
+  fetchSourceTexts,
   type KGPublication,
-  type KGRun,
+  type KGSourceText,
   routeSegment,
 } from "~/components/knowledge-graph";
 
 export interface PaperPageData {
   paperId: string;
   publication: KGPublication;
-  /** Model runs over this paper's source texts, in source-text order. */
-  runs: KGRun[];
-  lookups: KGLookups;
+  /** The paper's source texts with run statistics — no entity trees. Each
+   * row links to its own paragraph view/editor. */
+  sourceTexts: KGSourceText[];
+  /** Human feedback runs per source text id. */
+  humanRunCounts: Record<number, number>;
 }
 
-/** Everything the paper page shows is small JSON (citation + entity trees), so
- * it is fetched on the server and rendered into the HTML; only the interactive
- * entity viewer is a client island. */
+/** A summary of the paper: citation plus one row per source text. Papers can
+ * have tens of paragraphs, so the entity trees are not loaded here; the
+ * per-paragraph page (`/integrations/xdd/feedback/<id>`) shows and edits them. */
 export async function data(pageContext): Promise<PaperPageData> {
   // `/integrations/xdd/extractions/<paperId>`
   const paperId = routeSegment(pageContext, "paperId", 3);
@@ -27,15 +28,18 @@ export async function data(pageContext): Promise<PaperPageData> {
     throw render(404, "No paper specified");
   }
 
-  const [publication, runs, lookups] = await Promise.all([
+  const [publication, sourceTexts] = await Promise.all([
     fetchPublication(paperId),
-    fetchRuns({ paperId, kind: "model" }),
-    fetchKGLookups(),
+    fetchSourceTexts(paperId),
   ]);
 
   if (publication == null) {
     throw render(404, `Paper ${paperId} has no extractions`);
   }
 
-  return { paperId, publication, runs, lookups };
+  const humanRunCounts = await fetchHumanRunCounts(
+    sourceTexts.map((d) => d.id)
+  );
+
+  return { paperId, publication, sourceTexts, humanRunCounts };
 }

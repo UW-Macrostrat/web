@@ -40,7 +40,24 @@ export function Page() {
 }
 
 function SourceTextToolbar({ data }: { data: SourceTextPageData }) {
-  const { sourceText, adjacent, humanRunCount } = data;
+  const { sourceText, adjacent, humanRunCount, publication } = data;
+
+  let paperLink = null;
+  if (publication != null) {
+    paperLink = h(
+      AnchorButton,
+      { icon: "document", href: paperHref(publication.paper_id) },
+      "Paper"
+    );
+  }
+
+  let position = null;
+  if (adjacent.position != null) {
+    position = h(
+      "span.bp6-text-muted",
+      `Text ${adjacent.position} of ${adjacent.count} in this paper`
+    );
+  }
 
   let humanFeedbackLink = null;
   if (humanRunCount > 0) {
@@ -71,9 +88,11 @@ function SourceTextToolbar({ data }: { data: SourceTextPageData }) {
   return h(KGToolbar, { right: h(AuthStatus, { large: false }) }, [
     h(ButtonGroup, { minimal: true }, [
       h(AnchorButton, { icon: "list", href: `${xddRoot}/feedback` }, "Queue"),
+      paperLink,
       previous,
       next,
     ]),
+    position,
     humanFeedbackLink,
   ]);
 }

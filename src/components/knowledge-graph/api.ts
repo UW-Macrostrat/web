@@ -130,12 +130,69 @@ export async function fetchRuns(filter: RunFilter): Promise<KGRun[]> {
   return rows.filter((d) => d.model_run != null);
 }
 
+/** All source texts for a paper (cheap: statistics only, no entity trees),
+ * in the order they appear in the knowledge graph. */
+export async function fetchSourceTexts(paperId: string): Promise<KGSourceText[]> {
+  return fetchKGRows<KGSourceText>("kg_source_text", {
+    paper_id: `eq.${paperId}`,
+    order: "id",
+  });
+}
+
+/** Human feedback runs per source text, keyed by source-text id. Reads
+ * `kg_model_run` (a plain join over runs) rather than `kg_context_entities`,
+ * whose recursive entity-tree CTE is expensive to evaluate just to count rows. */
+export async function fetchHumanRunCounts(
+  sourceTextIds: number[]
+): Promise<Record<number, number>> {
+  if (sourceTextIds.length === 0) return {};
+  const rows = await fetchKGRows<{ source_text_id: number; id: number }>(
+    "kg_model_run",
+    {
+      select: "id,source_text_id",
+      source_text_id: `in.(${sourceTextIds.join(",")})`,
+      user_id: "not.is.null",
+    }
+  );
+  const counts: Record<number, number> = {};
+  for (const row of rows) {
+    counts[row.source_text_id] = (counts[row.source_text_id] ?? 0) + 1;
+  }
+  return counts;
+}
+
 export interface AdjacentSourceTexts {
   previous: number | null;
   next: number | null;
+  /** 1-based position and total within the paper, when stepping inside one. */
+  position?: number;
+  count?: number;
 }
 
-/** Neighboring source-text ids, for stepping through the review queue. */
+/** Neighbors within the same paper: the paper's source-text ids in order, so
+ * the page can say "text 3 of 12" and step to the next one. */
+export async function fetchAdjacentInPaper(
+  id: number,
+  paperId: string
+): Promise<AdjacentSourceTexts> {
+  const rows = await fetchKGRows<{ id: number }>("kg_source_text", {
+    select: "id",
+    paper_id: `eq.${paperId}`,
+    order: "id",
+  });
+  const ids = rows.map((d) => d.id);
+  const ix = ids.indexOf(id);
+  if (ix === -1) return fetchAdjacentSourceTexts(id);
+  return {
+    previous: ids[ix - 1] ?? null,
+    next: ids[ix + 1] ?? null,
+    position: ix + 1,
+    count: ids.length,
+  };
+}
+
+/** Neighboring source-text ids across the whole queue (for texts without a
+ * paper). */
 export async function fetchAdjacentSourceTexts(
   id: number
 ): Promise<AdjacentSourceTexts> {
@@ -187,13 +244,6 @@ export async function fetchFeedbackNotesForRuns(
 
 /** Number of human feedback runs recorded for a source text. */
 export async function countHumanRuns(sourceTextId: number): Promise<number> {
-  const rows = await fetchKGRows<{ model_run: number }>(
-    "kg_context_entities",
-    {
-      select: "model_run",
-      source_text: `eq.${sourceTextId}`,
-      user_id: "not.is.null",
-    }
-  );
-  return rows.filter((d) => d.model_run != null).length;
+  const counts = await fetchHumanRunCounts([sourceTextId]);
+  return counts[sourceTextId] ?? 0;
 }

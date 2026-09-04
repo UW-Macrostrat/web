@@ -60,17 +60,20 @@ export function ExtractionView({
   const { data, entityTypeIndex } = useEnhancedRun(run, models, entityTypes);
   return h(
     OverlaysProvider,
-    h(FeedbackComponent, {
-      key: run.model_run,
-      entities: data.entities ?? [],
-      text: data.paragraph_text,
-      model: data.model,
-      entityTypes: entityTypeIndex,
-      matchLinks: MATCH_LINKS,
-      allowOverlap: true,
-      view: true,
-      autoSelect,
-    })
+    h(
+      "div.extraction-view",
+      h(FeedbackComponent, {
+        key: run.model_run,
+        entities: data.entities ?? [],
+        text: data.paragraph_text,
+        model: data.model,
+        entityTypes: entityTypeIndex,
+        matchLinks: MATCH_LINKS,
+        allowOverlap: true,
+        view: true,
+        autoSelect,
+      })
+    )
   );
 }
 

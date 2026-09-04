@@ -128,3 +128,67 @@
 
 .source-text-body
   margin: 1em 0
+
+// Paper page: one row per source text, descending into the paragraph view
+.paper-summary
+  display: flex
+  flex-wrap: wrap
+  gap: 0.25em 1.5em
+  margin: 1em 0
+  color: var(--text-subtle-color)
+
+.source-text-list
+  display: flex
+  flex-direction: column
+  gap: 0.75em
+  margin-top: 1em
+
+.source-text-row
+  display: grid
+  grid-template-columns: minmax(0, 1fr) auto
+  gap: 0.5em 1.5em
+  padding: 0.75em 1em
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.3))
+  border-radius: 6px
+
+  &.reviewed
+    border-left: 4px solid var(--pz-intent-success, #0f9960)
+
+.source-text-row-main
+  min-width: 0
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+
+.source-text-row-aside
+  display: flex
+  flex-direction: column
+  align-items: flex-end
+  justify-content: space-between
+  gap: 0.5em
+  white-space: nowrap
+
+.source-text-row-header
+  display: flex
+  align-items: baseline
+  gap: 0.75em
+  color: var(--text-subtle-color)
+  font-size: 0.9em
+
+.paragraph-preview.expanded
+  -webkit-line-clamp: unset
+  line-clamp: unset
+
+// Workaround for @macrostrat/feedback-components <= 2.2.6: `.entity-panel` has
+// no definite height, but the tree inside is sized from a border-box
+// measurement of the panel, so the panel grows by its own padding on every
+// measure until it hits the library's 600px cap. Pin the height and drop the
+// padding (the tree compensates with its own margin/padding) so the measured
+// size is stable. Remove once the library sizes the panel itself.
+.extraction-view [class*="entity-panel"], .feedback-editor [class*="entity-panel"]
+  height: min(600px, 60vh)
+  max-height: none
+  padding: 0
+  width: 100%
+  box-sizing: border-box
+  overflow: hidden
