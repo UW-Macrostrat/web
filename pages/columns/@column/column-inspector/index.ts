@@ -21,7 +21,17 @@ import { ErrorBoundary } from "@macrostrat/ui-components";
 import { DataField } from "@macrostrat/data-components";
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
-import { useColumnState, ColumnSettingsPanel } from "./state";
+import {
+  useColumnState,
+  ColumnSettingsPanel,
+  columnTimeFilterAtom,
+} from "./state";
+import {
+  ageExtentOfUnits,
+  TimeFilterProvider,
+  TimeFilterTag,
+  useTimeFilterWindow,
+} from "~/components/time-filter";
 
 import h from "./index.module.sass";
 
@@ -33,7 +43,11 @@ export function ColumnPage(props) {
     h(
       MacrostratDataProvider,
       { baseURL: apiV2Prefix },
-      h(PatternProvider, h(ColumnPageInner, props))
+      h(
+        TimeFilterProvider,
+        { atom: columnTimeFilterAtom },
+        h(PatternProvider, h(ColumnPageInner, props))
+      )
     )
   );
 }
@@ -50,12 +64,15 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     selectedUnitID,
     setSelectedUnitID,
     selectedUnit,
-    t_age,
-    b_age,
     t_pos,
     b_pos,
     pixelScale,
   } = useColumnState(columnInfo);
+
+  // The rendered age window follows the shared time filter, animating between
+  // targets; with no filter it is the column's full extent.
+  const fullExtent = useMemo(() => ageExtentOfUnits(units), [units]);
+  const timeWindow = useTimeFilterWindow({ fullExtent });
 
   const facetElement = useMemo(() => {
     return facetElements(facetType, columnInfo.col_id);
@@ -109,6 +126,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
                     showLogo: true,
                     title: columnInfo.col_name,
                   }),
+                  h(TimeFilterTag, { className: "header-time-filter" }),
                 ]),
               ]),
               h("div.column-view", [
@@ -132,8 +150,13 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
                     showLabelColumn,
                     hybridScale,
                     pixelScale,
-                    t_age: t_age ?? 0,
-                    b_age: b_age ?? 4500,
+                    t_age: timeWindow.window?.t_age,
+                    b_age: timeWindow.window?.b_age,
+                    windowPadding: 24,
+                    isTransitioning: timeWindow.isAnimating,
+                    onClickTimescaleInterval:
+                      timeWindow.onClickTimescaleInterval,
+                    timescaleIntervalStyle: timeWindow.timescaleIntervalStyle,
                     t_pos,
                     b_pos,
                   },

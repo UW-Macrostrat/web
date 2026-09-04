@@ -37,6 +37,23 @@ import {
 } from "./hash-string";
 
 import { ErrorBoundary, useAsyncMemo } from "@macrostrat/ui-components";
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { useHydrateAtoms } from "jotai/utils";
+import {
+  ageExtentOfUnits,
+  TimeFilterPanel,
+  TimeFilterProvider,
+  TimeFilterTag,
+  useTimeFilterWindow,
+  type TimeFilterAtom,
+  type TimeFilterParams,
+} from "~/components/time-filter";
+
+/** The page's time filter, mirrored into the URL hash beside `section` and
+ * `unit` by the existing hash writer below. */
+const correlationTimeFilterAtom: TimeFilterAtom = atom<TimeFilterParams | null>(
+  null
+);
 
 export function Page() {
   const hashData = useMemo(getCorrelationHashParams, []);
@@ -44,11 +61,16 @@ export function Page() {
   const setSelectedUnit = useCorrelationDiagramStore(
     (state) => state.setSelectedUnit
   );
+  // Seed the time filter from the hash before the first render (so the hash
+  // writer never sees an empty filter), and again on later mounts.
+  useHydrateAtoms([[correlationTimeFilterAtom, hashData.time ?? null]]);
+  const setTimeFilter = useSetAtom(correlationTimeFilterAtom);
   useEffect(() => {
     // Set the initial selected unit from the hash if available
     if (hashData.unit != null) {
       setSelectedUnit(hashData.unit, undefined);
     }
+    setTimeFilter(hashData.time ?? null);
   }, []);
 
   return h(
@@ -59,7 +81,11 @@ export function Page() {
         baseURL: apiV2Prefix,
         focusedLine: hashData.section,
       },
-      h(PageInner, { selectedUnit: hashData.unit })
+      h(
+        TimeFilterProvider,
+        { atom: correlationTimeFilterAtom },
+        h(PageInner, { selectedUnit: hashData.unit })
+      )
     )
   );
 }
@@ -112,9 +138,15 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
     (state) => state.selectedUnitID
   );
 
+  const timeFilter = useAtomValue(correlationTimeFilterAtom);
+
   useEffect(() => {
-    setHashStringForCorrelation({ section: focusedLine, unit: selectedUnitID });
-  }, [focusedLine, selectedUnitID]);
+    setHashStringForCorrelation({
+      section: focusedLine,
+      unit: selectedUnitID,
+      time: timeFilter,
+    });
+  }, [focusedLine, selectedUnitID, timeFilter]);
 
   // selected unit management
   const onUnitSelected = useCorrelationDiagramStore(
@@ -129,6 +161,13 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
     return await fetchUnits(col_ids, fetch);
   }, [focusedColumns]);
 
+  // Age window driven by the shared time filter (full extent when unfiltered)
+  const fullExtent = useMemo(
+    () => ageExtentOfUnits(columnUnits),
+    [columnUnits]
+  );
+  const timeWindow = useTimeFilterWindow({ fullExtent });
+
   return h("div.correlation-diagram", [
     h(
       ErrorBoundary,
@@ -139,6 +178,11 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
           onUnitSelected,
           showUnitPopover: !expanded,
           collapseSmallUnconformities: true,
+          t_age: timeWindow.window?.t_age,
+          b_age: timeWindow.window?.b_age,
+          isTransitioning: timeWindow.isAnimating,
+          onClickTimescaleInterval: timeWindow.onClickTimescaleInterval,
+          axisTopContent: h(TimeFilterTag),
           ...props,
         }),
       ])
@@ -161,6 +205,8 @@ function CorrelationSettings() {
         applySettings({ colorizeUnits: !colorize });
       },
     }),
+    h("h3", "Time filter"),
+    h(TimeFilterPanel, { pickerLength: 280 }),
   ]);
 }
 

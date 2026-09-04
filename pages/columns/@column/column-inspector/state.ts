@@ -16,6 +16,11 @@ import {
   NumericInput,
 } from "@blueprintjs/core";
 import { useHydrateAtoms } from "jotai/utils";
+import {
+  normalizeTimeFilter,
+  TimeFilterPanel,
+  type TimeFilterAtom,
+} from "~/components/time-filter";
 
 export function useColumnState(columnInfo) {
   const { units, col_id } = columnInfo;
@@ -66,7 +71,7 @@ export function useColumnState(columnInfo) {
     maxInternalColumns = undefined;
   }
 
-  const { t_age, b_age, t_pos, b_pos } = useAtomValue(hashStateAtom);
+  const { t_pos, b_pos } = useAtomValue(hashStateAtom);
 
   const [selectedUnitID, setSelectedUnitID] =
     useAtom<number>(selectedUnitIDAtom);
@@ -88,8 +93,6 @@ export function useColumnState(columnInfo) {
     selectedUnitID,
     setSelectedUnitID,
     selectedUnit,
-    t_age,
-    b_age,
     t_pos,
     b_pos,
     pixelScale,
@@ -98,6 +101,8 @@ export function useColumnState(columnInfo) {
 
 interface ColumnHashState {
   unit?: number;
+  /** Time filter: a Macrostrat interval id and/or explicit age bounds */
+  int_id?: number;
   t_age?: number;
   b_age?: number;
   t_pos?: number;
@@ -159,6 +164,7 @@ function getStateFromHash(): ColumnHashState {
   );
   state.axis = validateAxis(params.get("axis"));
   state.unit = validateInt(params.get("unit"));
+  state.int_id = validateInt(params.get("int_id"));
   for (const key of ["t_age", "b_age", "t_pos", "b_pos", "scale"]) {
     state[key] = validateNumber(params.get(key));
   }
@@ -227,8 +233,24 @@ const validateSelectedUnitIDAtom = atom(null, (get, set) => {
 const axisTypeAtom = atomWithHashParam<ColumnAxisType>("axis");
 const facetAtom = atomWithHashParam<string | null>("facet");
 
-const t_ageAtom = atomWithHashParam<number>("t_age");
-const b_ageAtom = atomWithHashParam<number>("b_age");
+/** The page's time filter, stored in the URL hash alongside its other view
+ * state (`#int_id=…&t_age=…&b_age=…`). Handed to `TimeFilterProvider` so the
+ * shared filter components and hooks read and write this page's hash. */
+export const columnTimeFilterAtom: TimeFilterAtom = atom(
+  (get) => {
+    const { int_id, t_age, b_age } = get(hashStateAtom);
+    return normalizeTimeFilter({ int_id, t_age, b_age });
+  },
+  (get, set, value) => {
+    set(hashStateAtom, (prev) => ({
+      ...prev,
+      int_id: value?.int_id,
+      t_age: value?.t_age,
+      b_age: value?.b_age,
+    }));
+  }
+);
+
 const t_posAtom = atomWithHashParam<number>("t_pos");
 const b_posAtom = atomWithHashParam<number>("b_pos");
 
@@ -330,12 +352,7 @@ export function ColumnSettingsPanel() {
     h("h3", "Settings"),
     h(AxisTypeControl),
     h(FacetControl),
-    h(RangeControl, {
-      label: "Age range",
-      unit: "Ma",
-      topAtom: t_ageAtom,
-      bottomAtom: b_ageAtom,
-    }),
+    h(TimeFilterPanel, { showIntervalPicker: false }),
     h.if(isHeightAxis)(RangeControl, {
       label: heightAxisLabel + " range",
       unit: "m",
@@ -374,7 +391,7 @@ function NumericAtomControl({
   placeholder,
 }: {
   label: string;
-  atom: typeof t_ageAtom;
+  atom: typeof pixelScaleAtom;
   placeholder?: string;
 }) {
   const [value, setValue] = useAtom(atom);
