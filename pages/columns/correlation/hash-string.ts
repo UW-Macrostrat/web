@@ -1,10 +1,17 @@
 import { LineString } from "geojson";
 import { setHashString } from "@macrostrat/ui-components";
 import { parseLineFromString, stringifyLine } from "@macrostrat/column-views";
+import {
+  parseTimeFilterParams,
+  timeFilterToParams,
+  type TimeFilterParams,
+} from "~/components/time-filter";
 
 interface CorrelationHashParams {
   section?: LineString | null;
   unit?: number;
+  /** Shared time filter (`int_id`, `t_age`, `b_age`), see `~/components/time-filter` */
+  time?: TimeFilterParams | null;
 }
 
 export function getCorrelationHashParams(): CorrelationHashParams {
@@ -23,18 +30,22 @@ export function getCorrelationHashParams(): CorrelationHashParams {
     unit = Number(_unit);
   }
 
+  const time = parseTimeFilterParams(hash);
+
   return {
     section,
     unit,
+    time,
   };
 }
 
 export function setHashStringForCorrelation(state: CorrelationHashParams) {
-  const { section, unit } = state;
-  if (section == null) {
-    return;
+  const { section, unit, time = null } = state;
+  let _section = section;
+  if (_section != null && _section.coordinates.length < 2) {
+    _section = null;
   }
-  if (section.coordinates.length < 2) {
+  if (_section == null && time == null) {
     return;
   }
   let _unit = unit;
@@ -43,8 +54,9 @@ export function setHashStringForCorrelation(state: CorrelationHashParams) {
   }
 
   let hash = {
-    section: stringifyLine(section),
+    section: _section == null ? undefined : stringifyLine(_section),
     unit: _unit,
+    ...timeFilterToParams(time),
   };
   setHashString(hash);
 }
