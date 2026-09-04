@@ -26,7 +26,7 @@ export function Page() {
   const data = useData<SourceTextPageData>();
   const { sourceText, publication, modelRuns, lookups } = data;
   const ctx = usePageContext();
-  const autoSelect = autoSelectFromSearch(ctx.urlParsed?.search);
+  const autoSelect = autoSelectFromSearch(ctx);
 
   return h([
     h(SourceTextToolbar, { data }),

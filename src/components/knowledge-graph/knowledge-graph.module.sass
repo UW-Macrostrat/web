@@ -198,17 +198,3 @@
   flex-direction: column
   gap: 0.5em
   --data-panel-card-padding: 0
-
-// Workaround for @macrostrat/feedback-components <= 2.2.6: `.entity-panel` has
-// no definite height, but the tree inside is sized from a border-box
-// measurement of the panel, so the panel grows by its own padding on every
-// measure until it hits the library's 600px cap. Pin the height and drop the
-// padding (the tree compensates with its own margin/padding) so the measured
-// size is stable. Remove once the library sizes the panel itself.
-.extraction-view [class*="entity-panel"], .feedback-editor [class*="entity-panel"]
-  height: min(600px, 60vh)
-  max-height: none
-  padding: 0
-  width: 100%
-  box-sizing: border-box
-  overflow: hidden

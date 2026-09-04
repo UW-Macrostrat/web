@@ -1,6 +1,12 @@
 /* Client-side code to access configuration variables */
 import { getRuntimeConfig } from "./utils";
 
+/** The canonical reader for runtime configuration (`process.env` on the server,
+ * the injected `window.env` in the browser). Re-exported so consumers that need
+ * a variable this module doesn't expose as a constant don't reach for
+ * `import.meta.env`, which the client transform rewrites to `null` here. */
+export { getRuntimeConfig };
+
 export const darkMapURL =
   "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true";
 export const baseMapURL =

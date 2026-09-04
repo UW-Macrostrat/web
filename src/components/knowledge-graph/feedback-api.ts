@@ -39,7 +39,14 @@ export interface SaveFeedbackArgs {
   notes: FeedbackNotes;
 }
 
-/** Save a feedback run and its notes; resolves to the new run id. */
+/** Save a feedback run and its notes; resolves to the new run id.
+ *
+ * `treeToGraph` emits every text span an entity covers as `txt_range`, so a
+ * reviewer who merges two mentions sends a node with several spans.
+ * `macrostrat_kg.entity` stores one span per row, so until `record_run` handles
+ * multi-span nodes (see [[Knowledge graph feedback interface]]) such a node
+ * round-trips with its first span only. The payload stays faithful to the
+ * edit; the truncation is the server's, not ours. */
 export async function saveFeedback(args: SaveFeedbackArgs): Promise<number> {
   const { nodes, edges } = treeToGraph(args.tree);
   const runId = await recordRun({

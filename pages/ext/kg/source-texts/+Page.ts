@@ -19,6 +19,7 @@ import {
 } from "@macrostrat/data-sheet";
 import {
   type KGSourceText,
+  searchOriginal,
   SourceTextCard,
   kgRoot,
 } from "~/components/knowledge-graph";
@@ -144,7 +145,7 @@ export function Page() {
   // right one. The query string comes from the page context so server and
   // client render the same initial state.
   const { initialFilters, initialSorts } = initialViewStateFromURL(urlBindings, {
-    search: ctx.urlParsed?.searchOriginal ?? "",
+    search: searchOriginal(ctx),
   });
 
   return h(InfiniteScrollPage, {
