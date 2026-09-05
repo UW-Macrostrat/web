@@ -28,6 +28,8 @@ import {
 const modeIcons: Record<LayoutMode, string> = {
   "content-only": "list",
   "content-primary": "list-detail-view",
+  "content-full": "maximize",
+  "content-inset": "widget",
   "map-primary": "map",
   "map-only": "globe",
 };

@@ -32,12 +32,19 @@ import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
 import { Footer } from "~/layouts/footer";
 import {
   columnInfoAtom,
+  columnProjectFilterAtom,
   ColumnSettingsButton,
   columnTimeFilterAtom,
   useColumnSelection,
   useColumnState,
   useSetFacet,
 } from "./state";
+import {
+  PROJECT_FILTER_KEY,
+  ProjectFilterProvider,
+  ProjectFilterTag,
+  useProjectFilter,
+} from "~/components/project-filter";
 import {
   ageExtentOfUnits,
   TIME_FILTER_KEYS,
@@ -70,7 +77,11 @@ export function ColumnPage(props) {
       h(
         TimeFilterProvider,
         { atom: columnTimeFilterAtom },
-        h(PatternProvider, h(ColumnPageFrame, props))
+        h(
+          ProjectFilterProvider,
+          { atom: columnProjectFilterAtom },
+          h(PatternProvider, h(ColumnPageFrame, props))
+        )
       )
     )
   );
@@ -96,7 +107,7 @@ function ColumnPageFrame({
     initialAtoms,
     actions: h(ColumnSettingsButton),
     // Active filters sit in a second header row above the column
-    filterBar: h(TimeFilterTag),
+    filterBar: h([h(ProjectFilterTag), h(TimeFilterTag)]),
     content: h(ColumnContentPane, { columnInfo }),
     map: h(ColumnMapPane, { columnInfo, linkPrefix, projectID }),
     assistant: h(ColumnAssistantPane, { columnInfo, project, columnProjects }),
@@ -210,6 +221,9 @@ function ColumnContentPane({ columnInfo }) {
 
 function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   const modifierHeld = useModifierKeyRef();
+  // The shared project filter wins over the route's project when set
+  const { projectID: filterProject } = useProjectFilter();
+  const mapProject = filterProject ?? projectID;
 
   const onSelectColumn = useCallback(
     (col_id: number | null) => {
@@ -218,7 +232,7 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
       modifierHeld.current = false;
       if (withModifier) {
         // Start a correlation between this column and the clicked one
-        navigate(correlationHref([columnInfo.col_id, col_id]));
+        openCorrelation([columnInfo.col_id, col_id]);
         return;
       }
       // Column-to-column navigation carries the hash, so the time filter and
@@ -234,7 +248,7 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
     h(ColumnMap, {
       className: "column-map",
       inProcess: true,
-      projectID,
+      projectID: mapProject,
       selectedColumn: columnInfo.col_id,
       onSelectColumn,
     }),
@@ -258,16 +272,25 @@ function useModifierKeyRef() {
 }
 
 /** Link to the correlation page with a manual column selection, carrying the
- * current time filter across (both pages share the hash vocabulary). */
+ * current time and project filters across (the pages share the hash
+ * vocabulary). */
 function correlationHref(colIDs: number[]): string {
   const ids = Array.from(new Set(colIDs));
   const parts = [`columns=${ids.join(",")}`];
   const current = new URLSearchParams(window.location.hash.slice(1));
-  for (const key of TIME_FILTER_KEYS) {
+  for (const key of [...TIME_FILTER_KEYS, PROJECT_FILTER_KEY]) {
     const value = current.get(key);
     if (value != null) parts.push(`${key}=${encodeURIComponent(value)}`);
   }
   return `/columns/correlation#${parts.join("&")}`;
+}
+
+/** A full page load rather than a client-side route: the installed correlation
+ * map store hydrates its scope once per document, so a second client-side
+ * visit would show the previous visit's selection. Drop once map-views ships
+ * the per-provider store. */
+function openCorrelation(colIDs: number[]) {
+  window.location.assign(correlationHref(colIDs));
 }
 
 /* ----------------------------------------------------------- the assistant */
@@ -277,13 +300,19 @@ function ColumnAssistantPane({ columnInfo, project, columnProjects }) {
   const { selectedUnit, setSelectedUnitID } = useColumnSelection();
 
   if (selectedUnit != null) {
-    // The one piece of assistant content that reads as a card
-    return h(ModalUnitPanel, {
-      unitData: units,
-      className: "unit-details-panel",
-      selectedUnit,
-      onSelectUnit: setSelectedUnitID,
-    });
+    // The one piece of assistant content that reads as a card. The panel
+    // resolves adjacent units' names through the column state scope, so it
+    // gets its own provider here (the column's is in the content slot).
+    return h(
+      MacrostratColumnStateProvider,
+      { units },
+      h(ModalUnitPanel, {
+        unitData: units,
+        className: "unit-details-panel",
+        selectedUnit,
+        onSelectUnit: setSelectedUnitID,
+      })
+    );
   }
   return h(ColumnInfoPanel, { data: columnInfo, project, columnProjects });
 }
@@ -300,6 +329,8 @@ function ColumnInfoPanel({ data, project, columnProjects }) {
         icon: "comparison",
         text: "Correlate with other columns",
         href: correlationHref([data.col_id]),
+        // Full page load; see `openCorrelation`
+        rel: "external",
       }),
     ]),
   ]);

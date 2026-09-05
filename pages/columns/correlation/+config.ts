@@ -13,5 +13,7 @@ export default {
   pageInfo: {
     name: "Correlation chart",
   },
-  pageStyle: "fullscreen",
+  // The hybrid content/map frame (`~/layouts/hybrid`): the chart is the
+  // content, the correlation map an inset or sidebar card.
+  pageStyle: "hybrid",
 };

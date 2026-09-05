@@ -40,6 +40,11 @@ import { DevLinkButton, Link } from "~/components";
 import { LithologyTag } from "~/components/lex/tag";
 import { createWindowedScrollBody } from "~/components/data-view";
 import { HybridContentFooter, HybridPage } from "~/layouts/hybrid";
+import {
+  ProjectFilterControl,
+  ProjectFilterProvider,
+  ProjectFilterTag,
+} from "~/components/project-filter";
 import { onDemand } from "~/_utils";
 
 import {
@@ -63,6 +68,7 @@ import {
   linkPrefixAtom,
   mapBoundsAtom,
   projectIDAtom,
+  projectFilterAtom,
   projectsAtom,
   routeForFilterKey,
   selectColumnAtom,
@@ -167,21 +173,33 @@ export function Page({ linkPrefix = "/" }) {
   const data = useData();
   const { project, allColumnGroups, projects } = data;
   // Match the id `+data.ts` fetched with — defaulting to something else meant
-  // the client immediately refetched the list with different parameters.
-  const projectID = project?.project_id ?? data.project_id ?? 1;
+  // the client immediately refetched the list with different parameters. `null`
+  // is every project (the shared project filter's default).
+  const projectID = project?.project_id ?? data.project_id ?? null;
 
-  return h(HybridPage, {
-    capabilities: { defaultMode: "content-primary" },
-    initialAtoms: [
-      [projectIDAtom, projectID],
-      [initialDataAtom, allColumnGroups],
-      [linkPrefixAtom, linkPrefix],
-      [projectsAtom, projects ?? []],
-    ],
-    content: h(ColumnList),
-    map: h(ColumnListMap, { projectID }),
-    assistant: h(ColumnAssistant),
-  });
+  return h(
+    ProjectFilterProvider,
+    { atom: projectFilterAtom },
+    h(HybridPage, {
+      capabilities: { defaultMode: "content-primary" },
+      initialAtoms: [
+        [projectIDAtom, projectID],
+        [initialDataAtom, allColumnGroups],
+        [linkPrefixAtom, linkPrefix],
+        [projectsAtom, projects ?? []],
+      ],
+      filterBar: h(ProjectFilterTag),
+      content: h(ColumnList),
+      map: h(ColumnListMapSlot),
+      assistant: h(ColumnAssistant),
+    })
+  );
+}
+
+/** The map follows the project filter as it changes, not just the initial id. */
+function ColumnListMapSlot() {
+  const projectID = useAtomValue(projectIDAtom);
+  return h(ColumnListMap, { projectID });
 }
 
 /* ----------------------------------------------------------------- the list */
@@ -527,6 +545,7 @@ function SourceFacetsPanel() {
   const [showInProcess, setShowInProcess] = useAtom(showInProcessAtom);
 
   return h("div.source-facets", [
+    h(ProjectFilterControl),
     h(Switch, {
       checked: showEmpty,
       label: "Show empty columns",

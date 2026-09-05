@@ -5,6 +5,7 @@
  * filter controls, the details panel — shares one set of instances.
  */
 
+import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { atom } from "jotai";
 import { atomWithStorage, unwrap } from "jotai/utils";
 import { debounce } from "underscore";
@@ -53,6 +54,18 @@ export type MapBounds = [[number, number], [number, number]];
 /* ------------------------------------------------------------ page inputs */
 
 export const projectIDAtom = atom<number | null>(null);
+
+/** The shared project filter (`~/components/project-filter`) for this page:
+ * reads the list's project scope and writes it to `?project_id=` as well, so
+ * the choice is linkable and travels to the column and correlation pages. */
+const projectSearchParamAtom = atomWithSearchParam("project_id");
+export const projectFilterAtom = atom(
+  (get) => get(projectIDAtom),
+  (get, set, value: number | null) => {
+    set(projectIDAtom, value);
+    set(projectSearchParamAtom, value?.toString() ?? null);
+  }
+);
 export const initialDataAtom = atom<ColumnGroup[] | null>(null);
 export const linkPrefixAtom = atom<string>("/");
 

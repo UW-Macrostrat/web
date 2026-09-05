@@ -1,24 +1,33 @@
-import { FullscreenPage } from "~/layouts";
-import { C } from "@macrostrat/hyper";
+/** The correlation chart page, on the hybrid content/map frame.
+ *
+ * The chart is the content, at the full page width; the correlation map is
+ * either a small inset over it (`content-inset`, the default) or a sidebar
+ * card beside the chart's column list and unit details (`content-primary`).
+ * Selection state lives in the map store (`ColumnCorrelationProvider`), which
+ * wraps every slot through the frame's `wrap` hook so it can read the project
+ * filter the page seeds into the frame.
+ */
+import { C, compose } from "@macrostrat/hyper";
 import h from "./main.module.sass";
-import { compose } from "@macrostrat/hyper";
 import { mapboxAccessToken, apiV2Prefix } from "@macrostrat-web/settings";
 import {
   Alignment,
+  Button,
   FormGroup,
   Intent,
+  OverlaysProvider,
   PopoverNext,
   SegmentedControl,
   Switch,
 } from "@blueprintjs/core";
-import { PageBreadcrumbs } from "~/components";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { DisplayDensity, useCorrelationDiagramStore } from "./state";
 import { PatternProvider } from "~/_providers";
-import { useRef } from "react";
-
-import { Button, OverlaysProvider } from "@blueprintjs/core";
-import { DarkModeProvider } from "@macrostrat/ui-components";
+import {
+  DarkModeProvider,
+  ErrorBoundary,
+  useAsyncMemo,
+} from "@macrostrat/ui-components";
 import {
   MacrostratDataProvider,
   fetchUnits,
@@ -33,24 +42,27 @@ import {
 import {
   ColumnCorrelationMap,
   ColumnCorrelationProvider,
+  CorrelationChart,
+  MacrostratColumnStateProvider,
+  UnitDetailsPanel,
   useColumnMapLink,
   useCorrelationMapStore,
-  UnitDetailsPanel,
-  CorrelationChart,
-  CorrelationChartProps,
   type ColumnHeaderProps,
 } from "@macrostrat/column-views";
 import { useMapStyleOperator } from "@macrostrat/mapbox-react";
+import { atom, useAtomValue } from "jotai";
 import {
   getCorrelationHashParams,
   setHashStringForCorrelation,
 } from "./hash-string";
-
-import { ErrorBoundary, useAsyncMemo } from "@macrostrat/ui-components";
-import { atom, useAtomValue, useSetAtom } from "jotai";
-import { useHydrateAtoms } from "jotai/utils";
+import {
+  HybridPage,
+  layoutModeAtom,
+  type LayoutCapabilities,
+} from "~/layouts/hybrid";
 import {
   ageExtentOfUnits,
+  timeFilterToParams,
   TimeFilterPanel,
   TimeFilterProvider,
   TimeFilterTag,
@@ -59,133 +71,143 @@ import {
   type TimeFilterAtom,
   type TimeFilterParams,
 } from "~/components/time-filter";
+import {
+  PROJECT_FILTER_KEY,
+  ProjectFilterControl,
+  ProjectFilterProvider,
+  ProjectFilterTag,
+  type ProjectFilterAtom,
+} from "~/components/project-filter";
 
-/** The page's time filter, mirrored into the URL hash beside `section` and
- * `unit` by the existing hash writer below. */
+/** The page's filters, in the URL hash beside `section` / `columns` / `unit`.
+ * Seeded into the frame's jotai scope through `initialAtoms`. */
 const correlationTimeFilterAtom: TimeFilterAtom = atom<TimeFilterParams | null>(
   null
 );
+const correlationProjectFilterAtom: ProjectFilterAtom = atom<number | null>(
+  null
+);
 
-/** Page-level actions that need to reach inside the map provider's subtree. */
-const CorrelationPageActions = createContext<{ resetToLineMode(): void }>({
-  resetToLineMode() {},
-});
+/** The chart is wide, so it takes the page: a small inset map by default, or
+ * the map and details as a sidebar. */
+const correlationCapabilities: Partial<LayoutCapabilities> = {
+  modes: ["content-inset", "content-primary", "content-full"],
+  defaultMode: "content-inset",
+  hasAssistant: true,
+  itemName: "Chart",
+  // Viewport-locked; the chart pane is its own scroller
+  contentScroll: "panel",
+};
+
+const PageWrapper = compose(
+  DarkModeProvider,
+  PatternProvider,
+  OverlaysProvider,
+  C(MacrostratDataProvider, { baseURL: apiV2Prefix })
+);
 
 export function Page() {
   const hashData = useMemo(getCorrelationHashParams, []);
 
-  // What the map store is seeded with. Leaving manual mode for a fresh line of
-  // section reseeds the provider (via `key`) with no selection: the installed
-  // store has no action for that transition yet (`setSelectionMode` lands with
-  // the atom-based store in map-views).
-  const [seed, setSeed] = useState(() => ({
-    section: hashData.section,
-    columns: hashData.columns ?? null,
-    key: 0,
-  }));
-  const actions = useMemo(
-    () => ({
-      resetToLineMode() {
-        setSeed((prev) => ({ section: null, columns: null, key: prev.key + 1 }));
-      },
-    }),
-    []
-  );
-
   const setSelectedUnit = useCorrelationDiagramStore(
     (state) => state.setSelectedUnit
   );
-  // Seed the time filter from the hash before the first render (so the hash
-  // writer never sees an empty filter), and again on later mounts.
-  useHydrateAtoms([[correlationTimeFilterAtom, hashData.time ?? null]]);
-  const setTimeFilter = useSetAtom(correlationTimeFilterAtom);
   useEffect(() => {
     // Set the initial selected unit from the hash if available
     if (hashData.unit != null) {
       setSelectedUnit(hashData.unit, undefined);
     }
-    setTimeFilter(hashData.time ?? null);
   }, []);
+
+  const initialAtoms = useMemo(
+    () =>
+      [
+        [correlationTimeFilterAtom, hashData.time ?? null],
+        [correlationProjectFilterAtom, hashData.project_id ?? null],
+      ] as [any, any][],
+    []
+  );
+
+  // The map store spans every slot and reads the project filter, so it is
+  // mounted inside the frame's scope rather than around it.
+  const wrap = useMemo(
+    () => (children: ReactNode) =>
+      h(
+        CorrelationStoreProvider,
+        { section: hashData.section, columns: hashData.columns ?? null },
+        children
+      ),
+    []
+  );
 
   return h(
     PageWrapper,
     h(
-      ColumnCorrelationProvider,
-      {
-        key: seed.key,
-        baseURL: apiV2Prefix,
-        focusedLine: seed.section,
-        // An explicit column list (e.g. handed over from a column page) starts
-        // the map in manual selection mode: columns are toggled by clicking.
-        selectedColumns: seed.columns,
-      },
+      TimeFilterProvider,
+      { atom: correlationTimeFilterAtom },
       h(
-        CorrelationPageActions.Provider,
-        { value: actions },
-        h(
-          TimeFilterProvider,
-          { atom: correlationTimeFilterAtom },
-          h(PageInner, { selectedUnit: hashData.unit })
-        )
+        ProjectFilterProvider,
+        { atom: correlationProjectFilterAtom },
+        h(HybridPage, {
+          className: "correlation-page",
+          capabilities: correlationCapabilities,
+          initialAtoms,
+          wrap,
+          actions: h([h(SelectionModeControl), h(CorrelationSettingsButton)]),
+          filterBar: h([h(ProjectFilterTag), h(TimeFilterTag)]),
+          content: h(CorrelationChartPane),
+          map: h(CorrelationMapPane),
+          assistant: h(CorrelationAssistantPane),
+        })
       )
     )
   );
 }
 
-function PageInner() {
-  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
-  const ref = useRef();
-
-  return h("div.main-panel", { ref }, [
-    h("header.page-header", [
-      h("div.header-row", [
-        h(PageBreadcrumbs, { showLogo: true, separateTitle: false }),
-        h("div.header-controls", [
-          h(SelectionModeControl),
-          h(CorrelationSettingsPopup, { boundary: ref.current }),
-        ]),
-      ]),
-      // Active filters, above the content rather than beside the age axis
-      h("div.header-filters", h(TimeFilterTag)),
-    ]),
-    h(
-      "div.diagram-container",
-      { className: expanded ? "map-expanded" : "map-inset" },
-      [
-        h("div.main-area", [
-          h(CorrelationDiagramWrapper),
-          h("div.overlay-safe-area"),
-        ]),
-        h("div.assistant", [
-          h("div.column-selection-map", [
-            h(
-              ColumnCorrelationMap,
-              {
-                accessToken: mapboxAccessToken,
-                className: "correlation-map",
-                apiBaseURL: apiV2Prefix,
-                showLogo: false,
-                padding: expanded ? 100 : 20,
-              },
-              h(MapResizeOnToggle, { trigger: expanded })
-            ),
-            h(MapExpandedButton),
-          ]),
-          h(ColumnSelectionList),
-          h(UnitDetailsExt),
-        ]),
-      ]
-    ),
-  ]);
+/** The map store, seeded from the hash and scoped to the project filter. The
+ * footprints re-fetch when the project changes (a prop the store's effects
+ * track); the selection itself is the store's from then on. */
+function CorrelationStoreProvider({ section, columns, children }) {
+  const projectID = useAtomValue(correlationProjectFilterAtom);
+  return h(
+    ColumnCorrelationProvider,
+    {
+      focusedLine: section,
+      // An explicit column list (e.g. handed over from a column page) starts
+      // the map in manual selection mode: columns are toggled by clicking.
+      selectedColumns: columns,
+      projectID: projectID ?? undefined,
+    },
+    children
+  );
 }
 
-/** Re-measure the map once it has loaded and whenever the inset/expanded
- * toggle changes its container. The map's own resize tracking didn't reliably
- * follow this class-driven size change, leaving the canvas at its previous size
- * with the columns drawn into a corner of the expanded box (or clipped in the
- * inset). `useMapStyleOperator` waits for the map to exist, so this also covers
- * a map created before its box had settled. A resize that fits is a no-op. */
-function MapResizeOnToggle({ trigger }: { trigger: boolean }) {
+/* ------------------------------------------------------------------ the map */
+
+function CorrelationMapPane() {
+  const mode = useAtomValue(layoutModeAtom);
+  let padding = 100;
+  if (mode === "content-inset") {
+    padding = 20;
+  }
+  return h(
+    ColumnCorrelationMap,
+    {
+      accessToken: mapboxAccessToken,
+      className: "correlation-map",
+      showLogo: false,
+      padding,
+    },
+    h(MapResizeOnToggle, { trigger: mode })
+  );
+}
+
+/** Re-measure the map once it has loaded and whenever the layout mode moves it
+ * between the inset and the sidebar. The map's own resize tracking didn't
+ * reliably follow a class-driven size change, leaving the canvas at its
+ * previous size. `useMapStyleOperator` waits for the map to exist; a resize
+ * that already fits is a no-op. */
+function MapResizeOnToggle({ trigger }: { trigger: string }) {
   useMapStyleOperator(
     (map) => {
       const frame = requestAnimationFrame(() => map.resize());
@@ -196,27 +218,37 @@ function MapResizeOnToggle({ trigger }: { trigger: boolean }) {
   return null;
 }
 
-function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
-  /** This state management is a bit too complicated, but it does kinda sorta work */
+/* ---------------------------------------------------------------- the chart */
 
-  // Sync focused columns with map
+/** The focused columns' ids, joined — the stable key for anything that should
+ * follow the *selection* and not every recomputation of the store. */
+function useFocusedColumnIDs(): number[] {
   const focusedColumns = useCorrelationMapStore(
     (state) => state.focusedColumns
   );
+  const key = focusedColumns.map((c) => c.properties.col_id).join(",");
+  return useMemo(() => focusedColumns.map((c) => c.properties.col_id), [key]);
+}
+
+function CorrelationChartPane() {
+  return h("div.chart-scroll", h(CorrelationDiagramWrapper));
+}
+
+function CorrelationDiagramWrapper() {
+  const colIDs = useFocusedColumnIDs();
 
   const focusedLine = useCorrelationMapStore((state) => state.focusedLine);
-  // The manual selection as the store holds it — not the resolved
-  // `focusedColumns`, which is empty until the footprints have loaded and would
-  // wipe `columns=` from a freshly opened link.
+  // The manual selection as the store holds it — not the resolved focused
+  // columns, which are empty until the footprints have loaded and would wipe
+  // `columns=` from a freshly opened link.
   const selectedColumns = useCorrelationMapStore(
     (state) => state.selectedColumns
   );
-  const selectionMode = useCorrelationMapStore((state) => state.selectionMode);
   const selectedUnitID = useCorrelationDiagramStore(
     (state) => state.selectedUnitID
   );
-
   const timeFilter = useAtomValue(correlationTimeFilterAtom);
+  const projectID = useAtomValue(correlationProjectFilterAtom);
 
   useEffect(() => {
     // A manual selection is linkable as `columns=`; a line of section as
@@ -226,21 +258,23 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
       columns: selectedColumns,
       unit: selectedUnitID,
       time: timeFilter,
+      project_id: projectID,
     });
-  }, [focusedLine, selectedColumns, selectedUnitID, timeFilter]);
+  }, [focusedLine, selectedColumns, selectedUnitID, timeFilter, projectID]);
 
   // selected unit management
   const onUnitSelected = useCorrelationDiagramStore(
     (state) => state.setSelectedUnit
   );
 
-  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+  const mode = useAtomValue(layoutModeAtom);
+  // Details live in the sidebar when there is one; otherwise in a popover
+  const showUnitPopover = mode !== "content-primary";
 
   const fetch = useMacrostratStore((state) => state.fetch);
   const columnUnits = useAsyncMemo(async () => {
-    const col_ids = focusedColumns.map((col) => col.properties.col_id);
-    return await fetchUnits(col_ids, fetch);
-  }, [focusedColumns]);
+    return await fetchUnits(colIDs, fetch);
+  }, [colIDs]);
 
   // Age window driven by the shared time filter (full extent when unfiltered)
   const fullExtent = useMemo(
@@ -271,7 +305,7 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
           data: columnUnits,
           selectedUnit: null,
           onUnitSelected,
-          showUnitPopover: !expanded,
+          showUnitPopover,
           collapseSmallUnconformities: true,
           columnHeaderComponent: CorrelationColumnHeader,
           targetUnitHeight,
@@ -284,76 +318,17 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
           onClickTimescaleInterval: timeWindow.onClickTimescaleInterval,
           timescaleIntervalStyle: timeWindow.timescaleIntervalStyle,
           ...columnMapLink,
-          ...props,
         }),
       ])
     ),
   ]);
 }
 
-function CorrelationSettings() {
-  const colorize = useCorrelationDiagramStore((d) => d.colorizeUnits);
-  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
-
-  return h("div.correlation-settings.settings", [
-    h("h3", "Settings"),
-    h(DisplayDensitySelector),
-    h(Switch, {
-      label: "Colorize",
-      isOn: colorize,
-      alignIndicator: Alignment.RIGHT,
-      onChange() {
-        applySettings({ colorizeUnits: !colorize });
-      },
-    }),
-    h("h3", "Time filter"),
-    h(TimeFilterPanel),
-  ]);
-}
-
-function DisplayDensitySelector() {
-  const displayDensity = useCorrelationDiagramStore((d) => d.displayDensity);
-  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
-  const options = [
-    { label: "Low", value: DisplayDensity.LOW },
-    { label: "Medium", value: DisplayDensity.MEDIUM },
-    { label: "High", value: DisplayDensity.HIGH },
-  ];
-
-  return h(
-    FormGroup,
-    { label: "Display density" },
-    h(SegmentedControl, {
-      options,
-      value: displayDensity,
-      onValueChange(value) {
-        applySettings({ displayDensity: value });
-      },
-      small: true,
-      defaultValue: DisplayDensity.MEDIUM,
-    })
-  );
-}
-
-function CorrelationSettingsPopup({ boundary }) {
-  return h(PopoverNext, {
-    content: h(CorrelationSettings),
-    placement: "bottom-end",
-    renderTarget: ({ isOpen, ...targetProps }) =>
-      h(Button, {
-        ...targetProps,
-        icon: "settings",
-        minimal: true,
-        active: isOpen,
-        title: "Chart settings",
-      }),
-  });
-}
-
-/** Header above each chart column: its name (resolved by the chart), its id,
- * and a small × that drops the column from the chart. Removing from a line of
- * section converts the selection to a manual one (the library's semantics),
- * since a line can't describe an arbitrary subset. */
+/** Header above each chart column: its name (resolved by the chart), its id
+ * linking to the column page, and a small × that drops the column from the
+ * chart. Removing from a line of section converts the selection to a manual
+ * one (the library's semantics), since a line can't describe an arbitrary
+ * subset. */
 function CorrelationColumnHeader({ columnID, columnName }: ColumnHeaderProps) {
   const removeColumn = useCorrelationMapStore((s) => s.removeColumn);
   return h("div.column-header", [
@@ -376,7 +351,6 @@ function CorrelationColumnHeader({ columnID, columnName }: ColumnHeaderProps) {
       small: true,
       title: "Remove column from chart",
       onClick(e) {
-        // The header itself frames the column on the map
         e.stopPropagation();
         removeColumn(columnID);
       },
@@ -384,45 +358,52 @@ function CorrelationColumnHeader({ columnID, columnName }: ColumnHeaderProps) {
   ]);
 }
 
-/** Explicit switch between drawing a line of section and picking columns by
- * hand. To manual, the current columns seed the list; to line, the selection
- * is cleared for a new line to be drawn. */
-function SelectionModeControl() {
-  const selectionMode = useCorrelationMapStore((s) => s.selectionMode);
-  const focusedColumns = useCorrelationMapStore((s) => s.focusedColumns);
-  const setSelectedColumns = useCorrelationMapStore(
-    (s) => s.setSelectedColumns
-  );
-  const { resetToLineMode } = useContext(CorrelationPageActions);
+/* ------------------------------------------------------------- the assistant */
 
-  return h(SegmentedControl, {
-    small: true,
-    options: [
-      { label: "Line of section", value: "line" },
-      { label: "Pick columns", value: "manual" },
-    ],
-    value: selectionMode,
-    onValueChange(value) {
-      if (value === selectionMode) return;
-      if (value === "manual") {
-        setSelectedColumns(focusedColumns.map((c) => c.properties.col_id));
-      } else {
-        resetToLineMode();
-      }
-    },
-  });
+function CorrelationAssistantPane() {
+  const selectedUnit = useCorrelationDiagramStore(
+    (state) => state.selectedUnit
+  );
+  // Unit details take the sidebar over from the column list
+  if (selectedUnit != null) {
+    return h(UnitDetailsCard, { unit: selectedUnit });
+  }
+  return h(ColumnSelectionList);
+}
+
+/** The selected unit's details, as a card. The panel resolves adjacent units'
+ * names through the column state scope, so it is given the unit's column. */
+function UnitDetailsCard({ unit }) {
+  const setSelectedUnit = useCorrelationDiagramStore(
+    (state) => state.setSelectedUnit
+  );
+  const fetch = useMacrostratStore((state) => state.fetch);
+  const columnData = useAsyncMemo(async () => {
+    if (unit?.col_id == null) return null;
+    return await fetchUnits([unit.col_id], fetch);
+  }, [unit?.col_id]);
+  const units = columnData?.[0]?.units ?? [];
+
+  return h(
+    "div.unit-details-panel",
+    h(
+      MacrostratColumnStateProvider,
+      { units },
+      h(UnitDetailsPanel, {
+        unit,
+        onClose: () => setSelectedUnit(null),
+      })
+    )
+  );
 }
 
 /** The chart's columns, in order — drag to reorder, × to remove; hovering
- * highlights the column on the map and clicking frames it. Shown with the map
- * expanded, unless a unit's details have taken that space. Reordering or
+ * highlights the column on the map and clicking frames it. Reordering or
  * removing from a line-of-section selection converts it to a manual one, so
  * the list notes which mode is in play. */
 function ColumnSelectionList() {
-  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
-  const selectedUnit = useCorrelationDiagramStore((state) => state.selectedUnit);
   const selectionMode = useCorrelationMapStore((s) => s.selectionMode);
-  const focusedColumns = useCorrelationMapStore((s) => s.focusedColumns);
+  const ids = useFocusedColumnIDs();
   const setSelectedColumns = useCorrelationMapStore(
     (s) => s.setSelectedColumns
   );
@@ -430,11 +411,8 @@ function ColumnSelectionList() {
   const setHoveredColumn = useCorrelationMapStore((s) => s.setHoveredColumn);
   const zoomToColumn = useCorrelationMapStore((s) => s.zoomToColumn);
 
-  if (!expanded || selectedUnit != null) return null;
-
-  const ids = focusedColumns.map((c) => c.properties.col_id);
-
-  let modeNote = "Manual selection: click columns on the map to add or remove them.";
+  let modeNote =
+    "Manual selection: click columns on the map to add or remove them.";
   if (selectionMode === "line") {
     modeNote =
       "From the line of section. Reordering or removing a column switches to a manual selection.";
@@ -491,46 +469,111 @@ function ColumnSelectionLabel({ colID }: { colID: number }) {
   ]);
 }
 
-const PageWrapper = compose(
-  FullscreenPage,
-  DarkModeProvider,
-  PatternProvider,
-  OverlaysProvider,
-  C(MacrostratDataProvider, { baseURL: apiV2Prefix })
-);
+/* ------------------------------------------------------- header controls */
 
-function UnitDetailsExt() {
-  const selectedUnit = useCorrelationDiagramStore(
-    (state) => state.selectedUnit
+/** Explicit switch between drawing a line of section and picking columns by
+ * hand. To manual, the current columns seed the list. Back to line clears the
+ * selection for a new line to be drawn — by reloading the page without one,
+ * since the installed store has no action for that transition (it lands with
+ * the atom-based store in map-views) and re-mounting its provider re-uses the
+ * scope it hydrated on first mount. */
+function SelectionModeControl() {
+  const selectionMode = useCorrelationMapStore((s) => s.selectionMode);
+  const ids = useFocusedColumnIDs();
+  const setSelectedColumns = useCorrelationMapStore(
+    (s) => s.setSelectedColumns
   );
-  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
-  const setSelectedUnit = useCorrelationDiagramStore(
-    (state) => state.setSelectedUnit
-  );
+  const timeFilter = useAtomValue(correlationTimeFilterAtom);
+  const projectID = useAtomValue(correlationProjectFilterAtom);
 
-  if (selectedUnit == null || !expanded) {
-    return null;
-  }
+  const resetToLineMode = () => {
+    const params = new URLSearchParams();
+    const time = timeFilterToParams(timeFilter);
+    for (const [key, value] of Object.entries(time)) {
+      if (value != null) params.set(key, value);
+    }
+    if (projectID != null) params.set(PROJECT_FILTER_KEY, projectID.toString());
+    let hash = params.toString();
+    if (hash !== "") hash = `#${hash}`;
+    window.location.assign(`${window.location.pathname}${hash}`);
+  };
 
-  return h("div.unit-details-panel", [
-    h(UnitDetailsPanel, {
-      unit: selectedUnit,
-      onClose: () => setSelectedUnit(null),
+  return h(SegmentedControl, {
+    small: true,
+    options: [
+      { label: "Line of section", value: "line" },
+      { label: "Pick columns", value: "manual" },
+    ],
+    value: selectionMode,
+    onValueChange(value) {
+      if (value === selectionMode) return;
+      if (value === "manual") {
+        setSelectedColumns(ids);
+      } else {
+        resetToLineMode();
+      }
+    },
+  });
+}
+
+function CorrelationSettingsButton() {
+  return h(PopoverNext, {
+    minimal: true,
+    placement: "bottom-end",
+    content: h(CorrelationSettings),
+    renderTarget: ({ isOpen, ...targetProps }) =>
+      h(Button, {
+        ...targetProps,
+        icon: "settings",
+        minimal: true,
+        small: true,
+        active: isOpen,
+        title: "Chart settings",
+      }),
+  });
+}
+
+function CorrelationSettings() {
+  const colorize = useCorrelationDiagramStore((d) => d.colorizeUnits);
+  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
+
+  return h("div.correlation-settings.settings", [
+    h("h3", "Settings"),
+    h(DisplayDensitySelector),
+    h(Switch, {
+      label: "Colorize",
+      isOn: colorize,
+      alignIndicator: Alignment.RIGHT,
+      onChange() {
+        applySettings({ colorizeUnits: !colorize });
+      },
     }),
+    h(ProjectFilterControl),
+    h("h3", "Time filter"),
+    h(TimeFilterPanel),
   ]);
 }
 
-function MapExpandedButton() {
-  const toggleMapExpanded = useCorrelationDiagramStore(
-    (state) => state.toggleMapExpanded
+function DisplayDensitySelector() {
+  const displayDensity = useCorrelationDiagramStore((d) => d.displayDensity);
+  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
+  const options = [
+    { label: "Low", value: DisplayDensity.LOW },
+    { label: "Medium", value: DisplayDensity.MEDIUM },
+    { label: "High", value: DisplayDensity.HIGH },
+  ];
+
+  return h(
+    FormGroup,
+    { label: "Display density" },
+    h(SegmentedControl, {
+      options,
+      value: displayDensity,
+      onValueChange(value) {
+        applySettings({ displayDensity: value });
+      },
+      small: true,
+      defaultValue: DisplayDensity.MEDIUM,
+    })
   );
-  const mapExpanded = useCorrelationDiagramStore((state) => state.mapExpanded);
-
-  const icon = mapExpanded ? "collapse-all" : "expand-all";
-
-  return h(Button, {
-    className: "map-expanded-button",
-    icon,
-    onClick: toggleMapExpanded,
-  });
 }

@@ -13,19 +13,24 @@
  * layout mode picks which shell gets it.
  */
 
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import classNames from "classnames";
 import type { ReactNode } from "react";
+import { Button } from "@blueprintjs/core";
 
 import { onDemand } from "~/_utils";
 
 import h from "./composer.module.sass";
 import {
+  capabilitiesAtom,
   contentScrollAtom,
-  hasMapPane,
+  hasInsetMap,
+  hasSidebar,
+  isFullWidth,
   layoutModeAtom,
   layoutShellAtom,
   showAssistantAtom,
+  type LayoutMode,
 } from "./state";
 
 const MapShell = onDemand(() =>
@@ -77,32 +82,47 @@ function ContentShell({
   mode,
   showAssistant,
 }: ShellProps & { mode: string; showAssistant: boolean }) {
-  // `content-only` means *only* the list — no sidebar at all, so it reads as
-  // the plain list page. The assistant rides in the sidebar alongside the map
-  // rather than claiming a column of its own.
-  const hasSidebar = hasMapPane(mode as any);
+  // `content-only` / `content-full` mean *only* the content — no sidebar at
+  // all. `content-primary` adds the map and assistant as a column beside it;
+  // `content-inset` floats the map over full-width content instead.
+  const sidebar = hasSidebar(mode as LayoutMode);
+  const inset = hasInsetMap(mode as LayoutMode);
+  const fullWidth = isFullWidth(mode as LayoutMode);
   // `panel`: the content is the scroller (data panel); `page`: the document is.
   const contentScroll = useAtomValue(contentScrollAtom);
 
-  let mapRegion = null;
-  let assistantRegion = null;
-  if (hasSidebar) {
-    mapRegion = h("div.sidebar-map", map);
+  let sidebarRegion = null;
+  if (sidebar) {
+    let assistantRegion = null;
     if (showAssistant) {
       assistantRegion = h("div.sidebar-assistant", assistant);
     }
+    sidebarRegion = h("div.content-sidebar", [
+      h("div.sidebar-map", [
+        map,
+        // Shrink to the inset, when the page offers that mode
+        h(ModeSwitchButton, { target: "content-inset", icon: "minimize" }),
+      ]),
+      assistantRegion,
+    ]);
   }
 
-  let sidebar = null;
-  if (hasSidebar) {
-    sidebar = h("div.content-sidebar", [mapRegion, assistantRegion]);
+  let insetRegion = null;
+  if (inset) {
+    insetRegion = h("div.content-inset-map", [
+      map,
+      // Grow the inset into the sidebar, when the page offers that mode
+      h(ModeSwitchButton, { target: "content-primary", icon: "maximize" }),
+    ]);
   }
 
   return h(
     "div.content-shell",
     {
       className: classNames(`mode-${mode}`, `scroll-${contentScroll}`, {
-        "has-sidebar": hasSidebar,
+        "has-sidebar": sidebar,
+        "has-inset": inset,
+        "full-width": fullWidth,
       }),
     },
     [
@@ -115,10 +135,33 @@ function ContentShell({
       ]),
       h("div.content-main", [
         h("div.content-panel-holder", content),
-        sidebar,
+        sidebarRegion,
+        insetRegion,
       ]),
     ]
   );
+}
+
+/** A small overlay button on the map that switches to another layout mode —
+ * the inset's "expand", the sidebar map's "shrink". Renders nothing when the
+ * page doesn't offer the target mode. */
+function ModeSwitchButton({
+  target,
+  icon,
+}: {
+  target: LayoutMode;
+  icon: string;
+}) {
+  const { modes } = useAtomValue(capabilitiesAtom);
+  const setMode = useSetAtom(layoutModeAtom);
+  if (!modes.includes(target)) return null;
+  return h(Button, {
+    className: "mode-switch-button",
+    icon,
+    small: true,
+    title: "Switch layout",
+    onClick: () => setMode(target),
+  });
 }
 
 /* -------------------------------------------------------------- split shell */

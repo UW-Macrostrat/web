@@ -85,6 +85,38 @@
   .content-panel-holder
     max-width: var(--hybrid-shell-width)
 
+// `content-full` / `content-inset`: the content takes the whole page width.
+.content-shell.full-width
+  --hybrid-shell-width: 100%
+
+  .content-header,
+  .content-main,
+  .content-panel-holder
+    max-width: none
+
+// The inset map floats over the top-right of full-width content.
+.content-main
+  position: relative
+
+.content-inset-map
+  position: absolute
+  top: 0.5em
+  right: 1.5em
+  width: 14em
+  height: 14em
+  z-index: 10
+  overflow: hidden
+  border-radius: var(--pz-radius-md, 6px)
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
+
+// Overlay affordance on either map for growing/shrinking it.
+.mode-switch-button
+  position: absolute
+  top: 0.4em
+  right: 0.4em
+  z-index: 11
+
 // `content-primary` puts the map and assistant in a column beside the list. The
 // list keeps the app content measure; the sidebar takes the room to its right,
 // which is what the overhang in the old document-flow version was faking.
