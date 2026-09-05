@@ -15,13 +15,18 @@
   background-color: var(--pz-background-color, var(--background-color))
   color: var(--pz-text-color, var(--text-color))
 
-// Both shells are viewport-locked. The content shell hands scrolling to the
-// data panel (as `InfiniteScrollPage` does); the map shell locks the viewport
-// itself via `MapAreaContainer`'s `fitViewport`.
-.shell-content
+// The map shells are viewport-locked, as is the content shell in its `panel`
+// scroll mode, where the data panel is the scroller (as `InfiniteScrollPage`
+// does). In `page` mode the content shell sits in normal document flow so the
+// page itself scrolls, with the scrollbar at the far right of the window.
+.shell-content.scroll-panel
   position: fixed
   inset: 0
   overflow: hidden
+
+.shell-content.scroll-page
+  position: relative
+  min-height: 100vh
 
 .shell-split,
 .shell-map

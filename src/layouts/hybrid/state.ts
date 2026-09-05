@@ -49,16 +49,34 @@ export const allLayoutModes: LayoutMode[] = [
   "map-only",
 ];
 
-const layoutModeLabels: Record<LayoutMode, string> = {
-  "content-only": "List",
-  "content-primary": "List and map",
-  "map-primary": "Map and list",
-  "map-only": "Map",
-};
-
-export function layoutModeLabel(mode: LayoutMode): string {
-  return layoutModeLabels[mode];
+/** Mode names, phrased around the page's content item ("List", "Column"). */
+export function layoutModeLabel(
+  mode: LayoutMode,
+  itemName: string = defaultItemName
+): string {
+  const lower = itemName.toLowerCase();
+  switch (mode) {
+    case "content-only":
+      return itemName;
+    case "content-primary":
+      return `${itemName} and map`;
+    case "map-primary":
+      return `Map and ${lower}`;
+    case "map-only":
+      return "Map";
+  }
 }
+
+const defaultItemName = "List";
+
+/** How the content shell scrolls.
+ *
+ *  - `panel` — viewport-locked; the content (a data panel) is its own scroll
+ *    region, as on the column list page. Floating toolbars pin to its top.
+ *  - `page`  — the document scrolls, the sidebar sticks, and the scrollbar sits
+ *    at the far right of the page: a whole-page feel for a single tall item
+ *    such as a stratigraphic column. */
+export type ContentScrollMode = "panel" | "page";
 
 export function shellForMode(mode: LayoutMode): LayoutShell {
   if (mode === "map-only") return "map";
@@ -82,12 +100,19 @@ export interface LayoutCapabilities {
   defaultMode: LayoutMode;
   /** Whether the page has assistant content at all. */
   hasAssistant: boolean;
+  /** What the content slot holds, for the mode switcher's labels — "List" by
+   * default, so a column page can read "Column and map". */
+  itemName: string;
+  /** Scrolling model of the content shell (see `ContentScrollMode`). */
+  contentScroll: ContentScrollMode;
 }
 
 export const defaultCapabilities: LayoutCapabilities = {
   modes: allLayoutModes,
   defaultMode: "content-primary",
   hasAssistant: true,
+  itemName: defaultItemName,
+  contentScroll: "panel",
 };
 
 export function buildCapabilities(
@@ -131,6 +156,10 @@ export const layoutModeAtom = atom(
 
 export const layoutShellAtom = atom<LayoutShell>((get) =>
   shellForMode(get(layoutModeAtom))
+);
+
+export const contentScrollAtom = atom<ContentScrollMode>(
+  (get) => get(capabilitiesAtom).contentScroll
 );
 
 /** Whether the assistant slot renders. A page-level capability rather than a

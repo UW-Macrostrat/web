@@ -13,7 +13,7 @@
  *    the content shell, which is a better home for it
  */
 
-import { Button, Menu, MenuItem, Popover } from "@blueprintjs/core";
+import { Button, Menu, MenuItem, PopoverNext } from "@blueprintjs/core";
 import { useAtom, useAtomValue } from "jotai";
 import type { ReactNode } from "react";
 
@@ -33,7 +33,7 @@ const modeIcons: Record<LayoutMode, string> = {
 };
 
 export function LayoutModeControl({ className = null }) {
-  const { modes } = useAtomValue(capabilitiesAtom);
+  const { modes, itemName } = useAtomValue(capabilitiesAtom);
   const [mode, setMode] = useAtom(layoutModeAtom);
 
   if (modes.length < 2) return null;
@@ -44,14 +44,14 @@ export function LayoutModeControl({ className = null }) {
       h(MenuItem, {
         key: m,
         icon: modeIcons[m],
-        text: layoutModeLabel(m),
+        text: layoutModeLabel(m, itemName),
         selected: mode === m,
         onClick: () => setMode(m),
       })
     )
   );
 
-  return h(Popover, {
+  return h(PopoverNext, {
     className,
     minimal: true,
     placement: "bottom-end",
@@ -67,7 +67,7 @@ export function LayoutModeControl({ className = null }) {
           icon: modeIcons[mode],
           rightIcon: "caret-down",
         },
-        h("span.mode-label", layoutModeLabel(mode))
+        h("span.mode-label", layoutModeLabel(mode, itemName))
       ),
   });
 }

@@ -8,7 +8,12 @@ import {
 } from "~/components/time-filter";
 
 interface CorrelationHashParams {
+  /** Line of section; the chart's columns are those it crosses. */
   section?: LineString | null;
+  /** An explicit, ordered column selection (`columns=1,2,3`) — the manual
+   * alternative to a line of section, and how a column page hands off to this
+   * one. Mutually exclusive with `section`. */
+  columns?: number[] | null;
   unit?: number;
   /** Shared time filter (`int_id`, `t_age`, `b_age`), see `~/components/time-filter` */
   time?: TimeFilterParams | null;
@@ -30,22 +35,38 @@ export function getCorrelationHashParams(): CorrelationHashParams {
     unit = Number(_unit);
   }
 
+  const columns = parseColumnIDs(hash.get("columns"));
   const time = parseTimeFilterParams(hash);
 
   return {
     section,
+    columns,
     unit,
     time,
   };
 }
 
+function parseColumnIDs(value: string | null): number[] | null {
+  if (value == null || value === "") return null;
+  const ids = value
+    .split(",")
+    .map((d) => parseInt(d, 10))
+    .filter((d) => Number.isFinite(d));
+  if (ids.length === 0) return null;
+  return ids;
+}
+
 export function setHashStringForCorrelation(state: CorrelationHashParams) {
-  const { section, unit, time = null } = state;
+  const { section, unit, time = null, columns = null } = state;
   let _section = section;
   if (_section != null && _section.coordinates.length < 2) {
     _section = null;
   }
-  if (_section == null && time == null) {
+  let _columns = columns;
+  if (_columns != null && _columns.length === 0) {
+    _columns = null;
+  }
+  if (_section == null && _columns == null && time == null) {
     return;
   }
   let _unit = unit;
@@ -53,8 +74,18 @@ export function setHashStringForCorrelation(state: CorrelationHashParams) {
     _unit = undefined;
   }
 
+  let sectionString: string | undefined = undefined;
+  if (_section != null) {
+    sectionString = stringifyLine(_section);
+  }
+  let columnsString: string | undefined = undefined;
+  if (_columns != null) {
+    columnsString = _columns.join(",");
+  }
+
   let hash = {
-    section: _section == null ? undefined : stringifyLine(_section),
+    section: sectionString,
+    columns: columnsString,
     unit: _unit,
     ...timeFilterToParams(time),
   };

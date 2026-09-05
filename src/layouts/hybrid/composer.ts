@@ -20,7 +20,13 @@ import type { ReactNode } from "react";
 import { onDemand } from "~/_utils";
 
 import h from "./composer.module.sass";
-import { hasMapPane, layoutModeAtom, layoutShellAtom, showAssistantAtom } from "./state";
+import {
+  contentScrollAtom,
+  hasMapPane,
+  layoutModeAtom,
+  layoutShellAtom,
+  showAssistantAtom,
+} from "./state";
 
 const MapShell = onDemand(() =>
   import("./map-shell.client").then((mod) => mod.MapShell)
@@ -34,6 +40,8 @@ export interface ShellProps {
    * `MapAreaContainer`'s floating navbar. */
   breadcrumbs?: ReactNode;
   controls?: ReactNode;
+  /** Second header row (active filters), at the content's width. */
+  filterBar?: ReactNode;
   map?: ReactNode;
   assistant?: ReactNode;
 }
@@ -63,6 +71,7 @@ function ContentShell({
   content,
   breadcrumbs,
   controls,
+  filterBar,
   map,
   assistant,
   mode,
@@ -72,6 +81,8 @@ function ContentShell({
   // the plain list page. The assistant rides in the sidebar alongside the map
   // rather than claiming a column of its own.
   const hasSidebar = hasMapPane(mode as any);
+  // `panel`: the content is the scroller (data panel); `page`: the document is.
+  const contentScroll = useAtomValue(contentScrollAtom);
 
   let mapRegion = null;
   let assistantRegion = null;
@@ -89,11 +100,18 @@ function ContentShell({
 
   return h(
     "div.content-shell",
-    { className: classNames(`mode-${mode}`, { "has-sidebar": hasSidebar }) },
+    {
+      className: classNames(`mode-${mode}`, `scroll-${contentScroll}`, {
+        "has-sidebar": hasSidebar,
+      }),
+    },
     [
       h("header.content-header", [
-        h("div.header-titling", breadcrumbs),
-        h("div.header-controls", controls),
+        h("div.header-row", [
+          h("div.header-titling", breadcrumbs),
+          h("div.header-controls", controls),
+        ]),
+        h.if(filterBar != null)("div.header-filters", filterBar),
       ]),
       h("div.content-main", [
         h("div.content-panel-holder", content),
@@ -116,6 +134,7 @@ function SplitShell({
   content,
   breadcrumbs,
   controls,
+  filterBar,
   map,
   assistant,
   showAssistant,
@@ -128,8 +147,11 @@ function SplitShell({
   return h("div.split-shell", [
     h("div.split-panel", [
       h("header.split-header", [
-        h("div.header-titling", breadcrumbs),
-        h("div.header-controls", controls),
+        h("div.header-row", [
+          h("div.header-titling", breadcrumbs),
+          h("div.header-controls", controls),
+        ]),
+        h.if(filterBar != null)("div.header-filters", filterBar),
       ]),
       h("div.split-list", content),
     ]),

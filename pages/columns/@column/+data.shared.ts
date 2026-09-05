@@ -33,6 +33,7 @@ export async function data(pageContext) {
   /** This is a hack to make sure that all requisite data is on the table. */
   const responses = await Promise.all([
     fetchProjectData(projectID ?? 14), // Default to project 14 if no project_id is provided
+    fetchAllProjects(),
     getData(
       "columns",
       { col_id, project_id: projectID, format: "json", response: "long" },
@@ -50,15 +51,53 @@ export async function data(pageContext) {
     ),
   ]);
 
-  const [project, columns, units]: [any, any, any] = responses;
+  const [project, allProjects, columns, units]: [any, any, any, any] =
+    responses;
 
   const columnInfo: ColumnSummary = assembleColumnSummary(columns[0], units);
   return {
     project,
     columnInfo,
+    // The column's own project plus any composite project that includes it
+    columnProjects: projectsForColumn(allProjects, columnInfo.project_id),
     linkPrefix,
     projectID,
   };
+}
+
+/** Every project definition, composites included (`members` lists the projects
+ * a composite is built from). */
+async function fetchAllProjects(): Promise<any[]> {
+  const res = await getAndUnwrap(`${apiV2Prefix}/defs/projects?all=true`);
+  return res ?? [];
+}
+
+export interface ColumnProject {
+  project_id: number;
+  project: string;
+  /** True for a composite project the column belongs to through one of its
+   * member projects (e.g. "Core columns" for a North America column). */
+  composite: boolean;
+}
+
+/** A column belongs to its own project and to every composite project whose
+ * members include that project. Own project first. */
+function projectsForColumn(
+  projects: any[],
+  projectID: number
+): ColumnProject[] {
+  const out: ColumnProject[] = [];
+  for (const p of projects) {
+    if (p.project_id === projectID) {
+      out.unshift({ project_id: p.project_id, project: p.project, composite: false });
+      continue;
+    }
+    const members: any[] = p.members ?? [];
+    if (members.some((m) => m?.id === projectID)) {
+      out.push({ project_id: p.project_id, project: p.project, composite: true });
+    }
+  }
+  return out;
 }
 
 async function getData(
