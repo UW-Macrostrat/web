@@ -54,12 +54,17 @@ export interface ViewStateURLSyncProps {
   bindings?: FilterURLBinding[];
   /** Param holding the sort list (`-key` = descending). `null` to not sync sorts. */
   sortParam?: string | null;
+  /** Delay (ms) before a view-state change is written to the URL, so typing
+   * in a search field doesn't rewrite the location on every keystroke. `0`
+   * writes at once. */
+  writeDelay?: number;
 }
 
 /** Renders nothing; syncs the enclosing data view's filters + sorts to the URL. */
 export function ViewStateURLSync({
   bindings = [],
   sortParam = "sort",
+  writeDelay = 300,
 }: ViewStateURLSyncProps) {
   const store = useStoreAPI();
   const activeFilters = useSelector((s: any) => s.activeFilters);
@@ -68,6 +73,13 @@ export function ViewStateURLSync({
   // The params string last reconciled in either direction — the discriminator
   // between "the URL changed under us" and "the view state changed".
   const lastSyncedRef = useRef<string | null>(null);
+  // A pending (debounced) write, cancelled by a newer change or an unmount
+  const pendingWriteRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (pendingWriteRef.current != null) clearTimeout(pendingWriteRef.current);
+    };
+  }, []);
 
   const ownedParams = useMemo(
     () => collectOwnedParams(bindings, sortParam),
@@ -113,10 +125,19 @@ export function ViewStateURLSync({
       lastSyncedRef.current = urlKey;
       return;
     }
-    // The view state is what changed — publish it.
+    // The view state is what changed — publish it, after a pause so a burst of
+    // keystrokes becomes one location write.
     lastSyncedRef.current = storeKey;
-    writeURL(fromStore);
-  }, [fromStore, fromURL, store, bindings, sortParam, writeURL]);
+    if (pendingWriteRef.current != null) clearTimeout(pendingWriteRef.current);
+    if (writeDelay <= 0) {
+      writeURL(fromStore);
+      return;
+    }
+    pendingWriteRef.current = setTimeout(() => {
+      pendingWriteRef.current = null;
+      writeURL(fromStore);
+    }, writeDelay);
+  }, [fromStore, fromURL, store, bindings, sortParam, writeURL, writeDelay]);
 
   return null;
 }

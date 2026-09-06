@@ -15,6 +15,13 @@
   background-color: var(--pz-background-color, var(--background-color))
   color: var(--pz-text-color, var(--text-color))
 
+  // Column maps (`@macrostrat/map-views` ≥ 1.1) read these when they mount, so
+  // every page on the frame highlights and focuses columns in the same colors.
+  --column-map-color: var(--pz-text-subtle-color, var(--text-subtle-color))
+  --column-map-hover-color: var(--pz-accent-color)
+  --column-map-selection-color: var(--pz-accent-color)
+  --column-map-focus-color: var(--pz-accent-secondary-color)
+
 // The map shells are viewport-locked, as is the content shell in its `panel`
 // scroll mode, where the data panel is the scroller (as `InfiniteScrollPage`
 // does). In `page` mode the content shell sits in normal document flow so the

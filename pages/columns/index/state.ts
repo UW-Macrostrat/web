@@ -6,6 +6,15 @@
  */
 
 import { atomWithSearchParam } from "~/_utils/url-atoms";
+import {
+  normalizeProjectFilter,
+  projectIDParam,
+  resolveProjectIDs,
+  serializeProjectFilter,
+  type ProjectDef,
+  type ProjectFilterValue,
+} from "~/components/project-filter";
+
 import { atom } from "jotai";
 import { atomWithStorage, unwrap } from "jotai/utils";
 import { debounce } from "underscore";
@@ -53,25 +62,32 @@ export type MapBounds = [[number, number], [number, number]];
 
 /* ------------------------------------------------------------ page inputs */
 
-export const projectIDAtom = atom<number | null>(null);
+/** The project scope of the *request*: numeric id(s) as the API takes them,
+ * comma-joined (`"1,7"`); `null` for the API's default set. */
+export const projectIDAtom = atom<string | null>(null);
 
-/** The shared project filter (`~/components/project-filter`) for this page:
- * reads the list's project scope and writes it to `?project_id=` as well, so
- * the choice is linkable and travels to the column and correlation pages. */
+/** The shared project filter (`~/components/project-filter`) for this page,
+ * as slugs. Writing it resolves the slugs to ids for the request (through the
+ * loaded project definitions) and mirrors them to `?project_id=`, so the
+ * choice is linkable and travels to the column and correlation pages. */
+export const projectSlugsAtom = atom<ProjectFilterValue>(null);
 const projectSearchParamAtom = atomWithSearchParam("project_id");
 export const projectFilterAtom = atom(
-  (get) => get(projectIDAtom),
-  (get, set, value: number | null) => {
-    set(projectIDAtom, value);
-    set(projectSearchParamAtom, value?.toString() ?? null);
+  (get) => get(projectSlugsAtom),
+  (get, set, value: ProjectFilterValue) => {
+    const slugs = normalizeProjectFilter(value);
+    set(projectSlugsAtom, slugs);
+    set(projectIDAtom, projectIDParam(resolveProjectIDs(get(projectsAtom), slugs)));
+    set(projectSearchParamAtom, serializeProjectFilter(slugs));
   }
 );
 export const initialDataAtom = atom<ColumnGroup[] | null>(null);
 export const linkPrefixAtom = atom<string>("/");
 
 /** Project definitions, loaded in `+data.ts` so a project section header has a
- * name on the first paint rather than a bare id. */
-export const projectsAtom = atom<{ project_id: number; project: string }[]>([]);
+ * name on the first paint rather than a bare id — and so the filter's slugs
+ * can be resolved to ids. */
+export const projectsAtom = atom<ProjectDef[]>([]);
 
 export const projectNamesAtom = atom<Map<number, string>>((get) => {
   const map = new Map<number, string>();
@@ -98,6 +114,15 @@ export const addFilterAtom = atom(null, (_, set, data: ColumnFilterDef) => {
 
 export const clearAllFiltersAtom = atom(null, (_get, set) => {
   set(columnFilterAtom, []);
+});
+
+/** Remove one lexicon facet (matched by type and identifier). */
+export const removeFilterAtom = atom(null, (_get, set, data: ColumnFilterDef) => {
+  set(columnFilterAtom, (value) =>
+    value.filter(
+      (d) => !(d.type === data.type && d.identifier === data.identifier)
+    )
+  );
 });
 
 const suggestedFiltersFetchAtom = atom(async (get) => {

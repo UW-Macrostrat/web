@@ -5,7 +5,9 @@ interface ColumnResponseShort {
   col_name: string;
   col_group: string;
   col_group_id: number | null;
-  project_id: number;
+  /** Numeric id(s), comma-joined for several (`"1,7"`). Omitted (or null)
+   * means the API's default set — the "Core columns" composite. */
+  project_id?: number | string | null;
   status_code: string;
   lat: number;
   lng: number;
@@ -19,12 +21,13 @@ interface ColumnResponseShort {
 export interface ColumnGroup {
   id: number;
   name: string;
-  project_id: number;
+  /** Omitted (or null) means every project — the API's `all=true` */
+  project_id?: number | null;
   columns: ColumnResponseShort[];
 }
 
-export async function getGroupedColumns(params: ColumnFilterOptions) {
-  const { data: columns, refs } = await fetchColumns(params);
+export async function getGroupedColumns(params: ColumnFilterOptions | null) {
+  const { data: columns, refs } = await fetchColumns(params ?? {});
 
   columns.sort((a, b) => a.col_id - b.col_id);
 
@@ -67,7 +70,8 @@ export async function getGroupedColumns(params: ColumnFilterOptions) {
 }
 
 export interface ColumnFilterOptions {
-  project_id: number;
+  /** Omitted (or null) means every project — the API's `all=true` */
+  project_id?: number | null;
   status_code?: string;
   empty?: boolean;
   strat_names?: number[];
@@ -78,12 +82,17 @@ export interface ColumnFilterOptions {
   nameFuzzyMatch?: string;
 }
 
-async function fetchColumns(opts: ColumnFilterOptions) {
+async function fetchColumns(opts: ColumnFilterOptions = {}) {
   const params = new URLSearchParams();
 
+  // No project (the shared project filter's default) means the API's default
+  // set, the "Core columns" composite — the same result as `all=true`.
   const { project_id } = opts;
-
-  params.append("project_id", project_id.toString());
+  if (project_id != null) {
+    params.append("project_id", project_id.toString());
+  } else {
+    params.append("all", "true");
+  }
 
   if (opts.status_code) {
     params.append("status_code", opts.status_code);

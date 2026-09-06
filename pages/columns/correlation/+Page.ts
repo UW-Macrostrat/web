@@ -40,15 +40,19 @@ import {
   SortableItems,
 } from "@macrostrat/data-components";
 import {
-  ColumnCorrelationMap,
-  ColumnCorrelationProvider,
   CorrelationChart,
   MacrostratColumnStateProvider,
   UnitDetailsPanel,
-  useColumnMapLink,
-  useCorrelationMapStore,
   type ColumnHeaderProps,
 } from "@macrostrat/column-views";
+import {
+  ColumnCorrelationMap,
+  ColumnCorrelationProvider,
+  useColumnMapLink,
+  useCorrelationMapStore,
+  useFocusedColumns,
+  useSelectionMode,
+} from "@macrostrat/map-views";
 import { useMapStyleOperator } from "@macrostrat/mapbox-react";
 import { atom, useAtomValue } from "jotai";
 import {
@@ -62,7 +66,6 @@ import {
 } from "~/layouts/hybrid";
 import {
   ageExtentOfUnits,
-  timeFilterToParams,
   TimeFilterPanel,
   TimeFilterProvider,
   TimeFilterTag,
@@ -72,11 +75,13 @@ import {
   type TimeFilterParams,
 } from "~/components/time-filter";
 import {
-  PROJECT_FILTER_KEY,
+  projectIDParam,
   ProjectFilterControl,
   ProjectFilterProvider,
   ProjectFilterTag,
+  useProjectIDs,
   type ProjectFilterAtom,
+  type ProjectFilterValue,
 } from "~/components/project-filter";
 
 /** The page's filters, in the URL hash beside `section` / `columns` / `unit`.
@@ -84,9 +89,8 @@ import {
 const correlationTimeFilterAtom: TimeFilterAtom = atom<TimeFilterParams | null>(
   null
 );
-const correlationProjectFilterAtom: ProjectFilterAtom = atom<number | null>(
-  null
-);
+const correlationProjectFilterAtom: ProjectFilterAtom =
+  atom<ProjectFilterValue>(null);
 
 /** The chart is wide, so it takes the page: a small inset map by default, or
  * the map and details as a sidebar. */
@@ -153,7 +157,11 @@ export function Page() {
           capabilities: correlationCapabilities,
           initialAtoms,
           wrap,
-          actions: h([h(SelectionModeControl), h(CorrelationSettingsButton)]),
+          actions: h([
+            h(ProjectFilterControl),
+            h(SelectionModeControl),
+            h(CorrelationSettingsButton),
+          ]),
           filterBar: h([h(ProjectFilterTag), h(TimeFilterTag)]),
           content: h(CorrelationChartPane),
           map: h(CorrelationMapPane),
@@ -168,7 +176,12 @@ export function Page() {
  * footprints re-fetch when the project changes (a prop the store's effects
  * track); the selection itself is the store's from then on. */
 function CorrelationStoreProvider({ section, columns, children }) {
-  const projectID = useAtomValue(correlationProjectFilterAtom);
+  // Slugs resolved to the ids the API takes; `undefined` while resolving
+  const projectIDs = useProjectIDs();
+  let projectID: any = undefined;
+  if (projectIDs != null) {
+    projectID = projectIDParam(projectIDs);
+  }
   return h(
     ColumnCorrelationProvider,
     {
@@ -176,7 +189,7 @@ function CorrelationStoreProvider({ section, columns, children }) {
       // An explicit column list (e.g. handed over from a column page) starts
       // the map in manual selection mode: columns are toggled by clicking.
       selectedColumns: columns,
-      projectID: projectID ?? undefined,
+      projectID,
     },
     children
   );
@@ -220,14 +233,15 @@ function MapResizeOnToggle({ trigger }: { trigger: string }) {
 
 /* ---------------------------------------------------------------- the chart */
 
-/** The focused columns' ids, joined — the stable key for anything that should
- * follow the *selection* and not every recomputation of the store. */
+/** The focused columns' ids. `useFocusedColumns` recomputes only when the
+ * footprints, the selection or the line change, so this is a stable key for
+ * anything that should follow the selection. */
 function useFocusedColumnIDs(): number[] {
-  const focusedColumns = useCorrelationMapStore(
-    (state) => state.focusedColumns
+  const focusedColumns = useFocusedColumns();
+  return useMemo(
+    () => focusedColumns.map((c) => c.properties.col_id),
+    [focusedColumns]
   );
-  const key = focusedColumns.map((c) => c.properties.col_id).join(",");
-  return useMemo(() => focusedColumns.map((c) => c.properties.col_id), [key]);
 }
 
 function CorrelationChartPane() {
@@ -248,7 +262,7 @@ function CorrelationDiagramWrapper() {
     (state) => state.selectedUnitID
   );
   const timeFilter = useAtomValue(correlationTimeFilterAtom);
-  const projectID = useAtomValue(correlationProjectFilterAtom);
+  const projectFilter = useAtomValue(correlationProjectFilterAtom);
 
   useEffect(() => {
     // A manual selection is linkable as `columns=`; a line of section as
@@ -258,9 +272,9 @@ function CorrelationDiagramWrapper() {
       columns: selectedColumns,
       unit: selectedUnitID,
       time: timeFilter,
-      project_id: projectID,
+      project_id: projectFilter,
     });
-  }, [focusedLine, selectedColumns, selectedUnitID, timeFilter, projectID]);
+  }, [focusedLine, selectedColumns, selectedUnitID, timeFilter, projectFilter]);
 
   // selected unit management
   const onUnitSelected = useCorrelationDiagramStore(
@@ -402,7 +416,7 @@ function UnitDetailsCard({ unit }) {
  * removing from a line-of-section selection converts it to a manual one, so
  * the list notes which mode is in play. */
 function ColumnSelectionList() {
-  const selectionMode = useCorrelationMapStore((s) => s.selectionMode);
+  const selectionMode = useSelectionMode();
   const ids = useFocusedColumnIDs();
   const setSelectedColumns = useCorrelationMapStore(
     (s) => s.setSelectedColumns
@@ -472,31 +486,11 @@ function ColumnSelectionLabel({ colID }: { colID: number }) {
 /* ------------------------------------------------------- header controls */
 
 /** Explicit switch between drawing a line of section and picking columns by
- * hand. To manual, the current columns seed the list. Back to line clears the
- * selection for a new line to be drawn — by reloading the page without one,
- * since the installed store has no action for that transition (it lands with
- * the atom-based store in map-views) and re-mounting its provider re-uses the
- * scope it hydrated on first mount. */
+ * hand. To manual, the current columns seed the list; back to line clears the
+ * selection so a new line can be drawn. */
 function SelectionModeControl() {
-  const selectionMode = useCorrelationMapStore((s) => s.selectionMode);
-  const ids = useFocusedColumnIDs();
-  const setSelectedColumns = useCorrelationMapStore(
-    (s) => s.setSelectedColumns
-  );
-  const timeFilter = useAtomValue(correlationTimeFilterAtom);
-  const projectID = useAtomValue(correlationProjectFilterAtom);
-
-  const resetToLineMode = () => {
-    const params = new URLSearchParams();
-    const time = timeFilterToParams(timeFilter);
-    for (const [key, value] of Object.entries(time)) {
-      if (value != null) params.set(key, value);
-    }
-    if (projectID != null) params.set(PROJECT_FILTER_KEY, projectID.toString());
-    let hash = params.toString();
-    if (hash !== "") hash = `#${hash}`;
-    window.location.assign(`${window.location.pathname}${hash}`);
-  };
+  const selectionMode = useSelectionMode();
+  const setSelectionMode = useCorrelationMapStore((s) => s.setSelectionMode);
 
   return h(SegmentedControl, {
     small: true,
@@ -506,12 +500,7 @@ function SelectionModeControl() {
     ],
     value: selectionMode,
     onValueChange(value) {
-      if (value === selectionMode) return;
-      if (value === "manual") {
-        setSelectedColumns(ids);
-      } else {
-        resetToLineMode();
-      }
+      setSelectionMode(value as "line" | "manual");
     },
   });
 }
@@ -548,7 +537,6 @@ function CorrelationSettings() {
         applySettings({ colorizeUnits: !colorize });
       },
     }),
-    h(ProjectFilterControl),
     h("h3", "Time filter"),
     h(TimeFilterPanel),
   ]);

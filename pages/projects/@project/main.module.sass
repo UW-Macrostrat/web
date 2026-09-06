@@ -1,0 +1,37 @@
+.project-overview
+  display: flex
+  flex-direction: column
+  gap: 1.25em
+  max-width: 48em
+
+  .description
+    font-size: 1.05em
+    line-height: 1.5
+    margin: 0
+
+.project-actions
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.5em
+
+.project-stats
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(14em, 1fr))
+  gap: 0.25em 2em
+  padding: 0.75em 1em
+  border-radius: var(--pz-radius-md, 6px)
+  background-color: var(--pz-panel-secondary-background-color, var(--panel-secondary-background-color))
+
+.project-members
+  h3
+    margin: 0 0 0.5em
+    color: var(--pz-secondary-color, var(--secondary-color))
+
+  ul
+    margin: 0
+    padding-left: 1.2em
+
+  li
+    margin-bottom: 0.25em

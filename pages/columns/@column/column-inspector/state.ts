@@ -24,8 +24,10 @@ import {
   type TimeFilterAtom,
 } from "~/components/time-filter";
 import {
-  ProjectFilterControl,
+  parseProjectFilter,
+  serializeProjectFilter,
   type ProjectFilterAtom,
+  type ProjectFilterValue,
 } from "~/components/project-filter";
 
 export function useColumnState(columnInfo) {
@@ -124,8 +126,9 @@ interface ColumnHashState {
   t_age?: number;
   b_age?: number;
   age?: number;
-  /** Project filter: which projects' columns the navigation map shows */
-  project_id?: number;
+  /** Project filter: which projects' columns the navigation map shows
+   * (slugs, comma-joined) */
+  project_id?: string;
   t_pos?: number;
   b_pos?: number;
   axis?: string;
@@ -185,9 +188,10 @@ function getStateFromHash(): ColumnHashState {
   );
   state.axis = validateAxis(params.get("axis"));
   state.unit = validateInt(params.get("unit"));
-  for (const key of ["int_id", "t_int_id", "b_int_id", "project_id"]) {
+  for (const key of ["int_id", "t_int_id", "b_int_id"]) {
     state[key] = validateInt(params.get(key));
   }
+  state.project_id = params.get("project_id") ?? undefined;
   for (const key of ["t_age", "b_age", "age", "t_pos", "b_pos", "scale"]) {
     state[key] = validateNumber(params.get(key));
   }
@@ -286,9 +290,12 @@ export const columnTimeFilterAtom: TimeFilterAtom = atom(
 
 /** The page's project filter, in the hash beside the time filter. */
 export const columnProjectFilterAtom: ProjectFilterAtom = atom(
-  (get) => get(hashStateAtom).project_id ?? null,
-  (get, set, value) => {
-    set(hashStateAtom, (prev) => ({ ...prev, project_id: value ?? undefined }));
+  (get) => parseProjectFilter(get(hashStateAtom).project_id),
+  (get, set, value: ProjectFilterValue) => {
+    set(hashStateAtom, (prev) => ({
+      ...prev,
+      project_id: serializeProjectFilter(value) ?? undefined,
+    }));
   }
 );
 
@@ -393,7 +400,6 @@ export function ColumnSettingsPanel() {
     h("h3", "Settings"),
     h(AxisTypeControl),
     h(FacetControl),
-    h(ProjectFilterControl),
     h(TimeFilterPanel, { showIntervalPicker: false }),
     h.if(isHeightAxis)(RangeControl, {
       label: heightAxisLabel + " range",

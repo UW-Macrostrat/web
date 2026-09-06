@@ -41,9 +41,11 @@ import {
 } from "./state";
 import {
   PROJECT_FILTER_KEY,
+  projectIDParam,
+  ProjectFilterControl,
   ProjectFilterProvider,
   ProjectFilterTag,
-  useProjectFilter,
+  useProjectIDs,
 } from "~/components/project-filter";
 import {
   ageExtentOfUnits,
@@ -105,7 +107,8 @@ function ColumnPageFrame({
     className: "column-page",
     capabilities: columnPageCapabilities,
     initialAtoms,
-    actions: h(ColumnSettingsButton),
+    // The project dropdown is a first-class control, beside the settings
+    actions: h([h(ProjectFilterControl), h(ColumnSettingsButton)]),
     // Active filters sit in a second header row above the column
     filterBar: h([h(ProjectFilterTag), h(TimeFilterTag)]),
     content: h(ColumnContentPane, { columnInfo }),
@@ -221,9 +224,13 @@ function ColumnContentPane({ columnInfo }) {
 
 function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   const modifierHeld = useModifierKeyRef();
-  // The shared project filter wins over the route's project when set
-  const { projectID: filterProject } = useProjectFilter();
-  const mapProject = filterProject ?? projectID;
+  // The shared project filter (resolved to ids) wins over the route's project;
+  // while its slugs are still resolving the map keeps the route's project.
+  const filterProjectIDs = useProjectIDs();
+  let mapProject = projectID;
+  if (filterProjectIDs !== undefined) {
+    mapProject = projectIDParam(filterProjectIDs) ?? projectID;
+  }
 
   const onSelectColumn = useCallback(
     (col_id: number | null) => {
@@ -285,12 +292,8 @@ function correlationHref(colIDs: number[]): string {
   return `/columns/correlation#${parts.join("&")}`;
 }
 
-/** A full page load rather than a client-side route: the installed correlation
- * map store hydrates its scope once per document, so a second client-side
- * visit would show the previous visit's selection. Drop once map-views ships
- * the per-provider store. */
 function openCorrelation(colIDs: number[]) {
-  window.location.assign(correlationHref(colIDs));
+  navigate(correlationHref(colIDs));
 }
 
 /* ----------------------------------------------------------- the assistant */
@@ -329,8 +332,6 @@ function ColumnInfoPanel({ data, project, columnProjects }) {
         icon: "comparison",
         text: "Correlate with other columns",
         href: correlationHref([data.col_id]),
-        // Full page load; see `openCorrelation`
-        rel: "external",
       }),
     ]),
   ]);
@@ -349,13 +350,14 @@ function ColumnBasicInfo({
   // The column's own project, plus composites that include it (e.g. a North
   // America column is also in "Core columns"). Falls back to the one project
   // the page loaded when the full list isn't available.
-  let projects: Array<{ project_id: number; project: string }> =
+  let projects: Array<{ project_id: number; project: string; slug?: string }> =
     columnProjects ?? [];
   if (projects.length === 0) {
     projects = [
       {
         project_id: data.project_id,
         project: project?.project ?? `Project ${data.project_id}`,
+        slug: project?.slug,
       },
     ];
   }
@@ -376,7 +378,12 @@ function ColumnBasicInfo({
         "div.project-list",
         projects.map((p) =>
           h("div.project-item", { key: p.project_id }, [
-            h("a.field-link", { href: `/projects/${p.project_id}` }, p.project),
+            // Slugs where we have them: the forward-looking URL form
+            h(
+              "a.field-link",
+              { href: `/projects/${p.slug ?? p.project_id}` },
+              p.project
+            ),
             h(Identifier, { id: p.project_id }),
           ])
         )

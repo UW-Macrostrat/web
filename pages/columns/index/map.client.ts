@@ -21,7 +21,7 @@ import h from "@macrostrat/hyper";
 import {
   ColumnNavigationMap,
   ColumnsNavigationLayer,
-} from "@macrostrat/column-views";
+} from "@macrostrat/map-views";
 import {
   MacrostratDataProvider,
   useMacrostratColumns,
@@ -89,9 +89,11 @@ function ColumnMapSwitch({ projectID }) {
  * In `map-only` there is no list to agree with, so the map falls back to the
  * server-side result. (This is why map-only previously drew nothing at all.)
  */
-function useMapColumns(projectID: number) {
+/** `projectID` is the request's project argument as the API takes it — numeric
+ * id(s), comma-joined — or null for the default set. */
+function useMapColumns(projectID: string | null) {
   const inProcess = useAtomValue(showInProcessAtom);
-  const footprints = useMacrostratColumns(projectID, inProcess) ?? [];
+  const footprints = useMacrostratColumns(projectID as any, inProcess) ?? [];
   const mode = useAtomValue(layoutModeAtom);
   const visibleRows = useAtomValue(visibleRowsAtom);
   const allRows = useAtomValue(allRowsAtom);

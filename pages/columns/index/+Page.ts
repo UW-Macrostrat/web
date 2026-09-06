@@ -12,7 +12,6 @@ import {
   Button,
   ButtonGroup,
   Icon,
-  Popover,
   Spinner,
   Switch,
   Tag,
@@ -20,6 +19,7 @@ import {
 import {
   DataPanel,
   DataPanelToolbarStyle,
+  type TableFilter,
   SelectionInteractionStyle,
   createLocalProvider,
   ctx,
@@ -49,12 +49,15 @@ import { onDemand } from "~/_utils";
 
 import {
   columnTableFilters,
+  columnURLBindings,
   inMapAreaFilter,
   IN_MAP_AREA_FILTER_ID,
   SEARCH_FILTER_ID,
   onlySelectedFilter,
   ONLY_SELECTED_FILTER_ID,
 } from "./filters";
+import { initialViewStateFromURL } from "~/components";
+import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   addFilterAtom,
   allRowsAtom,
@@ -69,6 +72,7 @@ import {
   mapBoundsAtom,
   projectIDAtom,
   projectFilterAtom,
+  projectSlugsAtom,
   projectsAtom,
   routeForFilterKey,
   selectColumnAtom,
@@ -171,23 +175,26 @@ const columnSpec = [
 
 export function Page({ linkPrefix = "/" }) {
   const data = useData();
-  const { project, allColumnGroups, projects } = data;
-  // Match the id `+data.ts` fetched with — defaulting to something else meant
+  const { allColumnGroups, projects, projectSlugs } = data;
+  // Match what `+data.ts` fetched with — defaulting to something else meant
   // the client immediately refetched the list with different parameters. `null`
-  // is every project (the shared project filter's default).
-  const projectID = project?.project_id ?? data.project_id ?? null;
+  // is the API's default set (the shared project filter's default).
+  const projectID = data.project_id ?? null;
 
   return h(
     ProjectFilterProvider,
-    { atom: projectFilterAtom },
+    { atom: projectFilterAtom, projects },
     h(HybridPage, {
       capabilities: { defaultMode: "content-primary" },
       initialAtoms: [
         [projectIDAtom, projectID],
+        [projectSlugsAtom, projectSlugs ?? null],
         [initialDataAtom, allColumnGroups],
         [linkPrefixAtom, linkPrefix],
         [projectsAtom, projects ?? []],
       ],
+      // Selected projects show as tags in the header row (the dropdown that
+      // picks them sits in the panel toolbar)
       filterBar: h(ProjectFilterTag),
       content: h(ColumnList),
       map: h(ColumnListMapSlot),
@@ -229,6 +236,14 @@ function ColumnList() {
 
   const refreshToken = `${rows.length}`;
 
+  // The search text is read from `?q=` once, when the page loads, and applied
+  // at store creation so the first render is the linked view. From then on the
+  // URL only follows the state (`SearchURLWriter`); it is never read back.
+  const initialView = useMemo(
+    () => initialViewStateFromURL(columnURLBindings, { sortParam: null }),
+    []
+  );
+
   if (isLoading && rows.length === 0) {
     return h("div.list-loading", h(Spinner));
   }
@@ -241,15 +256,20 @@ function ColumnList() {
       itemLabel: "column",
       provider,
       refreshToken,
+      initialFilters: initialView.initialFilters,
+      // Typing shouldn't refilter on every keystroke
+      filterDebounce: 200,
       pageSize: PAGE_SIZE,
       autoLoadPages: AUTO_LOAD_PAGES,
       columnSpec: columnSpec as any,
-      filters: columnTableFilters,
+      // The library's Filter menu carries the row-local filters and, as an
+      // inline section, the request-changing "Source" facets.
+      filters: [...columnTableFilters, sourceFilter],
       itemComponent: ColumnRowCard,
       scrollBody: ColumnScrollBody,
-      toolbar: h(SourceFacetsButton),
-      // The panel is a bounded scroller in both shells, so the floating toolbar
-      // pins to the top of the list exactly as it does on the ingestion page.
+      // The project dropdown sits in the panel's own toolbar, beside the
+      // built-in search and Filter / Sort controls, as the ingestion list does.
+      toolbar: h(ProjectFilterControl),
       toolbarStyle: DataPanelToolbarStyle.FLOATING,
       statusBar: false,
       // Modal selection, the same configuration the map-ingestion list uses: the
@@ -263,6 +283,7 @@ function ColumnList() {
       h(SelectionPushBridge, { key: "selection" }),
       h(LexSuggestBridge, { key: "lex-suggest" }),
       h(SelectionModeBridge, { key: "selection-mode" }),
+      h(SearchURLWriter, { key: "url" }),
     ]
   );
 }
@@ -357,6 +378,25 @@ function SelectionPushBridge() {
     }
     setSelection(rowIndicesToRegions(indices));
   }, [selectedIDs, rows, setSelection]);
+
+  return null;
+}
+
+const searchParamAtom = atomWithSearchParam("q");
+
+/** Writes the search text to `?q=`, one way and after a pause, so a burst of
+ * keystrokes is one location change and the URL never feeds back into state. */
+function SearchURLWriter() {
+  const activeFilters = useSelector((state) => state.activeFilters);
+  const setParam = useSetAtom(searchParamAtom);
+  const text: string = (activeFilters?.get(SEARCH_FILTER_ID)?.state?.text ?? "").trim();
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setParam(text === "" ? null : text);
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [text, setParam]);
 
   return null;
 }
@@ -465,12 +505,19 @@ function ColumnRowCard({ data }) {
     selectColumn(col_id, { additive: additive || selectionMode, range });
   };
 
-  return h("div.column-row", { className: classNames({ selected }), onClick }, [
-    h(
+  // In selection mode a click selects and nothing navigates — so the name is
+  // plain text there, and a real link (middle-click, copy) otherwise.
+  let name = h("span.col-name", col_name);
+  if (!selectionMode) {
+    name = h(
       "a.col-name",
       { href: `${linkPrefix}columns/${col_id}`, onClick: stopPropagation },
       col_name
-    ),
+    );
+  }
+
+  return h("div.column-row", { className: classNames({ selected }), onClick }, [
+    name,
     statusTag,
     packagesTag,
     unitsTag,
@@ -503,49 +550,26 @@ function SelectionModeBridge() {
 /* ------------------------------------------------------------ source facets */
 
 /** The facets that change the *request* rather than filtering loaded rows —
- * empty / in-process columns, and the lexicon facets. They can't be
- * `TableFilter`s (those are row predicates), and the panel's toolbar is a fixed
- * 40px bar, so they collapse behind one button instead of a row of switches.
- * Everything row-local lives in the library's own Filter menu. */
-function SourceFacetsButton() {
-  const filters = useAtomValue(columnFilterAtom);
-  const showEmpty = useAtomValue(showEmptyAtom);
-  const showInProcess = useAtomValue(showInProcessAtom);
-
-  const activeCount =
-    filters.length + (showEmpty ? 0 : 1) + (showInProcess ? 1 : 0);
-
-  let label = "Source";
-  if (activeCount > 0) {
-    label = `Source (${activeCount})`;
-  }
-
-  return h(Popover, {
-    minimal: true,
-    placement: "bottom-start",
-    content: h(SourceFacetsPanel),
-    renderTarget: ({ isOpen, ...targetProps }) =>
-      h(
-        Button,
-        {
-          ...targetProps,
-          minimal: true,
-          small: true,
-          active: isOpen,
-          icon: "database",
-          rightIcon: "caret-down",
-        },
-        label
-      ),
-  });
-}
+ * the project, empty / in-process columns, and the lexicon facets. They live
+ * in the library's Filter menu as one inline section ("Source"), beside the
+ * row-local filters, so there is a single place to narrow the list. The
+ * `TableFilter` is a carrier for the form: its predicate passes everything,
+ * and the form drives the page's request atoms directly. */
+const sourceFilter: TableFilter<ColumnRow, any> = {
+  id: "source",
+  name: "Source",
+  icon: "database",
+  presentation: "menu-inline",
+  filterForm: SourceFacetsPanel,
+  describeState: () => null,
+  predicate: () => true,
+};
 
 function SourceFacetsPanel() {
   const [showEmpty, setShowEmpty] = useAtom(showEmptyAtom);
   const [showInProcess, setShowInProcess] = useAtom(showInProcessAtom);
 
   return h("div.source-facets", [
-    h(ProjectFilterControl),
     h(Switch, {
       checked: showEmpty,
       label: "Show empty columns",

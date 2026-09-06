@@ -138,6 +138,8 @@ export const defaultCapabilities: LayoutCapabilities = {
   defaultMode: "content-primary",
   hasAssistant: true,
   itemName: defaultItemName,
+  // A list page's data panel is its own scroller (the toolbar stays put by
+  // construction); a single tall item opts into `page`.
   contentScroll: "panel",
 };
 

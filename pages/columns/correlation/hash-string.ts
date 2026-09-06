@@ -6,7 +6,12 @@ import {
   timeFilterToParams,
   type TimeFilterParams,
 } from "~/components/time-filter";
-import { parseProjectID, PROJECT_FILTER_KEY } from "~/components/project-filter";
+import {
+  parseProjectFilter,
+  PROJECT_FILTER_KEY,
+  serializeProjectFilter,
+  type ProjectFilterValue,
+} from "~/components/project-filter";
 
 interface CorrelationHashParams {
   /** Line of section; the chart's columns are those it crosses. */
@@ -18,8 +23,8 @@ interface CorrelationHashParams {
   unit?: number;
   /** Shared time filter (`int_id`, `t_age`, `b_age`), see `~/components/time-filter` */
   time?: TimeFilterParams | null;
-  /** Shared project filter, see `~/components/project-filter` */
-  project_id?: number | null;
+  /** Shared project filter (slugs), see `~/components/project-filter` */
+  project_id?: ProjectFilterValue;
 }
 
 export function getCorrelationHashParams(): CorrelationHashParams {
@@ -40,7 +45,7 @@ export function getCorrelationHashParams(): CorrelationHashParams {
 
   const columns = parseColumnIDs(hash.get("columns"));
   const time = parseTimeFilterParams(hash);
-  const project_id = parseProjectID(hash.get(PROJECT_FILTER_KEY));
+  const project_id = parseProjectFilter(hash.get(PROJECT_FILTER_KEY));
 
   return {
     section,
@@ -93,7 +98,7 @@ export function setHashStringForCorrelation(state: CorrelationHashParams) {
     columns: columnsString,
     unit: _unit,
     ...timeFilterToParams(time),
-    [PROJECT_FILTER_KEY]: project_id?.toString(),
+    [PROJECT_FILTER_KEY]: serializeProjectFilter(project_id) ?? undefined,
   };
   setHashString(hash);
 }

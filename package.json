@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^6.14.0",
+    "@blueprintjs/icons": "^6.13.0",
     "@blueprintjs/select": "^6.2.0",
     "@blueprintjs/table": "^6.1.0",
     "@corelle/svg-map-layers": "^1.0.0",
@@ -81,6 +82,7 @@
     "@macrostrat/hyper": "^3.1.1",
     "@macrostrat/map-interface": "^2.4.0",
     "@macrostrat/map-styles": "^2.2.7",
+    "@macrostrat/map-views": "^1.1.0",
     "@macrostrat/mapbox-react": "^3.4.0",
     "@macrostrat/mapbox-utils": "^1.8.0",
     "@macrostrat/scoped-store": "^1.1.0",
@@ -167,8 +169,5 @@
   "prettier": {
     "proseWrap": "always"
   },
-  "packageManager": "yarn@4.12.0",
-  "resolutions": {
-    "zustand-computed": "2.1.0"
-  }
+  "packageManager": "yarn@4.12.0"
 }

@@ -74,6 +74,7 @@ async function fetchAllProjects(): Promise<any[]> {
 
 export interface ColumnProject {
   project_id: number;
+  slug?: string;
   project: string;
   /** True for a composite project the column belongs to through one of its
    * member projects (e.g. "Core columns" for a North America column). */
@@ -88,13 +89,14 @@ function projectsForColumn(
 ): ColumnProject[] {
   const out: ColumnProject[] = [];
   for (const p of projects) {
+    const entry = { project_id: p.project_id, slug: p.slug, project: p.project };
     if (p.project_id === projectID) {
-      out.unshift({ project_id: p.project_id, project: p.project, composite: false });
+      out.unshift({ ...entry, composite: false });
       continue;
     }
     const members: any[] = p.members ?? [];
     if (members.some((m) => m?.id === projectID)) {
-      out.push({ project_id: p.project_id, project: p.project, composite: true });
+      out.push({ ...entry, composite: true });
     }
   }
   return out;

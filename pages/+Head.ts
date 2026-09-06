@@ -42,6 +42,14 @@ export default function Head() {
     h("meta", { name: "description", content: "Macrostrat" }),
     // Disable darkreader in favor of native dark mode
     h("meta", { name: "darkreader-lock" }),
+    // Paint the dark background before the stylesheets arrive. The theme class
+    // itself is set by the inline script in +bodyHtmlBegin.ts; the color mirrors
+    // $dark-background in @macrostrat/style-system.
+    h("style", {
+      dangerouslySetInnerHTML: {
+        __html: "body.bp6-dark{color-scheme:dark;background-color:#141a1e}",
+      },
+    }),
     h("script", {
       type: "text/javascript",
       dangerouslySetInnerHTML: {

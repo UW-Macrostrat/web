@@ -25,8 +25,9 @@ function ProjectItem({ data, pictures }) {
   // check if has picture
   const hasPicture = pictures[data.project_id] != null;
 
-  const { project_id, project, descrip } = data;
-  const href = `/projects/${project_id}`;
+  const { project_id, project, descrip, slug } = data;
+  // Slugs in links where we have them — the forward-looking URL form
+  const href = `/projects/${slug ?? project_id}`;
   return h(
     LinkCard,
     { href, title: project },
