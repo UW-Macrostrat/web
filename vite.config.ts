@@ -4,6 +4,7 @@ import vike from "vike/plugin";
 import { defineConfig } from "vite";
 import path from "node:path";
 import { readFileSync } from "node:fs";
+import { cp } from "node:fs/promises";
 import textToolchain from "./packages/text-toolchain/src";
 import { cjsInterop } from "vite-plugin-cjs-interop";
 import hyperStyles from "@macrostrat/vite-plugin-hyperstyles";
@@ -45,7 +46,7 @@ export default defineConfig({
       contentDir: path.resolve(__dirname, "content"),
       wikiPrefix: "/docs",
     }),
-    cesium({
+    cesiumPlugin({
       cesiumBuildPath,
       cesiumBuildRootPath: cesiumRoot,
     }),
@@ -76,6 +77,43 @@ export default defineConfig({
     },
   },
 });
+
+/** `vite-plugin-cesium` copies Cesium's runtime assets to `build.outDir` as it was
+ * defined when its `config` hook ran, which is the default `dist` – Vike only sets
+ * the per-environment output directories (`dist/client`, `dist/server`) later on.
+ * The production server serves static files from `dist/client`, so `/cesium/*` ends
+ * up 404ing there even though the dev server (which serves Cesium from a middleware)
+ * works fine. Redo the copy against the actual client output directory instead.
+ */
+function cesiumPlugin(options) {
+  const plugin = cesium(options);
+  const { cesiumBuildPath } = options;
+
+  let clientOutDir = path.resolve(__dirname, "dist/client");
+
+  return {
+    ...plugin,
+    configResolved(config) {
+      const env = config.environments?.client ?? config;
+      clientOutDir = path.resolve(config.root ?? __dirname, env.build.outDir);
+    },
+    async closeBundle() {
+      // Only the client build ships static assets
+      if (this.environment != null && this.environment.name !== "client")
+        return;
+      const dest = path.join(clientOutDir, "cesium");
+      for (const dir of ["Assets", "ThirdParty", "Workers", "Widgets"]) {
+        await cp(path.join(cesiumBuildPath, dir), path.join(dest, dir), {
+          recursive: true,
+        });
+      }
+      await cp(
+        path.join(cesiumBuildPath, "Cesium.js"),
+        path.join(dest, "Cesium.js")
+      );
+    },
+  };
+}
 
 function getPackageJSONContents(packageJSONPath: string) {
   return JSON.parse(
