@@ -2,6 +2,7 @@ import mdx from "@mdx-js/rollup";
 import wikiLinks from "remark-wiki-link";
 import frontmatter from "remark-frontmatter";
 import gfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 import callouts from "./remark-callouts";
 import slugify from "@sindresorhus/slugify";
 import { join } from "path";
@@ -44,6 +45,9 @@ export default function viteTextToolchain({
       gfm,
       callouts,
     ],
+    // Heading ids, so pages can link to their own sections (and the docs
+    // sidebar can list them).
+    rehypePlugins: [rehypeSlug],
     include,
     // Extension = capability. `.md` is plain markdown (GFM + wikilinks +
     // callouts) and never fails on a stray `<` or `{`; `.mdx` may use JSX.

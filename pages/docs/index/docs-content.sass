@@ -42,3 +42,12 @@
 
   input[type="checkbox"][disabled]
     margin-right: 0.4em
+
+// Wide content scrolls inside the article; the page never scrolls sideways.
+.docs-content
+  overflow-wrap: break-word
+  pre
+    overflow-x: auto
+    max-width: 100%
+  img, video, svg
+    max-width: 100%
