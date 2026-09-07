@@ -34,3 +34,7 @@ docker-compose.yaml
 macrostrat_staging_context.json
 
 .vite
+
+# Documentation vault: assembled by scripts/assemble-docs.sh, not tracked here
+/content/
+/.cache/

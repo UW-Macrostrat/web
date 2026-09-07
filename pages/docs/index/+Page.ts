@@ -2,6 +2,7 @@ import h from "@macrostrat/hyper";
 import { Link } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import { Popover, Tag } from "@blueprintjs/core";
+import "./docs-content.sass";
 
 export function Page() {
   const ctx = usePageContext();
@@ -17,7 +18,7 @@ export function Page() {
   const _contentStr = ctx.mdxContent;
 
   // If we're on the server, we just render the content from a string, otherwise we hydrate it
-  const pageContent = h("div", {
+  const pageContent = h("div.docs-content", {
     dangerouslySetInnerHTML: { __html: _contentStr },
   });
 

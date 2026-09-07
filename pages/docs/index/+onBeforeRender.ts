@@ -3,7 +3,7 @@ import { renderToString } from "react-dom/server";
 import { PageContext } from "vike/types";
 import h from "@macrostrat/hyper";
 
-const modules = import.meta.glob("../../../content/**/*.md");
+const modules = import.meta.glob("../../../content/**/*.{md,mdx}");
 import { join } from "path";
 import { dirname } from "path";
 import { fileURLToPath } from "url";

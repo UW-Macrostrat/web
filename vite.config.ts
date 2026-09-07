@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import vike from "vike/plugin";
 import { defineConfig } from "vite";
 import path from "node:path";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { cp } from "node:fs/promises";
 import textToolchain from "./packages/text-toolchain/src";
 import { cjsInterop } from "vite-plugin-cjs-interop";
@@ -43,7 +43,7 @@ export default defineConfig({
     }),
     // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
-      contentDir: path.resolve(__dirname, "content"),
+      contentDir: requireDocsContent(path.resolve(__dirname, "content")),
       wikiPrefix: "/docs",
     }),
     cesiumPlugin({
@@ -113,6 +113,17 @@ function cesiumPlugin(options) {
       );
     },
   };
+}
+
+/** The /docs content tree is assembled from the documentation vault by
+ * scripts/assemble-docs.sh and is not tracked in this repository. */
+function requireDocsContent(contentDir: string): string {
+  if (!existsSync(contentDir)) {
+    throw new Error(
+      `Documentation content not found at ${contentDir}. Run 'yarn docs:assemble' first.`
+    );
+  }
+  return contentDir;
 }
 
 function getPackageJSONContents(packageJSONPath: string) {

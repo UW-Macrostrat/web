@@ -1,6 +1,8 @@
 import mdx from "@mdx-js/rollup";
 import wikiLinks from "remark-wiki-link";
 import frontmatter from "remark-frontmatter";
+import gfm from "remark-gfm";
+import callouts from "./remark-callouts";
 import slugify from "@sindresorhus/slugify";
 import { join } from "path";
 
@@ -39,10 +41,13 @@ export default function viteTextToolchain({
         },
       ],
       [frontmatter, { type: "yaml", marker: "-" }],
+      gfm,
+      callouts,
     ],
     include,
-    // Treat all .md files as MDX
-    mdxExtensions: [".mdx", ".md"],
-    mdExtensions: [],
+    // Extension = capability. `.md` is plain markdown (GFM + wikilinks +
+    // callouts) and never fails on a stray `<` or `{`; `.mdx` may use JSX.
+    mdExtensions: [".md"],
+    mdxExtensions: [".mdx"],
   });
 }

@@ -22,3 +22,6 @@ deps/web-components/.yarn
 deps/web-components/storybook/node_modules
 
 
+
+# Local clone of the documentation vault (assembled output in content/ IS sent)
+.cache

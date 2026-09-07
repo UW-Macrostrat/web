@@ -1,0 +1,44 @@
+// Styles for rendered documentation content. The markup is produced by the
+// text-toolchain (plain markdown + GFM + Obsidian callouts) and injected as
+// HTML, so these are global class selectors, not a CSS module.
+
+.docs-content
+  .callout
+    margin: var(--pz-space-3, 1em) 0
+    padding: var(--pz-space-2, 0.6em) var(--pz-space-3, 1em)
+    border-left: 3px solid var(--callout-color, var(--pz-accent-color, #2d72d2))
+    border-radius: var(--pz-radius-sm, 3px)
+    background: color-mix(in srgb, var(--callout-color, var(--pz-accent-color, #2d72d2)) 8%, var(--pz-panel-background-color, transparent))
+    & > :last-child
+      margin-bottom: 0
+    &[data-callout="tip"], &[data-callout="hint"], &[data-callout="success"], &[data-callout="check"]
+      --callout-color: #238551
+    &[data-callout="warning"], &[data-callout="caution"], &[data-callout="attention"]
+      --callout-color: #c87619
+    &[data-callout="danger"], &[data-callout="error"], &[data-callout="bug"], &[data-callout="failure"]
+      --callout-color: #cd4246
+    &[data-callout="question"], &[data-callout="help"], &[data-callout="faq"]
+      --callout-color: #7961db
+    &[data-callout="quote"], &[data-callout="cite"]
+      --callout-color: var(--pz-text-subtle-color, #5f6b7c)
+
+  .callout-title
+    font-weight: 600
+    color: var(--callout-color, var(--pz-accent-color, #2d72d2))
+    margin: 0 0 var(--pz-space-1, 0.3em)
+
+  table
+    border-collapse: collapse
+    margin: var(--pz-space-3, 1em) 0
+    max-width: 100%
+    display: block
+    overflow-x: auto
+  th, td
+    border: 1px solid var(--pz-border-color, #ddd)
+    padding: 0.3em 0.6em
+    text-align: left
+  th
+    background: var(--pz-panel-secondary-background-color, #f5f8fa)
+
+  input[type="checkbox"][disabled]
+    margin-right: 0.4em
