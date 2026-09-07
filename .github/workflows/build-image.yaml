@@ -7,6 +7,10 @@ on:
       - "v*.*.*" # glob for semver tags (including prereleases)
   pull_request:
     branches: [main]
+  # Fired by github.com/Macrostrat/docs when the documentation vault changes,
+  # so the /docs section is rebuilt without a commit here.
+  repository_dispatch:
+    types: [docs-updated]
 
 jobs:
   docker:
@@ -16,6 +20,22 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: "recursive"
+      # The /docs section of the site is assembled from the documentation vault
+      # (github.com/Macrostrat/docs) into ./content before the image is built.
+      # The vault is checked out under .cache/ (docker-ignored); only the
+      # assembled content/ tree reaches the image.
+      - name: Checkout documentation vault
+        uses: actions/checkout@v3
+        with:
+          repository: Macrostrat/docs
+          ref: main
+          path: .cache/docs
+      - name: Assemble documentation
+        env:
+          DOCS_SOURCE_DIR: .cache/docs
+        run: |
+          corepack enable
+          bash scripts/assemble-docs.sh
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4

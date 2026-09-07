@@ -16,7 +16,7 @@ export function buildPageIndex(
   // Walk the tree and generate permalinks for each page
   // Always happens on the server side.
 
-  const globPath = join(contentDir, "**/*.md");
+  const globPath = join(contentDir, "**/*.{md,mdx}");
   const replacePattern = new RegExp(`^${contentDir}/`);
 
   const files = globSync(globPath);

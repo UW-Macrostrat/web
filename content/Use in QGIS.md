@@ -1,2 +1,0 @@
-- [QGIS project file](../media/Macrostrat vector maps — dev v1.1.qgz)
--

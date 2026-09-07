@@ -6,14 +6,15 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf dist/*",
-    "dev": "vike dev",
+    "dev": "yarn run docs:assemble --if-missing && vike dev",
     "build": "vike build",
     "preview": "vike build && vike preview",
     "start": "vike build && node ./dist/server/index.mjs",
     "format": "prettier --write .",
     "dev:v1": "vike dev",
     "start:v1": "yarn run build && yarn run server",
-    "test:runtime": "tsx tests/test-urls.ts"
+    "test:runtime": "tsx tests/test-urls.ts",
+    "docs:assemble": "bash scripts/assemble-docs.sh"
   },
   "workspaces": [
     "packages/*"
