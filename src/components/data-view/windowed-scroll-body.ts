@@ -54,6 +54,12 @@ export interface WindowedScrollBodyOptions<T = any> {
   sectionHeight?: number;
   /** Extra rows rendered above and below the viewport. */
   overscan?: number;
+  /** Rows rendered before the viewport is measured — on the server, and on the
+   * client's first render, which must match it. The same fixed count for every
+   * client. Set it to the panel's page size so the server HTML holds the whole
+   * seeded page: the panel's hidden next-page link is counted from the last
+   * loaded row, and a crawler must be able to see every row before it. */
+  initialRows?: number;
 }
 
 interface ScrollBodyProps {
@@ -74,6 +80,7 @@ export function createWindowedScrollBody<T = any>(
     sectionOf,
     sectionHeight = rowHeight,
     overscan = 8,
+    initialRows = 100,
   } = options;
 
   return function WindowedScrollBody({ children }: ScrollBodyProps) {
@@ -117,7 +124,13 @@ export function createWindowedScrollBody<T = any>(
     const last = items[items.length - 1];
     const totalHeight = last.top + last.height;
 
-    let [start, end] = visibleRange(items, viewport, overscan, rowHeight);
+    let [start, end] = visibleRange(
+      items,
+      viewport,
+      overscan,
+      rowHeight,
+      initialRows
+    );
     // Snap back to the enclosing inner-group header so it stays mounted, and
     // therefore stays stuck to the top of the viewport.
     start = snapToGroupHeader(items, start);
@@ -253,18 +266,31 @@ function visibleRange(
   items: Item[],
   viewport: Viewport,
   overscan: number,
-  rowHeight: number
+  rowHeight: number,
+  initialRows: number
 ): [number, number] {
-  // Before the scroll container is measured, render one nominal screenful so
-  // the first paint isn't empty.
+  // Before the scroll container is measured, render a fixed number of rows —
+  // the same on the server and on the client's first render, which must match
+  // it. Windowing starts with the first measurement.
   if (viewport.height === 0) {
-    return [0, Math.min(items.length, overscan * 4)];
+    return [0, endOfFirstRows(items, initialRows)];
   }
 
   const pad = overscan * rowHeight;
   const first = findItemAt(items, viewport.top - pad);
   const last = findItemAt(items, viewport.top + viewport.height + pad);
   return [first, Math.min(items.length, last + 1)];
+}
+
+/** The item index just past the first `count` rows — group headers between
+ * them included, so the count is of rows, not items. */
+function endOfFirstRows(items: Item[], count: number): number {
+  let rows = 0;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type === "row") rows++;
+    if (rows >= count) return i + 1;
+  }
+  return items.length;
 }
 
 /** Index of the last item starting at or before `offset` (binary search over

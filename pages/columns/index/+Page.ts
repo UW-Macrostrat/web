@@ -28,6 +28,8 @@ import {
   selectionAtom,
   storeAtom,
   useSelector,
+  type ActiveFilterEntry,
+  type InitialDataChunk,
 } from "@macrostrat/data-sheet";
 import { DataField, Identifier } from "@macrostrat/data-components";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -57,6 +59,7 @@ import {
   ONLY_SELECTED_FILTER_ID,
 } from "./filters";
 import { initialViewStateFromURL } from "~/components";
+import { columnPageLinks, rowsAfterColumn } from "./page-links";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   addFilterAtom,
@@ -83,6 +86,9 @@ import {
   visibleRowsAtom,
   type ColumnFilterDef,
   type ColumnRow,
+  startAfterAtom,
+  pageLocationAtom,
+  startAfterParamAtom,
 } from "./state";
 
 import hyper from "@macrostrat/hyper";
@@ -100,7 +106,16 @@ const ROW_HEIGHT = 30;
 const GROUP_HEIGHT = 30;
 const SECTION_HEIGHT = 34;
 
+/** Rows per fetched page, and how many pages auto-load before the footer's
+ * "Load more" takes over. Deep results are reached by narrowing the filters,
+ * not by scrolling forever, so the checkpoint comes early — two pages in, which
+ * also brings the footer within reach. */
+const PAGE_SIZE = 100;
+const AUTO_LOAD_PAGES = 2;
+
 const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
+  // One seeded page in the server HTML, for crawlers (see page-links.ts)
+  initialRows: PAGE_SIZE,
   rowHeight: ROW_HEIGHT,
   // Projects are the outer sections (a handful, some very large); column groups
   // the inner ones (164 of them, median ~15 rows).
@@ -124,13 +139,6 @@ const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
     };
   },
 });
-
-/** Rows per fetched page, and how many pages auto-load before the footer's
- * "Load more" takes over. Deep results are reached by narrowing the filters,
- * not by scrolling forever, so the checkpoint comes early — two pages in, which
- * also brings the footer within reach. */
-const PAGE_SIZE = 100;
-const AUTO_LOAD_PAGES = 2;
 
 /** A paged in-memory provider whose row set can change underneath it without
  * the provider identity changing. Delegates to `createLocalProvider`, so filter
@@ -189,7 +197,9 @@ export function Page({ linkPrefix = "/" }) {
       initialAtoms: [
         [projectIDAtom, projectID],
         [projectSlugsAtom, projectSlugs ?? null],
-        [initialDataAtom, allColumnGroups],
+        [initialDataAtom, { params: data.requestParams, groups: allColumnGroups }],
+        [startAfterAtom, data.startAfter ?? null],
+        [pageLocationAtom, data.pageLocation ?? null],
         [linkPrefixAtom, linkPrefix],
         [projectsAtom, projects ?? []],
       ],
@@ -244,6 +254,32 @@ function ColumnList() {
     []
   );
 
+  // The first page, handed to the panel at store creation. The rows are in
+  // memory on the server too, so the server render carries real rows rather
+  // than the empty state the panel shows until its first (asynchronous) page
+  // resolves — and the client doesn't fetch a page it was given. Filtered with
+  // the same predicates the provider would apply, so a linked search (`?q=`)
+  // seeds its own first page. The list has no user sorts, so the order is the
+  // provider's.
+  //
+  // Crawlable paging: a `?after=<col_id>` page seeds the rows after that column,
+  // and the panel is told the cursor (`startAfter`) so its later chunks count
+  // from the same place. `pageLinks` gives the panel the hidden next-page link
+  // and the "Return to top" link, both on this page's own URL.
+  const startAfter = useAtomValue(startAfterAtom);
+  const pageLocation = useAtomValue(pageLocationAtom);
+  const initialData = useMemo(
+    () =>
+      firstPage(
+        rowsAfterColumn(
+          applyRowFilters(rows, initialView.initialFilters),
+          startAfter
+        )
+      ),
+    []
+  );
+  const pageLinks = useMemo(() => columnPageLinks(pageLocation), [pageLocation]);
+
   if (isLoading && rows.length === 0) {
     return h("div.list-loading", h(Spinner));
   }
@@ -257,6 +293,9 @@ function ColumnList() {
       provider,
       refreshToken,
       initialFilters: initialView.initialFilters,
+      initialData,
+      startAfter,
+      pageLinks,
       // Typing shouldn't refilter on every keystroke
       filterDebounce: 200,
       pageSize: PAGE_SIZE,
@@ -302,19 +341,31 @@ function VisibleRowsBridge() {
 
   useEffect(() => {
     const entries = [...(activeFilters?.values() ?? [])];
-    let rows = allRows;
-    if (entries.length > 0) {
-      rows = rows.filter((row) =>
-        entries.every(({ filter, state }) => {
-          if (filter?.predicate == null) return true;
-          return filter.predicate(row, state);
-        })
-      );
-    }
-    setVisibleRows(rows);
+    setVisibleRows(applyRowFilters(allRows, entries));
   }, [allRows, activeFilters, setVisibleRows]);
 
   return null;
+}
+
+/** The rows that pass every active filter's own predicate — the same
+ * `TableFilter.predicate`s the provider applies, so there is one definition
+ * of each filter. */
+function applyRowFilters(
+  rows: ColumnRow[],
+  entries: ActiveFilterEntry[]
+): ColumnRow[] {
+  if (entries.length === 0) return rows;
+  return rows.filter((row) =>
+    entries.every(({ filter, state }) => {
+      if (filter?.predicate == null) return true;
+      return filter.predicate(row, state);
+    })
+  );
+}
+
+/** The panel's first window over a known row set. */
+function firstPage(rows: ColumnRow[]): InitialDataChunk<ColumnRow> {
+  return { rows: rows.slice(0, PAGE_SIZE), totalCount: rows.length };
 }
 
 /** Keeps the two externally-fed filters' state fresh while they're active.
@@ -389,14 +440,21 @@ const searchParamAtom = atomWithSearchParam("q");
 function SearchURLWriter() {
   const activeFilters = useSelector((state) => state.activeFilters);
   const setParam = useSetAtom(searchParamAtom);
+  const setStartAfterParam = useSetAtom(startAfterParamAtom);
   const text: string = (activeFilters?.get(SEARCH_FILTER_ID)?.state?.text ?? "").trim();
 
+  // The first run only restates the text the page loaded with; a later one is
+  // a changed search, which also ends a `?after=` page (see `page-links.ts`).
+  const isFirstRun = useRef(true);
   useEffect(() => {
+    const changed = !isFirstRun.current;
+    isFirstRun.current = false;
     const handle = setTimeout(() => {
       setParam(text === "" ? null : text);
+      if (changed) setStartAfterParam(null);
     }, 300);
     return () => clearTimeout(handle);
-  }, [text, setParam]);
+  }, [text, setParam, setStartAfterParam]);
 
   return null;
 }

@@ -21,10 +21,14 @@ import { debounce } from "underscore";
 
 import { postgrest } from "~/_providers";
 import {
+  columnRequestParams,
+  DEFAULT_REQUEST_SCOPE,
   getGroupedColumns,
+  sameRequestParams,
   type ColumnFilterOptions,
   type ColumnGroup,
 } from "./grouped-cols";
+import { START_AFTER_KEY, type PageLocation } from "./page-links";
 
 export type ColumnFilterKey =
   | "liths"
@@ -79,9 +83,31 @@ export const projectFilterAtom = atom(
     set(projectSlugsAtom, slugs);
     set(projectIDAtom, projectIDParam(resolveProjectIDs(get(projectsAtom), slugs)));
     set(projectSearchParamAtom, serializeProjectFilter(slugs));
+    // A different list: the crawl cursor no longer describes it
+    set(startAfterParamAtom, null);
   }
 );
-export const initialDataAtom = atom<ColumnGroup[] | null>(null);
+
+/* ------------------------------------------------------- crawlable paging */
+
+/** The column the list starts after (`?after=`), read once at page load. The
+ * panel drops it on the first view change; see `page-links.ts`. */
+export const startAfterAtom = atom<number | null>(null);
+/** The page's path and query as requested, for building page links. */
+export const pageLocationAtom = atom<PageLocation | null>(null);
+/** The `?after=` parameter itself — only ever *removed* by the client, when it
+ * rewrites the URL for another reason, so a deep link never outlives the view
+ * it described. */
+export const startAfterParamAtom = atomWithSearchParam(START_AFTER_KEY);
+/** The list the server rendered with, together with the request that produced
+ * it. While the page's own request is the same one, this *is* the data — no
+ * fetch is made — so the first client render is the server render, and the
+ * first request only goes out when a control changes the scope. */
+export interface InitialColumnData {
+  params: ColumnFilterOptions;
+  groups: ColumnGroup[];
+}
+export const initialDataAtom = atom<InitialColumnData | null>(null);
 export const linkPrefixAtom = atom<string>("/");
 
 /** Project definitions, loaded in `+data.ts` so a project section header has a
@@ -100,10 +126,10 @@ export const projectNamesAtom = atom<Map<number, string>>((get) => {
 /* ------------------------------------------------------ server-side filters */
 
 export const columnFilterAtom = atom<ColumnFilterDef[]>([]);
-export const showEmptyAtom = atom(true);
+export const showEmptyAtom = atom(DEFAULT_REQUEST_SCOPE.showEmpty);
 export const showInProcessAtom = atomWithStorage(
   "macrostrat:show-in-process",
-  false
+  DEFAULT_REQUEST_SCOPE.showInProcess
 );
 export const inputTextAtom = atom("");
 
@@ -142,27 +168,22 @@ const filterParamsAtom = atom((get) => {
   const showInProcess = get(showInProcessAtom);
   const projectID = get(projectIDAtom);
 
-  const params = buildParamsFromFilters(filters);
-
-  if (projectID != null) {
-    params.project_id = projectID;
-  }
-  if (!showEmpty) {
-    params.empty = false;
-  }
-  if (!showInProcess) {
-    params.status_code = "active";
-  } else {
-    params.status_code = "in process,active";
-  }
-
-  if (Object.keys(params).length === 0) return null;
-  return params as ColumnFilterOptions;
+  return columnRequestParams(
+    { projectID, showEmpty, showInProcess },
+    buildParamsFromFilters(filters)
+  );
 });
 
-const fetchDataAtom = atom(async (get) => {
+/** Resolves synchronously to the seeded data while the request is the one the
+ * server already made (so `unwrap` below never enters a loading state for it),
+ * and fetches only once the request differs. */
+const fetchDataAtom = atom((get) => {
   const filterParams = get(filterParamsAtom);
-  return await instrumentResult(getGroupedColumns(filterParams));
+  const seed = get(initialDataAtom);
+  if (seed != null && sameRequestParams(seed.params, filterParams)) {
+    return { data: seed.groups, error: null, loading: false };
+  }
+  return instrumentResult(getGroupedColumns(filterParams));
 });
 
 const downloadedGroupsAtom = unwrap(fetchDataAtom, (prev) => ({
@@ -178,7 +199,8 @@ export const isLoadingAtom = atom((get) => get(downloadedGroupsAtom).loading);
  * selected, only in map area) is a library-side `TableFilter`, so the panel owns
  * the filtered view and we mirror it back out (`visibleRowsAtom`). */
 export const allRowsAtom = atom<ColumnRow[]>((get) => {
-  const groups = get(downloadedGroupsAtom).data ?? get(initialDataAtom) ?? [];
+  const groups =
+    get(downloadedGroupsAtom).data ?? get(initialDataAtom)?.groups ?? [];
   const projectNames = get(projectNamesAtom);
   return groups.flatMap((group) =>
     group.columns.map((col) => ({

@@ -4,7 +4,16 @@ import {
   projectIDParam,
   resolveProjectIDs,
 } from "~/components/project-filter/model";
-import { getGroupedColumns } from "./grouped-cols.ts";
+import {
+  columnRequestParams,
+  DEFAULT_REQUEST_SCOPE,
+  getGroupedColumns,
+} from "./grouped-cols.ts";
+import {
+  parseStartAfter,
+  START_AFTER_KEY,
+  type PageLocation,
+} from "./page-links.ts";
 
 export async function data(pageContext) {
   // The project definitions come first: the list's section headers need names,
@@ -18,11 +27,32 @@ export async function data(pageContext) {
   const projectIDs = resolveProjectIDs(projects, projectSlugs);
   const project_id = projectIDParam(projectIDs);
 
-  let params = null;
-  if (project_id != null) {
-    params = { project_id };
-  }
-  const allColumnGroups = await getGroupedColumns(params);
+  // Built with the same function as the page's own request, and returned with
+  // the result, so the page can tell the seeded data is exactly what it would
+  // fetch first and skip that request.
+  const requestParams = columnRequestParams({
+    ...DEFAULT_REQUEST_SCOPE,
+    projectID: project_id,
+  });
+  const allColumnGroups = await getGroupedColumns(requestParams);
 
-  return { allColumnGroups, projects, projectSlugs, project_id };
+  // Crawlable paging: `?after=<col_id>` starts the list after that column. The
+  // page's location is kept so the panel's page links stay on this URL (same
+  // project and search parameters, a different cursor).
+  const search: Record<string, string> = pageContext.urlParsed?.search ?? {};
+  const startAfter = parseStartAfter(search[START_AFTER_KEY]);
+  const pageLocation: PageLocation = {
+    pathname: pageContext.urlParsed?.pathname ?? "/columns",
+    search,
+  };
+
+  return {
+    allColumnGroups,
+    requestParams,
+    projects,
+    projectSlugs,
+    project_id,
+    startAfter,
+    pageLocation,
+  };
 }

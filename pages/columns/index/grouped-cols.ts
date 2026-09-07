@@ -26,6 +26,56 @@ export interface ColumnGroup {
   columns: ColumnResponseShort[];
 }
 
+/** The request-level scope of the list, apart from the lexicon facets: which
+ * projects, and which column statuses. Shared by the server data hook and the
+ * page's atoms so both build the *same* request — that is what lets the page
+ * recognize the server's result and skip refetching it on load. */
+export interface ColumnRequestScope {
+  /** Numeric id(s), comma-joined; `null` for the API's default set. */
+  projectID: string | null;
+  showEmpty: boolean;
+  showInProcess: boolean;
+}
+
+/** What the list requests before the user touches any control. */
+export const DEFAULT_REQUEST_SCOPE: Omit<ColumnRequestScope, "projectID"> = {
+  showEmpty: true,
+  showInProcess: false,
+};
+
+export function columnRequestParams(
+  scope: ColumnRequestScope,
+  facets: Partial<ColumnFilterOptions> = {}
+): ColumnFilterOptions {
+  const params: ColumnFilterOptions = { ...facets };
+  if (scope.projectID != null) {
+    params.project_id = scope.projectID;
+  }
+  if (!scope.showEmpty) {
+    params.empty = false;
+  }
+  if (scope.showInProcess) {
+    params.status_code = "in process,active";
+  } else {
+    params.status_code = "active";
+  }
+  return params;
+}
+
+/** Structural equality of two requests, independent of key order. */
+export function sameRequestParams(
+  a: ColumnFilterOptions | null,
+  b: ColumnFilterOptions | null
+): boolean {
+  return requestKey(a) === requestKey(b);
+}
+
+function requestKey(params: ColumnFilterOptions | null): string {
+  if (params == null) return "";
+  const keys = Object.keys(params).sort();
+  return JSON.stringify(params, keys);
+}
+
 export async function getGroupedColumns(params: ColumnFilterOptions | null) {
   const { data: columns, refs } = await fetchColumns(params ?? {});
 
@@ -70,8 +120,9 @@ export async function getGroupedColumns(params: ColumnFilterOptions | null) {
 }
 
 export interface ColumnFilterOptions {
-  /** Omitted (or null) means every project — the API's `all=true` */
-  project_id?: number | null;
+  /** Numeric id(s), comma-joined for several (`"1,7"`). Omitted (or null)
+   * means the API's default set — the "Core columns" composite. */
+  project_id?: number | string | null;
   status_code?: string;
   empty?: boolean;
   strat_names?: number[];
