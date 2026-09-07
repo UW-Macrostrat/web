@@ -1,4 +1,4 @@
-import { ColumnNavigationMap } from "@macrostrat/column-views";
+import { ColumnNavigationMap } from "@macrostrat/map-views";
 import {
   MacrostratDataProvider,
   useMacrostratColumns,

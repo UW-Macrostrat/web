@@ -4,7 +4,6 @@ import { ReactNode, useEffect, useRef } from "react";
 import styles from "./index.module.sass";
 
 import { AlphaTag } from "~/components";
-import { onDemand } from "~/_utils";
 import { Parenthetical } from "@macrostrat/data-components";
 import { ColumnAxisType } from "@macrostrat/column-components";
 import { atom, useAtom, useAtomValue, useSetAtom, WritableAtom } from "jotai";
@@ -14,8 +13,22 @@ import {
   FormGroup,
   HTMLSelect,
   NumericInput,
+  PopoverNext,
 } from "@blueprintjs/core";
 import { useHydrateAtoms } from "jotai/utils";
+import {
+  CommittedNumericInput,
+  normalizeTimeFilter,
+  TIME_FILTER_KEYS,
+  TimeFilterPanel,
+  type TimeFilterAtom,
+} from "~/components/time-filter";
+import {
+  parseProjectFilter,
+  serializeProjectFilter,
+  type ProjectFilterAtom,
+  type ProjectFilterValue,
+} from "~/components/project-filter";
 
 export function useColumnState(columnInfo) {
   const { units, col_id } = columnInfo;
@@ -66,7 +79,7 @@ export function useColumnState(columnInfo) {
     maxInternalColumns = undefined;
   }
 
-  const { t_age, b_age, t_pos, b_pos } = useAtomValue(hashStateAtom);
+  const { t_pos, b_pos } = useAtomValue(hashStateAtom);
 
   const [selectedUnitID, setSelectedUnitID] =
     useAtom<number>(selectedUnitIDAtom);
@@ -88,18 +101,34 @@ export function useColumnState(columnInfo) {
     selectedUnitID,
     setSelectedUnitID,
     selectedUnit,
-    t_age,
-    b_age,
     t_pos,
     b_pos,
     pixelScale,
   };
 }
 
+/** The selected unit and its setter, for panes that show the selection but
+ * don't own the column (the assistant). */
+export function useColumnSelection() {
+  const [selectedUnitID, setSelectedUnitID] =
+    useAtom<number>(selectedUnitIDAtom);
+  const selectedUnit = useAtomValue(selectedUnitAtom);
+  return { selectedUnitID, setSelectedUnitID, selectedUnit };
+}
+
 interface ColumnHashState {
   unit?: number;
+  /** Time filter (see `~/components/time-filter`): an interval, a range of
+   * intervals, explicit age bounds, or a single age */
+  int_id?: number;
+  t_int_id?: number;
+  b_int_id?: number;
   t_age?: number;
   b_age?: number;
+  age?: number;
+  /** Project filter: which projects' columns the navigation map shows
+   * (slugs, comma-joined) */
+  project_id?: string;
   t_pos?: number;
   b_pos?: number;
   axis?: string;
@@ -159,7 +188,11 @@ function getStateFromHash(): ColumnHashState {
   );
   state.axis = validateAxis(params.get("axis"));
   state.unit = validateInt(params.get("unit"));
-  for (const key of ["t_age", "b_age", "t_pos", "b_pos", "scale"]) {
+  for (const key of ["int_id", "t_int_id", "b_int_id"]) {
+    state[key] = validateInt(params.get(key));
+  }
+  state.project_id = params.get("project_id") ?? undefined;
+  for (const key of ["t_age", "b_age", "age", "t_pos", "b_pos", "scale"]) {
     state[key] = validateNumber(params.get(key));
   }
 
@@ -207,7 +240,7 @@ function atomWithHashParam<T>(key: keyof ColumnHashState) {
 }
 
 const selectedUnitIDAtom = atomWithHashParam<number | null>("unit");
-const selectedUnitAtom = atom((get) => {
+export const selectedUnitAtom = atom((get) => {
   const units = get(unitsAtom);
   const selectedUnitID = get(selectedUnitIDAtom);
   if (selectedUnitID == null) return null;
@@ -227,14 +260,49 @@ const validateSelectedUnitIDAtom = atom(null, (get, set) => {
 const axisTypeAtom = atomWithHashParam<ColumnAxisType>("axis");
 const facetAtom = atomWithHashParam<string | null>("facet");
 
-const t_ageAtom = atomWithHashParam<number>("t_age");
-const b_ageAtom = atomWithHashParam<number>("b_age");
+/** Setter for the facet shown beside the column (e.g. from a fossils link). */
+export function useSetFacet() {
+  return useSetAtom(facetAtom);
+}
+
+/** The page's time filter, stored in the URL hash alongside its other view
+ * state (`#int_id=…&t_age=…&b_age=…`). Handed to `TimeFilterProvider` so the
+ * shared filter components and hooks read and write this page's hash. */
+export const columnTimeFilterAtom: TimeFilterAtom = atom(
+  (get) => {
+    const hash = get(hashStateAtom);
+    const params = {};
+    for (const key of TIME_FILTER_KEYS) {
+      params[key] = hash[key];
+    }
+    return normalizeTimeFilter(params);
+  },
+  (get, set, value) => {
+    set(hashStateAtom, (prev) => {
+      const next = { ...prev };
+      for (const key of TIME_FILTER_KEYS) {
+        next[key] = value?.[key];
+      }
+      return next;
+    });
+  }
+);
+
+/** The page's project filter, in the hash beside the time filter. */
+export const columnProjectFilterAtom: ProjectFilterAtom = atom(
+  (get) => parseProjectFilter(get(hashStateAtom).project_id),
+  (get, set, value: ProjectFilterValue) => {
+    set(hashStateAtom, (prev) => ({
+      ...prev,
+      project_id: serializeProjectFilter(value) ?? undefined,
+    }));
+  }
+);
+
 const t_posAtom = atomWithHashParam<number>("t_pos");
 const b_posAtom = atomWithHashParam<number>("b_pos");
 
 const pixelScaleAtom = atomWithHashParam<number>("scale");
-
-const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
 const h = hyperStyled(styles);
 
@@ -263,7 +331,9 @@ interface ColumnInfo {
   units: ExtUnit[];
 }
 
-const columnInfoAtom = atom<ColumnInfo>();
+/** Seeded by the page (through the hybrid frame's `initialAtoms`) and kept
+ * current by `useColumnState` as the user moves between columns. */
+export const columnInfoAtom = atom<ColumnInfo>();
 
 const columnTypeAtom = atom<"section" | "column">((get) => {
   return get(columnInfoAtom).col_type;
@@ -330,12 +400,7 @@ export function ColumnSettingsPanel() {
     h("h3", "Settings"),
     h(AxisTypeControl),
     h(FacetControl),
-    h(RangeControl, {
-      label: "Age range",
-      unit: "Ma",
-      topAtom: t_ageAtom,
-      bottomAtom: b_ageAtom,
-    }),
+    h(TimeFilterPanel, { showIntervalPicker: false }),
     h.if(isHeightAxis)(RangeControl, {
       label: heightAxisLabel + " range",
       unit: "m",
@@ -351,6 +416,25 @@ export function ColumnSettingsPanel() {
       atom: pixelScaleAtom,
     }),
   ]);
+}
+
+/** The settings panel behind a toolbar button, so display controls sit apart
+ * from the column's description in the assistant pane. */
+export function ColumnSettingsButton() {
+  return h(PopoverNext, {
+    minimal: true,
+    placement: "bottom-end",
+    content: h("div.settings-popover", h(ColumnSettingsPanel)),
+    renderTarget: ({ isOpen, ...targetProps }) =>
+      h(Button, {
+        ...targetProps,
+        icon: "settings",
+        minimal: true,
+        small: true,
+        active: isOpen,
+        title: "Column display settings",
+      }),
+  });
 }
 
 function ClearButton({ value, setValue, disabled = null }) {
@@ -374,7 +458,7 @@ function NumericAtomControl({
   placeholder,
 }: {
   label: string;
-  atom: typeof t_ageAtom;
+  atom: typeof pixelScaleAtom;
   placeholder?: string;
 }) {
   const [value, setValue] = useAtom(atom);
@@ -444,11 +528,14 @@ function RangeControl({
   );
 }
 
+/** Commits on blur/Enter, so decimals (a fractional pixels-per-Myr scale) can
+ * be typed without the value snapping back after each keystroke. */
 function AtomNumericInput({ atom, ...rest }) {
   const [value, setValue] = useAtom(atom);
-  return h(NumericInput, {
-    value: value ?? "",
-    onValueChange: setValue,
+  return h(CommittedNumericInput, {
+    value: value ?? null,
+    onCommit: setValue,
+    minorStepSize: 0.1,
     ...rest,
   });
 }

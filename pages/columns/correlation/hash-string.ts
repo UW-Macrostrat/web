@@ -1,10 +1,30 @@
 import { LineString } from "geojson";
 import { setHashString } from "@macrostrat/ui-components";
 import { parseLineFromString, stringifyLine } from "@macrostrat/column-views";
+import {
+  parseTimeFilterParams,
+  timeFilterToParams,
+  type TimeFilterParams,
+} from "~/components/time-filter";
+import {
+  parseProjectFilter,
+  PROJECT_FILTER_KEY,
+  serializeProjectFilter,
+  type ProjectFilterValue,
+} from "~/components/project-filter";
 
 interface CorrelationHashParams {
+  /** Line of section; the chart's columns are those it crosses. */
   section?: LineString | null;
+  /** An explicit, ordered column selection (`columns=1,2,3`) — the manual
+   * alternative to a line of section, and how a column page hands off to this
+   * one. Mutually exclusive with `section`. */
+  columns?: number[] | null;
   unit?: number;
+  /** Shared time filter (`int_id`, `t_age`, `b_age`), see `~/components/time-filter` */
+  time?: TimeFilterParams | null;
+  /** Shared project filter (slugs), see `~/components/project-filter` */
+  project_id?: ProjectFilterValue;
 }
 
 export function getCorrelationHashParams(): CorrelationHashParams {
@@ -23,18 +43,40 @@ export function getCorrelationHashParams(): CorrelationHashParams {
     unit = Number(_unit);
   }
 
+  const columns = parseColumnIDs(hash.get("columns"));
+  const time = parseTimeFilterParams(hash);
+  const project_id = parseProjectFilter(hash.get(PROJECT_FILTER_KEY));
+
   return {
     section,
+    columns,
     unit,
+    time,
+    project_id,
   };
 }
 
+function parseColumnIDs(value: string | null): number[] | null {
+  if (value == null || value === "") return null;
+  const ids = value
+    .split(",")
+    .map((d) => parseInt(d, 10))
+    .filter((d) => Number.isFinite(d));
+  if (ids.length === 0) return null;
+  return ids;
+}
+
 export function setHashStringForCorrelation(state: CorrelationHashParams) {
-  const { section, unit } = state;
-  if (section == null) {
-    return;
+  const { section, unit, time = null, columns = null, project_id = null } = state;
+  let _section = section;
+  if (_section != null && _section.coordinates.length < 2) {
+    _section = null;
   }
-  if (section.coordinates.length < 2) {
+  let _columns = columns;
+  if (_columns != null && _columns.length === 0) {
+    _columns = null;
+  }
+  if (_section == null && _columns == null && time == null && project_id == null) {
     return;
   }
   let _unit = unit;
@@ -42,9 +84,21 @@ export function setHashStringForCorrelation(state: CorrelationHashParams) {
     _unit = undefined;
   }
 
+  let sectionString: string | undefined = undefined;
+  if (_section != null) {
+    sectionString = stringifyLine(_section);
+  }
+  let columnsString: string | undefined = undefined;
+  if (_columns != null) {
+    columnsString = _columns.join(",");
+  }
+
   let hash = {
-    section: stringifyLine(section),
+    section: sectionString,
+    columns: columnsString,
     unit: _unit,
+    ...timeFilterToParams(time),
+    [PROJECT_FILTER_KEY]: serializeProjectFilter(project_id) ?? undefined,
   };
   setHashString(hash);
 }

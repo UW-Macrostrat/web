@@ -1,40 +1,48 @@
-.page-container
-  overflow-y: scroll
-  height: 100vh
-  position: relative
+// Column page content. The frame (header, sidebar, layout modes) lives in
+// `~/layouts/hybrid`; this styles what goes in its slots.
 
-.main
+.column-page
   --column-background-color: var(--background-color)
   --column-stroke-color: var(--text-color)
 
-  display: flex
-  flex-direction: row
-
-  max-width: 80rem
-  margin: 0 auto
-  gap: 1em
-
-
-.left-column
-  flex-grow: 1
-
-.right-column
-  min-width: 200px
-  width: 40%
-  max-width: 500px
-  height: 100vh
-  position: sticky
-  top: 0
+// The content slot, in the frame's page-scrolling mode: normal flow, the
+// document scrolls, the footer follows the column — or sits at the bottom of
+// the viewport when the column is short.
+.column-content
+  min-width: 0
+  flex: 1 1 auto
   display: flex
   flex-direction: column
-  padding: 2em 1em
-  overflow-y: scroll
 
-  & > *
-    border-radius: 4px
+.column-view
+  margin: 0 0 3em
+  padding: 0
+
+.page-footer
+  margin-top: auto
+  padding-top: 2em
+
+/* --------------------------------------------------------------- settings */
+
+.settings-popover
+  padding: 1em
+  width: 24em
+  max-width: min(24em, 90vw)
 
   h3
+    margin-top: 0
     color: var(--secondary-color)
+
+  // Inputs share the row instead of keeping their intrinsic width and
+  // overflowing the popover.
+  :global(.bp6-control-group)
+    flex-wrap: nowrap
+    min-width: 0
+
+    > :global(.bp6-numeric-input),
+    > :global(.bp6-input-group)
+      flex: 1 1 0
+      min-width: 0
 
 .column-settings-panel
   :global
@@ -62,60 +70,88 @@
       flex-grow: unset
       flex-shrink: unset
 
-.right-column-boxes
-  display: flex
-  flex-direction: column
-  gap: 1em
+/* -------------------------------------------------------------------- map */
 
-
-.column-view
-  margin: 0 0 4em
-  padding: 0
-
-.column-header
-  margin: 1em 4em
-
-  h1
-    font-size: 1.5em
-
-    .subtitle
-      font-weight: normal
-
-  nav
-    position: sticky
-    top: 2em
-
-.column-nav
-  position: sticky
-  top: 2.2em
-
-  h3
-    color: var(--secondary-color)
-
-.default-buttons
-  width: 100%
-  margin: 0 -10px
+// Fills the frame's map slot (a fixed-aspect box); the hint overlays the map's
+// bottom edge so it costs no layout.
+.column-map-pane
+  position: absolute
+  inset: 0
 
 .column-map
   width: 100%
-  aspect-ratio: 3/2
+  height: 100%
   cursor: pointer
-  z-index: 100
-
-  &.expanded
-    cursor: inherit
-
-    .columns path:hover
-      stroke: rgba(255, 0, 0, .4) !important
-
-
-  .close-button
-    position: absolute
-    top: 1em
-    right: 1em
 
   .land
     background-color: rgb(233, 252, 234)
+
+.map-hint
+  position: absolute
+  left: 0.5em
+  right: 0.5em
+  bottom: 0.3em
+  font-size: 0.7em
+  line-height: 1.2
+  text-align: right
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  pointer-events: none
+
+/* -------------------------------------------------------------- assistant */
+
+// Plain metadata: not a card.
+.column-assistant
+  h3
+    color: var(--secondary-color)
+
+  .field-link
+    color: inherit
+    text-decoration: none
+    border-bottom: 1px dotted var(--pz-text-subtle-color, var(--secondary-color))
+
+    &:hover
+      color: var(--pz-link-color, var(--link-color))
+
+  .facet-link
+    color: inherit
+    text-decoration: none
+    border-bottom: 1px dotted var(--pz-text-subtle-color, var(--secondary-color))
+    cursor: pointer
+
+    &:hover
+      color: var(--pz-link-color, var(--link-color))
+
+  // One line per project the column belongs to, id at the right like the group
+  .project-list
+    display: flex
+    flex-direction: column
+    gap: 0.15em
+
+  .project-item
+    display: flex
+    flex-direction: row
+    justify-content: space-between
+    align-items: baseline
+    gap: 0.5em
+
+.column-actions
+  margin-top: 1em
+
+// The one piece of assistant content that is a card: the selected unit.
+.unit-details-panel
+  flex: 1
+  min-height: 0
+  border-radius: var(--pz-radius-md, 6px)
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
+
+.column-title-row
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  justify-content: space-between
+
+/* ----------------------------------------------------------------- column */
 
 div.section
   display: flex
@@ -125,27 +161,11 @@ div.section
     width: 7em
     --timescale-level-size: 1.5em
 
-
 .section .divisions .unit
   cursor: pointer
 
 rect.selection-overlay
   fill: rgba(255, 0, 0, .5)
-
-.unit-details-panel
-  flex: 1
-  min-height: 0
-
-.column-map, .unit-details-panel
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3)
-  border-radius: 6px
-
-
-.column-title-row
-  display: flex
-  flex-direction: row
-  align-items: baseline
-  justify-content: space-between
 
 .isotopes-column
   display: flex

@@ -1,78 +1,141 @@
-$map-size: 40em
-$map-size-inset: 12em
+// Correlation chart page content. The frame (header, inset / sidebar map,
+// layout modes) lives in `~/layouts/hybrid`; this styles what goes in its slots.
 
-.page-header
-  display: flex
-  flex-direction: row
-  justify-content: space-between
-  margin-bottom: 1em
-
-.diagram-container
-  flex: 1
-  position: relative
-  min-height: 0
-  display: flex
-
-  &.map-inset
-    .column-selection-map
-      position: absolute
-      top: 1em
-      right: 1em
-      height: $map-size-inset
-      width: $map-size-inset
-      z-index: 1000
-
-  &.map-expanded
-    flex-direction: row
-    gap: 1em
-
-    .assistant
-      width: 40em
-      position: relative
-
-.column-selection-map, .unit-details-panel, .main-area
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3)
-  border-radius: 6px
-
-.column-selection-map
-  overflow: hidden
-
-  .correlation-map
-    height: 100%
-    position: relative
-
-  flex: 1
-  min-height: $map-size-inset
-  max-height: $map-size
-  width: $map-size
-  position: relative
-  top: 0
-  right: 0
-
-.unit-details-panel
-  overflow: scroll
-  background: var(--panel-secondary-background-color)
-  flex: 2
-  max-width: 100%
-
-.main-area
-  position: relative
-  flex: 1
-  min-height: 0
-  min-width: 0
-  overflow: scroll
-  background-color: var(--panel-secondary-background-color)
-
-.diagram-container
-  position: relative
-
-.correlation-diagram
-  margin-right: 2em
-  width: fit-content
-  background-color: var(--panel-secondary-background-color)
+.correlation-page
   --column-background-color: var(--background-color)
   --column-stroke-color: var(--text-color)
 
+/* ------------------------------------------------------------------ chart */
+
+// The content slot, in the frame's panel-scrolling mode: the chart pane is its
+// own scroller in both directions.
+.chart-scroll
+  flex: 1 1 auto
+  min-height: 0
+  min-width: 0
+  overflow: auto
+  border-radius: var(--pz-radius-md, 6px)
+  background-color: var(--panel-secondary-background-color)
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3)
+
+.correlation-diagram
+  // Leaves room for the inset map when it floats over the chart's top-right
+  margin-right: 2em
+  width: fit-content
+  padding: 0.5em
+
+.correlation-map
+  height: 100%
+  position: relative
+
+/* --------------------------------------------------------- column headers */
+
+// Above each chart column: name wrapped within the column width, id inline.
+.column-header
+  padding: 0.35em 0.4em
+  font-size: 0.85em
+  line-height: 1.25
+  text-align: left
+  overflow-wrap: break-word
+
+  .column-name
+    font-weight: 600
+
+  .column-id-link
+    text-decoration: none
+    color: inherit
+
+    &:hover
+      color: var(--pz-link-color, var(--link-color))
+
+  .column-id
+    margin-left: 0.25em
+    white-space: nowrap
+
+  .remove-column
+    margin-left: 0.15em
+    vertical-align: middle
+    min-width: 0
+    min-height: 0
+    opacity: 0.5
+
+    &:hover
+      opacity: 1
+
+/* -------------------------------------------------------------- assistant */
+
+// The selected unit's details: the one piece of assistant content that is a card.
+.unit-details-panel
+  overflow: auto
+  max-height: 100%
+  border-radius: var(--pz-radius-md, 6px)
+  background: var(--panel-secondary-background-color)
+  box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
+
+.column-selection-list
+  min-height: 0
+  overflow: auto
+  padding: 0.5em 1em
+  border-radius: var(--pz-radius-md, 6px)
+  background: var(--panel-secondary-background-color)
+  box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
+
+  h3
+    margin: 0.25em 0 0.5em
+    color: var(--secondary-color)
+
+  .selection-empty, .selection-note
+    color: var(--text-subtle-color)
+    font-size: 0.85em
+
+  .selection-note
+    margin: 0 0 0.5em
+
+  .selection-item
+    padding: 0.3em 0.4em
+    border-radius: 4px
+    cursor: pointer
+    user-select: none
+
+    &:hover
+      background-color: var(--background-color)
+
+  .selection-label
+    flex: 1 1 auto
+    min-width: 0
+    display: flex
+    gap: 0.35em
+    align-items: baseline
+    overflow: hidden
+
+  .selection-name
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  .selection-id
+    color: var(--text-subtle-color)
+    font-size: 0.85em
+
+/* --------------------------------------------------------------- settings */
+
+// Bounded so the time filter's interval picker scrolls inside it rather than
+// stretching the popover to the timescale's length.
+.settings
+  padding: 1em
+  width: 26em
+  max-width: min(26em, 90vw)
+
+  > :first-child
+    margin-top: 0
+
+  > :last-child
+    margin-bottom: 0
+
+  h3
+    color: var(--secondary-color)
+
+/* ------------------------------------------------------------ chart internals */
 
 .package
   position: relative
@@ -91,51 +154,6 @@ $map-size-inset: 12em
     display: flex
     flex-direction: row
 
-.map-expanded-button
-  position: absolute
-  top: 0.5em
-  right: 0.5em
-  z-index: 100
-
-.main-panel
-  position: relative
-  height: 100%
-  display: flex
-  flex-direction: column
-  // Padding should be included in the fullscreen page, probably
-  padding: 2em
-
-
 .correlation-chart-inner
   display: flex
   flex-direction: row
-
-.overlay-safe-area
-  position: absolute
-  top: 1em
-  left: 1em
-  right: 1em
-  bottom: 1em
-  pointer-events: none
-
-.map-inset
-  .overlay-safe-area
-    margin-right: $map-size-inset + 1em
-
-  .column-selection-map
-    z-index: 1000
-
-.assistant
-  display: flex
-  flex-direction: column
-  gap: 1em
-
-.settings
-  padding: 1em
-  min-width: 10em
-
-  > :first-child
-    margin-top: 0
-
-  > :last-child
-    margin-bottom: 0

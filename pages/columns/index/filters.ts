@@ -11,8 +11,9 @@
  * filter defined by the selection self-destroying.
  */
 
-import { Icon, InputGroup } from "@blueprintjs/core";
+import { Icon, InputGroup, Switch } from "@blueprintjs/core";
 import type { TableFilter } from "@macrostrat/data-sheet";
+import type { FilterURLBinding } from "~/components";
 
 import h from "./main.module.sass";
 import { withinBounds, type ColumnRow, type MapBounds } from "./state";
@@ -27,15 +28,26 @@ interface SearchState {
   text: string;
 }
 
+/** The search bar, the toolbar's inline control: a large text field. The text
+ * filters the loaded rows and feeds the lexicon facet suggester. Projects are
+ * chosen with the dropdown beside it and shown as tags in the header row, so
+ * they stay out of this field. */
 function SearchForm({ state, setState }) {
   const text = state?.text ?? "";
   return h(InputGroup, {
     className: "search-input",
+    large: true,
     leftIcon: "search",
     placeholder: "Search columns…",
     value: text,
-    small: true,
-    onChange: (evt) => setState({ text: evt.currentTarget.value }),
+    onChange: (evt) => {
+      const next = evt.currentTarget.value;
+      if (next === "") {
+        setState(null);
+      } else {
+        setState({ text: next });
+      }
+    },
   });
 }
 
@@ -62,19 +74,51 @@ export const searchFilter: TableFilter<ColumnRow, SearchState> = {
   },
 };
 
+/** URL form of the search: `?q=`, as on the map-ingestion list. */
+export const columnURLBindings: FilterURLBinding[] = [
+  {
+    filter: searchFilter,
+    params: ["q"],
+    toParams: (s: SearchState) => ({ q: s?.text?.trim() || null }),
+    fromParams: ({ q }) => {
+      if (q == null || q.trim() === "") return null;
+      return { text: q };
+    },
+  },
+];
+
 /* ---------------------------------------------------------- only selected */
 
 export interface OnlySelectedState {
   ids: number[];
 }
 
-function OnlySelectedForm({ state }) {
+/** A switch turns the filter on (with an empty state the page's bridge then
+ * fills in) and off (`null` clears it); the note reports what it holds. */
+function OnlySelectedForm({ state, setState }) {
+  const active = state != null;
   const count = state?.ids?.length ?? 0;
-  let label = `${count} selected`;
+  let note = `${count} selected`;
   if (count === 0) {
-    label = "nothing selected";
+    note = "nothing selected";
   }
-  return h("div.filter-note", [h(Icon, { icon: "select", size: 12 }), label]);
+  return h("div.filter-toggle", [
+    h(Switch, {
+      checked: active,
+      label: "Only selected columns",
+      onChange: () => {
+        if (active) {
+          setState(null);
+        } else {
+          setState({ ids: [] });
+        }
+      },
+    }),
+    h.if(active)("div.filter-note", [
+      h(Icon, { icon: "select", size: 12 }),
+      note,
+    ]),
+  ]);
 }
 
 export const onlySelectedFilter: TableFilter<ColumnRow, OnlySelectedState> = {
@@ -94,12 +138,26 @@ export interface InMapAreaState {
   bounds: MapBounds | null;
 }
 
-function InMapAreaForm({ state }) {
-  let label = "waiting for the map";
+function InMapAreaForm({ state, setState }) {
+  const active = state != null;
+  let note = "waiting for the map";
   if (state?.bounds != null) {
-    label = "tracking the map view";
+    note = "tracking the map view";
   }
-  return h("div.filter-note", [h(Icon, { icon: "map", size: 12 }), label]);
+  return h("div.filter-toggle", [
+    h(Switch, {
+      checked: active,
+      label: "Only columns in the map view",
+      onChange: () => {
+        if (active) {
+          setState(null);
+        } else {
+          setState({ bounds: null });
+        }
+      },
+    }),
+    h.if(active)("div.filter-note", [h(Icon, { icon: "map", size: 12 }), note]),
+  ]);
 }
 
 export const inMapAreaFilter: TableFilter<ColumnRow, InMapAreaState> = {

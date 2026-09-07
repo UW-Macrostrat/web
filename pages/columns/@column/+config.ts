@@ -1,5 +1,7 @@
 export default {
-  pageStyle: "fullscreen",
+  // The hybrid content/map frame (`~/layouts/hybrid`): the column is the
+  // content, with the navigation map and column/unit details alongside.
+  pageStyle: "hybrid",
   meta: {
     Page: {
       env: {

@@ -2541,9 +2541,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^3.10.0":
-  version: 3.10.0
-  resolution: "@macrostrat/column-views@npm:3.10.0"
+"@macrostrat/column-views@npm:^3.11.0":
+  version: 3.11.0
+  resolution: "@macrostrat/column-views@npm:3.11.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/api-types": "npm:^1.3.0"
@@ -2571,7 +2571,7 @@ __metadata:
     jotai: "npm:^2.20.0"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/d60557b618336b1951cf68592fd57f884ebda5c191143972aab6b9072be956ce5d471b03b07cb4d73efce43a17ad94e3c7c71cd54ef099b6f72401914e34d4f7
+  checksum: 10c0/a27b2d303f9a37104426325e775d954585ef65857859d7216cc63a645bda48c4c3aa1b3183466861e927ea9b607eb353c6ef367b1d5209160ecd405f2a519e56
   languageName: node
   linkType: hard
 
@@ -2644,6 +2644,29 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
   checksum: 10c0/274402c231e9fc36b45fb56e6947b7743b1f88559b806537b3509fcd67ba3233f0f0643ede6c5c2e2839c93269effc4f833a3c0c03d5039ce859dd4961429e0f
+  languageName: node
+  linkType: hard
+
+"@macrostrat/data-sheet@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@macrostrat/data-sheet@npm:4.8.0"
+  dependencies:
+    "@blueprintjs/core": "npm:^6.14.0"
+    "@blueprintjs/table": "npm:^6.1.0"
+    "@macrostrat/color-utils": "npm:^1.2.2"
+    "@macrostrat/data-components": "npm:^1.5.1"
+    "@macrostrat/hyper": "npm:^3.1.1"
+    "@macrostrat/scoped-store": "npm:^1.1.0"
+    "@macrostrat/ui-components": "npm:^5.2.0"
+    "@supabase/postgrest-js": "npm:^1.17.7"
+    "@types/underscore": "npm:^1.13.0"
+    classnames: "npm:^2.5.1"
+    immutability-helper: "npm:^3.1.1"
+    jotai: "npm:^2.20.0"
+    underscore: "npm:^1.13.7"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+  checksum: 10c0/41ecfbc1770d95d9845cf1f1f73130540265a2ba60b57858d37149ab9a47aa80d4a6593849e223a08121a7a0dbb61b85c320cea6b33ef34e76b0eda10cf03419
   languageName: node
   linkType: hard
 
@@ -2757,9 +2780,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-views@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@macrostrat/map-views@npm:1.0.0"
+"@macrostrat/map-views@npm:^1.0.0, @macrostrat/map-views@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@macrostrat/map-views@npm:1.1.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/api-types": "npm:^1.3.0"
@@ -2793,10 +2816,9 @@ __metadata:
     react-spring: "npm:^9.7.5"
     topojson-client: "npm:^3.1.0"
     zustand: "npm:^5.0.3"
-    zustand-computed: "npm:^2.0.2"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/6f8f1a3d64df5c13a38888ac80c25abd5d5a0f91d716ae0ca6b03ef7317f76970d9cb7000a3654f153b3cd8e107be3f25aaf65524d6cc7e482b7bd7f7db5b0c3
+  checksum: 10c0/6b6bec2dca635cb5b06abe962f520b2df6ed1e963ed1ba38d52af28585af2889cc7df8e078e6cb5a32838cc7cfe181f72868ffd1b6366e3565586f4580a05557
   languageName: node
   linkType: hard
 
@@ -3046,6 +3068,7 @@ __metadata:
     "@babel/preset-typescript": "npm:^7.18.6"
     "@babel/runtime": "npm:^7.28.6"
     "@blueprintjs/core": "npm:^6.14.0"
+    "@blueprintjs/icons": "npm:^6.13.0"
     "@blueprintjs/select": "npm:^6.2.0"
     "@blueprintjs/table": "npm:^6.1.0"
     "@corelle/svg-map-layers": "npm:^1.0.0"
@@ -3063,15 +3086,16 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.3.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/column-components": "npm:^2.1.0"
-    "@macrostrat/column-views": "npm:^3.10.0"
+    "@macrostrat/column-views": "npm:^3.11.0"
     "@macrostrat/data-components": "npm:^1.5.1"
     "@macrostrat/data-provider": "npm:^1.2.0"
-    "@macrostrat/data-sheet": "npm:^4.6.0"
+    "@macrostrat/data-sheet": "npm:^4.8.0"
     "@macrostrat/feedback-components": "npm:^2.3.1"
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/map-interface": "npm:^2.4.0"
     "@macrostrat/map-styles": "npm:^2.2.7"
+    "@macrostrat/map-views": "npm:^1.1.0"
     "@macrostrat/mapbox-react": "npm:^3.4.0"
     "@macrostrat/mapbox-utils": "npm:^1.8.0"
     "@macrostrat/revision-info-webpack": "npm:^1.0.0"
@@ -21308,16 +21332,6 @@ __metadata:
   version: 4.3.6
   resolution: "zod@npm:4.3.6"
   checksum: 10c0/860d25a81ab41d33aa25f8d0d07b091a04acb426e605f396227a796e9e800c44723ed96d0f53a512b57be3d1520f45bf69c0cb3b378a232a00787a2609625307
-  languageName: node
-  linkType: hard
-
-"zustand-computed@npm:^2.0.2":
-  version: 2.1.1
-  resolution: "zustand-computed@npm:2.1.1"
-  peerDependencies:
-    react: ">=18.2.0 <20.0.0"
-    zustand: ">=5.0.0 <6.0.0"
-  checksum: 10c0/397056a366d524f504871d2944241b7ad607d7e68a4fbd9b2483f9e721c5f091836f47dd69d9a0c61161a480c4532c8c0ae153895b6924ef53a5fdc5f5c5ea82
   languageName: node
   linkType: hard
 

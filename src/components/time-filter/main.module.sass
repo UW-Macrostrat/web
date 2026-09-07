@@ -1,0 +1,44 @@
+.time-filter-tag
+  display: inline-flex
+  align-items: center
+  gap: 0.25em
+  vertical-align: middle
+
+  .clear-button
+    min-width: 0
+    min-height: 0
+
+.time-filter-panel
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+  min-width: 0
+  max-width: 100%
+
+  .unit
+    color: var(--secondary-color)
+    font-style: italic
+
+.age-range-control
+  :global(.bp6-control-group)
+    justify-content: space-between
+
+.interval-search
+  margin-bottom: 0
+
+  .interval-swatch
+    display: inline-block
+    width: 0.8em
+    height: 0.8em
+    border-radius: 2px
+    border: 1px solid var(--pz-border-color, var(--panel-rule-color))
+
+// Laid out at its full length and scrolled inside the panel, so it never
+// dictates the panel's width.
+.interval-picker
+  --timescale-level-size: 1.4em
+  overflow-x: auto
+  overflow-y: hidden
+  padding-bottom: 0.25em
+  cursor: pointer
+  min-width: 0

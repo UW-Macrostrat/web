@@ -8,6 +8,7 @@
  * lives in `ingestion-list.ts`; the coupled state lives in `view-state.ts`.
  */
 import hyper from "@macrostrat/hyper";
+import classNames from "classnames";
 import styles from "./controls.module.sass";
 import {
   Button,
@@ -98,6 +99,11 @@ export interface OpenSearchControlProps {
   placeholder?: string;
   /** Message for the dropdown when nothing matches. */
   noResultsText?: string;
+  /** Display label for a tag whose value is a key (a slug, an id). */
+  labelForTag?: (tag: string) => string;
+  /** Blueprint's large input size. */
+  large?: boolean;
+  className?: string;
 }
 
 export function isSearchEmpty(value: SearchValue | null | undefined): boolean {
@@ -117,9 +123,13 @@ export function OpenSearchControl({
   colorForTag,
   placeholder = "Search…",
   noResultsText = "No matches",
+  labelForTag,
+  large = false,
+  className,
 }: OpenSearchControlProps) {
   const text = value?.text ?? "";
   const selected = value?.tags ?? [];
+  const label = (tag: string) => labelForTag?.(tag) ?? tag;
 
   // Selecting a tag can fire two handlers in one batch (item-select, then the
   // tag input's query reset), and both would otherwise derive from the same
@@ -158,7 +168,7 @@ export function OpenSearchControl({
     const query = valueRef.current.text.trim();
     if (query === "") return;
     const q = query.toLowerCase();
-    if (tags.some((tag) => tag.toLowerCase().includes(q))) return;
+    if (tags.some((tag) => label(tag).toLowerCase().includes(q))) return;
     commit({ text: "" });
   };
 
@@ -174,7 +184,7 @@ export function OpenSearchControl({
   }
 
   return h(MultiSelect<string>, {
-    className: "open-search",
+    className: classNames("open-search", className, { large }),
     items: tags,
     selectedItems: selected,
     query: text,
@@ -185,7 +195,7 @@ export function OpenSearchControl({
     resetOnSelect: false,
     placeholder,
     itemPredicate: (q: string, tag: string) =>
-      tag.toLowerCase().includes(q.toLowerCase()),
+      label(tag).toLowerCase().includes(q.toLowerCase()),
     itemRenderer: (tag: string, { handleClick, modifiers }: any) => {
       if (!modifiers.matchesPredicate) return null;
       let icon: "tick" | "blank" = "blank";
@@ -194,16 +204,21 @@ export function OpenSearchControl({
         key: tag,
         active: modifiers.active,
         icon,
-        text: h(ColoredTag, { name: tag, color: colorForTag?.(tag) }),
+        text: h(ColoredTag, { name: label(tag), color: colorForTag?.(tag) }),
         shouldDismissPopover: false,
         onClick: handleClick,
       });
     },
-    tagRenderer: (tag: string) => tag,
+    tagRenderer: (tag: string) => label(tag),
     onItemSelect: toggleTag,
-    onRemove: (tag: string) => toggleTag(tag),
+    // `onRemove` receives the rendered label; map it back to the tag value
+    onRemove: (_node: any, index: number) => {
+      const tag = selected[index];
+      if (tag != null) toggleTag(tag);
+    },
     tagInputProps: {
       leftIcon: "search",
+      large,
       rightElement,
       tagProps: (_node: any, index: number) => {
         const color = colorForTag?.(selected[index]);

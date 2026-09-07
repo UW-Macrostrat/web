@@ -1,26 +1,20 @@
-import { getGroupedColumns } from "#/columns/index/grouped-cols";
 import { fetchAPIData } from "~/_utils/fetch-helpers";
+import { render } from "vike/abort";
+import { findProject } from "~/components/project-filter/model";
 
+/** The project overview needs only the project definition: its description,
+ * counts and (for a composite) member projects. The columns themselves live on
+ * `/columns?project_id=…`, which the page links to. */
 export async function data(pageContext) {
-  // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
-  const _project_id = pageContext.routeParams.project;
+  // The route takes a slug (`/projects/north-america`, the preferred form) or
+  // a numeric id. The API resolves ids only, so look the project up in the
+  // full definition list.
+  const key = String(pageContext.routeParams.project ?? "");
+  const projects = await fetchAPIData(`/defs/projects`, { all: true });
+  const project = findProject(projects, key);
+  if (project == null) {
+    throw render(404, `Project "${key}" not found.`);
+  }
 
-  const project_id = Number(_project_id);
-
-  const projects = await fetchAPIData(`/defs/projects`, {
-    project_id,
-  });
-  const project = projects[0];
-
-  const allColumnGroups = await getGroupedColumns({ project_id });
-
-  return {
-    allColumnGroups,
-    // The list's project section headers read names from here; a single-project
-    // route still supplies its own so the header isn't a bare id.
-    projects: [project],
-    project,
-    project_id,
-    linkPrefix: `/projects/${project_id}/`,
-  };
+  return { project, project_id: project.project_id };
 }

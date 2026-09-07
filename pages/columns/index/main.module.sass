@@ -5,6 +5,8 @@
 $row-height: 30px
 $group-height: 34px
 
+// The panel is the scroller (the frame's `panel` mode), so its floating
+// toolbar stays put by construction.
 .column-panel
   height: 100%
   min-height: 0
@@ -85,8 +87,20 @@ $group-height: 34px
   color: var(--pz-secondary-color, var(--secondary-color))
   font-size: 0.8rem
 
+// A large search field, taking the toolbar's width.
 .search-input
-  min-width: 12rem
+  flex: 1 1 auto
+  min-width: 20rem
+  max-width: 36rem
+
+.filter-toggle
+  display: flex
+  flex-direction: column
+  gap: 0.25em
+  padding: 0.2em 0.4em
+
+  :global(.bp6-control)
+    margin-bottom: 0
 
 .lex-suggestions
   display: flex

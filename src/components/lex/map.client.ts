@@ -1,4 +1,4 @@
-import { ColumnNavigationMap } from "@macrostrat/column-views";
+import { ColumnNavigationMap } from "@macrostrat/map-views";
 import h from "./map.module.sass";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";

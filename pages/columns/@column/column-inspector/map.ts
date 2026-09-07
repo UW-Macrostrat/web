@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { ColumnNavigationMap } from "@macrostrat/column-views";
+import { ColumnNavigationMap } from "@macrostrat/map-views";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 

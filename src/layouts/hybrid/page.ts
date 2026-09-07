@@ -24,6 +24,7 @@ import { ActionsPanel } from "./controls";
 import {
   buildCapabilities,
   capabilitiesAtom,
+  contentScrollAtom,
   layoutShellAtom,
   type LayoutCapabilities,
 } from "./state";
@@ -35,6 +36,13 @@ export interface HybridPageProps {
   content?: ReactNode;
   map?: ReactNode;
   assistant?: ReactNode;
+  /** Active filters and the like: a second header row above the content, at
+   * the content's width. Render nothing when there's nothing to show. */
+  filterBar?: ReactNode;
+  /** Wraps the assembled shell *inside* the frame's jotai scope — for a
+   * provider that must span every slot (a shared store) while reading atoms
+   * the page seeded through `initialAtoms`. */
+  wrap?: (children: ReactNode) => ReactNode;
   /** Page-owned atoms to seed inside the frame's jotai scope. The frame creates
    * its own `Provider`, which isolates *every* atom read below it — so a page
    * can't hydrate its state in an outer provider and expect the slots to see
@@ -84,17 +92,24 @@ function HybridPageInner({
   content,
   map,
   assistant,
+  filterBar,
+  wrap,
   className,
 }: HybridPageProps) {
   const shell = useAtomValue(layoutShellAtom);
+  const contentScroll = useAtomValue(contentScrollAtom);
 
-  const shellView = h(LayoutShellView, {
+  let shellView: ReactNode = h(LayoutShellView, {
     content,
     breadcrumbs: h(PageBreadcrumbs, { showLogo: true, separateTitle: false }),
     controls: h(HeaderControls, { actions }),
+    filterBar,
     map,
     assistant,
   });
+  if (wrap != null) {
+    shellView = wrap(shellView);
+  }
 
   if (shell !== "content") {
     return h(
@@ -108,10 +123,11 @@ function HybridPageInner({
   // frame — pages pass `HybridContentFooter` as the panel's `contentFooter`,
   // mirroring `InfiniteScrollPage`. The overlay button stays as a shortcut to
   // the same links from anywhere in a long list.
-  return h("div.hybrid-frame.shell-content", { className }, [
-    shellView,
-    h(FooterOverlayTrigger, { key: "footer-affordance" }),
-  ]);
+  return h(
+    "div.hybrid-frame.shell-content",
+    { className: classNames(className, `scroll-${contentScroll}`) },
+    [shellView, h(FooterOverlayTrigger, { key: "footer-affordance" })]
+  );
 }
 
 /** The layout controls, plus whatever the page contributes. Shells place these

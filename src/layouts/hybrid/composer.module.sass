@@ -18,10 +18,30 @@
   margin: 1.5em auto 0.75em
   padding: 0 1em
   display: flex
+  flex-direction: column
+  gap: 0.35em
+  min-width: 0
+
+// Breadcrumbs / title on the left, controls on the right.
+.header-row
+  display: flex
   flex-direction: row
   align-items: center
   gap: var(--pz-inline-gap, 0.5rem)
   min-width: 0
+
+// Active filters, as a second row at the content's width. Collapses when the
+// page has nothing to show.
+.header-filters
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  min-height: 0
+
+  &:empty
+    display: none
 
 .header-titling
   flex: 1 1 auto
@@ -34,10 +54,13 @@
   align-items: center
   gap: var(--pz-inline-gap, 0.5rem)
 
+// Header and main share one horizontal padding, so the header's left edge
+// lines up with the content (and the footer at the end of it) in every mode.
 .content-main
   flex: 1 1 auto
   min-height: 0
   width: 100%
+  padding: 0 1em
   display: flex
   flex-direction: row
   justify-content: center
@@ -62,13 +85,50 @@
   .content-panel-holder
     max-width: var(--hybrid-shell-width)
 
+// `content-full` / `content-inset`: the content takes the whole page width.
+.content-shell.full-width
+  --hybrid-shell-width: 100%
+
+  .content-header,
+  .content-main,
+  .content-panel-holder
+    max-width: none
+
+// The inset map floats over the top-right of full-width content.
+.content-main
+  position: relative
+
+.content-inset-map
+  position: absolute
+  top: 0.5em
+  right: 1.5em
+  width: 14em
+  height: 14em
+  z-index: 10
+  overflow: hidden
+  border-radius: var(--pz-radius-md, 6px)
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
+
+// Overlay affordance on either map for growing/shrinking it.
+.mode-switch-button
+  position: absolute
+  top: 0.4em
+  right: 0.4em
+  z-index: 11
+
 // `content-primary` puts the map and assistant in a column beside the list. The
 // list keeps the app content measure; the sidebar takes the room to its right,
 // which is what the overhang in the old document-flow version was faking.
 .content-shell.has-sidebar
+  // The header spans the same measure as content + sidebar, so its left edge
+  // stays aligned with the content when the sidebar widens the shell.
+  .content-header,
   .content-main
-    padding: 0 1em 1em
     max-width: calc(var(--hybrid-content-width) + var(--hybrid-sidebar-width) + var(--pz-section-gap, 1.5rem))
+
+  .content-main
+    padding-bottom: 1em
 
   .content-panel-holder
     flex: 1 1 var(--hybrid-content-width)
@@ -84,6 +144,9 @@
   padding-bottom: 1em
   overflow-y: auto
 
+// The map reads as an elevated card beside the content. The assistant slot is
+// unstyled: whether its content is a card (a details panel) or plain metadata
+// is the content's decision, not the slot's.
 .sidebar-map
   position: relative
   flex: 0 0 auto
@@ -91,11 +154,61 @@
   aspect-ratio: 4 / 3
   overflow: hidden
   border-radius: var(--pz-radius-md, 6px)
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
 
 .sidebar-assistant
   flex: 0 1 auto
   min-height: 0
   overflow-y: auto
+
+/* ------------------------------------------------- page-scrolling variant */
+
+// `contentScroll: "page"`: the document scrolls instead of the content. The
+// shell grows with its content, the sidebar sticks below the top edge, and the
+// page's own footer sits at the end of the content in normal flow.
+.content-shell.scroll-page
+  height: auto
+  min-height: 100vh
+  overflow: visible
+
+  .content-header
+    position: sticky
+    top: 0
+    z-index: 5
+    margin-top: 0
+    padding-top: 1.5em
+    padding-bottom: 0.75em
+    background-color: var(--pz-background-color, var(--background-color))
+
+    // Content passing beneath the header fades out under it.
+    &::after
+      content: ""
+      position: absolute
+      left: 0
+      right: 0
+      bottom: -1em
+      height: 1em
+      pointer-events: none
+      background: linear-gradient(to bottom, var(--pz-background-color, var(--background-color)), transparent)
+
+  // Grows to fill the viewport, so a page's footer (at the end of its content)
+  // sits at the bottom even when the content is short.
+  .content-main
+    flex: 1 1 auto
+    min-height: 0
+    align-items: flex-start
+
+  .content-panel-holder
+    display: flex
+    flex-direction: column
+    min-height: 0
+    align-self: stretch
+
+  .content-sidebar
+    position: sticky
+    top: 4.5em
+    max-height: calc(100vh - 5.5em)
 
 // Narrow: the sidebar stops earning its column.
 @media (max-width: 1000px)
