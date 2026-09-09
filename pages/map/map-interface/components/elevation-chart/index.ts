@@ -1,16 +1,19 @@
 import { Button, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { LocationFocusButton } from "@macrostrat/mapbox-react";
-import { useAPIResult } from "@macrostrat/ui-components";
 import { bisector, extent, max, min } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import { select, pointer } from "d3-selection";
 import { area, line } from "d3-shape";
+import { useAtomValue } from "jotai";
 import React, { useEffect, useRef } from "react";
-import { useAppActions, useAppState } from "../../app-state";
+import {
+  elevationProfileAtom,
+  useAppActions,
+  useAppState,
+} from "../../app-state";
 
-import { apiV2Prefix } from "@macrostrat-web/settings";
 import styles from "./main.module.styl";
 
 const h = hyper.styled(styles);
@@ -212,15 +215,22 @@ function ElevationChart({ elevationData = [] }) {
   return h("svg#elevationChart");
 }
 
-function ElevationChartPanel({ startPos, endPos }) {
-  const elevation: any = useAPIResult(apiV2Prefix + "/elevation", {
-    start_lng: startPos[0],
-    start_lat: startPos[1],
-    end_lng: endPos[0],
-    end_lat: endPos[1],
-  });
-  const elevationData = elevation?.success?.data;
-  if (elevationData == null) return h(Spinner);
+function ElevationChartPanel() {
+  const elevation = useAtomValue(elevationProfileAtom);
+
+  if (elevation.state == "loading") {
+    return h(Spinner);
+  }
+  if (elevation.state == "hasError") {
+    return h(
+      "div.elevation-instructions",
+      "Couldn't load the elevation profile"
+    );
+  }
+
+  const elevationData = elevation.data;
+  if (elevationData == null || elevationData.length == 0) return null;
+
   return h(
     "div.elevation-chart-wrapper",
     null,
@@ -235,20 +245,18 @@ function ElevationChartContainer() {
   const runAction = useAppActions();
 
   const nCoords = crossSectionLine?.coordinates?.length ?? 0;
+  const hasElevationData = nCoords >= 2;
 
-  const hasElevationData = crossSectionLine?.coordinates?.length >= 2;
-  const crossSectionOpen = crossSectionLine != null;
-
-  if (!crossSectionOpen) return null;
+  if (crossSectionLine == null) return null;
 
   return h(
     "div.elevation-chart-panel",
     null,
     h("div.elevation-chart", [
       h("div.control-bar", [
-        hasElevationData
-          ? h(LocationFocusButton, { location: crossSectionLine })
-          : null,
+        h.if(hasElevationData)(LocationFocusButton, {
+          location: crossSectionLine,
+        }),
         h("div.spacer"),
         h(Button, {
           icon: "cross",
@@ -265,10 +273,7 @@ function ElevationChartContainer() {
           nCoords == 0 ? "Click two points on the map" : "Click a second point",
           " to draw an elevation profile",
         ]),
-        h.if(hasElevationData)(ElevationChartPanel, {
-          startPos: crossSectionLine?.coordinates[0],
-          endPos: crossSectionLine?.coordinates[1],
-        }),
+        h.if(hasElevationData)(ElevationChartPanel),
       ]),
     ])
   );

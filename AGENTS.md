@@ -24,6 +24,11 @@ The site is built with **Vike + React + Mapbox GL**. Pages live under `pages/`; 
 - Context-local store and `jotai` helpers are available in `@macrostrat/scoped-store`.
 - View state that should be shareable/bookmarkable is synced to the URL query string (`atomWithLocation` plus a small `atomWithSearchParam` read/write helper). Keep default values OUT of the URL — write `null` to drop the param.
 
+## Data fetching
+
+- **Don't unwrap `success.data` twice.** `MacrostratDataProvider` (`@macrostrat/data-provider`) mounts an `APIProvider` configured with `unwrapResponse: (res) => res.success.data`, so under it `useAPIResult` already returns the bare payload. Reaching for `res.success.data` again yields `undefined`, which typically reads as "still loading" and renders a spinner forever. Raw `fetch`/axios calls are *not* wrapped and do still need the unwrap.
+- **Round coordinates before putting them in a request URL.** Map clicks carry full float precision; 5 decimal places (~1 m at the equator) is past the resolution of any Macrostrat dataset. Rounding also stabilizes the URL, so a numerically unchanged geometry doesn't refetch when it's used as a query/cache key.
+
 ## Maps & tiles
 
 - Map overlays are Mapbox GL style objects; vector tiles come from the tileserver (e.g., `tiles.macrostrat.local` for local development).
