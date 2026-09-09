@@ -1,0 +1,111 @@
+// Frame for documentation pages: a sticky breadcrumb header (the primary
+// navigation), the article, and a subsidiary sidebar floating to the right.
+
+.docs-page
+  --docs-header-height: 4.25em
+
+.docs-header
+  position: sticky
+  top: 0
+  z-index: 5
+  display: flex
+  align-items: center
+  gap: 1em
+  height: var(--docs-header-height)
+  background: var(--pz-background-color, #fff)
+  border-bottom: 1px solid var(--pz-panel-rule-color, #ddd)
+  margin-bottom: 1.5em
+
+  // The breadcrumb component fills the row; the title inside it is kept to one line
+  & > :first-child
+    flex: 1
+    min-width: 0
+  h1
+    font-size: 1.5em
+    margin: 0.1em 0 0
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+.docs-layout
+  display: grid
+  gap: 3em
+  align-items: start
+  max-width: 100%
+  &.with-sidebar
+    grid-template-columns: minmax(0, 1fr) 200px
+  &.single-column
+    grid-template-columns: minmax(0, 1fr)
+
+.docs-main
+  min-width: 0
+  margin-bottom: 4em
+
+.docs-sidebar
+  position: sticky
+  top: calc(var(--docs-header-height) + 1em)
+  max-height: calc(100vh - var(--docs-header-height) - 2em)
+  overflow-y: auto
+  font-size: 0.88em
+  line-height: 1.4
+  color: var(--pz-text-subtle-color, #5f6b7c)
+
+  ul
+    list-style: none
+    margin: 0
+    padding: 0
+  li
+    margin: 0.25em 0
+  a
+    display: block
+    text-decoration: none
+    color: inherit
+    &:hover
+      color: var(--pz-link-color, #2d72d2)
+
+.sidebar-block
+  margin-bottom: 1.5em
+
+.sidebar-heading
+  margin: 0 0 0.4em
+  font-size: 0.75em
+  font-weight: 600
+  letter-spacing: 0.06em
+  text-transform: uppercase
+  color: var(--pz-text-subtle-color, #5f6b7c)
+
+// Pages beneath the current one are the important links: bold and highlighted.
+.child-pages a
+  font-weight: 600
+  color: var(--pz-link-color, #2d72d2)
+  padding: 0.2em 0.5em
+  margin-left: -0.5em
+  border-radius: var(--pz-radius-sm, 3px)
+  background: var(--pz-panel-secondary-background-color, #f5f8fa)
+  &:hover
+    background: var(--pz-selected-background-color, #e5ebf1)
+
+.descend-marker
+  margin-left: 0.3em
+  opacity: 0.6
+
+.toc
+  border-left: 1px solid var(--pz-panel-rule-color, #ddd)
+  li
+    padding-left: 0.75em
+  .toc-depth-3
+    padding-left: 1.75em
+    font-size: 0.95em
+
+.section-index
+  ul
+    padding-left: 1.2em
+  li
+    margin: 0.3em 0
+
+@media (max-width: 720px)
+  .docs-layout.with-sidebar
+    grid-template-columns: 1fr
+  .docs-sidebar
+    position: static
+    max-height: none

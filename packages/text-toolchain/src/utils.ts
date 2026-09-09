@@ -26,7 +26,7 @@ export function buildPageIndex(
   for (const path of files) {
     // Get yaml frontmatter from file
     const content = readFileSync(path, "utf8");
-    const { data = {} } = matter(content);
+    const { data = {}, content: body } = matter(content);
 
     const newPath = path.replace(replacePattern, "");
 
@@ -42,7 +42,7 @@ export function buildPageIndex(
     if (lastPart == null) continue;
     const name = lastPart.split(".")[0];
 
-    const title = data.title ?? name;
+    const title = data.title ?? firstHeading(body) ?? name;
     permalinkIndex[sluggedPath] = { contentFile: newPath, title };
 
     const pathWithoutExt = newPath.split(".")[0];
@@ -70,11 +70,21 @@ export function slugifyPath(path: string, frontmatter: any) {
 
   let tokens = pathTokens.map((token) => slugify(token));
 
-  if (fileSlug != "" && fileSlug != "index") {
+  // `index` and `README` pages stand for their directory.
+  if (fileSlug != "" && fileSlug != "index" && fileSlug != "readme") {
     tokens.push(fileSlug);
   }
 
   // Join the path tokens back together
   let urlPath = tokens.join("/");
   return urlPath;
+}
+
+/** The text of the first level-1 heading in a markdown body, ignoring fenced
+ * code blocks, or null when the page has none. */
+function firstHeading(body: string): string | null {
+  const withoutCode = body.replace(/```[\s\S]*?```/g, "");
+  const m = /^#[ \t]+(.+?)[ \t]*#*[ \t]*$/m.exec(withoutCode);
+  if (m == null) return null;
+  return m[1].replace(/[*_`]/g, "").trim();
 }
