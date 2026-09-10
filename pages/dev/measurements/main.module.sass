@@ -1,6 +1,9 @@
+// The panel is wrapped in a PanelCard, which supplies its own background and
+// padding — this only lays out the contents.
 .panel
-    background-color: var(--background-color)
-    padding: 1em 1em .5em 1em
+    display: flex
+    flex-direction: column
+    gap: 1em
 
     h3 
         margin: 0
@@ -22,3 +25,8 @@
     .type
         .text
             margin: 0
+
+    .map-layer-controls
+        display: flex
+        flex-direction: column
+        gap: .5em

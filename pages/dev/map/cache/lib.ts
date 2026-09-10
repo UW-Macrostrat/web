@@ -2,11 +2,11 @@
  * (`+Page.client.ts`) stays render-only; everything non-visual lives here. */
 
 import { burwellTileDomain } from "@macrostrat-web/settings";
-import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { useCallback, useState } from "react";
 import { atom } from "jotai";
 import { atomWithLocation } from "jotai-location";
 import { Basemap } from "~/components";
+import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { loadable } from "jotai/utils";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -251,26 +251,6 @@ const HIGHLIGHT = "#ff6600"; // viewport-expiry rectangle/area
 const FOOTPRINT_OUTLINE = "#5c6066"; // prominent outline for all footprints
 const SELECTED_FILL = "#2b2f36"; // dark grey fill for selected maps
 
-/** The live Macrostrat geologic map (carto v2 tiles), for geographic context.
- * Source must be named "burwell" — that's what buildMacrostratStyleLayers
- * targets (source-layers `units` and `lines`). */
-function cartoStyle(): mapboxgl.Style {
-  return {
-    version: 8,
-    sources: {
-      burwell: {
-        type: "vector",
-        tiles: [`${burwellTileDomain}/dev/carto/{z}/{x}/{y}`],
-      },
-    },
-    layers: buildMacrostratStyleLayers({
-      fillOpacity: 0.4,
-      strokeOpacity: 0.4,
-      lineOpacity: 0.8,
-    }),
-  };
-}
-
 /** Clickable carto map footprints (the /cache/footprints layer). The endpoint
  * picks the scale band by zoom (+dz) and serves full footprints or realized
  * faces per `mode`. Non-selected maps show only a prominent outline (no fill,
@@ -343,7 +323,7 @@ export function buildOverlayStyles(opts: {
 }): mapboxgl.Style[] {
   const { showCarto, footprintMode, dz, selectedIds } = opts;
   const overlays: mapboxgl.Style[] = [];
-  if (showCarto) overlays.push(cartoStyle());
+  if (showCarto) overlays.push(macrostratCartoStyle());
   overlays.push(footprintsStyle({ mode: footprintMode, dz, selectedIds }));
   return overlays;
 }

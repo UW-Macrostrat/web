@@ -1,5 +1,32 @@
 /** Functions to apply specific layers to map UIs */
 
+import { burwellTileDomain } from "@macrostrat-web/settings";
+import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
+
+/** The live Macrostrat geologic map (the "carto v2" tileset), as an overlay
+ * style for geographic context on top of a plain basemap.
+ *
+ * The source must be named "burwell" — that's what `buildMacrostratStyleLayers`
+ * targets (source-layers `units` and `lines`). Semi-transparent by default so
+ * whatever a page draws above it stays readable.
+ */
+export function macrostratCartoStyle(): mapboxgl.Style {
+  return {
+    version: 8,
+    sources: {
+      burwell: {
+        type: "vector",
+        tiles: [`${burwellTileDomain}/dev/carto/{z}/{x}/{y}`],
+      },
+    },
+    layers: buildMacrostratStyleLayers({
+      fillOpacity: 0.4,
+      strokeOpacity: 0.4,
+      lineOpacity: 0.8,
+    }),
+  };
+}
+
 export enum MacrostratVectorTileset {
   Carto = "carto",
   CartoSlim = "carto-slim",

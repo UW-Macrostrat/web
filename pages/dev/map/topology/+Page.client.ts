@@ -22,7 +22,6 @@ import hyper from "@macrostrat/hyper";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { Spacer, useDarkMode, ErrorCallout } from "@macrostrat/ui-components";
 import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
-import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MapMarker,
@@ -48,6 +47,7 @@ import {
 import { atom, useAtom, useAtomValue } from "jotai";
 import { loadable } from "jotai/utils";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
+import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import {
   Link,
@@ -244,7 +244,7 @@ export function Page() {
     );
     // The live Macrostrat map sits beneath the topology overlays.
     if (showCarto) {
-      overlays.unshift(cartoStyle());
+      overlays.unshift(macrostratCartoStyle());
     }
     // Errors sit on top of everything so they're never hidden by the mode layer.
     if (showErrors && errors != null) {
@@ -711,26 +711,6 @@ function TileFeaturesCallout({ features }) {
     },
     h(Features, { features: primitives })
   );
-}
-
-/** The live Macrostrat geologic map, built from the carto_new tileserver layer
- * (the "carto v2" tileset). The source must be named "burwell" — that's what
- * buildMacrostratStyleLayers targets (source-layers `units` and `lines`). */
-function cartoStyle(): mapboxgl.Style {
-  return {
-    version: 8,
-    sources: {
-      burwell: {
-        type: "vector",
-        tiles: [`${burwellTileDomain}/dev/carto/{z}/{x}/{y}`],
-      },
-    },
-    layers: buildMacrostratStyleLayers({
-      fillOpacity: 0.4,
-      strokeOpacity: 0.4,
-      lineOpacity: 0.8,
-    }),
-  };
 }
 
 /** Topology-solving error faces, drawn from a GeoJSON source (the small /errors

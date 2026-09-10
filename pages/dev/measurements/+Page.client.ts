@@ -3,18 +3,67 @@ import h from "./main.module.sass";
 import {
   MapAreaContainer,
   MapView,
-  buildInspectorStyle,
+  PanelCard,
 } from "@macrostrat/map-interface";
-import { mapboxAccessToken } from "@macrostrat-web/settings";
-import { useEffect, useState } from "react";
+import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
+import { removeMapLabels } from "@macrostrat/mapbox-utils";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDarkMode, FlexRow } from "@macrostrat/ui-components";
 import { MultiSelect } from "@blueprintjs/select";
 import { MenuItem, Switch, Divider, Icon } from "@blueprintjs/core";
-import { tileserverDomain } from "@macrostrat-web/settings";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { fetchAPIV2Result, fetchPGData } from "~/_utils";
+import { macrostratCartoStyle } from "~/_utils/map-layers";
+import { atomWithSearchParam } from "~/_utils/url-atoms";
+import { BaseLayerForm, Basemap, basemapStyle } from "~/components";
+import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
 import { Measurement } from "./measurement.ts";
 import { usePageContext } from "vike-react/usePageContext";
-import { Loading } from "~/components";
+
+/** Shared width for the floating navbar and the context panel below it. */
+const PANEL_WIDTH = 320;
+
+/** The base map style, persisted in the URL (parallel to the other map pages).
+ * "basic" is the default and is kept out of the query string. */
+const basemapParamAtom = atomWithSearchParam("basemap");
+const basemapAtom = atom(
+  (get): Basemap => {
+    const value = get(basemapParamAtom);
+    if (value === Basemap.Satellite || value === Basemap.None) {
+      return value as Basemap;
+    }
+    return Basemap.Basic;
+  },
+  (get, set, value: Basemap) => {
+    let param: Basemap | null = value;
+    if (value === Basemap.Basic) param = null;
+    set(basemapParamAtom, param);
+  }
+);
+
+/** Whether the basemap's text labels are shown. On by default; the "off" state
+ * is stored in the URL. */
+const labelsParamAtom = atomWithSearchParam("labels");
+const showLabelsAtom = atom(
+  (get) => get(labelsParamAtom) !== "off",
+  (get, set, value: boolean) => {
+    let param: string | null = null;
+    if (!value) param = "off";
+    set(labelsParamAtom, param);
+  }
+);
+
+/** Whether to underlay the Macrostrat geologic map, for geological context
+ * behind the measurement points. Off by default; "on" is stored in the URL. */
+const cartoParamAtom = atomWithSearchParam("carto");
+const showCartoAtom = atom(
+  (get) => get(cartoParamAtom) === "on",
+  (get, set, value: boolean) => {
+    let param: string | null = null;
+    if (value) param = "on";
+    set(cartoParamAtom, param);
+  }
+);
 
 export function Page() {
   const [types, setTypes] = useState([]);
@@ -43,9 +92,30 @@ function Map({ types }) {
     }
   }, [types, id]);
 
-  const style = useMapStyle({ selectedTypes, clustered });
+  const [isOpen, setOpen] = useState(true);
 
-  if (style == null) return null;
+  const dark = useDarkMode();
+  const isEnabled = dark?.isEnabled;
+
+  const basemap = useAtomValue(basemapAtom);
+  const showLabels = useAtomValue(showLabelsAtom);
+  const showCarto = useAtomValue(showCartoAtom);
+
+  const baseStyle = basemapStyle(basemap, isEnabled);
+  const overlayStyles = useOverlayStyles({
+    selectedTypes,
+    clustered,
+    showCarto,
+  });
+
+  // Toggle basemap labels by stripping label layers from the resolved style.
+  const transformStyle = useCallback(
+    (style) => {
+      if (showLabels) return style;
+      return removeMapLabels(style, true);
+    },
+    [showLabels]
+  );
 
   const mapPosition = {
     camera: {
@@ -81,48 +151,49 @@ function Map({ types }) {
     }
   };
 
+  // Mirror the navbar width. PanelCard doesn't expose a flexible width, so we
+  // set it here until that can be addressed upstream in map-interface.
+  const contextPanel = h(
+    PanelCard,
+    { style: { width: PANEL_WIDTH } },
+    h(Panel, {
+      selectedTypes,
+      setSelectedTypes,
+      clustered,
+      setClustered,
+      selectedMeasurement,
+      setSelectedMeasurement,
+      types,
+    })
+  );
+
   return h(
-    "div.map-container",
-    // The Map Area Container
-    h(
-      MapAreaContainer,
-      {
-        className: "map-area-container",
-        contextPanel: h(Panel, {
-          selectedTypes,
-          setSelectedTypes,
-          clustered,
-          setClustered,
-          selectedMeasurement,
-          setSelectedMeasurement,
-          types,
-        }),
-        key: selectedTypes.join(",") + clustered,
+    MapAreaContainer,
+    {
+      navbar: h(MapPageNavbar, {
+        isOpen,
+        onToggle: () => setOpen(!isOpen),
+        width: PANEL_WIDTH,
+      }),
+      contextPanel,
+      contextPanelOpen: isOpen,
+    },
+    h(MapView, {
+      style: baseStyle,
+      overlayStyles,
+      transformStyle,
+      mapboxToken: mapboxAccessToken,
+      mapPosition,
+      onMapLoaded: (map) => {
+        map.on("click", (e) => handleClick(map, e));
       },
-      [
-        h(MapView, {
-          style,
-          mapboxToken: mapboxAccessToken,
-          mapPosition,
-          onMapLoaded: (map) => {
-            map.on("click", (e) => handleClick(map, e));
-          },
-        }),
-      ]
-    )
+    })
   );
 }
 
-function useMapStyle({ selectedTypes, clustered }) {
-  const dark = useDarkMode();
-  const isEnabled = dark?.isEnabled;
-
-  const baseStyle = isEnabled
-    ? "mapbox://styles/mapbox/dark-v10"
-    : "mapbox://styles/mapbox/light-v10";
-
-  const [actualStyle, setActualStyle] = useState(null);
-
+/** Overlay styles drawn above the basemap: the Macrostrat geologic map (when
+ * enabled, so it sits beneath the points) and the measurement tile layer. */
+function useOverlayStyles({ selectedTypes, clustered, showCarto }) {
   const ids = selectedTypes.map((t) => t.measure_id);
 
   const baseURL = tileserverDomain + "/measurements/tile/{z}/{x}/{y}";
@@ -229,27 +300,33 @@ function useMapStyle({ selectedTypes, clustered }) {
     },
   ];
 
-  const overlayStyle = {
+  let layers = unclusteredLayers;
+  if (clustered) {
+    layers = clusteredLayers;
+  }
+
+  const measurementStyle = {
+    version: 8,
     sources: {
       measurements: {
         type: "vector",
         tiles: [url],
       },
     },
-    layers: clustered ? clusteredLayers : unclusteredLayers,
+    layers,
   };
 
-  // Auto select sample type
-  useEffect(() => {
-    buildInspectorStyle(baseStyle, overlayStyle, {
-      mapboxToken: mapboxAccessToken,
-      inDarkMode: isEnabled,
-    }).then((s) => {
-      setActualStyle(s);
-    });
-  }, [isEnabled, clustered, selectedTypes]);
-
-  return actualStyle;
+  // MapView re-applies the style whenever this array's identity changes, so it
+  // has to be memoized on the things that actually affect it.
+  return useMemo(() => {
+    const overlays = [];
+    // The geologic map goes first, so measurement points draw on top of it.
+    if (showCarto) {
+      overlays.push(macrostratCartoStyle());
+    }
+    overlays.push(measurementStyle);
+    return overlays;
+  }, [url, clustered, showCarto]);
 }
 
 function Panel({
@@ -336,6 +413,25 @@ function Panel({
       selectedMeasurement,
       setSelectedMeasurement,
     }),
+    h(MapLayerControls),
+  ]);
+}
+
+/** Contextual map layers, shared with the other map pages: the Macrostrat
+ * geologic map beneath the measurements, plus the basemap/labels form. */
+function MapLayerControls() {
+  const [basemap, setBasemap] = useAtom(basemapAtom);
+  const [showCarto, setShowCarto] = useAtom(showCartoAtom);
+  const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
+
+  return h("div.map-layer-controls", [
+    h(Switch, {
+      className: "carto-toggle",
+      label: "Macrostrat map",
+      checked: showCarto,
+      onChange: (evt) => setShowCarto(evt.currentTarget.checked),
+    }),
+    h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),
   ]);
 }
 
