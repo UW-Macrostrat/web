@@ -29,6 +29,10 @@ import {
   type ProjectFilterAtom,
   type ProjectFilterValue,
 } from "~/components/project-filter";
+import {
+  IN_PROCESS_FILTER_KEY,
+  type InProcessFilterAtom,
+} from "~/components/in-process-filter";
 
 export function useColumnState(columnInfo) {
   const { units, col_id } = columnInfo;
@@ -129,6 +133,9 @@ interface ColumnHashState {
   /** Project filter: which projects' columns the navigation map shows
    * (slugs, comma-joined) */
   project_id?: string;
+  /** In-process filter (see `~/components/in-process-filter`): `"true"` when
+   * unfinished columns are in scope. Absent means off. */
+  in_process?: string;
   t_pos?: number;
   b_pos?: number;
   axis?: string;
@@ -192,6 +199,8 @@ function getStateFromHash(): ColumnHashState {
     state[key] = validateInt(params.get(key));
   }
   state.project_id = params.get("project_id") ?? undefined;
+  state.in_process =
+    params.get(IN_PROCESS_FILTER_KEY) === "true" ? "true" : undefined;
   for (const key of ["t_age", "b_age", "age", "t_pos", "b_pos", "scale"]) {
     state[key] = validateNumber(params.get(key));
   }
@@ -285,6 +294,19 @@ export const columnTimeFilterAtom: TimeFilterAtom = atom(
       }
       return next;
     });
+  }
+);
+
+/** The page's in-process filter, in the hash beside the project and time
+ * filters. Handed to `InProcessFilterProvider` so the shared switch, the
+ * navigation map and `useRevealInProcess` all read this page's hash. */
+export const columnInProcessFilterAtom: InProcessFilterAtom = atom(
+  (get) => get(hashStateAtom).in_process === "true",
+  (get, set, value: boolean) => {
+    set(hashStateAtom, (prev) => ({
+      ...prev,
+      in_process: value ? "true" : undefined,
+    }));
   }
 );
 

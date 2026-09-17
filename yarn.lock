@@ -2452,7 +2452,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/api-types@npm:1.3.0, @macrostrat/api-types@npm:^1.2.0, @macrostrat/api-types@npm:^1.3.0":
+"@macrostrat/api-types@npm:1.3.0, @macrostrat/api-types@npm:^1.3.0":
   version: 1.3.0
   resolution: "@macrostrat/api-types@npm:1.3.0"
   dependencies:
@@ -2608,13 +2608,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/data-provider@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@macrostrat/data-provider@npm:1.2.0"
+"@macrostrat/data-provider@npm:^1.2.0, @macrostrat/data-provider@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@macrostrat/data-provider@npm:1.2.1"
   dependencies:
-    "@macrostrat/api-types": "npm:^1.2.0"
+    "@macrostrat/api-types": "npm:^1.3.0"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/ui-components": "npm:^5.1.0"
+    "@macrostrat/ui-components": "npm:^5.2.0"
     "@types/topojson-client": "npm:^3.1.5"
     cross-fetch: "npm:^4.1.0"
     d3-geo: "npm:^3.1.1"
@@ -2622,7 +2622,7 @@ __metadata:
     zustand: "npm:^5.0.3"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/38e5ad083abd1f372ee1dbf4c028df80297a38ad3f7584cbe04ff4788af80c3d83bd75dd7b58e88395b80c337145d808412e26fa028177c8a5b599195ae37ad8
+  checksum: 10c0/68529b55ddb4881a6bd3927737f2b99978d65860820a1df8fcbf6bcdd935b82dfef647f27d182709c1bc8ad10d09ead206bc6c4f458dc584c1f2750ceff1ed29
   languageName: node
   linkType: hard
 
@@ -3090,7 +3090,7 @@ __metadata:
     "@macrostrat/column-components": "npm:^2.1.0"
     "@macrostrat/column-views": "npm:^3.11.0"
     "@macrostrat/data-components": "npm:^1.5.1"
-    "@macrostrat/data-provider": "npm:^1.2.0"
+    "@macrostrat/data-provider": "npm:^1.2.1"
     "@macrostrat/data-sheet": "npm:^4.8.0"
     "@macrostrat/feedback-components": "npm:^2.3.1"
     "@macrostrat/form-components": "npm:^1.0.10"

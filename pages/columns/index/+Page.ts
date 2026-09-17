@@ -47,6 +47,11 @@ import {
   ProjectFilterProvider,
   ProjectFilterTag,
 } from "~/components/project-filter";
+import {
+  InProcessFilterProvider,
+  InProcessFilterTag,
+  InProcessSwitch,
+} from "~/components/in-process-filter";
 import { onDemand } from "~/_utils";
 
 import {
@@ -83,6 +88,7 @@ import {
   selectionModeAtom,
   showEmptyAtom,
   showInProcessAtom,
+  showInProcessValueAtom,
   visibleRowsAtom,
   type ColumnFilterDef,
   type ColumnRow,
@@ -192,11 +198,15 @@ export function Page({ linkPrefix = "/" }) {
   return h(
     ProjectFilterProvider,
     { atom: projectFilterAtom, projects },
-    h(HybridPage, {
+    h(
+      InProcessFilterProvider,
+      { atom: showInProcessAtom },
+      h(HybridPage, {
       capabilities: { defaultMode: "content-primary" },
       initialAtoms: [
         [projectIDAtom, projectID],
         [projectSlugsAtom, projectSlugs ?? null],
+        [showInProcessValueAtom, data.showInProcess ?? false],
         [initialDataAtom, { params: data.requestParams, groups: allColumnGroups }],
         [startAfterAtom, data.startAfter ?? null],
         [pageLocationAtom, data.pageLocation ?? null],
@@ -205,12 +215,20 @@ export function Page({ linkPrefix = "/" }) {
       ],
       // Selected projects show as tags in the header row (the dropdown that
       // picks them sits in the panel toolbar)
-      filterBar: h(ProjectFilterTag),
-      content: h(ColumnList),
-      map: h(ColumnListMapSlot),
-      assistant: h(ColumnAssistant),
-    })
+        filterBar: h(FilterBar),
+        content: h(ColumnList),
+        map: h(ColumnListMapSlot),
+        assistant: h(ColumnAssistant),
+      })
+    )
   );
+}
+
+/** The header row's filter summary: selected projects, plus a marker when
+ * unfinished columns are in scope. The controls that set them sit in the panel
+ * toolbar. */
+function FilterBar() {
+  return h([h(ProjectFilterTag), h(InProcessFilterTag)]);
 }
 
 /** The map follows the project filter as it changes, not just the initial id. */
@@ -625,7 +643,6 @@ const sourceFilter: TableFilter<ColumnRow, any> = {
 
 function SourceFacetsPanel() {
   const [showEmpty, setShowEmpty] = useAtom(showEmptyAtom);
-  const [showInProcess, setShowInProcess] = useAtom(showInProcessAtom);
 
   return h("div.source-facets", [
     h(Switch, {
@@ -633,11 +650,7 @@ function SourceFacetsPanel() {
       label: "Show empty columns",
       onChange: () => setShowEmpty(!showEmpty),
     }),
-    h(Switch, {
-      checked: showInProcess,
-      label: "Show in-process columns",
-      onChange: () => setShowInProcess(!showInProcess),
-    }),
+    h(InProcessSwitch),
     h(LexSuggestions),
     h(LexFilters),
   ]);

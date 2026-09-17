@@ -6,6 +6,7 @@
  */
 
 import { atomWithSearchParam } from "~/_utils/url-atoms";
+import { IN_PROCESS_FILTER_KEY } from "~/components/in-process-filter";
 import {
   normalizeProjectFilter,
   projectIDParam,
@@ -16,7 +17,7 @@ import {
 } from "~/components/project-filter";
 
 import { atom } from "jotai";
-import { atomWithStorage, unwrap } from "jotai/utils";
+import { unwrap } from "jotai/utils";
 import { debounce } from "underscore";
 
 import { postgrest } from "~/_providers";
@@ -127,9 +128,28 @@ export const projectNamesAtom = atom<Map<number, string>>((get) => {
 
 export const columnFilterAtom = atom<ColumnFilterDef[]>([]);
 export const showEmptyAtom = atom(DEFAULT_REQUEST_SCOPE.showEmpty);
-export const showInProcessAtom = atomWithStorage(
-  "macrostrat:show-in-process",
+
+/** The shared in-process filter (`~/components/in-process-filter`) for this
+ * page. Read from the plain atom, seeded at page load; writing mirrors it to
+ * `?in_process=` so the choice is linkable and travels to the column and
+ * correlation pages — the same one-way arrangement as the project filter.
+ *
+ * This used to be `atomWithStorage("macrostrat:show-in-process")`, remembered
+ * per browser and invisible in the URL. A page-crossing scope that a link can
+ * carry is worth more here than a remembered one, and it is what lets a link to
+ * an in-process column arrive with the filter already on. */
+export const showInProcessValueAtom = atom(
   DEFAULT_REQUEST_SCOPE.showInProcess
+);
+const inProcessSearchParamAtom = atomWithSearchParam(IN_PROCESS_FILTER_KEY);
+export const showInProcessAtom = atom(
+  (get) => get(showInProcessValueAtom),
+  (get, set, value: boolean) => {
+    set(showInProcessValueAtom, value);
+    set(inProcessSearchParamAtom, value ? "true" : null);
+    // A different list: the crawl cursor no longer describes it
+    set(startAfterParamAtom, null);
+  }
 );
 export const inputTextAtom = atom("");
 

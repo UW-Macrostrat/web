@@ -20,7 +20,10 @@ import { AnchorButton } from "@blueprintjs/core";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { NavigationLinkProvider, PatternProvider } from "~/_providers";
 import { navigate } from "vike/client/router";
-import { MacrostratDataProvider } from "@macrostrat/data-provider";
+import {
+  CORE_COLUMNS_PROJECT_ID,
+  MacrostratDataProvider,
+} from "@macrostrat/data-provider";
 import { StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
 import { onDemand } from "~/_utils";
@@ -32,6 +35,7 @@ import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
 import { Footer } from "~/layouts/footer";
 import {
   columnInfoAtom,
+  columnInProcessFilterAtom,
   columnProjectFilterAtom,
   ColumnSettingsButton,
   columnTimeFilterAtom,
@@ -47,6 +51,13 @@ import {
   ProjectFilterTag,
   useProjectIDs,
 } from "~/components/project-filter";
+import {
+  InProcessFilterProvider,
+  InProcessFilterTag,
+  InProcessSwitch,
+  useRevealInProcess,
+  useShowInProcess,
+} from "~/components/in-process-filter";
 import {
   ageExtentOfUnits,
   TIME_FILTER_KEYS,
@@ -82,7 +93,11 @@ export function ColumnPage(props) {
         h(
           ProjectFilterProvider,
           { atom: columnProjectFilterAtom },
-          h(PatternProvider, h(ColumnPageFrame, props))
+          h(
+            InProcessFilterProvider,
+            { atom: columnInProcessFilterAtom },
+            h(PatternProvider, h(ColumnPageFrame, props))
+          )
         )
       )
     )
@@ -103,6 +118,11 @@ function ColumnPageFrame({
     [columnInfo]
   );
 
+  // A link straight to an in-process column is an implicit request to see
+  // in-process columns: without this the column being viewed is absent from its
+  // own navigation map, which reads as the map being broken.
+  useRevealInProcess(columnInfo.status);
+
   return h(HybridPage, {
     className: "column-page",
     capabilities: columnPageCapabilities,
@@ -110,7 +130,11 @@ function ColumnPageFrame({
     // The project dropdown is a first-class control, beside the settings
     actions: h([h(ProjectFilterControl), h(ColumnSettingsButton)]),
     // Active filters sit in a second header row above the column
-    filterBar: h([h(ProjectFilterTag), h(TimeFilterTag)]),
+    filterBar: h([
+      h(ProjectFilterTag),
+      h(InProcessFilterTag),
+      h(TimeFilterTag),
+    ]),
     content: h(ColumnContentPane, { columnInfo }),
     map: h(ColumnMapPane, { columnInfo, linkPrefix, projectID }),
     assistant: h(ColumnAssistantPane, { columnInfo, project, columnProjects }),
@@ -224,6 +248,7 @@ function ColumnContentPane({ columnInfo }) {
 
 function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   const modifierHeld = useModifierKeyRef();
+  const showInProcess = useShowInProcess();
   // The shared project filter (resolved to ids) wins over the route's project;
   // while its slugs are still resolving the map keeps the route's project.
   const filterProjectIDs = useProjectIDs();
@@ -231,6 +256,11 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   if (filterProjectIDs !== undefined) {
     mapProject = projectIDParam(filterProjectIDs) ?? projectID;
   }
+  // With neither a route project nor a filter, scope the map to the column's
+  // own project. This used to fall through to the API's core-projects default,
+  // which is why a column outside those projects — every GBDB column — was
+  // missing from its own map.
+  mapProject ??= columnInfo.project_id ?? CORE_COLUMNS_PROJECT_ID;
 
   const onSelectColumn = useCallback(
     (col_id: number | null) => {
@@ -254,11 +284,12 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   return h("div.column-map-pane", [
     h(ColumnMap, {
       className: "column-map",
-      inProcess: true,
+      inProcess: showInProcess,
       projectID: mapProject,
       selectedColumn: columnInfo.col_id,
       onSelectColumn,
     }),
+    h("div.map-controls", h(InProcessSwitch, { label: "In-process columns" })),
     h("div.map-hint", "Click a column to open it · ⌘/Ctrl-click to correlate"),
   ]);
 }

@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "strict": false,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "types": [
+      "@macrostrat/vite-plugin-hyperstyles/client",
+      "vite/client",
+      "vike-react"
+    ],
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ],
+      "#/*": [
+        "./pages/*"
+      ]
+    }
+  },
+  "exclude": [
+    "dist",
+    "**/archive_/**"
+  ],
+  "include": [
+    "vite.config.ts",
+    "packages/*/src/**/*",
+    "src/**/*",
+    "pages/**/*",
+    "server/**/*"
+  ]
+}

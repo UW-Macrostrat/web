@@ -10,15 +10,10 @@ const client = new PostgrestClient(postgrestPrefix, {
 export async function data(pageContext: PageContextServer) {
   const { id } = pageContext.routeParams;
 
-  // Check whether a map ID is structurally valid (a number).
-  if (isNaN(parseInt(id))) {
-    throw render(404, "Map IDs must be numbers.");
-  }
-
   const feature = await fetchMapData(id);
 
   if (!feature) {
-    throw render(404, "Map not found.");
+    throw render(404, `No map matching '${id}'.`);
   }
 
   return {
@@ -27,7 +22,16 @@ export async function data(pageContext: PageContextServer) {
   };
 }
 
+/** A map is addressable by either identifier it has: the numeric `source_id`
+ * that most links in the app carry, or the `slug`, which is the readable name
+ * the compilation system and the CLI use throughout. Slugs are unique in
+ * `maps.sources` and never all-digits, so the two spaces can't collide. */
 async function fetchMapData(id: string) {
-  const res: any = await client.from("sources").select("*").eq("source_id", id);
-  return res?.data?.features[0];
+  let column = "slug";
+  if (/^\d+$/.test(id)) {
+    column = "source_id";
+  }
+
+  const res: any = await client.from("sources").select("*").eq(column, id);
+  return res?.data?.features?.[0];
 }

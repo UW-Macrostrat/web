@@ -41,3 +41,62 @@ body
   &>*
     display: block
     margin: 1em
+
+.neighbor-maps
+  padding: 0.5em 0
+
+.neighbor-caveat
+  font-size: 0.85em
+  color: var(--secondary-color)
+  margin: 0 0 0.6em
+
+.neighbor-list
+  list-style: none
+  margin: 0
+  padding: 0
+
+.neighbor-item
+  padding: 0.35em 0
+  border-bottom: 1px solid var(--panel-rule-color, rgba(128, 128, 128, 0.2))
+
+  &:last-child
+    border-bottom: none
+
+.neighbor-main
+  display: flex
+  align-items: baseline
+  justify-content: space-between
+  gap: 0.6em
+
+.neighbor-name
+  font-weight: 500
+
+.neighbor-coverage
+  font-size: 0.8em
+  color: var(--secondary-color)
+  white-space: nowrap
+  flex-shrink: 0
+
+.neighbor-meta
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.25em
+  margin-top: 0.2em
+
+.neighbor-compilation
+  text-decoration: none
+
+.neighbor-coarser
+  margin-bottom: 0.6em
+  font-size: 0.85em
+
+.neighbor-group
+  margin-bottom: 0.8em
+
+.neighbor-group-title
+  margin: 0 0 0.2em
+  font-size: 0.8em
+  text-transform: uppercase
+  letter-spacing: 0.04em
+  color: var(--secondary-color)

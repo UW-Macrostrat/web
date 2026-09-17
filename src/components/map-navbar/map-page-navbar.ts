@@ -28,6 +28,10 @@ interface MapPageNavbarProps {
   onToggle: () => void;
   /** Matched to the context panel below it, so the two read as one column. */
   width?: number;
+  /** Whether the page title gets its own line below the breadcrumb trail.
+   * False keeps it inline as the trail's last crumb, for a one-row navbar that
+   * leaves more of the screen to the panel below. */
+  separateTitle?: boolean;
   className?: string;
   /** Extra controls, placed after the title and before the panel toggle. */
   children?: React.ReactNode;
@@ -46,6 +50,7 @@ export function MapPageNavbar({
   isOpen,
   onToggle,
   width = 320,
+  separateTitle = true,
   className,
   children,
 }: MapPageNavbarProps) {
@@ -60,7 +65,7 @@ export function MapPageNavbar({
         h(PageBreadcrumbsInternal, {
           items: trail,
           showLogo: true,
-          separateTitle: true,
+          separateTitle,
         }),
       ]),
       children,

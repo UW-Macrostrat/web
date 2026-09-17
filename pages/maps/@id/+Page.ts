@@ -40,6 +40,7 @@ import {
   BaseLayerSelector,
 } from "~/components";
 import { useData } from "vike-react/useData";
+import { NeighborMaps } from "./neighbors";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
@@ -408,6 +409,11 @@ function MenuButtons() {
       page: MenuPage.LEGEND,
     }),
     h(MapMenuButton, {
+      text: "Other maps",
+      icon: "map",
+      page: MenuPage.NEIGHBORS,
+    }),
+    h(MapMenuButton, {
       text: "Settings",
       icon: "settings",
       page: MenuPage.SETTINGS,
@@ -428,6 +434,7 @@ function MapMenuButton({ text, icon, page }) {
 
 enum MenuPage {
   LEGEND = "legend",
+  NEIGHBORS = "neighbors",
   SETTINGS = "settings",
 }
 
@@ -436,10 +443,16 @@ const activePageAtom = atom(MenuPage.LEGEND);
 function MapLegendPanel(params: MapData["mapInfo"]) {
   const activePage = useAtomValue(activePageAtom);
 
-  const mainPanel =
-    activePage === MenuPage.LEGEND
-      ? h(MapLegendData, params)
-      : h(MapSettingsPanel, { hasRaster: params.raster_url != null });
+  let mainPanel = null;
+  if (activePage === MenuPage.LEGEND) {
+    mainPanel = h(MapLegendData, params);
+  } else if (activePage === MenuPage.NEIGHBORS) {
+    // Mounted only while its tab is open, so the overlap query runs on demand
+    // rather than on every map page load.
+    mainPanel = h(NeighborMaps, { mapInfo: params });
+  } else {
+    mainPanel = h(MapSettingsPanel, { hasRaster: params.raster_url != null });
+  }
 
   return h(
     InfoDrawerContainer,

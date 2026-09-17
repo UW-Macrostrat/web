@@ -9,6 +9,7 @@ import {
   DEFAULT_REQUEST_SCOPE,
   getGroupedColumns,
 } from "./grouped-cols.ts";
+import { IN_PROCESS_FILTER_KEY } from "~/components/in-process-filter";
 import {
   parseStartAfter,
   START_AFTER_KEY,
@@ -27,12 +28,20 @@ export async function data(pageContext) {
   const projectIDs = resolveProjectIDs(projects, projectSlugs);
   const project_id = projectIDParam(projectIDs);
 
+  // The shared in-process filter travels as `?in_process=true`; unset means
+  // off, so the default stays out of the URL. Parsed here so the server renders
+  // the same list the client would request — including for a link that arrives
+  // with the filter already on.
+  const showInProcess =
+    (pageContext.urlParsed?.search?.[IN_PROCESS_FILTER_KEY] ?? null) === "true";
+
   // Built with the same function as the page's own request, and returned with
   // the result, so the page can tell the seeded data is exactly what it would
   // fetch first and skip that request.
   const requestParams = columnRequestParams({
     ...DEFAULT_REQUEST_SCOPE,
     projectID: project_id,
+    showInProcess,
   });
   const allColumnGroups = await getGroupedColumns(requestParams);
 
@@ -52,6 +61,7 @@ export async function data(pageContext) {
     projects,
     projectSlugs,
     project_id,
+    showInProcess,
     startAfter,
     pageLocation,
   };

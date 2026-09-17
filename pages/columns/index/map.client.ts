@@ -24,6 +24,7 @@ import {
 } from "@macrostrat/map-views";
 import {
   MacrostratDataProvider,
+  CORE_COLUMNS_PROJECT_ID,
   useMacrostratColumns,
 } from "@macrostrat/data-provider";
 import { getBasicMapStyle, MapView } from "@macrostrat/map-interface";
@@ -42,13 +43,13 @@ import { navigate } from "vike/client/router";
 
 import { hasContentPane, layoutModeAtom, layoutShellAtom } from "~/layouts/hybrid";
 
+import { useShowInProcess } from "~/components/in-process-filter";
 import {
   allRowsAtom,
   linkPrefixAtom,
   mapBoundsAtom,
   selectedColumnsAtom,
   selectionModeAtom,
-  showInProcessAtom,
   toggleColumnAtom,
   visibleRowsAtom,
   type MapBounds,
@@ -92,8 +93,9 @@ function ColumnMapSwitch({ projectID }) {
 /** `projectID` is the request's project argument as the API takes it — numeric
  * id(s), comma-joined — or null for the default set. */
 function useMapColumns(projectID: string | null) {
-  const inProcess = useAtomValue(showInProcessAtom);
-  const footprints = useMacrostratColumns(projectID as any, inProcess) ?? [];
+  const inProcess = useShowInProcess();
+  const footprints =
+    useMacrostratColumns(projectID ?? CORE_COLUMNS_PROJECT_ID, inProcess) ?? [];
   const mode = useAtomValue(layoutModeAtom);
   const visibleRows = useAtomValue(visibleRowsAtom);
   const allRows = useAtomValue(allRowsAtom);

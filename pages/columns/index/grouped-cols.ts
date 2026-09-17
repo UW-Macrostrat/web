@@ -1,4 +1,6 @@
 import { fetchAPIV2Result } from "~/_utils";
+import { statusCodeParam } from "~/components/in-process-filter";
+import { CORE_COLUMNS_PROJECT_ID } from "@macrostrat/data-provider";
 
 interface ColumnResponseShort {
   col_id: number;
@@ -54,11 +56,7 @@ export function columnRequestParams(
   if (!scope.showEmpty) {
     params.empty = false;
   }
-  if (scope.showInProcess) {
-    params.status_code = "in process,active";
-  } else {
-    params.status_code = "active";
-  }
+  params.status_code = statusCodeParam(scope.showInProcess);
   return params;
 }
 
@@ -136,14 +134,15 @@ export interface ColumnFilterOptions {
 async function fetchColumns(opts: ColumnFilterOptions = {}) {
   const params = new URLSearchParams();
 
-  // No project (the shared project filter's default) means the API's default
-  // set, the "Core columns" composite — the same result as `all=true`.
+  // Always name the projects. `all=true` used to stand in for "no project
+  // filter", but `/columns` never reads it — the request fell through to the
+  // API's core-projects default, so whole projects were quietly missing. The
+  // default set is the "Core columns" composite; say so.
   const { project_id } = opts;
-  if (project_id != null) {
-    params.append("project_id", project_id.toString());
-  } else {
-    params.append("all", "true");
-  }
+  params.append(
+    "project_id",
+    (project_id ?? CORE_COLUMNS_PROJECT_ID).toString()
+  );
 
   if (opts.status_code) {
     params.append("status_code", opts.status_code);
