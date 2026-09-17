@@ -116,17 +116,17 @@ export function NodeTags({
     );
   }
 
-  if (node.is_documentary) {
+  if (node.is_mosaic_member) {
     tags.push(
       h(
         Tag,
         {
-          key: "documentary",
+          key: "mosaic-member",
           minimal: true,
           title:
-            "A documentary member: a real source with a citation and a footprint, but no polygons, no linework and no faces of its own.",
+            "A mosaic member: a real source whose footprint is its extent and whose content is the mosaic's inside it. No polygons, linework or faces of its own.",
         },
-        "documentary"
+        "mosaic member"
       )
     );
   }

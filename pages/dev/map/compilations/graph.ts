@@ -23,9 +23,9 @@ export interface GraphNode {
   holds_polygons: boolean;
   /** A compilation that replaced its constituents. */
   is_materialized: boolean;
-  /** A member of an ingested compilation: a real source with a footprint and a
-   * citation, but no polygons, no linework and no faces. */
-  is_documentary: boolean;
+  /** A member of a mosaic: a real source whose footprint is its extent and whose
+   * content is the mosaic's inside it. No polygons, linework or faces of its own. */
+  is_mosaic_member: boolean;
   n_members: number;
   n_sources: number;
   content: "ingested" | "derived" | null;

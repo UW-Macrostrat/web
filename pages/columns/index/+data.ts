@@ -1,4 +1,4 @@
-import { fetchAPIData } from "~/_utils/fetch-helpers";
+import { fetchAllProjects } from "~/_utils/fetch-helpers";
 import {
   parseProjectFilter,
   projectIDParam,
@@ -21,7 +21,7 @@ export async function data(pageContext) {
   // and the shared project filter (`?project_id=`, slugs) has to be resolved to
   // the numeric ids the API takes. Unset means the API's default, the "Core
   // columns" composite — what the column and correlation maps show too.
-  const projects = await fetchAPIData("/defs/projects", { all: true });
+  const projects = await fetchAllProjects();
   const projectSlugs = parseProjectFilter(
     pageContext.urlParsed?.search?.project_id ?? null
   );

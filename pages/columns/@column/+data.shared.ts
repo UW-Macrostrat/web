@@ -5,7 +5,7 @@ import {
   assembleColumnSummary,
   ColumnSummary,
 } from "#/map/map-interface/app-state/columns/utils";
-import { fetchProjectData, getAndUnwrap } from "~/_utils";
+import { fetchAllProjects, fetchProjectData, getAndUnwrap } from "~/_utils";
 import { render } from "vike/abort";
 
 export async function data(pageContext) {
@@ -63,13 +63,6 @@ export async function data(pageContext) {
     linkPrefix,
     projectID,
   };
-}
-
-/** Every project definition, composites included (`members` lists the projects
- * a composite is built from). */
-async function fetchAllProjects(): Promise<any[]> {
-  const res = await getAndUnwrap(`${apiV2Prefix}/defs/projects?all=true`);
-  return res ?? [];
 }
 
 export interface ColumnProject {

@@ -77,6 +77,32 @@ async function fetchWrapper(url: string): Promise<Response> {
   }
 }
 
+/** The full project definition list. It is small, changes rarely, and four
+ * server-rendered pages need it before they can render anything — `/columns`
+ * for its section headers and the project filter, `/projects`, a project
+ * overview, a column page. The v2 route counts columns and units for every
+ * project, so it is one of the slowest calls the server makes; caching it for
+ * a few minutes keeps that off the critical path of most requests. */
+const ALL_PROJECTS_TTL = 5 * 60 * 1000;
+
+let allProjectsCache: { fetchedAt: number; value: Promise<any[]> } | null = null;
+
+export function fetchAllProjects(): Promise<any[]> {
+  const now = Date.now();
+  if (allProjectsCache != null && now - allProjectsCache.fetchedAt < ALL_PROJECTS_TTL) {
+    return allProjectsCache.value;
+  }
+  // The in-flight promise is cached, not just the result, so concurrent
+  // requests for a cold cache share a single fetch.
+  const value = fetchAPIData("/defs/projects", { all: true }).catch((err) => {
+    // A failed fetch shouldn't be remembered for the whole TTL.
+    if (allProjectsCache?.value === value) allProjectsCache = null;
+    throw err;
+  });
+  allProjectsCache = { fetchedAt: now, value };
+  return value;
+}
+
 const projectCache = new Map<number, any>();
 
 export async function fetchProjectData(project: string | number) {

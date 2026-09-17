@@ -36,7 +36,7 @@ interface NeighborMap {
    * coarser map, which only appears when asked for. */
   scale_distance: number;
   is_compilation: boolean;
-  is_documentary: boolean;
+  is_mosaic_member: boolean;
   in_compilations: string[];
 }
 
