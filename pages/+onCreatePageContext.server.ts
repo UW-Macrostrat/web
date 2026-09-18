@@ -35,7 +35,40 @@ export async function onCreatePageContext(pageContext: PageContextServer) {
   // Breadcrumb data
   pageContext.breadcrumbs = await getBreadcrumbs(pageContext);
 
+  // Dev-only runtime-config override; see below.
+  const environment = localhostEnvironment(pageContext);
+  if (environment != null) pageContext.environment = environment;
+
   return pageContext;
+}
+
+/** A replacement runtime config to hand the client, or null to use the global one.
+ *
+ * In dev the app can be reached two ways: through Caddy at
+ * `https://dev.macrostrat.local`, or directly at `http://localhost:3000`. Only
+ * the first can resolve the `.local` hostnames that `MACROSTRAT_API_DOMAIN` and
+ * `MACROSTRAT_TILESERVER_DOMAIN` point at — OrbStack publishes them over mDNS,
+ * which the Claude desktop app's browser pane (and anything else off the host's
+ * resolver) can't follow. So for a request that arrived on localhost, point the
+ * client at same-origin paths instead; `vite.config.ts` proxies those to the
+ * container stack.
+ *
+ * Server-side config is untouched: Node resolves the `.local` names fine, and
+ * `getRuntimeConfig` reads `process.env` there rather than this. */
+function localhostEnvironment(pageContext: PageContextServer) {
+  // Statically false in a build, so this whole branch drops out.
+  if (!import.meta.env.DEV) return null;
+
+  const host = pageContext.headers?.["host"] ?? "";
+  const isLocalhost = /^(localhost|127\.0\.0\.1|\[::1\])(:|$)/.test(host);
+  if (!isLocalhost) return null;
+
+  return {
+    ...pageContext.globalContext?.environment,
+    // Resolves to /api/v2, /api/v3 and /api/pg — the paths Caddy serves.
+    MACROSTRAT_API_DOMAIN: "",
+    MACROSTRAT_TILESERVER_DOMAIN: "/tiles",
+  };
 }
 
 // --- GeoIP ------------------------------------------------------------------

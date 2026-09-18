@@ -4,7 +4,8 @@ import { GoogleFonts } from "~/styles";
 
 export default function Head() {
   const ctx = usePageContext();
-  const environment = ctx.globalContext.environment;
+  // Per-request override (see pages/+onCreatePageContext.server.ts), if any.
+  const environment = ctx.environment ?? ctx.globalContext.environment;
 
   const { scripts = [] } = ctx.config;
 

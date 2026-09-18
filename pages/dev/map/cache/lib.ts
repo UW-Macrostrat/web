@@ -1,7 +1,7 @@
 /** State, hooks, and helpers for the cache-management page. The page module
  * (`+Page.client.ts`) stays render-only; everything non-visual lives here. */
 
-import { burwellTileDomain } from "@macrostrat-web/settings";
+import { apiV3Prefix, burwellTileDomain } from "@macrostrat-web/settings";
 import { useCallback, useState } from "react";
 import { atom } from "jotai";
 import { atomWithLocation } from "jotai-location";
@@ -135,6 +135,15 @@ export const showCartoAtom = atom(
 
 // ─── Invalidation request ─────────────────────────────────────────────────────
 
+/** Expiry runs through api_v3, not the tileserver directly.
+ *
+ * This used to POST `${burwellTileDomain}/cache/invalidate`, which 404'd — the
+ * tileserver mounts that router at `/cache/refresh/carto`. Those routes are now
+ * admin-only and no longer served outside the network; api_v3 holds the session
+ * check and forwards to the tileserver, so the request also has to carry the
+ * auth cookie (`credentials`, for the cross-origin case). */
+const INVALIDATE_ENDPOINT = `${apiV3Prefix}/cache/refresh/carto`;
+
 const invalidateBodyAtom = atom<{ body?: InvalidationBody; error?: string }>(
   (get) => {
     return buildInvalidationBody({
@@ -149,8 +158,9 @@ const invalidateBodyAtom = atom<{ body?: InvalidationBody; error?: string }>(
 const invalidateRequestAtom = atom(async (get, { signal }) => {
   const { body, error } = get(invalidateBodyAtom);
   if (error) throw error;
-  const resp = await fetch(`${burwellTileDomain}/cache/invalidate`, {
+  const resp = await fetch(INVALIDATE_ENDPOINT, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
@@ -158,7 +168,7 @@ const invalidateRequestAtom = atom(async (get, { signal }) => {
   return await resp.json();
 });
 
-/** Encapsulates the POST /cache/invalidate request and its result/error state. */
+/** Encapsulates the expiry request and its result/error state. */
 export function useTileInvalidation() {
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<InvalidationResult | null>(null);
@@ -169,8 +179,9 @@ export function useTileInvalidation() {
     setError(null);
     setRunning(true);
     try {
-      const resp = await fetch(`${burwellTileDomain}/cache/invalidate`, {
+      const resp = await fetch(INVALIDATE_ENDPOINT, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });

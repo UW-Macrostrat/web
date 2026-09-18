@@ -26,7 +26,7 @@ import {
 } from "@macrostrat/data-provider";
 import { StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
-import { onDemand } from "~/_utils";
+import { ColumnMapSlot } from "~/components/column-map/target";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { DataField } from "@macrostrat/data-components";
 import { SGPMeasurementsColumn } from "./sgp-facet";
@@ -34,11 +34,13 @@ import { ColumnExtData } from "./column-info";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
 import { Footer } from "~/layouts/footer";
 import {
+  columnHashStateAtom,
   columnInfoAtom,
   columnInProcessFilterAtom,
   columnProjectFilterAtom,
   ColumnSettingsButton,
   columnTimeFilterAtom,
+  initialColumnHashState,
   useColumnSelection,
   useColumnState,
   useSetFacet,
@@ -49,15 +51,19 @@ import {
   ProjectFilterControl,
   ProjectFilterProvider,
   ProjectFilterTag,
+  useProjectFilter,
   useProjectIDs,
 } from "~/components/project-filter";
 import {
   InProcessFilterProvider,
   InProcessFilterTag,
-  InProcessSwitch,
   useRevealInProcess,
   useShowInProcess,
 } from "~/components/in-process-filter";
+import {
+  useCarriedScopeAtMount,
+  usePublishColumnScope,
+} from "~/components/column-scope";
 import {
   ageExtentOfUnits,
   TIME_FILTER_KEYS,
@@ -69,7 +75,10 @@ import {
 
 import h from "./index.module.sass";
 
-const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
+/** The column page never draws a selection of its own, only the current
+ * column — a module-level constant so the target doesn't change identity on
+ * every render. */
+const EMPTY_SELECTION: number[] = [];
 
 /** The column is the content here, so a map-dominant view has no reading; the
  * page scrolls as a whole, the way a single tall document should. */
@@ -92,7 +101,11 @@ export function ColumnPage(props) {
         { atom: columnTimeFilterAtom },
         h(
           ProjectFilterProvider,
-          { atom: columnProjectFilterAtom },
+          // The definitions come with the page data, so the filter resolves its
+          // slugs to names and ids on the first render rather than after a
+          // client fetch — the tag would otherwise read a raw slug and
+          // `useProjectIDs` couldn't scope the map yet.
+          { atom: columnProjectFilterAtom, projects: props.projects },
           h(
             InProcessFilterProvider,
             { atom: columnInProcessFilterAtom },
@@ -113,20 +126,31 @@ function ColumnPageFrame({
 }) {
   // The frame isolates every atom read inside it, so the column is seeded
   // through `initialAtoms`; `useColumnState` keeps it current afterwards.
+  //
+  // The hash state is seeded the same way, with the scope carried from the page
+  // you came from filled in where the hash is silent — so the map and the tags
+  // have it on the first render rather than a beat later.
+  const carried = useCarriedScopeAtMount();
   const initialAtoms = useMemo(
-    () => [[columnInfoAtom, columnInfo]] as [any, any][],
-    [columnInfo]
+    () =>
+      [
+        [columnInfoAtom, columnInfo],
+        [columnHashStateAtom, initialColumnHashState(carried)],
+        // Not a URL parameter here — carried from the list instead.
+        [columnInProcessFilterAtom, carried?.inProcess ?? false],
+      ] as [any, any][],
+    [columnInfo, carried]
   );
-
-  // A link straight to an in-process column is an implicit request to see
-  // in-process columns: without this the column being viewed is absent from its
-  // own navigation map, which reads as the map being broken.
-  useRevealInProcess(columnInfo.status);
 
   return h(HybridPage, {
     className: "column-page",
     capabilities: columnPageCapabilities,
     initialAtoms,
+    // Inside the frame's jotai scope, so the scope hooks share atom cells with
+    // the map, the filter tags and the settings switch. `HybridPage` mounts its
+    // own `Provider`, and the same atom read on either side of one is a
+    // different cell.
+    wrap: (node) => h(ColumnScopeBridge, { status: columnInfo.status }, node),
     // The project dropdown is a first-class control, beside the settings
     actions: h([h(ProjectFilterControl), h(ColumnSettingsButton)]),
     // Active filters sit in a second header row above the column
@@ -244,6 +268,24 @@ function ColumnContentPane({ columnInfo }) {
   ]);
 }
 
+/** Carries the column scope between `/columns` pages, and keeps the in-process
+ * filter honest for the column on screen.
+ *
+ * Adoption runs before the reveal: arriving with a scope carried from the list
+ * (or the previous column) sets it when this page's hash says nothing, and the
+ * reveal can then still turn in-process on for a column that needs it. */
+function ColumnScopeBridge({ status, children }) {
+  // A link straight to an in-process column is an implicit request to see
+  // in-process columns: without this the column being viewed is absent from its
+  // own navigation map, which reads as the map being broken.
+  useRevealInProcess(status);
+
+  // The scope was adopted at seed time, so what this reads is already the
+  // adopted value — there is nothing to race with.
+  usePublishColumnScope(useProjectFilter().projects, useShowInProcess());
+  return children;
+}
+
 /* ----------------------------------------------------------------- the map */
 
 function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
@@ -281,16 +323,25 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
     [columnInfo.col_id, linkPrefix]
   );
 
+  // The shared instance, owned by `pages/columns/+Layout.ts` — so arriving from
+  // the list (or moving column to column) re-targets a warm map rather than
+  // building a new GL context. `visibleColumnIDs: null` means every column in
+  // scope; the list is the only page that narrows it.
   return h("div.column-map-pane", [
-    h(ColumnMap, {
-      className: "column-map",
-      inProcess: showInProcess,
-      projectID: mapProject,
-      selectedColumn: columnInfo.col_id,
-      onSelectColumn,
-    }),
-    h("div.map-controls", h(InProcessSwitch, { label: "In-process columns" })),
-    h("div.map-hint", "Click a column to open it · ⌘/Ctrl-click to correlate"),
+    h(
+      ColumnMapSlot,
+      {
+        className: "column-map",
+        targetKey: `column:${columnInfo.col_id}`,
+        projectID: mapProject,
+        inProcess: showInProcess,
+        visibleColumnIDs: null,
+        selectedColumnIDs: EMPTY_SELECTION,
+        selectedColumn: columnInfo.col_id,
+        onSelectColumn,
+      },
+      h("div.map-hint", "Click a column to open it · ⌘/Ctrl-click to correlate")
+    ),
   ]);
 }
 

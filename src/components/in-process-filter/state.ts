@@ -3,8 +3,13 @@
  * Whether unfinished columns are in scope is a page-crossing choice, like the
  * age window and the project filter: the column list, a column's navigation
  * map and the correlation map should agree, and a link should carry the choice.
- * The filter is one boolean behind one URL key, `in_process=true`; unset means
- * off, so the default stays out of the URL.
+ *
+ * It is one boolean, but it serializes as the API's own argument —
+ * `?status_code=active,in process` — rather than a private `in_process=true`
+ * flag, so the URL and the request that follows from it read the same. `active`
+ * alone is the default and stays out of the URL entirely. Only the two states
+ * the toggle can produce are written; a `status_code` naming anything else is
+ * read for whether it includes `in process` and otherwise left alone.
  *
  * As with `~/components/project-filter`, storage is the page's choice: it
  * supplies the atom through `InProcessFilterProvider`, and everything here only
@@ -22,8 +27,11 @@ import type { ColumnStatusCode } from "@macrostrat/api-types";
 
 export type InProcessFilterAtom = WritableAtom<boolean, [boolean], void>;
 
-/** The URL key the filter serializes to. */
-export const IN_PROCESS_FILTER_KEY = "in_process";
+/** The URL key the filter serializes to — the API's own argument name. */
+export const COLUMN_STATUS_FILTER_KEY = "status_code";
+
+/** The in-process status, spelled as the API spells it. */
+export const IN_PROCESS_STATUS = "in process";
 
 /** In-memory fallback when a page hasn't decided where the filter lives. */
 const memoryInProcessAtom: InProcessFilterAtom = atom(false);
@@ -73,6 +81,25 @@ export function statusCodesFor(showInProcess: boolean): ColumnStatusCode[] {
 /** Serialized for a request: `"active"` or `"active,in process"`. */
 export function statusCodeParam(showInProcess: boolean): string {
   return statusCodesFor(showInProcess).join(",");
+}
+
+/** The URL value for the filter, or `null` when it is the default (`active`
+ * alone) and so belongs out of the URL. */
+export function statusCodeURLValue(showInProcess: boolean): string | null {
+  if (!showInProcess) return null;
+  return statusCodeParam(true);
+}
+
+/** Read the filter back out of a `status_code` parameter. Anything listing
+ * `in process` turns it on; absent, empty or `active`-only leaves it off. */
+export function parseStatusCodeParam(
+  raw: string | null | undefined
+): boolean {
+  if (raw == null) return false;
+  return raw
+    .split(",")
+    .map((part) => part.trim())
+    .includes(IN_PROCESS_STATUS);
 }
 
 /** Turn the filter on when the column being viewed is itself in process.

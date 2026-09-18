@@ -60,6 +60,11 @@ export async function data(pageContext) {
     columnInfo,
     // The column's own project plus any composite project that includes it
     columnProjects: projectsForColumn(allProjects, columnInfo.project_id),
+    // The full list, so the shared project filter can resolve its slugs to
+    // names and ids without a second fetch — the same way the column list
+    // supplies them. Without it `useProjectDefs` is null on first paint, the
+    // filter tag shows a raw slug, and `useProjectIDs` can't scope the map.
+    projects: allProjects,
     linkPrefix,
     projectID,
   };

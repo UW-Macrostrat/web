@@ -30,9 +30,10 @@ import {
   type ProjectFilterValue,
 } from "~/components/project-filter";
 import {
-  IN_PROCESS_FILTER_KEY,
+  InProcessSwitch,
   type InProcessFilterAtom,
 } from "~/components/in-process-filter";
+import type { ColumnScope } from "~/components/column-scope";
 
 export function useColumnState(columnInfo) {
   const { units, col_id } = columnInfo;
@@ -133,9 +134,6 @@ interface ColumnHashState {
   /** Project filter: which projects' columns the navigation map shows
    * (slugs, comma-joined) */
   project_id?: string;
-  /** In-process filter (see `~/components/in-process-filter`): `"true"` when
-   * unfinished columns are in scope. Absent means off. */
-  in_process?: string;
   t_pos?: number;
   b_pos?: number;
   axis?: string;
@@ -199,8 +197,6 @@ function getStateFromHash(): ColumnHashState {
     state[key] = validateInt(params.get(key));
   }
   state.project_id = params.get("project_id") ?? undefined;
-  state.in_process =
-    params.get(IN_PROCESS_FILTER_KEY) === "true" ? "true" : undefined;
   for (const key of ["t_age", "b_age", "age", "t_pos", "b_pos", "scale"]) {
     state[key] = validateNumber(params.get(key));
   }
@@ -231,7 +227,28 @@ function setHashFromState(state: ColumnHashState) {
   }
 }
 
-const hashStateAtom = atom<ColumnHashState>(getStateFromHash());
+export const columnHashStateAtom = atom<ColumnHashState>(getStateFromHash());
+const hashStateAtom = columnHashStateAtom;
+
+/** This page's starting hash state, with the scope carried from the previous
+ * `/columns` page filling in whatever the hash itself doesn't say.
+ *
+ * Seeded through `HybridPage`'s `initialAtoms` rather than written from an
+ * effect, so the column, the map and the tags all see the adopted scope on the
+ * very first render — and `useColumnState`'s hash-sync effect puts it in the
+ * URL straight away, which an effect-based adoption left lagging a change
+ * behind. A hash that names a filter always wins: a shared link means what it
+ * says. */
+export function initialColumnHashState(
+  carried: ColumnScope | null
+): ColumnHashState {
+  const state = getStateFromHash();
+  if (carried == null) return state;
+  if (state.project_id == null && (carried.projectSlugs?.length ?? 0) > 0) {
+    state.project_id = serializeProjectFilter(carried.projectSlugs) ?? undefined;
+  }
+  return state;
+}
 
 function atomWithHashParam<T>(key: keyof ColumnHashState) {
   return atom(
@@ -297,18 +314,19 @@ export const columnTimeFilterAtom: TimeFilterAtom = atom(
   }
 );
 
-/** The page's in-process filter, in the hash beside the project and time
- * filters. Handed to `InProcessFilterProvider` so the shared switch, the
- * navigation map and `useRevealInProcess` all read this page's hash. */
-export const columnInProcessFilterAtom: InProcessFilterAtom = atom(
-  (get) => get(hashStateAtom).in_process === "true",
-  (get, set, value: boolean) => {
-    set(hashStateAtom, (prev) => ({
-      ...prev,
-      in_process: value ? "true" : undefined,
-    }));
-  }
-);
+/** The page's in-process filter.
+ *
+ * Unlike the project and time filters this one stays *out* of the URL. On a
+ * column page it only decides which neighbours the inset navigation map draws
+ * — it doesn't change the column being read — so it isn't worth a parameter in
+ * a link. It is seeded from the scope carried off the column list
+ * (`~/components/column-scope`) and remembered from there on, so the setting
+ * still follows you between pages; `useRevealInProcess` can also turn it on for
+ * a column that is itself in process.
+ *
+ * Handed to `InProcessFilterProvider` so the settings switch, the navigation
+ * map and the filter tag all read the same value. */
+export const columnInProcessFilterAtom: InProcessFilterAtom = atom(false);
 
 /** The page's project filter, in the hash beside the time filter. */
 export const columnProjectFilterAtom: ProjectFilterAtom = atom(
@@ -422,6 +440,10 @@ export function ColumnSettingsPanel() {
     h("h3", "Settings"),
     h(AxisTypeControl),
     h(FacetControl),
+    // What the navigation map shows, rather than how the column is drawn — but
+    // it belongs with the other view controls rather than floating over the map
+    // itself, where it read as part of the map.
+    h(InProcessSwitch, { label: "In-process columns" }),
     h(TimeFilterPanel, { showIntervalPicker: false }),
     h.if(isHeightAxis)(RangeControl, {
       label: heightAxisLabel + " range",

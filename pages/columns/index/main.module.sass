@@ -87,10 +87,20 @@ $group-height: 34px
   color: var(--pz-secondary-color, var(--secondary-color))
   font-size: 0.8rem
 
-// A large search field, taking the toolbar's width.
+// The project facet in the Filter menu: the same picker as the side panel's,
+// with the current selection under it.
+.source-projects
+  display: flex
+  flex-direction: column
+  align-items: flex-start
+  gap: 0.35em
+
+// A large search field, taking whatever width the toolbar has left. It shrinks
+// well past its comfortable size so the filter tags beside it never get
+// squeezed into wrapping.
 .search-input
   flex: 1 1 auto
-  min-width: 20rem
+  min-width: 10rem
   max-width: 36rem
 
 .filter-toggle
@@ -167,3 +177,48 @@ $group-height: 34px
 
 .assistant-links
   margin-top: var(--pz-stack-gap, 1rem)
+  display: flex
+  flex-direction: column
+  gap: var(--pz-stack-gap, 1rem)
+
+// The project picker and the link to the project pages read as one subject.
+.projects-section
+  display: flex
+  flex-direction: column
+  gap: 0.35em
+
+  .section-head
+    display: flex
+    flex-direction: row
+    align-items: baseline
+    justify-content: space-between
+    gap: var(--pz-inline-gap, 0.5rem)
+
+    h3
+      margin: 0
+      font-size: 1rem
+
+  // Fills the panel rather than hugging its label, so it reads as the
+  // section's control instead of a stray button.
+  .project-picker
+    align-self: stretch
+
+.assistant-buttons
+  align-items: flex-start
+
+/* ------------------------------------------------------------ filter tags */
+
+// Active filters, inline in the panel's filter bar. The toolbar row carries its
+// own `min-height`, so tags appearing and clearing cost no layout; they stay on
+// one line rather than wrapping the bar to a second row.
+.filter-tags
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap, 0.5rem)
+  // Takes its natural width and keeps each tag on one line. Squeezed instead,
+  // a tag wraps its name over its detail and the whole bar grows a row —
+  // exactly the reflow that moving the tags here was meant to avoid. The
+  // search field yields the space (see `.search-input`).
+  flex: 0 0 auto
+  white-space: nowrap

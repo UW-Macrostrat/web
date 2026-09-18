@@ -1,8 +1,7 @@
 import { useData } from "vike-react/useData";
-import h from "./main.module.sass";
+import h from "@macrostrat/hyper";
 import { LexItemPage, ConceptInfo, LexItemBodyClient } from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy.ts";
-import { StratTag } from "~/components/general";
 import { LexItemData } from "~/components/lex/data-loaders.ts";
 
 export function Page() {
@@ -17,13 +16,9 @@ export function Page() {
     "&name=" +
     resData?.name;
 
-  const { strat_name_long } = resData || {};
-
+  // The title (and the Name/Concept badge) belong to the layout's page header,
+  // built from `+pageInfo.ts` — not to a second heading here.
   return h(LexItemPage, { id, resData, siftLink: config.siftLink }, [
-    h("div.strat-header", [
-      h("h1.strat-title", strat_name_long),
-      h(StratTag, { isConcept: false, fontSize: "1.6em" }),
-    ]),
     h(StratNameHierarchy, { id }),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
     h(LexItemBodyClient, {

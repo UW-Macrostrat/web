@@ -1,5 +1,6 @@
 import h from "@macrostrat/hyper";
 import { Tag } from "@macrostrat/data-components";
+import type { ReactNode } from "react";
 import type { PageInfo } from "~/_utils/helpers.ts";
 
 export interface LexPageInfoOptions {
@@ -11,6 +12,11 @@ export interface LexPageInfoOptions {
   color?: string;
   /** Optional abbreviation, shown as an "aka" subtitle. */
   abbrev?: string;
+  /** A small badge for the *kind* of record, beside the name — e.g. the
+   * Name/Concept distinction that stratigraphic pages used to carry in a
+   * second `<h1>` of their own. Rendered by the caller, so this module stays
+   * free of component dependencies. */
+  kind?: ReactNode;
 }
 
 /** Build a standardized `PageInfo` for a `/lex` detail page, so the layout's
@@ -22,12 +28,12 @@ export interface LexPageInfoOptions {
  * to keep the breadcrumb path free of the barrel's heavy map/chart deps.
  */
 export function lexPageInfo(opts: LexPageInfoOptions): PageInfo {
-  const { name, identifier, color, abbrev } = opts;
+  const { name, identifier, color, abbrev, kind } = opts;
   const info: Partial<PageInfo> = {};
 
   if (name != null) {
     info.name = name;
-    info.title = () => h(LexItemTitle, { name, color, abbrev });
+    info.title = () => h(LexItemTitle, { name, color, abbrev, kind });
   }
   if (identifier != null) {
     info.identifier = identifier;
@@ -44,7 +50,7 @@ export function routeId(ctx: any): number | undefined {
   return Number.isFinite(id) ? id : undefined;
 }
 
-function LexItemTitle({ name, color, abbrev }: LexPageInfoOptions) {
+function LexItemTitle({ name, color, abbrev, kind }: LexPageInfoOptions) {
   let nameNode;
   if (color != null) {
     nameNode = h(Tag, { color, name });
@@ -58,5 +64,5 @@ function LexItemTitle({ name, color, abbrev }: LexPageInfoOptions) {
     abbrevNode = h("span.subtitle", [" aka ", h(Tag, { color, name: abbrev })]);
   }
 
-  return h("span.lex-item-title", [nameNode, abbrevNode]);
+  return h("span.lex-item-title", [nameNode, abbrevNode, kind]);
 }

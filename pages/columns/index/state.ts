@@ -6,7 +6,10 @@
  */
 
 import { atomWithSearchParam } from "~/_utils/url-atoms";
-import { IN_PROCESS_FILTER_KEY } from "~/components/in-process-filter";
+import {
+  COLUMN_STATUS_FILTER_KEY,
+  statusCodeURLValue,
+} from "~/components/in-process-filter";
 import {
   normalizeProjectFilter,
   projectIDParam,
@@ -16,7 +19,8 @@ import {
   type ProjectFilterValue,
 } from "~/components/project-filter";
 
-import { atom } from "jotai";
+import { atom, useAtomValue } from "jotai";
+import { useCallback } from "react";
 import { unwrap } from "jotai/utils";
 import { debounce } from "underscore";
 
@@ -30,6 +34,7 @@ import {
   type ColumnGroup,
 } from "./grouped-cols";
 import { START_AFTER_KEY, type PageLocation } from "./page-links";
+import { columnScopeHash } from "~/components/column-scope";
 
 export type ColumnFilterKey =
   | "liths"
@@ -131,7 +136,7 @@ export const showEmptyAtom = atom(DEFAULT_REQUEST_SCOPE.showEmpty);
 
 /** The shared in-process filter (`~/components/in-process-filter`) for this
  * page. Read from the plain atom, seeded at page load; writing mirrors it to
- * `?in_process=` so the choice is linkable and travels to the column and
+ * `?status_code=` so the choice is linkable and travels to the column and
  * correlation pages — the same one-way arrangement as the project filter.
  *
  * This used to be `atomWithStorage("macrostrat:show-in-process")`, remembered
@@ -141,12 +146,14 @@ export const showEmptyAtom = atom(DEFAULT_REQUEST_SCOPE.showEmpty);
 export const showInProcessValueAtom = atom(
   DEFAULT_REQUEST_SCOPE.showInProcess
 );
-const inProcessSearchParamAtom = atomWithSearchParam(IN_PROCESS_FILTER_KEY);
+const statusCodeSearchParamAtom = atomWithSearchParam(
+  COLUMN_STATUS_FILTER_KEY
+);
 export const showInProcessAtom = atom(
   (get) => get(showInProcessValueAtom),
   (get, set, value: boolean) => {
     set(showInProcessValueAtom, value);
-    set(inProcessSearchParamAtom, value ? "true" : null);
+    set(statusCodeSearchParamAtom, statusCodeURLValue(value));
     // A different list: the crawl cursor no longer describes it
     set(startAfterParamAtom, null);
   }
@@ -325,10 +332,6 @@ export const clearSelectionAtom = atom(null, (_get, set) => {
   set(selectionAnchorAtom, null);
 });
 
-/** The map viewport, republished on every settled move. Read by the
- * "only in map area" filter while it's active. */
-export const mapBoundsAtom = atom<MapBounds | null>(null);
-
 export function withinBounds(row: ColumnRow, bounds: MapBounds): boolean {
   const [[west, south], [east, north]] = bounds;
   if (row.lat == null || row.lng == null) return false;
@@ -423,4 +426,20 @@ async function instrumentResult<T>(promise: Promise<T>) {
   } catch (e) {
     return { data: null, error: e, loading: false };
   }
+}
+
+
+/** Builds a link to a column that carries the list's scope, so the column page
+ * opens on the same projects and the same in-process setting — its navigation
+ * map included. Every route out of the list uses this: the row's link, the
+ * row's click, a footprint click on the map, the side panel's link. */
+export function useColumnHref(): (colID: number) => string {
+  const linkPrefix = useAtomValue(linkPrefixAtom);
+  const projectSlugs = useAtomValue(projectSlugsAtom);
+  const inProcess = useAtomValue(showInProcessValueAtom);
+  const hash = columnScopeHash({ projectSlugs, inProcess });
+  return useCallback(
+    (colID: number) => `${linkPrefix}columns/${colID}${hash}`,
+    [linkPrefix, hash]
+  );
 }

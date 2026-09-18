@@ -1,7 +1,6 @@
 import { useData } from "vike-react/useData";
-import h from "./main.module.sass";
+import h from "@macrostrat/hyper";
 import { LexItemPage, ConceptInfo, LexItemBodyClient } from "~/components/lex";
-import { StratTag } from "~/components/general";
 import { LinkCard } from "~/components/cards";
 import { fetchAPIData } from "~/_utils";
 import { useEffect, useState } from "react";
@@ -9,8 +8,6 @@ import { LexItemData } from "~/components/lex/data-loaders.ts";
 
 export function Page() {
   const { resData, id, type, config } = useData<LexItemData>();
-
-  const { name } = resData;
 
   const relatedHref =
     config.idParam +
@@ -21,11 +18,8 @@ export function Page() {
     "&name=" +
     resData?.name;
 
+  // Title + Concept badge come from `+pageInfo.ts` via the layout header.
   return h(LexItemPage, { id, resData, siftLink: config.siftLink }, [
-    h("div.concept-header", [
-      h("h1.concept-title", name),
-      h(StratTag, { isConcept: true, fontSize: "1.6em" }),
-    ]),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: false }),
     h(ConceptBody, { concept_id: id }),
     h(LexItemBodyClient, {

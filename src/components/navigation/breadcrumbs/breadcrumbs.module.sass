@@ -34,3 +34,13 @@
     font-weight: 500
     font-family: var(--monospace-font)
 
+  // `lexPageInfo` renders the title as a name plus optional "aka" and kind
+  // badges. The class is set by that module (plain hyperscript, so unscoped),
+  // hence the :global.
+  :global(.lex-item-title)
+    display: inline-flex
+    flex-direction: row
+    align-items: baseline
+    gap: 0.4em
+    flex-wrap: wrap
+

@@ -1,0 +1,12 @@
+// The page-side placeholder for the shared column-navigation map. Mapbox needs
+// a *definite* height, so the slot fills whatever box the page gives it (the
+// hybrid frame's map slot is absolutely positioned and already has one) and the
+// map node just fills the slot.
+.column-map-slot
+  position: relative
+  width: 100%
+  height: 100%
+
+.map-mount
+  width: 100%
+  height: 100%

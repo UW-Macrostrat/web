@@ -1,127 +1,67 @@
-.sift-link
-  margin-bottom: 1em
+// The stratigraphic name/concept list. `InfiniteScrollPage` owns the page frame
+// and the scroll container; these rules only describe an entry.
 
 .strat-list
   display: flex
   flex-direction: column
-  gap: 1.3em
-  width: calc(100% - 2px)
+  gap: 2px
 
-  .strat-rank-group
-    display: flex
-    flex-direction: column
-    gap: 1em
+// One row of the view: a concept with its member names beneath, or a
+// standalone name on its own.
+.strat-entry
+  padding: 0.1em 0
 
-    .strat-subgroup,
-    .strat-group
-      border-left: 2px solid rgb(56, 62, 71)
-      padding-left: 1em
-
-      .strat-items
-        display: flex
-        gap: 5px
-        flex-wrap: wrap
-        align-items: center
-
-        .strat-name
-          padding: 2px 6px
-          margin: 0.2em 0
-          border-radius: 0.2em
-
-.search-bar
+.strat-line
   display: flex
-  gap: 5px
-  align-items: center
-  justify-content: center
+  flex-direction: row
+  align-items: baseline
+  gap: 0.6em
+  min-width: 0
 
-  input
-    width: 100%
-    padding: 0.5em
-    border-radius: 0.2em
-    border: none
-    background-color: var(--background-color)
+  .strat-name
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  .strat-rank
+    color: var(--secondary-color)
+    font-size: 0.85em
+
+  .strat-kind
+    margin-left: auto
+    flex: 0 0 auto
+
+// Deliberately quiet: the nesting is the information, so it is carried by an
+// indent and a hairline rule rather than by markers, padding and tag chrome.
+.concept-usages
+  list-style: none
+  margin: 0.1em 0 0.3em
+  padding: 0 0 0 0.9em
+  border-left: 1px solid var(--panel-rule-color)
+  font-size: 0.92em
+
+  li
+    margin: 0
+
+  .strat-name
+    color: var(--secondary-color)
+
+    &:hover
+      color: var(--text-emphasized-color)
+
+.strat-key
+  display: grid
+  grid-template-columns: auto 1fr
+  gap: 0.3em 0.8em
+  margin: 0
+  padding: 0.8em 1em
+  max-width: 32em
+
+  dt
+    font-weight: 600
     color: var(--text-emphasized-color)
-    font-size: 1em
-    margin: 3px
 
-    &:focus
-      outline: none
-      box-shadow: 0 0 0.2em var(--text-emphasized-color)
-
-.filter
-  margin-bottom: 1em
-  display: flex
-  flex-direction: column
-  gap: 1em
-
-.page-loader-container
-  display: flex
-  flex-direction: column
-  align-items: center
-  justify-content: center
-
-  h4
-    cursor: pointer
-
-.header
-  display: flex
-  flex-direction: column
-  gap: 1em
-  margin-bottom: 1em
-
-.concept-body
-  display: flex
-  flex-direction: column
-  gap: .5em
-
-  .concept  
-    display: flex
-    gap: .5em
-    alignn-items: center
-
-    .concept-tag
-      font-size: .75em
-      padding: .2em .5em
-      border-radius: .2em
-      background-color: var(--tertiary-background)
-
-  .concept-strats
-    list-style-type: circle
-    padding-left: 40px
-
-    .strat-name:not(:last-child)
-      margin-bottom: 10px
-
-.strat-name
-  display: flex
-  gap: .5em
-
-  .strat-tag
-    font-size: .75em
-    padding: .2em .5em
-    border-radius: .2em
-    background-color: var(--tertiary-background)
-
-.card-container
-  display: flex
-  gap: 1em
-  align-items: center
-  color: var(--text-emphasized-color) !important
-
-  .status
-    height: 10px
-    width: 10px
-    border-radius: 50%
-    display: inline-block
-    
-  .active
-    background-color: green
-
-  .inactive
-    background-color: red
-
-.clickable
-  cursor: pointer
-
-.header-description
-  margin: 1em 0
+  dd
+    margin: 0
+    color: var(--secondary-color)

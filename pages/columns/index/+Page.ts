@@ -43,9 +43,11 @@ import { LithologyTag } from "~/components/lex/tag";
 import { createWindowedScrollBody } from "~/components/data-view";
 import { HybridContentFooter, HybridPage } from "~/layouts/hybrid";
 import {
+  projectIDParam,
   ProjectFilterControl,
   ProjectFilterProvider,
   ProjectFilterTag,
+  resolveProjectIDs,
 } from "~/components/project-filter";
 import {
   InProcessFilterProvider,
@@ -53,6 +55,11 @@ import {
   InProcessSwitch,
 } from "~/components/in-process-filter";
 import { onDemand } from "~/_utils";
+import { useColumnMapBounds } from "~/components/column-map/target";
+import {
+  useCarriedScopeAtMount,
+  usePublishColumnScope,
+} from "~/components/column-scope";
 
 import {
   columnTableFilters,
@@ -77,7 +84,7 @@ import {
   suggestedFiltersAtom,
   isLoadingAtom,
   linkPrefixAtom,
-  mapBoundsAtom,
+  useColumnHref,
   projectIDAtom,
   projectFilterAtom,
   projectSlugsAtom,
@@ -189,11 +196,8 @@ const columnSpec = [
 
 export function Page({ linkPrefix = "/" }) {
   const data = useData();
-  const { allColumnGroups, projects, projectSlugs } = data;
-  // Match what `+data.ts` fetched with — defaulting to something else meant
-  // the client immediately refetched the list with different parameters. `null`
-  // is the API's default set (the shared project filter's default).
-  const projectID = data.project_id ?? null;
+  const { allColumnGroups, projects } = data;
+  const scope = useSeededScope(data);
 
   return h(
     ProjectFilterProvider,
@@ -202,20 +206,22 @@ export function Page({ linkPrefix = "/" }) {
       InProcessFilterProvider,
       { atom: showInProcessAtom },
       h(HybridPage, {
-      capabilities: { defaultMode: "content-primary" },
-      initialAtoms: [
-        [projectIDAtom, projectID],
-        [projectSlugsAtom, projectSlugs ?? null],
-        [showInProcessValueAtom, data.showInProcess ?? false],
-        [initialDataAtom, { params: data.requestParams, groups: allColumnGroups }],
-        [startAfterAtom, data.startAfter ?? null],
-        [pageLocationAtom, data.pageLocation ?? null],
-        [linkPrefixAtom, linkPrefix],
-        [projectsAtom, projects ?? []],
-      ],
-      // Selected projects show as tags in the header row (the dropdown that
-      // picks them sits in the panel toolbar)
-        filterBar: h(FilterBar),
+        capabilities: { defaultMode: "content-primary" },
+        initialAtoms: [
+          [projectIDAtom, scope.projectID],
+          [projectSlugsAtom, scope.projectSlugs],
+          [showInProcessValueAtom, scope.inProcess],
+          [
+            initialDataAtom,
+            { params: data.requestParams, groups: allColumnGroups },
+          ],
+          [startAfterAtom, data.startAfter ?? null],
+          [pageLocationAtom, data.pageLocation ?? null],
+          [linkPrefixAtom, linkPrefix],
+          [projectsAtom, projects ?? []],
+        ],
+        // Inside the frame's jotai scope, so it sees the live filters.
+        wrap: (node) => h(ColumnScopeSync, { adopted: scope.adopted }, node),
         content: h(ColumnList),
         map: h(ColumnListMapSlot),
         assistant: h(ColumnAssistant),
@@ -224,11 +230,83 @@ export function Page({ linkPrefix = "/" }) {
   );
 }
 
-/** The header row's filter summary: selected projects, plus a marker when
- * unfinished columns are in scope. The controls that set them sit in the panel
- * toolbar. */
-function FilterBar() {
-  return h([h(ProjectFilterTag), h(InProcessFilterTag)]);
+/** What the list starts filtered by.
+ *
+ * Normally exactly what `+data.ts` fetched with — seeding anything else means
+ * the client immediately refetches with different parameters. But when the URL
+ * says nothing about a filter, the scope carried from the column page you came
+ * from applies instead (`~/components/column-scope`), and the refetch is the
+ * point: the server had no way to know. Resolved once, at first render, in
+ * keeping with the read-the-URL-once rule. */
+function useSeededScope(data) {
+  const carried = useCarriedScopeAtMount();
+  return useMemo(() => {
+    let projectSlugs = data.projectSlugs ?? null;
+    let projectID = data.project_id ?? null;
+    let inProcess = data.showInProcess ?? false;
+
+    // What was taken from the carried scope rather than from the URL — the
+    // address bar has to be caught up for exactly those.
+    const adopted = { project: false, inProcess: false };
+
+    if (carried != null && !data.urlScope?.project) {
+      projectSlugs = carried.projectSlugs;
+      projectID = projectIDParam(
+        resolveProjectIDs(data.projects ?? [], carried.projectSlugs)
+      );
+      adopted.project = true;
+    }
+    if (carried != null && !data.urlScope?.inProcess) {
+      inProcess = carried.inProcess;
+      adopted.inProcess = true;
+    }
+    return { projectSlugs, projectID, inProcess, adopted };
+    // Resolved once: later navigations remount this page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+}
+
+/** Remembers the list's scope for the next column page, and puts an adopted
+ * scope into the URL.
+ *
+ * Seeding sets the filter atoms directly, which deliberately skips the writers
+ * that mirror them to `?project_id=` / `?status_code=`. That is right for a
+ * scope the URL already carries, but a scope *adopted* from the previous page
+ * would then be invisible in the address bar — the list would be filtered by
+ * something the link doesn't say. So an adopted scope is pushed back through
+ * the real setters once, which is a no-op for the state and writes the URL. */
+function ColumnScopeSync({ adopted, children }) {
+  const projectSlugs = useAtomValue(projectSlugsAtom);
+  const inProcess = useAtomValue(showInProcessValueAtom);
+  const setProjectFilter = useSetAtom(projectFilterAtom);
+  const setShowInProcess = useSetAtom(showInProcessAtom);
+
+  useEffect(() => {
+    if (adopted.project && projectSlugs != null && projectSlugs.length > 0) {
+      setProjectFilter(projectSlugs);
+    }
+    if (adopted.inProcess && inProcess) {
+      setShowInProcess(true);
+    }
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  usePublishColumnScope(projectSlugs, inProcess);
+  return children;
+}
+
+/** The active filters, as tags in the panel's filter bar beside the controls
+ * that set them.
+ *
+ * They used to sit in the frame's header row, which collapses when it has no
+ * tags (`.header-filters:empty`) — so selecting or clearing a project changed
+ * the header's height and pushed the whole list down. The filter bar is a
+ * single flex row with its own `min-height`, so a tag appearing or going away
+ * costs no layout. Each tag's × drops just that filter; the project picker
+ * itself lives in the side panel, with the link to the projects pages. */
+function ColumnFilterTags() {
+  return h("div.filter-tags", [h(ProjectFilterTag), h(InProcessFilterTag)]);
 }
 
 /** The map follows the project filter as it changes, not just the initial id. */
@@ -326,7 +404,7 @@ function ColumnList() {
       scrollBody: ColumnScrollBody,
       // The project dropdown sits in the panel's own toolbar, beside the
       // built-in search and Filter / Sort controls, as the ingestion list does.
-      toolbar: h(ProjectFilterControl),
+      toolbar: h(ColumnFilterTags),
       toolbarStyle: DataPanelToolbarStyle.FLOATING,
       statusBar: false,
       // Modal selection, the same configuration the map-ingestion list uses: the
@@ -397,7 +475,7 @@ function FilterStateBridge() {
   const setFilterState = ctx.useSet(setFilterStateAtom);
   const activeFilters = useSelector((state) => state.activeFilters);
   const selectedIDs = useAtomValue(selectedColumnsAtom);
-  const bounds = useAtomValue(mapBoundsAtom);
+  const bounds = useColumnMapBounds();
 
   const onlySelectedActive =
     activeFilters?.has(ONLY_SELECTED_FILTER_ID) ?? false;
@@ -533,7 +611,7 @@ function LexSuggestions() {
  * panel's is a derived artifact here, and reading it back would reintroduce the
  * index-based fragility the page-level selection exists to avoid. */
 function ColumnRowCard({ data }) {
-  const linkPrefix = useAtomValue(linkPrefixAtom);
+  const columnHref = useColumnHref();
   const selectedIDs = useAtomValue(selectedColumnsAtom);
   const selectColumn = useSetAtom(selectColumnAtom);
   const selectionMode = useAtomValue(selectionModeAtom);
@@ -572,7 +650,7 @@ function ColumnRowCard({ data }) {
     // click on its footprint does. Modifier-clicks still select, so a selection
     // can be started without reaching for the mode toggle first.
     if (!selectionMode && !additive && !range) {
-      navigate(`${linkPrefix}columns/${col_id}`);
+      navigate(columnHref(col_id));
       return;
     }
     // Inside the mode a plain click toggles — same as a footprint click on the
@@ -585,9 +663,10 @@ function ColumnRowCard({ data }) {
   // plain text there, and a real link (middle-click, copy) otherwise.
   let name = h("span.col-name", col_name);
   if (!selectionMode) {
+    const href = columnHref(col_id);
     name = h(
       "a.col-name",
-      { href: `${linkPrefix}columns/${col_id}`, onClick: stopPropagation },
+      { href, onClick: (evt) => onLinkClick(evt, href) },
       col_name
     );
   }
@@ -601,8 +680,26 @@ function ColumnRowCard({ data }) {
   ]);
 }
 
-function stopPropagation(evt) {
+/** The row's name is a real `<a>` so middle-click and copy-link work, but the
+ * row itself navigates on click — so the anchor has to stop the event reaching
+ * it. Stopping propagation alone left the browser to follow the href, and
+ * because vike's client router listens on the document, the event it needed
+ * never arrived: every click on a column name was a **full page load**. So take
+ * the navigation over explicitly, leaving modified clicks (new tab, new window,
+ * download) to the browser. */
+function onLinkClick(evt, href: string) {
   evt.stopPropagation();
+  if (
+    evt.button !== 0 ||
+    evt.metaKey ||
+    evt.ctrlKey ||
+    evt.shiftKey ||
+    evt.altKey
+  ) {
+    return;
+  }
+  evt.preventDefault();
+  navigate(href);
 }
 
 /** Mirrors the library's modal-selection state out to the page.
@@ -645,6 +742,14 @@ function SourceFacetsPanel() {
   const [showEmpty, setShowEmpty] = useAtom(showEmptyAtom);
 
   return h("div.source-facets", [
+    // The same picker as the side panel's, driving the same filter — people
+    // look for "which projects" under Filter as readily as in a panel, and a
+    // facet that changes the request belongs beside the others that do.
+    h("div.source-projects", [
+      h("p.filter-label", "Projects"),
+      h(ProjectFilterControl, { className: "project-picker" }),
+      h(ProjectFilterTag),
+    ]),
     h(Switch, {
       checked: showEmpty,
       label: "Show empty columns",
@@ -692,7 +797,7 @@ function ColumnAssistant() {
   const selectedIDs = useAtomValue(selectedColumnsAtom);
   const rows = useAtomValue(allRowsAtom);
   const visible = useAtomValue(visibleRowsAtom);
-  const linkPrefix = useAtomValue(linkPrefixAtom);
+  const columnHref = useColumnHref();
 
   const selected = useMemo(
     () => rows.filter((row) => selectedIDs.includes(row.col_id)),
@@ -739,7 +844,7 @@ function ColumnAssistant() {
       "p.assistant-link",
       h(
         Link,
-        { href: `${linkPrefix}columns/${row.col_id}` },
+        { href: columnHref(row.col_id) },
         "Open column page"
       )
     ),
@@ -747,9 +852,36 @@ function ColumnAssistant() {
   ]);
 }
 
+/** The side panel's standing content, under whatever the selection shows.
+ *
+ * Projects are one subject, so the control that scopes the list to a project
+ * and the link to the project pages sit together here rather than a filter
+ * dropdown in the toolbar and an unrelated "Projects" button below. What the
+ * picker selects still shows as tags in the filter bar, next to the list it
+ * narrows. */
 function AssistantLinks() {
-  return h(ButtonGroup, { vertical: true, className: "assistant-links" }, [
-    h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
-    h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
+  return h("div.assistant-links", [
+    h("div.projects-section", [
+      h("div.section-head", [
+        h("h3", "Projects"),
+        h(
+          AnchorButton,
+          {
+            href: "/projects",
+            minimal: true,
+            small: true,
+            rightIcon: "arrow-right",
+            title: "All projects",
+          },
+          "Browse"
+        ),
+      ]),
+      h(ProjectFilterControl, { className: "project-picker" }),
+    ]),
+    h(
+      ButtonGroup,
+      { vertical: true, className: "assistant-buttons" },
+      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart")
+    ),
   ]);
 }
