@@ -1,9 +1,13 @@
 /** Map legend for the current viewport.
  *
- * A port of the `Map interface/Map legend` story from `web-components`, brought
- * over as a `/dev` page more or less as the story had it: the Macrostrat carto
- * overlay on a basic basemap, with a fixed detail panel listing the legend
- * entries that fall within the map's bounds, youngest unit first.
+ * A port of the `Map interface/Map legend` story from `web-components`: the
+ * Macrostrat carto overlay on a basemap, with a fixed panel on the right
+ * listing the legend entries that fall within the map's bounds, youngest unit
+ * first.
+ *
+ * The page has no navbar and no context panel — the map fills everything to
+ * the left of a single column, which carries the way back out, the page's
+ * title and description, and the map controls above the legend itself.
  *
  * The two directions of selection are the point of the page:
  *  - clicking a map polygon selects its legend entry and opens its details
@@ -19,12 +23,12 @@ import hyper from "@macrostrat/hyper";
 import { Button, NonIdealState, Spinner, Tag } from "@blueprintjs/core";
 import classNames from "classnames";
 import {
+  applyMapPositionToHash,
   DetailPanelStyle,
+  getMapPositionForHash,
   LocationPanel,
   MapAreaContainer,
   MapView,
-  PanelCard,
-  useBasicStylePair,
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import {
@@ -36,9 +40,14 @@ import {
   MacrostratDataProvider,
   useMacrostratDefs,
 } from "@macrostrat/data-provider";
-import { JSONView } from "@macrostrat/ui-components";
+import {
+  buildQueryString,
+  getHashString,
+  JSONView,
+  useDarkMode,
+} from "@macrostrat/ui-components";
 import { useMapElement, useMapStyleOperator } from "@macrostrat/mapbox-react";
-import type { MapPosition } from "@macrostrat/mapbox-utils";
+import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
 import {
   apiV2Prefix,
   apiV3Prefix,
@@ -48,14 +57,17 @@ import {
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { loadable } from "jotai/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { atomWithSearchParam, locationAtom } from "~/_utils/url-atoms";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
-import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
+import {
+  BaseLayerForm,
+  Basemap,
+  basemapStyle,
+  PageBreadcrumbs,
+} from "~/components";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
-
-/** Shared width for the floating navbar and the context panel below it. */
-const PANEL_WIDTH = 320;
 
 /** The fill layer `buildMacrostratStyle` builds over the carto `units`
  * source-layer. Both the selection highlight and the click handler address it
@@ -75,21 +87,8 @@ const macrostratOverlay = buildMacrostratStyle({
  * the offset the story arrived at. */
 const LEGEND_ZOOM_OFFSET = 4;
 
-interface MapArea {
-  name: string;
-  bounds: [number, number, number, number];
-}
-
-/** The areas the story shipped as its individual stories, kept here as quick
- * jumps — each is somewhere the legend has enough variety to be worth reading. */
-const MAP_AREAS: MapArea[] = [
-  { name: "South Dakota", bounds: [-100, 43, -98, 44] },
-  { name: "Utah", bounds: [-112, 38, -110, 40] },
-  { name: "Appalachia", bounds: [-82, 36, -79, 38] },
-];
-
-/** Where to start when there's no recent last-viewed position: roughly the
- * story's South Dakota view. */
+/** Where to start when neither the URL nor the last-viewed position says
+ * otherwise: roughly the story's South Dakota view. */
 const DEFAULT_MAP_POSITION: MapPosition = {
   camera: { lng: -99, lat: 43.5, altitude: 250_000 },
 };
@@ -97,16 +96,57 @@ const DEFAULT_MAP_POSITION: MapPosition = {
 // --- Page state ---
 
 /** The camera, shared with the other map pages and restored on revisit
- * (see `~/_utils/last-map-position`). Deliberately not in the URL. */
+ * (see `~/_utils/last-map-position`). */
 const mapPositionAtom = lastMapPositionAtom;
+
+/** The camera in the URL hash, written in the same `x`/`y`/`z` (plus `a`/`e`)
+ * form as the main map page — so a link from here opens the same view there,
+ * and vice versa.
+ *
+ * Write-only, and routed through `locationAtom` rather than `setHashString`:
+ * the query-string params below are managed by the same atom, and a bare
+ * `setHashString` rewrites the URL from the pathname up, dropping them.
+ */
+const mapPositionHashAtom = atom(null, (get, set, position: MapPosition) => {
+  const loc = get(locationAtom);
+  const args = getHashString(loc.hash) ?? {};
+  applyMapPositionToHash(args, position);
+  const hash = buildQueryString(args, { sort: false, arrayFormat: "comma" });
+  set(locationAtom, { ...loc, hash });
+});
+
+/** The base map style, persisted in the URL as on the other map pages. "basic"
+ * is the default and is kept out of the query string. */
+const basemapParamAtom = atomWithSearchParam("basemap");
+const basemapAtom = atom(
+  (get): Basemap => {
+    const value = get(basemapParamAtom);
+    if (value === Basemap.Satellite) return value as Basemap;
+    return Basemap.Basic;
+  },
+  (get, set, value: Basemap) => {
+    let param: Basemap | null = value;
+    if (value === Basemap.Basic) param = null;
+    set(basemapParamAtom, param);
+  }
+);
+
+/** Whether the basemap's text labels are shown. On by default; the "off" state
+ * is stored in the URL. */
+const labelsParamAtom = atomWithSearchParam("labels");
+const showLabelsAtom = atom(
+  (get) => get(labelsParamAtom) !== "off",
+  (get, set, value: boolean) => {
+    let param: string | null = null;
+    if (!value) param = "off";
+    set(labelsParamAtom, param);
+  }
+);
 
 /** The query string the legend is fetched with — bounds and zoom, already
  * rounded. Holding the *string* rather than the bounds object means a camera
  * nudge too small to change the request doesn't refetch. */
 const legendQueryAtom = atom<string | null>(null);
-
-/** An area waiting to be flown to, cleared once the map has been sent there. */
-const pendingAreaAtom = atom<MapArea | null>(null);
 
 const legendDataAtom = atom(async (get, { signal }) => {
   const query = get(legendQueryAtom);
@@ -176,13 +216,16 @@ function bestAge(unit: any): number {
 // --- Page ---
 
 export function Page() {
-  const [isOpen, setOpen] = useState(true);
-  const style = useBasicStylePair();
+  const dark = useDarkMode();
+  const basemap = useAtomValue(basemapAtom);
+  const baseStyle = basemapStyle(basemap, dark?.isEnabled);
+  const transformStyle = useLabelTransform();
+
   const mapPosition = useInitialMapPosition();
   const onMapMoved = useMapMovedHandler();
 
-  // The definition maps the detail panel resolves interval and lithology IDs
-  // against; the map itself needs nothing from the provider.
+  // The definition maps the panel resolves interval and lithology IDs against;
+  // the map itself needs nothing from the provider.
   const detailPanel = h(
     MacrostratDataProvider,
     { baseURL: apiV2Prefix },
@@ -191,25 +234,12 @@ export function Page() {
 
   return h(
     MapAreaContainer,
-    {
-      navbar: h(MapPageNavbar, {
-        isOpen,
-        onToggle: () => setOpen(!isOpen),
-        width: PANEL_WIDTH,
-      }),
-      contextPanel: h(
-        PanelCard,
-        { style: { width: PANEL_WIDTH } },
-        h(AreaPanel)
-      ),
-      contextPanelOpen: isOpen,
-      detailPanel,
-      detailPanelStyle: DetailPanelStyle.FIXED,
-    },
+    { detailPanel, detailPanelStyle: DetailPanelStyle.FIXED },
     h(
       MapView,
       {
-        style,
+        style: baseStyle,
+        transformStyle,
         mapPosition,
         mapboxToken: mapboxAccessToken,
         enableTerrain: true,
@@ -221,25 +251,55 @@ export function Page() {
   );
 }
 
-/** The camera to open at. `MapView` applies `mapPosition` at initialization
- * only, so this is frozen on first render rather than tracking the atom it
- * came from — which the map updates on every move. */
+/** The camera to open at: an explicit position in the URL hash wins, then the
+ * last-viewed position shared with the other map pages, then this page's own
+ * default.
+ *
+ * Frozen on first render — `MapView` applies `mapPosition` at initialization
+ * only, and both sources change as the map moves.
+ */
 function useInitialMapPosition(): MapPosition {
   const stored = useAtomValue(mapPositionAtom);
-  const [initial] = useState(() => stored ?? DEFAULT_MAP_POSITION);
+  const { hash } = useAtomValue(locationAtom);
+
+  const [initial] = useState(() => {
+    const fallback = stored ?? DEFAULT_MAP_POSITION;
+    const hashData = getHashString(hash) ?? {};
+    if (hashData.x == null && hashData.y == null) return fallback;
+    return getMapPositionForHash(hashData, fallback.camera);
+  });
+
   return initial;
 }
 
+/** On every move: record the camera in the URL and in the shared last-viewed
+ * position, and re-key the legend request. */
 function useMapMovedHandler() {
-  const setMapPosition = useSetAtom(mapPositionAtom);
+  const setStoredPosition = useSetAtom(mapPositionAtom);
+  const setHashPosition = useSetAtom(mapPositionHashAtom);
   const setLegendQuery = useSetAtom(legendQueryAtom);
 
   return useCallback(
     (position: MapPosition, map: mapboxgl.Map) => {
-      setMapPosition(position);
+      setStoredPosition(position);
+      setHashPosition(position);
       setLegendQuery(legendQueryFor(map));
     },
-    [setMapPosition, setLegendQuery]
+    [setStoredPosition, setHashPosition, setLegendQuery]
+  );
+}
+
+/** Hide the basemap's own labels by stripping the label layers from the
+ * resolved style, as the other map pages do. */
+function useLabelTransform() {
+  const showLabels = useAtomValue(showLabelsAtom);
+
+  return useCallback(
+    (style) => {
+      if (showLabels) return style;
+      return removeMapLabels(style, true);
+    },
+    [showLabels]
   );
 }
 
@@ -249,7 +309,6 @@ function MapLegendManager() {
   useInitialLegendQuery();
   useLegendHighlight();
   useLegendClickHandler();
-  useAreaFocus();
   return null;
 }
 
@@ -318,108 +377,90 @@ function useLegendClickHandler() {
   }, [map, setSelectedID]);
 }
 
-/** Fly to an area picked in the context panel. */
-function useAreaFocus() {
-  const map = useMapElement();
-  const [area, setArea] = useAtom(pendingAreaAtom);
+// --- The page's single column ---
 
-  useEffect(() => {
-    if (map == null || area == null) return;
-    map.fitBounds(area.bounds, { padding: 40 });
-    setArea(null);
-  }, [map, area, setArea]);
-}
-
-// --- Context panel ---
-
-function AreaPanel() {
-  const setArea = useSetAtom(pendingAreaAtom);
-
-  return h("div.area-panel", [
-    h("p.intro", [
-      "Legend entries for the units in view, youngest first. Click a unit on ",
-      "the map or in the list to isolate it.",
-    ]),
-    h("h3.areas-title", "Jump to"),
-    h(
-      "div.areas",
-      MAP_AREAS.map((area) =>
-        h(Button, {
-          key: area.name,
-          minimal: true,
-          alignText: "left",
-          fill: true,
-          text: area.name,
-          onClick: () => setArea(area),
-        })
-      )
-    ),
-  ]);
-}
-
-// --- Detail panel ---
-
+/** The page header, then either the legend for the current viewport or the
+ * details of the entry selected from it. */
 function LegendPanel() {
   const selectedEntry = useAtomValue(selectedEntryAtom);
+
+  let content = h(LegendList);
   if (selectedEntry != null) {
-    return h(LegendDetailPanel, { entry: selectedEntry });
-  }
-  return h(LegendListPanel);
-}
-
-/** The scrollable list of legend entries for the current viewport. */
-function LegendListPanel() {
-  const res = useAtomValue(legendResultAtom);
-
-  let content;
-  if (res.state === "hasError") {
-    content = h(NonIdealState, {
-      icon: "error",
-      title: "Couldn't load the legend",
-      description: String(res.error),
-    });
-  } else if (res.state === "hasData" && res.data != null) {
-    content = h(LegendEntries, { data: res.data });
-  } else {
-    content = h(NonIdealState, {
-      icon: h(Spinner, { size: 24 }),
-      title: "Loading legend data",
-    });
+    content = h(LegendEntryDetailView, { entry: selectedEntry });
   }
 
   return h(
     LocationPanel,
-    { title: "Map legend", style: { flexShrink: 1 } },
+    { headerElement: h(PageHeader) },
     content
   );
 }
 
+/** Everything above the legend. With no navbar and no context panel this is
+ * the page's whole chrome: the way back out, what the page is, and the map
+ * controls. It sits in the panel's header, so it stays put while the legend
+ * scrolls beneath it. */
+function PageHeader() {
+  const [basemap, setBasemap] = useAtom(basemapAtom);
+  const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
+
+  return h("header.page-header", [
+    h(PageBreadcrumbs),
+    h("p.page-description", [
+      "Legend entries for the units in view, youngest first. Click a unit on ",
+      "the map or in the list to isolate it.",
+    ]),
+    h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),
+  ]);
+}
+
+/** The scrollable list of legend entries for the current viewport. */
+function LegendList() {
+  const res = useAtomValue(legendResultAtom);
+
+  if (res.state === "hasError") {
+    return h(NonIdealState, {
+      icon: "error",
+      title: "Couldn't load the legend",
+      description: String(res.error),
+    });
+  }
+  if (res.state === "hasData" && res.data != null) {
+    return h(LegendEntries, { data: res.data });
+  }
+  return h(NonIdealState, {
+    icon: h(Spinner, { size: 24 }),
+    title: "Loading legend data",
+  });
+}
+
 /** A single selected legend entry, as details or as its raw record. */
-function LegendDetailPanel({ entry }: { entry: any }) {
+function LegendEntryDetailView({ entry }: { entry: any }) {
   const setSelectedID = useSetAtom(selectedLegendIDAtom);
   const [viewMode, setViewMode] = useAtom(viewModeAtom);
-
-  const headerElement = h(LegendDetailHeader, {
-    entry,
-    viewMode,
-    setViewMode,
-    onClose: () => setSelectedID(null),
-  });
 
   let content = h(LegendEntryDetails, { entry });
   if (viewMode === LegendViewMode.JSON) {
     content = h(JSONView, { data: entry, showRoot: false });
   }
 
-  return h(LocationPanel, { headerElement, style: { flexShrink: 1 } }, content);
+  return h("div.legend-detail", [
+    h(LegendDetailHeader, {
+      entry,
+      viewMode,
+      setViewMode,
+      onClose: () => setSelectedID(null),
+    }),
+    content,
+  ]);
 }
 
-/** Mirrors the panel header `@macrostrat/map-interface` builds from a `title`,
- * with the unit's color and the view-mode toggle alongside the name. The
- * library's own header component isn't part of its public API, so the markup
- * lives here. */
+/** Names the selected unit above its details, with its color and the
+ * view-mode toggle alongside. Mirrors the panel header
+ * `@macrostrat/map-interface` builds from a `title`; the library's own header
+ * component isn't part of its public API, so the markup lives here. */
 function LegendDetailHeader({ entry, viewMode, setViewMode, onClose }) {
-  return h("header.legend-panel-header", [
+  return h("header.legend-detail-header", [
     h(ColorSwatch, { color: entry.color }),
     h("span.unit-name", entry.map_unit_name ?? "Unknown unit"),
     h("div.spacer"),

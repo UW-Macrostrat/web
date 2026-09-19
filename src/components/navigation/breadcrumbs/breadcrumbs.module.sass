@@ -1,13 +1,25 @@
+// The crumb that visually ends the trail. Usually the DOM-last one, but the
+// root is placed DOM-last when there is no crumb for the current page (it
+// collapses last), and `order` moves it back to the head — so the crumb before
+// it is the one that actually ends the trail.
+$trail-end: "li:last-of-type:not(.root-crumb), li:has(+ .root-crumb:last-of-type)"
 
 .breadcrumbs-root
   display: flex
   flex-direction: row
+  // Centred, not stretched: Blueprint pins its `<ol>` to a 30px height, so a
+  // stretched `<nav>` would leave the crumb text riding above the row's centre.
+  align-items: center
   gap: 1em
   flex: 1
   min-width: 0
 
+  // The nav takes the leftover space outright rather than sizing to its
+  // crumbs. `OverflowList` collapses by measuring against its container, so a
+  // container that in turn sizes to the collapsed content would oscillate.
   & > nav
     display: flex
+    flex: 1 1 0
     min-width: 0
 
   h1.macrostrat-wordmark.small
@@ -15,12 +27,71 @@
     font-family: "Maven Pro", sans-serif
 
 .logo-container
+  // Flex, not block: an inline `<img>` sits on the text baseline and leaves a
+  // descender's worth of dead space under the logo.
   padding: 0.2em 0
-  display: block
+  display: flex
+  align-items: center
+  flex: 0 0 auto
+
+.breadcrumbs-fallback
+  min-width: 0
 
 .breadcrumbs
   flex: 1
   min-width: 0
+
+  // The crumb list sheds width in two stages. Blueprint's `OverflowList`
+  // decides to collapse by watching a trailing 1px spacer, so *any* overflow
+  // drives the spacer to zero and moves another crumb into the "…" menu.
+  // Crumbs therefore have to hold their natural width — if they squished
+  // instead the list would always appear to fit, and nothing would collapse.
+  li
+    flex: 0 0 auto
+    min-width: 0
+
+  :global(.bp6-breadcrumb)
+    white-space: nowrap
+
+  // The root is handed to `OverflowList` last so it outlives the crumbs below
+  // it, and brought back to the head of the trail here.
+  .root-crumb
+    order: -1
+
+    // Blueprint hides the chevron after the DOM-last crumb. The root is only
+    // ever *visually* last when it is the trail's only crumb.
+    &:not(:only-of-type)::after
+      display: block
+
+  // Once the menu has swallowed everything it can, the crumb ending the trail
+  // is all that's left to give, so it is the only shrinkable item in the row.
+  #{$trail-end}
+    flex: 0 1 auto
+
+    &::after
+      display: none
+
+    :global(.bp6-breadcrumb),
+    :global(.bp6-breadcrumb-current)
+      // `text-overflow` needs a block box; Blueprint's default is inline-flex.
+      display: block
+      min-width: 0
+      overflow: hidden
+      text-overflow: ellipsis
+
+// Overflow modifiers. Both the trail and a separated title block carry one, so
+// each rule keys off the modifier on its own element rather than an ancestor.
+.breadcrumbs-root.title-wrap
+  .breadcrumbs
+    // Wrapped crumbs need the list to grow past Blueprint's fixed 30px row.
+    height: auto
+
+    #{$trail-end}
+      :global(.bp6-breadcrumb),
+      :global(.bp6-breadcrumb-current)
+        white-space: normal
+        overflow-wrap: anywhere
+        text-overflow: clip
 
 .title-block
   display: flex
@@ -28,11 +99,16 @@
   gap: 1em
   justify-content: space-between
   align-items: baseline
+  min-width: 0
+
+  h1
+    min-width: 0
 
   .identifier
     color: var(--secondary-color)
     font-weight: 500
     font-family: var(--monospace-font)
+    flex: 0 0 auto
 
   // `lexPageInfo` renders the title as a name plus optional "aka" and kind
   // badges. The class is set by that module (plain hyperscript, so unscoped),
@@ -44,3 +120,12 @@
     gap: 0.4em
     flex-wrap: wrap
 
+.title-block.title-ellipsis
+  h1
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.title-block.title-wrap
+  h1
+    overflow-wrap: anywhere

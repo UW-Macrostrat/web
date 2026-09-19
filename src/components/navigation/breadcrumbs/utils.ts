@@ -41,18 +41,24 @@ export function buildBreadcrumbs(ctx: Vike.PageContext): Item[] {
       text = text.charAt(0).toUpperCase() + text.slice(1);
     }
 
-    let title = undefined;
-    if (i == 0 && slug == "") {
+    // The site root carries the wordmark rather than a plain label. It's
+    // flagged here rather than special-cased downstream because a trail that
+    // shows the Macrostrat logo drops this crumb entirely — the logo is the
+    // same link.
+    const isRoot = i === 0 && slug === "";
+    let shortTitle = pageInfo?.shortTitle;
+    if (isRoot) {
       text = "Macrostrat";
-      pageInfo.shortTitle = () => h("h1.macrostrat-wordmark.small", text);
+      shortTitle = () => h("h1.macrostrat-wordmark.small", "Macrostrat");
     }
 
     return {
       href: breadcrumbItem.url,
-      title,
       ...pageInfo,
+      shortTitle,
       name: text,
       slug,
+      isRoot,
     };
   });
 }
@@ -68,4 +74,6 @@ export interface Item extends PageInfo {
   href?: string;
   current?: boolean;
   disabled?: boolean;
+  /** The site root (`/`), which the Macrostrat logo already links to. */
+  isRoot?: boolean;
 }

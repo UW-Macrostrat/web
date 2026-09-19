@@ -1,33 +1,28 @@
-.area-panel
+// Everything above the legend: breadcrumbs and page title, the description,
+// and the base-layer controls. It is the panel's header element, so it stays
+// put while the legend scrolls beneath it.
+.page-header
   display: flex
   flex-direction: column
-  gap: 10px
+  gap: 8px
+  padding: 10px 12px
+  border-bottom: 1px solid var(--panel-rule-color)
 
-  .intro
+  .page-description
     margin: 0
     font-size: 12px
     line-height: 1.4
     opacity: 0.7
 
-  .areas-title
-    margin: 0
-    font-size: 12px
-    text-transform: uppercase
-    letter-spacing: 0.04em
-    opacity: 0.6
-
-  .areas
-    display: flex
-    flex-direction: column
-
-// Mirrors the metrics of the panel header that `@macrostrat/map-interface`
-// builds from a `title`. That header's styles are CSS-module-scoped inside the
-// package, so the class names can't be reused from here.
-.legend-panel-header
+// Names the selected unit above its details. Mirrors the metrics of the panel
+// header that `@macrostrat/map-interface` builds from a `title`; that header's
+// styles are CSS-module-scoped inside the package, so the class names can't be
+// reused from here.
+.legend-detail-header
   display: flex
   align-items: center
   gap: var(--panel-header-gap, 0.5rem)
-  padding: 5px 5px 5px 10px
+  padding: 5px 5px 5px 0
   min-height: var(--panel-header-height, 40px)
   border-bottom: 1px solid var(--panel-rule-color)
 

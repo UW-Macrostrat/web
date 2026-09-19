@@ -30,10 +30,6 @@
     align-items: center;
     gap: 0.5em;
 
-    :global(.title-block) {
-      min-width: 0;
-    }
-
     h2 {
       font-size: 1.3rem;
       line-height: 1.2;
