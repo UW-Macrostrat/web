@@ -1,0 +1,89 @@
+.area-panel
+  display: flex
+  flex-direction: column
+  gap: 10px
+
+  .intro
+    margin: 0
+    font-size: 12px
+    line-height: 1.4
+    opacity: 0.7
+
+  .areas-title
+    margin: 0
+    font-size: 12px
+    text-transform: uppercase
+    letter-spacing: 0.04em
+    opacity: 0.6
+
+  .areas
+    display: flex
+    flex-direction: column
+
+// Mirrors the metrics of the panel header that `@macrostrat/map-interface`
+// builds from a `title`. That header's styles are CSS-module-scoped inside the
+// package, so the class names can't be reused from here.
+.legend-panel-header
+  display: flex
+  align-items: center
+  gap: var(--panel-header-gap, 0.5rem)
+  padding: 5px 5px 5px 10px
+  min-height: var(--panel-header-height, 40px)
+  border-bottom: 1px solid var(--panel-rule-color)
+
+  .spacer
+    flex-grow: 1
+    margin-right: calc(-1 * var(--panel-header-gap, 0.5rem))
+
+  .unit-name
+    font-weight: 500
+    font-size: 16px
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  // Kept out of the way until the header is hovered, so the panel reads as the
+  // unit's name rather than a row of controls.
+  .json-toggle
+    opacity: 0
+    transition: opacity 0.15s ease
+
+  &:hover .json-toggle,
+  .json-toggle.active
+    opacity: 1
+
+.legend-entries
+  display: flex
+  flex-direction: column
+
+.legend-entry
+  display: flex
+  align-items: center
+  gap: 6px
+  padding: 6px 0
+  cursor: pointer
+  border-bottom: 1px solid var(--panel-rule-color)
+
+  &:last-child
+    border-bottom: none
+
+  &:hover
+    background-color: var(--panel-background-hover-color, rgba(128, 128, 128, 0.1))
+
+  .unit-name
+    flex: 1
+    min-width: 0
+    font-weight: 500
+
+  .age-tag
+    flex-shrink: 0
+
+.color-swatch
+  display: inline-block
+  flex-shrink: 0
+  width: 16px
+  height: 16px
+  border: 1px solid rgba(0, 0, 0, 0.2)
+  border-radius: 2px
+  vertical-align: middle
