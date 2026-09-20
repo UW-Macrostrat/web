@@ -160,6 +160,24 @@ export async function fetchLexDefs(type: string) {
   return fetchAPIData(cfg.defsEndpoint, { all: true });
 }
 
+/**
+ * The stratigraphic names belonging to a concept.
+ *
+ * Server-side, deliberately: this is the concept page's core content — the only
+ * route from a concept to the names it groups — and it was previously fetched
+ * in a `useEffect`, so it was absent from the server HTML entirely and never
+ * indexable. Each record also carries its own rank ancestry (`gp`/`gp_id`, …),
+ * which is what the usage cards render as hierarchy links.
+ *
+ * A failure degrades to an empty list rather than failing the page.
+ */
+export async function fetchConceptUsages(conceptId: number) {
+  if (conceptId == null || isNaN(conceptId)) return [];
+  return fetchAPIData("/defs/strat_names", { concept_id: conceptId }).catch(
+    () => []
+  );
+}
+
 /** Merged references from the fossils + columns endpoints (server-HTML).
  * Per-source failures degrade to an empty list rather than failing the page. */
 export async function fetchLexRefs(cfg: LexTypeConfig, id: number) {

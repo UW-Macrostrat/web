@@ -1,57 +1,73 @@
 /** The compilation hierarchy, as an expandable tree.
  *
  * The whole graph is already in memory, so expanding a node is local work — no
- * request per level, and a search can look *through* closed branches because
- * the nodes beneath them are here whether or not they are drawn.
+ * request per level, and a search looks *through* closed branches because the
+ * nodes beneath them are here whether or not they are drawn.
  *
- * Selecting a node re-roots the tree on it: the main panel then shows that
- * compilation and its subsidiary tree, with a breadcrumb back out, and the map
- * draws the same node. One idea — "the thing I am looking at" — driving both,
- * which is what the previous two-control version got wrong.
+ * Selecting a node sets the page's focus slug and nothing else: the tree stays
+ * where it is, with the selection highlighted in place. Expansion and selection
+ * are separate gestures, which is what keeps "where am I in the hierarchy" and
+ * "what am I looking at" from fighting each other.
  */
 
-import { Button, InputGroup, NonIdealState, Tag } from "@blueprintjs/core";
+import { Button, InputGroup, NonIdealState } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useMemo, useState } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { Link } from "~/components";
 
 import {
   mapPageHref,
+  nodeName,
   scaleOrder,
   type GraphEdge,
   type GraphNode,
 } from "./graph";
 import { formatArea, NodeTags } from "./node-tags";
-import {
-  childrenAtom,
-  focusNodeAtom,
-  focusPathAtom,
-  focusSlugAtom,
-  matchingIdsAtom,
-  nodesByIdAtom,
-  rootsAtom,
-  scaleFilterAtom,
-  searchTextAtom,
-  standaloneNodesAtom,
-} from "./state";
-import styles from "./main.module.sass";
+import type { CompilationTreeAtoms } from "./state";
+import styles from "./tree.module.sass";
 
 const h = hyper.styled(styles);
 
-export function CompilationTree() {
+export interface CompilationTreeProps {
+  atoms: CompilationTreeAtoms;
+  /** Extra controls beneath the search box — a scale filter, say. Pages differ
+   * on what belongs here, and a slot beats a flag per control. */
+  toolbar?: ReactNode;
+  /** Ingested maps in no compilation. A real part of the catalog, but noise when
+   * the tree is a navigator for compilations. */
+  showStandalone?: boolean;
+  /** Called after a node is selected or cleared. A tree in a popover is a
+   * control, and a control's job ends when the choice is made. */
+  onSelect?: (slug: string | null) => void;
+}
+
+export function CompilationTree({
+  atoms,
+  toolbar = null,
+  showStandalone = true,
+  onSelect = null,
+}: CompilationTreeProps) {
   return h("div.compilation-tree", [
-    h(TreeToolbar),
-    h(FocusBreadcrumbs),
-    h(TreeBody),
+    h(TreeToolbar, { atoms, toolbar }),
+    h(TreeBody, { atoms, showStandalone, onSelect }),
   ]);
 }
 
 /* ------------------------------------------------------------------ toolbar */
 
-function TreeToolbar() {
-  const [text, setText] = useAtom(searchTextAtom);
+function TreeToolbar({ atoms, toolbar }) {
+  const [text, setText] = useAtom(atoms.searchText);
+
+  let clearButton = undefined;
+  if (text !== "") {
+    clearButton = h(Button, {
+      minimal: true,
+      icon: "cross",
+      onClick: () => setText(""),
+    });
+  }
 
   return h("div.tree-toolbar", [
     h(InputGroup, {
@@ -60,22 +76,16 @@ function TreeToolbar() {
       placeholder: "Search maps and compilations…",
       value: text,
       onChange: (evt) => setText(evt.currentTarget.value),
-      rightElement: text
-        ? h(Button, {
-            minimal: true,
-            icon: "cross",
-            onClick: () => setText(""),
-          })
-        : undefined,
+      rightElement: clearButton,
     }),
-    h(ScaleFilter),
+    toolbar,
   ]);
 }
 
 /** Scale bands, coarse to fine — the order they mean something in, which is not
  * alphabetical. Nothing selected means all of them. */
-function ScaleFilter() {
-  const [scales, setScales] = useAtom(scaleFilterAtom);
+export function ScaleFilter({ atoms }: { atoms: CompilationTreeAtoms }) {
+  const [scales, setScales] = useAtom(atoms.scaleFilter);
 
   return h(
     "div.scale-filter",
@@ -102,76 +112,30 @@ function ScaleFilter() {
   );
 }
 
-/* -------------------------------------------------------------- breadcrumbs */
-
-/** The route back out of a selection. Shown only when something is selected —
- * at the top level the roots are already the whole story. */
-function FocusBreadcrumbs() {
-  const path = useAtomValue(focusPathAtom);
-  const setFocus = useSetAtom(focusSlugAtom);
-
-  if (path.length === 0) return null;
-
-  const trail = path.slice(0, -1).map((node) =>
-    h(
-      Button,
-      {
-        key: node.source_id,
-        minimal: true,
-        small: true,
-        onClick: () => setFocus(node.slug),
-      },
-      node.name ?? node.slug
-    )
-  );
-
-  return h("div.focus-breadcrumbs", [
-    h(
-      Button,
-      {
-        minimal: true,
-        small: true,
-        icon: "home",
-        onClick: () => setFocus(null),
-      },
-      "All"
-    ),
-    trail,
-  ]);
-}
-
 /* --------------------------------------------------------------- tree body */
 
-function TreeBody() {
-  const focus = useAtomValue(focusNodeAtom);
-  const roots = useAtomValue(rootsAtom);
-  const matching = useAtomValue(matchingIdsAtom);
+function TreeBody({ atoms, showStandalone, onSelect }) {
+  const roots = useAtomValue(atoms.roots);
+  const matching = useAtomValue(atoms.matchingIds);
+  const standaloneNodes = useAtomValue(atoms.standaloneNodes);
 
-  // Rooted on the selection when there is one, otherwise on the graph's own
-  // roots — the compilations nothing else contains.
-  const shown = useMemo(() => {
-    if (focus != null) return [focus];
-    return roots;
-  }, [focus, roots]);
-
-  const visible = shown.filter(
+  const visible = roots.filter(
     (node) => matching == null || matching.has(node.source_id)
   );
 
-  // Only at the top level: once a node is selected, the panel is about that
-  // node's own subtree and an unrelated bucket below it is noise.
+  const hasStandalone = showStandalone && standaloneNodes.length > 0;
+
   let standalone = null;
-  if (focus == null) {
-    standalone = h(StandaloneGroup);
+  if (hasStandalone) {
+    standalone = h(StandaloneGroup, { atoms, onSelect });
   }
 
-  if (visible.length === 0 && standalone == null) {
+  if (visible.length === 0 && !hasStandalone) {
     return h(NonIdealState, {
       className: "tree-empty",
       icon: "search",
       title: "Nothing here",
-      description:
-        "No compilation matches. Clear the search, the scale filter, or the location.",
+      description: "No compilation matches. Clear the search or the filters.",
     });
   }
 
@@ -179,11 +143,13 @@ function TreeBody() {
     visible.map((node) =>
       h(TreeNode, {
         key: node.source_id,
+        atoms,
         node,
+        onSelect,
         path: `${node.source_id}`,
-        // The selected node is the subject of the panel, so it opens; so do the
-        // served layers at the top level, which are structural containers.
-        defaultOpen: focus != null || node.is_served_layer,
+        // Served layers are structural containers: their contents are the point,
+        // so they open.
+        defaultOpen: node.is_served_layer,
         depth: 0,
       })
     ),
@@ -199,9 +165,9 @@ function TreeBody() {
  * and reads as one — the NGS quadrangles sit here until something wraps them,
  * and a superseded map often stays here for good.
  */
-function StandaloneGroup() {
-  const nodes = useAtomValue(standaloneNodesAtom);
-  const isFiltering = useAtomValue(matchingIdsAtom) != null;
+function StandaloneGroup({ atoms, onSelect }) {
+  const nodes = useAtomValue(atoms.standaloneNodes);
+  const isFiltering = useAtomValue(atoms.matchingIds) != null;
   const [isOpen, setOpen] = useState(false);
 
   if (nodes.length === 0) return null;
@@ -218,7 +184,9 @@ function StandaloneGroup() {
       nodes.map((node) =>
         h(TreeNode, {
           key: node.source_id,
+          atoms,
           node,
+          onSelect,
           path: `standalone/${node.source_id}`,
           depth: 1,
         })
@@ -245,7 +213,9 @@ function StandaloneGroup() {
 }
 
 interface TreeNodeProps {
+  atoms: CompilationTreeAtoms;
   node: GraphNode;
+  onSelect?: ((slug: string | null) => void) | null;
   /** Identity of this *appearance*: a node reached under two compilations is
    * two rows, and they expand independently. */
   path: string;
@@ -255,17 +225,19 @@ interface TreeNodeProps {
 }
 
 function TreeNode({
+  atoms,
   node,
+  onSelect = null,
   path,
   edge = null,
   depth,
   defaultOpen = false,
 }: TreeNodeProps) {
-  const [isOpen, setOpen] = useState(defaultOpen);
-  const children = useAtomValue(childrenAtom);
-  const byId = useAtomValue(nodesByIdAtom);
-  const matching = useAtomValue(matchingIdsAtom);
-  const [focusSlug, setFocus] = useAtom(focusSlugAtom);
+  const children = useAtomValue(atoms.children);
+  const byId = useAtomValue(atoms.nodesById);
+  const matching = useAtomValue(atoms.matchingIds);
+  const focusAncestors = useAtomValue(atoms.focusAncestorIds);
+  const [focusSlug, setFocus] = useAtom(atoms.focusSlug);
 
   const edges = children.get(node.source_id) ?? [];
   const memberRows = edges
@@ -275,36 +247,38 @@ function TreeNode({
 
   // While a filter is active every surviving branch is on the path to a match,
   // so opening them is what shows the match rather than the ancestor that
-  // happens to contain it. Local expansion state is left alone, so clearing the
-  // filter returns the tree to however it was arranged.
-  const isFiltering = matching != null;
-  const open = isOpen || isFiltering;
+  // happens to contain it. The same goes for the route down to the selection:
+  // the tree opens itself far enough to show what the page is displaying.
+  const autoOpen =
+    matching != null || focusAncestors.has(node.source_id) || defaultOpen;
+
+  const open = useDisclosure(autoOpen);
 
   let chevron = "chevron-right";
-  if (open) chevron = "chevron-down";
+  if (open.isOpen) chevron = "chevron-down";
 
-  let expander = null;
+  let expander = h("span.expander-spacer");
   if (memberRows.length > 0) {
     expander = h(Button, {
       minimal: true,
       small: true,
       className: "expander",
       icon: chevron,
-      onClick: () => setOpen(!isOpen),
+      onClick: open.toggle,
       title: `${node.n_members} members`,
     });
-  } else {
-    expander = h("span.expander-spacer");
   }
 
   let members = null;
-  if (open && memberRows.length > 0) {
+  if (open.isOpen && memberRows.length > 0) {
     members = h(
       "ul.tree",
       memberRows.map(({ edge: e, node: child }) =>
         h(TreeNode, {
           key: `${path}/${child!.source_id}`,
+          atoms,
           node: child!,
+          onSelect,
           path: `${path}/${child!.source_id}`,
           edge: e,
           depth: depth + 1,
@@ -315,23 +289,32 @@ function TreeNode({
 
   const isSelected = focusSlug === node.slug;
 
-  return h("li.tree-node", { className: isSelected ? "selected" : undefined }, [
+  let selectedClass = undefined;
+  if (isSelected) selectedClass = "selected";
+
+  let selectTitle = "Show this compilation";
+  if (isSelected) selectTitle = "Clear the selection";
+
+  const selectThis = () => {
+    let next: string | null = node.slug;
+    if (isSelected) next = null;
+    setFocus(next);
+    onSelect?.(next);
+  };
+
+  return h("li.tree-node", { className: selectedClass }, [
     h("div.node-row", [
       expander,
       h("div.node-body", [
         h("div.node-title", [
-          h(PriorityTag, { edge }),
           // Selecting is the primary action, so it is the row's own click
           // target; the map page is a deliberate second step.
           h(
             "button.node-name",
-            {
-              onClick: () => setFocus(node.slug),
-              title: "Show this in the panel and on the map",
-            },
-            node.name ?? node.slug
+            { onClick: selectThis, title: selectTitle },
+            nodeName(node)
           ),
-          h(NodeTags, { node }),
+          h(NodeTags, { node, priority: edge?.priority }),
           h(
             Link,
             {
@@ -349,18 +332,22 @@ function TreeNode({
   ]);
 }
 
-function PriorityTag({ edge }: { edge: GraphEdge | null }) {
-  if (edge?.priority == null) return null;
-  return h(
-    Tag,
-    {
-      minimal: true,
-      className: "priority-tag",
-      title:
-        "Priority within its compilation — higher wins where members overlap",
-    },
-    `p${edge.priority}`
-  );
+/** Expansion that follows the tree's own cues until the reader overrides it.
+ *
+ * `autoOpen` covers the cases where a branch has to be visible — a filter is
+ * on, or the selection is somewhere below. A click overrides it; the override is
+ * dropped the next time `autoOpen` becomes true, so selecting a node reveals it
+ * even inside a branch that was closed by hand. */
+function useDisclosure(autoOpen: boolean) {
+  const [override, setOverride] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (autoOpen) setOverride(null);
+  }, [autoOpen]);
+
+  const isOpen = override ?? autoOpen;
+
+  return { isOpen, toggle: () => setOverride(!isOpen) };
 }
 
 function NodeStats({ node }: { node: GraphNode }) {

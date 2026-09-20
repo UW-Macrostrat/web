@@ -82,3 +82,39 @@
   to
     opacity: 1
     transform: none
+
+// A stratigraphic name carried by no unit: it exists in the lexicon, but
+// nothing in the column store uses it. Normal weight rather than the tag's
+// usual emphasis, so a strip reads at a glance for what is actually mapped.
+.no-units
+  opacity: 0.72
+
+  // The tag's own classes are hashed inside `@macrostrat/data-components`, so
+  // reach the text by inheritance rather than by naming a library class.
+  *
+    font-weight: 400
+
+// A record's ancestry on its own, outside the neighborhood strip — used on the
+// concept page, where each usage carries its own path.
+.strat-ancestry
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  align-items: baseline
+  gap: 0.35em
+  font-size: 0.9em
+  color: var(--secondary-color)
+
+// The stratigraphic tree: the ancestry path above, then the bounded tree from
+// `@macrostrat-web/lithology-hierarchy`.
+.strat-hierarchy
+  margin: 1em 0
+
+  .strat-ancestry
+    margin-bottom: 0.4em
+
+// The item the page is about, among its siblings.
+.is-active
+  outline: 2px solid var(--pz-accent-color, var(--accent-color))
+  outline-offset: 1px
+  border-radius: var(--pz-radius-sm, 3px)

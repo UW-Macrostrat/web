@@ -1,5 +1,5 @@
 export function pageInfo() {
   return {
-    name: "Legend",
+    name: "Diff",
   };
 }

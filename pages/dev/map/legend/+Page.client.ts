@@ -23,9 +23,7 @@ import hyper from "@macrostrat/hyper";
 import { Button, NonIdealState, Spinner, Tag } from "@blueprintjs/core";
 import classNames from "classnames";
 import {
-  applyMapPositionToHash,
   DetailPanelStyle,
-  getMapPositionForHash,
   LocationPanel,
   MapAreaContainer,
   MapView,
@@ -40,12 +38,7 @@ import {
   MacrostratDataProvider,
   useMacrostratDefs,
 } from "@macrostrat/data-provider";
-import {
-  buildQueryString,
-  getHashString,
-  JSONView,
-  useDarkMode,
-} from "@macrostrat/ui-components";
+import { JSONView, useDarkMode } from "@macrostrat/ui-components";
 import { useMapElement, useMapStyleOperator } from "@macrostrat/mapbox-react";
 import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
 import {
@@ -59,6 +52,7 @@ import { loadable } from "jotai/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { atomWithSearchParam, locationAtom } from "~/_utils/url-atoms";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
+import { hashWithMapPosition, initialMapPosition } from "~/_utils/map-position";
 import {
   BaseLayerForm,
   Basemap,
@@ -81,6 +75,10 @@ const legendAPIRoute = apiV3Prefix + "/map/carto/legend";
 const macrostratOverlay = buildMacrostratStyle({
   tileserverDomain: burwellTileDomain,
 });
+
+/** Hoisted, and not rebuilt per render: `MapView` re-applies the map style —
+ * which reloads every tile — whenever the identity of `overlayStyles` changes. */
+const OVERLAY_STYLES = [macrostratOverlay];
 
 /** The legend is assembled from carto's own scale-dependent unit selection, so
  * the request is keyed on a tile zoom several levels finer than the map's —
@@ -109,10 +107,7 @@ const mapPositionAtom = lastMapPositionAtom;
  */
 const mapPositionHashAtom = atom(null, (get, set, position: MapPosition) => {
   const loc = get(locationAtom);
-  const args = getHashString(loc.hash) ?? {};
-  applyMapPositionToHash(args, position);
-  const hash = buildQueryString(args, { sort: false, arrayFormat: "comma" });
-  set(locationAtom, { ...loc, hash });
+  set(locationAtom, { ...loc, hash: hashWithMapPosition(loc.hash, position) });
 });
 
 /** The base map style, persisted in the URL as on the other map pages. "basic"
@@ -243,7 +238,7 @@ export function Page() {
         mapPosition,
         mapboxToken: mapboxAccessToken,
         enableTerrain: true,
-        overlayStyles: [macrostratOverlay],
+        overlayStyles: OVERLAY_STYLES,
         onMapMoved,
       },
       h(MapLegendManager)
@@ -251,24 +246,15 @@ export function Page() {
   );
 }
 
-/** The camera to open at: an explicit position in the URL hash wins, then the
- * last-viewed position shared with the other map pages, then this page's own
- * default.
+/** The camera to open at — see `~/_utils/map-position` for the order the sinks
+ * are resolved in.
  *
- * Frozen on first render — `MapView` applies `mapPosition` at initialization
- * only, and both sources change as the map moves.
+ * Frozen on first render: `MapView` applies `mapPosition` at initialization
+ * only, and subscribing to either source would re-render the page on every
+ * map move.
  */
 function useInitialMapPosition(): MapPosition {
-  const stored = useAtomValue(mapPositionAtom);
-  const { hash } = useAtomValue(locationAtom);
-
-  const [initial] = useState(() => {
-    const fallback = stored ?? DEFAULT_MAP_POSITION;
-    const hashData = getHashString(hash) ?? {};
-    if (hashData.x == null && hashData.y == null) return fallback;
-    return getMapPositionForHash(hashData, fallback.camera);
-  });
-
+  const [initial] = useState(() => initialMapPosition(DEFAULT_MAP_POSITION));
   return initial;
 }
 
@@ -389,11 +375,7 @@ function LegendPanel() {
     content = h(LegendEntryDetailView, { entry: selectedEntry });
   }
 
-  return h(
-    LocationPanel,
-    { headerElement: h(PageHeader) },
-    content
-  );
+  return h(LocationPanel, { headerElement: h(PageHeader) }, content);
 }
 
 /** Everything above the legend. With no navbar and no context panel this is
@@ -405,7 +387,7 @@ function PageHeader() {
   const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
 
   return h("header.page-header", [
-    h(PageBreadcrumbs),
+    h(PageBreadcrumbs, { separateTitle: false }),
     h("p.page-description", [
       "Legend entries for the units in view, youngest first. Click a unit on ",
       "the map or in the list to isolate it.",
@@ -533,6 +515,7 @@ function LegendEntryDetails({ entry }: { entry: any }) {
     lith,
     descrip,
     comments,
+    age,
     b_age,
     t_age,
     b_interval,
@@ -549,6 +532,7 @@ function LegendEntryDetails({ entry }: { entry: any }) {
       label: "Stratigraphic name",
       value: strat_name,
     }),
+    h.if(age != null && age !== "")(DataField, { label: "Age", value: age }),
     h.if(intervals.length > 0)(IntervalField, { intervals }),
     h.if(b_age != null && t_age != null)(DataField, {
       label: "Age range",

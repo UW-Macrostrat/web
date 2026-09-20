@@ -40,7 +40,10 @@ import classNames from "classnames";
 
 import { DevLinkButton, Link } from "~/components";
 import { LithologyTag } from "~/components/lex/tag";
-import { createWindowedScrollBody } from "~/components/data-view";
+import {
+  autoLoadPagesForItems,
+  createWindowedScrollBody,
+} from "~/components/data-view";
 import { HybridContentFooter, HybridPage } from "~/layouts/hybrid";
 import {
   projectIDParam,
@@ -119,12 +122,11 @@ const ROW_HEIGHT = 30;
 const GROUP_HEIGHT = 30;
 const SECTION_HEIGHT = 34;
 
-/** Rows per fetched page, and how many pages auto-load before the footer's
- * "Load more" takes over. Deep results are reached by narrowing the filters,
- * not by scrolling forever, so the checkpoint comes early — two pages in, which
- * also brings the footer within reach. */
+/** Rows per fetched page. How far it auto-scrolls before the footer's "Load
+ * more" takes over is the shared row budget (`data-view/auto-load`) — deep
+ * results are reached by narrowing the filters, not by scrolling forever. */
 const PAGE_SIZE = 100;
-const AUTO_LOAD_PAGES = 2;
+const AUTO_LOAD_PAGES = autoLoadPagesForItems(PAGE_SIZE);
 
 const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
   // One seeded page in the server HTML, for crawlers (see page-links.ts)

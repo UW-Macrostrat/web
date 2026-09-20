@@ -1,6 +1,6 @@
 import { Image, SiteTitle } from "~/components/general";
 import { LinkCard } from "~/components/cards";
-import { Link } from "~/components";
+import { Link, StickyHeader } from "~/components";
 import { useData } from "vike-react/useData";
 import { webAssetsPrefix } from "@macrostrat-web/settings";
 import { AnchorButton } from "@blueprintjs/core";
@@ -11,7 +11,7 @@ import { LexSearchHost, LexSearchPrompt } from "~/components/lex/search-omnibar"
 import type { HeroData } from "./+data";
 
 /** The live map-and-column hero reaches mapbox-gl, so it loads on the client
- * only; the static hero stands in until then (and when no column was found). */
+ * only; the static cover photo stands in until it mounts. */
 const HeroLive = clientOnly(() =>
   import("./hero.client").then((m) => m.HeroLive)
 );
@@ -22,15 +22,25 @@ const HeroLive = clientOnly(() =>
 export default function Page() {
   return h("div.page-main", [
     h(BetaNotice),
-    h("header.site-header", [
-      h("div.site-intro", [
-        h(SiteTitle, { className: "main-title" }, [
-          h("h2.subtitle", "The data system for the crust"),
-        ]),
-        h(HeroLead),
-      ]),
-      h("div.site-search", h(LexSearchPrompt)),
-    ]),
+    // Sticky: once it reaches the top of the viewport the header collapses to
+    // a bar — the title and the search prompt — so the lexicon stays reachable
+    // from anywhere on the page. `.is-stuck` on `StickyHeader` drives the
+    // collapse; everything inside `.site-intro-detail` folds away.
+    h(
+      "div.site-header",
+      h(
+        StickyHeader,
+        h("div.site-header-inner", [
+          h("div.site-intro", [
+            h(SiteTitle, { className: "main-title" }, [
+              h("h2.subtitle", "The data system for the crust"),
+            ]),
+            h("div.site-intro-detail", h(HeroLead)),
+          ]),
+          h("div.site-search", h(LexSearchPrompt)),
+        ])
+      )
+    ),
     // The one omnibar instance the search prompt opens (also on ⌘K).
     h(LexSearchHost),
     h(Hero),
@@ -49,47 +59,36 @@ function BetaNotice() {
   ]);
 }
 
+/** The hero: the map, the column inset over it, and the age filter and credits
+ * beneath — all of it live, with the cover photo standing in until it mounts. */
 function Hero() {
   const { hero } = useData() as { hero: HeroData | null };
 
-  let panel;
+  let content;
   if (hero != null) {
-    panel = h(HeroLive, { hero, fallback: h(HeroStatic) });
+    content = h(HeroLive, { hero, fallback: h(HeroStatic) });
   } else {
-    panel = h(HeroStatic);
+    // Only when the day's location couldn't be resolved at all.
+    content = h(HeroStatic);
   }
 
-  return h("section.hero", h("div.hero-panel", panel));
+  return h("section.hero", content);
 }
 
-/** What Macrostrat is, and what the panel below is showing. */
+/** What Macrostrat is, and how to read the panel below. The column beneath the
+ * marker names itself in the hero's inset, and the marker moves, so there is
+ * nothing fixed for a caption to name. */
 function HeroLead() {
-  const { hero } = useData() as { hero: HeroData | null };
   return h("div.hero-lead", [
     h("p.hero-text", [
       "Geologic maps and stratigraphic columns, integrated into one model of ",
       "the Earth's crust through time.",
     ]),
-    h(HeroCaption, { hero }),
+    h("p.hero-caption", [
+      "Click anywhere on the map for the rock record beneath it, then pick a ",
+      "unit to see where it crops out.",
+    ]),
   ]);
-}
-
-/** What the live panel is showing, so the map and column read as one place. */
-function HeroCaption({ hero }: { hero: HeroData | null }) {
-  if (hero == null) return null;
-  const { location, column } = hero;
-  return h("p.hero-caption", [
-    "Beneath ",
-    h("strong", location.name),
-    ": the ",
-    h(Link, { href: `/columns/${column.col_id}` }, column.col_name),
-    ` column, ${column.t_units} rock units spanning ${formatAge(column.b_age)} of Earth history.`,
-  ]);
-}
-
-function formatAge(ma: number): string {
-  if (ma >= 1000) return `${(ma / 1000).toFixed(1)} billion years`;
-  return `${Math.round(ma)} million years`;
 }
 
 function HeroStatic() {

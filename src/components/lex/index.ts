@@ -873,15 +873,56 @@ function parseAttributes(type, data) {
   return parsed;
 }
 
+/** Compact enough to read as a caption to the map above it, not a second
+ * figure competing with it.
+ *
+ * The hole is sized to hold a percentage and no more — a donut again, but the
+ * ring is the figure rather than a frame around a large empty middle. That hole
+ * is where the hovered slice's share is shown, which is why the legend no
+ * longer carries it: the same number in two places meant the legend labels
+ * changed width as the pointer moved. */
+const CHART_HEIGHT = 120;
+const CHART_RADIUS = 52;
+const CHART_INNER_RADIUS = 28;
+
 function Chart(data, title, route, activeIndex, setActiveIndex) {
   const isDarkMode = useDarkMode().isEnabled;
   const reg = isDarkMode ? "#fff" : "#000";
   const hovered = isDarkMode ? "#000" : "#fff";
 
+  // The hovered slice, matched the same way the cell stroke is — by index *and*
+  // label, since `activeIndex` is shared across the three charts on a page.
+  const active = data?.find(
+    (entry, index) =>
+      activeIndex?.index === index && activeIndex?.label === entry.label
+  );
+
+  // The share of the hovered slice, in the hole. Nothing is shown at rest: a
+  // resting value would have to be arbitrary (the largest slice? the total?),
+  // and the ring already carries the proportions.
+  let centerValue = null;
+  if (active != null) {
+    centerValue = h(
+      "text",
+      {
+        x: "50%",
+        y: "50%",
+        textAnchor: "middle",
+        dominantBaseline: "middle",
+        className: "chart-value",
+      },
+      `${Math.trunc(active.value * 100)}%`
+    );
+  }
+
+  // A small donut, not the 300px one this replaced: a supporting breakdown on a
+  // page about something else. The section title sits above the chart rather
+  // than in the hole, which is now only big enough for the percentage.
   return h("div.chart-container", [
+    h("h4.chart-heading", h(Link, { href: "/lex/" + route }, title)),
     h(
       ResponsiveContainer,
-      { width: "100%", height: 300 },
+      { width: "100%", height: CHART_HEIGHT },
       h(PieChart, { className: "lithology-chart" }, [
         h(
           Pie,
@@ -889,8 +930,8 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
             data,
             dataKey: "value",
             nameKey: "label",
-            outerRadius: 120,
-            innerRadius: 80,
+            outerRadius: CHART_RADIUS,
+            innerRadius: CHART_INNER_RADIUS,
             cx: "50%",
             cy: "50%",
             fill: "#8884d8",
@@ -931,17 +972,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
             })
           )
         ),
-        h(
-          "text",
-          {
-            x: "50%",
-            y: "50%",
-            textAnchor: "middle",
-            dominantBaseline: "middle",
-            className: "chart-title",
-          },
-          h(Link, { href: "/lex/" + route }, title)
-        ),
+        centerValue,
       ])
     ),
     h(
@@ -960,8 +991,9 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   const label = hasColon ? data.label.split(": ")[1] : data.label;
   const group = hasColon ? data.label.split(": ")[0] : null;
 
-  const finalLabel =
-    label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "");
+  // The percentage lives in the donut's hole now. Keeping it here as well made
+  // the label reflow under the pointer, which is what made the block twitchy.
+  const finalLabel = label;
 
   return h("div.legend-item", [
     group

@@ -16,11 +16,29 @@
   a
     margin-left: 0.25em
 
+// The header sticks to the top of the viewport and collapses to a bar once it
+// gets there: the title shrinks and the lead folds away, leaving the wordmark
+// and the lexicon search. `.is-stuck` comes from the shared `StickyHeader`,
+// which owns the sticky positioning and the backdrop.
 .site-header
+  :global(.is-stuck)
+    .site-header-inner
+      align-items: center
+      gap: var(--pz-space-3, 1em)
+
+    .main-title
+      --macrostrat-logo-size: 34px
+      --macrostrat-wordmark-size: 1.6rem
+
+    .subtitle, .site-intro-detail
+      display: none
+
+.site-header-inner
   display: grid
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr)
   gap: var(--pz-space-5, 2em)
   align-items: center
+  transition: gap 0.2s ease
   @media (max-width: 800px)
     grid-template-columns: 1fr
 
@@ -74,18 +92,16 @@
 
 // ---------------------------------------------------------------- hero
 
-// Constrained to the content column; the panel is the page's centerpiece.
-.hero-panel
-  height: clamp(420px, 60vh, 640px)
-  border-radius: var(--pz-radius-lg, 10px)
-  overflow: hidden
-  border: 1px solid var(--pz-border-color, #ddd)
-  background: var(--pz-panel-background-color, #f5f5f5)
-  > *
-    height: 100%
+// One height for both the live hero and the cover photo that stands in for it,
+// so the swap never moves the page. Read by `hero.module.sass`.
+.hero
+  --hero-height: clamp(360px, 46vh, 520px)
 
 .hero-static
-  height: 100%
+  height: var(--hero-height)
+  border-radius: var(--pz-radius-lg, 10px)
+  border: 1px solid var(--pz-border-color, #ddd)
+  background: var(--pz-panel-background-color, #f5f5f5)
   background-size: cover
   background-position: center
 

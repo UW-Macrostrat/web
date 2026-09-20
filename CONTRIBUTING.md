@@ -1,1 +1,0 @@
-content/Contributing/Contributor guide.md

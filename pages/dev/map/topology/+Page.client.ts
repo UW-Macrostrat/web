@@ -36,8 +36,6 @@ import { ExpansionPanel } from "@macrostrat/data-components";
 import {
   NonIdealState,
   FormGroup,
-  HTMLSelect,
-  Button,
   SegmentedControl,
   Switch,
   Callout,
@@ -49,45 +47,42 @@ import { loadable } from "jotai/utils";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
+import { Link, BaseLayerForm, Basemap, basemapStyle } from "~/components";
 import {
-  Link,
-  BaseLayerForm,
-  Basemap,
-  basemapStyle,
-  NullableDropdown,
-} from "~/components";
+  CompilationPath,
+  CompilationSelector,
+  CompilationSummary,
+  compilationTreeAtoms,
+  fetchCompilationGraph,
+  graphValueAtom,
+  type GraphNode,
+} from "~/components/compilation-tree";
 import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
 import styles from "./main.module.scss";
 
 const h = hyper.styled(styles);
 
-/** Shared width for the floating navbar and the context panel below it. */
-const PANEL_WIDTH = 320;
+/** Shared width for the floating navbar and the context panel below it. The
+ * tree needs more room than the dropdown it replaced. */
+const PANEL_WIDTH = 400;
 
-/** A map layer as returned by /dev/topology/layers */
-interface TopologyLayer {
-  id: number;
-  name: string;
-  description: string | null;
-  parent: number | null;
-  composited_from: number[] | null;
-  slug: string;
-  min_zoom: number;
-  max_zoom: number;
-}
+/** The compilation graph, fetched once on the client.
+ *
+ * This replaces the former `/dev/topology/layers` fetch outright: a served layer
+ * *is* a compilation, so the layers are in here as the graph's roots, carrying
+ * the same zoom ranges. The tree's top level is what the dropdown used to hold.
+ *
+ * The page is client-rendered, so there is no `+data.ts` to load this on the
+ * server the way the compilations browser does; an async atom is the same thing
+ * one render later. The graph is a few hundred nodes and edges — small enough to
+ * hold whole, which is what lets the tree search across the entire hierarchy
+ * rather than only what has been expanded.
+ */
+const graphLoadableAtom = loadable(
+  atom((get, { signal }) => fetchCompilationGraph({ signal }))
+);
 
-/** Fetch the list of available map layers. */
-const layersAtom = atom(async (get, { signal }): Promise<TopologyLayer[]> => {
-  const res = await fetch(`${burwellTileDomain}/dev/topology/layers`, {
-    signal,
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to load topology layers: ${res.statusText}`);
-  }
-  return res.json();
-});
-
-const layersLoadableAtom = loadable(layersAtom);
+const graphAtom = graphValueAtom(graphLoadableAtom);
 
 /** The map camera. Uses the shared last-viewed-location atom
  * (`~/_utils/last-map-position`), so the view is carried across all map pages
@@ -96,8 +91,20 @@ const layersLoadableAtom = loadable(layersAtom);
  * ignored once stale (see the atom's staleness rule). */
 const mapPositionAtom = lastMapPositionAtom;
 
-/** The slug of the selected map layer, or null for the whole topology. */
-const selectedLayerSlugAtom = atomWithSearchParam("layer");
+/** The selected compilation, by slug — or null for the whole topology.
+ *
+ * Any compilation is addressable, not only a served layer: the `maps` and
+ * `faces` tile routes resolve the slug through `map_bounds.compilation_id()`, so
+ * `bc-surface` loads exactly the way `carto-large` does. The parameter keeps its
+ * `layer` name, since a layer slug still means what it always meant and existing
+ * links should keep working.
+ */
+const selectedSlugAtom = atomWithSearchParam("layer");
+
+const treeAtoms = compilationTreeAtoms({
+  graph: graphAtom,
+  focusSlug: selectedSlugAtom,
+});
 
 /** The map's display mode — three mutually exclusive views onto the same
  * topology:
@@ -200,14 +207,31 @@ const showErrorsAtom = atom(
   }
 );
 
-/** The selected layer object, resolved from the loaded layer list. */
-const selectedLayerAtom = atom<TopologyLayer | null>((get) => {
-  const slug = get(selectedLayerSlugAtom);
-  if (slug == null) return null;
-  const layers = get(layersLoadableAtom);
-  if (layers.state !== "hasData") return null;
-  return layers.data.find((d) => d.slug === slug) ?? null;
+/** The selected node, resolved from the graph. */
+const selectedNodeAtom = treeAtoms.focusNode;
+
+/** The served layer a selection is drawn from.
+ *
+ * Faces are materialized per served layer, so a compilation that is not one
+ * borrows its containing layer's faces. The routes that are still layer-scoped
+ * — `/elements`, `/info`, `/errors` — need that layer's slug rather than the
+ * compilation's, which they resolve to nothing and answer with silence.
+ */
+const servedLayerAtom = atom<GraphNode | null>((get) => {
+  const node = get(selectedNodeAtom);
+  if (node == null) return null;
+  if (node.is_served_layer) return node;
+
+  const layerId = node.placed_in_layer;
+  if (layerId == null) return null;
+  return get(graphAtom).nodes.find((n) => n.map_layer === layerId) ?? null;
 });
+
+/** Tiles are cached to the layer's maximum zoom; past it Mapbox overzooms the
+ * last level rather than asking for one that does not exist. */
+function maxZoomFor(layer: GraphNode | null): number {
+  return layer?.max_zoom ?? 9;
+}
 
 export function Page() {
   const dark = useDarkMode();
@@ -226,7 +250,8 @@ export function Page() {
 
   const [data, setData] = useState(null);
 
-  const selectedLayer = useAtomValue(selectedLayerAtom);
+  const selectedSlug = useAtomValue(selectedSlugAtom);
+  const servedLayer = useAtomValue(servedLayerAtom);
   const displayMode = useAtomValue(displayModeAtom);
   const showLabels = useAtomValue(showLabelsAtom);
   const showCarto = useAtomValue(showCartoAtom);
@@ -234,11 +259,12 @@ export function Page() {
 
   // Topology-solving errors are fetched as GeoJSON (small set, ~tens of faces)
   // and scoped to the selected layer, mirroring the /info popup.
-  const { data: errors } = useTopologyErrors(selectedLayer?.slug, showErrors);
+  const { data: errors } = useTopologyErrors(servedLayer?.slug, showErrors);
 
   const overlayStyles = useMemo(() => {
     const overlays = topologyOverlayStyles(
-      selectedLayer,
+      selectedSlug,
+      servedLayer,
       displayMode,
       isEnabled
     );
@@ -251,7 +277,15 @@ export function Page() {
       overlays.push(errorsStyle(errors));
     }
     return overlays;
-  }, [selectedLayer, displayMode, isEnabled, showCarto, showErrors, errors]);
+  }, [
+    selectedSlug,
+    servedLayer,
+    displayMode,
+    isEnabled,
+    showCarto,
+    showErrors,
+    errors,
+  ]);
 
   // Toggle basemap labels by stripping label layers from the resolved style.
   // TODO(upstream): a labels on/off toggle is a common need — consider baking a
@@ -293,7 +327,7 @@ export function Page() {
   const contextPanel = h(
     PanelCard,
     { style: { width: PANEL_WIDTH } },
-    h(LayerSelectorPanel)
+    h(CompilationSelectorPanel)
   );
 
   return h(
@@ -333,50 +367,27 @@ export function Page() {
   );
 }
 
-function LayerSelectorPanel() {
-  const layers = useAtomValue(layersLoadableAtom);
-  const [selectedSlug, setSelectedSlug] = useAtom(selectedLayerSlugAtom);
+/** The context panel: what to show, and how to draw it.
+ *
+ * The compilation tree replaces the layer dropdown this page used to carry.
+ * Served layers are the tree's roots, so everything the dropdown offered is
+ * still one click away — but a compilation below one (`bc-surface`, `sgmc`, a
+ * single ingested map) is now just as selectable, which is the whole point:
+ * resolved faces were only ever viewable for the seven served layers.
+ */
+function CompilationSelectorPanel() {
   const [mode, setMode] = useAtom(displayModeAtom);
   const [basemap, setBasemap] = useAtom(basemapAtom);
   const [showCarto, setShowCarto] = useAtom(showCartoAtom);
   const [showErrors, setShowErrors] = useAtom(showErrorsAtom);
   const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
 
-  let layerControl = null;
-  if (layers.state === "loading") {
-    layerControl = h(Spinner);
-  } else if (layers.state === "hasError") {
-    layerControl = h(ErrorCallout, { error: layers.error });
-  } else {
-    const options = layers.data.map((layer) => ({
-      label: layer.name,
-      value: layer.slug,
-    }));
-
-    layerControl = h(
-      FormGroup,
-      { label: "Map layer", className: "layer-field" },
-      h(NullableDropdown, {
-        options,
-        value: selectedSlug,
-        onChange: setSelectedSlug,
-        placeholder: "Select a layer…",
-      })
-    );
-  }
-
-  const hasLayer = selectedSlug != null;
-
   // Only the active mode's description is shown, beneath the segmented control.
   const activeMode = DISPLAY_MODES.find((m) => m.value === mode);
 
-  let warning = null;
-  if (!hasLayer) {
-    warning = h(WholeTopologyWarning, { mode });
-  }
-
   return h("div.layer-selector", [
-    layerControl,
+    h(CompilationField),
+    h(SelectionNote, { mode }),
     h(FormGroup, { label: "Display mode", className: "mode-field" }, [
       h(SegmentedControl, {
         fill: true,
@@ -399,14 +410,90 @@ function LayerSelectorPanel() {
       checked: showErrors,
       onChange: (evt) => setShowErrors(evt.currentTarget.checked),
     }),
-    warning,
     h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),
   ]);
 }
 
-/** Shown when no layer is selected: whole-topology views still render, but we
- * nudge the user to pick a layer and warn that on-the-fly primitive faces are
- * slow at low zoom. */
+/** What is being shown, and the control for changing it.
+ *
+ * The hierarchy is hundreds of nodes and belongs behind a popover; what earns
+ * permanent space in the panel is the selection itself — the route down to it,
+ * and the derived facts that say what it is. */
+function CompilationField() {
+  const graph = useAtomValue(graphLoadableAtom);
+
+  // The popover shows the graph's state in place of the tree, so the button is
+  // there to press from the first render.
+  let status = null;
+  if (graph.state === "loading") {
+    status = h("div.tree-status", h(Spinner, { size: 20 }));
+  } else if (graph.state === "hasError") {
+    status = h("div.tree-status", h(ErrorCallout, { error: graph.error }));
+  }
+
+  return h("div.compilation-field", [
+    h("label.field-label", "Compilation"),
+    h(CompilationPath, { atoms: treeAtoms }),
+    h(CompilationSelector, {
+      atoms: treeAtoms,
+      status,
+      // Standalone maps are ingested maps in no compilation — a real part of the
+      // catalog, and addressable by the tile routes like anything else, so they
+      // stay reachable here.
+      showStandalone: true,
+      placeholder: "Whole topology",
+    }),
+    h(CompilationSummary, { atoms: treeAtoms }),
+  ]);
+}
+
+/** What the current selection means for the mode in view.
+ *
+ * Three of the routes behind this page are still layer-scoped, so a selection
+ * below a served layer is answered at the layer's level rather than the
+ * compilation's. Saying so beats a view that quietly shows the wrong extent.
+ */
+function SelectionNote({ mode }: { mode: DisplayMode }) {
+  const slug = useAtomValue(selectedSlugAtom);
+  const node = useAtomValue(selectedNodeAtom);
+  const servedLayer = useAtomValue(servedLayerAtom);
+  const graph = useAtomValue(graphLoadableAtom);
+
+  if (slug == null) return h(WholeTopologyWarning, { mode });
+
+  // A slug from a bookmarked link that no longer names anything. The tile
+  // routes answer it with empty tiles, which reads as "nothing here" rather
+  // than "no such compilation".
+  if (node == null) {
+    if (graph.state !== "hasData") return null;
+    return h(
+      Callout,
+      { className: "selection-note", intent: "warning", icon: "warning-sign" },
+      h("p", `No compilation named ${slug}.`)
+    );
+  }
+
+  if (node.is_served_layer) return null;
+  if (mode !== "edges") return null;
+
+  let layerName = "its containing layer";
+  if (servedLayer != null) layerName = servedLayer.name ?? servedLayer.slug;
+
+  return h(
+    Callout,
+    { className: "selection-note", intent: "primary", icon: "info-sign" },
+    h(
+      "p",
+      `Edges belong to the topology as a whole, so they are shown for ${layerName} rather than for ${
+        node.name ?? node.slug
+      } alone. Maps and Faces are scoped to the selection.`
+    )
+  );
+}
+
+/** Shown when nothing is selected: whole-topology views still render, but we
+ * nudge the user to pick a compilation and warn that on-the-fly primitive faces
+ * are slow at low zoom. */
 function WholeTopologyWarning({ mode }: { mode: DisplayMode }) {
   let facesNote = null;
   if (mode === "faces") {
@@ -422,12 +509,12 @@ function WholeTopologyWarning({ mode }: { mode: DisplayMode }) {
       className: "whole-topology-warning",
       intent: "warning",
       icon: "warning-sign",
-      title: "No layer selected",
+      title: "Nothing selected",
     },
     [
       h(
         "p",
-        "Showing the whole topology. Select a map layer to focus on a single compilation."
+        "Showing the whole topology. Select a compilation to focus on what it resolves to."
       ),
       facesNote,
     ]
@@ -625,7 +712,10 @@ function ErrorFeaturesCallout({ features }) {
 /** Maps present at the clicked point (from /dev/topology/info), grouped by
  * topology layer, with the active map (the one forming the face) tagged. */
 function TopologyMapsList({ position }: { position: mapboxgl.LngLat }) {
-  const layerSlug = useAtomValue(selectedLayerSlugAtom);
+  // `/info` walks the hierarchy from the served layers down, so it takes the
+  // layer a selection sits in rather than the selection itself; the rows it
+  // returns already carry every compilation on the way to the point.
+  const layerSlug = useAtomValue(servedLayerAtom)?.slug ?? null;
   const { loading, data, error } = useTopologyInfo(position, layerSlug);
 
   if (loading) return h(Spinner);
@@ -750,31 +840,35 @@ function errorsStyle(data: ErrorsCollection): mapboxgl.Style {
 }
 
 /** Build the overlay style(s) for the active display mode. Each mode is a
- * single, mutually-exclusive view; every style handles a null layer by falling
- * back to its whole-topology tile route. */
+ * single, mutually-exclusive view; every style handles a null selection by
+ * falling back to its whole-topology tile route.
+ *
+ * Maps and faces are drawn for whatever is selected — the tile routes take any
+ * compilation slug. Edges are a property of the topology itself and are only
+ * served per layer, so they fall back to the layer the selection sits in. */
 function topologyOverlayStyles(
-  layer: TopologyLayer | null,
+  slug: string | null,
+  servedLayer: GraphNode | null,
   mode: DisplayMode,
   darkMode: boolean
 ): mapboxgl.Style[] {
   switch (mode) {
     case "maps":
-      return [mapsStyle(layer, darkMode)];
+      return [mapsStyle(slug, servedLayer, darkMode)];
     case "faces":
-      return [facesStyle(layer)];
+      return [facesStyle(slug, servedLayer)];
     case "edges":
-      return [elementsStyle(layer)];
+      return [elementsStyle(servedLayer)];
   }
 }
 
 /** Constituent map boundaries, styled like the rgeom bounds on /dev/map/sources.
  * Clicking these features powers the contextual info panel. */
 function mapsStyle(
-  layer: TopologyLayer | null,
+  slug: string | null,
+  servedLayer: GraphNode | null,
   darkMode: boolean
 ): mapboxgl.Style {
-  const slug = layer?.slug;
-
   let tiles = `${burwellTileDomain}/dev/topology/maps/{z}/{x}/{y}`;
   if (slug != null) {
     tiles = `${burwellTileDomain}/dev/topology/maps/${slug}/{z}/{x}/{y}`;
@@ -789,7 +883,7 @@ function mapsStyle(
       maps: {
         type: "vector",
         tiles: [tiles],
-        maxzoom: layer?.max_zoom ?? 9,
+        maxzoom: maxZoomFor(servedLayer),
       },
     },
     layers: [
@@ -816,18 +910,24 @@ function mapsStyle(
   };
 }
 
-/** Faces overlay. With a layer selected this serves that layer's `map_faces`;
- * with no layer it serves the whole-topology primitive faces (slower). The two
- * routes emit different MVT source-layers (`map_faces` vs `faces`). */
-function facesStyle(layer: TopologyLayer | null): mapboxgl.Style {
+/** Faces overlay. With something selected this serves the faces that
+ * compilation resolves to — borrowed from its containing layer's `map_face`
+ * rows and filtered to its members, which is what makes `bc-surface` as
+ * viewable as `carto-large`. With nothing selected it serves the whole-topology
+ * primitive faces (slower). The two routes emit different MVT source-layers
+ * (`map_faces` vs `faces`). */
+function facesStyle(
+  slug: string | null,
+  servedLayer: GraphNode | null
+): mapboxgl.Style {
   // Whole-topology primitive faces borrow the purple of the "edges" mode to
   // signal they belong to the topology itself, not the magenta map-face
   // compilation; they also come from a different route and MVT source-layer.
   let tiles = `${burwellTileDomain}/dev/topology/faces/{z}/{x}/{y}`;
   let sourceLayer = "faces";
   let color = "#4f11ab";
-  if (layer != null) {
-    tiles = `${burwellTileDomain}/dev/topology/faces/${layer.slug}/{z}/{x}/{y}`;
+  if (slug != null) {
+    tiles = `${burwellTileDomain}/dev/topology/faces/${slug}/{z}/{x}/{y}`;
     sourceLayer = "map_faces";
     color = "#c61b9e";
   }
@@ -838,15 +938,19 @@ function facesStyle(layer: TopologyLayer | null): mapboxgl.Style {
       faces: {
         type: "vector",
         tiles: [tiles],
-        maxzoom: layer?.max_zoom ?? 9,
+        maxzoom: maxZoomFor(servedLayer),
       },
     },
     layers: buildFaceLayers(sourceLayer, color),
   };
 }
 
-function elementsStyle(layer: TopologyLayer | null): mapboxgl.Style {
-  const slug = layer?.slug;
+/** Raw topology elements. `/elements/{layer}` resolves its slug through
+ * `map_bounds.layer_id()`, so it answers for served layers only — a compilation
+ * below one is drawn at its layer's level, which `SelectionNote` says out loud.
+ */
+function elementsStyle(servedLayer: GraphNode | null): mapboxgl.Style {
+  const slug = servedLayer?.slug;
 
   let tiles = `${burwellTileDomain}/dev/topology/elements/{z}/{x}/{y}`;
   if (slug != null) {
@@ -859,7 +963,7 @@ function elementsStyle(layer: TopologyLayer | null): mapboxgl.Style {
       topology: {
         type: "vector",
         tiles: [tiles],
-        maxzoom: layer?.max_zoom ?? 9,
+        maxzoom: maxZoomFor(servedLayer),
       },
     },
     layers: buildTopologyLayers(),

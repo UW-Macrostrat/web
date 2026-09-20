@@ -19,9 +19,37 @@
   flex-direction: column;
   gap: 10px;
 
-  .layer-field,
+  .compilation-field,
   .mode-field {
     margin-bottom: 0;
+  }
+
+  // Just the selection and its route: the tree itself is in the popover behind
+  // the selector button.
+  .compilation-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tree-status {
+    display: flex;
+    justify-content: center;
+    padding: 1em;
+  }
+
+  .field-label {
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .selection-note {
+    p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.35;
+    }
   }
 
   // Description of the active display mode, beneath the segmented control.

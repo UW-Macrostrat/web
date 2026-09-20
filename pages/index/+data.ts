@@ -1,7 +1,11 @@
 import { fetchAPIData } from "~/_utils";
-import { apiV2Prefix } from "@macrostrat-web/settings";
 import { parse as parseYaml } from "yaml";
-import { featuredLocationForToday, type FeaturedLocation } from "./featured-locations";
+import { featuredAreaForToday, type FeaturedArea } from "./featured-areas";
+import {
+  fetchColumnAtPoint,
+  fetchColumnByID,
+  type HeroColumn,
+} from "./hero-data";
 
 interface PageStats {
   columns: number;
@@ -17,22 +21,13 @@ interface NewsItem {
   href: string;
 }
 
-export interface HeroColumnInfo {
-  col_id: number;
-  col_name: string;
-  col_group: string | null;
-  project_id: number;
-  t_units: number;
-  b_age: number;
-  t_age: number;
-}
-
 export interface HeroData {
-  location: FeaturedLocation;
-  column: HeroColumnInfo;
-  units: any[];
-  /** The column's footprint, if the API returned one. */
-  footprint: GeoJSON.Geometry | null;
+  /** The featured area the server opened on. The browser may put its own
+   * synthetic "near you" area in front of it. */
+  area: FeaturedArea;
+  /** That area's column, so the first paint has one. Null when the area's
+   * point is outside the columns' coverage. */
+  column: HeroColumn | null;
 }
 
 /** News posts are pages under `News/` in the documentation vault; drafts live
@@ -69,60 +64,18 @@ function latestNews(limit = 3): NewsItem[] {
   return items.slice(0, limit);
 }
 
-/** The column under the featured location and its units. Null on any failure:
- * the hero then shows its static form rather than the page failing. */
-async function heroData(): Promise<HeroData | null> {
-  const location = featuredLocationForToday();
-  try {
-    const columns = await fetchAPIData("/columns", {
-      lat: location.lat,
-      lng: location.lng,
-      response: "long",
-      status_code: "active",
-    });
-    const col = columns[0];
-    if (col == null) return null;
-    const [units, footprint] = await Promise.all([
-      fetchAPIData("/units", {
-        col_id: col.col_id,
-        response: "long",
-        show_position: true,
-        status_code: "active",
-      }),
-      fetchFootprint(col.col_id),
-    ]);
-    if (units.length === 0) return null;
-    return {
-      location,
-      column: {
-        col_id: col.col_id,
-        col_name: col.col_name,
-        col_group: col.col_group ?? null,
-        project_id: col.project_id,
-        t_units: col.t_units,
-        b_age: col.b_age,
-        t_age: col.t_age,
-      },
-      units,
-      footprint,
-    };
-  } catch (err) {
-    console.warn("[homepage] hero data unavailable:", err?.message ?? err);
-    return null;
+/** What the hero opens on: the day's featured area, and its column — pinned by
+ * id when the area names one, otherwise whatever its view is centred over.
+ * Neither failing takes the page down; the map renders on its own. */
+async function heroData(): Promise<HeroData> {
+  const area = featuredAreaForToday();
+  let column: HeroColumn | null;
+  if (area.columnID != null) {
+    column = await fetchColumnByID(area.columnID);
+  } else {
+    column = await fetchColumnAtPoint(area.view.lat, area.view.lng);
   }
-}
-
-async function fetchFootprint(colID: number): Promise<GeoJSON.Geometry | null> {
-  try {
-    const url = `${apiV2Prefix}/columns?col_id=${colID}&format=geojson_bare`;
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const body: any = await res.json();
-    const feature = body?.features?.[0] ?? body;
-    return feature?.geometry ?? null;
-  } catch {
-    return null;
-  }
+  return { area, column };
 }
 
 export async function data(pageContext) {

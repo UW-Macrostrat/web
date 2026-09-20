@@ -1,52 +1,247 @@
-// The live hero panel: map beside column. Sized by the static hero's frame in
-// +Page.module.sass so the swap from static to live does not move the page.
+// The live hero: the map fills a frame whose height comes from `--hero-height`
+// (set on the section in +Page.module.sass, so the static cover photo and the
+// live map are always the same size), the column floats over it as an inset
+// box, and the age filter and credits sit underneath.
 
-.hero-live
-  display: grid
-  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr)
-  gap: 1px
-  height: 100%
-  min-height: 0
-  background: var(--pz-panel-rule-color, #ddd)
-  @media (max-width: 700px)
-    grid-template-columns: 1fr
-
-.hero-map, .hero-column
+.hero-frame
   position: relative
-  min-height: 0
+  height: var(--hero-height)
+  border-radius: var(--pz-radius-lg, 10px)
   overflow: hidden
-  background: var(--pz-background-color, #fff)
+  border: 1px solid var(--pz-border-color, #ddd)
+  background: var(--pz-panel-background-color, #f5f5f5)
 
 .hero-map
+  position: absolute
+  inset: 0
+  overflow: hidden
+
   :global(.map-view-container), :global(.mapboxgl-map)
     width: 100%
     height: 100%
 
-.hero-column-scroll
-  height: 100%
+  // No basemap chrome: the geology, the landform and the column are the page.
+  :global(.mapboxgl-ctrl-bottom-right), :global(.mapboxgl-ctrl-bottom-left)
+    opacity: 0.4
+    font-size: 0.7em
+
+// ------------------------------------------------------------ the column
+
+// No padding anywhere below the header, and a width that matches the column's
+// own (`COLUMN_WIDTH` in hero.client.ts), so the units run edge to edge and the
+// box reads as the column rather than as a panel holding one. The edge is a
+// shadow rather than a border for the same reason: a border would eat into the
+// 210px the column is drawn at.
+.column-inset
+  position: absolute
+  top: 0.75em
+  right: 0.75em
+  bottom: 0.75em
+  width: 210px
+  display: flex
+  flex-direction: column
+  min-height: 0
+  border-radius: var(--pz-radius-md, 6px)
+  background: var(--pz-panel-background-color, rgba(255, 255, 255, 0.95))
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.4)
+  overflow: hidden
+
+  @media (max-width: 700px)
+    top: 0.5em
+    right: 0.5em
+    bottom: 0.5em
+
+.column-inset-header
+  flex: 0 0 auto
+  padding: 0.5em 0.7em
+  border-bottom: 1px solid var(--pz-panel-rule-color, #eee)
+
+  .col-name
+    display: block
+    font-family: var(--header-font)
+    font-size: 0.95em
+    line-height: 1.2
+
+  .column-inset-summary
+    margin: 0.15em 0 0
+    font-size: 0.75em
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.column-inset-scroll
+  flex: 1 1 auto
+  min-height: 0
   overflow-y: auto
   overflow-x: hidden
-  padding: 0.5em 0.5em 3em
+  padding: 0
+
+  // Unit labels: small, serif, upright. Family inherits into the label's
+  // foreignObject; the size and style are the column's own variables.
+  font-family: var(--serif-font, Georgia, serif)
+  --column-unit-font-size: 8.5px
+  --column-unit-font-style: normal
+  --column-stroke-color: rgba(0, 0, 0, 0.25)
+  // Selection reads as the age filter below the hero, not as a wash over the
+  // unit that would fight the age color.
+  --selection-overlay-opacity: 0
+
+  // The scrollbar would be a gutter between the units and the box edge.
+  scrollbar-width: none
+  &::-webkit-scrollbar
+    display: none
+
+  // Centred in both directions. The library centres the label box; these make
+  // the text inside it centre too when it wraps.
+  :global(.unit-overlay)
+    text-align: center
+  :global(.unit-label)
+    width: 100%
+    text-align: center
+
+  // Units outside the age filter are dimmed by fading their color in
+  // `hero.client.ts`, not from here: only the background is meant to back off,
+  // and a class on the unit would displace the one the library puts there.
+
+// ---------------------------------------------------- featured areas
+
+// The story card: what this area is, and the way through the others. Bottom
+// left, clear of the column inset on the right.
+.hero-caption
+  position: absolute
+  left: 0.75em
+  bottom: 0.75em
+  z-index: 3
+  max-width: min(360px, calc(100% - 210px - 2.5em))
+  padding: 0.6em 0.8em
+  border-radius: var(--pz-radius-md, 6px)
+  background: var(--pz-overlay-background-color, rgba(255, 255, 255, 0.88))
+  backdrop-filter: blur(6px)
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35)
+
+  @media (max-width: 700px)
+    left: 0.5em
+    bottom: 0.5em
+    max-width: calc(100% - 150px - 2em)
+
+.caption-body
+  animation: caption-enter 0.4s ease both
+
+  .caption-title
+    margin: 0
+    font-family: var(--header-font)
+    font-size: 1.05em
+    line-height: 1.2
+    color: var(--pz-text-emphasized-color, inherit)
+
+  .caption-text
+    margin: 0.25em 0 0
+    font-size: 0.85em
+    line-height: 1.4
+    color: var(--pz-text-color, inherit)
+
+@keyframes caption-enter
+  from
+    opacity: 0
+    transform: translateY(6px)
+  to
+    opacity: 1
+    transform: none
+
+.caption-nav
   display: flex
+  align-items: center
+  gap: 0.25em
+  margin-top: 0.4em
+
+.caption-dots
+  display: flex
+  align-items: center
+  gap: 0.35em
+  flex: 1 1 auto
   justify-content: center
-  // The column is taller than the panel; fade it out rather than cut it.
-  mask-image: linear-gradient(to bottom, black 85%, transparent 100%)
 
-.hero-panel-link
+.caption-dot
+  width: 7px
+  height: 7px
+  padding: 0
+  border: none
+  border-radius: 50%
+  cursor: pointer
+  background: var(--pz-border-color, rgba(0, 0, 0, 0.25))
+  transition: background-color 0.2s ease, transform 0.2s ease
+
+  &:hover
+    transform: scale(1.3)
+
+  &:global(.active)
+    background: var(--pz-accent-color, #8f278a)
+
+// While a new column is being loaded.
+.hero-loading
   position: absolute
-  right: 0.6em
-  bottom: 0.6em
-  z-index: 2
-  font-size: 0.8em
-  padding: 0.2em 0.6em
-  border-radius: var(--pz-radius-sm, 3px)
+  top: 0.75em
+  left: 0.75em
+  z-index: 3
+  padding: 0.3em
+  border-radius: 50%
   background: var(--pz-panel-background-color, rgba(255, 255, 255, 0.9))
-  border: 1px solid var(--pz-border-color, #ddd)
-  color: var(--pz-link-color, inherit)
-  text-decoration: none
 
-.hero-zoom-control
-  position: absolute
-  top: 0.6em
-  right: 0.6em
-  z-index: 2
+// -------------------------------------------------- filter and credits
+
+.hero-context
+  display: flex
+  flex-wrap: wrap
+  align-items: baseline
+  justify-content: space-between
+  gap: 0.5em 1.5em
+  margin-top: 0.75em
+
+.hero-filter
+  display: flex
+  align-items: center
+  gap: 0.5em
+  min-height: 2em
+
+  // `IntervalField` renders a Blueprint-flavoured `DataField`; here it is one
+  // line beside the clear button rather than a stacked form field.
+  :global(.data-field)
+    display: flex
+    align-items: center
+    gap: 0.5em
+    margin: 0
+
+    :global(.label)
+      font-size: 0.8em
+      text-transform: uppercase
+      letter-spacing: 0.04em
+      color: var(--pz-text-subtle-color, var(--secondary-color))
+
+  .hero-filter-hint
+    margin: 0
+    font-size: 0.85em
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.hero-credits
+  display: flex
+  flex-direction: column
+  align-items: flex-end
+  gap: 0.1em
+  text-align: right
+
+  @media (max-width: 700px)
+    align-items: flex-start
+    text-align: left
+
+  .hero-credit
+    margin: 0
+    font-size: 0.8em
+    line-height: 1.35
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+  .credit-label
+    text-transform: uppercase
+    letter-spacing: 0.04em
+    font-size: 0.85em
+    margin-right: 0.5em
+
+  .credit-detail
+    color: var(--pz-text-subtle-color, var(--secondary-color))

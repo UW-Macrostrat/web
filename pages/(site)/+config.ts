@@ -18,8 +18,8 @@ export default {
     "siteData",
     "siteCrumbs",
   ],
-  // Inline breadcrumbs (the trail and the title on one line), the shared
-  // content width, and the footer.
-  pageStyle: "index",
+  // Inline breadcrumbs (the trail and the title on one line) in a header that
+  // sticks to the top of the viewport, the shared content width, and the footer.
+  pageStyle: "site",
   pageInfo: "import:./pageInfo:pageInfo",
 } satisfies Config;

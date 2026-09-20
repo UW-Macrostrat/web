@@ -6,11 +6,12 @@
  * polygons, is served as a layer, where the polygons came from.
  */
 
-import hyper from "@macrostrat/hyper";
 import { Tag } from "@blueprintjs/core";
 import type { Intent } from "@blueprintjs/core";
+import hyper from "@macrostrat/hyper";
+
 import type { CompilationState, GraphNode } from "./graph";
-import styles from "./main.module.sass";
+import styles from "./tree.module.sass";
 
 const h = hyper.styled(styles);
 
@@ -51,7 +52,7 @@ export function NodeTags({
   node,
   priority,
 }: {
-  node: MapNode & { state?: CompilationState | null };
+  node: GraphNode;
   priority?: number | null;
 }) {
   const tags = [];

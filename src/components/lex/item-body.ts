@@ -9,6 +9,7 @@ import {
   Fossils,
   References,
 } from "./index";
+import { LexColumnList } from "./column-list";
 import {
   useLexColumnsState,
   useLexFossils,
@@ -32,7 +33,15 @@ interface LexItemBodyProps {
   /** Server-agnostic extras rendered before/after the common block (e.g. the
    * interval age-scale, strat-name hierarchy, concept info). */
   topExtra?: any;
+  /** Between the map/columns and the charts — where a hierarchy belongs on a
+   * page whose subject *is* its place in a hierarchy. `topExtra` is above the
+   * map, which puts navigation ahead of the content it navigates away from. */
+  afterColumns?: any;
   bottomExtra?: any;
+  /** List the columns the item is found in, beneath the map. Opt-in rather than
+   * universal: it is the stratigraphic pages that are routinely read as "which
+   * columns carry this?", and it reuses `colData`, so it costs no request. */
+  showColumnList?: boolean;
 }
 
 /**
@@ -53,7 +62,9 @@ export function LexItemBody(props: LexItemBodyProps) {
     showMaps = false,
     showFossils = true,
     topExtra = null,
+    afterColumns = null,
     bottomExtra = null,
+    showColumnList = false,
   } = props;
 
   const itemRef = { type, id: Number(id) };
@@ -84,6 +95,8 @@ export function LexItemBody(props: LexItemBodyProps) {
       targetKey: `${type}:${id}`,
       loading: columnsLoading,
     }),
+    h.if(showColumnList)(LexColumnList, { colData }),
+    afterColumns,
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     // The beta "Columns" / "Map Legends" / "Fossils" cards are held back for now

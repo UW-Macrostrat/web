@@ -30,91 +30,118 @@ export function Page() {
     measurements += stat.measurements || 0;
   });
 
-  return h("div", [
-    h("p", [
-      "This is the homepage of Macrostrat's geological lexicons, which are assembled from many data sources including Canada's ",
+  return h("div.lex-index", [
+    h("p.lead", [
+      "The homepage of Macrostrat's geological lexicons, assembled from many ",
+      "sources including Canada's ",
       h(
         "a",
         { href: "https://weblex.canada.ca/weblexnet4/weblex_e.aspx" },
         "WebLex"
       ),
-      ", the USGS's ",
+      " and the USGS's ",
       h("a", { href: "https://ngmdb.usgs.gov/Geolex/search" }, "Geolex"),
-      ", and other sources. The lexicon is continually updated in partnership with researchers and data providers.",
+      ". They are continually updated in partnership with researchers and data ",
+      "providers.",
     ]),
-    h("div.stats-table", [
-      h(
-        "a",
-        { href: "/columns" },
-        h("p.stat", `${formatNumber(columns)} columns`)
-      ),
-      h("p.stat", `${formatNumber(packages)} packages`),
-      h("p.stat", `${formatNumber(units)} units`),
-      h("p.stat", `${formatNumber(measurements)} measurements`),
+    h("div.lex-stats", [
+      h(Stat, { value: columns, label: "columns", href: "/columns" }),
+      h(Stat, { value: packages, label: "packages" }),
+      h(Stat, { value: units, label: "units" }),
+      h(Stat, { value: measurements, label: "measurements" }),
     ]),
-    h(LexSearchPrompt),
-    h("div.body-content", [
+    h("div.lex-search", h(LexSearchPrompt)),
+    h("section.dictionaries", [
       h("h2", "Dictionaries"),
       h(
-        LinkCard,
-        { href: "/lex/strat-names", title: "Geologic names" },
-        "Names of rock units, organized hierarchically and concepts that capture relationships between differently-named rock units"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/lithologies", title: "Lithologies" },
-        "Names and hierarchies for geological materials"
-      ),
-
-      h(
-        LinkCard,
-        { href: "/lex/intervals", title: "Intervals" },
-        "Time intervals"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/timescales", title: "Timescales" },
-        "Groups of intervals used together to span intervals of time"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/lith-atts", title: "Lithology attributes" },
-        "Names and descriptions of lithology attributes"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/environments", title: "Environments" },
-        "Depositional environments and formation mechanisms"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/economics", title: "Economics" },
-        "Economic uses of geologic materials"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/minerals", title: "Minerals" },
-        "Mineral names and formulas"
-      ),
-      h(
-        LinkCard,
-        { href: "/lex/structures", title: "Structures" },
-        "Names and descriptions of geologic structures"
-      ),
-      h("p", [
-        h(
-          "strong",
+        "div.dictionary-grid",
+        dictionaries.map((item) =>
           h(
-            "a",
-            { href: "https://macrostrat.org/sift/#", target: "_blank" },
-            "Sift"
+            LinkCard,
+            {
+              key: item.href,
+              href: item.href,
+              title: item.title,
+              // Global (matched with `:global()` in the stylesheet): the card's
+              // own class is hashed by the cards module, so the grid can only
+              // reach it through a name it passes in itself.
+              className: "dictionary-card",
+            },
+            item.text
           )
-        ),
-        ", Macrostrat's legacy lexicon app, is still available for use as it is gradually brought into this new framework.",
-      ]),
-      h(UpdatesExpandableDialog),
+        )
+      ),
     ]),
+    h("p.lex-footnote", [
+      h("a", { href: "https://macrostrat.org/sift/#", target: "_blank" }, "Sift"),
+      ", Macrostrat's legacy lexicon app, is still available while it is ",
+      "gradually brought into this framework.",
+    ]),
+    h(UpdatesExpandableDialog),
   ]);
+}
+
+/** The lexicon's dictionaries, as a list so the grid and the order live in one
+ * place rather than in the markup. */
+const dictionaries = [
+  {
+    href: "/lex/strat-names",
+    title: "Geologic names",
+    text: "Names of rock units, organized hierarchically, and the concepts that relate differently-named units to each other.",
+  },
+  {
+    href: "/lex/lithologies",
+    title: "Lithologies",
+    text: "Names and hierarchies for geological materials.",
+  },
+  {
+    href: "/lex/intervals",
+    title: "Intervals",
+    text: "Named spans of geologic time.",
+  },
+  {
+    href: "/lex/timescales",
+    title: "Timescales",
+    text: "Groups of intervals used together to span time.",
+  },
+  {
+    href: "/lex/lith-atts",
+    title: "Lithology attributes",
+    text: "Names and descriptions of lithology attributes.",
+  },
+  {
+    href: "/lex/environments",
+    title: "Environments",
+    text: "Depositional environments and formation mechanisms.",
+  },
+  {
+    href: "/lex/economics",
+    title: "Economics",
+    text: "Economic uses of geologic materials.",
+  },
+  {
+    href: "/lex/minerals",
+    title: "Minerals",
+    text: "Mineral names and formulas.",
+  },
+  {
+    href: "/lex/structures",
+    title: "Structures",
+    text: "Names and descriptions of geologic structures.",
+  },
+];
+
+/** One figure in the row above the dictionaries. Linked when there is
+ * somewhere to go. */
+function Stat({ value, label, href = null }) {
+  const body = [
+    h("span.stat-value", formatNumber(value)),
+    h("span.stat-label", label),
+  ];
+  if (href == null) {
+    return h("div.stat", body);
+  }
+  return h("a.stat", { href }, body);
 }
 
 function formatNumber(num) {

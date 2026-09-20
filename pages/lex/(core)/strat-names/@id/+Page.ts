@@ -1,7 +1,7 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
 import { LexItemPage, ConceptInfo, LexItemBodyClient } from "~/components/lex";
-import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy.ts";
+import { StratNameHierarchy } from "~/components/lex/strat-hierarchy";
 import { LexItemData } from "~/components/lex/data-loaders.ts";
 
 export function Page() {
@@ -18,9 +18,13 @@ export function Page() {
 
   // The title (and the Name/Concept badge) belong to the layout's page header,
   // built from `+pageInfo.ts` — not to a second heading here.
+  //
+  // Order: what the name *is* (its concept), then where it is (the map and the
+  // columns), then where it sits (the hierarchy) — above the attribute charts,
+  // since the hierarchy is the more important of the two on a stratigraphic
+  // page. Both ride in the body's existing client-only island via `topExtra` /
+  // `afterColumns` rather than mounting islands of their own.
   return h(LexItemPage, { id, resData, siftLink: config.siftLink }, [
-    h(StratNameHierarchy, { id }),
-    h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
     h(LexItemBodyClient, {
       type,
       id,
@@ -30,6 +34,12 @@ export function Page() {
       showUnits: true,
       showMaps: true,
       showFossils: true,
+      showColumnList: true,
+      topExtra: h(ConceptInfo, {
+        concept_id: resData?.concept_id,
+        showHeader: true,
+      }),
+      afterColumns: h(StratNameHierarchy, { id }),
     }),
   ]);
 }
