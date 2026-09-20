@@ -24,9 +24,9 @@ export function Navbar({ className, children, showSiteTitle = true }) {
       children,
       h("ul.nav-list", [
         h(NavListItem, { href: "/about" }, "About"),
-        h(NavListItem, { href: "/people" }, "People"),
+        h(NavListItem, { href: "/community" }, "Community"),
         h(NavListItem, { href: "/publications" }, "Publications"),
-        h(NavListItem, { href: "/support" }, "Support"),
+        h(NavListItem, { href: "/docs" }, "Docs"),
         h(NavListItem, { href: "https://rockd.org/" }, "Rockd"),
       ]),
     ]),

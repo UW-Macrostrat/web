@@ -1,10 +1,9 @@
-import { Divider } from "@blueprintjs/core";
-import h from "./main.module.sass";
+import h from "./legacy-publications.module.sass";
 
-export function Page() {
+/** The v1 publications list, verbatim, until the bibliography is published from
+ * the Zotero library (see the Publications feature area). */
+export function LegacyPublicationList() {
   return h([
-    h("p", "Literature utilizing Macrostrat"),
-    h(Divider, { className: "divider" }),
     h("ol", { className: "pub-list", reversed: true }, [
       h("li", [
         h(

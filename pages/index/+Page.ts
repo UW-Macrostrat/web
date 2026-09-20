@@ -1,122 +1,117 @@
 import { Image, SiteTitle } from "~/components/general";
 import { LinkCard } from "~/components/cards";
+import { Link } from "~/components";
 import { useData } from "vike-react/useData";
-import { isDev, webAssetsPrefix } from "@macrostrat-web/settings";
+import { webAssetsPrefix } from "@macrostrat-web/settings";
 import h from "./+Page.module.sass";
-import { Navbar } from "~/layouts";
+import { Footer, Navbar } from "~/layouts";
 
+/** The homepage: what Macrostrat is in a line, the data, a few entry points,
+ * what is new, and an honest beta notice. Design notes live in the workbench
+ * feature area "Homepage design and layout". */
 export default function Page() {
   return h("div.page-main", [
+    h(BetaNotice),
     h("header.site-header", [
       h(SiteTitle, { className: "main-title" }, [
         h("h2.subtitle", "The data system for the crust"),
       ]),
     ]),
     h(Navbar, { className: "site-navbar" }),
-    h("div.hero", [
-      h("div.hero-backdrop", {
-        style: {
-          // Put the background image here to allow us to dynamically change the prefix
-          backgroundImage: `url('${webAssetsPrefix}/main-page/cover_large.jpg')`,
-        },
-      }),
-      h("div.hero-content", [
-        h("p.hero-text", [
-          "Macrostrat integrates geologic maps and stratigraphic columns " +
-            "into a  model of the Earth's crustal framework through time.",
-        ]),
-        h(MacrostratStats),
-      ]),
-    ]),
-    h("div.buttons", [
-      h("h2", "Geologic maps"),
-      h(LinkCard, { title: "Map interface", href: "/map/#3/40.78/-94.13" }, [
-        "An integrated geological map of the world",
-      ]),
-      h(
-        LinkCard,
-        { title: "Map index", href: "/maps" },
-        "Maps from different data providers that have been integrated into Macrostrat"
-      ),
-      h("div.details", [
-        h("p", {}, [
-          h("em", "Macrostrat"),
-          " is the world's largest homogenized geologic map database, ",
-          "with over 225 maps from data providers around the world at every scale. ",
-          "Our data processing pipeline links geologic map polygons to stratigraphic columns, geologic name lexicons, and geochronological intervals. ",
-          "This enhancement of map data allows for direct links to the literature via ",
-          h("a", { href: "https://xdd.wisc.edu", target: "_blank" }, "xDD"),
-          ".",
-        ]),
-        h("p", [
-          "Are you affiliated with a state or national geologic survey? ",
-          h(
-            "a",
-            {
-              href: "mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration",
-            },
-            "Get in touch"
-          ),
-          " with us - we'd love to collaborate and help publicize your maps!",
-        ]),
-        h("p", {}, [
-          "Get started by ",
-          h("a", { href: "/map" }, "exploring the map"),
-          " or ",
-          h("a", { href: "/map/sources" }, "taking a look at"),
-          " which maps are currently a part of Macrostrat.",
-        ]),
-      ]),
-      h("h2", "Stratigraphic columns"),
-      h(LinkCard, { title: "Columns", href: "/columns" }, [
-        "Regional and local descriptions of the evolution of the Earth's crust through time",
-      ]),
-      h(
-        "p",
-        "Macrostrat's stratigraphic columns account for the organization of rocks in the crust and their evolution over Earth history."
-      ),
-      h(
-        "p",
-        "Macrostrat stores both regional columns that represent a unified chronostratigraphic framework and measured sections and drill core logs that provide detailed information about specific locations."
-      ),
+    h(Hero),
+    h(EntryPoints),
+    h(WhatsNew),
+    h(Footer),
+  ]);
+}
 
-      h(LinkCard, { title: "Macrostrat lexicon", href: "/lex" }, [
-        h(
-          "p",
-          "Comprehensive searchable list of stratigraphic names, lithologies, environments and more"
-        ),
+function BetaNotice() {
+  return h("div.beta-notice", [
+    h("strong", "Macrostrat v2 is in beta."),
+    " The data are real and some things will be rough. ",
+    h(Link, { href: "/community" }, "Tell us what you find."),
+  ]);
+}
+
+function Hero() {
+  return h("div.hero", [
+    h("div.hero-backdrop", {
+      style: {
+        // Put the background image here to allow us to dynamically change the prefix
+        backgroundImage: `url('${webAssetsPrefix}/main-page/cover_large.jpg')`,
+      },
+    }),
+    h("div.hero-content", [
+      h("p.hero-text", [
+        "Geologic maps and stratigraphic columns, integrated into one model of ",
+        "the Earth's crust through time.",
       ]),
-      h(LinkCard, { title: "Projects", href: "/projects" }, [
-        h("p", "Projects for specific regions or geological problems"),
-      ]),
-      h(LinkCard, { title: "Rockd", href: "https://rockd.org" }, [
-        h("h3.rock-info", [
-          h(Image, {
-            className: "rockd-png",
-            src: "rockd.png",
-            width: "22px",
-            height: "22px",
-          }),
-          " Go mobile!",
-        ]),
-      ]),
-      h(
-        LinkCard,
-        { title: "Usage Map", href: "/usage-map" },
-        h("p", "Macrostrat usage map")
-      ),
-      h(
-        LinkCard,
-        { title: "Documentation", href: "/docs" },
-        h("p", "Macrostrat documentation")
-      ),
-      h.if(isDev)(
-        LinkCard,
-        { title: "Developer apps", href: "/dev" },
-        h("p", "Layers and testbed apps that aren't ready for prime time")
-      ),
+      h(MacrostratStats),
     ]),
-    //h(Footer),
+  ]);
+}
+
+const entryPoints = [
+  {
+    title: "Map",
+    href: "/map/#3/40.78/-94.13",
+    text: "The world's geologic maps, harmonized into one.",
+  },
+  {
+    title: "Columns",
+    href: "/columns",
+    text: "The rock record through time, region by region.",
+  },
+  {
+    title: "Lexicon",
+    href: "/lex",
+    text: "Stratigraphic names, lithologies, intervals and environments.",
+  },
+  {
+    title: "Projects",
+    href: "/projects",
+    text: "Columns and maps for specific regions and problems.",
+  },
+  {
+    title: "Rockd",
+    href: "https://rockd.org",
+    text: "The mobile field companion. Explore and record the geology around you.",
+    image: "rockd.png",
+  },
+];
+
+function EntryPoints() {
+  return h(
+    "nav.entry-points",
+    entryPoints.map((item) => {
+      let icon = null;
+      if (item.image != null) {
+        icon = h(Image, { className: "entry-icon", src: item.image, width: "22px", height: "22px" });
+      }
+      return h(LinkCard, { key: item.href, title: item.title, href: item.href, className: "entry-card" }, [
+        h("p", [icon, item.text]),
+      ]);
+    })
+  );
+}
+
+function WhatsNew() {
+  const { news } = useData() as any;
+  const posts: any[] = news ?? [];
+  if (posts.length === 0) return null;
+  return h("section.whats-new", [
+    h("h2", "What's new"),
+    h(
+      "ul.news-list",
+      posts.map((post) =>
+        h("li.news-item", { key: post.href }, [
+          h("span.news-date", post.date),
+          h(Link, { href: post.href }, post.title),
+          h("span.news-summary", post.summary),
+        ])
+      )
+    ),
+    h(Link, { href: "/news", className: "news-more" }, "All news"),
   ]);
 }
 
@@ -125,7 +120,7 @@ function formatNumber(num) {
 }
 
 function MacrostratStats() {
-  const { stats } = useData();
+  const { stats } = useData() as any;
   const { columns, units, polygons, projects } = stats;
 
   return h("div.stats", {}, [

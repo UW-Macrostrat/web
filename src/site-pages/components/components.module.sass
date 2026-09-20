@@ -1,0 +1,152 @@
+// Records rendered into site pages. Prose around them is styled by docs-content.
+
+.tier-label
+  font-size: var(--pz-font-size-md, 1em)
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  margin: var(--pz-space-4, 1.5em) 0 var(--pz-space-2, 0.5em)
+  text-transform: uppercase
+  letter-spacing: 0.04em
+
+ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-list, ul.contact-list, ul.cite-list
+  list-style: none
+  padding: 0
+  margin: 0
+
+.supporter-list, .app-list
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))
+  gap: var(--pz-space-3, 1em)
+
+.supporter-card, .app-card, .person-card
+  display: flex
+  gap: var(--pz-space-3, 1em)
+  padding: var(--pz-space-3, 1em)
+  border: 1px solid var(--pz-border-color, #ddd)
+  border-radius: var(--pz-radius-md, 6px)
+  background: var(--pz-panel-background-color, transparent)
+
+.supporter-logo, .app-logo
+  width: 56px
+  height: 56px
+  object-fit: contain
+  flex: none
+
+.supporter-body, .app-body, .person-body
+  display: flex
+  flex-direction: column
+  gap: 0.2em
+  min-width: 0
+  p
+    margin: 0.2em 0 0
+    font-size: 0.95em
+
+.supporter-name, .app-name, .person-name
+  font-weight: 600
+  font-family: var(--header-font)
+
+.supporter-program, .app-meta, .supporter-period, .person-title, .person-affiliation
+  font-size: 0.85em
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.archived, .former
+  .app-card, .person-card
+    opacity: 0.8
+
+.people-list
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))
+  gap: var(--pz-space-3, 1em)
+
+.person-photo
+  width: 64px
+  height: 64px
+  border-radius: 50%
+  object-fit: cover
+  flex: none
+  &.placeholder
+    display: flex
+    align-items: center
+    justify-content: center
+    background: var(--pz-purple-200, #ddd)
+    color: var(--pz-purple-700, #333)
+    font-weight: 600
+
+.person-tags
+  display: flex
+  flex-wrap: wrap
+  gap: 0.3em
+  margin-top: 0.3em
+  align-items: center
+  font-size: 0.85em
+
+.person-note
+  font-size: 0.85em
+
+.directory-controls
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-2, 0.5em)
+  margin-bottom: var(--pz-space-3, 1em)
+
+.role-filters
+  display: flex
+  flex-wrap: wrap
+  gap: 0.3em
+
+.integration
+  padding: var(--pz-space-2, 0.6em) 0
+  border-bottom: 1px solid var(--pz-panel-rule-color, #eee)
+  p
+    margin: 0.2em 0 0
+
+.integration-head
+  display: flex
+  gap: 1em
+  align-items: baseline
+
+.integration-name, .repo-name
+  font-weight: 600
+
+.integration-direction
+  font-size: 0.8em
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.repo
+  display: flex
+  gap: 1em
+  padding: 0.3em 0
+  align-items: baseline
+
+.repo-what
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.contact-list
+  display: flex
+  flex-wrap: wrap
+  gap: var(--pz-space-3, 1em) var(--pz-space-5, 2em)
+
+.contact-channel
+  display: flex
+  flex-direction: column
+  .contact-label
+    font-size: 0.8em
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.cite-item
+  display: flex
+  flex-direction: column
+  gap: 0.2em
+  padding: var(--pz-space-2, 0.6em) var(--pz-space-3, 1em)
+  margin-bottom: var(--pz-space-2, 0.6em)
+  border-left: 3px solid var(--pz-accent-color, #492f7a)
+  background: var(--pz-panel-secondary-background-color, transparent)
+
+.cite-note
+  font-size: 0.8em
+  text-transform: uppercase
+  letter-spacing: 0.04em
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.cite-doi
+  font-family: var(--monospace-font)
+  font-size: 0.85em
