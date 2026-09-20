@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { getBasicMapStyle, MapView } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { setMapPosition } from "@macrostrat/mapbox-utils";
+import { MapboxMapProvider } from "@macrostrat/mapbox-react";
 import {
   Column,
   ColoredUnitComponent,
@@ -49,8 +50,10 @@ function HeroMap({ hero }: { hero: HeroData }) {
 
   const style = useMemo(() => getBasicMapStyle({ inDarkMode }), [inDarkMode]);
 
+  // `MapView` reads its map from a `MapboxMapProvider`; outside `MapAreaContainer`
+  // it has to bring its own, or it throws "Missing Provider from createIsolation".
   return h("div.hero-map", [
-    h(MapView, {
+    h(MapboxMapProvider, h(MapView, {
       style,
       accessToken: mapboxAccessToken,
       standalone: true,
@@ -64,7 +67,7 @@ function HeroMap({ hero }: { hero: HeroData }) {
           zoom: location.zoom,
         });
       },
-    }),
+    })),
     h(
       "a.hero-panel-link",
       { href: `/map/#${location.zoom}/${location.lat}/${location.lng}` },

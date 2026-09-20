@@ -21,12 +21,13 @@ const HeroLive = clientOnly(() =>
 export default function Page() {
   return h("div.page-main", [
     h(BetaNotice),
+    h(Hero),
     h("header.site-header", [
       h(SiteTitle, { className: "main-title" }, [
         h("h2.subtitle", "The data system for the crust"),
       ]),
     ]),
-    h(Hero),
+    h(HeroLead),
     h(EntryPoints),
     h(WhatsNew),
     h(PlatformLinks),
@@ -51,16 +52,20 @@ function Hero() {
     panel = h(HeroStatic);
   }
 
-  return h("section.hero", [
-    h("div.hero-lead", [
-      h("p.hero-text", [
-        "Geologic maps and stratigraphic columns, integrated into one model of ",
-        "the Earth's crust through time.",
-      ]),
-      h(HeroCaption, { hero }),
-      h(MacrostratStats),
+  return h("section.hero", h("div.hero-panel", panel));
+}
+
+/** The words beneath the hero: what Macrostrat is, what the panel shows, and
+ * how much of it there is. */
+function HeroLead() {
+  const { hero } = useData() as { hero: HeroData | null };
+  return h("section.hero-lead", [
+    h("p.hero-text", [
+      "Geologic maps and stratigraphic columns, integrated into one model of ",
+      "the Earth's crust through time.",
     ]),
-    h("div.hero-panel", panel),
+    h(HeroCaption, { hero }),
+    h(MacrostratStats),
   ]);
 }
 
