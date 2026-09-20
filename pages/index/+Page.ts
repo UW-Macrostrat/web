@@ -7,6 +7,7 @@ import { AnchorButton } from "@blueprintjs/core";
 import h from "./+Page.module.sass";
 import { platformNavItems } from "~/layouts/footer";
 import { clientOnly } from "~/components/lex/client-only";
+import { LexSearchHost, LexSearchPrompt } from "~/components/lex/search-omnibar";
 import type { HeroData } from "./+data";
 
 /** The live map-and-column hero reaches mapbox-gl, so it loads on the client
@@ -21,13 +22,19 @@ const HeroLive = clientOnly(() =>
 export default function Page() {
   return h("div.page-main", [
     h(BetaNotice),
-    h(Hero),
     h("header.site-header", [
-      h(SiteTitle, { className: "main-title" }, [
-        h("h2.subtitle", "The data system for the crust"),
+      h("div.site-intro", [
+        h(SiteTitle, { className: "main-title" }, [
+          h("h2.subtitle", "The data system for the crust"),
+        ]),
+        h(HeroLead),
       ]),
+      h("div.site-search", h(LexSearchPrompt)),
     ]),
-    h(HeroLead),
+    // The one omnibar instance the search prompt opens (also on ⌘K).
+    h(LexSearchHost),
+    h(Hero),
+    h(MacrostratStats),
     h(EntryPoints),
     h(WhatsNew),
     h(PlatformLinks),
@@ -55,17 +62,15 @@ function Hero() {
   return h("section.hero", h("div.hero-panel", panel));
 }
 
-/** The words beneath the hero: what Macrostrat is, what the panel shows, and
- * how much of it there is. */
+/** What Macrostrat is, and what the panel below is showing. */
 function HeroLead() {
   const { hero } = useData() as { hero: HeroData | null };
-  return h("section.hero-lead", [
+  return h("div.hero-lead", [
     h("p.hero-text", [
       "Geologic maps and stratigraphic columns, integrated into one model of ",
       "the Earth's crust through time.",
     ]),
     h(HeroCaption, { hero }),
-    h(MacrostratStats),
   ]);
 }
 

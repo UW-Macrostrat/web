@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { getBasicMapStyle, MapView } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { setMapPosition } from "@macrostrat/mapbox-utils";
-import { MapboxMapProvider } from "@macrostrat/mapbox-react";
+import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import {
   Column,
   ColoredUnitComponent,
@@ -59,7 +59,6 @@ function HeroMap({ hero }: { hero: HeroData }) {
       standalone: true,
       overlayStyles,
       infoMarkerPosition: [location.lng, location.lat],
-      scrollZoom: false,
       onMapLoaded: (map) => {
         setMapPosition(map, {
           lat: location.lat,
@@ -67,7 +66,7 @@ function HeroMap({ hero }: { hero: HeroData }) {
           zoom: location.zoom,
         });
       },
-    })),
+    }, [h(ZoomControl, { key: "zoom", className: "hero-zoom-control" })])),
     h(
       "a.hero-panel-link",
       { href: `/map/#${location.zoom}/${location.lat}/${location.lng}` },
