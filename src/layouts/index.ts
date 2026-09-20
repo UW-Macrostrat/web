@@ -109,7 +109,17 @@ export function HybridFramePage({ children, className, ...rest }) {
   );
 }
 
+/** The homepage: no breadcrumb bar (the page carries the site title itself),
+ * the shared content width, and the one footer. */
+export function HomePage({ children, className, ...rest }) {
+  return h(BaseContentPage, { className: classNames("home-page", className), ...rest }, [
+    h("div.main", children),
+    h(Footer),
+  ]);
+}
+
 export const pageLayouts = {
+  home: HomePage,
   fullscreen: FullscreenPage,
   hybrid: HybridFramePage,
   content: ContentPage,

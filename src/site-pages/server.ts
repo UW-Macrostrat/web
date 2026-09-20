@@ -43,6 +43,8 @@ export interface SitePageData {
   siteTitle: string;
   siteSections: SiteSection[];
   siteData: Record<string, unknown>;
+  /** Breadcrumb labels for this route and its ancestors, keyed by URL slug. */
+  siteCrumbs: Record<string, string>;
 }
 
 export function hasSitePage(route: string): boolean {
@@ -63,7 +65,22 @@ export async function renderSitePage(route: string): Promise<SitePageData | null
     siteTitle: page.title,
     siteSections: splitSections(html),
     siteData: loadSiteData(slotDataFiles(route)),
+    siteCrumbs: crumbLabels(route),
   };
+}
+
+/** `/about/support` -> { about: "About Macrostrat", support: "Support" }, from
+ * the titles of the site pages along the route. A missing ancestor page keeps
+ * its slug. */
+function crumbLabels(route: string): Record<string, string> {
+  const labels: Record<string, string> = {};
+  const segments = route.split("/").filter(Boolean);
+  for (let i = 0; i < segments.length; i++) {
+    const ancestor = "/" + segments.slice(0, i + 1).join("/");
+    const page = routeIndex[ancestor];
+    if (page != null) labels[segments[i]] = page.title;
+  }
+  return labels;
 }
 
 function loadSiteData(names: string[]): Record<string, unknown> {

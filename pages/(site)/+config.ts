@@ -16,7 +16,10 @@ export default {
     "siteTitle",
     "siteSections",
     "siteData",
+    "siteCrumbs",
   ],
-  pageStyle: "meta",
+  // Inline breadcrumbs (the trail and the title on one line), the shared
+  // content width, and the footer.
+  pageStyle: "index",
   pageInfo: "import:./pageInfo:pageInfo",
 } satisfies Config;

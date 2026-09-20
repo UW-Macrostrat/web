@@ -3,12 +3,21 @@ import { LinkCard } from "~/components/cards";
 import { Link } from "~/components";
 import { useData } from "vike-react/useData";
 import { webAssetsPrefix } from "@macrostrat-web/settings";
+import { AnchorButton } from "@blueprintjs/core";
 import h from "./+Page.module.sass";
-import { Footer, Navbar } from "~/layouts";
+import { platformNavItems } from "~/layouts/footer";
+import { clientOnly } from "~/components/lex/client-only";
+import type { HeroData } from "./+data";
 
-/** The homepage: what Macrostrat is in a line, the data, a few entry points,
- * what is new, and an honest beta notice. Design notes live in the workbench
- * feature area "Homepage design and layout". */
+/** The live map-and-column hero reaches mapbox-gl, so it loads on the client
+ * only; the static hero stands in until then (and when no column was found). */
+const HeroLive = clientOnly(() =>
+  import("./hero.client").then((m) => m.HeroLive)
+);
+
+/** The homepage: what Macrostrat is in a line, the data itself, a few entry
+ * points, what is new, and an honest beta notice. Design notes live in the
+ * workbench feature area "Homepage design and layout". */
 export default function Page() {
   return h("div.page-main", [
     h(BetaNotice),
@@ -17,11 +26,10 @@ export default function Page() {
         h("h2.subtitle", "The data system for the crust"),
       ]),
     ]),
-    h(Navbar, { className: "site-navbar" }),
     h(Hero),
     h(EntryPoints),
     h(WhatsNew),
-    h(Footer),
+    h(PlatformLinks),
   ]);
 }
 
@@ -34,21 +42,52 @@ function BetaNotice() {
 }
 
 function Hero() {
-  return h("div.hero", [
-    h("div.hero-backdrop", {
-      style: {
-        // Put the background image here to allow us to dynamically change the prefix
-        backgroundImage: `url('${webAssetsPrefix}/main-page/cover_large.jpg')`,
-      },
-    }),
-    h("div.hero-content", [
+  const { hero } = useData() as { hero: HeroData | null };
+
+  let panel;
+  if (hero != null) {
+    panel = h(HeroLive, { hero, fallback: h(HeroStatic) });
+  } else {
+    panel = h(HeroStatic);
+  }
+
+  return h("section.hero", [
+    h("div.hero-lead", [
       h("p.hero-text", [
         "Geologic maps and stratigraphic columns, integrated into one model of ",
         "the Earth's crust through time.",
       ]),
+      h(HeroCaption, { hero }),
       h(MacrostratStats),
     ]),
+    h("div.hero-panel", panel),
   ]);
+}
+
+/** What the live panel is showing, so the map and column read as one place. */
+function HeroCaption({ hero }: { hero: HeroData | null }) {
+  if (hero == null) return null;
+  const { location, column } = hero;
+  return h("p.hero-caption", [
+    "Beneath ",
+    h("strong", location.name),
+    ": the ",
+    h(Link, { href: `/columns/${column.col_id}` }, column.col_name),
+    ` column, ${column.t_units} rock units spanning ${formatAge(column.b_age)} of Earth history.`,
+  ]);
+}
+
+function formatAge(ma: number): string {
+  if (ma >= 1000) return `${(ma / 1000).toFixed(1)} billion years`;
+  return `${Math.round(ma)} million years`;
+}
+
+function HeroStatic() {
+  return h("div.hero-static", {
+    style: {
+      backgroundImage: `url('${webAssetsPrefix}/main-page/cover_large.jpg')`,
+    },
+  });
 }
 
 const entryPoints = [
@@ -112,6 +151,25 @@ function WhatsNew() {
       )
     ),
     h(Link, { href: "/news", className: "news-more" }, "All news"),
+  ]);
+}
+
+/** The pages about the project, below the data rather than in a header. Same
+ * list the footer uses, so the two never disagree. */
+function PlatformLinks() {
+  const items = platformNavItems.filter((item) => item.href !== "/heatmap");
+  return h("nav.platform-links", [
+    h("h2", "About the project"),
+    h(
+      "ul",
+      items.map((item) =>
+        h(
+          "li",
+          { key: item.href },
+          h(AnchorButton, { href: item.href, icon: item.icon, minimal: true, large: true }, item.text)
+        )
+      )
+    ),
   ]);
 }
 
