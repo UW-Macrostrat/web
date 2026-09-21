@@ -1,5 +1,5 @@
-// The editor page: content slot (column + sheet), header controls, the
-// surfaces overlay on the column, and the inspector in the assistant slot.
+// The editor page: a full-screen working surface — column, editing sheet and
+// details pane side by side, with the mode bar and actions in the header.
 
 .column-editor-page
   --column-background-color: var(--background-color)
@@ -13,15 +13,17 @@
   align-items: center
   gap: 0.5em
 
-.column-picker
-  .column-id-input
-    width: 7em
-
 .editor-mode-bar
   display: flex
   flex-direction: row
   align-items: center
   gap: 1em
+
+.editor-mode-bar .spacer
+  flex: 1
+
+.draft-tag
+  white-space: nowrap
 
 .dirty-indicator
   font-size: 0.85em
@@ -29,27 +31,27 @@
 
 /* --------------------------------------------------------------- content */
 
-.editor-content
-  min-width: 0
-  flex: 1 1 auto
-  display: flex
-  flex-direction: column
+// Three panes filling the viewport: the column, the editing sheet, and the
+// details of whatever is selected. Each scrolls on its own — the page never
+// does, because an editor that scrolls away from its toolbar is unusable.
 
-.editor-main
+.editor-content
+  flex: 1 1 auto
+  min-height: 0
+  min-width: 0
   display: flex
   flex-direction: row
-  align-items: flex-start
-  gap: 1.5em
-  margin-bottom: 3em
+  align-items: stretch
+  gap: 1em
+  padding: 0 1em 1em 1em
+  overflow: hidden
 
 .editor-column-pane
   flex: none
-  position: sticky
-  top: var(--hybrid-sticky-offset, 3.5rem)
-  max-height: calc(100vh - var(--hybrid-sticky-offset, 3.5rem))
   overflow-y: auto
-  // The pane is a scroll container, which also clips horizontally: in
-  // surfaces mode the library's surface labels hang off the right of the
+  overflow-x: hidden
+  padding-right: 0.5em
+  // In surfaces mode the library's surface labels hang off the right of the
   // units, so the pane reserves their room (`labelWidth`, default 200).
   &.mode-surfaces
     padding-right: 200px
@@ -57,46 +59,19 @@
 .editor-sheet-pane
   flex: 1 1 auto
   min-width: 0
-  position: sticky
-  top: var(--hybrid-sticky-offset, 3.5rem)
-  height: calc(100vh - var(--hybrid-sticky-offset, 3.5rem) - 1em)
   display: flex
   flex-direction: column
 
-.editor-sheet
+.editor-sheet-pane > *
   flex: 1 1 auto
   min-height: 0
-  display: flex
-  flex-direction: column
-  // The data sheet fills the pane
-  > *
-    flex: 1 1 auto
-    min-height: 0
 
-.page-footer
-  margin-top: auto
-  padding-top: 2em
-
-/* ------------------------------------------------------------------- map */
-
-.editor-map-pane
-  position: absolute
-  inset: 0
-
-.column-map
-  width: 100%
-  height: 100%
-  cursor: pointer
-
-.map-hint
-  position: absolute
-  left: 0.5em
-  right: 0.5em
-  bottom: 0.3em
-  font-size: 0.7em
-  text-align: right
-  color: var(--pz-text-subtle-color, var(--secondary-color))
-  pointer-events: none
+.editor-inspector-pane
+  flex: 0 0 22em
+  min-width: 0
+  overflow-y: auto
+  padding: 0 0.5em
+  border-left: 1px solid var(--pz-divider-color, rgba(128, 128, 128, 0.2))
 
 /* ------------------------------------------------------------- inspector */
 

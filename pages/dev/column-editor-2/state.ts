@@ -16,10 +16,12 @@ import {
 } from "./surfaces";
 
 export interface ColumnSnapshot {
-  col_id: number;
+  /** `null` for a draft column that has never been written */
+  col_id: number | null;
   columnInfo: any;
   units: UnitLong[];
   boundaries: AgeModelBoundary[];
+  isDraft?: boolean;
 }
 
 /** The column as loaded: what reset returns to, and the source of the
@@ -57,6 +59,19 @@ export const editingModeAtom = atom(
     let value: string | null = mode;
     if (mode === "units") value = null;
     set(modeParamAtom, value);
+  }
+);
+
+/** Whether the details pane is showing. Synced to `?details=`, closed state
+ * kept out of the URL. */
+const detailsParamAtom = atomWithSearchParam("details");
+
+export const inspectorOpenAtom = atom(
+  (get) => get(detailsParamAtom) !== "0",
+  (get, set, open: boolean) => {
+    let value: string | null = null;
+    if (!open) value = "0";
+    set(detailsParamAtom, value);
   }
 );
 

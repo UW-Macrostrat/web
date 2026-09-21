@@ -1,9 +1,8 @@
 export default {
-  // The hybrid content/map frame (`~/layouts/hybrid`): the column and its
-  // editing sheet are the content, the navigation map and column summary ride
-  // alongside.
+  // The editor runs full-width in the hybrid frame — no map, no sidebar (see
+  // `editor-shell.ts`).
   pageStyle: "hybrid",
-  title: "Column editor 2",
+  title: "Column editor",
   description:
     "Experimental column editor: units and surfaces edited side by side.",
   meta: {
