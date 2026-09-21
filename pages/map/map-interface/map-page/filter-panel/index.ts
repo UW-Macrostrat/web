@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import hyper from "@macrostrat/hyper";
-import { Tag, Card, Button, Collapse, Switch } from "@blueprintjs/core";
-import { useAppActions, useAppState } from "#/map/map-interface/app-state";
+import { Button, Collapse, Switch } from "@blueprintjs/core";
+import { useAppActions } from "#/map/map-interface/app-state";
 import { useAdmoinshments } from "./admonishments";
+import { FilterItemTag } from "../search-tags";
 import styles from "./filters.module.styl";
 
 const h = hyper.styled(styles);
@@ -25,27 +26,27 @@ function Filter({ filter }) {
     runAction({ type: "async-add-filter", filter: newFilter });
   };
 
-  const { name, category, type } = filter;
+  const { category, type } = filter;
 
   const isTypeAll: boolean = type.substr(0, 4) === "all_";
   const label: string = isTypeAll ? "All matches" : "Best matches";
 
   return h("div.filter-tag", [
-    h(
-      Tag,
-      {
-        onRemove: remove,
-        interactive: true,
-        style: { backgroundColor: "#D9822B" },
-      },
-      [name]
-    ),
+    h(FilterItemTag, { filter }),
+    h("span.spacer"),
     h.if(category == "lithology")(Switch, {
       style: { margin: 0 },
       alignIndicator: "right",
       label,
       checked: isTypeAll,
       onChange: swapFilterType,
+    }),
+    h(Button, {
+      minimal: true,
+      small: true,
+      icon: "cross",
+      title: "Remove filter",
+      onClick: remove,
     }),
   ]);
 }
@@ -57,7 +58,9 @@ function FiltersView({ filters }) {
       "No Filters. To add filters begin searching..",
     ]),
     h.if(shouldFiltersBeOpen)(
-      filters.map((filter, key) => h(Filter, { key, filter }))
+      filters.map((filter) =>
+        h(Filter, { key: `${filter.type}:${filter.id}`, filter })
+      )
     ),
   ]);
 }

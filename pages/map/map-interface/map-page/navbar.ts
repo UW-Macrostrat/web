@@ -6,6 +6,7 @@ import h from "./navbar.module.sass";
 import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { MacrostratLogoLink } from "~/components";
+import { SearchResultLabel, useLexDefs } from "./search-tags";
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -25,6 +26,7 @@ const sortOrder = {
 
 function ResultList({ searchResults }) {
   const runAction = useAppActions();
+  const defs = useLexDefs();
   const onSelectResult = useCallback(
     (f) => {
       runAction({ type: "select-search-result", result: f });
@@ -65,7 +67,7 @@ function ResultList({ searchResults }) {
                     onSelectResult(item);
                   },
                 },
-                item.name
+                h(SearchResultLabel, { result: item, defs })
               );
             })
         ),
@@ -158,7 +160,6 @@ export function Searchbar({ className }) {
         large: true,
         onChange: handleSearchInput,
         onKeyDown: (e) => {
-          console.log("event", e);
           if (e.key === "Escape") {
             runAction({ type: "set-input-focus", inputFocus: false });
             e.preventDefault();

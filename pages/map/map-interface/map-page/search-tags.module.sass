@@ -1,0 +1,20 @@
+// Standardized tags in the map's search results.
+
+.search-result-label
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  justify-content: space-between
+  gap: 1em
+  width: 100%
+
+  .place-name
+    flex: 1
+    min-width: 0
+
+  // The ID sits on the right of every row, as in the lexicon omnibar.
+  .result-id
+    flex-shrink: 0
+    color: var(--secondary-color)
+    font-family: var(--monospace-font)
+    font-size: 0.9em
