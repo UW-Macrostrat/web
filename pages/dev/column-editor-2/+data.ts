@@ -3,7 +3,7 @@
 import { fetchAPIData } from "~/_utils";
 import { render } from "vike/abort";
 import type { UnitLong } from "@macrostrat/api-types";
-import type { AgeModelBoundary } from "./surfaces";
+import type { AgeModelBoundary } from "@macrostrat/api-types";
 
 /** The default column: Illinois (432), the house test column. */
 const DEFAULT_COLUMN_ID = 432;

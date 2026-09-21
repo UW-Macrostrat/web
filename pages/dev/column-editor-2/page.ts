@@ -27,6 +27,7 @@ import { onDemand } from "~/_utils";
 import { AlphaTag } from "~/components";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
 import { Footer } from "~/layouts/footer";
+import { ColumnMapSlot } from "~/components/column-map/target";
 import type { ColumnEditorData } from "./+data";
 import { EditorColumn } from "./column-view";
 import { EditorInspector } from "./inspector";
@@ -45,9 +46,17 @@ import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
-const ColumnMap = onDemand(() =>
-  import("../../columns/@column/column-inspector/map").then(
-    (mod) => mod.ColumnMap
+/** The editor is about one column, so nothing is multi-selected. Stable, so
+ * the slot doesn't re-target on every render. */
+const EMPTY_SELECTION: number[] = [];
+
+/** The `/columns` subtree keeps one warm Mapbox instance in its layout and
+ * pages move it into their slot (see `~/components/column-map/target`). The
+ * editor sits outside that subtree, so it mounts the instance half itself;
+ * the slot below is the same. Client-only — it reaches mapbox-gl. */
+const ColumnPersistentMap = onDemand(() =>
+  import("~/components/column-map/persistent-map.client").then(
+    (mod) => mod.ColumnPersistentMap
   )
 );
 
@@ -222,13 +231,20 @@ function EditorMapPane({ col_id }: { col_id: number }) {
   );
 
   return h("div.editor-map-pane", [
-    h(ColumnMap, {
-      className: "column-map",
-      inProcess: true,
-      projectID: 1,
-      selectedColumn: col_id,
-      onSelectColumn,
-    }),
-    h("div.map-hint", "Click a column to edit it"),
+    h(
+      ColumnMapSlot,
+      {
+        className: "column-map",
+        targetKey: `column-editor:${col_id}`,
+        projectID: 1,
+        inProcess: true,
+        visibleColumnIDs: null,
+        selectedColumnIDs: EMPTY_SELECTION,
+        selectedColumn: col_id,
+        onSelectColumn,
+      },
+      h("div.map-hint", "Click a column to edit it")
+    ),
+    h(ColumnPersistentMap),
   ]);
 }

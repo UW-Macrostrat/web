@@ -3,12 +3,12 @@
 import hyper from "@macrostrat/hyper";
 import classNames from "classnames";
 import { useAtomValue, useSetAtom } from "jotai";
-import { Button, Tag } from "@blueprintjs/core";
 import {
   MacrostratColumnStateProvider,
+  SurfaceDetailsPanel,
   UnitDetailsPanel,
 } from "@macrostrat/column-views";
-import { DataField, Identifier, Value } from "@macrostrat/data-components";
+import { DataField, Identifier } from "@macrostrat/data-components";
 import {
   editingModeAtom,
   selectedSurfaceAtom,
@@ -19,13 +19,7 @@ import {
   surfacesAtom,
   unitsAtom,
 } from "./state";
-import {
-  type EditorSurface,
-  formatAge,
-  formatProportion,
-  surfaceStatusLabels,
-} from "./surfaces";
-import { surfaceClasses } from "./surfaces-overlay";
+import type { EditorSurface } from "./surfaces";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -61,117 +55,32 @@ function UnitInspector({ unit }) {
   );
 }
 
+/** The library's surface panel, wired to the editor's selection. It resolves
+ * the units a surface separates through the column scope, so it sees the
+ * edited units rather than the ones as loaded. */
 function SurfaceInspector({ surface }: { surface: EditorSurface }) {
   const units = useAtomValue(unitsAtom);
   const setSelectedSurfaceID = useSetAtom(selectedSurfaceIDAtom);
   const setSelectedUnitID = useSetAtom(selectedUnitIDAtom);
   const setMode = useSetAtom(editingModeAtom);
 
-  const unitName = (id: number) =>
-    units.find((u) => u.unit_id === id)?.unit_name ?? `#${id}`;
-
   const selectUnit = (id: number) => {
     setSelectedUnitID(id);
     setMode("units");
   };
 
-  let calibration = h(DataField, { label: "Calibration", value: "None" });
-  if (surface.calibration != null) {
-    calibration = h(DataField, { label: "Calibration" }, [
-      h("div", [
-        h("strong", surface.calibration.name),
-        " ",
-        h(
-          "span.subtle",
-          `(${surface.calibration.b_age}–${surface.calibration.t_age} Ma)`
-        ),
-      ]),
-      h("div", [
-        h(Value, { value: formatProportion(surface.proportion) }),
-        " above the base of the interval",
-      ]),
-    ]);
-  }
-
-  let boundaryField = null;
-  if (surface.boundary_id != null) {
-    boundaryField = h(
-      DataField,
-      { label: "Age-model boundary" },
-      h(Identifier, { id: surface.boundary_id })
-    );
-  }
-
   return h(
-    "div.inspector-panel.surface-inspector",
-    { className: surfaceClasses(surface) },
-    [
-      h("div.inspector-header", [
-        h("h3", "Surface"),
-        h(
-          Tag,
-          { minimal: true, className: "surface-status-tag" },
-          surfaceStatusLabels[surface.status] ?? surface.status
-        ),
-        h.if(surface.type !== "")(Tag, { minimal: true }, surface.type),
-        h("div.spacer"),
-        h(Button, {
-          icon: "cross",
-          minimal: true,
-          small: true,
-          onClick: () => setSelectedSurfaceID(null),
-        }),
-      ]),
-      h(DataField, { label: "Age", value: formatAge(surface.age) }),
-      calibration,
-      h(UnitLinks, {
-        label: "Units above",
-        ids: surface.unitsAbove,
-        unitName,
-        onSelect: selectUnit,
-      }),
-      h(UnitLinks, {
-        label: "Units below",
-        ids: surface.unitsBelow,
-        unitName,
-        onSelect: selectUnit,
-      }),
-      boundaryField,
-      h(
-        "p.inspector-hint",
-        "Edit the age in the surfaces table to move every unit hung on this surface."
-      ),
-    ]
-  );
-}
-
-function UnitLinks({ label, ids, unitName, onSelect }) {
-  if (ids.length === 0) {
-    return h(DataField, { label, value: "None" });
-  }
-  return h(
-    DataField,
-    { label },
+    MacrostratColumnStateProvider,
+    { units },
     h(
-      "ul.unit-links",
-      ids.map((id) =>
-        h(
-          "li",
-          { key: id },
-          h(
-            "a.unit-link",
-            {
-              href: "#",
-              onClick(evt) {
-                evt.preventDefault();
-                onSelect(id);
-              },
-            },
-            [unitName(id), " ", h("span.subtle", `#${id}`)]
-          )
-        )
-      )
-    )
+      SurfaceDetailsPanel,
+      {
+        surface,
+        className: "inspector-panel surface-inspector",
+        onClose: () => setSelectedSurfaceID(null),
+        onSelectUnit: selectUnit,
+      },
+    ),
   );
 }
 

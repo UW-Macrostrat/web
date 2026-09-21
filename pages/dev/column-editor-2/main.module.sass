@@ -49,10 +49,10 @@
   max-height: calc(100vh - var(--hybrid-sticky-offset, 3.5rem))
   overflow-y: auto
   // The pane is a scroll container, which also clips horizontally: in
-  // surfaces mode the surface labels hang off the right of the units, so the
-  // pane reserves their room.
+  // surfaces mode the library's surface labels hang off the right of the
+  // units, so the pane reserves their room (`labelWidth`, default 200).
   &.mode-surfaces
-    padding-right: 170px
+    padding-right: 200px
 
 .editor-sheet-pane
   flex: 1 1 auto
@@ -98,115 +98,6 @@
   color: var(--pz-text-subtle-color, var(--secondary-color))
   pointer-events: none
 
-/* -------------------------------------------------------------- surfaces */
-
-// Status and type tokens, shared with the inspector. These mirror the
-// `@macrostrat/column-views` surfaces view so the swap is a no-op visually.
-.surfaces-overlay, .surface-inspector
-  --surface-color-absolute: var(--pz-intent-danger, #c23030)
-  --surface-color-relative: var(--pz-intent-primary, #2d72d2)
-  --surface-color-spike: var(--pz-purple-500, #7961db)
-  --surface-color-imposed: var(--pz-orange-500, #c87619)
-  --surface-color-modeled: var(--pz-neutral-500, #8f99a8)
-  --surface-color-unspecified: var(--pz-neutral-400, #abb3bf)
-  --surface-color-derived: var(--pz-intent-success, #238551)
-  --surface-selected-color: var(--pz-accent-color, #f0b429)
-
-.status-absolute
-  --surface-color: var(--surface-color-absolute)
-  --surface-line-style: solid
-  --surface-line-width: 2px
-.status-relative, .status-spike
-  --surface-line-style: solid
-  --surface-line-width: 1.5px
-.status-relative
-  --surface-color: var(--surface-color-relative)
-.status-spike
-  --surface-color: var(--surface-color-spike)
-.status-imposed
-  --surface-color: var(--surface-color-imposed)
-  --surface-line-style: dashed
-  --surface-line-width: 1.5px
-.status-modeled
-  --surface-color: var(--surface-color-modeled)
-  --surface-line-style: dotted
-  --surface-line-width: 1.5px
-.status-unspecified
-  --surface-color: var(--surface-color-unspecified)
-  --surface-line-style: dotted
-  --surface-line-width: 1.5px
-.status-derived
-  --surface-color: var(--surface-color-derived)
-  --surface-line-style: dotted
-  --surface-line-width: 1px
-.type-fault
-  --surface-line-style: dashed
-  --surface-line-width: 2px
-
-.surfaces-overlay
-  position: absolute
-  top: 0
-  left: 0
-  width: 100%
-  pointer-events: none
-  z-index: 5
-  &.measuring
-    visibility: hidden
-
-.surface-marker
-  position: absolute
-  left: 0
-  right: 0
-  height: 0
-  padding: 4px 0
-  transform: translateY(-4px)
-  pointer-events: auto
-  cursor: pointer
-  color: var(--surface-color)
-
-  .surface-marker-line
-    border-top: var(--surface-line-width, 1px) var(--surface-line-style, solid) var(--surface-color)
-    transform: translateY(calc(var(--surface-line-width, 1px) / -2))
-
-  &.type-unconformity, &.type-disconformity, &.type-non-conformity, &.type-angular-unconformity
-    .surface-marker-line
-      border-bottom: var(--surface-line-width, 1px) var(--surface-line-style, solid) var(--surface-color)
-      height: 3px
-
-  &:hover .surface-marker-line
-    border-top-width: calc(var(--surface-line-width, 1px) + 1px)
-    filter: brightness(0.8)
-
-  &.selected .surface-marker-line
-    border-top-color: var(--surface-selected-color)
-    border-top-style: solid
-    border-top-width: calc(var(--surface-line-width, 1px) + 1px)
-    box-shadow: 0 0 0 1px var(--column-background-color, #fff), 0 0 0 2px var(--surface-selected-color)
-
-.surface-marker-label
-  position: absolute
-  left: calc(100% + 4px)
-  top: 0
-  transform: translateY(-50%)
-  display: flex
-  flex-direction: column
-  align-items: flex-start
-  line-height: 1.1
-  padding: 1px 4px
-  border-radius: 3px
-  background-color: var(--column-background-color, #fff)
-  box-shadow: 0 0 0 1px var(--surface-color)
-  color: var(--text-color)
-  white-space: nowrap
-  .primary
-    font-size: 0.7rem
-    font-weight: 500
-  .secondary
-    font-size: 0.65rem
-    color: var(--pz-text-subtle-color, var(--secondary-color))
-  .surface-marker.selected &
-    box-shadow: 0 0 0 2px var(--surface-selected-color)
-
 /* ------------------------------------------------------------- inspector */
 
 .inspector-panel
@@ -214,23 +105,9 @@
     margin: 0
     color: var(--secondary-color)
 
-.inspector-header
-  display: flex
-  flex-direction: row
-  align-items: center
-  gap: 0.5em
-  margin-bottom: 0.5em
-  .spacer
-    flex: 1
-
-.surface-status-tag:before
-  content: ''
-  display: inline-block
-  width: 0.6em
-  height: 0.6em
-  border-radius: 50%
-  margin-right: 0.4em
-  background-color: var(--surface-color, currentColor)
+.surface-inspector
+  h3
+    color: inherit
 
 .inspector-hint
   color: var(--pz-text-subtle-color, var(--secondary-color))
@@ -238,21 +115,3 @@
 
 .subtle
   color: var(--pz-text-subtle-color, var(--secondary-color))
-
-.unit-links
-  list-style: none
-  margin: 0
-  padding: 0
-  li
-    display: inline
-    &:after
-      content: ', '
-    &:last-child:after
-      content: ''
-
-.unit-link
-  color: inherit
-  text-decoration: none
-  border-bottom: 1px dotted var(--pz-text-subtle-color, var(--secondary-color))
-  &:hover
-    color: var(--pz-link-color, var(--link-color))

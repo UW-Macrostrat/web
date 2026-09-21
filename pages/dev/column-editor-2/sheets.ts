@@ -24,10 +24,10 @@ import {
   unitsAtom,
 } from "./state";
 import {
-  type EditorSurface,
   formatProportion,
   surfaceStatusLabels,
-} from "./surfaces";
+} from "@macrostrat/column-views";
+import type { EditorSurface } from "./surfaces";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -218,7 +218,7 @@ const surfaceColumnSpec: ColumnSpec[] = [
     name: "Position in interval",
     dataType: "number",
     width: 120,
-    valueRenderer: formatProportion,
+    valueRenderer: (d) => formatProportion(d) ?? "",
   },
   {
     key: "unitsAbove",
@@ -234,7 +234,13 @@ const surfaceColumnSpec: ColumnSpec[] = [
     width: 200,
     valueRenderer: renderUnitNames,
   },
-  { key: "boundary_id", name: "Boundary", dataType: "integer", width: 90 },
+  {
+    key: "boundary",
+    name: "Boundary",
+    dataType: "object",
+    width: 90,
+    valueRenderer: (d) => d?.boundary_id ?? "",
+  },
 ];
 
 /** Unit ids resolved to names, through a row-render context we don't have: the

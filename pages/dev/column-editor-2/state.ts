@@ -7,11 +7,10 @@
  * until a v3 write route exists — so the page offers reset and export instead.
  */
 import { atom } from "jotai";
-import type { UnitLong } from "@macrostrat/api-types";
+import type { AgeModelBoundary, UnitLong } from "@macrostrat/api-types";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   AGE_TOLERANCE,
-  type AgeModelBoundary,
   buildEditorSurfaces,
   type EditorSurface,
 } from "./surfaces";
