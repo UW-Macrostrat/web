@@ -1,6 +1,7 @@
 import { SETTINGS } from "@macrostrat-web/settings";
 import { FeatureCollection, Point } from "geojson";
 import {
+  filterAppliesToMap,
   FilterData,
   IntervalFilterData,
 } from "#/map/map-interface/app-state/handlers/filters";
@@ -13,16 +14,22 @@ export function getExpressionForFilters(
   // Keep track of name: index values of time filters for easier removing
   let expr: mapboxgl.Expression = ["all", ["!=", "color", ""]];
 
-  const timeFilters = filters
+  // Environment filters act on the columns layer only; the map legend has
+  // nothing to match them against, so they must not reach the map expression.
+  const mapFilters = filters.filter(filterAppliesToMap);
+
+  const timeFilters = mapFilters
     .filter((f) => f.type === "intervals")
-    .map(buildFilterExpression);
+    .map(buildFilterExpression)
+    .filter((e) => e != null);
   if (timeFilters.length > 0) {
     expr.push(["any", ...timeFilters]);
   }
 
-  const otherFilters = filters
+  const otherFilters = mapFilters
     .filter((f) => f.type !== "intervals")
-    .map(buildFilterExpression);
+    .map(buildFilterExpression)
+    .filter((e) => e != null);
   if (otherFilters.length > 0) {
     expr.push(["any", ...otherFilters]);
   }
@@ -43,7 +50,7 @@ function buildFilterClasses(
   return filter;
 }
 
-function buildFilterExpression(filter: FilterData): mapboxgl.Expression {
+function buildFilterExpression(filter: FilterData): mapboxgl.Expression | null {
   // Check which kind of filter it is
   switch (filter.type) {
     case "intervals":
@@ -66,6 +73,8 @@ function buildFilterExpression(filter: FilterData): mapboxgl.Expression {
     case "strat_name_orphans":
     case "strat_name_concepts":
       return ["in", "legend_id", ...filter.legend_ids];
+    default:
+      return null;
   }
 }
 

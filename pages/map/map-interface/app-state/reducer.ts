@@ -1,6 +1,6 @@
 import { AppAction, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
-import { FilterData } from "./handlers/filters";
+import { FilterData, filterAppliesToMap } from "./handlers/filters";
 import { updateStateFromLocation } from "./location-state";
 import { browserHistory } from "./browser-history";
 import { hashHasMapPosition } from "./hash-string";
@@ -154,19 +154,23 @@ export function coreReducer(
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
-    case "add-filter":
+    case "add-filter": {
       // action.filter.type and action.filter.id go to the URI
       // handle search resetting
+      if (action.filter == null) return state;
+      const newState = coreReducer(state, { type: "stop-searching" });
       return {
-        ...coreReducer(state, { type: "stop-searching" }),
+        ...newState,
         filters: buildFilters(state.filters, [action.filter]),
+        mapLayers: layersForFilter(newState.mapLayers, action.filter),
       };
+    }
     case "remove-filter":
+      // Match on identity, not name alone: an environment class and type
+      // (or a lithology and its "all_" variant) can share a name.
       return {
         ...state,
-        filters: state.filters.filter((d) => {
-          if (d.name != action.filter.name) return d;
-        }),
+        filters: state.filters.filter((d) => !isTheSame(d, action.filter)),
       };
     case "clear-filters":
       return { ...state, filters: [] };
@@ -284,6 +288,20 @@ export function coreReducer(
     default:
       return state;
   }
+}
+
+/** An environment filter only narrows the columns layer, so adding one with
+ * that layer hidden would have no visible effect: turn the layer on. */
+function layersForFilter(
+  layers: Set<MapLayer>,
+  filter: FilterData
+): Set<MapLayer> {
+  if (filterAppliesToMap(filter) || layers.has(MapLayer.COLUMNS)) {
+    return layers;
+  }
+  const next = new Set(layers);
+  next.add(MapLayer.COLUMNS);
+  return next;
 }
 
 function isTheSame(f: FilterData, newFilter: FilterData) {

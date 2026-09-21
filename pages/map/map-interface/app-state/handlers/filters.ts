@@ -8,7 +8,10 @@ export type AddFilter = { type: "add-filter"; filter: FilterData };
 // handler to reduce noise on case & switch
 // want this function to return an action object {type: "type", place/filter: fitler}
 // this is still a mess
-export async function runFilter(filter: Filter): Promise<FilterData> {
+/** Resolve a search result or URL-hash filter into the data the map and column
+ * layers need. Returns `null` for a filter type we can't handle, so callers can
+ * drop it instead of pushing `undefined` into the filter list. */
+export async function runFilter(filter: Filter): Promise<FilterData | null> {
   switch (filter.type) {
     case "strat_name_concepts":
       return await stratNameConcepts(filter);
@@ -33,15 +36,34 @@ export async function runFilter(filter: Filter): Promise<FilterData> {
     case "all_lithology_classes":
     case "all_lithology_types":
       return await fetchAllLithTypes(filter);
-    // No working handler for environments yet...
-    // case "environments":
-    // case "environment_types":
-    // case "environment_classes":
-    //   return {
-    //     type: "add-filter",
-    //     filter: filter,
-    //   };
+    case "environments":
+      return await fetchEnvironmentFilter(filter);
+    case "environment_types":
+    case "environment_classes":
+      // Like lithology classes and types, these are keyed by name: the
+      // autocomplete table gives them `id = 0`.
+      return {
+        category: "environment",
+        id: filter.name ?? filter.id,
+        name: filter.name ?? filter.id.toString(),
+        type: filter.type,
+      };
+    default:
+      return null;
   }
+}
+
+/** Filter types whose identifier is a *name* (a lithology or environment class
+ * or type), not a numeric ID. */
+export function isNameKeyedFilterType(type: FilterType): boolean {
+  return [
+    FilterType.LithologyClasses,
+    FilterType.LithologyTypes,
+    FilterType.AllLithologyClasses,
+    FilterType.AllLithologyTypes,
+    FilterType.EnvironmentTypes,
+    FilterType.EnvironmentClasses,
+  ].includes(type);
 }
 
 export enum FilterType {
@@ -157,11 +179,12 @@ export const fetchIntervalFilter = async (
   let url = `${base}/defs/intervals?int_id=${id}`;
   const res = await axios.get(url, { responseType: "json" });
   let f = res.data.success.data[0];
-  f.name = f.name;
-  f.type = "intervals";
-  f.category = "interval";
-  f.id = id;
-  return f;
+  return {
+    ...f,
+    type: FilterType.Intervals,
+    category: "interval",
+    id,
+  };
 };
 
 /* Lithology classes and lithology types are filtered by name */
@@ -183,7 +206,9 @@ type LithologyFilter = {
   id: number;
 };
 
-// Environment filters are unused for now
+/* Environments are attributes of column units, not of map legend entries, so an
+ * environment filter narrows the *columns* layer only; the map polygons are left
+ * alone (see `getExpressionForFilters`). Types and classes are keyed by name. */
 type EnvironmentFilter = {
   type: FilterType.Environments;
   id: number;
@@ -191,13 +216,47 @@ type EnvironmentFilter = {
 
 type EnvironmentTypeFilter = {
   type: FilterType.EnvironmentTypes;
-  name: string;
+  name?: string;
+  id: string;
 };
 
 type EnvironmentClassFilter = {
   type: FilterType.EnvironmentClasses;
-  name: string;
+  name?: string;
+  id: string;
 };
+
+export type EnvironmentFilterData = {
+  category: "environment";
+  type:
+    | FilterType.Environments
+    | FilterType.EnvironmentTypes
+    | FilterType.EnvironmentClasses;
+  name: string;
+  id: string | number;
+  /** Set for a specific environment; classes and types have no color. */
+  color?: string;
+  environ_id?: number;
+};
+
+//case "environments":
+async function fetchEnvironmentFilter(
+  filter: EnvironmentFilter
+): Promise<EnvironmentFilterData> {
+  const { id } = filter;
+  const url = `${base}/defs/environments?environ_id=${id}`;
+  const res = await axios.get(url, { responseType: "json" });
+  const f = res.data.success.data[0];
+
+  return {
+    category: "environment",
+    id,
+    environ_id: id,
+    type: FilterType.Environments,
+    name: f.name,
+    color: f.color,
+  };
+}
 
 type LithologyFilterData = {
   category: "lithology";
@@ -211,6 +270,9 @@ type LithologyFilterData = {
   name: string;
   id: string | number;
   legend_ids: number[];
+  /** Set for a specific lithology; classes and types have no single color. */
+  color?: string;
+  lith_id?: number;
 };
 
 //case "lithologies":
@@ -229,8 +291,10 @@ async function fetchLithFilter(
   return {
     category: "lithology",
     id,
+    lith_id: id,
     type: FilterType.Lithologies,
     name: f.name,
+    color: f.color,
     legend_ids,
   };
 }
@@ -256,8 +320,10 @@ async function fetchAllLithsFilter(
   return {
     category: "lithology",
     id,
+    lith_id: id,
     type: FilterType.AllLithologies,
     name: f.name,
+    color: f.color,
     legend_ids,
   };
 }
@@ -311,4 +377,13 @@ export type Filter =
 export type FilterData =
   | LithologyFilterData
   | IntervalFilterData
-  | StratNameFilterData;
+  | StratNameFilterData
+  | EnvironmentFilterData;
+
+export type FilterCategory = FilterData["category"];
+
+/** Whether a filter narrows the map polygons. Environment filters don't: the
+ * map legend carries no environment information, so they act on columns only. */
+export function filterAppliesToMap(filter: FilterData): boolean {
+  return filter.category !== "environment";
+}

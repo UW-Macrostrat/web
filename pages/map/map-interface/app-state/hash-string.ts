@@ -4,7 +4,7 @@ import {
 } from "@macrostrat/map-interface";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 import { buildQueryString, getHashString } from "@macrostrat/ui-components";
-import { Filter, FilterType } from "./handlers/filters";
+import { Filter, FilterType, isNameKeyedFilterType } from "./handlers/filters";
 import { CoreState, InfoMarkerPosition, MapLayer } from "./types";
 
 interface HashParams {
@@ -202,22 +202,16 @@ export function updateMapPositionForHash(
   }
 }
 
-function isLithologyFilterType(type: FilterType): boolean {
-  return [
-    FilterType.AllLithologyClasses,
-    FilterType.AllLithologyTypes,
-    FilterType.LithologyClasses,
-    FilterType.LithologyTypes,
-  ].includes(type);
-}
-
-function createTypedFilter(type: FilterType, value: string): Filter {
-  const isLithology = isLithologyFilterType(type);
-
-  return {
-    type,
-    id: isLithology ? value : Number(value),
-  } as Filter;
+/** Lithology and environment classes/types are keyed by name in the URL
+ * (`lithology_classes=sedimentary`); everything else by numeric ID. A
+ * non-numeric value for an ID-keyed type is invalid and dropped. */
+function createTypedFilter(type: FilterType, value: string): Filter | null {
+  if (isNameKeyedFilterType(type)) {
+    return { type, id: value, name: value } as Filter;
+  }
+  const id = Number(value);
+  if (!Number.isFinite(id)) return null;
+  return { type, id } as Filter;
 }
 
 function getActiveFiltersFromHash(hashString: string): Filter[] {
@@ -225,10 +219,10 @@ function getActiveFiltersFromHash(hashString: string): Filter[] {
   let filters: Filter[] = [];
   for (const type of Object.values(FilterType)) {
     const val = hashData[type];
-    if (val != null) {
-      for (const v of Array.isArray(val) ? val : [val]) {
-        filters.push(createTypedFilter(type, v));
-      }
+    if (val == null) continue;
+    for (const v of Array.isArray(val) ? val : [val]) {
+      const filter = createTypedFilter(type, String(v));
+      if (filter != null) filters.push(filter);
     }
   }
 

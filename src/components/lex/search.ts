@@ -228,22 +228,61 @@ export function categorizeLexResults(
     .map(({ item }) => item);
 }
 
+export interface LexMatchDecoration {
+  /** The joined definition record, when the type has one. */
+  def: any | null;
+  /** Tag color, from the joined record. */
+  color?: string;
+  /** Small qualifier shown beside the name (lithology/environment type, or an
+   * interval's age range). */
+  details?: string;
+  /** The hierarchy level the match sits under: a lithology or environment
+   * `class`, or an interval's `int_type`. */
+  level?: string;
+}
+
+/**
+ * Join one autocomplete match to its definition record (for the types that have
+ * one) and derive the presentation every search surface shares — the lexicon
+ * omnibar and the map's search — so a lithology or interval looks the same
+ * wherever it turns up.
+ */
+export function describeLexMatch(
+  type: string,
+  id: number,
+  name: string,
+  defs: LexDefs
+): LexMatchDecoration {
+  const join = LEX_SEARCH_GROUPS[type]?.join;
+  const def = join != null ? defs[join]?.get(id) : null;
+  if (def == null) return { def: null };
+
+  if (join === "intervals") {
+    return {
+      def,
+      color: def.color,
+      details: formatAgeRange(def),
+      level: def.int_type,
+    };
+  }
+  // Lithologies and environments share a `class` → `type` → name hierarchy.
+  // The type is only worth showing when it isn't just the name again.
+  let details: string | undefined = undefined;
+  if (def.type && def.type !== name) details = def.type;
+  return { def, color: def.color, details, level: def.class };
+}
+
 function decorate(row: LexSearchResult, defs: LexDefs): LexSearchItem {
   const group = LEX_SEARCH_GROUPS[row.type];
-  const def = group.join != null ? defs[group.join]?.get(row.id) : null;
+  const { def, color, details, level } = describeLexMatch(
+    row.type,
+    row.id,
+    row.name,
+    defs
+  );
 
-  let details: string | undefined = undefined;
   let section = group.pluralLabel;
+  if (level) section = `${group.pluralLabel} · ${level}`;
 
-  if (def != null && group.join === "intervals") {
-    details = formatAgeRange(def);
-    if (def.int_type) section = `${group.pluralLabel} · ${def.int_type}`;
-  } else if (def != null) {
-    // Lithologies and environments share a `class` → `type` → name hierarchy.
-    // The type is only worth showing when it isn't just the name again.
-    if (def.type && def.type !== row.name) details = def.type;
-    if (def.class) section = `${group.pluralLabel} · ${def.class}`;
-  }
-
-  return { ...row, def: def ?? null, color: def?.color, details, section };
+  return { ...row, def, color, details, section };
 }
