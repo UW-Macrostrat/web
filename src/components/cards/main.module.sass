@@ -1,23 +1,22 @@
-// The shared link card. Styled entirely from Paleozoic (`--pz-`) tokens rather
-// than Blueprint's `.bp6-card`, so surface, rule, shadow and link colors all
-// follow the design system — including in dark mode, where the tokens are
-// redefined under `.bp6-dark`.
+// The shared link card. Every color here is a Paleozoic role token — the
+// system is imported globally in `src/styles/core.sass`, so there is no case
+// where one is missing and a literal fallback would only hide a mistake.
 
 .link-card
   display: block
-  padding: var(--pz-space-4, 1em)
-  margin: var(--pz-space-4, 1em) 0
-  border: 1px solid var(--pz-border-muted-color, #e5e8eb)
-  border-radius: var(--pz-radius-lg, 8px)
-  background-color: var(--pz-panel-background-color, #fff)
-  box-shadow: var(--pz-shadow-md, 0 1px 3px rgba(17, 20, 24, 0.15))
-  color: var(--pz-text-color, inherit)
+  padding: var(--pz-space-4)
+  margin: var(--pz-space-4) 0
+  border: 1px solid var(--pz-border-muted-color)
+  border-radius: var(--pz-radius-lg)
+  background-color: var(--pz-panel-background-color)
+  box-shadow: var(--pz-shadow-md)
+  color: var(--pz-text-color)
   text-decoration: none
   // Cheap to animate and cheap to undo: only the lift and the shadow move.
   transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease
 
   h3, h4
-    color: var(--pz-text-emphasized-color, inherit)
+    color: var(--pz-heading-color)
     transition: color 0.18s ease
 
   :first-child
@@ -28,27 +27,28 @@
 
   &:hover
     text-decoration: none
-    color: var(--pz-text-color, inherit)
-    box-shadow: var(--pz-shadow-lg, 0 2px 6px rgba(17, 20, 24, 0.2))
-    border-color: var(--pz-accent-color, #8f278a)
+    color: var(--pz-text-color)
+    box-shadow: var(--pz-shadow-lg)
+    border-color: var(--pz-accent-color)
     transform: translateY(-2px)
 
+    // The card is a link, so its heading darkens the way a link does.
     h3, h4
-      color: var(--pz-link-hover-color, var(--pz-accent-text-color, inherit))
+      color: var(--pz-heading-hover-color)
 
   // The press should read as the lift coming back down.
   &:active
     transform: translateY(0)
-    box-shadow: var(--pz-shadow-md, 0 1px 3px rgba(17, 20, 24, 0.15))
+    box-shadow: var(--pz-shadow-md)
 
   &:focus-visible
-    outline: 2px solid var(--pz-focus-ring-color, #4c90f0)
+    outline: 2px solid var(--pz-focus-ring-color)
     outline-offset: 2px
 
-
-// A card whose content carries links of its own (`nestedLinks`). The overlay
-// covers the card and sits *above* its text but *below* any link inside it, so
-// a click anywhere that isn't one of those follows the card itself.
+// A card whose content carries links of its own (`nestedLinks`). Anchors can't
+// nest, so the card is a block with a full-bleed overlay link: it covers the
+// card and sits *above* its text but *below* any link inside it, so a click
+// anywhere that isn't one of those follows the card itself.
 .link-card.has-overlay
   position: relative
 
@@ -62,3 +62,13 @@
   a:not(.card-overlay-link)
     position: relative
     z-index: 2
+
+// What the card links to, above its title: "Concept", "Name". Quiet — it is a
+// hint about the destination, not a heading.
+.card-kind
+  font-size: 0.72em
+  font-weight: 600
+  letter-spacing: 0.06em
+  text-transform: uppercase
+  color: var(--pz-secondary-color)
+  margin-bottom: 0.1em

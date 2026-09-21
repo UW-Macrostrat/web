@@ -4,91 +4,74 @@
 .page-main
   display: flex
   flex-direction: column
-  gap: var(--pz-section-gap, 2.5em)
+  gap: var(--pz-section-gap)
 
+// The v2 notice. Carries the house purple rather than a warning tint: this is
+// a statement about where the project is, not a problem.
 .beta-notice
-  text-align: center
-  font-size: 0.9em
-  padding: 0.5em 1em
-  border-radius: var(--pz-radius-md, 6px)
-  background: var(--pz-intent-warning-surface, #fff3e0)
-  color: var(--pz-text-color, inherit)
+  font-size: 0.85em
+  padding: 0.4em 0.9em
+  border-radius: var(--pz-radius-md)
+  border-left: 3px solid var(--pz-accent-color)
+  background: color-mix(in srgb, var(--pz-accent-color) 10%, transparent)
+  color: var(--pz-text-color)
+  strong
+    color: var(--pz-accent-text-color)
   a
     margin-left: 0.25em
+    font-weight: 500
 
-// The header sticks to the top of the viewport and collapses to a bar once it
-// gets there: the title shrinks and the lead folds away, leaving the wordmark
-// and the lexicon search. `.is-stuck` comes from the shared `StickyHeader`,
-// which owns the sticky positioning and the backdrop.
+// The header holds the wordmark and the search and nothing else — everything
+// else that used to live here pushed the hero below the fold. Once it sticks,
+// the title shrinks further; `.is-stuck` comes from the shared `StickyHeader`.
 .site-header
   :global(.is-stuck)
-    .site-header-inner
-      align-items: center
-      gap: var(--pz-space-3, 1em)
-
     .main-title
-      --macrostrat-logo-size: 34px
-      --macrostrat-wordmark-size: 1.6rem
+      --macrostrat-logo-size: 30px
+      --macrostrat-wordmark-size: 1.4rem
 
-    .subtitle, .site-intro-detail
+    .subtitle
       display: none
 
 .site-header-inner
-  display: grid
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr)
-  gap: var(--pz-space-5, 2em)
-  align-items: center
-  transition: gap 0.2s ease
-  @media (max-width: 800px)
-    grid-template-columns: 1fr
-
-.site-intro
   display: flex
-  flex-direction: column
-  gap: 0.75em
+  flex-wrap: wrap
+  align-items: center
+  justify-content: space-between
+  gap: var(--pz-space-3) var(--pz-space-5)
 
 .main-title
-  --macrostrat-logo-size: 80px
-  --macrostrat-wordmark-size: 3rem
+  --macrostrat-logo-size: 46px
+  --macrostrat-wordmark-size: 2rem
   justify-content: flex-start
-  gap: 1rem !important
+  gap: 0.75rem !important
+  transition: none
 
   .subtitle
-    font-size: 1.1rem
-    margin-top: 0.25rem
-    color: var(--pz-text-subtle-color, var(--secondary-color))
-    margin-bottom: 0
+    font-size: 0.95rem
+    margin: 0.1rem 0 0
+    color: var(--pz-text-subtle-color)
     font-weight: 500
 
 .site-search
   display: flex
-  justify-content: center
+  justify-content: flex-end
+  margin-left: auto
   :global(.lex-search-prompt)
     display: flex
-    flex-direction: column
     align-items: center
-    gap: 0.5em
-    text-align: center
-    :global(.search-hint)
-      margin: 0
-      font-size: 0.85em
-      color: var(--pz-text-subtle-color, var(--secondary-color))
+  // The search speaks for itself up here; its explanation belongs on /lex.
+  :global(.search-hint)
+    display: none
 
-.hero-lead
-  display: flex
-  flex-direction: column
-  gap: 0.5em
-
-  .hero-text
-    margin: 0
-    font-family: var(--header-font)
-    font-size: 1.25em
-    line-height: 1.35
-
-  .hero-caption
-    margin: 0
-    font-size: 0.95em
-    color: var(--pz-text-subtle-color, var(--secondary-color))
+// The page's thesis, now beneath the hero rather than above it.
+.site-lead
+  margin: 0
+  text-align: center
+  font-family: var(--header-font)
+  font-size: 1.15em
+  line-height: 1.35
+  color: var(--pz-text-color)
 
 // ---------------------------------------------------------------- hero
 
@@ -99,9 +82,9 @@
 
 .hero-static
   height: var(--hero-height)
-  border-radius: var(--pz-radius-lg, 10px)
-  border: 1px solid var(--pz-border-color, #ddd)
-  background: var(--pz-panel-background-color, #f5f5f5)
+  border-radius: var(--pz-radius-lg)
+  border: 1px solid var(--pz-border-color)
+  background: var(--pz-panel-background-color)
   background-size: cover
   background-position: center
 
@@ -110,7 +93,7 @@
   gap: 1.5em 2.5em
   flex-wrap: wrap
   justify-content: center
-  margin-top: calc(-1 * var(--pz-space-3, 1em))
+  margin-top: calc(-1 * var(--pz-space-3))
 
   .stat
     display: flex
@@ -119,21 +102,22 @@
 
   .top-stat
     font-weight: 600
-    font-size: 1.25em
+    font-size: 1.35em
     font-variant-numeric: tabular-nums
+    color: var(--pz-accent-text-color)
 
   .top-stat-label
     font-size: 0.75em
     text-transform: uppercase
     letter-spacing: 0.05em
-    color: var(--pz-text-subtle-color, var(--secondary-color))
+    color: var(--pz-text-subtle-color)
 
 // ---------------------------------------------------------- entry points
 
 .entry-points
   display: grid
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr))
-  gap: var(--pz-space-3, 1em)
+  gap: var(--pz-space-3)
 
   :global(.entry-card)
     margin: 0
@@ -142,7 +126,7 @@
     p
       margin: 0
       font-size: 0.9em
-      color: var(--pz-text-subtle-color, var(--secondary-color))
+      color: var(--pz-text-subtle-color)
 
   .entry-icon
     vertical-align: text-bottom
@@ -154,6 +138,7 @@
   h2
     font-size: 1.2em
     margin-bottom: 0.5em
+    color: var(--pz-heading-color)
 
   .news-list
     list-style: none
@@ -165,16 +150,16 @@
     grid-template-columns: 6.5em 1fr
     gap: 0 1em
     padding: 0.4em 0
-    border-bottom: 1px solid var(--pz-panel-rule-color, #eee)
+    border-bottom: 1px solid var(--pz-panel-rule-color)
 
   .news-date
-    color: var(--pz-text-subtle-color, var(--secondary-color))
+    color: var(--pz-text-subtle-color)
     font-variant-numeric: tabular-nums
 
   .news-summary
     grid-column: 2
     font-size: 0.9em
-    color: var(--pz-text-subtle-color, var(--secondary-color))
+    color: var(--pz-text-subtle-color)
 
   .news-more
     display: inline-block
@@ -183,12 +168,12 @@
 // ----------------------------------------------------- platform links
 
 .platform-links
-  padding-top: var(--pz-space-4, 1.5em)
-  border-top: 1px solid var(--pz-panel-rule-color, #eee)
+  padding-top: var(--pz-space-4)
+  border-top: 2px solid color-mix(in srgb, var(--pz-accent-color) 35%, transparent)
   h2
     font-size: 1em
     margin: 0 0 0.5em
-    color: var(--pz-text-subtle-color, var(--secondary-color))
+    color: var(--pz-heading-color)
     text-transform: uppercase
     letter-spacing: 0.04em
   ul

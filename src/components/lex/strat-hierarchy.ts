@@ -1,36 +1,42 @@
 /**
  * Stratigraphic hierarchy navigation for `/lex/strat-names/<id>`.
  *
- * **What this replaces.** The old `StratNameHierarchy` rendered the *entire*
- * tree returned by `?rule=all` as a nested `Hierarchy`: for a name inside a
- * large group that is hundreds of rows, several screens tall, and mostly about
- * names unrelated to the one being read. It also gave every node a bare number
- * with nothing to say what was being counted.
+ * **What this replaces.** The original `StratNameHierarchy` rendered the entire
+ * `?rule=all` payload as a nested tree: for a name inside a large group that is
+ * hundreds of rows, several screens tall, and mostly about names unrelated to
+ * the one being read. A first rewrite went too far the other way (an inline tag
+ * strip), and a second reused the `/lex/lithologies` page's `Hierarchy`
+ * component, which renders each level's name as a plain heading — so the parent
+ * you most want to click was the one thing you couldn't.
  *
- * **What it shows instead** is a *bounded* tree, in the same nested form the
- * `/lex/lithologies` page uses (`Hierarchy` from `@macrostrat-web/lithology-
- * hierarchy`) — deliberately between the two existing treatments. The inline
- * tag strip that the lithology *detail* pages use turned out to be too terse
- * for stratigraphy, where the tree is the subject rather than a footnote; the
- * full `?rule=all` tree is unreadable. So: one parent level up, that parent's
- * children (the item's siblings) beneath it, and the item's own children nested
- * under it. Long runs reveal progressively rather than all at once.
+ * **What it does now** is nest the whole ancestry, every level of it a link:
  *
- * The ancestry above that parent stays a `›` path (`StratAncestryPath`), which
- * is also what the concept page renders per usage.
+ *     Wabaunsee Group
+ *       └ Howard Limestone
+ *           ├ …the item's siblings…
+ *           └ Aarde Shale Member          ← the page's subject
+ *                 └ …its children…
+ *
+ * Only the *spine* is expanded by default — each ancestor shows the one child
+ * that continues the path down to the item — so the page opens on the item's
+ * own neighborhood rather than on everything at every level. **Show full
+ * hierarchy** expands every level of the payload instead.
+ *
+ * **Relevance ordering.** Within any run, names carried by at least one
+ * Macrostrat unit sort first and are set in bold; the rest follow in normal
+ * weight. A stratigraphic tree contains a great many names that nothing in the
+ * column store uses, and they are not what someone navigating it is looking
+ * for.
  *
  * **The numbers are units.** `t_units` from `/defs/strat_names` is the number of
  * Macrostrat *units* carrying the name — not the number of columns (the Shaler
- * Group has 15 units across 4 columns). It is rendered as the tag's `details`
- * so it reads as "15 units" rather than a bare "15", and a name carried by no
- * unit at all is set in normal weight instead of bold: it exists in the
- * lexicon, but nothing in the column store uses it.
+ * Group has 15 units across 4 columns). It renders as the tag's `details` so it
+ * reads as "15 units" rather than a bare integer.
  */
 import hyper from "@macrostrat/hyper";
 import styles from "./hierarchy.module.sass";
 import { useMemo, useState } from "react";
 import { Tag, TagSize } from "@macrostrat/data-components";
-import { Hierarchy } from "@macrostrat-web/lithology-hierarchy";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { MacrostratLink } from "~/components/navigation/MacrostratLink";
@@ -53,26 +59,13 @@ const RANK_INDEX: Record<string, number> = Object.fromEntries(
   RANKS.map((r, i) => [r.rank, i])
 );
 
-/** Long runs cap, and reveal progressively rather than all at once — a
- * stratigraphic run is not a dozen peers but sometimes hundreds (the Pennine
- * Middle Coal Measures have 439 beds).
- *
- * The cap is set well above the inline strip's (five): this view is a tree, and
- * the tree *is* the subject on a stratigraphic page, so it should open showing
- * a real neighborhood rather than a hint of one. Two dozen names is roughly a
- * screen of wrapped tags. */
+/** Long runs cap, and reveal progressively — a stratigraphic run is not a dozen
+ * peers but sometimes hundreds (the Pennine Middle Coal Measures have 439
+ * beds). The cap is generous because the tree *is* the subject on these pages;
+ * "show full hierarchy" removes it entirely. */
 const OVERFLOW_THRESHOLD = 30;
 const COLLAPSED_COUNT = 24;
 const REVEAL_STEP = 48;
-
-export interface StratRelations {
-  item: any;
-  /** The nearest recorded ancestor — the one level of tree shown above the item. */
-  parent: any | null;
-  ancestors: any[];
-  siblings: any[];
-  children: any[];
-}
 
 function levelOf(item: any): number {
   return RANK_INDEX[item?.rank] ?? RANKS.length - 1;
@@ -96,50 +89,264 @@ function parentID(item: any): number | null {
   return null;
 }
 
-/**
- * Ancestry, siblings and one level of children for `item`, out of the flat
- * `?rule=all` payload.
- *
- * Siblings are *structural*: the same rank under the same parent, not every
- * name of that rank in the tree. Children are the records whose own nearest
- * recorded ancestor is this one — so a bed recorded under a formation shows up
- * on the formation when the intervening member is absent, rather than being
- * unreachable.
- */
-export function stratHierarchyRelations(
-  data: any[] | null,
-  id: number
-): StratRelations | null {
-  if (data == null || data.length === 0) return null;
-  const byID = new Map<number, any>(data.map((d) => [d.strat_name_id, d]));
-  const item = byID.get(id);
-  if (item == null) return null;
+/** Names a unit actually carries, first and in order of how many — then the
+ * rest alphabetically. */
+function byRelevance(records: any[]): any[] {
+  return [...records].sort((a, b) => {
+    const ua = a?.t_units ?? 0;
+    const ub = b?.t_units ?? 0;
+    if (ua !== ub) return ub - ua;
+    return String(a?.strat_name_long ?? "").localeCompare(
+      String(b?.strat_name_long ?? "")
+    );
+  });
+}
 
-  const ancestors: any[] = [];
-  for (let i = 0; i < levelOf(item); i++) {
-    const ancestorId = ancestorID(item, i);
-    if (ancestorId == null || ancestorId === id) continue;
-    const record = byID.get(ancestorId);
-    if (record != null) ancestors.push(record);
+export interface StratNode {
+  record: any;
+  children: StratNode[];
+}
+
+/**
+ * The flat `?rule=all` payload as a forest, each node's children sorted by
+ * relevance. A record whose recorded parent isn't in the payload is a root.
+ */
+export function buildStratForest(data: any[]): StratNode[] {
+  const nodes = new Map<number, StratNode>(
+    data.map((record) => [record.strat_name_id, { record, children: [] }])
+  );
+  const roots: StratNode[] = [];
+
+  for (const node of nodes.values()) {
+    const parent = parentID(node.record);
+    const parentNode = parent == null ? null : nodes.get(parent);
+    if (parentNode == null || parentNode === node) {
+      roots.push(node);
+      continue;
+    }
+    parentNode.children.push(node);
   }
 
-  const parent = parentID(item);
-  const siblings = data.filter(
-    (d) =>
-      d.strat_name_id !== id &&
-      levelOf(d) === levelOf(item) &&
-      parentID(d) === parent
+  for (const node of nodes.values()) {
+    node.children = byRelevance(node.children.map((c) => c.record)).map(
+      (record) => nodes.get(record.strat_name_id)!
+    );
+  }
+  return byRelevance(roots.map((r) => r.record)).map(
+    (record) => nodes.get(record.strat_name_id)!
   );
+}
 
-  const children = data.filter((d) => parentID(d) === id);
+/** The chain of nodes from a root down to `id`, or null when it isn't in the
+ * forest. */
+function pathToItem(nodes: StratNode[], id: number): StratNode[] | null {
+  for (const node of nodes) {
+    if (node.record.strat_name_id === id) return [node];
+    const below = pathToItem(node.children, id);
+    if (below != null) return [node, ...below];
+  }
+  return null;
+}
 
-  return {
-    item,
-    parent: parent == null ? null : byID.get(parent) ?? null,
-    ancestors,
-    siblings,
-    children,
-  };
+/**
+ * The forest pruned to the item's neighborhood: the spine of ancestors, each
+ * keeping only the child that continues the path, and at the bottom the item
+ * among its siblings with its own children beneath it.
+ *
+ * Everything else is dropped rather than collapsed — a level of the spine with
+ * its full sibling set is the old unreadable tree, one level at a time.
+ */
+function pruneToNeighborhood(path: StratNode[]): StratNode | null {
+  if (path.length === 0) return null;
+
+  const itemNode = path[path.length - 1];
+  let current: StratNode = { record: itemNode.record, children: itemNode.children };
+
+  // Walk back up the spine. The parent keeps every sibling (so the item sits
+  // among its peers); higher ancestors keep only the spine.
+  for (let i = path.length - 2; i >= 0; i--) {
+    const ancestor = path[i];
+    const isParent = i === path.length - 2;
+
+    let children: StratNode[] = [current];
+    if (isParent) {
+      // The item leads its own sibling run. Relevance order governs the rest,
+      // but the subject of the page has to be *visible*: ordered by relevance it
+      // can sort past the run's cap — a 0-unit bed among 442 siblings — and
+      // disappear from its own page.
+      const siblings = ancestor.children
+        .filter((c) => c.record.strat_name_id !== current.record.strat_name_id)
+        // Siblings are terminal: expanding each one's descendants is the whole
+        // tree again.
+        .map((child) => ({ record: child.record, children: [] }));
+      children = [current, ...siblings];
+    }
+    current = { record: ancestor.record, children };
+  }
+
+  return current;
+}
+
+export function StratNameHierarchy({ id }: { id: number | string }) {
+  const activeId = Number(id);
+  // `rule=all` returns every name in the tree this one belongs to. (The host
+  // comes from settings; this used to be hardcoded to macrostrat.org, so a
+  // local or dev page read production.)
+  const data = useAPIResult(
+    `${apiV2Prefix}/defs/strat_names?rule=all&strat_name_id=${activeId}`
+  )?.success?.data;
+
+  const [showFull, setShowFull] = useState(false);
+  // Rows revealed per run, beyond the collapsed default.
+  const [shown, setShown] = useState<Record<string, number>>({});
+
+  const forest = useMemo(() => buildStratForest(data ?? []), [data]);
+  const neighborhood = useMemo(() => {
+    const path = pathToItem(forest, activeId);
+    if (path == null) return null;
+    return pruneToNeighborhood(path);
+  }, [forest, activeId]);
+
+  if (data == null || data.length === 0) return null;
+
+  let roots: StratNode[] = forest;
+  if (!showFull) {
+    if (neighborhood == null) return null;
+    roots = [neighborhood];
+  }
+
+  // Nothing to navigate: a name alone in its own hierarchy.
+  if (roots.length === 1 && roots[0].children.length === 0 && !showFull) {
+    return null;
+  }
+
+  let toggleLabel = "Show full hierarchy";
+  if (showFull) toggleLabel = "Show only nearby names";
+
+  return h("div.strat-hierarchy", [
+    h("div.strat-tree", { key: "tree" }, [
+      roots.map((node) =>
+        h(StratTreeNode, {
+          key: node.record.strat_name_id,
+          node,
+          activeId,
+          depth: 0,
+          showFull,
+          shown,
+          setShown,
+        })
+      ),
+    ]),
+    h(
+      "button.text-control.hierarchy-toggle",
+      { key: "toggle", type: "button", onClick: () => setShowFull(!showFull) },
+      toggleLabel
+    ),
+  ]);
+}
+
+/** One node and its children. The node itself is always a link — the parent is
+ * the thing you most often want to click, and rendering it as a bare heading is
+ * what made the previous version frustrating. */
+function StratTreeNode({
+  node,
+  activeId,
+  depth,
+  showFull,
+  shown,
+  setShown,
+}: {
+  node: StratNode;
+  activeId: number;
+  depth: number;
+  showFull: boolean;
+  shown: Record<string, number>;
+  setShown: (fn: (c: Record<string, number>) => Record<string, number>) => void;
+}) {
+  const { record, children } = node;
+  const isActive = record.strat_name_id === activeId;
+
+  let childBlock = null;
+  if (children.length > 0) {
+    const key = `n${record.strat_name_id}`;
+    let limit = children.length;
+    if (!showFull && children.length > OVERFLOW_THRESHOLD) {
+      limit = Math.min(shown[key] ?? COLLAPSED_COUNT, children.length);
+    }
+    const remaining = children.length - limit;
+
+    let moreControl = null;
+    if (remaining > 0) {
+      moreControl = h(
+        "button.text-control",
+        {
+          key: "more",
+          type: "button",
+          onClick: () =>
+            setShown((current) => ({
+              ...current,
+              [key]: (current[key] ?? COLLAPSED_COUNT) + REVEAL_STEP,
+            })),
+        },
+        `and ${remaining.toLocaleString()} more…`
+      );
+    }
+
+    childBlock = h("div.strat-children", { key: "children" }, [
+      children.slice(0, limit).map((child) =>
+        h(StratTreeNode, {
+          key: child.record.strat_name_id,
+          node: child,
+          activeId,
+          depth: depth + 1,
+          showFull,
+          shown,
+          setShown,
+        })
+      ),
+      moreControl,
+    ]);
+  }
+
+  return h("div.strat-node", [
+    h(StratNodeTag, { key: "tag", record, isActive }),
+    childBlock,
+  ]);
+}
+
+/**
+ * One name: its rank-qualified name, and the unit count as the tag's `details`
+ * so the number says what it counts.
+ *
+ * A name at least one unit carries is bold; one no unit carries is set in
+ * normal weight and dimmed. That is the single most useful signal in a
+ * stratigraphic tree, most of which is names the column store never uses.
+ */
+function StratNodeTag({ record, isActive }) {
+  const units = record?.t_units ?? 0;
+
+  let details: string | undefined = undefined;
+  if (units > 0) {
+    details = `${units.toLocaleString()} ${units === 1 ? "unit" : "units"}`;
+  }
+
+  let holder = "span.tag-holder";
+  if (units > 0) holder += ".has-units";
+  if (units === 0) holder += ".no-units";
+  if (isActive) holder += ".is-active";
+
+  return h(
+    holder,
+    h(
+      MacrostratLink,
+      { item: { strat_name_id: record.strat_name_id } },
+      h(Tag, {
+        name: record.strat_name_long ?? record.strat_name,
+        details,
+        size: TagSize.Small,
+      })
+    )
+  );
 }
 
 export interface StratAncestor {
@@ -189,180 +396,4 @@ export function StratAncestryPath({ record }: { record: any }) {
   });
 
   return h("div.strat-ancestry", nodes);
-}
-
-/**
- * The stratigraphic neighborhood as a bounded tree.
- *
- * Bounded three ways, each for a case that actually occurs:
- *  - **one parent level.** Ancestry above it is the `›` path, not tree levels —
- *    a bed six ranks deep would otherwise open with five nested headers.
- *  - **siblings are terminal.** They render as tags, not as subtrees of their
- *    own; expanding every sibling's children is the full tree again.
- *  - **runs reveal progressively.** The Pennine Middle Coal Measures have 439
- *    beds; `REVEAL_STEP` at a time keeps the page bounded.
- */
-export function StratNameHierarchy({ id }: { id: number | string }) {
-  const activeId = Number(id);
-  // `rule=all` returns every name in the tree this one belongs to — the input
-  // the relations are derived from. (The host comes from settings; this used to
-  // be hardcoded to macrostrat.org, so a local or dev page read production.)
-  const data = useAPIResult(
-    `${apiV2Prefix}/defs/strat_names?rule=all&strat_name_id=${activeId}`
-  )?.success?.data;
-
-  const relations = useMemo(
-    () => stratHierarchyRelations(data, activeId),
-    [data, activeId]
-  );
-
-  // Rows revealed per run, beyond the collapsed default.
-  const [shown, setShown] = useState<Record<string, number>>({});
-
-  // Stable component identity — `Hierarchy` would otherwise remount every tag
-  // on each reveal. `setShown` is stable, so this is built once.
-  const itemComponent = useMemo(() => buildStratItem(setShown), []);
-
-  const tree = useMemo(
-    () => stratTree(relations, shown),
-    [relations, shown]
-  );
-
-  if (relations == null || tree == null) return null;
-
-  return h("div.strat-hierarchy", [
-    h(StratAncestryPath, { key: "path", record: relations.item }),
-    h(Hierarchy, { key: "tree", data: tree, itemComponent }),
-  ]);
-}
-
-/** How many of a run are visible, given what has been revealed. */
-function visibleCount(key: string, total: number, shown: Record<string, number>) {
-  if (total <= OVERFLOW_THRESHOLD) return total;
-  return Math.min(shown[key] ?? COLLAPSED_COUNT, total);
-}
-
-/** A run of records as tree nodes, with a trailing "and N more…" node when the
- * run is capped. The control is a node rather than a sibling of the list so it
- * sits in the same wrapped flow as the tags.
- *
- * A terminal node's `name` is only ever used as its React key (the label is
- * rendered from `data` by the item component), and stratigraphic names repeat
- * among siblings — the Howard Limestone has two members called "Aarde Shale
- * Member" — so these are keyed by id rather than by name. */
-function runNodes(key: string, items: any[], shown: Record<string, number>) {
-  const limit = visibleCount(key, items.length, shown);
-  const nodes: any[] = items.slice(0, limit).map((record) => ({
-    name: `id:${record.strat_name_id}`,
-    data: record,
-  }));
-
-  const remaining = items.length - limit;
-  if (remaining > 0) {
-    nodes.push({
-      name: `more:${key}`,
-      data: { __more: { key, remaining } },
-    });
-  }
-  return nodes;
-}
-
-/**
- * The bounded tree handed to `Hierarchy`.
- *
- * The root node's header is hidden at level 0 by the hierarchy's own styles, so
- * the parent is nested one level in to make its name visible. `Hierarchy` sorts
- * children into terminal nodes (tags in a wrapped list) and sub-trees (nested,
- * with a heading) by whether they have children — which is exactly the split
- * wanted here: siblings are terminal, the active item is a sub-tree when it has
- * children of its own.
- */
-function stratTree(
-  relations: StratRelations | null,
-  shown: Record<string, number>
-) {
-  if (relations == null) return null;
-  const { item, parent, siblings, children } = relations;
-
-  // With children the item is a sub-tree and its `name` is the heading; without
-  // them it is a terminal node among its siblings, where `name` is just the key.
-  let self: any = {
-    name: `id:${item.strat_name_id}`,
-    data: { ...item, __active: true },
-  };
-  if (children.length > 0) {
-    self.name = item.strat_name_long ?? item.strat_name;
-    self.children = runNodes("children", children, shown);
-  }
-
-  // No parent: the item is the top of its hierarchy, so it *is* the level.
-  if (parent == null) {
-    if (children.length === 0) return null;
-    return { name: "", data: {}, children: [self] };
-  }
-
-  const peers = runNodes("siblings", siblings, shown);
-  return {
-    name: "",
-    data: {},
-    children: [
-      {
-        name: parent.strat_name_long ?? parent.strat_name,
-        data: parent,
-        children: [...peers, self],
-      },
-    ],
-  };
-}
-
-/**
- * One node of the tree: the name, and the unit count as the tag's `details` so
- * the number says what it counts. A name no unit carries gets no count and
- * normal weight — present in the lexicon, absent from the column store. The
- * active item is marked so it can be found among its siblings.
- */
-function buildStratItem(
-  setShown: (fn: (current: Record<string, number>) => Record<string, number>) => void
-) {
-  return function StratHierarchyItem({ data }: { data: any }) {
-    if (data?.__more != null) {
-      const { key, remaining } = data.__more;
-      return h(
-        "button.text-control",
-        {
-          type: "button",
-          onClick: () =>
-            setShown((current) => ({
-              ...current,
-              [key]: (current[key] ?? COLLAPSED_COUNT) + REVEAL_STEP,
-            })),
-        },
-        `and ${remaining.toLocaleString()} more…`
-      );
-    }
-
-    const units = data?.t_units ?? 0;
-
-    let details: string | undefined = undefined;
-    if (units > 0) {
-      details = `${units.toLocaleString()} ${units === 1 ? "unit" : "units"}`;
-    }
-
-    let holder = "span.tag-holder";
-    if (units === 0) holder += ".no-units";
-    if (data?.__active) holder += ".is-active";
-
-    return h(
-      holder,
-      h(
-        MacrostratLink,
-        { item: { strat_name_id: data.strat_name_id } },
-        h(Tag, {
-          name: data.strat_name_long ?? data.strat_name,
-          details,
-          size: TagSize.Small,
-        })
-      )
-    );
-  };
 }

@@ -8,6 +8,10 @@ const h = hyper.styled(styles);
 
 interface LinkCardProps {
   title?: ReactNode;
+  /** A small label above the title naming *what* the card links to — "Concept",
+   * "Name". For a card that sits among cards of another kind, where the title
+   * alone doesn't say which kind of thing you're about to open. */
+  kind?: ReactNode;
   href: string;
   children?: ReactNode;
   className?: string;
@@ -27,18 +31,31 @@ interface LinkCardProps {
 }
 
 export function LinkCard(props: LinkCardProps) {
-  const { href, title, children, className, nestedLinks = false, label } = props;
+  const {
+    href,
+    title,
+    kind,
+    children,
+    className,
+    nestedLinks = false,
+    label,
+  } = props;
 
   let titleNode: ReactNode = null;
   if (title != null) {
     titleNode = h("h3", title);
   }
 
+  let kindNode: ReactNode = null;
+  if (kind != null) {
+    kindNode = h("div.card-kind", kind);
+  }
+
   if (!nestedLinks) {
     return h(
       Link,
       { className: classNames("link-card", className), href },
-      [titleNode, children]
+      [kindNode, titleNode, children]
     );
   }
 
@@ -54,6 +71,7 @@ export function LinkCard(props: LinkCardProps) {
       href,
       "aria-label": ariaLabel,
     }),
+    kindNode,
     titleNode,
     children,
   ]);

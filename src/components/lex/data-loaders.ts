@@ -178,6 +178,22 @@ export async function fetchConceptUsages(conceptId: number) {
   );
 }
 
+/**
+ * The concept a stratigraphic name belongs to.
+ *
+ * Server-side, like the concept page's usages, so the "Concept" card is in the
+ * server HTML on both sides of the relationship rather than appearing after a
+ * client round-trip on one of them. `/defs/strat_name_concepts` is also what
+ * `ConceptInfo` reads, so passing the record down saves that fetch.
+ */
+export async function fetchStratConcept(conceptId: number | null | undefined) {
+  if (conceptId == null || conceptId === 0) return null;
+  const res = await fetchAPIData("/defs/strat_name_concepts", {
+    strat_name_concept_id: conceptId,
+  }).catch(() => null);
+  return res?.[0] ?? null;
+}
+
 /** Merged references from the fossils + columns endpoints (server-HTML).
  * Per-source failures degrade to an empty list rather than failing the page. */
 export async function fetchLexRefs(cfg: LexTypeConfig, id: number) {

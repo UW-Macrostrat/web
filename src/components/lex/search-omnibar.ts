@@ -257,6 +257,7 @@ interface LexSearchButtonProps {
   minimal?: boolean;
   large?: boolean;
   text?: string;
+  className?: string;
 }
 
 /** Opens the omnibar. Rendered small in the lex page header, and large in the
@@ -265,6 +266,7 @@ export function LexSearchButton({
   minimal = true,
   large = false,
   text = "Search",
+  className,
 }: LexSearchButtonProps) {
   const openSearch = useOpenLexSearch();
   const hotkeyLabel = useMemo(getHotkeyLabel, []);
@@ -272,6 +274,7 @@ export function LexSearchButton({
   return h(
     Button,
     {
+      className,
       minimal,
       large,
       small: !large,
@@ -291,6 +294,9 @@ export function LexSearchControl() {
 export function LexSearchPrompt() {
   return h("div.lex-search-prompt", [
     h(LexSearchButton, {
+      // The one action these pages are really offering: it takes the house
+      // purple through the shared `pz-important-button` role (src/styles).
+      className: "pz-important-button",
       minimal: false,
       large: true,
       text: "Search the lexicon",

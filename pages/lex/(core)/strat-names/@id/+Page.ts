@@ -2,10 +2,15 @@ import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
 import { LexItemPage, ConceptInfo, LexItemBodyClient } from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/strat-hierarchy";
+import { ConceptRelationCard } from "~/components/lex/relation-cards";
 import { LexItemData } from "~/components/lex/data-loaders.ts";
 
+interface StratNamePageData extends LexItemData {
+  concept: any;
+}
+
 export function Page() {
-  const { resData, id, type, config } = useData<LexItemData>();
+  const { resData, id, type, config, concept } = useData<StratNamePageData>();
 
   const relatedHref =
     config.idParam +
@@ -19,12 +24,14 @@ export function Page() {
   // The title (and the Name/Concept badge) belong to the layout's page header,
   // built from `+pageInfo.ts` — not to a second heading here.
   //
-  // Order: what the name *is* (its concept), then where it is (the map and the
-  // columns), then where it sits (the hierarchy) — above the attribute charts,
-  // since the hierarchy is the more important of the two on a stratigraphic
-  // page. Both ride in the body's existing client-only island via `topExtra` /
-  // `afterColumns` rather than mounting islands of their own.
+  // Order: what the name belongs to (the concept card, then that concept's
+  // description), then where it is (the map and the columns), then where it
+  // sits (the hierarchy) — above the attribute charts, since the hierarchy is
+  // the more important of the two on a stratigraphic page. The relation card
+  // block sits in the same position here as on the concept page.
   return h(LexItemPage, { id, resData, siftLink: config.siftLink }, [
+    h(ConceptRelationCard, { concept }),
+    h(ConceptInfo, { concept_id: resData?.concept_id, record: concept }),
     h(LexItemBodyClient, {
       type,
       id,
@@ -35,10 +42,6 @@ export function Page() {
       showMaps: true,
       showFossils: true,
       showColumnList: true,
-      topExtra: h(ConceptInfo, {
-        concept_id: resData?.concept_id,
-        showHeader: true,
-      }),
       afterColumns: h(StratNameHierarchy, { id }),
     }),
   ]);

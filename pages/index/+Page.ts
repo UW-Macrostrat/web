@@ -22,20 +22,16 @@ const HeroLive = clientOnly(() =>
 export default function Page() {
   return h("div.page-main", [
     h(BetaNotice),
-    // Sticky: once it reaches the top of the viewport the header collapses to
-    // a bar — the title and the search prompt — so the lexicon stays reachable
-    // from anywhere on the page. `.is-stuck` on `StickyHeader` drives the
-    // collapse; everything inside `.site-intro-detail` folds away.
+    // Everything above the hero, and nothing else: the wordmark and tagline on
+    // the left, the lexicon search on the right. Sticky, and once it reaches
+    // the top the title shrinks — `.is-stuck` comes from `StickyHeader`.
     h(
       "div.site-header",
       h(
         StickyHeader,
         h("div.site-header-inner", [
-          h("div.site-intro", [
-            h(SiteTitle, { className: "main-title" }, [
-              h("h2.subtitle", "The data system for the crust"),
-            ]),
-            h("div.site-intro-detail", h(HeroLead)),
+          h(SiteTitle, { className: "main-title" }, [
+            h("h2.subtitle", "The data system for the crust"),
           ]),
           h("div.site-search", h(LexSearchPrompt)),
         ])
@@ -45,6 +41,7 @@ export default function Page() {
     h(LexSearchHost),
     h(Hero),
     h(MacrostratStats),
+    h(SiteLead),
     h(EntryPoints),
     h(WhatsNew),
     h(PlatformLinks),
@@ -73,22 +70,6 @@ function Hero() {
   }
 
   return h("section.hero", content);
-}
-
-/** What Macrostrat is, and how to read the panel below. The column beneath the
- * marker names itself in the hero's inset, and the marker moves, so there is
- * nothing fixed for a caption to name. */
-function HeroLead() {
-  return h("div.hero-lead", [
-    h("p.hero-text", [
-      "Geologic maps and stratigraphic columns, integrated into one model of ",
-      "the Earth's crust through time.",
-    ]),
-    h("p.hero-caption", [
-      "Click anywhere on the map for the rock record beneath it, then pick a ",
-      "unit to see where it crops out.",
-    ]),
-  ]);
 }
 
 function HeroStatic() {
@@ -127,6 +108,15 @@ const entryPoints = [
     image: "rockd.png",
   },
 ];
+
+/** What Macrostrat is, in a line. It used to sit in the header; the header is
+ * now the wordmark and the search and nothing else. */
+function SiteLead() {
+  return h("p.site-lead", [
+    "Geologic maps and stratigraphic columns, integrated into one model of ",
+    "the Earth's crust through time.",
+  ]);
+}
 
 function EntryPoints() {
   return h(

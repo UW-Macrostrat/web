@@ -441,30 +441,35 @@ function useIntervalID({ name }) {
   return id;
 }
 
-export function ConceptInfo({ concept_id, showHeader }) {
-  // Hook must run unconditionally; pass a null route when there's no concept.
-  const data = useAPIResult(
-    concept_id
+/**
+ * The concept's descriptive metadata — author, province, geologic age, notes.
+ *
+ * The "Part of <concept>" heading this used to carry is now a `LinkCard` with a
+ * "Concept" kind hint (`./relation-cards`), so that the link out of a name page
+ * looks like the links out of a concept page rather than like a section header.
+ *
+ * `record` short-circuits the fetch: the stratigraphic pages load the concept
+ * in their `+data` hook, so the metadata is server HTML and there is one
+ * request rather than two for the same record.
+ */
+export function ConceptInfo({ concept_id, record = null }) {
+  // Hook must run unconditionally; pass a null route when the record is already
+  // in hand, or when there's no concept at all.
+  const fetched = useAPIResult(
+    record == null && concept_id
       ? apiV2Prefix +
           "/defs/strat_name_concepts?strat_name_concept_id=" +
           concept_id
       : null
   )?.success?.data?.[0];
 
+  const data = record ?? fetched;
   if (!data) return null;
 
-  const { author, name, province, geologic_age, other, usage_notes, url } =
-    data;
+  const { author, province, geologic_age, other, usage_notes, url } = data;
 
   return h("div.concept-info", [
-    h.if(showHeader)("div.concept-head-container", [
-      h("h2.head", "Part of "),
-      h("a.concept-header", { href: "/lex/strat-concepts/" + concept_id }, [
-        h("h3", name),
-        h(StratTag, { isConcept: true, fontSize: "1.5em" }),
-      ]),
-    ]),
-    h("div.author", [
+    h.if(author)("div.author", [
       h("span.title", "Author: "),
       h("span.author-text", h(Link, { href: url, target: "_blank" }, author)),
     ]),

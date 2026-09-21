@@ -105,16 +105,47 @@
   font-size: 0.9em
   color: var(--secondary-color)
 
-// The stratigraphic tree: the ancestry path above, then the bounded tree from
-// `@macrostrat-web/lithology-hierarchy`.
+// The stratigraphic tree. Every level is a link, nested by indent and a hairline
+// rule — the same cue the inline strip uses for descendants, applied per level.
 .strat-hierarchy
   margin: 1em 0
 
   .strat-ancestry
     margin-bottom: 0.4em
 
+.strat-node
+  display: flex
+  flex-direction: column
+  align-items: flex-start
+  gap: 0.25em
+
+// A level's contents. `row` + `wrap` so a run of siblings fills the line and
+// wraps tag by tag, rather than one name per line down the page.
+.strat-children
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  align-items: baseline
+  gap: 0.35em
+  margin-left: 0.5em
+  padding-left: 0.75em
+  border-left: 1px solid var(--tertiary-color)
+
+  // A child that has children of its own breaks to its own line: it is a level,
+  // not a peer, and its subtree needs the full width.
+  > .strat-node:has(.strat-children)
+    flex: 1 0 100%
+
+.hierarchy-toggle
+  margin-top: 0.5em
+
 // The item the page is about, among its siblings.
 .is-active
   outline: 2px solid var(--pz-accent-color, var(--accent-color))
   outline-offset: 1px
   border-radius: var(--pz-radius-sm, 3px)
+
+// A name at least one Macrostrat unit carries — the ones worth navigating to.
+.has-units
+  *
+    font-weight: 600
