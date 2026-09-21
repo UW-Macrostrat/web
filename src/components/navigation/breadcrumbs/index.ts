@@ -159,6 +159,20 @@ export function PageBreadcrumbsInternal({
 
   const hasTitleCrumb = !separateTitle && trail.length > 0;
 
+  // The item's identifier, when the title rides along as the trail's last crumb.
+  // Only `__PageTitle` renders it, and that is the `separateTitle` path — so on
+  // a single-row header (the hybrid frame, the infinite-scroll list) a page that
+  // supplies one was silently dropping it: the column page set
+  // `identifier: col_id` in its `pageInfo` and never showed an id.
+  let identifierElement = null;
+  const currentItem = trail[trail.length - 1];
+  if (hasTitleCrumb && currentItem?.identifier != null) {
+    identifierElement = h(
+      "span.nav-identifier",
+      h(Identifier, { id: currentItem.identifier })
+    );
+  }
+
   let crumbs: Crumb[] = trail.map((item, i) => {
     return {
       // `text`, not `children`: the same props feed the overflow menu's
@@ -217,6 +231,7 @@ export function PageBreadcrumbsInternal({
   const breadCrumbs = h("div.breadcrumbs-root", { className: trailClassName }, [
     startItem,
     breadcrumbsList,
+    identifierElement,
   ]);
 
   return h("div.page-nav", [breadCrumbs, titleElement]);

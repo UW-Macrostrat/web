@@ -129,3 +129,11 @@ $trail-end: "li:last-of-type:not(.root-crumb), li:has(+ .root-crumb:last-of-type
 .title-block.title-wrap
   h1
     overflow-wrap: anywhere
+
+// The current item's identifier on a single-row header, where there is no
+// separate title block to carry it. Sits after the trail, in the same quiet
+// monospace as identifiers everywhere else in the app.
+.nav-identifier
+  flex: 0 0 auto
+  margin-left: var(--pz-inline-gap, 0.5rem)
+  align-self: baseline

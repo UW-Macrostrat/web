@@ -72,3 +72,41 @@
   text-transform: uppercase
   color: var(--pz-secondary-color)
   margin-bottom: 0.1em
+
+// A card with nowhere to go (`href: null`) — the item you are already looking
+// at. It is not an anchor, so it must not offer an anchor's affordances: the
+// pointer, the lift, and the heading darkening all say "click me".
+.link-card.no-link
+  cursor: default
+
+  &:hover
+    box-shadow: var(--pz-shadow-md)
+    border-color: var(--pz-border-muted-color)
+    transform: none
+
+    h3, h4
+      color: var(--pz-heading-color)
+
+// A denser rendition, for a list of cards or a tree of them (`density:
+// "compact"`). The card keeps its border, its background and its heading
+// color — what makes it read as a card — and gives up the things that only
+// work for one card at a time: the page-level margin, the shadow, and the lift
+// on hover. Spacing is the caller's, since what surrounds a compact card is a
+// grid gap or an enclosing card's padding rather than the page.
+.link-card.compact
+  padding: var(--pz-space-2) var(--pz-space-3)
+  margin: 0
+  border-radius: var(--pz-radius-md)
+  box-shadow: none
+
+  h3, h4
+    margin: 0
+    font-size: 1em
+
+  &:hover
+    box-shadow: none
+    transform: none
+
+  &:active
+    transform: none
+    box-shadow: none

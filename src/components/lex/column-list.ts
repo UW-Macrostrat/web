@@ -1,5 +1,5 @@
 /**
- * The columns a lexicon item is found in, as a list of links.
+ * The columns a lexicon item is found in, as a grid of cards.
  *
  * The column *map* and the summary counters beside it (`ColumnsTable`) say how
  * much of the record there is and roughly where; neither gets you to a column.
@@ -7,15 +7,15 @@
  * common route into "which columns carry this name".
  *
  * It reads the same `colData` GeoJSON the map already loads (`useLexColumns`),
- * so it costs no extra request. Presentation follows the hierarchy strip: an
- * inline run of tags that wraps, with long runs capped, rather than a table
- * that grows the page.
+ * so it costs no extra request. Presentation follows the hierarchy tree on the
+ * same page: compact `LinkCard`s in a flexible grid, with long runs capped,
+ * rather than a strip of tags or a table that grows the page.
  */
 import hyper from "@macrostrat/hyper";
 import styles from "./column-list.module.sass";
 import { useMemo, useState } from "react";
-import { Tag, TagSize } from "@macrostrat/data-components";
-import { MacrostratLink } from "~/components/navigation/MacrostratLink";
+import { LinkCard } from "~/components/cards";
+import { buildHrefForItem } from "~/_providers/navigation";
 
 const h = hyper.styled(styles);
 
@@ -75,24 +75,37 @@ export function LexColumnList({ colData }: { colData: any }) {
       h("span.column-count", { key: "count" }, entries.length.toLocaleString()),
     ]),
     h("div.column-run", { key: "run" }, [
-      shown.map((entry) => h(ColumnTag, { key: entry.col_id, entry })),
+      shown.map((entry) => h(ColumnCard, { key: entry.col_id, entry })),
       more,
     ]),
   ]);
 }
 
-/** One column: its name, and how many of its units carry this item. */
-function ColumnTag({ entry }: { entry: LexColumnEntry }) {
-  let details: string | undefined = undefined;
+/** One column: its name, the group it belongs to, and how many of its units
+ * carry this item. */
+function ColumnCard({ entry }: { entry: LexColumnEntry }) {
+  const meta = [];
+  if (entry.col_group != null && entry.col_group !== "") {
+    meta.push(entry.col_group);
+  }
   if (entry.t_units > 0) {
-    details = `${entry.t_units.toLocaleString()} ${
-      entry.t_units === 1 ? "unit" : "units"
-    }`;
+    const noun = entry.t_units === 1 ? "unit" : "units";
+    meta.push(`${entry.t_units.toLocaleString()} ${noun}`);
+  }
+
+  let metaNode = null;
+  if (meta.length > 0) {
+    metaNode = h("div.column-meta", { key: "meta" }, meta.join(" · "));
   }
 
   return h(
-    MacrostratLink,
-    { item: { col_id: entry.col_id }, className: "column-tag" },
-    h(Tag, { name: entry.col_name, details, size: TagSize.Small })
+    LinkCard,
+    {
+      className: "column-card",
+      density: "compact",
+      href: buildHrefForItem({ col_id: entry.col_id })!,
+      title: entry.col_name,
+    },
+    metaNode
   );
 }

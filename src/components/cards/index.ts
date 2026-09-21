@@ -12,7 +12,12 @@ interface LinkCardProps {
    * "Name". For a card that sits among cards of another kind, where the title
    * alone doesn't say which kind of thing you're about to open. */
   kind?: ReactNode;
-  href: string;
+  /**
+   * Where the card leads. `null` renders it as a plain block with no link at
+   * all — the card for the thing you are already looking at, which has nowhere
+   * to go. It keeps the card's shape so it still reads as one of a set.
+   */
+  href?: string | null;
   children?: ReactNode;
   className?: string;
   /**
@@ -28,6 +33,21 @@ interface LinkCardProps {
   nestedLinks?: boolean;
   /** Label for the overlay link when the title isn't plain text. */
   label?: string;
+  /**
+   * Click handler on the card's link. For a card that is *usually* a plain
+   * navigation but sometimes something else — a list row that selects instead
+   * of opening while the list is in selection mode. Call `preventDefault()` to
+   * suppress the navigation; leaving the event alone lets the anchor behave
+   * like any other link (middle-click, copy link, the client router).
+   */
+  onClick?: (event: React.MouseEvent) => void;
+  /**
+   * `compact` is the rendition a dense list or a nested tree wants: the same
+   * card, without the page-level margin or the hover lift. The caller owns the
+   * spacing (a grid gap, an enclosing card's padding), and a tree of cards that
+   * each lifted under the pointer would be a page that moves as you read it.
+   */
+  density?: "default" | "compact";
 }
 
 export function LinkCard(props: LinkCardProps) {
@@ -39,7 +59,18 @@ export function LinkCard(props: LinkCardProps) {
     className,
     nestedLinks = false,
     label,
+    onClick,
+    density = "default",
   } = props;
+
+  // Built here rather than passed as a tag class, because a variant selected by
+  // the caller's `className` would be scoped by the *caller's* style module —
+  // which doesn't define it — and so would never match this module's rule.
+  const cardClass = classNames(
+    "link-card",
+    { compact: density === "compact" },
+    className
+  );
 
   let titleNode: ReactNode = null;
   if (title != null) {
@@ -51,12 +82,20 @@ export function LinkCard(props: LinkCardProps) {
     kindNode = h("div.card-kind", kind);
   }
 
+  if (href == null) {
+    return h("div", { className: classNames(cardClass, "no-link") }, [
+      kindNode,
+      titleNode,
+      children,
+    ]);
+  }
+
   if (!nestedLinks) {
-    return h(
-      Link,
-      { className: classNames("link-card", className), href },
-      [kindNode, titleNode, children]
-    );
+    return h(Link, { className: cardClass, href, onClick }, [
+      kindNode,
+      titleNode,
+      children,
+    ]);
   }
 
   let ariaLabel = label;
@@ -64,11 +103,12 @@ export function LinkCard(props: LinkCardProps) {
     ariaLabel = title;
   }
 
-  return h("div.link-card.has-overlay", { className }, [
+  return h("div.has-overlay", { className: cardClass }, [
     h(Link, {
       key: "overlay",
       className: "card-overlay-link",
       href,
+      onClick,
       "aria-label": ariaLabel,
     }),
     kindNode,

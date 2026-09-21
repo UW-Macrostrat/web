@@ -9,13 +9,19 @@
  * component, which renders each level's name as a plain heading — so the parent
  * you most want to click was the one thing you couldn't.
  *
- * **What it does now** is nest the whole ancestry, every level of it a link:
+ * **What it does now** is nest the whole ancestry as cards that contain one
+ * another, every level of it a link:
  *
- *     Wabaunsee Group
- *       └ Howard Limestone
- *           ├ …the item's siblings…
- *           └ Aarde Shale Member          ← the page's subject
- *                 └ …its children…
+ *     ┌ Wabaunsee Group ─────────────────────────────────┐
+ *     │ ┌ Howard Limestone ────────────────────────────┐ │
+ *     │ │ [Aarde Shale Mbr] [sibling] [sibling] …      │ │
+ *     │ │       ↑ the page's subject                   │ │
+ *     │ └──────────────────────────────────────────────┘ │
+ *     └──────────────────────────────────────────────────┘
+ *
+ * Containment is what shows the nesting, so a level needs no indent rule; a run
+ * of terminal names is a flexible grid inside its parent rather than a column
+ * of one name per line.
  *
  * Only the *spine* is expanded by default — each ancestor shows the one child
  * that continues the path down to the item — so the page opens on the item's
@@ -30,16 +36,17 @@
  *
  * **The numbers are units.** `t_units` from `/defs/strat_names` is the number of
  * Macrostrat *units* carrying the name — not the number of columns (the Shaler
- * Group has 15 units across 4 columns). It renders as the tag's `details` so it
- * reads as "15 units" rather than a bare integer.
+ * Group has 15 units across 4 columns). It renders beside the name as "15
+ * units" rather than as a bare integer.
  */
 import hyper from "@macrostrat/hyper";
 import styles from "./hierarchy.module.sass";
 import { useMemo, useState } from "react";
-import { Tag, TagSize } from "@macrostrat/data-components";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { MacrostratLink } from "~/components/navigation/MacrostratLink";
+import { LinkCard } from "~/components/cards";
+import { buildHrefForItem } from "~/_providers/navigation";
 
 const h = hyper.styled(styles);
 
@@ -59,13 +66,25 @@ const RANK_INDEX: Record<string, number> = Object.fromEntries(
   RANKS.map((r, i) => [r.rank, i])
 );
 
-/** Long runs cap, and reveal progressively — a stratigraphic run is not a dozen
- * peers but sometimes hundreds (the Pennine Middle Coal Measures have 439
- * beds). The cap is generous because the tree *is* the subject on these pages;
- * "show full hierarchy" removes it entirely. */
+/** Long runs are shown a window at a time, and reveal progressively — a
+ * stratigraphic run is not a dozen peers but sometimes hundreds (this Pennine
+ * formation has 446 beds). The window is generous because the tree *is* the
+ * subject on these pages; "show full hierarchy" removes it entirely. */
 const OVERFLOW_THRESHOLD = 30;
 const COLLAPSED_COUNT = 24;
 const REVEAL_STEP = 48;
+
+/** Rows a reader has revealed in one run, in each direction, beyond the window
+ * the subject's position selects. */
+interface RunReveal {
+  before: number;
+  after: number;
+}
+
+const NO_REVEAL: RunReveal = { before: 0, after: 0 };
+
+type RevealMap = Record<string, RunReveal>;
+type SetReveal = (update: (current: RevealMap) => RevealMap) => void;
 
 function levelOf(item: any): number {
   return RANK_INDEX[item?.rank] ?? RANKS.length - 1;
@@ -89,16 +108,22 @@ function parentID(item: any): number | null {
   return null;
 }
 
-/** Names a unit actually carries, first and in order of how many — then the
- * rest alphabetically. */
-function byRelevance(records: any[]): any[] {
+/**
+ * Alphabetical, tie-broken on id.
+ *
+ * A run has to sit in the same order on every page that shows it. Sorting by
+ * unit count (as this once did) reshuffled a level as you navigated into it, so
+ * the name you had just clicked was not where you left it — and neither were
+ * the ones beside it. The unit count still governs *emphasis*, which is the
+ * part of the old behavior worth keeping.
+ */
+function byName(records: any[]): any[] {
   return [...records].sort((a, b) => {
-    const ua = a?.t_units ?? 0;
-    const ub = b?.t_units ?? 0;
-    if (ua !== ub) return ub - ua;
-    return String(a?.strat_name_long ?? "").localeCompare(
+    const order = String(a?.strat_name_long ?? "").localeCompare(
       String(b?.strat_name_long ?? "")
     );
+    if (order !== 0) return order;
+    return (a?.strat_name_id ?? 0) - (b?.strat_name_id ?? 0);
   });
 }
 
@@ -108,8 +133,8 @@ export interface StratNode {
 }
 
 /**
- * The flat `?rule=all` payload as a forest, each node's children sorted by
- * relevance. A record whose recorded parent isn't in the payload is a root.
+ * The flat `?rule=all` payload as a forest, each node's children in name order.
+ * A record whose recorded parent isn't in the payload is a root.
  */
 export function buildStratForest(data: any[]): StratNode[] {
   const nodes = new Map<number, StratNode>(
@@ -128,11 +153,11 @@ export function buildStratForest(data: any[]): StratNode[] {
   }
 
   for (const node of nodes.values()) {
-    node.children = byRelevance(node.children.map((c) => c.record)).map(
+    node.children = byName(node.children.map((c) => c.record)).map(
       (record) => nodes.get(record.strat_name_id)!
     );
   }
-  return byRelevance(roots.map((r) => r.record)).map(
+  return byName(roots.map((r) => r.record)).map(
     (record) => nodes.get(record.strat_name_id)!
   );
 }
@@ -151,7 +176,7 @@ function pathToItem(nodes: StratNode[], id: number): StratNode[] | null {
 /**
  * The forest pruned to the item's neighborhood: the spine of ancestors, each
  * keeping only the child that continues the path, and at the bottom the item
- * among its siblings with its own children beneath it.
+ * in among its siblings, in order, with its own children beneath it.
  *
  * Everything else is dropped rather than collapsed — a level of the spine with
  * its full sibling set is the old unreadable tree, one level at a time.
@@ -170,21 +195,27 @@ function pruneToNeighborhood(path: StratNode[]): StratNode | null {
 
     let children: StratNode[] = [current];
     if (isParent) {
-      // The item leads its own sibling run. Relevance order governs the rest,
-      // but the subject of the page has to be *visible*: ordered by relevance it
-      // can sort past the run's cap — a 0-unit bed among 442 siblings — and
-      // disappear from its own page.
-      const siblings = ancestor.children
-        .filter((c) => c.record.strat_name_id !== current.record.strat_name_id)
-        // Siblings are terminal: expanding each one's descendants is the whole
-        // tree again.
-        .map((child) => ({ record: child.record, children: [] }));
-      children = [current, ...siblings];
+      // The item sits where the run's order puts it, carrying its own children;
+      // its siblings are terminal, since expanding each one's descendants is
+      // the whole tree again. It used to be pinned to the front so it couldn't
+      // fall past the run's cap — the cap is now a window that reaches it
+      // instead (`StratTreeNode`), which leaves the order alone.
+      children = ancestor.children.map((child) => {
+        if (child.record.strat_name_id === current.record.strat_name_id) {
+          return current;
+        }
+        return { record: child.record, children: [] };
+      });
     }
     current = { record: ancestor.record, children };
   }
 
   return current;
+}
+
+/** Records a subtree holds, counting the node itself. */
+function countNodes(node: StratNode): number {
+  return node.children.reduce((sum, child) => sum + countNodes(child), 1);
 }
 
 export function StratNameHierarchy({ id }: { id: number | string }) {
@@ -197,8 +228,8 @@ export function StratNameHierarchy({ id }: { id: number | string }) {
   )?.success?.data;
 
   const [showFull, setShowFull] = useState(false);
-  // Rows revealed per run, beyond the collapsed default.
-  const [shown, setShown] = useState<Record<string, number>>({});
+  // Rows revealed per run, beyond the window each one opens with.
+  const [revealed, setRevealed] = useState<RevealMap>({});
 
   const forest = useMemo(() => buildStratForest(data ?? []), [data]);
   const neighborhood = useMemo(() => {
@@ -223,7 +254,21 @@ export function StratNameHierarchy({ id }: { id: number | string }) {
   let toggleLabel = "Show full hierarchy";
   if (showFull) toggleLabel = "Show only nearby names";
 
+  // The full view is only worth offering when it would add something: the
+  // neighborhood often *is* the whole payload, and a control that changes
+  // nothing is worse than no control.
+  let toggle = null;
+  const nearbyCount = neighborhood == null ? 0 : countNodes(neighborhood);
+  if (data.length > nearbyCount) {
+    toggle = h(
+      "button.text-control.hierarchy-toggle",
+      { key: "toggle", type: "button", onClick: () => setShowFull(!showFull) },
+      toggleLabel
+    );
+  }
+
   return h("div.strat-hierarchy", [
+    h("h3.hierarchy-header", { key: "header" }, "Hierarchy"),
     h("div.strat-tree", { key: "tree" }, [
       roots.map((node) =>
         h(StratTreeNode, {
@@ -232,36 +277,89 @@ export function StratNameHierarchy({ id }: { id: number | string }) {
           activeId,
           depth: 0,
           showFull,
-          shown,
-          setShown,
+          revealed,
+          setRevealed,
         })
       ),
     ]),
-    h(
-      "button.text-control.hierarchy-toggle",
-      { key: "toggle", type: "button", onClick: () => setShowFull(!showFull) },
-      toggleLabel
-    ),
+    toggle,
   ]);
 }
 
-/** One node and its children. The node itself is always a link — the parent is
- * the thing you most often want to click, and rendering it as a bare heading is
- * what made the previous version frustrating. */
+/**
+ * The slice of a run to show: a fixed window aligned to a multiple of its own
+ * size, containing the subject of the page, plus whatever the reader has
+ * revealed at either end.
+ *
+ * Aligning it — rather than centering it on the subject — is what makes the run
+ * legible as you step through it: every name in the same slice opens the same
+ * window, in the same order, so the set you are reading stays put instead of
+ * sliding by one with each name you visit. A run no longer than
+ * `OVERFLOW_THRESHOLD`, and any run at all under "show full hierarchy", is
+ * shown whole.
+ */
+function runWindow({
+  children,
+  activeId,
+  showFull,
+  revealed,
+  key,
+}: {
+  children: StratNode[];
+  activeId: number;
+  showFull: boolean;
+  revealed: RevealMap;
+  key: string;
+}): { start: number; end: number } {
+  if (showFull || children.length <= OVERFLOW_THRESHOLD) {
+    return { start: 0, end: children.length };
+  }
+
+  const activeIndex = children.findIndex(
+    (child) => child.record.strat_name_id === activeId
+  );
+
+  // A run holding no subject — every level but the one the page is about —
+  // opens at its beginning.
+  let windowStart = 0;
+  if (activeIndex > 0) {
+    windowStart = Math.floor(activeIndex / COLLAPSED_COUNT) * COLLAPSED_COUNT;
+  }
+
+  const reveal = revealed[key] ?? NO_REVEAL;
+  return {
+    start: Math.max(0, windowStart - reveal.before),
+    end: Math.min(
+      children.length,
+      windowStart + COLLAPSED_COUNT + reveal.after
+    ),
+  };
+}
+
+/**
+ * One node and its children, as a card that contains the cards below it.
+ *
+ * Every node is a link except the one the page is already about — the parent in
+ * particular is the thing you most often want to click, and rendering it as a
+ * bare heading is what made an earlier version frustrating. A level with
+ * children is a container card holding them; a terminal name is a cell in the
+ * grid its parent lays out. Containment is what shows the nesting, so the
+ * indent-and-hairline rule the tag strip used is gone.
+ */
 function StratTreeNode({
   node,
   activeId,
   depth,
   showFull,
-  shown,
-  setShown,
+  revealed,
+  setRevealed,
 }: {
   node: StratNode;
   activeId: number;
   depth: number;
   showFull: boolean;
-  shown: Record<string, number>;
-  setShown: (fn: (c: Record<string, number>) => Record<string, number>) => void;
+  revealed: RevealMap;
+  setRevealed: SetReveal;
 }) {
   const { record, children } = node;
   const isActive = record.strat_name_id === activeId;
@@ -269,83 +367,107 @@ function StratTreeNode({
   let childBlock = null;
   if (children.length > 0) {
     const key = `n${record.strat_name_id}`;
-    let limit = children.length;
-    if (!showFull && children.length > OVERFLOW_THRESHOLD) {
-      limit = Math.min(shown[key] ?? COLLAPSED_COUNT, children.length);
+    const { start, end } = runWindow({
+      children,
+      activeId,
+      showFull,
+      revealed,
+      key,
+    });
+
+    const hiddenBefore = start;
+    const hiddenAfter = children.length - end;
+
+    const revealMore = (direction: "before" | "after") => {
+      setRevealed((current) => {
+        const run = current[key] ?? NO_REVEAL;
+        return {
+          ...current,
+          [key]: { ...run, [direction]: run[direction] + REVEAL_STEP },
+        };
+      });
+    };
+
+    // What the window leaves out, at the end it leaves it out: each control
+    // expands its own side of this run, rather than both at once.
+    let earlierControl = null;
+    if (hiddenBefore > 0) {
+      earlierControl = h(
+        "button.text-control",
+        { key: "earlier", type: "button", onClick: () => revealMore("before") },
+        `${hiddenBefore.toLocaleString()} earlier…`
+      );
     }
-    const remaining = children.length - limit;
 
     let moreControl = null;
-    if (remaining > 0) {
+    if (hiddenAfter > 0) {
       moreControl = h(
         "button.text-control",
-        {
-          key: "more",
-          type: "button",
-          onClick: () =>
-            setShown((current) => ({
-              ...current,
-              [key]: (current[key] ?? COLLAPSED_COUNT) + REVEAL_STEP,
-            })),
-        },
-        `and ${remaining.toLocaleString()} more…`
+        { key: "more", type: "button", onClick: () => revealMore("after") },
+        `${hiddenAfter.toLocaleString()} more…`
       );
     }
 
     childBlock = h("div.strat-children", { key: "children" }, [
-      children.slice(0, limit).map((child) =>
+      earlierControl,
+      children.slice(start, end).map((child) =>
         h(StratTreeNode, {
           key: child.record.strat_name_id,
           node: child,
           activeId,
           depth: depth + 1,
           showFull,
-          shown,
-          setShown,
+          revealed,
+          setRevealed,
         })
       ),
       moreControl,
     ]);
   }
 
-  return h("div.strat-node", [
-    h(StratNodeTag, { key: "tag", record, isActive }),
-    childBlock,
-  ]);
-}
-
-/**
- * One name: its rank-qualified name, and the unit count as the tag's `details`
- * so the number says what it counts.
- *
- * A name at least one unit carries is bold; one no unit carries is set in
- * normal weight and dimmed. That is the single most useful signal in a
- * stratigraphic tree, most of which is names the column store never uses.
- */
-function StratNodeTag({ record, isActive }) {
+  const name = record.strat_name_long ?? record.strat_name;
   const units = record?.t_units ?? 0;
 
-  let details: string | undefined = undefined;
+  // The count says what it counts. A name at least one unit carries is set in
+  // bold; one no unit carries is quieted — the single most useful signal in a
+  // stratigraphic tree, most of which is names the column store never uses.
+  let unitsNode = null;
   if (units > 0) {
-    details = `${units.toLocaleString()} ${units === 1 ? "unit" : "units"}`;
+    unitsNode = h(
+      "span.strat-units",
+      { key: "units" },
+      `${units.toLocaleString()} ${units === 1 ? "unit" : "units"}`
+    );
   }
 
-  let holder = "span.tag-holder";
-  if (units > 0) holder += ".has-units";
-  if (units === 0) holder += ".no-units";
-  if (isActive) holder += ".is-active";
+  let className = "strat-card";
+  if (units > 0) className += " has-units";
+  else className += " no-units";
+  if (isActive) className += " is-active";
+  if (childBlock != null) className += " has-children";
+
+  // The subject of the page has nowhere to go, so its card isn't a link.
+  let href: string | null = buildHrefForItem({
+    strat_name_id: record.strat_name_id,
+  });
+  if (isActive) href = null;
 
   return h(
-    holder,
-    h(
-      MacrostratLink,
-      { item: { strat_name_id: record.strat_name_id } },
-      h(Tag, {
-        name: record.strat_name_long ?? record.strat_name,
-        details,
-        size: TagSize.Small,
-      })
-    )
+    LinkCard,
+    {
+      className,
+      density: "compact",
+      href,
+      // A container card holds links of its own, so it needs the overlay form;
+      // a terminal card is simply the anchor.
+      nestedLinks: childBlock != null,
+      label: name,
+      title: h("span.strat-card-head", [
+        h("span.strat-card-name", { key: "name" }, name),
+        unitsNode,
+      ]),
+    },
+    childBlock
   );
 }
 

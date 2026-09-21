@@ -288,6 +288,15 @@ function ColumnScopeBridge({ status, children }) {
 
 /* ----------------------------------------------------------------- the map */
 
+/** The list's default scope, plus the column's own project when that isn't
+ * already part of it. */
+function mapScopeWithColumn(columnProjectID: number | null | undefined) {
+  if (columnProjectID == null || columnProjectID === CORE_COLUMNS_PROJECT_ID) {
+    return CORE_COLUMNS_PROJECT_ID;
+  }
+  return `${CORE_COLUMNS_PROJECT_ID},${columnProjectID}`;
+}
+
 function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   const modifierHeld = useModifierKeyRef();
   const showInProcess = useShowInProcess();
@@ -298,11 +307,18 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   if (filterProjectIDs !== undefined) {
     mapProject = projectIDParam(filterProjectIDs) ?? projectID;
   }
-  // With neither a route project nor a filter, scope the map to the column's
-  // own project. This used to fall through to the API's core-projects default,
-  // which is why a column outside those projects — every GBDB column — was
-  // missing from its own map.
-  mapProject ??= columnInfo.project_id ?? CORE_COLUMNS_PROJECT_ID;
+  // With neither a route project nor a filter, keep the scope the *list* has:
+  // its default is the core-projects composite, and narrowing to this column's
+  // own project on arrival made the map contract under you every time you
+  // opened a column from the list.
+  //
+  // Unioned with the column's own project, because the two fixes pull opposite
+  // ways: the composite alone leaves a column outside it — every GBDB column —
+  // missing from its own map, and the column's project alone is the narrowing
+  // this is about. The API takes a comma-joined list, and a project already in
+  // the composite is a no-op, so the union is the right answer in both cases
+  // and gives the same map whether you arrived from the list or a direct link.
+  mapProject ??= mapScopeWithColumn(columnInfo.project_id);
 
   const onSelectColumn = useCallback(
     (col_id: number | null) => {
