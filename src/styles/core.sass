@@ -17,6 +17,97 @@
 
   --monospace-font: "Fira Mono", monospace
 
+  // --- Brand roles ---------------------------------------------------------
+  //
+  // Paleozoic's `:root` tokens are the documented surface a downstream brand
+  // overrides (see `_semantic.scss`), so these live here rather than in a
+  // component: one place to change what the house colors *mean*, and no page
+  // reaching for a primitive — or a literal — on its own.
+  //
+  // The scheme, from the logo's three colors:
+  //   green  (--pz-link-*)             link text, anywhere you can click through
+  //   pink   (--pz-heading-*)          headings, on cards and in sections
+  //   purple (--pz-accent-*,           emphasis: important buttons, card hover
+  //           --pz-button-primary-*)   outlines, structural rules, figures
+  //
+  // Green sits close enough to the blue people expect of a link that it reads
+  // as one without a second thought, which is what lets the other two colors
+  // carry meaning instead of decoration.
+  //
+  // Everything below is a candidate to graduate into `@macrostrat/style-system`
+  // on its next release; until then web owns them.
+
+  // Ramp extensions. The library ships mint at 500/300 and pink at 500/200 —
+  // all too light to read as text on a light surface — so each gets a dark
+  // rendition at the same hue, matching how purple already carries 700 for
+  // text. Purple gains a light step for a filled button's hover in dark mode.
+  --pz-mint-700: #1c7d73
+  --pz-mint-800: #145a53
+  --pz-mint-100: #c9f2e2
+  // Pink at the logo's hue, one step readable on white and one for its hover.
+  // The library's 500 *is* the logo pink and carries headings in dark mode,
+  // where it has contrast to spare; 200 is too pale to be anything but a hover.
+  --pz-pink-600: #d02583
+  --pz-pink-700: #9b2769
+  --pz-purple-400: #9781bd
+
+  // Links (overriding the library's blue).
+  --pz-link-color: var(--pz-mint-700)
+  --pz-link-hover-color: var(--pz-mint-800)
+
+  // Headings. `--pz-heading-hover-color` is for a heading that is itself a
+  // link — a card title — and darkens the way any link does.
+  --pz-heading-color: var(--pz-pink-600)
+  --pz-heading-hover-color: var(--pz-pink-700)
+
+  // The readable-on-background counterpart of `--pz-accent-tertiary-color`,
+  // the way `--pz-accent-text-color` is for the primary accent.
+  --pz-accent-tertiary-text-color: var(--pz-pink-600)
+
+  // A filled, important button: the same purple a card's outline takes when you
+  // reach for it, so "this is the thing to press" reads the same either way.
+  --pz-button-primary-background: var(--pz-accent-color)
+  --pz-button-primary-hover-background: var(--pz-accent-text-color)
+  --pz-button-primary-text: var(--pz-text-on-fill-color)
+
+// Dark mode. A token derived through `var()` is substituted where it is
+// declared, so it does not re-resolve on inheritance — every one of the roles
+// above has to be restated here (the rule is documented in `_semantic.scss`).
+.bp6-dark
+  // Pastel where it belongs: on a dark surface the light end of each ramp is
+  // the legible one, so the hover direction inverts with it.
+  --pz-link-color: var(--pz-mint-300)
+  --pz-link-hover-color: var(--pz-mint-100)
+  --pz-heading-color: var(--pz-pink-500)
+  --pz-heading-hover-color: var(--pz-pink-200)
+  --pz-accent-tertiary-text-color: var(--pz-pink-500)
+  --pz-button-primary-background: var(--pz-purple-500)
+  --pz-button-primary-hover-background: var(--pz-purple-400)
+  --pz-button-primary-text: var(--pz-white)
+
+// Links are green, everywhere. A type selector, so anything that gives its
+// anchors a color of their own — a card, a Blueprint button — still wins.
+a
+  color: var(--pz-link-color)
+
+  &:hover
+    color: var(--pz-link-hover-color)
+
+// An important button: the one action a page is really offering. Sits with the
+// other global utilities below because it is part of the language, not of any
+// one page.
+.pz-important-button.bp6-button
+  background: var(--pz-button-primary-background)
+  color: var(--pz-button-primary-text)
+  box-shadow: none
+
+  :global(.bp6-icon)
+    color: var(--pz-button-primary-text)
+
+  &:hover
+    background: var(--pz-button-primary-hover-background)
+    color: var(--pz-button-primary-text)
+
 
 .secondary
   color: var(--secondary-color)

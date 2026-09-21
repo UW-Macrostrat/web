@@ -40,9 +40,33 @@ export interface RowGroup {
 }
 
 export interface WindowedScrollBodyOptions<T = any> {
-  /** Fixed height of one card, in px. Rows are positioned by arithmetic, so
-   * this has to match the card's own styling. */
+  /** Fixed height of one *band* — a row of the grid — in px. Bands are
+   * positioned by arithmetic, so this has to match the card's own styling. */
   rowHeight: number;
+  /**
+   * The width one card would ideally have, in px. Set it and the body is a
+   * flexible grid: as many columns as fit (`floor(width / columnWidth)`, never
+   * fewer than one), each stretching to share the room evenly. Consecutive
+   * cards within a group share a *band* — one line of the grid — and the
+   * layout arithmetic counts bands rather than cards. Groups never share a
+   * band, so a group always starts on a fresh line.
+   *
+   * The count has to be computed here rather than left to a CSS
+   * `auto-fill`/`minmax` grid: a band holds a fixed number of cards, so
+   * wrapping them in CSS would overflow the band's fixed height and be clipped.
+   */
+  columnWidth?: number;
+  /**
+   * Columns assumed before the body is measured — on the server, and on the
+   * client's first render, which must match it. Pick the count the layout
+   * usually resolves to; the `ResizeObserver` settles it immediately after.
+   * Defaults to one column, i.e. a plain list.
+   */
+  initialColumns?: number;
+  /** Blank space after a group's last band, in px — so the next group's sticky
+   * header doesn't butt up against the previous group's last card. Laid out as
+   * an item of its own, which keeps every band the same height. */
+  groupGap?: number;
   /** Inner grouping — a sticky header, always kept in the window. */
   groupOf?: (row: T) => RowGroup | null;
   groupHeight?: number;
@@ -68,7 +92,10 @@ interface ScrollBodyProps {
 
 type Item =
   | { type: "group"; group: RowGroup; top: number; height: number }
-  | { type: "row"; cardIndex: number; top: number; height: number };
+  /** One band: up to `columns` cards laid out side by side. */
+  | { type: "row"; cardIndices: number[]; top: number; height: number }
+  /** Blank space closing a group. */
+  | { type: "gap"; top: number; height: number };
 
 export function createWindowedScrollBody<T = any>(
   options: WindowedScrollBodyOptions<T>
@@ -81,6 +108,9 @@ export function createWindowedScrollBody<T = any>(
     sectionHeight = rowHeight,
     overscan = 8,
     initialRows = 100,
+    columnWidth,
+    initialColumns = 1,
+    groupGap = 0,
   } = options;
 
   return function WindowedScrollBody({ children }: ScrollBodyProps) {
@@ -92,6 +122,14 @@ export function createWindowedScrollBody<T = any>(
 
     const nonNullRows = useMemo(() => rows.filter((r) => r != null), [rows]);
 
+    // Before measurement `initialColumns` is used, so the server render and the
+    // client's first render agree; the ResizeObserver on the root settles it.
+    const activeColumns = resolveColumns(
+      columnWidth,
+      initialColumns,
+      viewport.width
+    );
+
     const items = useMemo(
       () =>
         buildItems(nonNullRows, {
@@ -100,8 +138,10 @@ export function createWindowedScrollBody<T = any>(
           sectionOf,
           sectionHeight,
           rowHeight,
+          columns: activeColumns,
+          groupGap,
         }),
-      [nonNullRows]
+      [nonNullRows, activeColumns, groupGap]
     );
 
     // During a load the panel appends skeleton cards, so the card list and the
@@ -112,13 +152,9 @@ export function createWindowedScrollBody<T = any>(
     if (!aligned || items.length === 0) {
       return h(
       "div.windowed-root",
-      {
-        ref: rootRef,
-        style: { "--windowed-context-height": `${sectionHeight}px` } as any,
-      },
-      [
-        h("div.windowed-body.unwindowed", cards),
-      ]);
+      { ref: rootRef, style: rootStyle(sectionHeight, activeColumns) },
+      [h("div.windowed-body.unwindowed", cards)]
+    );
     }
 
     const last = items[items.length - 1];
@@ -148,9 +184,22 @@ export function createWindowedScrollBody<T = any>(
         rendered.push(
           h(
             "div.windowed-row",
-            { key: `row-${item.cardIndex}`, style: { height: item.height } },
-            cards[item.cardIndex]
+            {
+              key: `row-${item.cardIndices[0]}`,
+              style: { height: item.height },
+            },
+            item.cardIndices.map((index) => cards[index])
           )
+        );
+        continue;
+      }
+      if (item.type === "gap") {
+        rendered.push(
+          h("div.windowed-gap", {
+            key: `gap-${item.top}`,
+            style: { height: item.height },
+            "aria-hidden": true,
+          })
         );
         continue;
       }
@@ -170,10 +219,7 @@ export function createWindowedScrollBody<T = any>(
 
     return h(
       "div.windowed-root",
-      {
-        ref: rootRef,
-        style: { "--windowed-context-height": `${sectionHeight}px` } as any,
-      },
+      { ref: rootRef, style: rootStyle(sectionHeight, activeColumns) },
       [
       h.if(section != null)(
         "div.windowed-context-bar",
@@ -193,6 +239,14 @@ export function createWindowedScrollBody<T = any>(
   };
 }
 
+/**
+ * Lay the cards out into items: group headers, bands of up to `columns` cards,
+ * and a closing gap per group.
+ *
+ * Cards are batched into bands only *within* a group — a group boundary always
+ * starts a fresh band, so a sticky header never has the previous group's
+ * leftovers beside it.
+ */
 function buildItems<T>(
   rows: T[],
   cfg: {
@@ -201,12 +255,28 @@ function buildItems<T>(
     sectionOf?: (row: T) => RowGroup | null;
     sectionHeight: number;
     rowHeight: number;
+    columns: number;
+    groupGap: number;
   }
 ): Item[] {
   const items: Item[] = [];
+  const perBand = Math.max(1, Math.floor(cfg.columns));
   let top = 0;
   let lastSection: string | number | null = null;
   let lastGroup: string | number | null = null;
+  let band: number[] | null = null;
+
+  function closeBand() {
+    band = null;
+  }
+
+  /** The blank space that closes a group, once anything has been laid out. */
+  function closeGroup() {
+    closeBand();
+    if (cfg.groupGap <= 0 || items.length === 0) return;
+    items.push({ type: "gap", top, height: cfg.groupGap });
+    top += cfg.groupGap;
+  }
 
   rows.forEach((row, cardIndex) => {
     const section = cfg.sectionOf?.(row) ?? null;
@@ -219,16 +289,30 @@ function buildItems<T>(
 
     const group = cfg.groupOf?.(row) ?? null;
     if (group != null && group.key !== lastGroup) {
+      closeGroup();
       items.push({ type: "group", group, top, height: cfg.groupHeight });
       top += cfg.groupHeight;
       lastGroup = group.key;
     }
 
-    items.push({ type: "row", cardIndex, top, height: cfg.rowHeight });
+    if (band != null && band.length < perBand) {
+      band.push(cardIndex);
+      return;
+    }
+    band = [cardIndex];
+    items.push({ type: "row", cardIndices: band, top, height: cfg.rowHeight });
     top += cfg.rowHeight;
   });
 
   return items;
+}
+
+/** The context-bar height and the grid's column count, published to CSS. */
+function rootStyle(sectionHeight: number, columns: number) {
+  return {
+    "--windowed-context-height": `${sectionHeight}px`,
+    "--windowed-columns": String(Math.max(1, Math.floor(columns))),
+  } as any;
 }
 
 /** Walk back to the nearest inner-group header at or before `index`, so it is
@@ -252,7 +336,7 @@ function firstVisibleSection<T>(
   if (sectionOf == null) return null;
   for (let i = index; i < items.length; i++) {
     const item = items[i];
-    if (item.type === "row") return sectionOf(rows[item.cardIndex]);
+    if (item.type === "row") return sectionOf(rows[item.cardIndices[0]]);
   }
   return null;
 }
@@ -260,6 +344,20 @@ function firstVisibleSection<T>(
 interface Viewport {
   top: number;
   height: number;
+  width: number;
+}
+
+/** As many cards of the ideal width as fit, never fewer than one. Falls back to
+ * the pre-measurement count while the width is unknown. */
+function resolveColumns(
+  columnWidth: number | undefined,
+  initialColumns: number,
+  width: number
+): number {
+  if (columnWidth == null || columnWidth <= 0 || width === 0) {
+    return Math.max(1, Math.floor(initialColumns));
+  }
+  return Math.max(1, Math.floor(width / columnWidth));
 }
 
 function visibleRange(
@@ -282,13 +380,15 @@ function visibleRange(
   return [first, Math.min(items.length, last + 1)];
 }
 
-/** The item index just past the first `count` rows — group headers between
- * them included, so the count is of rows, not items. */
+/** The item index just past the first `count` **cards** — headers and gaps
+ * between them included, and bands counted by the cards they hold, so the
+ * initial render is the same number of cards whatever the column count. */
 function endOfFirstRows(items: Item[], count: number): number {
-  let rows = 0;
+  let cards = 0;
   for (let i = 0; i < items.length; i++) {
-    if (items[i].type === "row") rows++;
-    if (rows >= count) return i + 1;
+    const item = items[i];
+    if (item.type === "row") cards += item.cardIndices.length;
+    if (cards >= count) return i + 1;
   }
   return items.length;
 }
@@ -321,7 +421,11 @@ function findItemAt(items: Item[], offset: number): number {
 function useScrollViewport(
   ref: React.MutableRefObject<HTMLElement | null>
 ): Viewport {
-  const [viewport, setViewport] = useState<Viewport>({ top: 0, height: 0 });
+  const [viewport, setViewport] = useState<Viewport>({
+    top: 0,
+    height: 0,
+    width: 0,
+  });
 
   const measure = useCallback(() => {
     const root = ref.current;
@@ -341,6 +445,7 @@ function useScrollViewport(
     setViewport({
       top: Math.max(visibleTop - rootRect.top, 0),
       height: Math.max(visibleBottom - visibleTop, 0),
+      width: rootRect.width,
     });
   }, []);
 

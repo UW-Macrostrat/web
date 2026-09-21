@@ -32,9 +32,9 @@ export const dataNavItems: NavLinkItem[] = [
 
 export const platformNavItems: NavLinkItem[] = [
   { href: "/about", text: "About", icon: "info-sign" },
-  { href: "/people", text: "People", icon: "people" },
+  { href: "/community", text: "Community", icon: "people" },
   { href: "/publications", text: "Publications", icon: "book" },
-  { href: "/support", text: "Support", icon: "office" },
+  { href: "/about/support", text: "Support us", icon: "heart" },
   { href: "/heatmap", text: "Heatmap", icon: "geosearch" },
 ];
 

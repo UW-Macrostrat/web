@@ -17,10 +17,14 @@ import { useData } from "vike-react/useData";
 
 import { HybridPage } from "~/layouts/hybrid";
 
+import {
+  CompilationTree,
+  ScaleFilter,
+  emptyGraph,
+} from "~/components/compilation-tree";
+
 import { CompilationAssistant } from "./assistant";
-import { CompilationTree } from "./tree";
-import { emptyGraph } from "./graph";
-import { graphAtom } from "./state";
+import { graphAtom, treeAtoms } from "./state";
 import { onDemand } from "~/_utils";
 
 // The map pulls in mapbox-gl, which has no business in the server bundle.
@@ -40,7 +44,10 @@ export function Page() {
     // `HybridPage` creates its own jotai scope, so page state has to be seeded
     // here rather than in an outer provider.
     initialAtoms: [[graphAtom, graph]],
-    content: h(CompilationTree),
+    content: h(CompilationTree, {
+      atoms: treeAtoms,
+      toolbar: h(ScaleFilter, { atoms: treeAtoms }),
+    }),
     map: h(CompilationMap),
     assistant: h(CompilationAssistant),
   });

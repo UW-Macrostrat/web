@@ -36,6 +36,11 @@ export default {
     "pageInfo",
     "breadcrumbs",
   ],
+  // The v1 addresses of pages now under /about and /community.
+  redirects: {
+    "/people": "/community/contributors",
+    "/support": "/about/support",
+  },
   clientRouting: true,
   supportsDarkMode: true,
   trailingSlash: false,

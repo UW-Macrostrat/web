@@ -1,0 +1,57 @@
+// The columns a lexicon item is found in. Same idiom as the hierarchy tree on
+// the same page — compact cards in a flexible grid — so the two lists below the
+// map read as one family rather than as a strip and a tree.
+
+.lex-column-list
+  margin: 1em 0
+
+.column-list-header
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  gap: 0.5em
+  margin: 0 0 0.4em
+
+  .column-count
+    font-size: 0.8em
+    font-weight: 400
+    color: var(--pz-secondary-color)
+
+// An ideal card width rather than a fixed count: the list sits in the content
+// column on a lexicon page but in a narrow panel on a hybrid one.
+.column-run
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(13em, 1fr))
+  gap: 0.35em
+  align-items: stretch
+
+  // The control that reveals the rest of a long run belongs on its own line.
+  > .text-control
+    grid-column: 1 / -1
+    justify-self: start
+    margin-top: 0.15em
+
+.column-card
+  h3
+    font-size: 1em
+    line-height: var(--pz-line-height-snug)
+
+// The group the column belongs to, and how much of this item it carries.
+.column-meta
+  font-size: 0.8em
+  color: var(--pz-secondary-color)
+
+.text-control
+  appearance: none
+  background: none
+  border: none
+  padding: 0
+  margin: 0
+  cursor: pointer
+  font-family: inherit
+  font-style: italic
+  font-size: 0.85em
+  color: var(--pz-secondary-color)
+
+  &:hover
+    color: var(--pz-text-emphasized-color)

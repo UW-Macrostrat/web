@@ -1,15 +1,112 @@
+// The shared link card. Every color here is a Paleozoic role token — the
+// system is imported globally in `src/styles/core.sass`, so there is no case
+// where one is missing and a literal fallback would only hide a mistake.
+
 .link-card
-  padding: 1em
-  margin: 1em 0 1em
   display: block
+  padding: var(--pz-space-4)
+  margin: var(--pz-space-4) 0
+  border: 1px solid var(--pz-border-muted-color)
+  border-radius: var(--pz-radius-lg)
+  background-color: var(--pz-panel-background-color)
+  box-shadow: var(--pz-shadow-md)
+  color: var(--pz-text-color)
   text-decoration: none
-  color: unset
-  &:hover
-    text-decoration: none
-    background-color: var(--accent-secondary-hover-color)
+  // Cheap to animate and cheap to undo: only the lift and the shadow move.
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease
+
+  h3, h4
+    color: var(--pz-heading-color)
+    transition: color 0.18s ease
+
   :first-child
     margin-top: 0
+
   :last-child
     margin-bottom: 0
 
+  &:hover
+    text-decoration: none
+    color: var(--pz-text-color)
+    box-shadow: var(--pz-shadow-lg)
+    border-color: var(--pz-accent-color)
+    transform: translateY(-2px)
 
+    // The card is a link, so its heading darkens the way a link does.
+    h3, h4
+      color: var(--pz-heading-hover-color)
+
+  // The press should read as the lift coming back down.
+  &:active
+    transform: translateY(0)
+    box-shadow: var(--pz-shadow-md)
+
+  &:focus-visible
+    outline: 2px solid var(--pz-focus-ring-color)
+    outline-offset: 2px
+
+// A card whose content carries links of its own (`nestedLinks`). Anchors can't
+// nest, so the card is a block with a full-bleed overlay link: it covers the
+// card and sits *above* its text but *below* any link inside it, so a click
+// anywhere that isn't one of those follows the card itself.
+.link-card.has-overlay
+  position: relative
+
+  .card-overlay-link
+    position: absolute
+    inset: 0
+    z-index: 1
+    // No visual of its own — the card is the affordance.
+    border-radius: inherit
+
+  a:not(.card-overlay-link)
+    position: relative
+    z-index: 2
+
+// What the card links to, above its title: "Concept", "Name". Quiet — it is a
+// hint about the destination, not a heading.
+.card-kind
+  font-size: 0.72em
+  font-weight: 600
+  letter-spacing: 0.06em
+  text-transform: uppercase
+  color: var(--pz-secondary-color)
+  margin-bottom: 0.1em
+
+// A card with nowhere to go (`href: null`) — the item you are already looking
+// at. It is not an anchor, so it must not offer an anchor's affordances: the
+// pointer, the lift, and the heading darkening all say "click me".
+.link-card.no-link
+  cursor: default
+
+  &:hover
+    box-shadow: var(--pz-shadow-md)
+    border-color: var(--pz-border-muted-color)
+    transform: none
+
+    h3, h4
+      color: var(--pz-heading-color)
+
+// A denser rendition, for a list of cards or a tree of them (`density:
+// "compact"`). The card keeps its border, its background and its heading
+// color — what makes it read as a card — and gives up the things that only
+// work for one card at a time: the page-level margin, the shadow, and the lift
+// on hover. Spacing is the caller's, since what surrounds a compact card is a
+// grid gap or an enclosing card's padding rather than the page.
+.link-card.compact
+  padding: var(--pz-space-2) var(--pz-space-3)
+  margin: 0
+  border-radius: var(--pz-radius-md)
+  box-shadow: none
+
+  h3, h4
+    margin: 0
+    font-size: 1em
+
+  &:hover
+    box-shadow: none
+    transform: none
+
+  &:active
+    transform: none
+    box-shadow: none

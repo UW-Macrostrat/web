@@ -29,9 +29,12 @@ export function buildDocsNav(
     a.localeCompare(b)
   );
 
-  for (const [href, { title, contentFile }] of entries) {
+  for (const [href, { title, contentFile, route }] of entries) {
     const rel = href.slice(prefix.length).replace(/^\//, "");
     if (rel === "") continue; // the landing page is the root itself
+    // Site pages (About, Community, ...) are rendered at their own routes by
+    // `~/site-pages`, not as documentation.
+    if (route != null) continue;
 
     const dirs = contentFile.split("/").slice(0, -1);
     const urlSegments = rel.split("/");

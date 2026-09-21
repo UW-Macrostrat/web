@@ -82,3 +82,114 @@
   to
     opacity: 1
     transform: none
+
+// A record's ancestry on its own, outside the neighborhood strip — used on the
+// concept page, where each usage carries its own path.
+.strat-ancestry
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  align-items: baseline
+  gap: 0.35em
+  font-size: 0.9em
+  color: var(--pz-secondary-color)
+
+// The stratigraphic tree, as cards that contain the cards below them: a level
+// with children is a container, a terminal name is a cell in the grid its
+// parent lays out. Containment is what shows the nesting, which is why there is
+// no indent-and-hairline rule here any more.
+//
+// Every card is a compact `LinkCard`, so the border, the surface and the pink
+// heading come from the shared card; what's below is the tree's own geometry,
+// and the hover behavior a tree needs.
+.strat-hierarchy
+  margin: 1em 0
+
+  .strat-ancestry
+    margin-bottom: 0.4em
+
+  // Nested under `.strat-hierarchy` so these outrank the shared card's own
+  // rules on specificity rather than by `!important`.
+  .strat-card
+    display: block
+
+    > h3
+      margin: 0
+      font-size: 1em
+      line-height: var(--pz-line-height-snug)
+
+    // Quieted on its own head only — dimming the card itself would dim every
+    // card nested inside it.
+    &.no-units > h3 .strat-card-name
+      font-weight: 400
+      color: var(--pz-secondary-color)
+
+    &.has-units > h3 .strat-card-name
+      font-weight: 600
+
+    // Neutral by default; the rules below light up the one card that is
+    // actually under the pointer.
+    &:hover
+      border-color: var(--pz-border-muted-color)
+
+    // The name the page is about. It is still a card — it is one of the run —
+    // but it carries no selection treatment: there is nothing to select, since
+    // this is the page you are on. What marks it is that its title is text
+    // rather than a link, so it takes neither the heading color nor the
+    // quieting that flags a name no unit carries. Last in the block so a hover
+    // can't color it.
+    &.is-active > h3 .strat-card-name
+      color: var(--pz-text-color)
+      font-weight: 600
+
+  // A terminal card *is* the anchor; a container's own surface is its overlay
+  // link, so ask whether that link — rather than anything nested inside it — is
+  // the thing being hovered. Without this, pointing at a bed would light up
+  // every level above it at once, since `:hover` holds for ancestors too.
+  a.strat-card:hover,
+  .strat-card:has(> a:hover)
+    border-color: var(--pz-accent-color)
+
+    > h3 .strat-card-name
+      color: var(--pz-heading-hover-color)
+
+// The count sits beside the name rather than at the card's far edge: a
+// container card is as wide as the level it holds, and a number pushed out to
+// that edge reads as a column of its own instead of as part of the name.
+.strat-card-head
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  gap: 0.5em
+
+.strat-card-name
+  color: var(--pz-heading-color)
+
+.strat-units
+  flex: 0 0 auto
+  font-size: 0.8em
+  font-weight: 400
+  color: var(--pz-secondary-color)
+  white-space: nowrap
+
+// A level's children: a flexible grid, so a run of terminal names fills the
+// width rather than running one per line down the page. A child that is itself
+// a level takes the full row, since its own cards need the width — as does the
+// control that reveals the rest of a long run.
+.strat-children
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(13em, 1fr))
+  gap: 0.35em
+  margin-top: 0.4em
+
+  > .has-children,
+  > .text-control
+    grid-column: 1 / -1
+    justify-self: start
+
+// Names the block, the way the columns list beside it is named.
+.hierarchy-header
+  margin: 0 0 0.4em
+
+.hierarchy-toggle
+  margin-top: 0.75em

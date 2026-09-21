@@ -1,8 +1,13 @@
+@use "sass:math"
+
 // Column list page content. The frame itself lives in `~/layouts/hybrid`.
 
-// Must match ROW_HEIGHT / GROUP_HEIGHT in `+Page.ts` — the windowed scroll body
-// positions rows absolutely, so it can't measure them.
-$row-height: 30px
+// Must match ROW_HEIGHT / GROUP_HEIGHT / GROUP_GAP in `+Page.ts` — the windowed
+// scroll body lays bands out by arithmetic, so it can't measure them.
+// `$row-height` is a *band* (one line of the three-column grid); `$row-gap` is
+// the vertical breathing room inside it, so the card itself takes the rest.
+$row-height: 40px
+$row-gap: 4px
 $group-height: 34px
 
 // The panel is the scroller (the frame's `panel` mode), so its floating
@@ -27,23 +32,59 @@ $group-height: 34px
 
 /* ------------------------------------------------------------------- rows */
 
+// A column is the shared `LinkCard`, re-geometried for a dense windowed grid:
+// the card's own padding and margin are far too generous at this density, and
+// its hover *lift* would be clipped by the fixed-height, `overflow: hidden`
+// band the windowed body puts it in. Surface, border, radius and focus ring
+// stay the card's.
 .column-row
+  display: flex
+  flex-direction: column
+  justify-content: center
+  height: $row-height - $row-gap
+  margin: math.div($row-gap, 2) 0
+  padding: 0 var(--pz-space-2)
+  cursor: pointer
+  user-select: none
+  box-shadow: none
+
+  // Geometry only: the card's heading *color* is the design system's role for a
+  // card title (`--pz-heading-color`), and a column card is a card.
+  h3
+    margin: 0
+    font-size: 1em
+    font-weight: 400
+
+  &:hover
+    // No lift: see above.
+    transform: none
+    box-shadow: none
+    background-color: var(--pz-panel-secondary-background-color)
+
+  &.selected
+    background-color: var(--pz-accent-secondary-color)
+    border-color: var(--pz-accent-color)
+    color: var(--pz-selected-text-color)
+
+// The card is one line: the name takes the space, any status tag follows it,
+// and the identifier is right-aligned — the same shape as the group and project
+// headers above it.
+.col-head
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  gap: var(--pz-inline-gap)
+  min-width: 0
+
+.col-tags
   display: flex
   flex-direction: row
   align-items: center
-  gap: var(--pz-inline-gap, 0.5rem)
-  height: $row-height
-  padding: 0 var(--pz-space-2, 0.5rem)
-  border-radius: var(--pz-radius-sm, 4px)
-  cursor: pointer
-  user-select: none
+  gap: 0.35em
+  flex: 0 0 auto
 
-  &:hover
-    background-color: var(--pz-hover-background-color, var(--secondary-background))
-
-  &.selected
-    background-color: var(--pz-selected-background-color, var(--tertiary-background))
-    color: var(--pz-selected-text-color, var(--text-emphasized-color))
+  &:empty
+    display: none
 
 // Identifiers are right-aligned at every level of the list — project, group,
 // column — so the eye can read names down the left and ids down the right.
@@ -51,8 +92,8 @@ $group-height: 34px
 .header-identifier
   flex: 0 0 auto
   margin-left: auto
-  padding-left: var(--pz-inline-gap, 0.5rem)
-  color: var(--pz-secondary-color, var(--secondary-color))
+  padding-left: var(--pz-inline-gap)
+  color: var(--pz-secondary-color)
   font-family: var(--monospace-font)
   font-size: 0.8rem
 
@@ -69,13 +110,25 @@ $group-height: 34px
   text-overflow: ellipsis
   white-space: nowrap
 
+.col-identifier
+  flex: 0 0 auto
+
+// A group or project header that leads somewhere.
+.header-link
+  color: inherit
+  text-decoration: none
+
+  &:hover
+    color: var(--pz-link-hover-color)
+    text-decoration: underline
+
 /* --------------------------------------------------------------- controls */
 
 .source-facets
   display: flex
   flex-direction: column
-  gap: var(--pz-space-2, 0.5rem)
-  padding: var(--pz-space-3, 0.75rem)
+  gap: var(--pz-space-2)
+  padding: var(--pz-space-3)
   min-width: 16rem
   max-width: 24rem
 
@@ -84,7 +137,7 @@ $group-height: 34px
 
 .filter-label
   margin: 0
-  color: var(--pz-secondary-color, var(--secondary-color))
+  color: var(--pz-secondary-color)
   font-size: 0.8rem
 
 // The project facet in the Filter menu: the same picker as the side panel's,
@@ -116,7 +169,7 @@ $group-height: 34px
   display: flex
   flex-direction: row
   align-items: center
-  gap: var(--pz-inline-gap, 0.5rem)
+  gap: var(--pz-inline-gap)
   flex-wrap: wrap
 
 .filter-note
@@ -125,7 +178,7 @@ $group-height: 34px
   align-items: center
   gap: 0.35em
   padding: 0.2em 0.4em
-  color: var(--pz-secondary-color, var(--secondary-color))
+  color: var(--pz-secondary-color)
   font-size: 0.85rem
   white-space: nowrap
 
@@ -133,7 +186,7 @@ $group-height: 34px
   display: flex
   flex-direction: row
   align-items: center
-  gap: var(--pz-inline-gap, 0.5rem)
+  gap: var(--pz-inline-gap)
   flex-wrap: wrap
 
 .lex-filter-item
@@ -150,36 +203,36 @@ $group-height: 34px
   flex-direction: row
   align-items: center
   gap: 0.3em
-  background-color: var(--pz-panel-secondary-background-color, var(--tertiary-color))
+  background-color: var(--pz-panel-secondary-background-color)
   border-radius: .2em
   padding-right: .5em
   cursor: pointer
 
 .label
-  color: var(--pz-text-emphasized-color, var(--text-emphasized-color))
+  color: var(--pz-text-emphasized-color)
   margin: 0
 
 /* -------------------------------------------------------------- assistant */
 
 .assistant
-  padding: var(--pz-content-padding, 1rem)
+  padding: var(--pz-content-padding)
 
   h2
     font-size: 1rem
-    margin: 0 0 var(--pz-heading-spacing, 0.5em)
+    margin: 0 0 var(--pz-heading-spacing)
 
 .assistant-empty
-  color: var(--pz-secondary-color, var(--secondary-color))
+  color: var(--pz-secondary-color)
   margin: 0
 
 .assistant-link
-  margin: var(--pz-paragraph-spacing, 0.75em) 0 0
+  margin: var(--pz-paragraph-spacing) 0 0
 
 .assistant-links
-  margin-top: var(--pz-stack-gap, 1rem)
+  margin-top: var(--pz-stack-gap)
   display: flex
   flex-direction: column
-  gap: var(--pz-stack-gap, 1rem)
+  gap: var(--pz-stack-gap)
 
 // The project picker and the link to the project pages read as one subject.
 .projects-section
@@ -192,7 +245,7 @@ $group-height: 34px
     flex-direction: row
     align-items: baseline
     justify-content: space-between
-    gap: var(--pz-inline-gap, 0.5rem)
+    gap: var(--pz-inline-gap)
 
     h3
       margin: 0
@@ -215,7 +268,7 @@ $group-height: 34px
   display: flex
   flex-direction: row
   align-items: center
-  gap: var(--pz-inline-gap, 0.5rem)
+  gap: var(--pz-inline-gap)
   // Takes its natural width and keeps each tag on one line. Squeezed instead,
   // a tag wraps its name over its detail and the whole bar grows a row —
   // exactly the reflow that moving the tags here was meant to avoid. The

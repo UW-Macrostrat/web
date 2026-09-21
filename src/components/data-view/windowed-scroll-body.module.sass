@@ -17,13 +17,13 @@
   display: flex
   flex-direction: row
   align-items: center
-  gap: var(--pz-inline-gap, 0.5rem)
-  padding: 0 var(--pz-space-2, 0.5rem)
-  font-family: var(--pz-heading-font, var(--header-font))
+  gap: var(--pz-inline-gap)
+  padding: 0 var(--pz-space-2)
+  font-family: var(--pz-heading-font)
   font-weight: 600
-  color: var(--pz-text-emphasized-color, var(--text-emphasized-color))
-  background-color: var(--pz-panel-background-color, var(--panel-background-color))
-  border-bottom: 1px solid var(--pz-border-color, var(--panel-rule-color))
+  color: var(--pz-text-emphasized-color)
+  background-color: var(--pz-panel-background-color)
+  border-bottom: 1px solid var(--pz-border-color)
 
 .windowed-body
   position: relative
@@ -38,19 +38,34 @@
 .windowed-spacer
   flex: 0 0 auto
 
+// One band of the grid. At `columns: 1` this is a single card filling the band,
+// which is the same box the non-grid layout produced.
 .windowed-row
   flex: 0 0 auto
   overflow: hidden
+  display: grid
+  grid-template-columns: repeat(var(--windowed-columns, 1), minmax(0, 1fr))
+  gap: var(--pz-inline-gap)
+  align-items: stretch
+
+  // The panel wraps each card in its own container; it has to fill the cell.
+  > *
+    min-width: 0
+
+// Blank space closing a group, so the next group's sticky header doesn't butt
+// up against the previous group's last card.
+.windowed-gap
+  flex: 0 0 auto
 
 .windowed-group-header
   flex: 0 0 auto
   display: flex
   flex-direction: row
   align-items: center
-  gap: var(--pz-inline-gap, 0.5rem)
-  padding: 0 var(--pz-space-2, 0.5rem)
+  gap: var(--pz-inline-gap)
+  padding: 0 var(--pz-space-2)
   overflow: hidden
-  background-color: var(--pz-background-color, var(--background-color))
+  background-color: var(--pz-background-color)
 
 // Inner group headers stick beneath the context bar. The window start snaps
 // back to include the enclosing one, so there is always something to stick.
@@ -58,6 +73,6 @@
   position: sticky
   top: var(--windowed-context-height, 1.75rem)
   z-index: 3
-  font-family: var(--pz-heading-font, var(--header-font))
-  color: var(--pz-secondary-color, var(--secondary-color))
-  border-bottom: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
+  font-family: var(--pz-heading-font)
+  color: var(--pz-secondary-color)
+  border-bottom: 1px solid var(--pz-panel-rule-color)

@@ -5,9 +5,12 @@
  * enough to seed into the HTML so the first render is the real list.
  */
 
-import { apiV3Prefix } from "@macrostrat-web/settings";
 import type { PageContextServer } from "vike/types";
-import { emptyGraph, type CompilationGraph } from "./graph";
+import {
+  emptyGraph,
+  fetchCompilationGraph,
+  type CompilationGraph,
+} from "~/components/compilation-tree";
 
 export async function data(pageContext: PageContextServer) {
   const graph = await fetchGraph();
@@ -16,11 +19,7 @@ export async function data(pageContext: PageContextServer) {
 
 async function fetchGraph(): Promise<CompilationGraph> {
   try {
-    const res = await fetch(
-      `${apiV3Prefix}/compilations`.replace(/\/$/, "") + "/graph"
-    );
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    return await res.json();
+    return await fetchCompilationGraph();
   } catch (error) {
     // A dev page shouldn't 500 because the API is down — it renders its own
     // empty state, and the client retries on demand.

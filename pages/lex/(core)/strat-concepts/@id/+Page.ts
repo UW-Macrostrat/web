@@ -1,13 +1,15 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
 import { LexItemPage, ConceptInfo, LexItemBodyClient } from "~/components/lex";
-import { LinkCard } from "~/components/cards";
-import { fetchAPIData } from "~/_utils";
-import { useEffect, useState } from "react";
+import { StratNameCards } from "~/components/lex/relation-cards";
 import { LexItemData } from "~/components/lex/data-loaders.ts";
 
+interface ConceptPageData extends LexItemData {
+  usages: any[];
+}
+
 export function Page() {
-  const { resData, id, type, config } = useData<LexItemData>();
+  const { resData, id, type, config, usages } = useData<ConceptPageData>();
 
   const relatedHref =
     config.idParam +
@@ -19,9 +21,14 @@ export function Page() {
     resData?.name;
 
   // Title + Concept badge come from `+pageInfo.ts` via the layout header.
+  //
+  // Same shape as the name page, in the same order: the relation cards (there,
+  // the one concept; here, the names it groups), the concept's description,
+  // then the map / columns / charts body. No "Names" heading above the cards —
+  // each card says what it links to.
   return h(LexItemPage, { id, resData, siftLink: config.siftLink }, [
-    h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: false }),
-    h(ConceptBody, { concept_id: id }),
+    h(StratNameCards, { usages }),
+    h(ConceptInfo, { concept_id: resData?.concept_id }),
     h(LexItemBodyClient, {
       type,
       id,
@@ -31,42 +38,7 @@ export function Page() {
       showUnits: true,
       showMaps: true,
       showFossils: true,
+      showColumnList: true,
     }),
-  ]);
-}
-
-function ConceptBody({ concept_id }) {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    if (!concept_id) return; // Avoid calling API with undefined/null ID
-
-    fetchAPIData(`/defs/strat_names`, { concept_id })
-      .then((response) => {
-        setData(response);
-      })
-      .catch((error) => {
-        console.error("Error fetching strat names:", error);
-        setData(null);
-      });
-  }, [concept_id]);
-
-  if (!data) return null;
-
-  return h("div.concept-body", [
-    h("h2.strat-names", "Usages"),
-    h(
-      "ul.strat-name-list",
-      data.map((strat) =>
-        h(
-          LinkCard,
-          {
-            href: "/lex/strat-names/" + strat.strat_name_id,
-            className: "strat-name",
-          },
-          strat.strat_name_long + " (" + strat.t_units + ")"
-        )
-      )
-    ),
   ]);
 }

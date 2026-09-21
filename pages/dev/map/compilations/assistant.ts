@@ -13,11 +13,15 @@ import hyper from "@macrostrat/hyper";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 
-import { apiV3Prefix } from "@macrostrat-web/settings";
 import { BaseLayerForm, Link } from "~/components";
+import {
+  fetchCompilationGraph,
+  formatArea,
+  mapPageHref,
+  NodeTags,
+  stateTags,
+} from "~/components/compilation-tree";
 
-import { mapPageHref, type CompilationGraph } from "./graph";
-import { formatArea, NodeTags, stateTags } from "./node-tags";
 import {
   basemapAtom,
   expandMembersAtom,
@@ -69,17 +73,7 @@ function PointLoader() {
     setGraph(null);
     setError(null);
 
-    // 5 decimal places (~1 m) is past the resolution of any Macrostrat dataset,
-    // and keeps the URL stable so an unchanged click doesn't refetch.
-    const url = `${apiV3Prefix}/compilations/graph?lng=${lng.toFixed(
-      5
-    )}&lat=${lat.toFixed(5)}`;
-
-    fetch(url)
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-        return (await res.json()) as CompilationGraph;
-      })
+    fetchCompilationGraph({ lng, lat })
       .then((graph) => {
         if (!cancelled) setGraph(graph);
       })

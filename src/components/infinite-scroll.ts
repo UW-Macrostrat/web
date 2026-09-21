@@ -10,13 +10,9 @@ import {
 } from "@macrostrat/data-sheet";
 import { ReactNode } from "react";
 import { Button } from "@blueprintjs/core";
+import { autoLoadPagesForItems } from "./data-view";
 
 const PAGE_SIZE = 20;
-/** Pages auto-loaded per burst before the inline footer's "Load more" takes
- * over. Deep results are reached by scrolling (and, more usefully, by narrowing
- * the search) — so this is set high enough that the footer is a checkpoint
- * rather than a speed bump. */
-const AUTO_LOAD_PAGES = 10;
 
 export function InfiniteScrollPage<T>({
   className,
@@ -32,7 +28,9 @@ export function InfiniteScrollPage<T>({
       "div.data-panel-container",
       h(DataPanel<T>, {
         pageSize: PAGE_SIZE,
-        autoLoadPages: AUTO_LOAD_PAGES,
+        // A row budget, not a page count — see `data-view/auto-load`. Overridable
+        // per page like any other `DataPanel` prop (`...rest` wins below).
+        autoLoadPages: autoLoadPagesForItems(PAGE_SIZE),
         className: "ingestion-panel",
         statusBar: false,
         enableSelection: SelectionInteractionStyle.MODAL,

@@ -39,8 +39,12 @@ import { navigate } from "vike/client/router";
 import classNames from "classnames";
 
 import { DevLinkButton, Link } from "~/components";
+import { LinkCard } from "~/components/cards";
 import { LithologyTag } from "~/components/lex/tag";
-import { createWindowedScrollBody } from "~/components/data-view";
+import {
+  autoLoadPagesForItems,
+  createWindowedScrollBody,
+} from "~/components/data-view";
 import { HybridContentFooter, HybridPage } from "~/layouts/hybrid";
 import {
   projectIDParam,
@@ -113,23 +117,56 @@ const ColumnListMap = onDemand(() =>
   import("./map.client").then((mod) => mod.ColumnListMap)
 );
 
-/** Must match `.column-row` / `.group-header` in `main.module.sass` — the
- * windowed body positions rows absolutely, so it can't measure them. */
-const ROW_HEIGHT = 30;
+/** Must match `$row-height` / `$group-height` / `$group-gap` in
+ * `main.module.sass` — the windowed body lays bands out by arithmetic, so it
+ * can't measure them.
+ *
+ * `ROW_HEIGHT` is the height of a *band* (one line of the grid), not of the
+ * list: three cards share a band. Each card is one line — name, any status, and
+ * the id — so the band is only a little taller than the row it replaced while
+ * holding three times as much. */
+const ROW_HEIGHT = 40;
+/** The width a column card wants. The grid fits as many as the body has room
+ * for — three at the content measure, one in the ~350px panel beside the map. */
+const COLUMN_CARD_WIDTH = 280;
+/** What to assume before the body is measured (server + first client render). */
+const COLUMN_INITIAL_COLUMNS = 3;
+/** Space closing each column group, so the next group's sticky header doesn't
+ * butt up against the last card of the previous one. */
+const GROUP_GAP = 12;
 const GROUP_HEIGHT = 30;
 const SECTION_HEIGHT = 34;
 
-/** Rows per fetched page, and how many pages auto-load before the footer's
- * "Load more" takes over. Deep results are reached by narrowing the filters,
- * not by scrolling forever, so the checkpoint comes early — two pages in, which
- * also brings the footer within reach. */
+/** Rows per fetched page. How far it auto-scrolls before the footer's "Load
+ * more" takes over is the shared row budget (`data-view/auto-load`) — deep
+ * results are reached by narrowing the filters, not by scrolling forever. */
 const PAGE_SIZE = 100;
-const AUTO_LOAD_PAGES = 2;
+const AUTO_LOAD_PAGES = autoLoadPagesForItems(PAGE_SIZE);
+
+/** A project's overview page. */
+function projectHref(projectID: number | null | undefined): string | null {
+  if (projectID == null || projectID <= 0) return null;
+  return `/projects/${projectID}`;
+}
+
+/** A column group's page, which is nested under its project. Both ids are on
+ * the row, so no lookup is needed. */
+function groupHref(
+  projectID: number | null | undefined,
+  groupID: number | null | undefined
+): string | null {
+  if (projectID == null || projectID <= 0) return null;
+  if (groupID == null || groupID <= 0) return null;
+  return `/projects/${projectID}/groups/${groupID}`;
+}
 
 const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
   // One seeded page in the server HTML, for crawlers (see page-links.ts)
   initialRows: PAGE_SIZE,
   rowHeight: ROW_HEIGHT,
+  columnWidth: COLUMN_CARD_WIDTH,
+  initialColumns: COLUMN_INITIAL_COLUMNS,
+  groupGap: GROUP_GAP,
   // Projects are the outer sections (a handful, some very large); column groups
   // the inner ones (164 of them, median ~15 rows).
   sectionHeight: SECTION_HEIGHT,
@@ -137,7 +174,11 @@ const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
     if (row == null) return null;
     return {
       key: row.project_id,
-      label: h(HeaderLabel, { name: row.project_name, id: row.project_id }),
+      label: h(HeaderLabel, {
+        name: row.project_name,
+        id: row.project_id,
+        href: projectHref(row.project_id),
+      }),
     };
   },
   groupHeight: GROUP_HEIGHT,
@@ -148,6 +189,7 @@ const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
       label: h(HeaderLabel, {
         name: row.col_group ?? "Ungrouped",
         id: row.col_group_id,
+        href: groupHref(row.project_id, row.col_group_id),
       }),
     };
   },
@@ -174,13 +216,24 @@ function createPagedRowProvider(rowsRef: { current: ColumnRow[] }) {
 }
 
 /** Name on the left, identifier right-aligned — the same shape at every level
- * of the list, so project, group and column read consistently. */
-function HeaderLabel({ name, id }) {
+ * of the list, so project, group and column read consistently.
+ *
+ * The name is a link when the level has a page of its own: a project, and a
+ * column group within it. Both were plain text, which left the two levels of
+ * grouping the list is built around as the only things in it you couldn't
+ * follow. */
+function HeaderLabel({ name, id, href = null }) {
   let identifier = null;
   if (id != null && id > 0) {
     identifier = h("span.header-identifier", h(Identifier, { id }));
   }
-  return h([h("span.header-name", name), identifier]);
+
+  let nameEl = h("span.header-name", name);
+  if (href != null) {
+    nameEl = h(Link, { className: "header-name header-link", href }, name);
+  }
+
+  return h([nameEl, identifier]);
 }
 
 /** No `sortable` fields for now. The list is grouped project → group, and the
@@ -607,9 +660,20 @@ function LexSuggestions() {
   );
 }
 
-/** A row. `selected` comes from the page's selection, not the panel's — the
- * panel's is a derived artifact here, and reading it back would reintroduce the
- * index-based fragility the page-level selection exists to avoid. */
+/** One column, as a card.
+ *
+ * The card *is* the link — `LinkCard` with an `onClick` — rather than a div
+ * with an anchor inside it and a click handler on the row. That arrangement had
+ * to intercept the anchor's click to keep it from reaching the row handler, and
+ * because vike's client router listens on the document, the event it needed
+ * never arrived: every click on a column name was a full page load. With the
+ * anchor on the outside there is nothing to intercept, and middle-click, copy
+ * link and the client router all behave normally.
+ *
+ * `selected` comes from the page's selection, not the panel's — the panel's is a
+ * derived artifact here, and reading it back would reintroduce the index-based
+ * fragility the page-level selection exists to avoid.
+ */
 function ColumnRowCard({ data }) {
   const columnHref = useColumnHref();
   const selectedIDs = useAtomValue(selectedColumnsAtom);
@@ -619,6 +683,10 @@ function ColumnRowCard({ data }) {
   const { col_id, col_name, t_units, t_sections, status_code } = data;
   const selected = selectedIDs.includes(col_id);
 
+  // `t_units` / `t_sections` are only in the API's `response=long` payload,
+  // which this list can't afford (4.7 MB and ~3 s for the 2,783 rows it holds
+  // in memory, against 0.9 MB for the default). So these render when a caller
+  // does have them and are simply absent here.
   let unitsTag = null;
   if (t_units > 0) {
     unitsTag = h(Tag, { minimal: true, size: "small" }, `${t_units} units`);
@@ -642,73 +710,43 @@ function ColumnRowCard({ data }) {
     );
   }
 
+
   const onClick = (evt) => {
     const additive = evt.metaKey || evt.ctrlKey;
     const range = evt.shiftKey;
 
     // Out of selection mode a plain click opens the column, matching what a
-    // click on its footprint does. Modifier-clicks still select, so a selection
-    // can be started without reaching for the mode toggle first.
-    if (!selectionMode && !additive && !range) {
-      navigate(columnHref(col_id));
-      return;
-    }
+    // click on its footprint does — so the anchor is left to do its job.
+    if (!selectionMode && !additive && !range) return;
+
     // Inside the mode a plain click toggles — same as a footprint click on the
-    // map, and the whole point of entering the mode. A plain click *replacing*
-    // the selection would make the mode useless for building one up.
+    // map, and the whole point of entering the mode. Modifier-clicks select
+    // outside it too, so a selection can be started without reaching for the
+    // mode toggle first.
+    evt.preventDefault();
     selectColumn(col_id, { additive: additive || selectionMode, range });
   };
 
-  // In selection mode a click selects and nothing navigates — so the name is
-  // plain text there, and a real link (middle-click, copy) otherwise.
-  let name = h("span.col-name", col_name);
-  if (!selectionMode) {
-    const href = columnHref(col_id);
-    name = h(
-      "a.col-name",
-      { href, onClick: (evt) => onLinkClick(evt, href) },
-      col_name
-    );
-  }
-
-  return h("div.column-row", { className: classNames({ selected }), onClick }, [
-    name,
-    statusTag,
-    packagesTag,
-    unitsTag,
-    h("span.col-identifier", h(Identifier, { id: col_id })),
-  ]);
+  return h(
+    LinkCard,
+    {
+      className: classNames("column-row", { selected }),
+      href: columnHref(col_id),
+      onClick,
+      title: h("span.col-head", [
+        h("span.col-name", { key: "name" }, col_name),
+        h("span.col-tags", { key: "tags" }, [
+          statusTag,
+          packagesTag,
+          unitsTag,
+        ]),
+        h("span.col-identifier", { key: "id" }, h(Identifier, { id: col_id })),
+      ]),
+      label: col_name,
+    }
+  );
 }
 
-/** The row's name is a real `<a>` so middle-click and copy-link work, but the
- * row itself navigates on click — so the anchor has to stop the event reaching
- * it. Stopping propagation alone left the browser to follow the href, and
- * because vike's client router listens on the document, the event it needed
- * never arrived: every click on a column name was a **full page load**. So take
- * the navigation over explicitly, leaving modified clicks (new tab, new window,
- * download) to the browser. */
-function onLinkClick(evt, href: string) {
-  evt.stopPropagation();
-  if (
-    evt.button !== 0 ||
-    evt.metaKey ||
-    evt.ctrlKey ||
-    evt.shiftKey ||
-    evt.altKey
-  ) {
-    return;
-  }
-  evt.preventDefault();
-  navigate(href);
-}
-
-/** Mirrors the library's modal-selection state out to the page.
- *
- * `SelectionInteractionStyle.MODAL` puts the Select control in the panel's own
- * actions toolbar — consistent with the ingestion list, and one less bespoke
- * button. But the *map* also needs to know the mode, and it renders outside the
- * panel's provider, so the flag is mirrored to a page atom. One way: the
- * library owns the mode, we own the selected set. */
 function SelectionModeBridge() {
   const enabled = ctx.useValue(enableSelectionAtom);
   const setSelectionMode = useSetAtom(selectionModeAtom);

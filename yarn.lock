@@ -3220,6 +3220,7 @@ __metadata:
     vite-css-modules: "npm:^1.11.1"
     vite-plugin-cesium: "npm:^1.2.23"
     vite-plugin-cjs-interop: "npm:^2.3.0"
+    yaml: "npm:^2.9.1"
     zustand: "npm:^5.0.12"
   languageName: unknown
   linkType: soft
@@ -21566,6 +21567,15 @@ __metadata:
   version: 1.10.2
   resolution: "yaml@npm:1.10.2"
   checksum: 10c0/5c28b9eb7adc46544f28d9a8d20c5b3cb1215a886609a2fd41f51628d8aaa5878ccd628b755dbcd29f6bb4921bd04ffbc6dcc370689bb96e594e2f9813d2605f
+  languageName: node
+  linkType: hard
+
+"yaml@npm:^2.9.1":
+  version: 2.9.1
+  resolution: "yaml@npm:2.9.1"
+  bin:
+    yaml: bin.mjs
+  checksum: 10c0/9d06676ef02b89559a8b10a71882bd2cdae81e8393dc8dbc871615c3259475d9609ad973d19cb3c9e71e72d6206e3d1e7aa241c7e55f3d16fd2e77db305827d6
   languageName: node
   linkType: hard
 

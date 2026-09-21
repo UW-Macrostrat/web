@@ -2,7 +2,7 @@ import h from "./main.module.sass";
 import { Spinner } from "@blueprintjs/core";
 import { usePageTransitionStore } from "~/renderer/usePageTransitionStore";
 import classNames from "classnames";
-import { PageBreadcrumbs, PageTitle, usePageTitle } from "~/components";
+import { PageBreadcrumbs, PageTitle, StickyHeader, usePageTitle } from "~/components";
 import { useTransition } from "transition-hook";
 import { NavigationLinkProvider } from "~/_providers";
 import { Footer } from "./footer";
@@ -109,12 +109,39 @@ export function HybridFramePage({ children, className, ...rest }) {
   );
 }
 
+/** The site ("meta") pages — About, Community, Publications and the rest of
+ * `pages/(site)`. Same shape as `IndexPage`, except that the header stays with
+ * the reader: these pages are long prose, and the trail back out of them
+ * shouldn't scroll away. */
+export function SitePage({ children, className, ...rest }) {
+  return h(BaseContentPage, { className, ...rest }, [
+    h(
+      StickyHeader,
+      { className: "site-page-header" },
+      h(PageBreadcrumbs, { separateTitle: false })
+    ),
+    h("div.main", [children]),
+    h(Footer),
+  ]);
+}
+
+/** The homepage: no breadcrumb bar (the page carries the site title itself),
+ * the shared content width, and the one footer. */
+export function HomePage({ children, className, ...rest }) {
+  return h(BaseContentPage, { className: classNames("home-page", className), ...rest }, [
+    h("div.main", children),
+    h(Footer),
+  ]);
+}
+
 export const pageLayouts = {
+  home: HomePage,
   fullscreen: FullscreenPage,
   hybrid: HybridFramePage,
   content: ContentPage,
   content2: ContentPage,
   index: IndexPage,
+  site: SitePage,
   meta: MetaPage,
 };
 export { NavListItem } from "~/layouts/navbar.ts";

@@ -1,0 +1,121 @@
+// Everything above the content: breadcrumbs, the description, the two sides of
+// the comparison, and the map controls. It is the panel's header element, so
+// it stays put while the units scroll beneath it.
+.page-header
+  display: flex
+  flex-direction: column
+  gap: 8px
+  padding: 10px 12px
+  border-bottom: 1px solid var(--panel-rule-color)
+
+  .page-description
+    margin: 0
+    font-size: 12px
+    line-height: 1.4
+    opacity: 0.7
+
+
+.source-picker
+  display: grid
+  grid-template-columns: auto minmax(0, 1fr) auto
+  align-items: center
+  column-gap: 8px
+  row-gap: 4px
+
+  .source-label
+    font-size: 11px
+    text-transform: uppercase
+    letter-spacing: 0.04em
+    opacity: 0.6
+
+  // Spans both picker rows, so it reads as acting on the pair.
+  .swap-button
+    grid-column: 3
+    grid-row: 1 / span 2
+
+.location-diff
+  display: flex
+  flex-direction: column
+  gap: 8px
+
+.unit-list
+  display: flex
+  flex-direction: column
+
+.unit-row
+  border-bottom: 1px solid var(--panel-rule-color)
+
+  &:last-child
+    border-bottom: none
+
+.unit-header
+  display: flex
+  align-items: center
+  gap: 6px
+  padding: 6px 0
+
+  .unit-name
+    flex: 1
+    min-width: 0
+    font-weight: 500
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  .age-tag
+    flex-shrink: 0
+
+.unit-details
+  padding: 0 0 8px 22px
+
+  // Where the polygon came from, set apart from what it is.
+  .provenance
+    margin-top: 6px
+    padding-top: 6px
+    border-top: 1px solid var(--panel-rule-color)
+
+  // Lexicon and column links, laid out as a wrapping run rather than a list.
+  .linked-list
+    display: flex
+    flex-wrap: wrap
+    gap: 2px 10px
+
+  .lex-link
+    display: inline-flex
+    align-items: center
+    gap: 4px
+
+  // A matched column unit: an id is all there is to show, so keep it quiet.
+  .unit-link
+    font-size: 11px
+    opacity: 0.85
+
+  .overflow
+    font-size: 11px
+    opacity: 0.6
+
+  // A map unit that reached nothing in Macrostrat — which is the finding.
+  .unmatched
+    opacity: 0.6
+    font-style: italic
+
+  // Long free text; let it wrap rather than stretching the panel.
+  .reference
+    font-size: 11px
+    line-height: 1.35
+    opacity: 0.8
+
+  .identifiers
+    display: flex
+    flex-wrap: wrap
+    gap: 0 12px
+    opacity: 0.7
+
+.color-swatch
+  display: inline-block
+  flex-shrink: 0
+  width: 16px
+  height: 16px
+  border: 1px solid rgba(0, 0, 0, 0.2)
+  border-radius: 2px
+  vertical-align: middle

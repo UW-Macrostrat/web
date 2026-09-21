@@ -1,0 +1,252 @@
+// The live hero. `MapAreaContainer` from @macrostrat/map-interface owns the
+// layout: the map fills the frame, the column rides in its detail panel on the
+// right and the story card in its context panel on the left — the same shape
+// as every other Macrostrat map page. These rules size those panels for a hero
+// rather than a viewport, and keep the two cards looking as they did.
+
+.hero-frame
+  position: relative
+  height: var(--hero-height)
+  border-radius: var(--pz-radius-lg)
+  overflow: hidden
+  border: 1px solid color-mix(in srgb, var(--pz-accent-color) 30%, transparent)
+  background: var(--pz-panel-background-color)
+
+  // The container's stacks default to viewport widths (30em for the detail
+  // stack); a hero is a good deal narrower than that.
+  --map-detail-stack-width: 226px
+  --map-context-stack-width: 250px
+  --map-context-stack-max-width: 280px
+  --map-context-min-width: 250px
+  --map-panel-border-radius: var(--pz-radius-md)
+
+  @media (max-width: 700px)
+    --map-detail-stack-width: 166px
+    --map-context-stack-width: 180px
+    --map-context-stack-max-width: 190px
+    --map-context-min-width: 160px
+
+.hero-map-area
+  height: 100%
+
+// ------------------------------------------------------- the context panel
+
+.hero-context-panel
+  display: flex
+  flex-direction: column
+  gap: 0.4em
+  pointer-events: all
+  box-shadow: var(--pz-shadow-lg)
+
+.caption-body
+  animation: caption-enter 0.4s ease both
+
+  .caption-title
+    margin: 0
+    font-family: var(--header-font)
+    font-size: 1.05em
+    line-height: 1.2
+    color: var(--pz-heading-color)
+
+  .caption-text
+    margin: 0.25em 0 0
+    font-size: 0.85em
+    line-height: 1.4
+    color: var(--pz-text-color)
+
+@keyframes caption-enter
+  from
+    opacity: 0
+    transform: translateY(6px)
+  to
+    opacity: 1
+    transform: none
+
+.caption-nav
+  display: flex
+  align-items: center
+  gap: 0.25em
+
+.caption-dots
+  display: flex
+  align-items: center
+  gap: 0.35em
+  flex: 1 1 auto
+  justify-content: center
+
+.caption-dot
+  width: 7px
+  height: 7px
+  padding: 0
+  border: none
+  border-radius: 50%
+  cursor: pointer
+  background: var(--pz-border-color)
+  transition: background-color 0.2s ease, transform 0.2s ease
+
+  &:hover
+    transform: scale(1.3)
+
+  &:global(.active)
+    background: var(--pz-accent-color)
+
+.hero-filter
+  display: flex
+  align-items: center
+  gap: 0.4em
+  flex-wrap: wrap
+  padding-top: 0.4em
+  border-top: 1px solid var(--pz-panel-rule-color)
+
+  // `IntervalField` renders a Blueprint-flavoured `DataField`; here it is one
+  // line beside the clear button rather than a stacked form field.
+  :global(.data-field)
+    display: flex
+    align-items: center
+    flex-wrap: wrap
+    gap: 0.35em
+    margin: 0
+
+    :global(.label)
+      font-size: 0.75em
+      text-transform: uppercase
+      letter-spacing: 0.04em
+      color: var(--pz-text-subtle-color)
+
+  .hero-filter-hint
+    margin: 0
+    font-size: 0.8em
+    line-height: 1.35
+    color: var(--pz-text-subtle-color)
+
+.hero-explore
+  align-self: flex-start
+  color: var(--pz-accent-text-color) !important
+
+// -------------------------------------------------------- the column panel
+
+// No padding below the header, and a column drawn exactly the panel's width
+// (`COLUMN_WIDTH` in hero.client.ts), so the units run edge to edge and the
+// panel reads as the column rather than as a box holding one.
+.hero-column-panel
+  --panel-padding: 0
+  display: flex
+  flex-direction: column
+  min-height: 0
+  pointer-events: all
+  box-shadow: var(--pz-shadow-lg)
+
+.column-inset-header
+  flex: 0 0 auto
+  display: flex
+  align-items: flex-start
+  gap: 0.25em
+  padding: 0.45em 0.3em 0.45em 0.7em
+  border-bottom: 1px solid var(--pz-panel-rule-color)
+
+  .column-inset-titles
+    flex: 1 1 auto
+    min-width: 0
+
+  // A link, so it takes the heading role and darkens on hover with it.
+  .col-name
+    display: block
+    font-family: var(--header-font)
+    font-size: 0.95em
+    line-height: 1.2
+    color: var(--pz-heading-color)
+    transition: color 0.18s ease
+    &:hover
+      color: var(--pz-heading-hover-color)
+      text-decoration: none
+
+  .column-inset-summary
+    margin: 0.15em 0 0
+    font-size: 0.75em
+    color: var(--pz-text-subtle-color)
+
+  .column-focus-button
+    flex: 0 0 auto
+
+  // `LocationFocusButton` renders a "Recenter" label beside its icon whenever
+  // the target is off screen. In a column header there is no room for it and
+  // the icon says enough; its own class is hashed inside the library's style
+  // module, so this goes through Blueprint's text wrapper instead.
+  :global(.bp6-button-text)
+    display: none
+
+.column-inset-scroll
+  flex: 1 1 auto
+  min-height: 0
+  overflow-y: auto
+  overflow-x: hidden
+  padding: 0
+
+  // Unit labels: small, serif, upright. Family inherits into the label's
+  // foreignObject; the size and style are the column's own variables.
+  font-family: var(--serif-font, Georgia, serif)
+  --column-unit-font-size: 8.5px
+  --column-unit-font-style: normal
+  // Theme-aware, through the design-system tokens: a hairline of the text
+  // color rather than a fixed black, which vanishes on dark unit fills.
+  --column-stroke-color: color-mix(in srgb, var(--pz-text-color) 35%, transparent)
+  // What the column considers "empty": the panel itself, not the page.
+  --column-background-color: var(--pz-panel-background-color)
+  // Selection reads as the age filter in the context panel, not as a wash over
+  // the unit that would fight the age color.
+  --selection-overlay-opacity: 0
+
+  // The scrollbar would be a gutter between the units and the panel edge.
+  scrollbar-width: none
+  &::-webkit-scrollbar
+    display: none
+
+  // Centred in both directions. The library centres the label box; these make
+  // the text inside it centre too when it wraps.
+  :global(.unit-overlay)
+    text-align: center
+  :global(.unit-label)
+    width: 100%
+    text-align: center
+
+  // Units outside the age filter are dimmed by fading their color in
+  // `hero.client.ts`, not from here: only the background is meant to back off,
+  // and a class on the unit would displace the one the library puts there.
+
+// ------------------------------------------------------------- map chrome
+
+// While a new column is being loaded.
+.hero-loading
+  position: absolute
+  top: 0.75em
+  left: 50%
+  transform: translateX(-50%)
+  z-index: 20
+  padding: 0.3em
+  border-radius: 50%
+  background: var(--pz-panel-background-color)
+
+// ------------------------------------------------------------- credits
+
+.hero-credits
+  display: flex
+  flex-wrap: wrap
+  gap: 0.15em 1.5em
+  margin-top: 0.5em
+  justify-content: flex-end
+
+  .hero-credit
+    margin: 0
+    font-size: 0.8em
+    line-height: 1.35
+    color: var(--pz-text-subtle-color)
+
+  .credit-label
+    text-transform: uppercase
+    letter-spacing: 0.04em
+    font-size: 0.85em
+    margin-right: 0.5em
+    color: var(--pz-accent-text-color)
+
+  .credit-detail
+    color: var(--pz-text-subtle-color)

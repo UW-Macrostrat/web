@@ -6,7 +6,13 @@ import { join } from "path";
 
 export type PageIndex = { [k: string]: string[] };
 export type PermalinkIndex = {
-  [k: string]: { contentFile: string; title: string };
+  [k: string]: {
+    contentFile: string;
+    title: string;
+    /** Site pages declare the website address they are rendered at
+     * (`route: /about`); the documentation navigation leaves them out. */
+    route?: string;
+  };
 };
 
 export function buildPageIndex(
@@ -43,7 +49,8 @@ export function buildPageIndex(
     const name = lastPart.split(".")[0];
 
     const title = data.title ?? firstHeading(body) ?? name;
-    permalinkIndex[sluggedPath] = { contentFile: newPath, title };
+    const route = typeof data.route === "string" ? data.route : undefined;
+    permalinkIndex[sluggedPath] = { contentFile: newPath, title, route };
 
     const pathWithoutExt = newPath.split(".")[0];
 

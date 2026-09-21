@@ -1,17 +1,83 @@
-.stats-table
-    display: grid
-    grid-template-columns: repeat(4, 25%)
+// The lexicon index. Colors, spacing, rules and elevation come from the
+// Paleozoic tokens (`--pz-`); the cards themselves are the shared `LinkCard`.
 
-    .stat
-        border-right: 1px solid var(--text-color)
-        border-bottom: 1px solid var(--text-color)
-        border-top: 1px solid var(--text-color)
-        padding: .5em
-        text-align: center
+.lex-index
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-5)
 
-    .stat:first-child
-        border-left: 1px solid var(--text-color)
-        
+.lead
+  margin: 0
+  font-size: 1.1em
+  line-height: 1.5
+  color: var(--pz-text-color)
+  max-width: 44em
+
+// A row of figures, on rules rather than in a boxed table.
+.lex-stats
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))
+  gap: var(--pz-space-2)
+  padding: var(--pz-space-4) 0
+  border-top: 2px solid color-mix(in srgb, var(--pz-accent-color) 35%, transparent)
+  border-bottom: 2px solid color-mix(in srgb, var(--pz-accent-color) 35%, transparent)
+
+  .stat
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: 0.15em
+    padding: var(--pz-space-2)
+    border-radius: var(--pz-radius-md)
+    color: inherit
+    text-decoration: none
+    transition: background-color 0.15s ease
+
+  a.stat:hover
+    background-color: var(--pz-hover-background-color)
+    text-decoration: none
+    .stat-value
+      color: var(--pz-link-hover-color)
+
+  .stat-value
+    font-family: var(--header-font)
+    font-size: 1.5em
+    font-variant-numeric: tabular-nums
+    color: var(--pz-accent-text-color)
+    transition: color 0.15s ease
+
+  .stat-label
+    font-size: 0.8em
+    text-transform: uppercase
+    letter-spacing: 0.05em
+    color: var(--pz-text-subtle-color)
+
+.lex-search
+  display: flex
+  justify-content: center
+
+.dictionaries
+  h2
+    margin: 0 0 var(--pz-space-3)
+    color: var(--pz-heading-color)
+
+// The dictionaries read as a set, not a stack: a grid of equal cards, each of
+// which carries its own elevation from the shared card styles.
+.dictionary-grid
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr))
+  gap: var(--pz-space-4)
+
+  // `.link-card` is hashed inside the cards module, so the page hands each
+  // card a global class of its own to reach it by.
+  :global(.dictionary-card)
+    margin: 0
+    height: 100%
+
+.lex-footnote
+  margin: 0
+  font-size: 0.9em
+  color: var(--pz-text-subtle-color)
 
 .content-page
     display: flex
