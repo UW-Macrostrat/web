@@ -1,5 +1,6 @@
 import {
   Alignment,
+  AnchorButton,
   Button,
   ButtonGroup,
   ButtonProps,
@@ -23,7 +24,6 @@ import {
   isDetailPanelRouteInternal,
   useCurrentPage,
 } from "../app-state/navigation.ts";
-import Changelog from "../changelog.mdx";
 import { LayerButton, LinkButton, ListButton } from "../components/buttons";
 import { CloseableCard } from "../components/closeable-card";
 import BedrockIcon from "../components/icons/BedrockIcon";
@@ -32,7 +32,7 @@ import ElevationIcon from "../components/icons/ElevationIcon";
 import FossilIcon from "../components/icons/FossilIcon";
 import LineIcon from "../components/icons/LineIcon";
 import { SearchResults } from "./navbar.ts";
-import UsageText from "../usage.mdx";
+import { mapUsageDocsURL } from "../docs-links";
 import { ExperimentsPanel, SettingsPanel } from "./settings-panel";
 import h from "./main.module.sass";
 import { MenuButton } from "~/components";
@@ -106,10 +106,6 @@ export default function Menu(props: MenuProps) {
     },
     elementForMenuPage(menuPage)
   );
-}
-
-function ChangelogPanel() {
-  return h("div.bp6-text.text-panel", [h(Changelog)]);
 }
 
 const AboutText = loadable(() => import("../components/About"));
@@ -189,19 +185,11 @@ const LayerList = (props) => {
   ]);
 };
 
-const UsagePanel = () => h("div.text-panel", h(UsageText));
-
 const locationTitleForRoute = {
   "/about": "About",
-  "/usage": "Usage",
   "/settings": "Settings",
   "/experiments": "Experiments",
   "/layers": "Layers",
-  "/changelog": "Changelog",
-};
-
-const menuBacklinkLocationOverrides = {
-  "/changelog": "/about",
 };
 
 function useLastPageLocation(
@@ -215,9 +203,7 @@ function useLastPageLocation(
 
   if (breadcrumbs.length < 2) return null;
   const prevPage = breadcrumbs[breadcrumbs.length - 2];
-  const currentPage = breadcrumbs[breadcrumbs.length - 1];
-  const prevRoute =
-    menuBacklinkLocationOverrides[currentPage.key] ?? prevPage.key;
+  const prevRoute = prevPage.key;
   if (prevRoute == mapPagePrefix || isDetailPanelRouteInternal(prevRoute))
     return null;
   return {
@@ -261,10 +247,14 @@ function MenuHeaderButtons({ baseRoute = "/" }) {
       text: "About",
       page: MenuPage.ABOUT,
     }),
-    h(TabButton, {
+    // The usage guide is a documentation page (docs/map/usage.md), outside
+    // the map's client-side router.
+    h(AnchorButton, {
       icon: "help",
       text: "Usage",
-      page: MenuPage.USAGE,
+      href: mapUsageDocsURL,
+      minimal: true,
+      className: "menu-button tab-button",
     }),
   ]);
 }
@@ -301,10 +291,6 @@ function elementForMenuPage(page: MenuPage) {
       return h(SettingsPanel);
     case MenuPage.ABOUT:
       return h(AboutText);
-    case MenuPage.USAGE:
-      return h(UsagePanel);
-    case MenuPage.CHANGELOG:
-      return h(ChangelogPanel);
     case MenuPage.EXPERIMENTS:
       return h(ExperimentsPanel);
   }

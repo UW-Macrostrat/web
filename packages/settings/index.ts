@@ -96,6 +96,12 @@ export const cdrAPIKey = getRuntimeConfig("CDR_API_KEY");
 export const mapPagePrefix = "/map";
 export const routerBasename = "/map";
 
+/** Where this repository's own user documentation (`docs/`) is published within
+ * the site's documentation section. It mirrors the `mount` of the `website`
+ * source in the documentation vault's `sources.yml`
+ * (github.com/Macrostrat/docs); change the two together. */
+export const websiteDocsPrefix = "/docs/website";
+
 /** Base URL of the knowledge-graph (xDD extraction) API that records feedback
  * runs. `XDD_KNOWLEDGE_GRAPH_API_URL` is the canonical setting; the older
  * `MACROSTRAT_KG_API_DOMAIN` is honored as a fallback so existing deployments

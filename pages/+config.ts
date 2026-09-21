@@ -36,10 +36,14 @@ export default {
     "pageInfo",
     "breadcrumbs",
   ],
-  // The v1 addresses of pages now under /about and /community.
   redirects: {
+    // The v1 addresses of pages now under /about and /community.
     "/people": "/community/contributors",
     "/support": "/about/support",
+    // The map interface's usage guide and changelog, formerly panels of the
+    // map page, are documentation pages (docs/map in this repository).
+    "/map/usage": "/docs/website/map/usage",
+    "/map/changelog": "/docs/website/map/changelog",
   },
   clientRouting: true,
   supportsDarkMode: true,

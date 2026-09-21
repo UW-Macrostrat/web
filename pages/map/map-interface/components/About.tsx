@@ -1,8 +1,8 @@
 import { AnchorButton } from "@blueprintjs/core";
-import { mapPagePrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import newGithubIssueUrl from "new-github-issue-url";
 import { Link, useNavigate } from "../app-state/navigation";
+import { mapChangelogDocsURL, mapUsageDocsURL } from "../docs-links";
 import styles from "./about.module.styl";
 
 const h = hyper.styled(styles);
@@ -23,13 +23,8 @@ const SoftwareInfo = (props) => {
       ]),
     ]),
     h("p.changes", [
-      h(
-        Link,
-        {
-          to: mapPagePrefix + "/changelog",
-        },
-        "Changelog"
-      ),
+      // A documentation page, not a panel of this app.
+      h("a", { href: mapChangelogDocsURL }, "Changelog"),
       // h(LinkButton, {
       //   to: "/experiments",
       //   icon: "clean",
@@ -80,9 +75,9 @@ const AboutText = (props) => {
           </LinkButton>
         </li>
         <li>
-          <LinkButton to="/usage" icon="help" minimal>
+          <AnchorButton href={mapUsageDocsURL} icon="help" minimal>
             Tips and tricks
-          </LinkButton>
+          </AnchorButton>
         </li>
         <li>
           <AnchorButton href={issueURL} target="_blank" icon="issue" minimal>
