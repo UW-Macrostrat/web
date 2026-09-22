@@ -25,17 +25,19 @@ import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
 import type { ColumnEditorData } from "./data";
 import { EDITOR_BASE } from "./data";
 import { EditorColumn } from "./column-view";
+import { DisplaySettingsButton } from "./display";
 import { EditorInspector } from "./inspector";
-import { SurfacesSheet, UnitsSheet } from "./sheets";
+import { SurfacesSheet, UnifiedSheet, UnitsSheet } from "./sheets";
 import {
+  blockingIssuesAtom,
+  columnVisibleAtom,
   type EditingMode,
+  editedUnitsAtom,
   editingModeAtom,
   inspectorOpenAtom,
   isDirtyAtom,
   resetEditsAtom,
   snapshotAtom,
-  surfacesAtom,
-  unitsAtom,
 } from "./state";
 import { downloadText, unitsToCSV } from "./export";
 import styles from "./main.module.sass";
@@ -66,12 +68,11 @@ function ColumnEditorFrame(props: ColumnEditorData) {
   // The frame isolates every atom below it, so the column is seeded through
   // `initialAtoms`; keying on the column remounts the frame (and re-seeds)
   // when the route moves to another one.
+  // Only the snapshot is seeded: it *is* the input data, and the transaction
+  // over it starts empty.
   const initialAtoms = useMemo(() => {
     const snapshot = { col_id, columnInfo, units, boundaries, isDraft };
-    return [
-      [snapshotAtom, snapshot],
-      [unitsAtom, units],
-    ] as [any, any][];
+    return [[snapshotAtom, snapshot]] as [any, any][];
   }, [col_id, columnInfo, units, boundaries, isDraft]);
 
   return h(HybridPage, {
@@ -92,7 +93,8 @@ function EditorActions() {
   const snapshot = useAtomValue(snapshotAtom);
   const isDirty = useAtomValue(isDirtyAtom);
   const resetEdits = useSetAtom(resetEditsAtom);
-  const units = useAtomValue(unitsAtom);
+  const units = useAtomValue(editedUnitsAtom);
+  const blockingIssues = useAtomValue(blockingIssuesAtom);
 
   const onExport = useCallback(() => {
     const csv = unitsToCSV(units);
@@ -132,33 +134,56 @@ function EditorActions() {
       h(Button, {
         icon: "download",
         text: "Export CSV",
+        // An ingestion sheet with a unit overlapping its neighbour isn't worth
+        // writing out; the sheet says which cells are at fault.
+        disabled: blockingIssues.length > 0,
+        title: exportTitle(blockingIssues.length),
         onClick: onExport,
       }),
     ]),
   ]);
 }
 
-/** Units ⇄ surfaces, with counts, the dirty state and the inspector toggle,
- * in the header's second row so it sits directly above the sheet. */
+function exportTitle(errorCount: number): string | undefined {
+  if (errorCount === 0) return undefined;
+  return `${errorCount} cell${errorCount === 1 ? "" : "s"} need fixing first`;
+}
+
+/** Units ⇄ surfaces, the dirty state, and the toggles for the two panes that
+ * frame the sheet. In the header's second row, so it sits directly above the
+ * sheet it switches. */
 function EditorModeBar() {
   const [mode, setMode] = useAtom(editingModeAtom);
+  const [columnVisible, setColumnVisible] = useAtom(columnVisibleAtom);
   const [inspectorOpen, setInspectorOpen] = useAtom(inspectorOpenAtom);
-  const units = useAtomValue(unitsAtom);
-  const surfaces = useAtomValue(surfacesAtom);
   const isDirty = useAtomValue(isDirtyAtom);
 
   return h("div.editor-mode-bar", [
     h(SegmentedControl, {
       small: true,
       options: [
-        { label: `Units (${units.length})`, value: "units" },
-        { label: `Surfaces (${surfaces.length})`, value: "surfaces" },
+        { label: "Units", value: "units" },
+        // The ingestion sheet's own view, between the two: units with their
+        // boundaries, surfaces implicit
+        { label: "Unified", value: "unified" },
+        { label: "Surfaces", value: "surfaces" },
       ],
       value: mode,
       onValueChange: (value: EditingMode) => setMode(value),
     }),
     h.if(isDirty)("span.dirty-indicator", "Unsaved edits"),
     h("div.spacer"),
+    h(DisplaySettingsButton),
+    // Both framing panes give way to the sheet: a wide table is the reason to
+    // hide either of them.
+    h(Button, {
+      icon: "vertical-bar-chart-asc",
+      minimal: true,
+      small: true,
+      active: columnVisible,
+      text: "Column",
+      onClick: () => setColumnVisible(!columnVisible),
+    }),
     h(Button, {
       icon: "panel-stats",
       minimal: true,
@@ -177,11 +202,23 @@ function EditorModeBar() {
  * assistant slot, which `content-full` doesn't render. */
 function EditorContent() {
   const mode = useAtomValue(editingModeAtom);
+  const columnVisible = useAtomValue(columnVisibleAtom);
   const inspectorOpen = useAtomValue(inspectorOpenAtom);
 
   let sheet = h(UnitsSheet);
   if (mode === "surfaces") {
     sheet = h(SurfacesSheet);
+  } else if (mode === "unified") {
+    sheet = h(UnifiedSheet);
+  }
+
+  let column = null;
+  if (columnVisible) {
+    column = h(
+      "div.editor-column-pane",
+      { className: classNames(`mode-${mode}`) },
+      h(ErrorBoundary, h(EditorColumn))
+    );
   }
 
   let inspector = null;
@@ -195,14 +232,6 @@ function EditorContent() {
   return h(
     "div.editor-content",
     { className: classNames(`mode-${mode}`) },
-    [
-      h(
-        "div.editor-column-pane",
-        { className: classNames(`mode-${mode}`) },
-        h(ErrorBoundary, h(EditorColumn))
-      ),
-      h("div.editor-sheet-pane", h(ErrorBoundary, sheet)),
-      inspector,
-    ]
+    [column, h("div.editor-sheet-pane", h(ErrorBoundary, sheet)), inspector]
   );
 }

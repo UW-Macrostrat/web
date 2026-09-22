@@ -6,60 +6,105 @@
   flex-direction: column
   gap: var(--pz-section-gap)
 
-// The v2 notice. Carries the house purple rather than a warning tint: this is
-// a statement about where the project is, not a problem.
-.beta-notice
-  font-size: 0.85em
-  padding: 0.4em 0.9em
-  border-radius: var(--pz-radius-md)
-  border-left: 3px solid var(--pz-accent-color)
-  background: color-mix(in srgb, var(--pz-accent-color) 10%, transparent)
-  color: var(--pz-text-color)
-  strong
-    color: var(--pz-accent-text-color)
-  a
-    margin-left: 0.25em
-    font-weight: 500
-
-// The header holds the wordmark and the search and nothing else — everything
-// else that used to live here pushed the hero below the fold. Once it sticks,
-// the title shrinks further; `.is-stuck` comes from the shared `StickyHeader`.
+// The header. It is the wordmark, the tagline, the beta tag and the search —
+// everything else that used to live here pushed the hero below the fold. Once
+// it sticks, the title shrinks; `.is-stuck` comes from the shared
+// `StickyHeader`, which is also the element this class is on.
 .site-header
-  :global(.is-stuck)
+  // The class lands on this same element, not on a descendant of it.
+  &:global(.is-stuck)
+    // The size the breadcrumbs carry on every other page, so the header the
+    // reader scrolls into is the header they already know.
     .main-title
-      --macrostrat-logo-size: 30px
-      --macrostrat-wordmark-size: 1.4rem
+      --macrostrat-logo-size: 24px
+      --macrostrat-wordmark-size: 1.1rem
+
+    .logo-full
+      opacity: 0
+
+    .logo-simple
+      opacity: 1
 
     .subtitle
       display: none
+
+    // Nothing wraps once the header is a strip: the name, the tag and the
+    // search stay on one line.
+    .site-header-inner
+      flex-wrap: nowrap
 
 .site-header-inner
   display: flex
   flex-wrap: wrap
   align-items: center
-  justify-content: space-between
-  gap: var(--pz-space-3) var(--pz-space-5)
+  gap: var(--pz-space-2) var(--pz-space-4)
 
+// The wordmark, at the size a landing page's name should be. It drops to the
+// breadcrumbs' size once the header sticks — eased rather than snapped, since
+// the header shrinking mid-scroll is the one moment the reader is watching it.
 .main-title
-  --macrostrat-logo-size: 46px
-  --macrostrat-wordmark-size: 2rem
+  --macrostrat-logo-size: 64px
+  --macrostrat-wordmark-size: 2.8rem
   justify-content: flex-start
-  gap: 0.75rem !important
-  transition: none
+  gap: 0.6rem !important
+  transition: font-size 0.25s ease
+
+  // Tight under the wordmark, and sans-serif: the logo link sets Publico Text
+  // on everything inside it, which is right for the name and wrong for a line
+  // of running text.
+  h1
+    line-height: 1.05
 
   .subtitle
+    font-family: var(--sans-serif-font) !important
     font-size: 0.95rem
-    margin: 0.1rem 0 0
+    line-height: 1.2
+    margin: 0
     color: var(--pz-text-subtle-color)
     font-weight: 500
+
+  // The two marks occupy one box and cross-fade between them. Sized here
+  // rather than by the shared `a.macrostrat-logo-link img` rule, which these
+  // out-specify.
+  .logo-dissolve
+    position: relative
+    flex: 0 0 auto
+    width: var(--macrostrat-logo-size)
+    height: var(--macrostrat-logo-size)
+    transition: width 0.25s ease, height 0.25s ease
+
+  .logo-dissolve img
+    position: absolute
+    inset: 0
+    width: 100%
+    height: 100%
+    transition: opacity 0.25s ease
+
+  .logo-simple
+    opacity: 0
+
+// That this is a beta is a tag beside the name, not a banner over the page.
+.v2-beta-tag
+  align-self: center
+  flex: 0 0 auto
+  font-size: 0.8em
+  font-weight: 600
+  letter-spacing: 0.02em
+  padding: 0.15em 0.6em
+  border-radius: 2em
+  white-space: nowrap
+  color: var(--pz-accent-text-color) !important
+  background: color-mix(in srgb, var(--pz-accent-color) 15%, transparent)
+  border: 1px solid color-mix(in srgb, var(--pz-accent-color) 35%, transparent)
+
+  &:hover
+    text-decoration: none
+    background: color-mix(in srgb, var(--pz-accent-color) 25%, transparent)
 
 .site-search
   display: flex
   justify-content: flex-end
   margin-left: auto
-  :global(.lex-search-prompt)
-    display: flex
-    align-items: center
   // The search speaks for itself up here; its explanation belongs on /lex.
   :global(.search-hint)
     display: none
@@ -78,7 +123,7 @@
 // One height for both the live hero and the cover photo that stands in for it,
 // so the swap never moves the page. Read by `hero.module.sass`.
 .hero
-  --hero-height: clamp(360px, 46vh, 520px)
+  --hero-height: clamp(320px, 40vh, 450px)
 
 .hero-static
   height: var(--hero-height)
@@ -170,16 +215,25 @@
 .platform-links
   padding-top: var(--pz-space-4)
   border-top: 2px solid color-mix(in srgb, var(--pz-accent-color) 35%, transparent)
+
   h2
-    font-size: 1em
+    font-size: 1.2em
     margin: 0 0 0.5em
     color: var(--pz-heading-color)
-    text-transform: uppercase
-    letter-spacing: 0.04em
-  ul
-    list-style: none
-    padding: 0
+
+  // The same boxes as the entry points above, on a narrower grid: these are
+  // the quieter half of the page, but they are still the same kind of thing.
+  .platform-cards
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr))
+    gap: var(--pz-space-3)
+
+  :global(.platform-card)
     margin: 0
-    display: flex
-    flex-wrap: wrap
-    gap: 0.5em 1em
+    h3
+      margin-top: 0
+      font-size: 1em
+    p
+      margin: 0
+      font-size: 0.85em
+      color: var(--pz-text-subtle-color)

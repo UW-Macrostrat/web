@@ -3,9 +3,15 @@
  * The map lives here rather than in the editor: choosing *which* column to
  * work on is a different task from working on it, and the editor wants the
  * whole window (see `../editor-shell.ts`).
+ *
+ * Which columns the map draws is the shared project filter
+ * (`~/components/project-filter`), in `?project_id=`. Unset is the API's
+ * default "Core columns" composite; picking a project reaches the rest of
+ * Macrostrat's set — eODP, Deep Sea, New Zealand — which is the only way to
+ * open a column outside the core compilation for editing.
  */
 import hyper from "@macrostrat/hyper";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { navigate } from "vike/client/router";
 import {
   AnchorButton,
@@ -14,11 +20,31 @@ import {
   ControlGroup,
   NumericInput,
 } from "@blueprintjs/core";
+import { atom } from "jotai";
 import { MacrostratDataProvider } from "@macrostrat/data-provider";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { onDemand } from "~/_utils";
+import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { AlphaTag } from "~/components";
 import { ColumnMapSlot } from "~/components/column-map/target";
+import {
+  InProcessFilterProvider,
+  InProcessFilterTag,
+  InProcessSwitch,
+  useShowInProcess,
+  type InProcessFilterAtom,
+} from "~/components/in-process-filter";
+import {
+  parseProjectFilter,
+  projectIDParam,
+  ProjectFilterControl,
+  ProjectFilterProvider,
+  ProjectFilterTag,
+  serializeProjectFilter,
+  useProjectIDs,
+  type ProjectFilterAtom,
+  type ProjectFilterValue,
+} from "~/components/project-filter";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
 import { DEFAULT_COLUMN_ID, editorHref, newColumnHref } from "../data";
 import styles from "./picker.module.sass";
@@ -47,6 +73,21 @@ const capabilities: Partial<LayoutCapabilities> = {
   contentScroll: "panel",
 };
 
+/** The project scope, in `?project_id=` beside the editor's own parameters. */
+const projectParamAtom = atomWithSearchParam("project_id");
+
+const pickerProjectFilterAtom: ProjectFilterAtom = atom(
+  (get) => parseProjectFilter(get(projectParamAtom)),
+  (get, set, value: ProjectFilterValue) => {
+    set(projectParamAtom, serializeProjectFilter(value));
+  }
+);
+
+/** In-process columns are the ones most likely to want editing, so they are
+ * drawn by default here — unlike the column list, where the default is the
+ * published set. Not a URL parameter: it only changes what the map offers. */
+const pickerInProcessAtom: InProcessFilterAtom = atom(true);
+
 export function Page() {
   return h(
     MacrostratDataProvider,
@@ -54,10 +95,27 @@ export function Page() {
     h(HybridPage, {
       className: "column-picker-page",
       capabilities,
-      actions: h(AlphaTag, {
-        content:
-          "An experimental column editor. Edits stay in the page — there is no write API yet.",
-      }),
+      // Inside the frame's jotai scope, so the map, the dropdown and the tags
+      // share atom cells — `HybridPage` mounts its own `Provider`, and the same
+      // atom read on either side of one is a different cell.
+      wrap: (node) =>
+        h(
+          ProjectFilterProvider,
+          { atom: pickerProjectFilterAtom },
+          h(InProcessFilterProvider, { atom: pickerInProcessAtom }, node)
+        ),
+      actions: h([
+        h(ProjectFilterControl, { key: "projects" }),
+        h(AlphaTag, {
+          key: "alpha",
+          content:
+            "An experimental column editor. Edits stay in the page — there is no write API yet.",
+        }),
+      ]),
+      filterBar: h([
+        h(ProjectFilterTag, { key: "project" }),
+        h(InProcessFilterTag, { key: "in-process" }),
+      ]),
       content: h(PickerPanel),
       map: h(PickerMap),
     })
@@ -72,6 +130,12 @@ function PickerPanel() {
       "Click a column on the map to edit its units and age model, or open one by ID."
     ),
     h(OpenByID),
+    h("h2", "Scope"),
+    h(
+      "p",
+      "The map draws the core compilation by default. Choose a project to reach the rest of Macrostrat's columns."
+    ),
+    h(InProcessSwitch, { label: "In-process columns" }),
     h("h2", "Start from nothing"),
     h(
       "p",
@@ -121,14 +185,25 @@ function PickerMap() {
     navigate(editorHref(colID));
   }, []);
 
+  const projectIDs = useProjectIDs();
+  const inProcess = useShowInProcess();
+  const projectID = useMemo(
+    () => projectIDParam(projectIDs ?? null),
+    [projectIDs?.join(",")]
+  );
+
+  // The map refits when its target key changes, which is what a change of
+  // project scope wants: the new project's columns are somewhere else.
+  const targetKey = `column-editor-picker:${projectID ?? "core"}`;
+
   return h("div.picker-map-pane", [
     h(
       ColumnMapSlot,
       {
         className: "column-map",
-        targetKey: "column-editor-picker",
-        projectID: 1,
-        inProcess: true,
+        targetKey,
+        projectID,
+        inProcess,
         visibleColumnIDs: null,
         selectedColumnIDs: EMPTY_SELECTION,
         selectedColumn: null,

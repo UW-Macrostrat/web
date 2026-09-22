@@ -16,6 +16,10 @@ export interface NavLinkItem {
   href: string;
   text: string;
   icon?: any;
+  /** One line saying what is behind the link, for the places that show these
+   * as cards rather than as a list of buttons (the homepage). Ignored by the
+   * footer and the navbar, which have room for the label alone. */
+  description?: string;
 }
 
 /** The site's canonical link sets, exported so that compact chrome (e.g. the
@@ -31,11 +35,36 @@ export const dataNavItems: NavLinkItem[] = [
 ];
 
 export const platformNavItems: NavLinkItem[] = [
-  { href: "/about", text: "About", icon: "info-sign" },
-  { href: "/community", text: "Community", icon: "people" },
-  { href: "/publications", text: "Publications", icon: "book" },
-  { href: "/about/support", text: "Support us", icon: "heart" },
-  { href: "/heatmap", text: "Heatmap", icon: "geosearch" },
+  {
+    href: "/about",
+    text: "About",
+    icon: "info-sign",
+    description: "What Macrostrat is, who builds it, and how it is funded.",
+  },
+  {
+    href: "/community",
+    text: "Community",
+    icon: "people",
+    description: "Contributors, discussion, and how to get in touch.",
+  },
+  {
+    href: "/publications",
+    text: "Publications",
+    icon: "book",
+    description: "Papers built on Macrostrat, and how to cite it.",
+  },
+  {
+    href: "/about/support",
+    text: "Support us",
+    icon: "heart",
+    description: "Funders, and what keeps the system running.",
+  },
+  {
+    href: "/heatmap",
+    text: "Heatmap",
+    icon: "geosearch",
+    description: "Where Macrostrat is being used, right now.",
+  },
 ];
 
 const repoURL = "https://github.com/UW-Macrostrat/web";

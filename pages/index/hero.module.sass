@@ -1,66 +1,123 @@
-// The live hero. `MapAreaContainer` from @macrostrat/map-interface owns the
-// layout: the map fills the frame, the column rides in its detail panel on the
-// right and the story card in its context panel on the left — the same shape
-// as every other Macrostrat map page. These rules size those panels for a hero
-// rather than a viewport, and keep the two cards looking as they did.
+// The live hero. A two-cell grid — the map, then the stratigraphic column
+// beside it — with the area carousel underneath. Over the map: the "Explore"
+// masthead in one corner and the caption (the area's name, the age range) in
+// the other, both over a scrim because satellite imagery is neither light nor
+// dark. It was a `MapAreaContainer` with the column floating over the map;
+// taking the column out of the frame is what left room for the caption in it.
 
 .hero-frame
-  position: relative
+  // Wide enough for the column the library draws at `COLUMN_WIDTH`
+  // (hero.client.ts), plus the card's own hairline.
+  --hero-column-width: 206px
+  display: grid
+  grid-template-columns: minmax(0, 1fr) var(--hero-column-width)
+  gap: var(--pz-space-2)
   height: var(--hero-height)
-  border-radius: var(--pz-radius-lg)
+
+  // No column under the map's centre: the map takes the whole width.
+  &.no-column
+    grid-template-columns: minmax(0, 1fr)
+
+  // Below this there is no room for both. The map is the half that still works
+  // at phone width; the column has its own page.
+  @media (max-width: 620px)
+    grid-template-columns: minmax(0, 1fr)
+
+    .hero-column-slot
+      display: none
+
+.hero-map-slot
+  position: relative
+  min-width: 0
+  // The map is clipped to this box and nothing escapes it: Mapbox's canvas is
+  // sized in device pixels and rounds up, its controls sit outside the canvas,
+  // and a rounded corner over a satellite image shows every pixel that gets
+  // past. `isolation` keeps the overlay's stacking to this box as well.
   overflow: hidden
+  isolation: isolate
+  border-radius: var(--pz-radius-lg)
   border: 1px solid color-mix(in srgb, var(--pz-accent-color) 30%, transparent)
   background: var(--pz-panel-background-color)
 
-  // The container's stacks default to viewport widths (30em for the detail
-  // stack); a hero is a good deal narrower than that.
-  --map-detail-stack-width: 226px
-  --map-context-stack-width: 250px
-  --map-context-stack-max-width: 280px
-  --map-context-min-width: 250px
-  --map-panel-border-radius: var(--pz-radius-md)
+  // `MapView`'s own containers, which sit between this box and the canvas.
+  :global(.map-view-container),
+  :global(.mapbox-map)
+    border-radius: inherit
+    overflow: hidden
 
-  @media (max-width: 700px)
-    --map-detail-stack-width: 166px
-    --map-context-stack-width: 180px
-    --map-context-stack-max-width: 190px
-    --map-context-min-width: 160px
+  // Mapbox's wordmark and the compact attribution, both required, both moved
+  // to the right-hand corner and kept above the caption's scrim.
+  :global(.mapboxgl-ctrl-bottom-right)
+    z-index: 11
 
-.hero-map-area
-  height: 100%
+.hero-column-slot
+  display: flex
+  min-height: 0
 
-// ------------------------------------------------------- the context panel
+// ------------------------------------------------------- over the map
 
-.hero-context-panel
+// Both of these sit over satellite imagery, which is neither light nor dark and
+// carries no design-system surface. Their contrast comes from a scrim and a
+// shadow, in literal colors: there is no token for "legible over a photograph".
+$over-imagery-text: #fff
+$over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
+
+// The way into the full map. A proper button, in the corner the reader starts
+// from: the hero is an invitation, and a button is what says so.
+.hero-explore
+  position: absolute
+  top: 0.7em
+  left: 0.7em
+  z-index: 10
+  font-size: 1.05em
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important
+
+  @media (max-width: 620px)
+    font-size: 1em
+
+// What is on screen, bottom-left. Transparent to the pointer except where
+// there is something to click, so the map underneath stays draggable.
+.hero-overlay
+  position: absolute
+  left: 0
+  right: 0
+  bottom: 0
+  z-index: 10
   display: flex
   flex-direction: column
-  gap: 0.4em
-  pointer-events: all
-  box-shadow: var(--pz-shadow-lg)
+  align-items: flex-start
+  gap: 0.25em
+  padding: 2.5em 0.85em 0.6em
+  pointer-events: none
+  // Weighted into the corner the caption is in, so it reaches the text without
+  // washing over the whole bottom edge of the map.
+  background: linear-gradient(to top right, rgba(0, 0, 0, 0.65), transparent 65%)
 
-.caption-body
-  animation: caption-enter 0.4s ease both
+  > *
+    pointer-events: auto
 
-  .caption-title
-    margin: 0
-    font-family: var(--header-font)
-    font-size: 1.05em
-    line-height: 1.2
-    color: var(--pz-heading-color)
+.hero-title
+  margin: 0
+  font-family: var(--header-font)
+  font-size: 1.4em
+  line-height: 1.2
+  color: $over-imagery-text
+  text-shadow: $over-imagery-shadow
+  transition: opacity 0.45s ease, transform 0.45s ease
 
-  .caption-text
-    margin: 0.25em 0 0
-    font-size: 0.85em
-    line-height: 1.4
-    color: var(--pz-text-color)
-
-@keyframes caption-enter
-  from
+  // Panned away from the area: the name stops describing what is on screen, so
+  // it leaves rather than being replaced by a sentence saying it has.
+  &.is-hidden
     opacity: 0
-    transform: translateY(6px)
-  to
-    opacity: 1
-    transform: none
+    transform: translateY(0.4em)
+    pointer-events: none
+
+// ------------------------------------------------------- under the map
+
+.hero-context
+  display: flex
+  justify-content: center
+  margin-top: 0.4em
 
 .caption-nav
   display: flex
@@ -71,7 +128,6 @@
   display: flex
   align-items: center
   gap: 0.35em
-  flex: 1 1 auto
   justify-content: center
 
 .caption-dot
@@ -95,8 +151,6 @@
   align-items: center
   gap: 0.4em
   flex-wrap: wrap
-  padding-top: 0.4em
-  border-top: 1px solid var(--pz-panel-rule-color)
 
   // `IntervalField` renders a Blueprint-flavoured `DataField`; here it is one
   // line beside the clear button rather than a stacked form field.
@@ -111,30 +165,32 @@
       font-size: 0.75em
       text-transform: uppercase
       letter-spacing: 0.04em
-      color: var(--pz-text-subtle-color)
+      color: $over-imagery-text
+      text-shadow: $over-imagery-shadow
 
-  .hero-filter-hint
-    margin: 0
-    font-size: 0.8em
-    line-height: 1.35
-    color: var(--pz-text-subtle-color)
-
-.hero-explore
-  align-self: flex-start
-  color: var(--pz-accent-text-color) !important
+  // The clear button, over imagery rather than over a panel.
+  :global(.bp6-button)
+    color: $over-imagery-text !important
+    :global(.bp6-icon)
+      color: $over-imagery-text !important
 
 // -------------------------------------------------------- the column panel
 
-// No padding below the header, and a column drawn exactly the panel's width
+// No padding anywhere, and a column drawn exactly the card's width
 // (`COLUMN_WIDTH` in hero.client.ts), so the units run edge to edge and the
-// panel reads as the column rather than as a box holding one.
+// card reads as the column rather than as a box holding one.
 .hero-column-panel
-  --panel-padding: 0
+  flex: 1 1 auto
   display: flex
   flex-direction: column
   min-height: 0
-  pointer-events: all
-  box-shadow: var(--pz-shadow-lg)
+  overflow: hidden
+  border-radius: var(--pz-radius-lg)
+
+  // Blueprint's own card padding, beaten on specificity rather than with
+  // `!important`.
+  &:global(.bp6-card)
+    padding: 0
 
 .column-inset-header
   flex: 0 0 auto
@@ -181,15 +237,16 @@
   overflow-y: auto
   overflow-x: hidden
   padding: 0
+  margin: 0 -2px
 
   // Unit labels: small, serif, upright. Family inherits into the label's
   // foreignObject; the size and style are the column's own variables.
-  font-family: var(--serif-font, Georgia, serif)
-  --column-unit-font-size: 8.5px
+  font-family: var(--sans-serif-font)
+  --column-unit-font-size: 10px
   --column-unit-font-style: normal
   // Theme-aware, through the design-system tokens: a hairline of the text
   // color rather than a fixed black, which vanishes on dark unit fills.
-  --column-stroke-color: color-mix(in srgb, var(--pz-text-color) 35%, transparent)
+  --column-stroke-color: var(--pz-text-color)
   // What the column considers "empty": the panel itself, not the page.
   --column-background-color: var(--pz-panel-background-color)
   // Selection reads as the age filter in the context panel, not as a wash over
@@ -206,7 +263,6 @@
   :global(.unit-overlay)
     text-align: center
   :global(.unit-label)
-    width: 100%
     text-align: center
 
   // Units outside the age filter are dimmed by fading their color in
