@@ -30,11 +30,13 @@ export async function actionRunner(
       });
 
       const state = getState();
-      const filters = await Promise.all(
+      const resolved = await Promise.all(
         state.filtersInfo.map((f) => {
           return runFilter(f);
         })
       );
+      // A filter type we can't resolve (or a bad URL value) is dropped
+      const filters = resolved.filter((f) => f != null);
       return { type: "initial-load-complete", filters };
     }
     case "map-layers-changed": {
@@ -117,8 +119,14 @@ export async function actionRunner(
           dispatch
         );
       }
-    case "async-add-filter":
-      return { type: "add-filter", filter: await runFilter(action.filter) };
+    case "async-add-filter": {
+      const filter = await runFilter(action.filter);
+      if (filter == null) {
+        console.warn("Unhandled filter", action.filter);
+        return { type: "stop-searching" };
+      }
+      return { type: "add-filter", filter };
+    }
     case "get-filtered-columns":
       const filters = getState((state) => state.filters);
       return await fetchFilteredColumns(filters);

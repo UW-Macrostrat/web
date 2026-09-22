@@ -26,8 +26,7 @@ function buildColumnQueryParams(filters) {
     all_lithology_classes: ["lith_class", "name"],
     all_lithology_types: ["lith_type", "name"],
     all_lithologies: ["lith_id", "id"],
-    // Environments are unused for now in map filtering, but used in
-    // column filtering (I think)
+    // Environments only apply to columns: the map legend carries none
     environments: ["environ_id", "id"],
     environment_types: ["environ_type", "name"],
     environment_classes: ["environ_class", "name"],
@@ -35,7 +34,9 @@ function buildColumnQueryParams(filters) {
 
   let query = {};
   filters.forEach((f) => {
-    let [value, attr] = possibleFields[f.type];
+    const fields = possibleFields[f.type];
+    if (fields == null) return;
+    let [value, attr] = fields;
     if (query[value]) {
       query[value].push(f[attr]);
     } else {
