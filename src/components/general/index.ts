@@ -14,15 +14,20 @@ export function MacrostratLogoLink({
   href = "/",
   className,
   logoStyle,
+  logo,
   children,
 }: {
   href?: string;
   className?: string;
   logoStyle?: MacrostratIconStyle;
+  /** Something other than the plain icon in the logo's place — a pair of icons
+   * that cross-fade as a header shrinks, say. The link's own layout and sizing
+   * are unchanged; only the mark is. */
+  logo?: ReactNode;
   children?: React.ReactNode;
 }) {
   return h("a.macrostrat-logo-link", { href, className }, [
-    h(MacrostratIcon, { iconStyle: logoStyle }),
+    logo ?? h(MacrostratIcon, { iconStyle: logoStyle }),
     children,
   ]);
 }
@@ -54,16 +59,18 @@ export function MacrostratIcon({
 
 export function SiteTitle({
   logoStyle,
+  logo,
   className,
   children,
 }: {
   logoStyle?: MacrostratIconStyle;
+  logo?: ReactNode;
   className?: string;
   children?: ReactNode;
 }) {
   return h(
     MacrostratLogoLink,
-    { logoStyle, className: classNames("site-title", className) },
+    { logoStyle, logo, className: classNames("site-title", className) },
     h("div.site-title-content", [h("h1", "Macrostrat"), children])
   );
 }

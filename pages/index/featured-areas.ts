@@ -7,10 +7,13 @@
  * Paleozoic section" or "New Zealand" is a literal-object edit to the list
  * below, with nothing else to touch.
  *
- * Areas can also be synthetic: {@link nearbyArea} builds one from wherever the
- * reader was last looking, and it goes first when it exists.
+ * The list is deliberately **fixed and server-known**: every area the hero can
+ * show is in it at build time, which is what would let these views be
+ * prerendered and served as images until the reader first touches the map. A
+ * synthetic "where you were looking" area, built from localStorage, used to go
+ * in front of it; it said nothing the map didn't already show and it made the
+ * set unknowable to the server, so it is gone.
  */
-import { readLastMapPosition } from "~/_utils/last-map-position";
 
 /** Where the hero's camera sits. Pitch and bearing are part of the model, not
  * a global constant, so an area can be flat, rotated or oblique as it suits. */
@@ -106,41 +109,9 @@ export function areaByID(id: string): FeaturedArea | null {
 }
 
 /** The area the server opens on: the same one all day, so the page caches and a
- * reader who comes back sees what they saw. The browser may put a synthetic
- * "near you" area in front of it — see {@link nearbyArea}. */
+ * reader who comes back sees what they saw. */
 export function featuredAreaForToday(date = new Date()): FeaturedArea {
   const start = Date.UTC(date.getUTCFullYear(), 0, 1);
   const dayOfYear = Math.floor((date.getTime() - start) / 86400000);
   return featuredAreas[dayOfYear % featuredAreas.length];
-}
-
-/** The synthetic area for the reader's own region, or null when we have no
- * estimate of it.
- *
- * The estimate is the last place they had a Macrostrat map open (localStorage,
- * ignored past a day). It is **not** GeoIP: `pageContext.geo` is deliberately
- * scoped to `/map` because an IP-derived value on a cacheable page can be
- * served to the next reader. Giving the homepage a real GeoIP default needs a
- * cache-bypassed endpoint to fetch it from — see the "User location
- * management" feature area. Client-only either way: the server has no idea. */
-export function nearbyArea(): FeaturedArea | null {
-  const position = readLastMapPosition();
-  if (position == null) return null;
-
-  const target = position.target;
-  const cam = position.camera;
-  const lat = target?.lat ?? cam?.lat;
-  const lng = target?.lng ?? cam?.lng;
-  if (lat == null || lng == null) return null;
-
-  // Pull in to where terrain reads, whatever scale they left the map at.
-  const zoom = Math.min(Math.max(target?.zoom ?? 10, 9), 12);
-
-  return {
-    id: "near-you",
-    title: "Where you were looking",
-    description:
-      "The geology around the last place you had a Macrostrat map open.",
-    view: camera(lat, lng, zoom),
-  };
 }

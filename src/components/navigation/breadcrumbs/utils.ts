@@ -2,7 +2,12 @@ import type { ReactNode } from "react";
 import h from "./breadcrumbs.module.sass";
 
 export function buildBreadcrumbs(ctx: Vike.PageContext): Item[] {
-  const breadcrumbs = ctx.breadcrumbs;
+  // `breadcrumbs` is filled by `+onCreatePageContext.server.ts`, so it is
+  // absent whenever the trail wasn't built on the server — notably when a
+  // client-only page aborts (`render(404)` from a client-side `data` hook)
+  // and Vike renders the error page in the browser. Fall back to the URL so
+  // the reader still gets a path back rather than a blank page.
+  const breadcrumbs = ctx.breadcrumbs ?? breadcrumbsFromURL(ctx.urlPathname);
 
   let errorText: string | null = null;
   if (ctx.is404) {
@@ -61,6 +66,20 @@ export function buildBreadcrumbs(ctx: Vike.PageContext): Item[] {
       isRoot,
     };
   });
+}
+
+/** A trail derived from the path alone: the same shape `getBreadcrumbs`
+ * returns, minus the `pageId` that resolves a crumb's `pageInfo`. */
+function breadcrumbsFromURL(urlPathname: string | undefined) {
+  const segments = (urlPathname ?? "/").split("/").filter(Boolean);
+  const crumbs = [{ url: "/", slug: "" }];
+  for (let i = 0; i < segments.length; i++) {
+    crumbs.push({
+      url: "/" + segments.slice(0, i + 1).join("/"),
+      slug: segments[i],
+    });
+  }
+  return crumbs;
 }
 
 export interface PageInfo {

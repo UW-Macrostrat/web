@@ -56,3 +56,44 @@
     text-align: center
     color: var(--secondary-color)
     font-size: 0.9em
+
+// The site search box. Shaped like a text field rather than like a button: it
+// is the page's search, not one action among several, and a field is what a
+// reader looks for. Opening it hands the real input to the omnibar.
+.site-search-prompt
+  display: flex
+  align-items: center
+  gap: 0.5em
+  min-width: 15em
+  max-width: 22em
+  padding: 0.4em 0.75em
+  cursor: pointer
+  font: inherit
+  text-align: left
+  color: var(--pz-text-subtle-color)
+  background: var(--pz-panel-background-color)
+  border: 1px solid var(--pz-border-color)
+  border-radius: 2em
+  transition: border-color 0.15s ease, color 0.15s ease
+
+  &:hover
+    color: var(--pz-text-color)
+    border-color: var(--pz-accent-color)
+
+  // Blueprint's icon, which takes no class of ours: `className` on a component
+  // is a prop, and this module scopes only the classes written in a tag.
+  :global(.bp6-icon)
+    flex: 0 0 auto
+    color: var(--pz-accent-text-color)
+
+  .site-search-label
+    flex: 1 1 auto
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+  .site-search-hotkey
+    flex: 0 0 auto
+    font-family: var(--monospace-font)
+    font-size: 0.85em
+    color: var(--pz-text-subtle-color)

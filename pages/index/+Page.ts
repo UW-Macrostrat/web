@@ -1,13 +1,20 @@
-import { Image, SiteTitle } from "~/components/general";
+import {
+  Image,
+  MacrostratIcon,
+  MacrostratIconStyle,
+  SiteTitle,
+} from "~/components/general";
 import { LinkCard } from "~/components/cards";
 import { Link, StickyHeader } from "~/components";
 import { useData } from "vike-react/useData";
 import { webAssetsPrefix } from "@macrostrat-web/settings";
-import { AnchorButton } from "@blueprintjs/core";
 import h from "./+Page.module.sass";
 import { platformNavItems } from "~/layouts/footer";
 import { clientOnly } from "~/components/lex/client-only";
-import { LexSearchHost, LexSearchPrompt } from "~/components/lex/search-omnibar";
+import {
+  LexSearchHost,
+  SiteSearchPrompt,
+} from "~/components/lex/search-omnibar";
 import type { HeroData } from "./+data";
 
 /** The live map-and-column hero reaches mapbox-gl, so it loads on the client
@@ -21,22 +28,25 @@ const HeroLive = clientOnly(() =>
  * workbench feature area "Homepage design and layout". */
 export default function Page() {
   return h("div.page-main", [
-    h(BetaNotice),
-    // Everything above the hero, and nothing else: the wordmark and tagline on
-    // the left, the lexicon search on the right. Sticky, and once it reaches
-    // the top the title shrinks — `.is-stuck` comes from `StickyHeader`.
-    h(
-      "div.site-header",
-      h(
-        StickyHeader,
-        h("div.site-header-inner", [
-          h(SiteTitle, { className: "main-title" }, [
-            h("h2.subtitle", "The data system for the crust"),
-          ]),
-          h("div.site-search", h(LexSearchPrompt)),
-        ])
-      )
-    ),
+    // Everything above the hero, and nothing else: the wordmark, the tagline
+    // and the beta tag on the left, the site search on the right. The class
+    // goes on `StickyHeader` itself rather than on a wrapper around it: a
+    // sticky element can only travel inside its own parent, so a wrapper sized
+    // to the header leaves it nowhere to stick. `.is-stuck`, where the title
+    // shrinks, comes from `StickyHeader`.
+    h(StickyHeader, { className: h["site-header"] }, [
+      h("div.site-header-inner", [
+        // `className` on a component is a prop, not a tag class, so the style
+        // module doesn't scope it — look the hashed name up instead.
+        h(
+          SiteTitle,
+          { className: h["main-title"], logo: h(DissolvingLogo) },
+          [h("h2.subtitle", "The data system for the crust")]
+        ),
+        h(V2BetaTag),
+        h("div.site-search", h(SiteSearchPrompt)),
+      ]),
+    ]),
     // The one omnibar instance the search prompt opens (also on ⌘K).
     h(LexSearchHost),
     h(Hero),
@@ -48,12 +58,34 @@ export default function Page() {
   ]);
 }
 
-function BetaNotice() {
-  return h("div.beta-notice", [
-    h("strong", "Macrostrat v2 is in beta."),
-    " The data are real and some things will be rough. ",
-    h(Link, { href: "/community" }, "Tell us what you find."),
+/** The two marks, stacked and cross-faded: the full logo while the header is at
+ * its own size, the simple one — what the breadcrumbs carry on every other page
+ * — once it sticks. Two images rather than one whose `src` changes, because a
+ * swapped `src` cannot dissolve; which of them shows is decided by `.is-stuck`
+ * in the stylesheet. */
+function DissolvingLogo() {
+  return h("span.logo-dissolve", [
+    h(MacrostratIcon, { className: h["logo-full"] }),
+    h(MacrostratIcon, {
+      iconStyle: MacrostratIconStyle.SIMPLE,
+      className: h["logo-simple"],
+    }),
   ]);
+}
+
+/** That this is v2 and a beta is worth one tag beside the wordmark, not a
+ * banner across the top of the page. It leads to `/community`, which is where
+ * the feedback the banner used to ask for actually goes. */
+function V2BetaTag() {
+  return h(
+    Link,
+    {
+      href: "/community",
+      className: h["v2-beta-tag"],
+      title: "Macrostrat v2 is in beta — tell us what you find",
+    },
+    "v2 beta 🎉"
+  );
 }
 
 /** The hero: the map, the column inset over it, and the age filter and credits
@@ -124,11 +156,23 @@ function EntryPoints() {
     entryPoints.map((item) => {
       let icon = null;
       if (item.image != null) {
-        icon = h(Image, { className: "entry-icon", src: item.image, width: "22px", height: "22px" });
+        icon = h(Image, {
+          className: "entry-icon",
+          src: item.image,
+          width: "22px",
+          height: "22px",
+        });
       }
-      return h(LinkCard, { key: item.href, title: item.title, href: item.href, className: "entry-card" }, [
-        h("p", [icon, item.text]),
-      ]);
+      return h(
+        LinkCard,
+        {
+          key: item.href,
+          title: item.title,
+          href: item.href,
+          className: "entry-card",
+        },
+        [h("p", [icon, item.text])]
+      );
     })
   );
 }
@@ -154,18 +198,25 @@ function WhatsNew() {
 }
 
 /** The pages about the project, below the data rather than in a header. Same
- * list the footer uses, so the two never disagree. */
+ * list the footer uses, so the two never disagree — and the same card as the
+ * entry points above, quieter, so the page reads as one set of boxes rather
+ * than as content followed by a row of buttons. */
 function PlatformLinks() {
   const items = platformNavItems.filter((item) => item.href !== "/heatmap");
   return h("nav.platform-links", [
     h("h2", "About the project"),
     h(
-      "ul",
+      "div.platform-cards",
       items.map((item) =>
         h(
-          "li",
-          { key: item.href },
-          h(AnchorButton, { href: item.href, icon: item.icon, minimal: true, large: true }, item.text)
+          LinkCard,
+          {
+            key: item.href,
+            title: item.text,
+            href: item.href,
+            className: "platform-card",
+          },
+          [h("p", item.description)]
         )
       )
     ),

@@ -44,6 +44,10 @@ export interface ShellProps {
    * shell into a header row of its own, the map shell into
    * `MapAreaContainer`'s floating navbar. */
   breadcrumbs?: ReactNode;
+  /** Shown immediately after the title, inside the titling area: a status tag
+   * or badge that belongs to the page's identity rather than to its controls
+   * (which sit at the other end of the row). */
+  titleAdornment?: ReactNode;
   controls?: ReactNode;
   /** Second header row (active filters), at the content's width. */
   filterBar?: ReactNode;
@@ -75,6 +79,7 @@ export function LayoutShellView(props: ShellProps) {
 function ContentShell({
   content,
   breadcrumbs,
+  titleAdornment,
   controls,
   filterBar,
   map,
@@ -128,7 +133,7 @@ function ContentShell({
     [
       h("header.content-header", [
         h("div.header-row", [
-          h("div.header-titling", breadcrumbs),
+          h("div.header-titling", [breadcrumbs, titleAdornment]),
           h("div.header-controls", controls),
         ]),
         h.if(filterBar != null)("div.header-filters", filterBar),
@@ -176,6 +181,7 @@ function ModeSwitchButton({
 function SplitShell({
   content,
   breadcrumbs,
+  titleAdornment,
   controls,
   filterBar,
   map,
@@ -191,7 +197,7 @@ function SplitShell({
     h("div.split-panel", [
       h("header.split-header", [
         h("div.header-row", [
-          h("div.header-titling", breadcrumbs),
+          h("div.header-titling", [breadcrumbs, titleAdornment]),
           h("div.header-controls", controls),
         ]),
         h.if(filterBar != null)("div.header-filters", filterBar),

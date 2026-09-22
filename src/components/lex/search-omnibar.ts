@@ -1,8 +1,9 @@
 /**
- * The lexicon's single search surface: a Blueprint `Omnibar` over the API v2
- * `defs/autocomplete` source (`./search`). Mounted once by the `/lex` layout, so
- * it is reachable from every lexicon page — the header button, the homepage's
- * central search button, or ⌘K / ctrl-K.
+ * The site's single search surface: a Blueprint `Omnibar` over the API v2
+ * `defs/autocomplete` source (`./search`). Mounted once by the `/lex` layout and
+ * once by the homepage, and opened from the header control on either, from the
+ * lexicon's own prompt, or with ⌘K / ctrl-K. What it indexes is still the
+ * lexicon; what it is presented as, off `/lex`, is the site's search.
  *
  * Rows are categorized into sections (see `categorizeLexResults`) instead of
  * carrying a per-row type tag, and lithologies / environments / intervals render
@@ -13,7 +14,13 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./search.module.sass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button, Menu, MenuDivider, MenuItem } from "@blueprintjs/core";
+import {
+  Button,
+  Icon,
+  Menu,
+  MenuDivider,
+  MenuItem,
+} from "@blueprintjs/core";
 import { Omnibar } from "@blueprintjs/select";
 import { navigate } from "vike/client/router";
 import { atom, useAtom, useSetAtom } from "jotai";
@@ -185,7 +192,7 @@ function LexSearchOmnibar({
     [onClose]
   );
 
-  let emptyMessage = "Search the Macrostrat lexicon…";
+  let emptyMessage = "Search Macrostrat…";
   if (loading) {
     emptyMessage = "Searching…";
   } else if (query.trim().length >= MIN_QUERY_LENGTH) {
@@ -210,7 +217,7 @@ function LexSearchOmnibar({
     onItemSelect,
     resetOnSelect: true,
     inputProps: {
-      placeholder: "Search lithologies, names, intervals, minerals…",
+      placeholder: "Search Macrostrat: names, lithologies, intervals, minerals…",
     },
   });
 }
@@ -269,7 +276,6 @@ export function LexSearchButton({
   className,
 }: LexSearchButtonProps) {
   const openSearch = useOpenLexSearch();
-  const hotkeyLabel = useMemo(getHotkeyLabel, []);
 
   return h(
     Button,
@@ -281,7 +287,7 @@ export function LexSearchButton({
       icon: "search",
       onClick: openSearch,
     },
-    [h("span.label", text), h("span.hotkey", hotkeyLabel)]
+    [h("span.label", text)]
   );
 }
 
@@ -290,27 +296,59 @@ export function LexSearchControl() {
   return h("div.lex-search-control", h(LexSearchButton));
 }
 
-/** The homepage's central call to action — the lexicon's primary entry point. */
+/** The lexicon homepage's central call to action. */
 export function LexSearchPrompt() {
   return h("div.lex-search-prompt", [
     h(LexSearchButton, {
-      // The one action these pages are really offering: it takes the house
-      // purple through the shared `pz-important-button` role (src/styles).
+      // The one action that page is really offering: it takes the house purple
+      // through the shared `pz-important-button` role (src/styles).
       className: "pz-important-button",
       minimal: false,
       large: true,
       text: "Search the lexicon",
     }),
-    h(
-      "p.search-hint",
-      "Lithologies, stratigraphic names, intervals, minerals, environments, economic uses, columns, and projects."
-    ),
   ]);
 }
 
+/**
+ * The site's search box: a field-shaped control that opens the omnibar, worded
+ * for the whole site rather than for the lexicon. It is the only search surface
+ * Macrostrat has, and on a page that isn't `/lex` a button labelled "Search the
+ * lexicon" reads as a link into one section rather than as *the* search.
+ *
+ * What it searches is still the lexicon's autocomplete (`./search`); widening
+ * the index to columns, map sources and projects is the other half of this and
+ * happens behind the same control.
+ */
+export function SiteSearchPrompt({
+  placeholder = "Search Macrostrat",
+}: {
+  placeholder?: string;
+}) {
+  const openSearch = useOpenLexSearch();
+  const hotkeyLabel = useHotkeyLabel();
+
+  return h(
+    "button.site-search-prompt",
+    { type: "button", onClick: openSearch, "aria-label": placeholder },
+    [
+      h(Icon, { icon: "search" }),
+      h("span.site-search-label", placeholder),
+      h("span.site-search-hotkey", hotkeyLabel),
+    ]
+  );
+}
+
+/** The platform's modifier, resolved after mount: `navigator` is absent on the
+ * server, and picking the label during render would hydrate a Mac's ⌘K onto
+ * every other platform. */
+function useHotkeyLabel() {
+  const [label, setLabel] = useState("⌘K");
+  useEffect(() => setLabel(getHotkeyLabel()), []);
+  return label;
+}
+
 function getHotkeyLabel() {
-  // The lex layout renders on the server too, where `navigator` is absent.
-  if (typeof navigator === "undefined") return "⌘K";
   const isApple = /Mac|iPhone|iPad/.test(
     navigator.platform ?? navigator.userAgent ?? ""
   );

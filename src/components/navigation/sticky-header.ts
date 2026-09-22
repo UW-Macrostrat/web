@@ -1,10 +1,7 @@
-import hyper from "@macrostrat/hyper";
-import styles from "./sticky-header.module.sass";
+import h from "./sticky-header.module.sass";
 import classNames from "classnames";
 import { useEffect, useRef, useState } from "react";
 import { useTransition } from "transition-hook";
-
-const h = hyper.styled(styles);
 
 export function StickyHeader(props) {
   const ref = useRef(null);
@@ -13,9 +10,7 @@ export function StickyHeader(props) {
   const { children } = props;
 
   const className = classNames(
-    {
-      "is-stuck": isStuckToTop,
-    },
+    { "is-stuck": isStuckToTop },
     "transition-" + transition.stage,
     props.className
   );

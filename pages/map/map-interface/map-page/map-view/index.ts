@@ -14,7 +14,7 @@ import {
   setGeoJSON,
 } from "@macrostrat/mapbox-utils";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
-import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
+import { getMapboxStyle } from "@macrostrat/mapbox-utils";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -30,9 +30,10 @@ import {
   FlyToPlaceManager,
   HoveredFeatureManager,
   MacrostratLayerManager,
+  SelectedColumnManager,
 } from "./map";
 import { getBaseMapStyle } from "@macrostrat-web/map-utils";
-import { buildOverlayStyle } from "../map-styles";
+import { buildOverlayStyle, mergeMapStyles } from "../map-styles";
 import h from "../main.module.sass";
 import { useSetAtom } from "jotai";
 
@@ -79,7 +80,7 @@ export default function MainMapView(props) {
     //     tileserverDomain: SETTINGS.burwellTileDomain,
     //   });
     // }
-    return mergeStyles(baseStyle, macrostratStyle, overlayStyle);
+    return mergeMapStyles(baseStyle, macrostratStyle, overlayStyle);
   }, [baseStyle, isDarkMode]);
 
   useEffect(() => {
@@ -165,6 +166,7 @@ export default function MainMapView(props) {
       h(MacrostratLayerManager),
       h(FlyToPlaceManager),
       h(HoveredFeatureManager),
+      h(SelectedColumnManager),
     ]
   );
 }
