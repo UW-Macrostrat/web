@@ -9,6 +9,7 @@ import {
   CreateButton,
 } from "@macrostrat-web/column-builder";
 import { useData } from "vike-react/useData";
+import { ColumnUpload } from "./column-upload";
 
 export function Page() {
   const data: {
@@ -27,6 +28,10 @@ export function Page() {
         href: "/project/new",
         text: "Create New Project",
       }),
+    ]),
+    h("div.column-upload-section", { style: { margin: "1rem 0" } }, [
+      h("h3", "Upload columns"),
+      h(ColumnUpload),
     ]),
     h(Table, { interactive: true, headers }, [
       projects.map((project, i) => {
