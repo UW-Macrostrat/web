@@ -265,8 +265,6 @@ export enum MenuPage {
   LAYERS = "layers",
   SETTINGS = "settings",
   ABOUT = "about",
-  USAGE = "usage",
-  CHANGELOG = "changelog",
   EXPERIMENTS = "experiments",
 }
 
