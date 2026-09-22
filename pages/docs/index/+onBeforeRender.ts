@@ -1,16 +1,15 @@
-import { buildPageIndex } from "@macrostrat-web/text-toolchain";
+import {
+  buildPageIndex,
+  WEB_ASSETS_STORE,
+} from "@macrostrat-web/text-toolchain";
 import { renderToString } from "react-dom/server";
 import { PageContext } from "vike/types";
 import { render } from "vike/abort";
 import h from "@macrostrat/hyper";
+import { webAssetsPrefix } from "@macrostrat-web/settings";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import {
-  buildDocsNav,
-  crumbLabels,
-  findTrail,
-  type DocsNavNode,
-} from "./nav";
+import { buildDocsNav, crumbLabels, findTrail, type DocsNavNode } from "./nav";
 
 const modules = import.meta.glob("../../../content/**/*.{md,mdx}");
 
@@ -50,6 +49,22 @@ function stripLeadingH1(html: string): string {
 }
 
 const HEADING = /<h([23])\b[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h\1>/g;
+
+/** Documentation media is referenced by its object-store URL, so the pages read
+ * and check correctly outside the site (GitHub, Obsidian, the vault's CI). When
+ * this deployment serves that store under its own web-assets prefix (nginx
+ * proxies `/assets/web/` to the bucket in the cluster), the URLs are rewritten
+ * so media loads same-origin through the site's cache. With the default prefix
+ * this is a no-op. The prefix is runtime configuration, which is why this
+ * happens here rather than in the text-toolchain at compile time; the
+ * toolchain warns about media the rewrite would not cover. */
+function localizeAssetURLs(html: string): string {
+  if (webAssetsPrefix == null || webAssetsPrefix === WEB_ASSETS_STORE) {
+    return html;
+  }
+  const base = webAssetsPrefix.replace(/\/+$/, "");
+  return html.replaceAll(`"${WEB_ASSETS_STORE}/`, `"${base}/`);
+}
 
 function extractToc(html: string): TocEntry[] {
   const toc: TocEntry[] = [];
@@ -100,7 +115,7 @@ export async function onBeforeRender(
 
   const mod: any = await pageModule();
   const html = renderToString(h(mod.default));
-  const mdxContent = stripLeadingH1(html);
+  const mdxContent = localizeAssetURLs(stripLeadingH1(html));
 
   return {
     pageContext: {

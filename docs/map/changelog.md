@@ -54,7 +54,7 @@ _February 1, 2023_
 
 ### User interface improvements
 
-![The new Settings panel](https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/settings-panel.png)
+![The new Settings panel](https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/settings-panel.png)
 
 - Added a new _Settings_ panel to control map display options. The _Experiments_
   sub-panel allows previews of new features that are still in development.
@@ -62,14 +62,14 @@ _February 1, 2023_
   style. This follows the browser-level preference by default, but it can be
   overridden from the _Settings_ panel.
 
-<video src="https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/dark-mode.mp4" controls loop muted playsinline preload="metadata">
-  <a href="https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/dark-mode.mp4">Video: toggling dark mode</a>
+<video src="https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/dark-mode.mp4" controls loop muted playsinline preload="metadata">
+  <a href="https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/dark-mode.mp4">Video: toggling dark mode</a>
 </video>
 
 #### Map features and bug fixes
 
-<video src="https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/basemap-labels.mp4" controls loop muted playsinline preload="metadata">
-  <a href="https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/basemap-labels.mp4">Video: toggling basemap labels</a>
+<video src="https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/basemap-labels.mp4" controls loop muted playsinline preload="metadata">
+  <a href="https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/basemap-labels.mp4">Video: toggling basemap labels</a>
 </video>
 
 - Added an option to show and hide text labels on the map (in the _Settings_
@@ -81,13 +81,13 @@ _February 1, 2023_
 - Added an experimental _Map sources_ layer (_not yet fully integrated into the
   user interface_)
 
-![The Rocky Mountains without map labels](https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/cordillera-without-labels.png)
+![The Rocky Mountains without map labels](https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/cordillera-without-labels.png)
 
 #### Info panel
 
-![The info panel header](https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/infobox-header.png)
+![The info panel header](https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/infobox-header.png)
 
-![The age refinement panel](https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/age-refinement-panel.png)
+![The age refinement panel](https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/age-refinement-panel.png)
 
 - Update [xDD](https://xdd.wisc.edu) publications list to use the newer snippets
   API.
@@ -98,8 +98,8 @@ _February 1, 2023_
 
 #### Line symbols (experimental)
 
-<video src="https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/experimental-line-symbols.mp4" controls loop muted playsinline preload="metadata">
-  <a href="https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/experimental-line-symbols.mp4">Video: experimental line symbols</a>
+<video src="https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/experimental-line-symbols.mp4" controls loop muted playsinline preload="metadata">
+  <a href="https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/experimental-line-symbols.mp4">Video: experimental line symbols</a>
 </video>
 
 _Line symbols are critical to the representation of crustal processes on
@@ -125,8 +125,8 @@ basis.
 - Correctly save filter states from URL parameters.
 - Major simplification of the internal design of the map filter system.
 
-<video src="https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/save-location.mp4" controls loop muted playsinline preload="metadata">
-  <a href="https://macrostrat-media.s3.amazonaws.com/maps/docs/version-4.1.0/save-location.mp4">Video: saving location state</a>
+<video src="https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/save-location.mp4" controls loop muted playsinline preload="metadata">
+  <a href="https://storage.macrostrat.org/assets/web/docs/maps/version-4.1.0/save-location.mp4">Video: saving location state</a>
 </video>
 
 #### Examples of saved state
