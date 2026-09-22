@@ -176,3 +176,16 @@ span.spacer
 p
   margin-top: 0
   margin-bottom: 1em
+
+// Mapbox draws the geolocation dot and its accuracy circle as ordinary
+// positioned elements over the canvas, and sets no `pointer-events` on either.
+// The circle is sized in pixels from the reported accuracy scaled to the
+// current zoom and re-sized on every `zoom` event, so a coarse desktop fix —
+// hundreds of metres, which is what `enableHighAccuracy` gets without GPS —
+// grows to cover the whole viewport as you zoom in. Every drag and click then
+// lands on the circle instead of the map. The fix arrives with the position,
+// which can be many seconds after the control was pressed, so it reads as a
+// map that suddenly stops responding. Neither element is interactive.
+.mapboxgl-user-location,
+.mapboxgl-user-location-accuracy-circle
+  pointer-events: none

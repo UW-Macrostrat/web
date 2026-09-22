@@ -7,20 +7,34 @@
 
 /* ---------------------------------------------------------------- header */
 
-.editor-actions
+.editor-context
   display: flex
   flex-direction: row
   align-items: center
   gap: 0.5em
 
-.editor-mode-bar
+.editor-toolbar
   display: flex
   flex-direction: row
   align-items: center
-  gap: 1em
+  gap: 0.75em
+  flex-wrap: wrap
 
-.editor-mode-bar .spacer
+.editor-toolbar .spacer
   flex: 1
+
+// The focused interval, in the same idiom as the project and time filter tags:
+// the tag names what is in force, its × lifts it.
+.focus-indicator
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.25em
+  .clear-button
+    margin-left: -0.15em
+  .focus-ages
+    font-size: 0.85em
+    color: var(--pz-text-subtle-color, var(--secondary-color))
 
 .draft-tag
   white-space: nowrap

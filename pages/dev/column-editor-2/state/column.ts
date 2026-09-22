@@ -63,12 +63,22 @@ export const editedUnitsAtom = atom<UnitLong[]>((get) => {
   });
 });
 
-/** The transaction as `DataSheet`'s `updatedData` for a unit-backed sheet:
- * one entry per row of `baseUnitsAtom`, in the same order. */
-export const unitOverlayAtom = atom<(UnitEdit | undefined)[]>((get) => {
-  const edits = get(unitEditsAtom);
-  return get(baseUnitsAtom).map((unit) => edits.get(unit.unit_id));
-});
+/** The transaction as `DataSheet`'s overlay, aligned to the rows the sheet is
+ * *currently holding*.
+ *
+ * Not to `baseUnitsAtom`: a local data provider applies the active filters
+ * itself and hands back only the matching rows, leaving the store's `data`
+ * shorter than the column as loaded. An overlay built against the full set
+ * would then be both too long — the table draws `max(data, updatedData)` rows,
+ * so the surplus appear as empty ones — and misaligned, attaching each edit to
+ * whichever row now sits at its old index. Keying on the row in hand avoids
+ * both. */
+export function unitOverlayFor(
+  edits: Map<number, UnitEdit>,
+  rows: (UnitLong | null | undefined)[]
+): (UnitEdit | undefined)[] {
+  return rows.map((unit) => (unit == null ? undefined : edits.get(unit.unit_id)));
+}
 
 /* -------------------------------------------------------------- writing */
 

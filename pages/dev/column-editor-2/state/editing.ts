@@ -8,8 +8,9 @@
  */
 import { atom } from "jotai";
 import type { UnitLong } from "@macrostrat/api-types";
-import type { EditEvent } from "@macrostrat/data-sheet";
+import type { ColumnSpec, EditEvent } from "@macrostrat/data-sheet";
 import {
+  ageForProportion,
   boundaryFieldInfo,
   boundaryTolerance,
   readBoundaryEdit,
@@ -26,8 +27,9 @@ import {
   resetEditsAtom,
   type UnitFieldEdit,
 } from "./column";
-import { boundaryKindAtom, preserveSurfacesAtom } from "./options";
+import { preserveSurfacesAtom } from "./options";
 import { surfacesAtom } from "./surfaces";
+import type { EditorSurface } from "../surfaces";
 
 export type IntervalMap = Map<number, IntervalDef> | null;
 
@@ -106,8 +108,17 @@ function boundaryEdits(
 
 /* ------------------------------------------------- a sheet's edit events */
 
-/** Cell edits on a unit-backed sheet (units, unified). A boundary column goes
- * through `editBoundaryAtom`; anything else is the row's own field. */
+/** Cell edits on a unit-backed sheet (units, unified).
+ *
+ * The **column spec decides what may be written**, and it is the only thing
+ * that does. A locked column is locked however the edit arrived: the cell
+ * renderer declines to offer an editor for one, but a fill or a paste writes
+ * across the whole column range of a selection without consulting the spec, so
+ * the check has to be made here too. It is also the only check — a second
+ * allow-list beside the spec is a second opinion waiting to disagree with it.
+ *
+ * A boundary column goes through `editBoundaryAtom`; anything else is the
+ * row's own field, coerced by the column's declared `dataType`. */
 export const editUnitCellsAtom = atom(
   null,
   (
@@ -116,15 +127,11 @@ export const editUnitCellsAtom = atom(
     {
       event,
       intervals,
-      editableFields,
-      numericFields,
+      columnSpec,
     }: {
       event: EditEvent<UnitLong>;
       intervals: IntervalMap;
-      /** Non-boundary columns this sheet lets through */
-      editableFields: Set<string>;
-      /** Which of those hold numbers */
-      numericFields: Set<string>;
+      columnSpec: ColumnSpec[];
     }
   ) => {
     if (event.type === "resetChanges") {
@@ -133,9 +140,13 @@ export const editUnitCellsAtom = atom(
     }
     if (event.type !== "setCells") return;
 
+    const specs = new Map(columnSpec.map((spec) => [spec.key, spec]));
     const edits: UnitFieldEdit[] = [];
+
     for (const { row, column, value } of event.cells) {
       if (row == null) continue;
+      const spec = specs.get(column);
+      if (spec == null || spec.editable === false) continue;
 
       if (boundaryFieldInfo(column) != null) {
         const edit = readBoundaryEdit(row, column, value, intervals);
@@ -144,9 +155,8 @@ export const editUnitCellsAtom = atom(
         continue;
       }
 
-      if (!editableFields.has(column)) continue;
       let next: any = value;
-      if (numericFields.has(column)) {
+      if (spec.dataType === "number" || spec.dataType === "integer") {
         if (value === "" || value == null) continue;
         next = Number(value);
       }
@@ -156,11 +166,17 @@ export const editUnitCellsAtom = atom(
   }
 );
 
-/** Cell edits on the surfaces sheet. A surface is a projection, so an edit
- * there is a boundary move on every unit hung on it — which is what
- * `preserveSurfaces` does by default, applied to the surface's own units
- * whatever the setting says. Moving a surface *is* the whole point of that
- * table. */
+/** Cell edits on the surfaces sheet.
+ *
+ * A surface is a projection, so an edit there is a boundary move on every unit
+ * hung on it — always, whatever `preserveSurfaces` says, because moving a
+ * surface *is* what that table is for.
+ *
+ * What moves it follows the axis. A measured column's surfaces have a position
+ * and that is the record. An age column's have a *calibration* — an interval
+ * and a proportion within it — and the age falls out of the two, so the
+ * proportion is the record and the age is read-only. A surface with no
+ * calibration has nothing to move it by, and is left alone. */
 export const editSurfaceCellsAtom = atom(
   null,
   (
@@ -169,7 +185,7 @@ export const editSurfaceCellsAtom = atom(
     {
       event,
       coordinateKey,
-    }: { event: EditEvent<any>; coordinateKey: "age" | "position" }
+    }: { event: EditEvent<any>; coordinateKey: "position" | "proportion" }
   ) => {
     if (event.type === "resetChanges") {
       set(resetEditsAtom);
@@ -177,7 +193,6 @@ export const editSurfaceCellsAtom = atom(
     }
     if (event.type !== "setCells") return;
 
-    const kind = get(boundaryKindAtom);
     const surfaces = get(surfacesAtom);
     const edits: UnitFieldEdit[] = [];
 
@@ -188,8 +203,9 @@ export const editSurfaceCellsAtom = atom(
       const surface = surfaces.find((s) => s.id === row.id);
       if (surface == null) continue;
 
-      const values: BoundaryValues =
-        coordinateKey === "position" ? { pos: next } : { age: next };
+      const values = surfaceBoundaryValues(surface, coordinateKey, next);
+      if (values == null) continue;
+
       // The unit below a surface meets it with its top, the unit above with
       // its base.
       for (const unit_id of surface.unitsBelow) {
@@ -203,3 +219,25 @@ export const editSurfaceCellsAtom = atom(
     set(applyUnitEditsAtom, edits);
   }
 );
+
+function surfaceBoundaryValues(
+  surface: EditorSurface,
+  coordinateKey: "position" | "proportion",
+  value: number
+): BoundaryValues | null {
+  if (coordinateKey === "position") return { pos: value };
+
+  const calibration = surface.calibration;
+  if (calibration == null) return null;
+  const age = ageForProportion(
+    { int_id: calibration.id, name: calibration.name, ...calibration },
+    value
+  );
+  if (age == null) return null;
+  return {
+    prop: value,
+    age,
+    int_id: calibration.id,
+    int_name: calibration.name,
+  };
+}

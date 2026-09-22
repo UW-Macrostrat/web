@@ -34,26 +34,32 @@ export const surfacesAtom = atom<EditorSurface[]>((get) =>
 /** Fields of the surfaces sheet that an edit can change. */
 const SURFACE_EDITABLE_FIELDS = ["age", "position", "proportion"] as const;
 
-/** The transaction seen from the surfaces sheet: for each row, the fields
- * that differ from the same surface in the column as loaded. The rows are the
- * *edited* surfaces, so this only ever marks cells — it never has to invent or
- * drop a row. A surface with no counterpart in the loaded column (one an edit
- * created) is marked whole. */
-export const surfaceOverlayAtom = atom<(Partial<EditorSurface> | undefined)[]>(
-  (get) => {
-    const base = new Map(get(baseSurfacesAtom).map((s) => [s.id, s]));
-    return get(surfacesAtom).map((surface) => {
-      const original = base.get(surface.id);
-      if (original == null) {
-        return { age: surface.age, position: surface.position };
-      }
-      const changed: Partial<EditorSurface> = {};
-      for (const field of SURFACE_EDITABLE_FIELDS) {
-        if (surface[field] === original[field]) continue;
-        (changed as any)[field] = surface[field];
-      }
-      if (Object.keys(changed).length === 0) return undefined;
-      return changed;
-    });
-  }
+/** The loaded surfaces by id, for diffing the edited ones against. */
+export const baseSurfaceIndexAtom = atom((get) =>
+  new Map(get(baseSurfacesAtom).map((s) => [s.id, s]))
 );
+
+/** The transaction seen from the surfaces sheet: for each row the sheet is
+ * holding, the fields that differ from the same surface in the column as
+ * loaded. Built against the rows in hand rather than the whole projection,
+ * for the reason `unitOverlayFor` gives. A surface with no counterpart in the
+ * loaded column — one an edit created — is marked whole. */
+export function surfaceOverlayFor(
+  base: Map<string, EditorSurface>,
+  rows: (EditorSurface | null | undefined)[]
+): (Partial<EditorSurface> | undefined)[] {
+  return rows.map((surface) => {
+    if (surface == null) return undefined;
+    const original = base.get(surface.id);
+    if (original == null) {
+      return { age: surface.age, position: surface.position };
+    }
+    const changed: Partial<EditorSurface> = {};
+    for (const field of SURFACE_EDITABLE_FIELDS) {
+      if (surface[field] === original[field]) continue;
+      (changed as any)[field] = surface[field];
+    }
+    if (Object.keys(changed).length === 0) return undefined;
+    return changed;
+  });
+}

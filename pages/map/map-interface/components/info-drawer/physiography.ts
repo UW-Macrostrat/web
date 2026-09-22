@@ -5,7 +5,9 @@ function Physiography(props) {
   const { mapInfo } = props;
   const { regions } = mapInfo;
 
-  if (!mapInfo || !regions) return h("div");
+  // An empty div here would still count as a section in the accordion's
+  // header stacking, so render nothing at all.
+  if (!mapInfo || !regions) return null;
 
   return h.if(regions.length > 0)(
     ExpansionPanel,

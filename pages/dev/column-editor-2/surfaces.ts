@@ -25,20 +25,19 @@ import {
   nullifyUnitID,
 } from "@macrostrat/column-views";
 import { positionValue } from "./scale";
+import {
+  AGE_TOLERANCE,
+  POSITION_TOLERANCE,
+  proportionForAge,
+} from "./boundaries";
+
+export { AGE_TOLERANCE, POSITION_TOLERANCE };
 
 /** A surface in the editor. Its id is built from the units it separates, so
  * it survives an edit and the selection holds. */
 export interface EditorSurface extends ColumnSurface {
   id: string;
 }
-
-/** Ages closer than this are one surface */
-export const AGE_TOLERANCE = 0.001;
-
-/** Positions closer than this (metres) are one surface. Looser than the age
- * tolerance because measured positions are recorded to the centimetre at
- * best, and the eODP columns carry them as three-decimal strings. */
-export const POSITION_TOLERANCE = 0.01;
 
 /** The unit field a surface is keyed on, for one side of a unit. */
 function unitCoordinate(
@@ -127,9 +126,9 @@ export function buildEditorSurfaces(
       };
       // The proportion follows the (possibly edited) age, so the calibration
       // label stays honest as a surface is moved.
-      surface.proportion = proportionInInterval(
-        surface.age,
-        surface.calibration
+      surface.proportion = proportionForAge(
+        surface.calibration,
+        surface.age
       );
     }
   }
@@ -188,15 +187,4 @@ function surfaceID(s: Omit<EditorSurface, "id">): string {
   const below = [...s.unitsBelow].sort((a, b) => a - b).join(".");
   const above = [...s.unitsAbove].sort((a, b) => a - b).join(".");
   return `s:${below}/${above}`;
-}
-
-export function proportionInInterval(
-  age: number,
-  interval: SurfaceCalibration | null
-): number | null {
-  if (interval == null) return null;
-  const span = interval.b_age - interval.t_age;
-  if (span <= 0) return null;
-  const prop = (interval.b_age - age) / span;
-  return Math.min(Math.max(prop, 0), 1);
 }

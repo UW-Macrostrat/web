@@ -2295,7 +2295,7 @@ __metadata:
     "@blueprintjs/select": "npm:^6.2.0"
     "@macrostrat-web/settings": "workspace:*"
     "@macrostrat/column-components": "npm:^2.2.0"
-    "@macrostrat/data-components": "npm:^1.5.1"
+    "@macrostrat/data-components": "npm:^1.6.0"
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/ui-components": "npm:^5.2.0"
@@ -2605,6 +2605,37 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
   checksum: 10c0/ef0119c94687e6e6cfef8e9a23a6516bcef6774750ecd724c9c7a05b47a551ff52fefa45c2491c0f7d1fba8c35f4fbf49f40916d4512a461dbb605379313f04e
+  languageName: node
+  linkType: hard
+
+"@macrostrat/data-components@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "@macrostrat/data-components@npm:1.6.0"
+  dependencies:
+    "@blueprintjs/core": "npm:^6.14.0"
+    "@dnd-kit/core": "npm:^6.3.1"
+    "@dnd-kit/sortable": "npm:^10.0.0"
+    "@macrostrat/color-utils": "npm:^1.2.2"
+    "@macrostrat/hyper": "npm:^3.1.1"
+    "@macrostrat/mapbox-utils": "npm:^1.8.0"
+    "@macrostrat/scoped-store": "npm:^1.1.0"
+    "@macrostrat/stratigraphy-utils": "npm:^1.4.2"
+    "@macrostrat/ui-components": "npm:^5.2.0"
+    "@types/d3-array": "npm:^3.2.1"
+    "@visx/axis": "npm:^3.12.0"
+    "@visx/gradient": "npm:^3.12.0"
+    "@visx/scale": "npm:^3.12.0"
+    "@visx/shape": "npm:^3.12.0"
+    axios: "npm:^1.13.2"
+    classnames: "npm:^2.5.1"
+    cross-fetch: "npm:^4.1.0"
+    d3-array: "npm:^3.2.4"
+    jotai: "npm:^2.20.0"
+    jotai-scope: "npm:^0.11.0"
+    mapbox-gl: "npm:^3.0.0"
+  peerDependencies:
+    react: ^18.0.0||^19.0.0
+  checksum: 10c0/5cf8668c975c31ef353e99ef696e27be32ba37c3176770142aad3dfefd296cca65fabae777d3322c6543643f1d9245daa140cb2904ad21814b6552c3424b88f0
   languageName: node
   linkType: hard
 
@@ -3066,7 +3097,7 @@ __metadata:
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/column-components": "npm:^2.2.0"
     "@macrostrat/column-views": "npm:^3.12.0"
-    "@macrostrat/data-components": "npm:^1.5.1"
+    "@macrostrat/data-components": "npm:^1.6.0"
     "@macrostrat/data-provider": "npm:^1.3.1"
     "@macrostrat/data-sheet": "npm:^4.8.0"
     "@macrostrat/feedback-components": "npm:^2.3.1"

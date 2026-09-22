@@ -2,8 +2,10 @@ import { getPBDBData } from "./filter-helpers";
 import {
   AppAction,
   MapLayer,
+  selectedColumnMetadataAtom,
   useAppActions,
 } from "#/map/map-interface/app-state";
+import { useAtomValue } from "jotai";
 import { ColumnProperties } from "#/map/map-interface/app-state/columns/columns.ts";
 import {
   useMapRef,
@@ -384,7 +386,46 @@ const highlightLayers = [
   { layer: "pbdb-points", source: "pbdb-points" },
   { layer: "pbdb-points-clustered", source: "pbdb-points" },
   { layer: "pbdb-clusters", source: "pbdb-clusters" },
+  // The column fills are transparent, but they are still the hit target, so
+  // they carry the hover state that lights up the footprint's outline.
+  { layer: "column_fill", source: "columns" },
+  { layer: "filtered_column_fill", source: "filteredColumns" },
 ];
+
+const columnSources = ["columns", "filteredColumns"];
+
+/** Mirror the column behind the info marker into feature state, so the columns
+ * overlay can pick it out the way the column-navigation map picks out its
+ * selected column. */
+export function SelectedColumnManager() {
+  const selectedColumn = useAtomValue(selectedColumnMetadataAtom);
+  const columnID = selectedColumn?.col_id ?? null;
+  const previousID = useRef<number | null>(null);
+
+  // The column sets are also dependencies: a feature's state is dropped when
+  // its source is given new data, so the selection has to be reapplied then.
+  const allColumns = useAppState((s) => s.allColumns);
+  const filteredColumns = useAppState((s) => s.filteredColumns);
+
+  useMapStyleOperator(
+    (map) => {
+      setColumnSelected(map, previousID.current, false);
+      setColumnSelected(map, columnID, true);
+      previousID.current = columnID;
+    },
+    [columnID, allColumns, filteredColumns]
+  );
+
+  return null;
+}
+
+function setColumnSelected(map, columnID: number | null, selected: boolean) {
+  if (columnID == null) return;
+  for (const source of columnSources) {
+    if (map.getSource(source) == null) continue;
+    map.setFeatureState({ source, id: columnID }, { selected });
+  }
+}
 
 export function HoveredFeatureManager() {
   const mapRef = useMapRef();

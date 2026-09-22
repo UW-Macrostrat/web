@@ -18,7 +18,14 @@
 import type { UnitLong } from "@macrostrat/api-types";
 import { ColumnAxisType } from "@macrostrat/column-components";
 import { positionValue } from "./scale";
-import { AGE_TOLERANCE, POSITION_TOLERANCE } from "./surfaces";
+
+/** Ages closer than this are one boundary */
+export const AGE_TOLERANCE = 0.001;
+
+/** Positions closer than this (metres) are one boundary. Looser than the age
+ * tolerance because measured positions are recorded to the centimetre at best,
+ * and the eODP columns carry them as three-decimal strings. */
+export const POSITION_TOLERANCE = 0.01;
 
 export type BoundarySide = "top" | "bottom";
 
@@ -27,12 +34,17 @@ export type BoundarySide = "top" | "bottom";
  * which the age follows). */
 export type BoundaryKind = "position" | "chrono";
 
-/** An interval as `useMacrostratDefs("intervals")` holds it. */
-export interface IntervalDef {
-  int_id: number;
-  name: string;
+/** Anything with an age span: an interval definition, or the calibration
+ * carried on a surface. */
+export interface AgeSpan {
   b_age: number;
   t_age: number;
+}
+
+/** An interval as `useMacrostratDefs("intervals")` holds it. */
+export interface IntervalDef extends AgeSpan {
+  int_id: number;
+  name: string;
 }
 
 /** A boundary's value, side-neutral, so the same edit can be written to a
@@ -73,9 +85,9 @@ export function boundaryFieldInfo(key: string) {
 
 /** The age of a proportion within an interval: 0 at the interval's base (its
  * older bound), 1 at its top — the same convention as the ingestion format
- * and `proportionInInterval`. */
+ * and the ingestion format. */
 export function ageForProportion(
-  interval: IntervalDef | null | undefined,
+  interval: AgeSpan | null | undefined,
   prop: number | null | undefined
 ): number | null {
   if (interval == null || prop == null || isNaN(prop)) return null;
@@ -86,7 +98,7 @@ export function ageForProportion(
 
 /** Where an age falls within an interval, on the same 0-at-the-base scale. */
 export function proportionForAge(
-  interval: IntervalDef | null | undefined,
+  interval: AgeSpan | null | undefined,
   age: number | null | undefined
 ): number | null {
   if (interval == null || age == null || isNaN(age)) return null;

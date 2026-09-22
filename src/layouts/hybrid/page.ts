@@ -32,6 +32,8 @@ import {
 export interface HybridPageProps {
   /** Page-specific controls, shown left of the frame's own layout controls. */
   actions?: ReactNode;
+  /** Shown immediately after the page title (see `LayoutShellView`). */
+  titleAdornment?: ReactNode;
   capabilities?: Partial<LayoutCapabilities>;
   content?: ReactNode;
   map?: ReactNode;
@@ -89,6 +91,7 @@ function HydrateAtoms({ atoms, children }) {
 
 function HybridPageInner({
   actions,
+  titleAdornment,
   content,
   map,
   assistant,
@@ -102,6 +105,7 @@ function HybridPageInner({
   let shellView: ReactNode = h(LayoutShellView, {
     content,
     breadcrumbs: h(PageBreadcrumbs, { showLogo: true, separateTitle: false }),
+    titleAdornment,
     controls: h(HeaderControls, { actions }),
     filterBar,
     map,

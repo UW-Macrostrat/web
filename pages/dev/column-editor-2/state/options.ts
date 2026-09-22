@@ -139,6 +139,18 @@ export const targetUnitHeightAtom: PrimitiveAtom<number | null> = atom<
 
 export const showTimescaleAtom: PrimitiveAtom<boolean> = atom(true);
 
+/** Which timescales are drawn beside the column in surfaces mode.
+ *
+ * - `ics` — the international timescale alone, as everywhere else.
+ * - `selection` — and the timescale(s) the selected surface's calibration
+ *   interval belongs to, so you can see what it was referred to.
+ * - `all` — and every timescale any of this column's surfaces reference.
+ */
+export type ShownTimescales = "ics" | "selection" | "all";
+
+export const shownTimescalesAtom: PrimitiveAtom<ShownTimescales> =
+  atom<ShownTimescales>("ics");
+
 /** Whether the surfaces overlay is drawn in units mode. In surfaces mode the
  * lines are the edit targets, so they are always drawn. */
 export const showSurfaceLinesAtom: PrimitiveAtom<boolean> = atom(true);

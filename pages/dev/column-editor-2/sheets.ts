@@ -31,20 +31,27 @@ import {
   surfaceStatusLabels,
 } from "@macrostrat/column-views";
 import {
-  baseSurfacesAtom,
+  baseSurfaceIndexAtom,
   baseUnitsAtom,
+  editedUnitsAtom,
   columnScaleOptionsAtom,
   editSurfaceCellsAtom,
   editUnitCellsAtom,
   selectedSurfaceIDAtom,
   selectedUnitIDAtom,
-  surfaceOverlayAtom,
+  surfaceOverlayFor,
   surfacesAtom,
+  unitEditsAtom,
   unitIssuesAtom,
-  unitOverlayAtom,
+  unitOverlayFor,
   useIntervalDefs,
 } from "./state";
 import { issueForCell, validateAge, validateProportion } from "./validation";
+import {
+  FocusFilterBridge,
+  useFocusActions,
+  type FocusActions,
+} from "./sheet-focus";
 import type { EditorSurface } from "./surfaces";
 import styles from "./main.module.sass";
 
@@ -115,30 +122,107 @@ const surfaceIdentity = (row: EditorSurface) => row?.id;
 
 /* ------------------------------------------------------------------- units */
 
-/** Non-boundary columns the units sheet lets through. `b_pos`, `t_pos`,
- * `b_age` and `t_age` are editable too, but as *boundaries* — see
- * `./state/editing`. */
-const EDITABLE_UNIT_FIELDS = new Set([
-  "unit_name",
-  "min_thick",
-  "max_thick",
-  "notes",
-]);
-const NUMERIC_UNIT_FIELDS = new Set(["min_thick", "max_thick"]);
+/** The unit attributes both unit-backed sheets carry, differing only in what
+ * they are called: the ingestion format's field names in the unified sheet,
+ * readable titles in the units sheet.
+ *
+ * Lithology and environment are read-only. They are arrays of resolved
+ * definitions rendered down to a string, and a typed string has nowhere to go
+ * back to — editing them wants a picker, not a cell. */
+type AttributeLabels = Record<
+  | "unit_name"
+  | "strat_name"
+  | "lithology"
+  | "environment"
+  | "min_thickness"
+  | "max_thickness"
+  | "description",
+  string
+>;
 
-function useUnitColumnSpec(): ColumnSpec[] {
+function unitAttributeColumns(
+  names: AttributeLabels
+): Record<keyof AttributeLabels, ColumnSpec> {
+  return {
+    unit_name: {
+      key: "unit_name",
+      name: names.unit_name,
+      dataType: "string",
+      width: 200,
+    },
+    strat_name: {
+      key: "strat_name_long",
+      name: names.strat_name,
+      dataType: "string",
+      width: 180,
+    },
+    lithology: {
+      key: "lith",
+      name: names.lithology,
+      dataType: "array",
+      width: 220,
+      editable: false,
+      valueRenderer: renderLithology,
+    },
+    environment: {
+      key: "environ",
+      name: names.environment,
+      dataType: "array",
+      width: 160,
+      editable: false,
+      valueRenderer: renderNames,
+    },
+    min_thickness: {
+      key: "min_thick",
+      name: names.min_thickness,
+      dataType: "number",
+      width: 100,
+    },
+    max_thickness: {
+      key: "max_thick",
+      name: names.max_thickness,
+      dataType: "number",
+      width: 100,
+    },
+    description: {
+      key: "notes",
+      name: names.description,
+      dataType: "text",
+      width: 240,
+    },
+  };
+}
+
+function useUnitColumnSpec(focus: FocusActions): ColumnSpec[] {
   const validator = useUnitIssueValidator();
-  return useMemo(
-    () => [
-      { key: "unit_id", name: "ID", dataType: "integer", width: 70 },
-      { key: "section_id", name: "Section", dataType: "integer", width: 80 },
-      { key: "unit_name", name: "Unit name", dataType: "string", width: 200 },
+  return useMemo(() => {
+    const attrs = unitAttributeColumns({
+      unit_name: "Unit name",
+      strat_name: "Strat. name",
+      lithology: "Lithology",
+      environment: "Environment",
+      min_thickness: "Min. thickness",
+      max_thickness: "Max. thickness",
+      description: "Notes",
+    });
+    return [
       {
-        key: "strat_name_long",
-        name: "Strat. name",
-        dataType: "string",
-        width: 180,
+        key: "unit_id",
+        name: "ID",
+        dataType: "integer",
+        width: 70,
+        editable: false,
       },
+      {
+        key: "section_id",
+        name: "Section",
+        dataType: "integer",
+        width: 80,
+        editable: false,
+        actions: [focus.sectionAction],
+      },
+      attrs.unit_name,
+      attrs.strat_name,
       {
         key: "b_pos",
         name: "b_pos",
@@ -159,6 +243,9 @@ function useUnitColumnSpec(): ColumnSpec[] {
         name: "b_age (Ma)",
         dataType: "number",
         width: 100,
+        // Derived: the age follows from `b_int` and `b_prop`, which are the
+        // ingestion format's record. Editing it would put the two out of step.
+        editable: false,
         validate: combineValidators(validateAge, validator("b_age")),
       },
       { key: "t_int_name", name: "t_int", dataType: "string", width: 120 },
@@ -167,73 +254,64 @@ function useUnitColumnSpec(): ColumnSpec[] {
         name: "t_age (Ma)",
         dataType: "number",
         width: 100,
+        editable: false,
         validate: combineValidators(validateAge, validator("t_age")),
       },
-      {
-        key: "lith",
-        name: "Lithology",
-        dataType: "array",
-        width: 220,
-        valueRenderer: renderLithology,
-      },
-      {
-        key: "environ",
-        name: "Environment",
-        dataType: "array",
-        width: 160,
-        valueRenderer: renderNames,
-      },
-      {
-        key: "min_thick",
-        name: "Min. thickness",
-        dataType: "number",
-        width: 90,
-      },
-      {
-        key: "max_thick",
-        name: "Max. thickness",
-        dataType: "number",
-        width: 90,
-      },
-      { key: "notes", name: "Notes", dataType: "text", width: 240 },
-    ],
-    [validator]
-  );
+      attrs.lithology,
+      attrs.environment,
+      attrs.min_thickness,
+      attrs.max_thickness,
+      attrs.description,
+    ];
+  }, [validator, focus]);
 }
 
 export function UnitsSheet() {
+  const focus = useUnitFocusActions();
   return h(
     "div.editor-sheet.units-sheet",
     h(UnitBackedSheet, {
-      columnSpec: useUnitColumnSpec(),
+      columnSpec: useUnitColumnSpec(focus),
       name: "Units",
-      editableFields: EDITABLE_UNIT_FIELDS,
-      numericFields: NUMERIC_UNIT_FIELDS,
+      focus,
     })
   );
 }
 
 /* ----------------------------------------------------------------- unified */
 
-const EDITABLE_UNIFIED_FIELDS = new Set([
-  "unit_name",
-  "strat_name_long",
-  "notes",
-  "min_thick",
-  "max_thick",
-]);
-const NUMERIC_UNIFIED_FIELDS = new Set(["min_thick", "max_thick"]);
-
 /** The ingestion format's `units` sheet, in its own vocabulary: position,
  * then chronostratigraphic position, then the descriptors. Header names are
  * the format's field names so a row reads the same here and in the template
  * (`b_int` is the API's `b_int_name`, and so on). */
-function useUnifiedColumnSpec(): ColumnSpec[] {
+function useUnifiedColumnSpec(focus: FocusActions): ColumnSpec[] {
   const validator = useUnitIssueValidator();
-  return useMemo(
-    () => [
-      { key: "unit_id", name: "unit_id", dataType: "integer", width: 70 },
-      { key: "section_id", name: "section_id", dataType: "integer", width: 80 },
+  return useMemo(() => {
+    const attrs = unitAttributeColumns({
+      unit_name: "unit_name",
+      strat_name: "strat_name",
+      lithology: "lithology",
+      environment: "environment",
+      min_thickness: "min_thickness",
+      max_thickness: "max_thickness",
+      description: "unit_description",
+    });
+    return [
+      {
+        key: "unit_id",
+        name: "unit_id",
+        dataType: "integer",
+        width: 70,
+        editable: false,
+      },
+      {
+        key: "section_id",
+        name: "section_id",
+        dataType: "integer",
+        width: 80,
+        editable: false,
+        actions: [focus.sectionAction],
+      },
       {
         key: "b_pos",
         name: "b_pos",
@@ -264,80 +342,77 @@ function useUnifiedColumnSpec(): ColumnSpec[] {
         width: 80,
         validate: validateProportion,
       },
-      { key: "unit_name", name: "unit_name", dataType: "string", width: 200 },
-      {
-        key: "strat_name_long",
-        name: "strat_name",
-        dataType: "string",
-        width: 180,
-      },
-      {
-        key: "lith",
-        name: "lithology",
-        dataType: "array",
-        width: 220,
-        valueRenderer: renderLithology,
-      },
-      {
-        key: "environ",
-        name: "environment",
-        dataType: "array",
-        width: 160,
-        valueRenderer: renderNames,
-      },
-      {
-        key: "min_thick",
-        name: "min_thickness",
-        dataType: "number",
-        width: 100,
-      },
-      {
-        key: "max_thick",
-        name: "max_thickness",
-        dataType: "number",
-        width: 100,
-      },
-      { key: "notes", name: "unit_description", dataType: "text", width: 240 },
-    ],
-    [validator]
-  );
+      attrs.unit_name,
+      attrs.strat_name,
+      attrs.lithology,
+      attrs.environment,
+      attrs.min_thickness,
+      attrs.max_thickness,
+      attrs.description,
+    ];
+  }, [validator, focus]);
 }
 
 export function UnifiedSheet() {
+  const focus = useUnitFocusActions();
   return h(
     "div.editor-sheet.unified-sheet",
     h(UnitBackedSheet, {
-      columnSpec: useUnifiedColumnSpec(),
+      columnSpec: useUnifiedColumnSpec(focus),
       name: "Units and surfaces",
-      editableFields: EDITABLE_UNIFIED_FIELDS,
-      numericFields: NUMERIC_UNIFIED_FIELDS,
+      focus,
     })
   );
 }
 
-/** Units and unified differ only in which columns they show and which plain
- * fields they let through; the data, the overlay and the edit path are one. */
+/** The focus actions for a sheet whose rows are units. A selected row comes
+ * back as the *loaded* unit, so it is resolved to its edited counterpart by
+ * `unit_id` before its age range is read. */
+function useUnitFocusActions() {
+  const units = useAtomValue(editedUnitsAtom);
+  const byID = useMemo(
+    () => new Map(units.map((u) => [u.unit_id, u])),
+    [units]
+  );
+  const resolve = useCallback(
+    (row: any) => byID.get(row?.unit_id) ?? row ?? null,
+    [byID]
+  );
+  return useFocusActions(units, resolve);
+}
+
+/** Units and unified differ only in which columns they show; the data, the
+ * overlay and the edit path are one, and the spec says what may be written. */
 function UnitBackedSheet({
   columnSpec,
   name,
-  editableFields,
-  numericFields,
+  focus,
 }: {
   columnSpec: ColumnSpec[];
   name: string;
-  editableFields: Set<string>;
-  numericFields: Set<string>;
+  focus: FocusActions;
 }) {
   const data = useAtomValue(baseUnitsAtom);
-  const updatedData = useAtomValue(unitOverlayAtom);
+  const edits = useAtomValue(unitEditsAtom);
   const editCells = useSetAtom(editUnitCellsAtom);
   const intervals = useIntervalDefs();
 
+  // `deriveOverlay` rather than a plain `updatedData` prop: the sheet hands it
+  // the rows it is currently holding, which is the only way to stay aligned
+  // once a filter has narrowed them (see `unitOverlayFor`).
+  const deriveOverlay = useCallback(
+    (rows: UnitLong[]) => ({
+      updatedData: unitOverlayFor(edits, rows),
+      rowStatus: [],
+    }),
+    [edits]
+  );
+
   const onEdit = useCallback(
     (event: EditEvent<UnitLong>) => {
-      editCells({ event, intervals, editableFields, numericFields });
+      editCells({ event, intervals, columnSpec });
     },
-    [editCells, intervals, editableFields, numericFields]
+    [editCells, intervals, columnSpec]
   );
 
   return h(
@@ -345,12 +420,13 @@ function UnitBackedSheet({
     {
       ...sheetProps(name, "unit"),
       data,
-      updatedData,
       columnSpec,
       identity: unitIdentity,
+      actions: [focus.rowAction],
+      deriveOverlay,
       onEdit,
     },
-    h(UnitSelectionBridge)
+    [h(UnitSelectionBridge, { key: "selection" }), h(FocusFilterBridge, { key: "focus" })]
   );
 }
 
@@ -360,12 +436,18 @@ function UnitBackedSheet({
  * surface's age; on a measured one it is its position, and the modeled age
  * comes along read-only — a measured position and the age model that
  * calibrates it are separate records, so moving one doesn't move the other. */
-function surfaceColumnSpec(isPositionAxis: boolean): ColumnSpec[] {
+function surfaceColumnSpec(
+  isPositionAxis: boolean,
+  focus: FocusActions
+): ColumnSpec[] {
   const ageColumn: ColumnSpec = {
     key: "age",
     name: "Age (Ma)",
     dataType: "number",
     width: 110,
+    // Derived from the surface's calibration — see `proportion`, which is what
+    // an age column's surfaces are moved by.
+    editable: false,
     validate: validateAge,
   };
   const positionColumn: ColumnSpec = {
@@ -396,11 +478,23 @@ function surfaceColumnSpec(isPositionAxis: boolean): ColumnSpec[] {
       valueRenderer: (d) => d?.name ?? "",
     },
     {
+      // On an age column this is the editable coordinate: a surface sits at a
+      // proportion of its calibration interval, and its age follows.
       key: "proportion",
       name: "Position in interval",
       dataType: "number",
       width: 120,
+      editable: !isPositionAxis,
+      validate: validateProportion,
       valueRenderer: (d) => formatProportion(d) ?? "",
+    },
+    {
+      key: "section_id",
+      name: "Section",
+      dataType: "integer",
+      width: 80,
+      editable: false,
+      actions: [focus.sectionAction],
     },
     {
       key: "unitsAbove",
@@ -421,6 +515,7 @@ function surfaceColumnSpec(isPositionAxis: boolean): ColumnSpec[] {
       name: "Boundary",
       dataType: "object",
       width: 90,
+      editable: false,
       valueRenderer: (d) => d?.boundary_id ?? "",
     },
   ];
@@ -437,7 +532,8 @@ function renderUnitNames(ids: number[] | null | undefined): string {
 
 export function SurfacesSheet() {
   const surfaces = useAtomValue(surfacesAtom);
-  const updatedData = useAtomValue(surfaceOverlayAtom);
+  const focus = useFocusActions(surfaces);
+  const baseSurfaces = useAtomValue(baseSurfaceIndexAtom);
   const units = useAtomValue(baseUnitsAtom);
   const editCells = useSetAtom(editSurfaceCellsAtom);
   const { isPositionAxis } = useAtomValue(columnScaleOptionsAtom);
@@ -448,19 +544,27 @@ export function SurfacesSheet() {
   );
 
   const columnSpec = useMemo(
-    () => surfaceColumnSpec(isPositionAxis),
-    [isPositionAxis]
+    () => surfaceColumnSpec(isPositionAxis, focus),
+    [isPositionAxis, focus]
   );
 
   // Which column moves the surface follows the axis in force, so the same
   // sheet edits ages on an age column and positions on a measured one.
-  const coordinateKey = isPositionAxis ? "position" : "age";
+  const coordinateKey = isPositionAxis ? "position" : "proportion";
 
   const onEdit = useCallback(
     (event: EditEvent<EditorSurface>) => {
       editCells({ event, coordinateKey });
     },
     [editCells, coordinateKey]
+  );
+
+  const deriveOverlay = useCallback(
+    (rows: EditorSurface[]) => ({
+      updatedData: surfaceOverlayFor(baseSurfaces, rows),
+      rowStatus: [],
+    }),
+    [baseSurfaces]
   );
 
   return h(
@@ -472,12 +576,16 @@ export function SurfacesSheet() {
         // The rows are the *edited* surfaces: a surface an edit split or
         // merged is simply gone or new, which no cell overlay could express.
         data: surfaces,
-        updatedData,
         columnSpec,
         identity: surfaceIdentity,
+        actions: [focus.rowAction],
+        deriveOverlay,
         onEdit,
       },
-      h(SurfaceSelectionBridge)
+      [
+        h(SurfaceSelectionBridge, { key: "selection" }),
+        h(FocusFilterBridge, { key: "focus" }),
+      ]
     )
   );
 }
@@ -488,11 +596,7 @@ export function SurfacesSheet() {
 function UnitSelectionBridge() {
   const selectedUnitID = useAtomValue(selectedUnitIDAtom);
   const setSelectedUnitID = useSetAtom(selectedUnitIDAtom);
-  useSheetSelectionBridge<UnitLong>(
-    (row) => row.unit_id,
-    selectedUnitID,
-    setSelectedUnitID
-  );
+  useSheetSelectionBridge<UnitLong>(unitIdentity, selectedUnitID, setSelectedUnitID);
   return null;
 }
 
@@ -500,7 +604,7 @@ function SurfaceSelectionBridge() {
   const selectedID = useAtomValue(selectedSurfaceIDAtom);
   const setSelectedID = useSetAtom(selectedSurfaceIDAtom);
   useSheetSelectionBridge<EditorSurface>(
-    (row) => row.id,
+    surfaceIdentity,
     selectedID,
     setSelectedID
   );
@@ -520,7 +624,7 @@ function SurfaceSelectionBridge() {
  * The sheet indexes rows by position in the *filtered* view, so both
  * directions go through `filteredRowIndices` to reach the underlying row. */
 function useSheetSelectionBridge<T>(
-  identity: (row: T) => string | number,
+  identity: (row: T | null | undefined) => string | number | null | undefined,
   selectedID: string | number | null,
   setSelectedID: (id: any) => void
 ) {
@@ -544,7 +648,8 @@ function useSheetSelectionBridge<T>(
     const row = selectedRow();
     if (row == null) return;
     const id = identity(row);
-    if (id !== selectedID) setSelectedID(id);
+    if (id == null || id === selectedID) return;
+    setSelectedID(id);
   }, [selection]);
 
   // Page → sheet
@@ -553,7 +658,13 @@ function useSheetSelectionBridge<T>(
     const shown = selectedRow();
     if (shown != null && identity(shown) === selectedID) return;
 
-    const baseIndex = data.findIndex((row) => identity(row) === selectedID);
+    // `data` is not dense: a row can be missing while a window loads, and for
+    // the moment after a mode switch when the incoming sheet's store has been
+    // sized but not filled. Reading an id off one of those holes is what used
+    // to throw here.
+    const baseIndex = data.findIndex(
+      (row) => row != null && identity(row) === selectedID
+    );
     if (baseIndex === -1) return;
     let viewIndex = baseIndex;
     if (filteredRowIndices != null) {

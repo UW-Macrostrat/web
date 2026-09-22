@@ -1,4 +1,6 @@
-/** The display settings: how the column is drawn, behind a toolbar button.
+/** The settings panel behind the toolbar's button: how the column is drawn,
+ * and how an edit behaves. The values themselves are atoms in
+ * `./state/options` — this is only the controls for them.
  *
  * The same idiom as the column page's `ColumnSettingsButton`
  * (`pages/columns/@column/column-inspector`) — display options sit apart from
@@ -28,6 +30,8 @@ import {
 import {
   allowOverlappingUnitsAtom,
   columnScaleOptionsAtom,
+  editingModeAtom,
+  shownTimescalesAtom,
   heightScaleModeAtom,
   overlapsLockedAtom,
   pixelScaleAtom,
@@ -75,6 +79,7 @@ function DisplaySettingsPanel() {
     h("h3", "Display"),
     h(HeightScaleControl),
     h(UnconformityControl),
+    h(TimescalesControl),
     h(NumberControl, {
       label: labelWithUnit("Fixed scale", scaleUnit),
       valueAtom: pixelScaleAtom,
@@ -158,6 +163,44 @@ function HeightScaleControl() {
       options,
       value: mode,
       onChange: (evt) => setMode(evt.target.value as HeightScaleMode),
+    })
+  );
+}
+
+const timescaleOptions = [
+  { label: "ICS", value: "ics" },
+  { label: "Selection", value: "selection" },
+  { label: "All referenced", value: "all" },
+];
+
+/** Which timescales are drawn beside the column. A surface is calibrated
+ * against an interval, and that interval often belongs to a regional set
+ * rather than the international one — this is how to see which. Only surfaces
+ * mode has a surface to answer for, so the control says so elsewhere. */
+function TimescalesControl() {
+  const [value, setValue] = useAtom(shownTimescalesAtom);
+  const mode = useAtomValue(editingModeAtom);
+  const inSurfacesMode = mode === "surfaces";
+
+  let helperText = null;
+  if (!inSurfacesMode) {
+    helperText = "Referenced timescales are drawn in surfaces mode.";
+  }
+
+  return h(
+    FormGroup,
+    {
+      label: "Show timescales",
+      helperText,
+      disabled: !inSurfacesMode,
+    },
+    h(SegmentedControl, {
+      small: true,
+      fill: true,
+      options: timescaleOptions,
+      value,
+      onValueChange: (next: any) => setValue(next),
+      disabled: !inSurfacesMode,
     })
   );
 }

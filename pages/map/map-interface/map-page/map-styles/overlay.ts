@@ -5,6 +5,7 @@ interface SourceExt extends mapboxgl.Source {
   cluster?: boolean;
   clusterRadius?: number;
   generateId?: boolean;
+  promoteId?: string;
   data?: any;
 }
 
@@ -42,9 +43,11 @@ const overlaySources: { [k: string]: SourceExt } = {
       features: [],
     },
   },
+  // `promoteId` makes `col_id` the feature id, so hover and selection can be
+  // set by column id alone — the app only ever knows columns by that.
   columns: {
     type: "geojson",
-    generateId: true,
+    promoteId: "col_id",
     data: {
       type: "FeatureCollection",
       features: [],
@@ -52,7 +55,7 @@ const overlaySources: { [k: string]: SourceExt } = {
   },
   filteredColumns: {
     type: "geojson",
-    generateId: true,
+    promoteId: "col_id",
     data: {
       type: "FeatureCollection",
       features: [],
@@ -81,77 +84,128 @@ const overlaySources: { [k: string]: SourceExt } = {
   },
 };
 
-export function buildOverlayLayers(): mapboxgl.Layer[] {
-  // Get CSS colors from settings
-  const ruleColor = getComputedStyle(document.body).getPropertyValue(
-    "--panel-background-color"
+/** Resolve the first CSS custom property in a chain that is actually set,
+ * matching how `@macrostrat/map-views` resolves its column-map colors — the
+ * columns here answer to the same variables as the column-navigation map. */
+function resolveColor(variables: string[], fallback: string): string {
+  const style = getComputedStyle(document.body);
+  for (const variable of variables) {
+    const value = style.getPropertyValue(variable).trim();
+    if (value !== "") return value;
+  }
+  return fallback;
+}
+
+/** Column footprints, drawn the way the column-navigation map draws them: a
+ * high-contrast outline that brightens on hover and selection, and no fill of
+ * its own, so the geologic map underneath stays readable.
+ *
+ * The fill layers remain in the style, fully transparent, because they are the
+ * hit target — the map click handler queries `column_fill` /
+ * `filtered_column_fill` to work out which column was clicked, and a layer is
+ * only excluded from that query when its *visibility* is `none`.
+ */
+function buildColumnLayers(): mapboxgl.Layer[] {
+  const columnColor = resolveColor(
+    ["--column-map-color", "--text-subtle-color"],
+    "black"
+  );
+  const hoverColor = resolveColor(
+    ["--column-map-hover-color", "--pz-accent-color"],
+    "purple"
+  );
+  const selectedColor = resolveColor(
+    ["--column-map-selection-color", "--pz-accent-color"],
+    hoverColor
   );
 
-  const centerColor = getComputedStyle(document.body).getPropertyValue(
-    "--panel-rule-color"
-  );
+  const isSelected = ["boolean", ["feature-state", "selected"], false];
+  const isHovered = ["boolean", ["feature-state", "hover"], false];
+  const isEmphasized = ["any", isSelected, isHovered];
 
+  const fillPaint = () => ({
+    // Invisible at rest; a wash only under the pointer or the selection, which
+    // is what makes a large footprint readable as one shape.
+    "fill-color": ["case", isSelected, selectedColor, hoverColor],
+    "fill-opacity": ["case", isEmphasized, 0.15, 0],
+  });
+
+  // A `["zoom"]` expression is only allowed as the input to the outermost
+  // `interpolate`, so the emphasis test goes in each stop's output rather than
+  // wrapping two zoom ramps in a `case` — that is a style validation error, and
+  // one bad layer takes the whole style down.
+  const widthForZoom = (base: number, emphasized: number) => [
+    "case",
+    isEmphasized,
+    emphasized,
+    base,
+  ];
+
+  const linePaint = () => ({
+    "line-color": [
+      "case",
+      isSelected,
+      selectedColor,
+      isHovered,
+      hoverColor,
+      columnColor,
+    ],
+    "line-opacity": ["case", isEmphasized, 1, 0.6],
+    "line-width": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      0,
+      widthForZoom(0.75, 1.5),
+      4,
+      widthForZoom(1.25, 2.5),
+      10,
+      widthForZoom(2, 3.5),
+    ],
+  });
+
+  const hidden = () => ({ visibility: "none" });
+
+  // `columns` carries every column and shows when no filters are set;
+  // `filteredColumns` carries the matching set and replaces it when they are.
+  // Same styling either way — both are the live column set for their state.
+  // Each layer gets its own paint and layout objects: mapbox-gl takes these
+  // over, so sharing one between layers is asking for trouble.
   return [
     {
       id: "column_fill",
       type: "fill",
       source: "columns",
-      paint: {
-        "fill-color": centerColor,
-        "fill-opacity": 0.3,
-      },
-      layout: {
-        visibility: "none",
-      },
+      paint: fillPaint(),
+      layout: hidden(),
     },
     {
       id: "column_stroke",
       type: "line",
       source: "columns",
-      paint: {
-        "line-color": ruleColor,
-        "line-opacity": 0.75,
-        "line-width": {
-          stops: [
-            [0, 0.5],
-            [4, 1],
-            [10, 2],
-          ],
-        },
-      },
-      layout: {
-        visibility: "none",
-      },
+      paint: linePaint(),
+      layout: hidden(),
     },
     {
       id: "filtered_column_fill",
       type: "fill",
       source: "filteredColumns",
-      paint: {
-        "fill-color": "#777777",
-        "fill-opacity": 0.2,
-      },
-      layout: {
-        visibility: "none",
-      },
+      paint: fillPaint(),
+      layout: hidden(),
     },
     {
       id: "filtered_column_stroke",
       type: "line",
       source: "filteredColumns",
-      paint: {
-        "line-color": "#777777",
-        "line-width": {
-          stops: [
-            [0, 0.2],
-            [10, 1],
-          ],
-        },
-      },
-      layout: {
-        visibility: "none",
-      },
+      paint: linePaint(),
+      layout: hidden(),
     },
+  ] as mapboxgl.Layer[];
+}
+
+export function buildOverlayLayers(): mapboxgl.Layer[] {
+  return [
+    ...buildColumnLayers(),
     ...buildCrossSectionLayers(),
 
     // {

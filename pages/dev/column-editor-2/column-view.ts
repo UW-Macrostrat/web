@@ -5,7 +5,7 @@
  */
 import h from "@macrostrat/hyper";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   ColoredUnitComponent,
   Column,
@@ -15,8 +15,14 @@ import {
 } from "@macrostrat/column-views";
 import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 import type { ComponentType } from "react";
+import type { ColumnTimescaleLike } from "@macrostrat/column-views";
 import { collapseUnconformities } from "./scale";
+import type { IntervalDef } from "./boundaries";
 import {
+  selectedSurfaceAtom,
+  shownTimescalesAtom,
+  useColumnFocus,
+  useIntervalDefs,
   DEFAULT_UNIT_HEIGHT,
   columnScaleOptionsAtom,
   editingModeAtom,
@@ -42,6 +48,20 @@ import {
  * after the connector gutter and the note's own margins this leaves about
  * 150px of text. Still under the library's 200 default. */
 export const SURFACE_LABEL_WIDTH = 190;
+
+/** A floor on how short a section can be drawn, whatever it holds.
+ *
+ * The library's floor is `targetUnitHeight` — one unit's worth — so a section
+ * with a unit or two collapses to a few pixels, which is unreadable and
+ * unclickable just when a zoomed-in view has left you with only a few. This is
+ * a floor, so it never shrinks a section that has earned more height, and it
+ * follows the unit height up rather than capping it. */
+const MIN_SECTION_HEIGHT = 120;
+
+/** Pixels of the abutting sections revealed past a focused window, so the
+ * intervals either side of the one you drilled into stay on screen and
+ * clickable — which is how you walk up and down the timescale. */
+const WINDOW_PADDING = 30;
 const SURFACE_LABEL_PADDING_LEFT = 20;
 
 export function EditorColumn() {
@@ -61,6 +81,8 @@ export function EditorColumn() {
   const showTimescale = useAtomValue(showTimescaleAtom);
   const showSurfaceLines = useAtomValue(showSurfaceLinesAtom);
   const unconformityCollapse = useAtomValue(unconformityCollapseAtom);
+  const zoom = useColumnFocus();
+  const timescales = useColumnTimescales(mode, zoom?.timescaleLevels);
 
   const onUnitSelected = useCallback(
     (unitID: number | null) => {
@@ -92,6 +114,8 @@ export function EditorColumn() {
   // would be measuring something else.
   let timescale = showTimescale;
   if (isPositionAxis) timescale = false;
+
+  const unitHeight = targetUnitHeight ?? DEFAULT_UNIT_HEIGHT;
 
   // Plain unit boxes while the surfaces are the active layer: stripped of
   // their lithology colors the units read as context, and the surface lines
@@ -139,6 +163,9 @@ export function EditorColumn() {
   return h(
     Column,
     {
+      // The timescale's click-to-zoom: the rendered age window, the level
+      // window that follows the drill path, and the transition flag.
+      ...(zoom?.columnProps ?? {}),
       units,
       unitComponent,
       unconformityLabels: "minimal",
@@ -146,9 +173,14 @@ export function EditorColumn() {
         unconformityCollapse
       ),
       showTimescale: timescale,
+      // Supersedes `timescaleLevels`, so the zoom's level window is folded
+      // into the international entry (see `useColumnTimescales`).
+      timescales,
       columnWidth: 200,
       width: columnWidthFor(timescale),
-      targetUnitHeight: targetUnitHeight ?? DEFAULT_UNIT_HEIGHT,
+      targetUnitHeight: unitHeight,
+      minSectionHeight: Math.max(MIN_SECTION_HEIGHT, unitHeight),
+      windowPadding: WINDOW_PADDING,
       pixelScale: pixelScale ?? undefined,
       axisType,
       hybridScale: hybridScale ?? undefined,
@@ -165,4 +197,62 @@ export function EditorColumn() {
 function columnWidthFor(showTimescale: boolean) {
   if (showTimescale) return 340;
   return 270;
+}
+
+
+/** The timescales drawn beside the column.
+ *
+ * Always the international one, carrying whatever level window the timescale
+ * zoom has drilled to. In surfaces mode it can be joined by the timescales a
+ * surface's calibration interval actually belongs to — the answer to "what was
+ * this referred to?", which the international scale alone can't give for a
+ * column calibrated against a regional set.
+ *
+ * `undefined` rather than a one-element list when there is nothing to add, so
+ * `Column` keeps its own `timescaleLevels` handling.
+ */
+function useColumnTimescales(
+  mode: string,
+  levels: [number, number] | undefined
+): ColumnTimescaleLike[] | undefined {
+  const shown = useAtomValue(shownTimescalesAtom);
+  const surfaces = useAtomValue(surfacesAtom);
+  const selectedSurface = useAtomValue(selectedSurfaceAtom);
+  const intervals = useIntervalDefs();
+
+  const referenced = useMemo(() => {
+    if (mode !== "surfaces" || shown === "ics") return [];
+    let sources = surfaces;
+    if (shown === "selection") {
+      sources = selectedSurface == null ? [] : [selectedSurface];
+    }
+    return referencedTimescaleIDs(sources, intervals);
+  }, [mode, shown, surfaces, selectedSurface, intervals]);
+
+  return useMemo(() => {
+    if (referenced.length === 0) return undefined;
+    return [{ id: INTERNATIONAL_TIMESCALE_ID, levels }, ...referenced];
+  }, [referenced, levels?.[0], levels?.[1]]);
+}
+
+/** Macrostrat's international timescale — the one `Column` draws by default,
+ * and the one an explicit `timescales` list has to name for itself. */
+const INTERNATIONAL_TIMESCALE_ID = 11;
+
+function referencedTimescaleIDs(
+  surfaces: { calibration?: { id: number } | null }[],
+  intervals: Map<number, IntervalDef> | null
+): number[] {
+  if (intervals == null) return [];
+  const ids = new Set<number>();
+  for (const surface of surfaces) {
+    const interval = intervals.get(surface.calibration?.id as number);
+    for (const timescale of (interval as any)?.timescales ?? []) {
+      const id = timescale?.timescale_id;
+      // The international scale is already drawn, with its own levels.
+      if (id == null || id === INTERNATIONAL_TIMESCALE_ID) continue;
+      ids.add(id);
+    }
+  }
+  return Array.from(ids);
 }

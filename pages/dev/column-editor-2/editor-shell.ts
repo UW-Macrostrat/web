@@ -17,6 +17,7 @@ import { useCallback, useMemo } from "react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Button, ButtonGroup, SegmentedControl, Tag } from "@blueprintjs/core";
 import { MacrostratDataProvider } from "@macrostrat/data-provider";
+import { IntervalTag, TagSize } from "@macrostrat/data-components";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
@@ -25,11 +26,13 @@ import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
 import type { ColumnEditorData } from "./data";
 import { EDITOR_BASE } from "./data";
 import { EditorColumn } from "./column-view";
-import { DisplaySettingsButton } from "./display";
+import { DisplaySettingsButton } from "./settings-panel";
 import { EditorInspector } from "./inspector";
 import { SurfacesSheet, UnifiedSheet, UnitsSheet } from "./sheets";
 import {
   blockingIssuesAtom,
+  ColumnFocusProvider,
+  useColumnFocus,
   columnVisibleAtom,
   type EditingMode,
   editedUnitsAtom,
@@ -80,16 +83,67 @@ function ColumnEditorFrame(props: ColumnEditorData) {
     className: "column-editor-page",
     capabilities,
     initialAtoms,
-    actions: h(EditorActions),
-    filterBar: h(EditorModeBar),
+    // Inside the frame's jotai scope, so the focused window is one thing the
+    // column, the sheets and the toolbar all read.
+    wrap: (node) => h(ColumnFocusProvider, node),
+    // Context on the title row, the working controls beneath it: what column
+    // this is and how to leave it belong with the page's identity, while the
+    // things that act on the transaction belong above the sheet they act on.
+    titleAdornment: h(EditorContext),
+    actions: h(EditorNavigation),
+    filterBar: h(EditorToolbar),
     content: h(EditorContent),
   });
 }
 
 /* ---------------------------------------------------------------- header */
 
-/** Reset and export, beside the frame's own controls */
-function EditorActions() {
+/** What this column is: the experiment's own warning, and whether the column
+ * has ever been written. Sits with the title, not with the controls. */
+function EditorContext() {
+  const snapshot = useAtomValue(snapshotAtom);
+  const isDirty = useAtomValue(isDirtyAtom);
+
+  let draftTag = null;
+  if (snapshot?.isDraft) {
+    draftTag = h(
+      Tag,
+      { intent: "warning", minimal: true, className: "draft-tag" },
+      "Unsaved column"
+    );
+  }
+
+  return h("span.editor-context", [
+    h(AlphaTag, {
+      content:
+        "An experimental editor. Edits stay in the page: reset discards them, export writes a units sheet in the column-ingestion format.",
+    }),
+    draftTag,
+    h.if(isDirty)("span.dirty-indicator", "Unsaved edits"),
+  ]);
+}
+
+/** Leaving the editor — a navigation action, so it keeps the title row. */
+function EditorNavigation() {
+  return h(Button, {
+    icon: "cross",
+    text: "Close",
+    minimal: true,
+    // Leaving the editor is leaving the column: back to the picker.
+    onClick: () => {
+      window.location.href = EDITOR_BASE;
+    },
+  });
+}
+
+function exportTitle(errorCount: number): string | undefined {
+  if (errorCount === 0) return undefined;
+  return `${errorCount} cell${errorCount === 1 ? "" : "s"} need fixing first`;
+}
+
+/** Reset and export: they act on the transaction, so they sit on the toolbar
+ * row with the mode control rather than beside the title. */
+function TransactionActions() {
   const snapshot = useAtomValue(snapshotAtom);
   const isDirty = useAtomValue(isDirtyAtom);
   const resetEdits = useSetAtom(resetEditsAtom);
@@ -101,64 +155,87 @@ function EditorActions() {
     downloadText(`column-${snapshot?.col_id ?? "draft"}-units.csv`, csv);
   }, [units, snapshot?.col_id]);
 
-  let draftTag = null;
-  if (snapshot?.isDraft) {
-    draftTag = h(
-      Tag,
-      { intent: "warning", minimal: true, className: "draft-tag" },
-      "Unsaved column"
-    );
-  }
-
-  return h("div.editor-actions", [
-    h(AlphaTag, {
-      content:
-        "An experimental editor. Edits stay in the page: reset discards them, export writes a units sheet in the column-ingestion format.",
+  return h(ButtonGroup, { minimal: true }, [
+    h(Button, {
+      icon: "reset",
+      text: "Reset",
+      small: true,
+      disabled: !isDirty,
+      onClick: resetEdits,
     }),
-    draftTag,
-    h(ButtonGroup, [
-      h(Button, {
-        icon: "cross",
-        text: "Close",
-        // Leaving the editor is leaving the column: back to the picker.
-        onClick: () => {
-          window.location.href = EDITOR_BASE;
-        },
-      }),
-      h(Button, {
-        icon: "reset",
-        text: "Reset",
-        disabled: !isDirty,
-        onClick: resetEdits,
-      }),
-      h(Button, {
-        icon: "download",
-        text: "Export CSV",
-        // An ingestion sheet with a unit overlapping its neighbour isn't worth
-        // writing out; the sheet says which cells are at fault.
-        disabled: blockingIssues.length > 0,
-        title: exportTitle(blockingIssues.length),
-        onClick: onExport,
-      }),
-    ]),
+    h(Button, {
+      icon: "download",
+      text: "Export CSV",
+      small: true,
+      // An ingestion sheet with a unit overlapping its neighbour isn't worth
+      // writing out; the sheet says which cells are at fault.
+      disabled: blockingIssues.length > 0,
+      title: exportTitle(blockingIssues.length),
+      onClick: onExport,
+    }),
   ]);
 }
 
-function exportTitle(errorCount: number): string | undefined {
-  if (errorCount === 0) return undefined;
-  return `${errorCount} cell${errorCount === 1 ? "" : "s"} need fixing first`;
+/** What the column is focused on, and the way back out of it. Nothing at all
+ * while the whole column is showing, which is most of the time.
+ *
+ * Named by the intervals that were clicked, as the timescale draws them,
+ * rather than by the ages they work out to — a period has a name and that is
+ * what you picked. A window focused from a row action has no interval behind
+ * it, so that one falls back to its age range. */
+function FocusIndicator() {
+  const zoom = useColumnFocus();
+  if (zoom == null || !zoom.enabled || zoom.isFullExtent) return null;
+
+  const intervals = zoom.selectedIntervals ?? [];
+  let label;
+  if (intervals.length > 0) {
+    label = intervals.map((interval) =>
+      h(IntervalTag, {
+        key: interval.oid,
+        size: TagSize.Small,
+        interval: {
+          id: interval.oid,
+          name: interval.nam,
+          b_age: interval.eag,
+          t_age: interval.lag,
+          color: interval.col,
+          rank: interval.lvl,
+        },
+      })
+    );
+  } else {
+    const { t_age, b_age } = zoom.window ?? {};
+    label = h("span.focus-ages", `${formatAge(b_age)}–${formatAge(t_age)} Ma`);
+  }
+
+  return h("span.focus-indicator", [
+    label,
+    h(Button, {
+      className: "clear-button",
+      icon: "cross",
+      minimal: true,
+      small: true,
+      title: "Show the whole column again",
+      onClick: () => zoom.reset(),
+    }),
+  ]);
 }
 
-/** Units ⇄ surfaces, the dirty state, and the toggles for the two panes that
- * frame the sheet. In the header's second row, so it sits directly above the
- * sheet it switches. */
-function EditorModeBar() {
+function formatAge(age: number | undefined): string {
+  if (age == null) return "—";
+  return age.toFixed(age < 10 ? 2 : 0);
+}
+
+/** Everything that acts on the column: which table is being edited, how it is
+ * drawn, which panes frame it, and what to do with the transaction. In the
+ * header's second row, directly above the sheet it acts on. */
+function EditorToolbar() {
   const [mode, setMode] = useAtom(editingModeAtom);
   const [columnVisible, setColumnVisible] = useAtom(columnVisibleAtom);
   const [inspectorOpen, setInspectorOpen] = useAtom(inspectorOpenAtom);
-  const isDirty = useAtomValue(isDirtyAtom);
 
-  return h("div.editor-mode-bar", [
+  return h("div.editor-toolbar", [
     h(SegmentedControl, {
       small: true,
       options: [
@@ -171,8 +248,9 @@ function EditorModeBar() {
       value: mode,
       onValueChange: (value: EditingMode) => setMode(value),
     }),
-    h.if(isDirty)("span.dirty-indicator", "Unsaved edits"),
+    h(FocusIndicator),
     h("div.spacer"),
+    h(TransactionActions),
     h(DisplaySettingsButton),
     // Both framing panes give way to the sheet: a wide table is the reason to
     // hide either of them.

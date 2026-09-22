@@ -12,7 +12,10 @@ import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
 import { Physiography } from "./physiography.ts";
-import { MacrostratInteractionProvider } from "@macrostrat/data-components";
+import {
+  ExpansionPanelAccordion,
+  MacrostratInteractionProvider,
+} from "@macrostrat/data-components";
 
 import h from "./main.module.sass";
 import classNames from "classnames";
@@ -119,7 +122,9 @@ function InfoDrawerMainPanel({ mapInfo, columnInfo, loading }) {
     ref: {},
   };
 
-  return h("div.info-drawer-main-panel", [
+  // An accordion, so every section's header stays reachable however long the
+  // geologic-map description above it runs.
+  return h(ExpansionPanelAccordion, { className: "info-drawer-main-panel" }, [
     h(GeologicMapInfo, {
       mapInfo,
       bedrockExpanded: true,
