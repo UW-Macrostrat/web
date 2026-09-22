@@ -44,8 +44,11 @@ Conventions, shared with every other federated documentation source:
 - **Headings get GitHub-style ids** (`## Version 4.1.0` → `#version-410`), so a
   changelog entry can be linked from a usage page in either place.
 - **Media is not committed.** Screenshots and videos live in the object store
-  and are referenced by URL; the vault's reference check verifies that every
-  referenced file resolves. Existing map-interface media is on the legacy
-  `macrostrat-media` bucket.
+  under `https://storage.macrostrat.org/assets/web/docs/<interface>s/` (the map
+  interface's under `docs/maps/`) and are referenced by that absolute URL, so
+  they preview on GitHub and the vault's reference check can verify that every
+  file resolves. The published site rewrites the `assets/web` prefix to its
+  configured web-assets base, so where the site fronts the bucket the media is
+  served same-origin through its cache.
 - The page title comes from `title` in the frontmatter (else the first `#`
   heading); `README.md` stands for its directory.
