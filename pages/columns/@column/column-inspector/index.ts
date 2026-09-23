@@ -431,6 +431,22 @@ function ColumnInfoPanel({ data, project, columnProjects }) {
         text: "Correlate with other columns",
         href: correlationHref([data.col_id]),
       }),
+      // The same column as tables — its units, its ingestion-format sheet
+      // and the age model behind it — and, for those with leave, the editor.
+      h(AnchorButton, {
+        minimal: true,
+        small: true,
+        icon: "th",
+        text: "View as table",
+        href: `/columns/${data.col_id}/table`,
+      }),
+      h(AnchorButton, {
+        minimal: true,
+        small: true,
+        icon: "edit",
+        text: "Edit units",
+        href: `/columns/${data.col_id}/edit`,
+      }),
     ]),
   ]);
 }

@@ -44,6 +44,10 @@ export default {
     // map page, are documentation pages (docs/map in this repository).
     "/map/usage": "/docs/website/map/usage",
     "/map/changelog": "/docs/website/map/changelog",
+    // The experimental column editor moved under the column it edits.
+    "/dev/column-editor-2": "/columns",
+    "/dev/column-editor-2/new": "/columns/new",
+    "/dev/column-editor-2/edit/@col_id": "/columns/@col_id/edit",
   },
   clientRouting: true,
   supportsDarkMode: true,

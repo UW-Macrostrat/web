@@ -1,0 +1,250 @@
+// The editor page: a full-screen working surface — column, editing sheet and
+// details pane side by side, with the mode bar and actions in the header.
+
+.column-editor-page
+  --column-background-color: var(--background-color)
+  --column-stroke-color: var(--text-color)
+
+/* ---------------------------------------------------------------- header */
+
+.editor-context
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.5em
+
+.editor-toolbar
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.75em
+  flex-wrap: wrap
+
+.editor-toolbar .spacer
+  flex: 1
+
+// The focused interval, in the same idiom as the project and time filter tags:
+// the tag names what is in force, its × lifts it.
+.focus-indicator
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.25em
+  .clear-button
+    margin-left: -0.15em
+  .focus-ages
+    font-size: 0.85em
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.draft-tag
+  white-space: nowrap
+
+.dirty-indicator
+  font-size: 0.85em
+  color: var(--pz-intent-warning, #c87619)
+
+/* --------------------------------------------------------------- content */
+
+// Three panes filling the viewport: the column, the editing sheet, and the
+// details of whatever is selected. Each scrolls on its own — the page never
+// does, because an editor that scrolls away from its toolbar is unusable.
+
+.editor-content
+  flex: 1 1 auto
+  min-height: 0
+  min-width: 0
+  display: flex
+  flex-direction: row
+  align-items: stretch
+  gap: 1em
+  padding: 0 1em 1em 1em
+  overflow: hidden
+
+.editor-column-pane
+  flex: none
+  overflow-y: auto
+  overflow-x: hidden
+  padding-right: 0.5em
+  // Nothing to reserve for the surface labels: `ColumnSurfaces` renders them
+  // as an ordinary flex child of the library's `.column` row, so they already
+  // take their own width (`SURFACE_LABEL_WIDTH`) in flow. The pane reserved it
+  // a second time, which left the labels adrift in a column of empty space.
+
+.editor-sheet-pane
+  flex: 1 1 auto
+  min-width: 0
+  display: flex
+  flex-direction: column
+
+.editor-sheet-pane > *
+  flex: 1 1 auto
+  min-height: 0
+
+.editor-inspector-pane
+  flex: 0 0 22em
+  min-width: 0
+  overflow-y: auto
+  padding: 0 0.5em
+  border-left: 1px solid var(--pz-divider-color, rgba(128, 128, 128, 0.2))
+  // With the table hidden the details pane is the working surface and takes
+  // its room; the form's fields are wider, and the column sits beside it.
+  &.wide
+    flex: 1 1 auto
+    max-width: 40em
+    border-left: none
+
+/* ------------------------------------------------------------- inspector */
+
+.inspector-panel
+  h3
+    margin: 0
+    color: var(--secondary-color)
+
+.surface-inspector
+  h3
+    color: inherit
+
+.inspector-hint
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  font-size: 0.9em
+
+.subtle
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+
+/* ------------------------------------------------------- display settings */
+
+.settings-popover
+  padding: 0.5em 1em 0.75em 1em
+  max-width: 24em
+
+.display-settings-panel
+  h3
+    margin: 0 0 0.5em 0
+    font-size: 1em
+    color: var(--secondary-color)
+  h3.section
+    margin-top: 1em
+  .unit
+    font-weight: normal
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+  .setting-hint
+    margin: -0.3em 0 0.75em 0
+    font-size: 0.8em
+    line-height: 1.3
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+  // Blueprint's inline form groups otherwise leave the numeric inputs ragged
+  :global(.bp6-form-group)
+    margin-bottom: 0.5em
+  :global(.bp6-numeric-input) input
+    width: 6em
+
+/* ------------------------------------------------------- cell presentation */
+
+// What a value *is*, beyond what it says. Derived: computed from the record
+// (an age from an interval and a proportion). Modeled: an interpolation of
+// the age model rather than a tie point. Filled: a restatement of the
+// neighbouring unit's attribute, which the ingestion sheet leaves blank.
+.derived-value
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  font-style: italic
+
+.modeled-value
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.filled-value
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  .fill-arrow
+    opacity: 0.6
+    margin-right: 0.3em
+
+// A picker or interval editor inside a cell's popover
+.cell-editor-popover
+  padding: 0.5em 0.75em
+  min-width: 18em
+  max-width: 28em
+
+.cell-editor-hint
+  margin: 0.4em 0 0 0
+  font-size: 0.8em
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.interval-cell-editor
+  display: flex
+  flex-direction: column
+  gap: 0.4em
+  .derived-age
+    font-variant-numeric: tabular-nums
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+    font-style: italic
+
+.vocabulary-picker
+  :global(.bp6-tag-input)
+    min-width: 16em
+
+/* --------------------------------------------------------- row editor */
+
+// The details pane's row editor: one record's fields as a form, from the
+// same column spec the sheet uses. A mirror of `@macrostrat/data-sheet`'s
+// `RowEditor` until that ships; the classes match it.
+.row-editor
+  display: flex
+  flex-direction: column
+  gap: 0.25em
+
+.row-editor-header
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.5em
+  margin-bottom: 0.5em
+  h3
+    margin: 0
+    flex: 1
+    min-width: 0
+    color: inherit
+
+.row-editor-field
+  margin-bottom: 0.4em
+  :global(.bp6-label)
+    margin-bottom: 0.15em
+  &.edited .field-name
+    color: var(--pz-intent-success, #0f9960)
+  &.derived .field-value
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+    font-style: italic
+
+.field-label
+  display: inline-flex
+  align-items: center
+  gap: 0.35em
+  min-height: 1.4em
+
+.field-name
+  font-weight: 600
+  font-size: 0.85em
+  color: var(--secondary-color)
+
+.field-marker
+  font-size: 0.7em
+  line-height: 1
+  padding: 0 0.4em
+  min-height: 1.4em
+
+.reset-field
+  min-height: 0
+  :global(.bp6-icon)
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.field-value
+  display: inline-block
+  overflow-wrap: anywhere
+  &.empty
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.inspector-switch
+  display: flex
+  justify-content: flex-end
+  margin-bottom: 0.25em
+
+.view-mode-tag
+  white-space: nowrap
