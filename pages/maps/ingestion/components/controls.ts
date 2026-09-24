@@ -22,7 +22,7 @@ import {
 } from "@blueprintjs/core";
 import { MultiSelect } from "@blueprintjs/select";
 import "@blueprintjs/select/lib/css/blueprint-select.css";
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 const h = hyper.styled(styles);
 
@@ -106,6 +106,9 @@ export interface OpenSearchControlProps {
   className?: string;
 }
 
+/** How long typing must pause before the search is published (and refetched). */
+export const SEARCH_DEBOUNCE_MS = 350;
+
 export function isSearchEmpty(value: SearchValue | null | undefined): boolean {
   return (value?.text ?? "").trim() === "" && (value?.tags ?? []).length === 0;
 }
@@ -148,6 +151,36 @@ export function OpenSearchControl({
     onChange(next);
   };
 
+  // The input is driven by a local draft and only published after a pause, so a
+  // word typed at speed costs one request rather than one per keystroke. The
+  // draft keeps the field responsive; `commit` is what triggers a refetch.
+  const [draft, setDraft] = useState(text);
+  const [typing, setTyping] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Adopt text that changed elsewhere (URL restore, clear button, tag click).
+  useEffect(() => {
+    if (timer.current == null) setDraft(text);
+  }, [text]);
+
+  useEffect(() => () => {
+    if (timer.current != null) clearTimeout(timer.current);
+  }, []);
+
+  const publish = (q: string) => {
+    if (timer.current != null) clearTimeout(timer.current);
+    timer.current = null;
+    setTyping(false);
+    commit({ text: q });
+  };
+
+  const onQueryChange = (q: string) => {
+    setDraft(q);
+    setTyping(true);
+    if (timer.current != null) clearTimeout(timer.current);
+    timer.current = setTimeout(() => publish(q), SEARCH_DEBOUNCE_MS);
+  };
+
   const toggleTag = (tag: string) => {
     const current = valueRef.current.tags;
     const next = current.includes(tag)
@@ -155,21 +188,23 @@ export function OpenSearchControl({
       : [...current, tag];
     // Selecting a tag consumes the query text, so the two don't silently AND
     // together (typing "azgs" then picking `Arizona AZGS` should mean the tag).
+    if (timer.current != null) clearTimeout(timer.current);
+    timer.current = null;
+    setTyping(false);
+    setDraft("");
     commit({ text: "", tags: next });
   };
 
-  // Enter is the tag-selection gesture: with a matching tag the typeahead
-  // applies it (and `toggleTag` consumes the query). With nothing matching,
-  // Enter has no tag to pick, so it clears the box instead of leaving a dead
-  // query sitting there — the text search itself is applied live as you type,
-  // so nothing is waiting on Enter.
+  // Tags are a mouse gesture: clicking one in the dropdown picks it. Enter is
+  // *not* a tag-selection gesture, because a query like "arizona" that happens
+  // to match a tag name is usually meant as a text search over names and slugs.
+  // The text search applies live as you type, so Enter has nothing left to do
+  // but stay out of the way — it keeps the query rather than consuming it.
   const onKeyDown = (event: any) => {
     if (event.key !== "Enter") return;
-    const query = valueRef.current.text.trim();
-    if (query === "") return;
-    const q = query.toLowerCase();
-    if (tags.some((tag) => label(tag).toLowerCase().includes(q))) return;
-    commit({ text: "" });
+    event.preventDefault();
+    // Enter runs the search now rather than waiting out the debounce.
+    publish(draft);
   };
 
   let rightElement: ReactNode = undefined;
@@ -187,8 +222,8 @@ export function OpenSearchControl({
     className: classNames("open-search", className, { large }),
     items: tags,
     selectedItems: selected,
-    query: text,
-    onQueryChange: (q: string) => commit({ text: q }),
+    query: draft,
+    onQueryChange,
     fill: true,
     // The query is ours to clear (`toggleTag` does it); letting the tag input
     // reset it too only adds a redundant, racier update.
@@ -228,9 +263,21 @@ export function OpenSearchControl({
         };
       },
     },
-    popoverProps: { minimal: true, matchTargetWidth: true },
-    // MultiSelect calls this *after* its own typeahead key handling, so an
-    // Enter that picked a tag has already been consumed by the time we see it.
+    // Holding the active item at `null` is what keeps Enter from selecting a
+    // tag: QueryList's Enter handler acts on the *active* item, and this
+    // control is deliberately mouse-only for tags. It has to be done here —
+    // `popoverTargetProps.onKeyDown` below runs *after* the typeahead, far too
+    // late to take a selection back.
+    activeItem: null,
+    onActiveItemChange: () => {},
+    // Held shut mid-word: the tag list flickering through partial matches on
+    // every keystroke is noise when the query is meant as a text search. It
+    // reopens once typing settles (or on Enter), so tags stay one click away.
+    popoverProps: {
+      minimal: true,
+      matchTargetWidth: true,
+      isOpen: typing ? false : undefined,
+    },
     popoverTargetProps: { onKeyDown },
     noResults: h(MenuItem, { disabled: true, text: noResultsText }),
   });

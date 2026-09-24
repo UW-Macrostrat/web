@@ -76,10 +76,10 @@ function MapSearchForm({
   setState: (s: SearchValue | null) => void;
 }) {
   const { tags, failed } = useDefinedTags();
-  let placeholder = "Search maps by name, ID, or tag…";
+  let placeholder = "Search maps by name, slug, status, ID, or tag…";
   let noResultsText = "No matching tags";
   if (failed) {
-    placeholder = "Search maps by name or ID…";
+    placeholder = "Search maps by name, slug, status, or ID…";
     noResultsText = "Couldn't load tags";
   }
   return h(OpenSearchControl, {
@@ -115,8 +115,8 @@ export const searchFilter: TableFilter<IngestMap, SearchValue> = {
     const tags = s?.tags ?? [];
     const textOK =
       q === "" ||
-      [row?.name, row?.slug, String(row?.source_id ?? "")].some((v) =>
-        v?.toLowerCase?.().includes(q)
+      [row?.name, row?.slug, row?.state, String(row?.source_id ?? "")].some(
+        (v) => v?.toLowerCase?.().includes(q)
       );
     const tagsOK =
       tags.length === 0 ||
@@ -343,8 +343,12 @@ export function translateIngestFilter(
   return standardizeFilter({ key, operator: s.operator, value: s.value });
 }
 
-/** Free text → `or=(name.ilike.*q*, slug.ilike.*q*, source_id.eq.q)`;
- * tags → `tags=ov.{…}` ("has any of"). Both apply together (AND). */
+/** Free text → `or=(name.ilike.*q*, slug.ilike.*q*, state.ilike.*q*, source_id.eq.q)`;
+ * tags → `tags=ov.{…}` ("has any of"). Both apply together (AND).
+ *
+ * `state` is matched here as well as by the Status facet, so "failed" typed into
+ * the search bar works without opening a menu. The facet remains the way to pick
+ * several statuses at once, or to select maps with no status. */
 function translateSearch(state: SearchValue): PostgrestFilter | null {
   const q = (state?.text ?? "").trim();
   const tags = state?.tags ?? [];
@@ -355,7 +359,11 @@ function translateSearch(state: SearchValue): PostgrestFilter | null {
       let out = req;
       if (q !== "") {
         const like = quoteLogicValue(`*${q}*`);
-        const parts = [`name.ilike.${like}`, `slug.ilike.${like}`];
+        const parts = [
+          `name.ilike.${like}`,
+          `slug.ilike.${like}`,
+          `state.ilike.${like}`,
+        ];
         // A purely numeric query also matches an exact source_id.
         if (/^\d+$/.test(q)) parts.push(`source_id.eq.${q}`);
         out = out.or(parts.join(","));
