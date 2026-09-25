@@ -39,5 +39,5 @@ macrostrat_staging_context.json
 /content/
 /.cache/
 
-# Local renders from `yarn snapshots:render --out public/map-snapshots`
+# Local renders from `yarn snapshots:local`
 /public/map-snapshots/

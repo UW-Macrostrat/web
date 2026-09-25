@@ -2348,6 +2348,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat-web/map-snapshot-renderer@workspace:packages/map-snapshot-renderer":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/map-snapshot-renderer@workspace:packages/map-snapshot-renderer"
+  dependencies:
+    "@macrostrat-web/map-snapshots": "workspace:*"
+    playwright-core: "npm:1.56.1"
+    tsx: "npm:^4.20.6"
+  languageName: unknown
+  linkType: soft
+
+"@macrostrat-web/map-snapshots@workspace:*, @macrostrat-web/map-snapshots@workspace:packages/map-snapshots":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/map-snapshots@workspace:packages/map-snapshots"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat-web/map-utils@workspace:*, @macrostrat-web/map-utils@workspace:packages/map-utils":
   version: 0.0.0-use.local
   resolution: "@macrostrat-web/map-utils@workspace:packages/map-utils"
@@ -3089,6 +3105,7 @@ __metadata:
     "@macrostrat-web/column-builder": "workspace:*"
     "@macrostrat-web/globe": "workspace:*"
     "@macrostrat-web/lithology-hierarchy": "workspace:*"
+    "@macrostrat-web/map-snapshots": "workspace:*"
     "@macrostrat-web/map-utils": "workspace:*"
     "@macrostrat-web/section-editor-demo": "workspace:*"
     "@macrostrat-web/security": "workspace:*"
@@ -3178,7 +3195,6 @@ __metadata:
     maxmind: "npm:^5.0.6"
     new-github-issue-url: "npm:^1.0.0"
     part-regex: "npm:^0.1.2"
-    playwright-core: "npm:~1.56.0"
     prettier: "npm:^2.7.1"
     prop-types: "npm:^15.8.1"
     react: "npm:^19.2.8"
@@ -16399,7 +16415,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:~1.56.0":
+"playwright-core@npm:1.56.1":
   version: 1.56.1
   resolution: "playwright-core@npm:1.56.1"
   bin:

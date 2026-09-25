@@ -2,10 +2,10 @@
  *
  * The hero opens as a still of its map — rendered by the snapshot route from
  * the very `HeroMap` the live hero uses — and becomes the live map only when
- * the reader reaches for it. See `~/map-snapshots/spec.ts` for the machinery.
+ * the reader reaches for it. See `@macrostrat-web/map-snapshots` for the machinery.
  */
 import { fetchAPIData } from "~/_utils";
-import type { MapSnapshotSpec } from "~/map-snapshots/spec";
+import type { MapSnapshotSpec } from "@macrostrat-web/map-snapshots";
 import { areaByID, featuredAreas, type FeaturedArea } from "./featured-areas";
 import { fetchColumnAtPoint, fetchColumnByID } from "./hero-data";
 import {

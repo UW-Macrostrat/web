@@ -6,8 +6,8 @@
  * - **the snapshot route** (`/dev/map-snapshot/<kind>/<id>`), which renders one
  *   view with the same components the live page uses and reports when it has
  *   settled;
- * - **the renderer** (`scripts/render-map-snapshots.ts`), which drives that
- *   route with Playwright and writes the images and a manifest;
+ * - **the renderer** (`@macrostrat-web/map-snapshot-renderer`), which drives
+ *   that route with Playwright and writes the images and a manifest;
  * - **the page** that shows the image, which looks its spec up in the manifest.
  *
  * A snapshot is keyed by what it depends on. Change an area's camera, its age

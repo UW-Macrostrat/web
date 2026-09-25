@@ -1,0 +1,16 @@
+{
+  "name": "@macrostrat-web/map-snapshot-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Renders the site's cached map views in headless Chromium",
+  "type": "module",
+  "scripts": {
+    "render": "tsx src/cli.ts",
+    "local": "tsx src/local.ts"
+  },
+  "dependencies": {
+    "@macrostrat-web/map-snapshots": "workspace:*",
+    "playwright-core": "1.56.1",
+    "tsx": "^4.20.6"
+  }
+}

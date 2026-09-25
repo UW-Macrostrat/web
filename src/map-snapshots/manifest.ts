@@ -7,27 +7,22 @@
  *
  * Configured by `MACROSTRAT_MAP_SNAPSHOTS_URL` (read as
  * `VITE_MACROSTRAT_MAP_SNAPSHOTS_URL` on the server, like every runtime
- * setting). Unset, snapshots are off. It must be absolute — the server fetches
- * the manifest from it — e.g. the web-assets bucket's `map-snapshots/` prefix,
- * or `http://localhost:3000/map-snapshots` with a local render written to
- * `public/map-snapshots`.
+ * setting). Unset, snapshots are off. Two forms:
+ *
+ * - **Absolute** — the bucket's `map-snapshots/` prefix, e.g.
+ *   `https://storage.macrostrat.org/assets/web/map-snapshots`. The server
+ *   fetches the manifest from it, and caches it for a few minutes.
+ * - **Relative** — `/map-snapshots`, for a local render (`yarn
+ *   snapshots:local`) into `public/map-snapshots`. The browser loads the images
+ *   from whatever origin served the page, and the server reads the manifest
+ *   from disk on every request, so a fresh render shows on reload.
  */
 import { getRuntimeConfig } from "@macrostrat-web/settings";
-import { mapSnapshotKey, type MapSnapshotSpec } from "./spec";
-
-export interface MapSnapshotManifestEntry {
-  width: number;
-  height: number;
-  /** Pixel ratio → file, relative to the snapshot base. */
-  files: Record<string, string>;
-  renderedAt: string;
-}
-
-export interface MapSnapshotManifest {
-  version: 1;
-  generatedAt: string;
-  entries: Record<string, MapSnapshotManifestEntry>;
-}
+import {
+  mapSnapshotKey,
+  type MapSnapshotManifest,
+  type MapSnapshotSpec,
+} from "@macrostrat-web/map-snapshots";
 
 /** What a page needs to draw a snapshot: an `<img>`'s attributes. */
 export interface MapSnapshotImage {
@@ -44,6 +39,9 @@ const MANIFEST_TTL_MS = 5 * 60 * 1000;
 
 let cached: { at: number; manifest: MapSnapshotManifest | null } | null = null;
 
+/** Where a relative snapshot URL's files are: Vite serves `public/` at `/`. */
+const PUBLIC_DIR = "public";
+
 export function mapSnapshotBaseURL(): string | null {
   const base = getRuntimeConfig("MACROSTRAT_MAP_SNAPSHOTS_URL", null);
   if (base == null || base === "") return null;
@@ -56,6 +54,7 @@ export function mapSnapshotBaseURL(): string | null {
 export async function loadMapSnapshotManifest(): Promise<MapSnapshotManifest | null> {
   const base = mapSnapshotBaseURL();
   if (base == null) return null;
+  if (base.startsWith("/")) return readLocalManifest(base);
   if (cached != null && Date.now() - cached.at < MANIFEST_TTL_MS) {
     return cached.manifest;
   }
@@ -69,6 +68,18 @@ export async function loadMapSnapshotManifest(): Promise<MapSnapshotManifest | n
   }
   cached = { at: Date.now(), manifest };
   return manifest;
+}
+
+async function readLocalManifest(base: string): Promise<MapSnapshotManifest | null> {
+  const { readFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const path = join(process.cwd(), PUBLIC_DIR, base, "manifest.json");
+  try {
+    return JSON.parse(await readFile(path, "utf8"));
+  } catch {
+    // Nothing rendered locally yet.
+    return null;
+  }
 }
 
 /** The image for a spec, if the manifest has one rendered from exactly this

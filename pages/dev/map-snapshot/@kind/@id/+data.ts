@@ -1,5 +1,5 @@
 import { render } from "vike/abort";
-import { mapSnapshotKey } from "~/map-snapshots/spec";
+import { mapSnapshotKey } from "@macrostrat-web/map-snapshots";
 import { findMapSnapshotSpec, mapSnapshotKinds } from "../../registry";
 
 export interface MapSnapshotPageData {

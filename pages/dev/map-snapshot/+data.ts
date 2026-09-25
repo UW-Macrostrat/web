@@ -1,7 +1,7 @@
 import {
   mapSnapshotIndexEntry,
   type MapSnapshotIndexEntry,
-} from "~/map-snapshots/spec";
+} from "@macrostrat-web/map-snapshots";
 import { allMapSnapshotSpecs } from "./registry";
 
 export async function data(): Promise<{ entries: MapSnapshotIndexEntry[] }> {

@@ -4,7 +4,7 @@
  * A new kind — a project's coverage map, a map source's thumbnail — is an
  * entry here, a view in `@kind/@id/views.client.ts`, and wherever the page
  * that shows it resolves its spec against the manifest. */
-import type { MapSnapshotSpec } from "~/map-snapshots/spec";
+import type { MapSnapshotSpec } from "@macrostrat-web/map-snapshots";
 import { heroSnapshotData, heroSnapshotSpecs } from "../../index/hero-snapshot";
 
 interface MapSnapshotKind {

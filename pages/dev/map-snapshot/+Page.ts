@@ -1,6 +1,6 @@
 /** The cached map views this deployment knows about, for people and for the
  * renderer. The table links each view's snapshot route; the JSON beside it is
- * what `scripts/render-map-snapshots.ts` reads, so what gets rendered, and the
+ * what `@macrostrat-web/map-snapshot-renderer` reads, so what gets rendered, and the
  * key it is filed under, is always this deployment's answer. */
 import h from "@macrostrat/hyper";
 import { useData } from "vike-react/useData";
@@ -8,7 +8,7 @@ import { Link } from "~/components";
 import {
   MAP_SNAPSHOT_INDEX_ELEMENT_ID,
   type MapSnapshotIndexEntry,
-} from "~/map-snapshots/spec";
+} from "@macrostrat-web/map-snapshots";
 
 export function Page() {
   const { entries } = useData() as { entries: MapSnapshotIndexEntry[] };
