@@ -14,6 +14,9 @@
     "dev:v1": "vike dev",
     "start:v1": "yarn run build && yarn run server",
     "test:runtime": "tsx tests/test-urls.ts",
+    "snapshots:render": "yarn workspace @macrostrat-web/map-snapshot-renderer run render",
+    "snapshots:local": "yarn workspace @macrostrat-web/map-snapshot-renderer run local",
+    "snapshots:install-browser": "yarn workspace @macrostrat-web/map-snapshot-renderer exec playwright-core install chromium-headless-shell",
     "docs:assemble": "bash scripts/assemble-docs.sh"
   },
   "workspaces": [
@@ -64,6 +67,7 @@
     "@macrostrat-web/column-builder": "workspace:*",
     "@macrostrat-web/globe": "workspace:*",
     "@macrostrat-web/lithology-hierarchy": "workspace:*",
+    "@macrostrat-web/map-snapshots": "workspace:*",
     "@macrostrat-web/map-utils": "workspace:*",
     "@macrostrat-web/section-editor-demo": "workspace:*",
     "@macrostrat-web/security": "workspace:*",

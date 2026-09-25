@@ -2348,6 +2348,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat-web/map-snapshot-renderer@workspace:packages/map-snapshot-renderer":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/map-snapshot-renderer@workspace:packages/map-snapshot-renderer"
+  dependencies:
+    "@macrostrat-web/map-snapshots": "workspace:*"
+    playwright-core: "npm:1.56.1"
+    tsx: "npm:^4.20.6"
+  languageName: unknown
+  linkType: soft
+
+"@macrostrat-web/map-snapshots@workspace:*, @macrostrat-web/map-snapshots@workspace:packages/map-snapshots":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/map-snapshots@workspace:packages/map-snapshots"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat-web/map-utils@workspace:*, @macrostrat-web/map-utils@workspace:packages/map-utils":
   version: 0.0.0-use.local
   resolution: "@macrostrat-web/map-utils@workspace:packages/map-utils"
@@ -3089,6 +3105,7 @@ __metadata:
     "@macrostrat-web/column-builder": "workspace:*"
     "@macrostrat-web/globe": "workspace:*"
     "@macrostrat-web/lithology-hierarchy": "workspace:*"
+    "@macrostrat-web/map-snapshots": "workspace:*"
     "@macrostrat-web/map-utils": "workspace:*"
     "@macrostrat-web/section-editor-demo": "workspace:*"
     "@macrostrat-web/security": "workspace:*"
@@ -16395,6 +16412,15 @@ __metadata:
     exsolve: "npm:^1.0.7"
     pathe: "npm:^2.0.3"
   checksum: 10c0/d2bbddc5b81bd4741e1529c08ef4c5f1542bbdcf63498b73b8e1d84cff71806d1b8b1577800549bb569cb7aa20056257677b979bff48c97967cba7e64f72ae12
+  languageName: node
+  linkType: hard
+
+"playwright-core@npm:1.56.1":
+  version: 1.56.1
+  resolution: "playwright-core@npm:1.56.1"
+  bin:
+    playwright-core: cli.js
+  checksum: 10c0/ffd40142b99c68678b387445d5b42f1fee4ab0b65d983058c37f342e5629f9cdbdac0506ea80a0dfd41a8f9f13345bad54e9a8c35826ef66dc765f4eb3db8da7
   languageName: node
   linkType: hard
 

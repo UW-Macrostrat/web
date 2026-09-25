@@ -306,3 +306,70 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
   .credit-detail
     color: var(--pz-text-subtle-color)
+
+// ------------------------------------------------------- the still
+
+// The hero as the page opens: a snapshot of the map with the same chrome over
+// it as HTML (hero-stage.ts). The whole cell is the control that loads the
+// live map.
+.hero-still
+  cursor: pointer
+
+  &:focus-visible
+    outline: 2px solid var(--pz-accent-color)
+    outline-offset: 2px
+
+// Unscaled, from its centre: the snapshot is rendered at the largest size the
+// cell reaches, and Mapbox keeps centre and scale fixed as its container
+// shrinks, so every smaller cell is a crop of it — the same pixels the live
+// map then draws.
+.hero-still-image,
+.hero-still-cover
+  position: absolute
+  inset: 0
+  width: 100%
+  height: 100%
+  object-fit: none
+  object-position: center
+
+.hero-cover-photo
+  position: absolute
+  inset: 0
+  background-size: cover
+  background-position: center
+
+// Over the live map's canvas and under its chrome, until the map has drawn.
+.hero-still-cover
+  z-index: 5
+  pointer-events: none
+  transition: opacity 400ms ease
+
+  &.is-revealed
+    opacity: 0
+
+.hero-engage-hint
+  position: absolute
+  top: 0.8em
+  right: 0.8em
+  z-index: 10
+  display: flex
+  align-items: center
+  gap: 0.35em
+  padding: 0.2em 0.6em
+  border-radius: var(--pz-radius-lg)
+  font-size: 0.8em
+  color: $over-imagery-text
+  background: rgba(0, 0, 0, 0.45)
+  pointer-events: none
+
+.hero-still-attribution
+  position: absolute
+  right: 0.5em
+  bottom: 0.3em
+  z-index: 11
+  font-size: 0.7em
+  color: $over-imagery-text
+  text-shadow: $over-imagery-shadow
+
+  a
+    color: inherit

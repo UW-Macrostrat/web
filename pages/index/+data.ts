@@ -1,6 +1,16 @@
 import { fetchAPIData } from "~/_utils";
 import { parse as parseYaml } from "yaml";
-import { featuredAreaForToday, type FeaturedArea } from "./featured-areas";
+import {
+  featuredAreaForToday,
+  featuredAreas,
+  type FeaturedArea,
+} from "./featured-areas";
+import {
+  loadMapSnapshotManifest,
+  resolveMapSnapshot,
+  type MapSnapshotImage,
+} from "~/map-snapshots/manifest";
+import { heroSnapshotSpec } from "./hero-snapshot";
 import {
   fetchColumnAtPoint,
   fetchColumnByID,
@@ -22,12 +32,15 @@ interface NewsItem {
 }
 
 export interface HeroData {
-  /** The featured area the server opened on. The browser may put its own
-   * synthetic "near you" area in front of it. */
+  /** The featured area the server opened on. */
   area: FeaturedArea;
   /** That area's column, so the first paint has one. Null when the area's
    * point is outside the columns' coverage. */
   column: HeroColumn | null;
+  /** A cached still of each featured area's map, by area id — every area, so
+   * the carousel can move through them without loading the live map. Absent
+   * for an area the renderer hasn't drawn in its current form. */
+  snapshots: Record<string, MapSnapshotImage | null>;
 }
 
 /** News posts are pages under `News/` in the documentation vault; drafts live
@@ -69,13 +82,26 @@ function latestNews(limit = 3): NewsItem[] {
  * Neither failing takes the page down; the map renders on its own. */
 async function heroData(): Promise<HeroData> {
   const area = featuredAreaForToday();
-  let column: HeroColumn | null;
+  let columnRequest: Promise<HeroColumn | null>;
   if (area.columnID != null) {
-    column = await fetchColumnByID(area.columnID);
+    columnRequest = fetchColumnByID(area.columnID);
   } else {
-    column = await fetchColumnAtPoint(area.view.lat, area.view.lng);
+    columnRequest = fetchColumnAtPoint(area.view.lat, area.view.lng);
   }
-  return { area, column };
+  const [column, snapshots] = await Promise.all([
+    columnRequest,
+    heroSnapshots(),
+  ]);
+  return { area, column, snapshots };
+}
+
+async function heroSnapshots(): Promise<Record<string, MapSnapshotImage | null>> {
+  const manifest = await loadMapSnapshotManifest();
+  const snapshots: Record<string, MapSnapshotImage | null> = {};
+  for (const area of featuredAreas) {
+    snapshots[area.id] = resolveMapSnapshot(manifest, heroSnapshotSpec(area));
+  }
+  return snapshots;
 }
 
 export async function data(pageContext) {

@@ -1,0 +1,7 @@
+{
+  "name": "@macrostrat-web/map-snapshots",
+  "version": "1.0.0",
+  "description": "The contract between the site's cached map views and the renderer that draws them",
+  "type": "module",
+  "main": "index.ts"
+}
