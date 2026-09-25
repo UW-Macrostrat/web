@@ -140,14 +140,10 @@
 
 /* ------------------------------------------------------- cell presentation */
 
-// What a value *is*, beyond what it says. Derived: computed from the record
-// (an age from an interval and a proportion). Modeled: an interpolation of
-// the age model rather than a tie point. Filled: a restatement of the
+// What a value *is*, beyond what it says. Modeled: an interpolation of the
+// age model rather than a tie point. Filled: a restatement of the
 // neighbouring unit's attribute, which the ingestion sheet leaves blank.
-.derived-value
-  color: var(--pz-text-subtle-color, var(--secondary-color))
-  font-style: italic
-
+// (Derived values are the column spec's own role, drawn by the library.)
 .modeled-value
   color: var(--pz-text-subtle-color, var(--secondary-color))
 
@@ -157,90 +153,6 @@
     opacity: 0.6
     margin-right: 0.3em
 
-// A picker or interval editor inside a cell's popover
-.cell-editor-popover
-  padding: 0.5em 0.75em
-  min-width: 18em
-  max-width: 28em
-
-.cell-editor-hint
-  margin: 0.4em 0 0 0
-  font-size: 0.8em
-  color: var(--pz-text-subtle-color, var(--secondary-color))
-
-.interval-cell-editor
-  display: flex
-  flex-direction: column
-  gap: 0.4em
-  .derived-age
-    font-variant-numeric: tabular-nums
-    color: var(--pz-text-subtle-color, var(--secondary-color))
-    font-style: italic
-
-.vocabulary-picker
-  :global(.bp6-tag-input)
-    min-width: 16em
-
-/* --------------------------------------------------------- row editor */
-
-// The details pane's row editor: one record's fields as a form, from the
-// same column spec the sheet uses. A mirror of `@macrostrat/data-sheet`'s
-// `RowEditor` until that ships; the classes match it.
-.row-editor
-  display: flex
-  flex-direction: column
-  gap: 0.25em
-
-.row-editor-header
-  display: flex
-  flex-direction: row
-  align-items: center
-  gap: 0.5em
-  margin-bottom: 0.5em
-  h3
-    margin: 0
-    flex: 1
-    min-width: 0
-    color: inherit
-
-.row-editor-field
-  margin-bottom: 0.4em
-  :global(.bp6-label)
-    margin-bottom: 0.15em
-  &.edited .field-name
-    color: var(--pz-intent-success, #0f9960)
-  &.derived .field-value
-    color: var(--pz-text-subtle-color, var(--secondary-color))
-    font-style: italic
-
-.field-label
-  display: inline-flex
-  align-items: center
-  gap: 0.35em
-  min-height: 1.4em
-
-.field-name
-  font-weight: 600
-  font-size: 0.85em
-  color: var(--secondary-color)
-
-.field-marker
-  font-size: 0.7em
-  line-height: 1
-  padding: 0 0.4em
-  min-height: 1.4em
-
-.reset-field
-  min-height: 0
-  :global(.bp6-icon)
-    color: var(--pz-text-subtle-color, var(--secondary-color))
-
-.field-value
-  display: inline-block
-  overflow-wrap: anywhere
-  &.empty
-    color: var(--pz-text-subtle-color, var(--secondary-color))
-
 .inspector-switch
   display: flex
   justify-content: flex-end
@@ -248,3 +160,10 @@
 
 .view-mode-tag
   white-space: nowrap
+
+// The row editor (the library's) in the details pane
+.unit-row-editor
+  .row-editor-title
+    display: inline-flex
+    align-items: baseline
+    gap: 0.3em

@@ -1,22 +1,24 @@
 /** The details pane beside the sheet: the selected unit or surface, else a
  * summary of the column and how this view works.
  *
- * In edit mode a selected unit is shown through the **row editor** — its
- * fields as a form, from the same column spec as the units sheet, with the
- * same pickers — so a unit can be edited one record at a time, with the table
- * hidden if the column is what you want beside it. The library's details
- * panel is a switch away, and is what the table view shows.
+ * In edit mode a selected unit is shown through the **row editor** of
+ * `@macrostrat/data-sheet` — its fields as a form, from the same column spec
+ * as the units sheet, with the same pickers as the cells' surfaces. It is fed
+ * the unit and the transaction rather than bound to a sheet's store, so it
+ * keeps working with the table hidden, which is how a column is edited one
+ * record at a time. The library's details panel is a switch away, and is
+ * what the table view shows.
  */
 import hyper from "@macrostrat/hyper";
 import classNames from "classnames";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { atom } from "jotai";
-import { Button, Switch } from "@blueprintjs/core";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { Switch } from "@blueprintjs/core";
 import {
   MacrostratColumnStateProvider,
   SurfaceDetailsPanel,
   UnitDetailsPanel,
 } from "@macrostrat/column-views";
+import { RowEditor } from "@macrostrat/data-sheet";
 import { DataField, Identifier } from "@macrostrat/data-components";
 import type { UnitLong } from "@macrostrat/api-types";
 import {
@@ -38,7 +40,6 @@ import {
   useIntervalDefs,
 } from "./state";
 import { boundaryFieldInfo, readBoundaryEdit } from "./boundaries";
-import { RowEditor } from "./row-editor";
 import { useUnitSheetColumns } from "./sheets";
 import type { EditorSurface } from "./surfaces";
 import styles from "./main.module.sass";
@@ -152,17 +153,6 @@ function UnitRowEditor({ unit }: { unit: UnitLong }) {
     applyEdits([{ unit_id: unit.unit_id, changes: { [key]: base[key] } }]);
   };
 
-  const header = h("div.row-editor-header", [
-    h("h3", unit.unit_name || `Unit ${unit.unit_id}`),
-    h(Identifier, { id: unit.unit_id }),
-    h(Button, {
-      icon: "cross",
-      minimal: true,
-      small: true,
-      onClick: () => setSelectedUnitID(null),
-    }),
-  ]);
-
   return h(RowEditor<UnitLong>, {
     className: classNames("inspector-panel", "unit-row-editor", {
       standalone: !sheetVisible,
@@ -171,10 +161,17 @@ function UnitRowEditor({ unit }: { unit: UnitLong }) {
     row: base,
     edits: unitEdits,
     editable: true,
+    panel: true,
+    title: h("span.row-editor-title", [
+      unit.unit_name || `Unit ${unit.unit_id}`,
+      " ",
+      h(Identifier, { id: unit.unit_id }),
+    ]),
+    onClose: () => setSelectedUnitID(null),
+    closeLabel: "Clear selection",
     // With the table hidden this is the only place the identifiers and ages
     // can be seen, so the form shows what the sheet would hide.
     showHidden: !sheetVisible,
-    header,
     onChange,
     onResetField,
   });

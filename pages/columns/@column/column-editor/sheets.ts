@@ -13,10 +13,10 @@
  * empties the transaction, and every sheet shows the same edits however they
  * were made. What an edit *means* is in `./state/editing`; what counts as
  * valid is in `./validation`. This file says what the tables look like — and
- * what each value *is*:
+ * what each value *is*, through the column spec's roles:
  *
  * - a **locked** column (`editable: false`) is an identifier the editor never
- *   writes; **identifiers** are hidden unless asked for;
+ *   writes; **identifiers** are `hidden` unless asked for;
  * - a **derived** column is computed from the record — the ages, which follow
  *   from an interval and a proportion or from a measured position through the
  *   age model — drawn dimmed, and hidden unless asked for;
@@ -25,8 +25,10 @@
  * - a **filled** attribute restates the neighbouring unit's, which the
  *   ingestion sheet would leave blank, and is drawn behind an arrow.
  *
- * The `hidden` and `derived` flags mirror `ColumnSpec` in the next release of
- * `@macrostrat/data-sheet`; `resolveColumns` applies them here meanwhile.
+ * Lithology, environment and the boundary intervals are entered through the
+ * pickers of `@macrostrat/data-components`, as the columns' cell surfaces
+ * (`./cell-surfaces`), so a value is picked from the vocabulary rather than
+ * typed.
  */
 import hyper from "@macrostrat/hyper";
 import { RegionCardinality } from "@blueprintjs/table";
@@ -82,32 +84,19 @@ import {
   type FocusActions,
 } from "./sheet-focus";
 import { fillDirection, restatementKey } from "./filling";
-import {
-  derivedValue,
-  filledValue,
-  formatAge,
-  modeledValue,
-  renderLithology,
-  renderNames,
-} from "./render";
+import { filledValue, formatAge, modeledValue } from "./render";
 import {
   EnvironmentCellDetail,
   LithologyCellDetail,
   intervalCellDetail,
-} from "./pickers";
+  renderBoundaryPosition,
+  renderEnvironmentTags,
+  renderLithologyTags,
+} from "./cell-surfaces";
 import type { EditorSurface } from "./surfaces";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
-
-/** A column as the editor declares it: the library's spec plus the two role
- * flags the next `@macrostrat/data-sheet` carries itself. */
-export interface EditorColumnSpec extends ColumnSpec {
-  /** Kept in the spec but left out of the table. */
-  hidden?: boolean;
-  /** Computed from the record: never written, drawn dimmed. */
-  derived?: boolean;
-}
 
 /** Everything but the whole table. Selecting every cell at once (the corner
  * above the row headers) means nothing here — the selection addresses one
@@ -120,21 +109,6 @@ const SELECTION_MODES = [
 ];
 
 /* --------------------------------------------------------- shared pieces */
-
-/** The declared columns as the sheet takes them: hidden ones dropped, derived
- * ones locked and drawn as derived. */
-export function resolveColumns(specs: EditorColumnSpec[]): ColumnSpec[] {
-  return specs
-    .filter((col) => !col.hidden)
-    .map((col) => {
-      if (!col.derived) return col;
-      return {
-        ...col,
-        editable: false,
-        valueRenderer: derivedValue(col.valueRenderer),
-      };
-    });
-}
 
 /**
  * A `ColumnSpec.validate` that reports the transaction's issues for this cell.
@@ -229,7 +203,10 @@ function useColumnVisibility(): ColumnVisibility {
   );
 }
 
-/** The properties every one of these sheets shares. */
+/** The properties every one of these sheets shares. The selection feeds the
+ * details pane's row editor, so a click selects a cell and a second click
+ * opens its surface, rather than a popover opening over the grid on every
+ * selection. */
 function sheetProps(name: string, itemLabel: string, editable: boolean) {
   return {
     name,
@@ -238,6 +215,7 @@ function sheetProps(name: string, itemLabel: string, editable: boolean) {
     enableColumnReordering: false,
     density: DataSheetDensity.MEDIUM,
     selectionModes: SELECTION_MODES,
+    cellInteraction: "second-click" as const,
   };
 }
 
@@ -270,7 +248,7 @@ function useUnitSheetInputs(focus: FocusActions): UnitSheetInputs {
 function identifierColumns(
   names: { unit_id: string; section_id: string },
   { focus, show }: UnitSheetInputs
-): EditorColumnSpec[] {
+): ColumnSpec[] {
   return [
     {
       key: "unit_id",
@@ -297,7 +275,7 @@ function identifierColumns(
 function positionColumns(
   { validator, show }: UnitSheetInputs,
   width = 80
-): EditorColumnSpec[] {
+): ColumnSpec[] {
   return [
     {
       key: "b_pos",
@@ -324,7 +302,7 @@ function positionColumns(
 function ageColumns(
   names: { b_age: string; t_age: string },
   { validator, presentation, show }: UnitSheetInputs
-): EditorColumnSpec[] {
+): ColumnSpec[] {
   return [
     {
       key: "b_age",
@@ -351,17 +329,22 @@ function ageColumns(
 
 /** The chronostratigraphic position of each boundary, in the ingestion
  * format's terms: an interval (picked, and checked against the definitions)
- * and a proportion within it. */
+ * and a proportion within it. The interval cell shows the interval's tag with
+ * the position in it; its surface is the interval editor, which writes both
+ * fields and the age they imply. */
 function chronoColumns({
   validator,
   intervalValidator,
-}: UnitSheetInputs): EditorColumnSpec[] {
+}: UnitSheetInputs): ColumnSpec[] {
   return [
     {
       key: "b_int_name",
       name: "b_int",
+      cellLabel: "base interval",
       dataType: "string",
-      width: 130,
+      width: 170,
+      detailPlacement: "bottom-start",
+      valueRenderer: renderBoundaryPosition("bottom"),
       cellDetail: intervalCellDetail("bottom"),
       validate: intervalValidator,
     },
@@ -376,8 +359,11 @@ function chronoColumns({
     {
       key: "t_int_name",
       name: "t_int",
+      cellLabel: "top interval",
       dataType: "string",
-      width: 130,
+      width: 170,
+      detailPlacement: "bottom-start",
+      valueRenderer: renderBoundaryPosition("top"),
       cellDetail: intervalCellDetail("top"),
       validate: intervalValidator,
     },
@@ -397,8 +383,9 @@ function chronoColumns({
  * readable titles in the units sheet.
  *
  * Lithology and environment are arrays of resolved definitions. They are
- * edited through pickers over the definitions rather than as text, and a
- * value that restates the unit before it is drawn as a fill. */
+ * shown as tags and edited through pickers over the definitions — over
+ * several rows at once, when several are selected — and a value that
+ * restates the unit before it is drawn as a fill. */
 type AttributeLabels = Record<
   | "unit_name"
   | "strat_name"
@@ -413,7 +400,7 @@ type AttributeLabels = Record<
 function attributeColumns(
   names: AttributeLabels,
   { presentation }: UnitSheetInputs
-): Record<keyof AttributeLabels, EditorColumnSpec> {
+): Record<keyof AttributeLabels, ColumnSpec> {
   return {
     unit_name: {
       key: "unit_name",
@@ -434,22 +421,28 @@ function attributeColumns(
     lithology: {
       key: "lith",
       name: names.lithology,
+      cellLabel: "lithology",
       dataType: "array",
-      width: 220,
+      width: 260,
+      multiCell: true,
+      detailPlacement: "bottom-start",
       cellDetail: LithologyCellDetail,
       valueRenderer: filledValue(
-        renderLithology,
+        renderLithologyTags,
         presentation.isRestated("lith")
       ),
     },
     environment: {
       key: "environ",
       name: names.environment,
+      cellLabel: "environment",
       dataType: "array",
-      width: 160,
+      width: 200,
+      multiCell: true,
+      detailPlacement: "bottom-start",
       cellDetail: EnvironmentCellDetail,
       valueRenderer: filledValue(
-        renderNames,
+        renderEnvironmentTags,
         presentation.isRestated("environ")
       ),
     },
@@ -476,7 +469,7 @@ function attributeColumns(
 
 /** The guided view's columns. Exported for the details pane's row editor,
  * which shows a unit through the same spec. */
-export function unitSheetColumns(inputs: UnitSheetInputs): EditorColumnSpec[] {
+export function unitSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
   const attrs = attributeColumns(
     {
       unit_name: "Unit name",
@@ -503,14 +496,13 @@ export function unitSheetColumns(inputs: UnitSheetInputs): EditorColumnSpec[] {
   ];
 }
 
-export function useUnitSheetColumns(): EditorColumnSpec[] {
+export function useUnitSheetColumns(): ColumnSpec[] {
   const inputs = useUnitSheetInputs(useUnitFocusActions());
   return useMemo(() => unitSheetColumns(inputs), [inputs]);
 }
 
 export function UnitsSheet() {
-  const columns = useUnitSheetColumns();
-  const columnSpec = useMemo(() => resolveColumns(columns), [columns]);
+  const columnSpec = useUnitSheetColumns();
   return h(
     "div.editor-sheet.units-sheet",
     h(UnitBackedSheet, { columnSpec, name: "Units" })
@@ -525,7 +517,7 @@ export function UnitsSheet() {
  * (`b_int` is the API's `b_int_name`, and so on). The ages aren't part of
  * the format — they follow from it — so they sit after the record they
  * follow from, shown on request. */
-function unifiedSheetColumns(inputs: UnitSheetInputs): EditorColumnSpec[] {
+function unifiedSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
   const attrs = attributeColumns(
     {
       unit_name: "unit_name",
@@ -558,10 +550,7 @@ function unifiedSheetColumns(inputs: UnitSheetInputs): EditorColumnSpec[] {
 
 export function UnifiedSheet() {
   const inputs = useUnitSheetInputs(useUnitFocusActions());
-  const columnSpec = useMemo(
-    () => resolveColumns(unifiedSheetColumns(inputs)),
-    [inputs]
-  );
+  const columnSpec = useMemo(() => unifiedSheetColumns(inputs), [inputs]);
   return h(
     "div.editor-sheet.unified-sheet",
     h(UnitBackedSheet, { columnSpec, name: "Units and surfaces" })
@@ -647,13 +636,13 @@ function surfaceColumns(
   isPositionAxis: boolean,
   focus: FocusActions,
   show: ColumnVisibility
-): EditorColumnSpec[] {
+): ColumnSpec[] {
   // A `modeled` surface's age is an interpolation between the tie points
   // around it; the status is the row's own, so the predicate reads it there.
   const isModeledSurface: CellPredicate = (ctx) =>
     isModeledStatus(ctx?.row?.status);
 
-  const ageColumn: EditorColumnSpec = {
+  const ageColumn: ColumnSpec = {
     key: "age",
     name: "Age (Ma)",
     dataType: "number",
@@ -662,7 +651,7 @@ function surfaceColumns(
     valueRenderer: modeledValue(formatAge, isModeledSurface),
     validate: validateAge,
   };
-  const positionColumn: EditorColumnSpec = {
+  const positionColumn: ColumnSpec = {
     key: "position",
     name: "Position (m)",
     dataType: "number",
@@ -765,7 +754,7 @@ export function SurfacesSheet() {
   );
 
   const columnSpec = useMemo(
-    () => resolveColumns(surfaceColumns(isPositionAxis, focus, show)),
+    () => surfaceColumns(isPositionAxis, focus, show),
     [isPositionAxis, focus, show]
   );
 
