@@ -14,6 +14,7 @@
     "dev:v1": "vike dev",
     "start:v1": "yarn run build && yarn run server",
     "test:runtime": "tsx tests/test-urls.ts",
+    "snapshots:render": "tsx scripts/render-map-snapshots.ts",
     "docs:assemble": "bash scripts/assemble-docs.sh"
   },
   "workspaces": [
@@ -47,6 +48,7 @@
     "@typescript-eslint/parser": "^6.3.0",
     "@vitejs/plugin-react": "^5.1.2",
     "@yarnpkg/sdks": "^3.1.0",
+    "playwright-core": "~1.56.0",
     "prettier": "^2.7.1",
     "sass-embedded": "^1.79.1",
     "stylus": "^0.55.0",

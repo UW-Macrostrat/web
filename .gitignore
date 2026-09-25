@@ -38,3 +38,6 @@ macrostrat_staging_context.json
 # Documentation vault: assembled by scripts/assemble-docs.sh, not tracked here
 /content/
 /.cache/
+
+# Local renders from `yarn snapshots:render --out public/map-snapshots`
+/public/map-snapshots/
