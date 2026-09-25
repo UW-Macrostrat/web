@@ -10,43 +10,61 @@ import { Tag } from "@blueprintjs/core";
 import type { Intent } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 
-import type { CompilationState, GraphNode } from "./graph";
+import type { GraphNode } from "./graph";
 import styles from "./tree.module.sass";
 
 const h = hyper.styled(styles);
 
-interface StateTag {
+interface ContentTag {
   label: string;
   intent: Intent;
   title: string;
 }
 
-export const stateTags: Record<CompilationState, StateTag> = {
-  virtual: {
-    label: "virtual",
-    intent: "none",
-    title:
-      "Holds no polygons of its own. Resolution descends through it to whichever member has the geometry.",
-  },
-  current: {
-    label: "materialized",
+/** The four readings of a compilation's content, for a legend. */
+export const contentTags: ContentTag[] = [
+  contentTag({ is_materialized: false, is_derived: false, is_stale: false }),
+  contentTag({ is_materialized: true, is_derived: false, is_stale: false }),
+  contentTag({ is_materialized: true, is_derived: true, is_stale: false }),
+  contentTag({ is_materialized: true, is_derived: true, is_stale: true }),
+];
+
+/** What a compilation's content is, from three facts: holds polygons; those
+ * polygons are cut from its members'; the members have changed since. */
+export function contentTag(
+  node: Pick<GraphNode, "is_materialized" | "is_derived" | "is_stale">
+): ContentTag {
+  if (!node.is_materialized) {
+    return {
+      label: "virtual",
+      intent: "none",
+      title:
+        "Holds no polygons of its own. Resolution descends through it to whichever member has the geometry.",
+    };
+  }
+  if (!node.is_derived) {
+    return {
+      label: "materialized",
+      intent: "primary",
+      title:
+        "Holds polygons that arrived with it; its members record where they came from and hold none of their own.",
+    };
+  }
+  if (node.is_stale) {
+    return {
+      label: "stale",
+      intent: "warning",
+      title:
+        "Polygons cut from its members, but the members have changed since. Re-run `macrostrat compilations materialize`.",
+    };
+  }
+  return {
+    label: "derived",
     intent: "success",
     title:
-      "Polygons assembled from its members, and current with the member set. Resolution stops here.",
-  },
-  stale: {
-    label: "stale",
-    intent: "warning",
-    title:
-      "Materialized, but its members have changed since. Re-run `macrostrat compilations materialize`.",
-  },
-  ingested: {
-    label: "ingested",
-    intent: "primary",
-    title:
-      "The polygons arrived with the compilation; its members record where they came from, and hold no polygons of their own.",
-  },
-};
+      "Polygons cut from its members, current with the member set. Resolution stops here.",
+  };
+}
 
 export function NodeTags({
   node,
@@ -73,7 +91,7 @@ export function NodeTags({
     );
   }
 
-  if (node.is_served_layer) {
+  if (node.has_faces) {
     tags.push(
       h(
         Tag,
@@ -82,20 +100,19 @@ export function NodeTags({
           minimal: true,
           intent: "primary",
           title:
-            "A compilation served as a tile layer: its dissolve is cached in map_face and it carries a zoom range.",
+            "A compilation whose faces are cached in map_face and which carries a zoom range.",
         },
         "layer"
       )
     );
   }
 
-  const state = node.state;
-  if (node.is_compilation && state != null) {
-    const tag = stateTags[state];
+  if (node.is_compilation) {
+    const tag = contentTag(node);
     tags.push(
       h(
         Tag,
-        { key: "state", minimal: true, intent: tag.intent, title: tag.title },
+        { key: "content", minimal: true, intent: tag.intent, title: tag.title },
         tag.label
       )
     );
@@ -125,7 +142,7 @@ export function NodeTags({
           key: "mosaic-member",
           minimal: true,
           title:
-            "A mosaic member: a real source whose footprint is its extent and whose content is the mosaic's inside it. No polygons, linework or faces of its own.",
+            "A mosaic member: a real source whose bounds are its extent and whose content is the mosaic's inside them. No polygons, linework or faces of its own.",
         },
         "mosaic member"
       )

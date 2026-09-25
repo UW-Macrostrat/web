@@ -149,7 +149,7 @@ function TreeBody({ atoms, showStandalone, onSelect }) {
         path: `${node.source_id}`,
         // Served layers are structural containers: their contents are the point,
         // so they open.
-        defaultOpen: node.is_served_layer,
+        defaultOpen: node.has_faces,
         depth: 0,
       })
     ),
