@@ -19,7 +19,7 @@ import {
   formatArea,
   mapPageHref,
   NodeTags,
-  stateTags,
+  contentTags,
 } from "~/components/compilation-tree";
 
 import {
@@ -232,15 +232,14 @@ function MapOptions() {
 }
 
 function Legend() {
-  const entries = Object.entries(stateTags);
   return h(
     ExpansionPanel,
     { title: "Legend", className: "legend-panel", expanded: false },
     h(
       "dl.legend",
-      entries.flatMap(([key, tag]) => [
-        h("dt", { key: `${key}-t` }, tag.label),
-        h("dd", { key: `${key}-d` }, tag.title),
+      contentTags.flatMap((tag) => [
+        h("dt", { key: `${tag.label}-t` }, tag.label),
+        h("dd", { key: `${tag.label}-d` }, tag.title),
       ])
     )
   );

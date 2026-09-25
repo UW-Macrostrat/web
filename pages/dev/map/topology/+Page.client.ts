@@ -94,7 +94,7 @@ const mapPositionAtom = lastMapPositionAtom;
 /** The selected compilation, by slug — or null for the whole topology.
  *
  * Any compilation is addressable, not only a served layer: the `maps` and
- * `faces` tile routes resolve the slug through `map_bounds.compilation_id()`, so
+ * `faces` tile routes resolve the slug through `map_bounds.source_id()`, so
  * `bc-surface` loads exactly the way `carto-large` does. The parameter keeps its
  * `layer` name, since a layer slug still means what it always meant and existing
  * links should keep working.
@@ -220,11 +220,11 @@ const selectedNodeAtom = treeAtoms.focusNode;
 const servedLayerAtom = atom<GraphNode | null>((get) => {
   const node = get(selectedNodeAtom);
   if (node == null) return null;
-  if (node.is_served_layer) return node;
+  if (node.has_faces) return node;
 
-  const layerId = node.placed_in_layer;
+  const layerId = node.placed_in_layer_id;
   if (layerId == null) return null;
-  return get(graphAtom).nodes.find((n) => n.map_layer === layerId) ?? null;
+  return get(graphAtom).nodes.find((n) => n.map_layer_id === layerId) ?? null;
 });
 
 /** Tiles are cached to the layer's maximum zoom; past it Mapbox overzooms the
@@ -473,7 +473,7 @@ function SelectionNote({ mode }: { mode: DisplayMode }) {
     );
   }
 
-  if (node.is_served_layer) return null;
+  if (node.has_faces) return null;
   if (mode !== "edges") return null;
 
   let layerName = "its containing layer";
@@ -526,13 +526,22 @@ function WholeTopologyWarning({ mode }: { mode: DisplayMode }) {
  * there — i.e. it's the active map for that layer at this point. */
 interface TopologyInfoRow {
   source_id: number;
-  priority: number;
+  /** The priority path as a dotted string; `priority_path` is the array. */
+  priority: string;
+  priority_path: number[];
   map_layer: string;
+  map_layer_id: number;
   layer_name: string;
   name: string;
   slug: string;
   scale: string | null;
-  is_composite: boolean;
+  is_compilation: boolean;
+  is_materialized: boolean;
+  is_derived: boolean;
+  /** The member of the layer this row belongs to; equal to `source_id` for the
+   * row that matches a clicked feature. */
+  member_id: number | null;
+  member_slug: string | null;
   map_face_id: number | null;
 }
 
@@ -743,9 +752,19 @@ function TopologyMapsList({ position }: { position: mapboxgl.LngLat }) {
   );
 }
 
+function comparePaths(a: number[], b: number[]): number {
+  const n = Math.min(a.length, b.length);
+  for (let i = 0; i < n; i++) {
+    if (a[i] !== b[i]) return a[i] - b[i];
+  }
+  return a.length - b.length;
+}
+
 function TopologyLayerGroup({ rows }: { rows: TopologyInfoRow[] }) {
-  // Highest priority first.
-  const sorted = [...rows].sort((a, b) => b.priority - a.priority);
+  // Highest priority first: paths compare lexicographically, deeper wins a tie.
+  const sorted = [...rows].sort((a, b) =>
+    comparePaths(b.priority_path ?? [], a.priority_path ?? [])
+  );
   return h("div.topology-layer-group", [
     h("h3.layer-name", sorted[0].layer_name),
     h(
