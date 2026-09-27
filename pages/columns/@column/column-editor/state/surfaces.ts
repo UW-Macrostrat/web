@@ -7,9 +7,24 @@
  * as changed.
  */
 import { atom } from "jotai";
+import type { UnitLong } from "@macrostrat/api-types";
 import { buildEditorSurfaces, type EditorSurface } from "../surfaces";
+import { unitBoundary } from "../boundaries";
 import { baseUnitsAtom, boundariesAtom, editedUnitsAtom } from "./column";
-import { surfaceAxisTypeAtom } from "./options";
+import { boundaryKindAtom, surfaceAxisTypeAtom } from "./options";
+
+/** The edited units that can be placed on the index in force: both
+ * boundaries known. A unit just added to an age column has no ages until its
+ * intervals are entered; it is in the sheets, flagged, but has nowhere to be
+ * drawn and no surfaces to contribute. */
+export const drawableUnitsAtom = atom<UnitLong[]>((get) => {
+  const kind = get(boundaryKindAtom);
+  return get(editedUnitsAtom).filter(
+    (unit) =>
+      unitBoundary(unit, "top", kind) != null &&
+      unitBoundary(unit, "bottom", kind) != null
+  );
+});
 
 /** The surfaces of the column as loaded. */
 export const baseSurfacesAtom = atom<EditorSurface[]>((get) =>
@@ -25,7 +40,7 @@ export const baseSurfacesAtom = atom<EditorSurface[]>((get) =>
  * an edit split or merged is simply gone or new. */
 export const surfacesAtom = atom<EditorSurface[]>((get) =>
   buildEditorSurfaces(
-    get(editedUnitsAtom),
+    get(drawableUnitsAtom),
     get(boundariesAtom),
     get(surfaceAxisTypeAtom)
   )

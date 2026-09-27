@@ -15,17 +15,18 @@ export type EditingMode = "units" | "surfaces" | "unified";
 
 const modeParamAtom = atomWithSearchParam("mode");
 
-/** Which table is being edited. Synced to `?mode=`, default kept out. */
+/** Which table is being edited: the unified sheet unless another is asked
+ * for. Synced to `?mode=`, default kept out. */
 export const editingModeAtom = atom(
   (get): EditingMode => {
     const raw = get(modeParamAtom);
     if (raw === "surfaces") return "surfaces";
-    if (raw === "unified") return "unified";
-    return "units";
+    if (raw === "units") return "units";
+    return "unified";
   },
   (get, set, mode: EditingMode) => {
     let value: string | null = mode;
-    if (mode === "units") value = null;
+    if (mode === "unified") value = null;
     set(modeParamAtom, value);
   }
 );

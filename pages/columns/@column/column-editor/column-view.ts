@@ -14,6 +14,7 @@ import {
   type ColumnSurface,
 } from "@macrostrat/column-views";
 import { MacrostratInteractionProvider } from "@macrostrat/data-components";
+import { type Timescale, useTimescales } from "@macrostrat/data-provider";
 import type { ComponentType } from "react";
 import type { ColumnTimescaleLike } from "@macrostrat/column-views";
 import { collapseUnconformities } from "./scale";
@@ -30,6 +31,7 @@ import {
   selectedSurfaceIDAtom,
   selectedUnitIDAtom,
   showSurfaceLinesAtom,
+  drawableUnitsAtom,
   editedUnitsAtom,
   showTimescaleAtom,
   surfacesAtom,
@@ -65,7 +67,8 @@ const WINDOW_PADDING = 30;
 const SURFACE_LABEL_PADDING_LEFT = 20;
 
 export function EditorColumn() {
-  const units = useAtomValue(editedUnitsAtom);
+  const allUnits = useAtomValue(editedUnitsAtom);
+  const units = useAtomValue(drawableUnitsAtom);
   const surfaces = useAtomValue(surfacesAtom);
   const mode = useAtomValue(editingModeAtom);
   const selectedUnitID = useAtomValue(selectedUnitIDAtom);
@@ -107,7 +110,11 @@ export function EditorColumn() {
   );
 
   if (units.length === 0) {
-    return h("p", "This column has no units.");
+    let message = "This column has no units.";
+    if (allUnits.length > 0) {
+      message = "No unit can be placed yet: give one both of its boundaries.";
+    }
+    return h("p.column-placeholder", message);
   }
 
   // A measured column's axis is metres, not time, so a timescale beside it
@@ -216,6 +223,7 @@ function useColumnTimescales(
   const surfaces = useAtomValue(surfacesAtom);
   const selectedSurface = useAtomValue(selectedSurfaceAtom);
   const intervals = useIntervalDefs();
+  const timescales = useTimescales();
 
   const referenced = useMemo(() => {
     if (mode !== "surfaces" || shown === "ics") return [];
@@ -223,8 +231,8 @@ function useColumnTimescales(
     if (shown === "selection") {
       sources = selectedSurface == null ? [] : [selectedSurface];
     }
-    return referencedTimescaleIDs(sources, intervals);
-  }, [mode, shown, surfaces, selectedSurface, intervals]);
+    return referencedTimescaleIDs(sources, intervals, timescales);
+  }, [mode, shown, surfaces, selectedSurface, intervals, timescales]);
 
   return useMemo(() => {
     if (referenced.length === 0) return undefined;
@@ -236,20 +244,57 @@ function useColumnTimescales(
  * and the one an explicit `timescales` list has to name for itself. */
 const INTERNATIONAL_TIMESCALE_ID = 11;
 
+/** The timescales the surfaces' calibration intervals refer to — one per
+ * interval, though an interval is often listed in several (Maastrichtian is
+ * in six). Waits for the timescale definitions, which decide the choice. */
 function referencedTimescaleIDs(
   surfaces: { calibration?: { id: number } | null }[],
-  intervals: Map<number, IntervalDef> | null
+  intervals: Map<number, IntervalDef> | null,
+  timescales: Map<number, Timescale> | null
 ): number[] {
-  if (intervals == null) return [];
+  if (intervals == null || timescales == null) return [];
   const ids = new Set<number>();
   for (const surface of surfaces) {
     const interval = intervals.get(surface.calibration?.id as number);
-    for (const timescale of (interval as any)?.timescales ?? []) {
-      const id = timescale?.timescale_id;
-      // The international scale is already drawn, with its own levels.
-      if (id == null || id === INTERNATIONAL_TIMESCALE_ID) continue;
-      ids.add(id);
-    }
+    const id = intervalTimescaleID(interval, timescales);
+    if (id != null) ids.add(id);
   }
   return Array.from(ids);
+}
+
+/** The one timescale an interval is read against. None when it belongs to
+ * any of the international scales, since the international timescale is
+ * already drawn; otherwise the most specific one it is in — the timescale
+ * with the fewest intervals. */
+function intervalTimescaleID(
+  interval: IntervalDef | undefined,
+  timescales: Map<number, Timescale>
+): number | null {
+  const memberships: number[] = ((interval as any)?.timescales ?? [])
+    .map((t) => t?.timescale_id)
+    .filter((id) => id != null);
+  if (memberships.some((id) => isInternational(id, timescales))) return null;
+
+  let best: number | null = null;
+  let bestSize = Infinity;
+  for (const id of memberships) {
+    const size = timescales.get(id)?.n_intervals ?? Infinity;
+    // Ties go to the lower id, so the choice doesn't depend on list order
+    if (size < bestSize || (size === bestSize && id < (best ?? Infinity))) {
+      best = id;
+      bestSize = size;
+    }
+  }
+  return best;
+}
+
+/** The international scales (ages, epochs, periods, eras, eons, and the
+ * combined one) share the international timescale's reference. */
+function isInternational(
+  id: number,
+  timescales: Map<number, Timescale>
+): boolean {
+  if (id === INTERNATIONAL_TIMESCALE_ID) return true;
+  const ref = timescales.get(INTERNATIONAL_TIMESCALE_ID)?.ref_id;
+  return ref != null && timescales.get(id)?.ref_id === ref;
 }

@@ -14,6 +14,7 @@ import {
   FormGroup,
   InputGroup,
   NumericInput,
+  SegmentedControl,
 } from "@blueprintjs/core";
 import { AlphaTag } from "~/components";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
@@ -44,11 +45,33 @@ export function Page() {
   return h(NewColumnForm, { onStart: setDraft });
 }
 
+/** The ingestion format's `col_type`: a measured section, whose units are
+ * placed by height or depth, or a composite column, placed by age with
+ * positions only as an ordering. Not switched later — it decides what a
+ * unit's position *is*. */
+type ColumnType = "section" | "column";
+
+/** Which way a measured section's positions run: up from a datum, or down
+ * from a surface (a core). */
+type AxisType = "height" | "depth";
+
 interface ColumnFields {
   col_name: string;
   col_group: string;
   project_id: number | null;
+  col_type: ColumnType;
+  axis_type: AxisType;
 }
+
+const columnTypeOptions = [
+  { label: "Measured section", value: "section" },
+  { label: "Composite column", value: "column" },
+];
+
+const axisTypeOptions = [
+  { label: "Height", value: "height" },
+  { label: "Depth", value: "depth" },
+];
 
 function NewColumnForm({
   onStart,
@@ -59,6 +82,8 @@ function NewColumnForm({
     col_name: "",
     col_group: "",
     project_id: null,
+    col_type: "section",
+    axis_type: "height",
   });
 
   const set = useCallback((key: keyof ColumnFields, value: any) => {
@@ -67,16 +92,38 @@ function NewColumnForm({
 
   const start = useCallback(() => {
     if (fields.col_name.trim() === "") return;
+    // A composite column's axis is age; only a section declares a direction
+    let axis_type: string = "age";
+    if (fields.col_type === "section") axis_type = fields.axis_type;
     onStart(
       draftColumn({
         col_id: null,
         col_name: fields.col_name.trim(),
         col_group: fields.col_group.trim() || null,
         project_id: fields.project_id,
+        col_type: fields.col_type,
+        axis_type,
         t_units: 0,
       })
     );
   }, [fields, onStart]);
+
+  let axisControl = null;
+  if (fields.col_type === "section") {
+    axisControl = h(
+      FormGroup,
+      {
+        label: "Positions",
+        helperText:
+          "Height runs up from a datum, as in a measured section; depth runs down from the surface, as in a core.",
+      },
+      h(SegmentedControl, {
+        options: axisTypeOptions,
+        value: fields.axis_type,
+        onValueChange: (v: string) => set("axis_type", v),
+      })
+    );
+  }
 
   const canStart = fields.col_name.trim() !== "";
 
@@ -91,7 +138,7 @@ function NewColumnForm({
       h("h1", "New column"),
       h(
         "p.lead",
-        "Name the column, then build up its units in the editor. Export writes a units sheet in the column-ingestion format."
+        "Name the column and say what kind it is, then build up its units in the editor. Export writes a units sheet in the column-ingestion format."
       ),
       h(
         FormGroup,
@@ -106,6 +153,20 @@ function NewColumnForm({
           },
         })
       ),
+      h(
+        FormGroup,
+        {
+          label: "Column type",
+          helperText:
+            "A measured section places units by position; a composite column places them by age, with positions only as an ordering. This can't be changed once you start.",
+        },
+        h(SegmentedControl, {
+          options: columnTypeOptions,
+          value: fields.col_type,
+          onValueChange: (v: string) => set("col_type", v),
+        })
+      ),
+      axisControl,
       h(
         FormGroup,
         { label: "Group", helperText: "The column group this belongs to." },

@@ -1,6 +1,7 @@
 /** The editor's state, apart from its views.
  *
  * - `column` — the loaded column and the transaction over it
+ * - `structure` — adding, splitting and removing units
  * - `editing` — what a sheet's cell edits mean
  * - `focus` — the age window the column and the tables are narrowed to
  * - `options` — display and editing settings
@@ -16,5 +17,6 @@ export * from "./focus";
 export * from "./intervals";
 export * from "./options";
 export * from "./presentation";
+export * from "./structure";
 export * from "./surfaces";
 export * from "./view";

@@ -39,10 +39,22 @@ const heightScaleChoiceAtom = atom(
   }
 );
 
-/** The position axis this column's units support, if any. */
-export const positionAxisAtom = atom<ColumnAxisType | null>((get) =>
-  inferPositionAxis(get(baseUnitsAtom))
+/** The position axis this column's units support, if any: the one a new
+ * column was declared with, else the one its loaded units run along. */
+export const positionAxisAtom = atom<ColumnAxisType | null>(
+  (get) =>
+    declaredPositionAxis(get(snapshotAtom)?.columnInfo) ??
+    inferPositionAxis(get(baseUnitsAtom))
 );
+
+/** A measured column says which way it runs, in the ingestion format's
+ * `axis_type`; a composite one has no position axis to declare. */
+function declaredPositionAxis(columnInfo: any): ColumnAxisType | null {
+  if (columnInfo?.col_type !== "section") return null;
+  if (columnInfo?.axis_type === "depth") return ColumnAxisType.DEPTH;
+  if (columnInfo?.axis_type === "height") return ColumnAxisType.HEIGHT;
+  return null;
+}
 
 /** A measured column opens on its own index. `col_type == "section"` is how
  * Macrostrat marks the columns that were measured rather than compiled — the
@@ -142,9 +154,13 @@ export const showTimescaleAtom: PrimitiveAtom<boolean> = atom(true);
 /** Which timescales are drawn beside the column in surfaces mode.
  *
  * - `ics` — the international timescale alone, as everywhere else.
- * - `selection` — and the timescale(s) the selected surface's calibration
- *   interval belongs to, so you can see what it was referred to.
+ * - `selection` — and the timescale the selected surface's calibration
+ *   interval is read against, so you can see what it was referred to.
  * - `all` — and every timescale any of this column's surfaces reference.
+ *
+ * An interval is read against one timescale, though it may be listed in
+ * several: none beyond the international one if it is in any international
+ * scale, else the most specific it is in (see `column-view.ts`).
  */
 export type ShownTimescales = "ics" | "selection" | "all";
 

@@ -190,7 +190,7 @@ function SurfaceInspector({ surface }: { surface: EditorSurface }) {
 
   const selectUnit = (id: number) => {
     setSelectedUnitID(id);
-    setMode("units");
+    setMode("unified");
   };
 
   return h(

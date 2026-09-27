@@ -50,8 +50,10 @@ import {
   surfaceStatusLabels,
 } from "@macrostrat/column-views";
 import {
+  addedUnitsAtom,
   baseSurfaceIndexAtom,
-  baseUnitsAtom,
+  deletedUnitIDsAtom,
+  deleteUnitsAtom,
   editedUnitsAtom,
   columnScaleOptionsAtom,
   editModeAtom,
@@ -62,6 +64,7 @@ import {
   positionAxisAtom,
   selectedSurfaceIDAtom,
   selectedUnitIDAtom,
+  sheetUnitsAtom,
   showAgesAtom,
   showIdentifiersAtom,
   surfaceOverlayFor,
@@ -94,6 +97,7 @@ import {
   renderLithologyTags,
 } from "./cell-surfaces";
 import type { EditorSurface } from "./surfaces";
+import { useStructureActions } from "./structure-actions";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -220,6 +224,16 @@ function sheetProps(name: string, itemLabel: string, editable: boolean) {
 }
 
 const unitIdentity = (row: UnitLong) => row?.unit_id;
+
+/** A unit made in the page. Not the library's `added` status: the store
+ * splices `added` rows out of its arrays when they are deleted, before it
+ * reports the deletion, so the rows the report names could no longer be
+ * found. The page owns these rows, so it removes them itself. */
+const NEW_UNIT_STATUS = "new";
+
+const unitRowStatusStyles = {
+  [NEW_UNIT_STATUS]: { intent: "success" as const },
+};
 const surfaceIdentity = (row: EditorSurface) => row?.id;
 
 /* ------------------------------------------------------------------- units */
@@ -574,7 +588,11 @@ function useUnitFocusActions() {
 }
 
 /** Units and unified differ only in which columns they show; the data, the
- * overlay and the edit path are one, and the spec says what may be written. */
+ * overlay and the edit path are one, and the spec says what may be written.
+ *
+ * The rows are the column's structure as it stands (`sheetUnitsAtom`): the
+ * loaded units, with their edits in the overlay, the units made in the page,
+ * and the removed ones, struck through until the transaction is reset. */
 function UnitBackedSheet({
   columnSpec,
   name,
@@ -582,12 +600,22 @@ function UnitBackedSheet({
   columnSpec: ColumnSpec[];
   name: string;
 }) {
-  const data = useAtomValue(baseUnitsAtom);
+  const data = useAtomValue(sheetUnitsAtom);
   const edits = useAtomValue(unitEditsAtom);
+  const added = useAtomValue(addedUnitsAtom);
+  const deleted = useAtomValue(deletedUnitIDsAtom);
   const editable = useAtomValue(editModeAtom);
   const editCells = useSetAtom(editUnitCellsAtom);
+  const deleteUnits = useSetAtom(deleteUnitsAtom);
   const intervals = useIntervalDefs();
   const focus = useUnitFocusActions();
+  const structureActions = useStructureActions();
+  const storeRef = useRef<SheetStore | null>(null);
+
+  const actions = useMemo(
+    () => [focus.rowAction, ...structureActions],
+    [focus, structureActions]
+  );
 
   // `deriveOverlay` rather than a plain `updatedData` prop: the sheet hands it
   // the rows it is currently holding, which is the only way to stay aligned
@@ -595,16 +623,25 @@ function UnitBackedSheet({
   const deriveOverlay = useCallback(
     (rows: UnitLong[]) => ({
       updatedData: unitOverlayFor(edits, rows),
-      rowStatus: [],
+      rowStatus: rows.map((row) => unitRowStatus(row, added, deleted)),
     }),
-    [edits]
+    [edits, added, deleted]
   );
 
   const onEdit = useCallback(
     (event: EditEvent<UnitLong>) => {
+      if (event.type === "deleteRows") {
+        // Reported by index into the rows the sheet holds
+        const rows = storeRef.current?.getState().data ?? [];
+        const ids = event.rowIndices
+          .map((i) => rows[i]?.unit_id)
+          .filter((id) => id != null);
+        deleteUnits(ids);
+        return;
+      }
       editCells({ event, intervals, columnSpec });
     },
-    [editCells, intervals, columnSpec]
+    [editCells, deleteUnits, intervals, columnSpec]
   );
 
   return h(
@@ -614,15 +651,41 @@ function UnitBackedSheet({
       data,
       columnSpec,
       identity: unitIdentity,
-      actions: [focus.rowAction],
+      actions,
+      rowStatusStyles: unitRowStatusStyles,
       deriveOverlay,
       onEdit,
     },
     [
       h(UnitSelectionBridge, { key: "selection" }),
       h(FocusFilterBridge, { key: "focus" }),
+      h(StoreRefBridge, { key: "store", storeRef }),
     ]
   );
+}
+
+type SheetStore = ReturnType<typeof useStoreAPI<UnitLong>>;
+
+/** Hands the sheet's store to the component that renders the sheet, which
+ * sits outside the store's scope. */
+function StoreRefBridge({
+  storeRef,
+}: {
+  storeRef: { current: SheetStore | null };
+}) {
+  storeRef.current = useStoreAPI<UnitLong>();
+  return null;
+}
+
+function unitRowStatus(
+  row: UnitLong | null | undefined,
+  added: Map<number, UnitLong>,
+  deleted: Set<number>
+): string | undefined {
+  if (row == null) return undefined;
+  if (deleted.has(row.unit_id)) return "deleted";
+  if (added.has(row.unit_id)) return NEW_UNIT_STATUS;
+  return undefined;
 }
 
 /* ---------------------------------------------------------------- surfaces */
@@ -742,7 +805,7 @@ export function SurfacesSheet() {
   const surfaces = useAtomValue(surfacesAtom);
   const focus = useFocusActions(surfaces);
   const baseSurfaces = useAtomValue(baseSurfaceIndexAtom);
-  const units = useAtomValue(baseUnitsAtom);
+  const units = useAtomValue(editedUnitsAtom);
   const editable = useAtomValue(editModeAtom);
   const editCells = useSetAtom(editSurfaceCellsAtom);
   const { isPositionAxis } = useAtomValue(columnScaleOptionsAtom);

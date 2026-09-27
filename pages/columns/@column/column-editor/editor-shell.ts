@@ -309,10 +309,10 @@ function EditorToolbar() {
     h(SegmentedControl, {
       small: true,
       options: [
-        { label: "Units", value: "units" },
-        // The ingestion sheet's own view, between the two: units with their
+        // The ingestion sheet's own view, and the default: units with their
         // boundaries, surfaces implicit
         { label: "Unified", value: "unified" },
+        { label: "Units", value: "units" },
         { label: "Surfaces", value: "surfaces" },
       ],
       value: mode,
@@ -363,11 +363,11 @@ function EditorContent() {
   const sheetVisible = useAtomValue(sheetVisibleAtom);
   const inspectorOpen = useAtomValue(inspectorOpenAtom);
 
-  let sheet = h(UnitsSheet);
+  let sheet = h(UnifiedSheet);
   if (mode === "surfaces") {
     sheet = h(SurfacesSheet);
-  } else if (mode === "unified") {
-    sheet = h(UnifiedSheet);
+  } else if (mode === "units") {
+    sheet = h(UnitsSheet);
   }
 
   let column = null;

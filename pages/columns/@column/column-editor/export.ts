@@ -30,8 +30,12 @@ export type IngestionUnitRow = Record<
 >;
 
 export function unitToIngestionRow(unit: UnitLong): IngestionUnitRow {
+  // A unit made in the page has a placeholder id (negative), which means
+  // nothing outside it; the format leaves `unit_id` blank for the importer
+  let unit_id: number | null = unit.unit_id;
+  if (unit_id != null && unit_id < 0) unit_id = null;
   return {
-    unit_id: unit.unit_id,
+    unit_id,
     col_id: unit.col_id,
     section_id: unit.section_id,
     unit_name: unit.unit_name ?? "",

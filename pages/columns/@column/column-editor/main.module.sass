@@ -70,6 +70,11 @@
   // take their own width (`SURFACE_LABEL_WIDTH`) in flow. The pane reserved it
   // a second time, which left the labels adrift in a column of empty space.
 
+// In place of the column, while there is no unit to draw
+.column-placeholder
+  max-width: 14em
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+
 .editor-sheet-pane
   flex: 1 1 auto
   min-width: 0
