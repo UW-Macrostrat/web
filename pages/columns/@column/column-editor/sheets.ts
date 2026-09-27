@@ -53,7 +53,9 @@ import {
   addedUnitsAtom,
   baseSurfaceIndexAtom,
   deletedUnitIDsAtom,
+  deleteSurfacesAtom,
   deleteUnitsAtom,
+  isDraftColumnAtom,
   editedUnitsAtom,
   columnScaleOptionsAtom,
   editModeAtom,
@@ -95,9 +97,14 @@ import {
   renderBoundaryPosition,
   renderEnvironmentTags,
   renderLithologyTags,
+  renderSurfaceCalibration,
+  SurfaceCalibrationDetail,
 } from "./cell-surfaces";
 import type { EditorSurface } from "./surfaces";
-import { useStructureActions } from "./structure-actions";
+import {
+  useStructureActions,
+  useSurfaceStructureActions,
+} from "./structure-actions";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -664,16 +671,12 @@ function UnitBackedSheet({
   );
 }
 
-type SheetStore = ReturnType<typeof useStoreAPI<UnitLong>>;
+type SheetStore<T = UnitLong> = ReturnType<typeof useStoreAPI<T>>;
 
 /** Hands the sheet's store to the component that renders the sheet, which
  * sits outside the store's scope. */
-function StoreRefBridge({
-  storeRef,
-}: {
-  storeRef: { current: SheetStore | null };
-}) {
-  storeRef.current = useStoreAPI<UnitLong>();
+function StoreRefBridge({ storeRef }: { storeRef: { current: any } }) {
+  storeRef.current = useStoreAPI();
   return null;
 }
 
@@ -698,7 +701,8 @@ function unitRowStatus(
 function surfaceColumns(
   isPositionAxis: boolean,
   focus: FocusActions,
-  show: ColumnVisibility
+  show: ColumnVisibility,
+  isDraft: boolean
 ): ColumnSpec[] {
   // A `modeled` surface's age is an interpolation between the tie points
   // around it; the status is the row's own, so the predicate reads it there.
@@ -736,14 +740,7 @@ function surfaceColumns(
       valueRenderer: (d) => surfaceStatusLabels[d] ?? d,
     },
     { key: "type", name: "Contact", dataType: "string", width: 110 },
-    {
-      key: "calibration",
-      name: "Calibration",
-      dataType: "object",
-      width: 160,
-      editable: false,
-      valueRenderer: (d) => d?.name ?? "",
-    },
+    calibrationColumn(isDraft),
     {
       // On an age column this is the editable coordinate: a surface sits at a
       // proportion of its calibration interval, and its age follows.
@@ -792,6 +789,32 @@ function surfaceColumns(
   ];
 }
 
+/** A surface's calibration: the interval it is tied to. A new column's
+ * surfaces are constrained here, through the interval editor; a loaded
+ * column's calibration comes from its age model and is shown by name. */
+function calibrationColumn(isDraft: boolean): ColumnSpec {
+  if (!isDraft) {
+    return {
+      key: "calibration",
+      name: "Calibration",
+      dataType: "object",
+      width: 160,
+      editable: false,
+      valueRenderer: (d) => d?.name ?? "",
+    };
+  }
+  return {
+    key: "calibration",
+    name: "Calibration",
+    cellLabel: "calibration",
+    dataType: "object",
+    width: 170,
+    detailPlacement: "bottom-start",
+    valueRenderer: renderSurfaceCalibration,
+    cellDetail: SurfaceCalibrationDetail,
+  };
+}
+
 /** Unit ids resolved to names, through a row-render context we don't have: the
  * spec is static, so the renderer reads a module-level map kept current by
  * `SurfacesSheet`. */
@@ -808,8 +831,13 @@ export function SurfacesSheet() {
   const units = useAtomValue(editedUnitsAtom);
   const editable = useAtomValue(editModeAtom);
   const editCells = useSetAtom(editSurfaceCellsAtom);
+  const deleteSurfaces = useSetAtom(deleteSurfacesAtom);
   const { isPositionAxis } = useAtomValue(columnScaleOptionsAtom);
+  const isDraft = useAtomValue(isDraftColumnAtom);
+  const intervals = useIntervalDefs();
   const show = useColumnVisibility();
+  const draftActions = useSurfaceStructureActions();
+  const storeRef = useRef<SheetStore<EditorSurface> | null>(null);
 
   unitNameLookup = useMemo(
     () => new Map(units.map((u) => [u.unit_id, u.unit_name])),
@@ -817,9 +845,15 @@ export function SurfacesSheet() {
   );
 
   const columnSpec = useMemo(
-    () => surfaceColumns(isPositionAxis, focus, show),
-    [isPositionAxis, focus, show]
+    () => surfaceColumns(isPositionAxis, focus, show, isDraft),
+    [isPositionAxis, focus, show, isDraft]
   );
+
+  // A new column's surfaces are records, and are added and removed here
+  const actions = useMemo(() => {
+    if (!isDraft) return [focus.rowAction];
+    return [focus.rowAction, ...draftActions];
+  }, [isDraft, focus, draftActions]);
 
   // Which column moves the surface follows the axis in force, so the same
   // sheet edits ages on an age column and positions on a measured one.
@@ -827,17 +861,34 @@ export function SurfacesSheet() {
 
   const onEdit = useCallback(
     (event: EditEvent<EditorSurface>) => {
-      editCells({ event, coordinateKey });
+      if (event.type === "deleteRows") {
+        // Backspace on surface rows: only a new column's surfaces are
+        // records to remove, and only those no unit rests on. The sheet
+        // struck the rows through itself, so its statuses are cleared
+        // and the surfaces left standing show as they are.
+        const store = storeRef.current;
+        const rows = store?.getState().data ?? [];
+        if (isDraft) {
+          deleteSurfaces(event.rowIndices.map((i) => rows[i]?.id));
+        }
+        store?.setState({ rowStatus: [] });
+        return;
+      }
+      editCells({ event, coordinateKey, intervals });
     },
-    [editCells, coordinateKey]
+    [editCells, deleteSurfaces, coordinateKey, intervals, isDraft]
   );
 
+  // Nothing of a new column's was loaded, so nothing reads as changed
   const deriveOverlay = useCallback(
-    (rows: EditorSurface[]) => ({
-      updatedData: surfaceOverlayFor(baseSurfaces, rows),
-      rowStatus: [],
-    }),
-    [baseSurfaces]
+    (rows: EditorSurface[]) => {
+      if (isDraft) return { updatedData: [], rowStatus: [] };
+      return {
+        updatedData: surfaceOverlayFor(baseSurfaces, rows),
+        rowStatus: [],
+      };
+    },
+    [baseSurfaces, isDraft]
   );
 
   return h(
@@ -851,13 +902,14 @@ export function SurfacesSheet() {
         data: surfaces,
         columnSpec,
         identity: surfaceIdentity,
-        actions: [focus.rowAction],
+        actions,
         deriveOverlay,
         onEdit,
       },
       [
         h(SurfaceSelectionBridge, { key: "selection" }),
         h(FocusFilterBridge, { key: "focus" }),
+        h(StoreRefBridge, { key: "store", storeRef }),
       ]
     )
   );

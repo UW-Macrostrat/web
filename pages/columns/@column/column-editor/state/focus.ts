@@ -25,8 +25,8 @@ import {
   unitsAgeExtent,
   useTimescaleZoom,
 } from "@macrostrat/column-views";
-import { editedUnitsAtom } from "./column";
 import { columnScaleOptionsAtom } from "./options";
+import { drawableUnitsAtom, isSpeculativeColumnAtom } from "./surfaces";
 
 /** How many timescale levels are drawn at once (the library's default is 3). */
 const TIMESCALE_LEVEL_WINDOW = 4;
@@ -34,20 +34,24 @@ const TIMESCALE_LEVEL_WINDOW = 4;
 const ColumnFocusContext = createContext<TimescaleZoom | null>(null);
 
 export function ColumnFocusProvider({ children }: { children: ReactNode }) {
-  const units = useAtomValue(editedUnitsAtom);
+  // The units as drawn: a new column's are placed on its surfaces' working
+  // coordinates before they have ages of their own
+  const units = useAtomValue(drawableUnitsAtom);
   const { isPositionAxis } = useAtomValue(columnScaleOptionsAtom);
+  const speculative = useAtomValue(isSpeculativeColumnAtom);
   const fullExtent = useMemo(() => unitsAgeExtent(units), [units]);
 
   // A measured column is drawn on metres, not time, so an age window has
-  // nothing to narrow. The hook still runs — it reports itself disabled rather
-  // than changing hook order.
+  // nothing to narrow; nor has a new column placed by surface order alone,
+  // whose "ages" are only an ordering. The hook still runs — it reports itself
+  // disabled rather than changing hook order.
   //
   // Four levels at once rather than the default three: at rest that reaches
   // era through age, so the fine intervals are on screen to be clicked
   // instead of appearing only once you have already drilled past them.
   const zoom = useTimescaleZoom({
     fullExtent,
-    enabled: !isPositionAxis,
+    enabled: !isPositionAxis && !speculative,
     levelWindow: TIMESCALE_LEVEL_WINDOW,
   });
 

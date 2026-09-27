@@ -111,3 +111,36 @@ export function intervalCellDetail(side: BoundarySide) {
       timescaleChoice: true,
     });
 }
+
+/* ------------------------------------------------------------- surfaces */
+
+/** A surface's calibration as an interval position: its interval and its
+ * proportion within it. */
+function surfacePosition(row: any): IntervalPosition {
+  return {
+    int_id: row?.calibration?.id ?? null,
+    int_name: row?.calibration?.name ?? null,
+    prop: row?.proportion ?? null,
+  };
+}
+
+/** The calibration cell at rest: the interval's tag, the position in it. */
+export function renderSurfaceCalibration(
+  _value: any,
+  ctx?: CellRenderContext
+) {
+  return h(IntervalPositionEditor, {
+    value: surfacePosition(ctx?.row),
+    showAge: false,
+  });
+}
+
+/** Constraining a new column's surface: the interval editor over its
+ * calibration. */
+export function SurfaceCalibrationDetail(ctx: CellDetailContext) {
+  return h(IntervalPositionEditor, {
+    value: surfacePosition(ctx.row),
+    onChange: editableChange(ctx),
+    timescaleChoice: true,
+  });
+}

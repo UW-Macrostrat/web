@@ -23,13 +23,17 @@ import {
 } from "../boundaries";
 import {
   applyUnitEditsAtom,
+  draftSurfacesAtom,
   editedUnitsAtom,
+  isDraftColumnAtom,
   resetEditsAtom,
   type UnitFieldEdit,
 } from "./column";
+import { constrainSurfaceAtom, writeBoundaryToSurfaceAtom } from "./draft";
 import { preserveSurfacesAtom } from "./options";
 import { surfacesAtom } from "./surfaces";
 import type { EditorSurface } from "../surfaces";
+import type { DraftSurface } from "../draft-surfaces";
 
 export type IntervalMap = Map<number, IntervalDef> | null;
 
@@ -41,7 +45,10 @@ export type IntervalMap = Map<number, IntervalDef> | null;
  * along — a unit meeting it from below has its top moved, one from above its
  * bottom — so the surface survives the edit. With it off only the row's own
  * unit moves, which is how the ingestion spreadsheet behaves and how a shared
- * surface gets split. */
+ * surface gets split.
+ *
+ * On a new column the boundary *is* a surface record, so the edit constrains
+ * the surface and every unit resting on it follows (see `./draft`). */
 export const editBoundaryAtom = atom(
   null,
   (
@@ -52,13 +59,24 @@ export const editBoundaryAtom = atom(
       side,
       kind,
       values,
+      intervals = null,
     }: {
       unit_id: number;
       side: BoundarySide;
       kind: BoundaryKind;
       values: BoundaryValues;
+      intervals?: IntervalMap;
     }
   ) => {
+    if (get(isDraftColumnAtom)) {
+      const written = set(writeBoundaryToSurfaceAtom, {
+        unit_id,
+        side,
+        values,
+        intervals,
+      });
+      if (written) return;
+    }
     set(
       applyUnitEditsAtom,
       boundaryEdits(get(editedUnitsAtom), {
@@ -154,7 +172,7 @@ export const editUnitCellsAtom = atom(
       if (boundaryFieldInfo(column) != null) {
         const edit = readBoundaryEdit(row, column, value, intervals);
         if (edit == null) continue;
-        set(editBoundaryAtom, { unit_id: row.unit_id, ...edit });
+        set(editBoundaryAtom, { unit_id: row.unit_id, ...edit, intervals });
         continue;
       }
 
@@ -188,13 +206,29 @@ export const editSurfaceCellsAtom = atom(
     {
       event,
       coordinateKey,
-    }: { event: EditEvent<any>; coordinateKey: "position" | "proportion" }
+      intervals = null,
+    }: {
+      event: EditEvent<any>;
+      coordinateKey: "position" | "proportion";
+      intervals?: IntervalMap;
+    }
   ) => {
     if (event.type === "resetChanges") {
       set(resetEditsAtom);
       return;
     }
     if (event.type !== "setCells") return;
+
+    if (get(isDraftColumnAtom)) {
+      for (const cell of event.cells) {
+        const surface = get(draftSurfacesAtom).get(cell.row?.id);
+        if (surface == null) continue;
+        const changes = draftSurfaceEdit(surface, cell.column, cell.value, intervals);
+        if (changes == null) continue;
+        set(constrainSurfaceAtom, { id: surface.id, changes });
+      }
+      return;
+    }
 
     const surfaces = get(surfacesAtom);
     const edits: UnitFieldEdit[] = [];
@@ -222,6 +256,48 @@ export const editSurfaceCellsAtom = atom(
     set(applyUnitEditsAtom, edits);
   }
 );
+
+/** An edit to a new column's surface, as the constraint it sets: a position,
+ * a proportion within the surface's interval, or an interval (with the
+ * proportion it came with). A cleared cell removes that part of the
+ * constraint. `null` when the edit means nothing. */
+function draftSurfaceEdit(
+  surface: DraftSurface,
+  column: string,
+  value: any,
+  intervals: IntervalMap
+): Partial<DraftSurface> | null {
+  const blank = value == null || value === "";
+  if (column === "position") {
+    if (blank) return { pos: null };
+    const pos = Number(value);
+    if (isNaN(pos)) return null;
+    return { pos };
+  }
+  if (column === "proportion") {
+    if (blank) return { prop: null, age: null };
+    const prop = Number(value);
+    if (isNaN(prop)) return null;
+    return { prop, age: ageForProportion(surface.interval, prop) };
+  }
+  if (column === "calibration") {
+    if (blank || value?.int_id == null) {
+      return { int_id: null, int_name: null, prop: null, age: null, interval: null };
+    }
+    const def = intervals?.get(value.int_id) ?? null;
+    const prop = value.prop ?? surface.prop ?? null;
+    let interval: DraftSurface["interval"] = null;
+    if (def != null) interval = { b_age: def.b_age, t_age: def.t_age };
+    return {
+      int_id: value.int_id,
+      int_name: def?.name ?? value.int_name ?? null,
+      prop,
+      age: ageForProportion(def, prop),
+      interval,
+    };
+  }
+  return null;
+}
 
 function surfaceBoundaryValues(
   surface: EditorSurface,

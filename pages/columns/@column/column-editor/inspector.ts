@@ -136,7 +136,7 @@ function UnitRowEditor({ unit }: { unit: UnitLong }) {
     if (boundaryFieldInfo(key) != null) {
       const edit = readBoundaryEdit(unit, key, value, intervals);
       if (edit == null) return;
-      editBoundary({ unit_id: unit.unit_id, ...edit });
+      editBoundary({ unit_id: unit.unit_id, ...edit, intervals });
       return;
     }
     const spec = columnSpec.find((c) => c.key === key);

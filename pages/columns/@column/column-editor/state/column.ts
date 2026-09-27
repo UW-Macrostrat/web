@@ -9,7 +9,9 @@
  * (`addedUnitsAtom`, whole records under negative ids), the loaded units
  * removed (`deletedUnitIDsAtom`), and, once anything has been inserted, the
  * order the rows run in (`unitOrderAtom`). A new column is all structure —
- * nothing was loaded, so every unit is an added one.
+ * nothing was loaded, so every unit is an added one — and keeps its surfaces
+ * as records too (`draftSurfacesAtom`, in `draftSurfaceOrderAtom`), since it
+ * has no boundary values to derive them from (see `../draft-surfaces`).
  *
  * That is the whole of the editor's mutable state. The sheets don't own their
  * edits: each passes a slice of it as `DataSheet`'s overlay, which puts it
@@ -19,6 +21,11 @@
 import { atom } from "jotai";
 import type { AgeModelBoundary, UnitLong } from "@macrostrat/api-types";
 import { sameFieldValue } from "../validation";
+import {
+  resolveDraftUnit,
+  type DraftSurfaces,
+  type DraftUnit,
+} from "../draft-surfaces";
 
 export interface ColumnSnapshot {
   /** `null` for a draft column that has never been written */
@@ -59,11 +66,21 @@ export const deletedUnitIDsAtom = atom<Set<number>>(new Set());
  * among the loaded ones; `null` keeps the order they were loaded in. */
 export const unitOrderAtom = atom<number[] | null>(null);
 
+/** Whether this is a column built in the page, whose surfaces are records. */
+export const isDraftColumnAtom = atom(
+  (get) => get(snapshotAtom)?.isDraft ?? false
+);
+
+/** A new column's surfaces, by id, and their order, top first. */
+export const draftSurfacesAtom = atom<DraftSurfaces>(new Map());
+export const draftSurfaceOrderAtom = atom<string[]>([]);
+
 export const isDirtyAtom = atom(
   (get) =>
     get(unitEditsAtom).size > 0 ||
     get(addedUnitsAtom).size > 0 ||
-    get(deletedUnitIDsAtom).size > 0
+    get(deletedUnitIDsAtom).size > 0 ||
+    get(draftSurfaceOrderAtom).length > 0
 );
 
 /** Discard the transaction, structure and all. The sheets' overlays follow,
@@ -74,6 +91,8 @@ export const resetEditsAtom = atom(null, (get, set) => {
   set(addedUnitsAtom, new Map());
   set(deletedUnitIDsAtom, new Set());
   set(unitOrderAtom, null);
+  set(draftSurfacesAtom, new Map());
+  set(draftSurfaceOrderAtom, []);
 });
 
 /** Every unit id in row order, removed ones included. */
@@ -85,18 +104,37 @@ export const unitIDsInOrderAtom = atom<number[]>((get) => {
 });
 
 /** The rows the unit sheets hold, in order: each loaded unit as loaded (the
- * overlay carries its edits), each added unit as it now stands, and the
- * removed ones, which the overlay marks. */
+ * overlay carries its edits), each added unit as it now stands — its
+ * boundaries read off its surfaces, when it has them — and the removed ones,
+ * which the overlay marks. */
 export const sheetUnitsAtom = atom<UnitLong[]>((get) => {
   const base = new Map(get(baseUnitsAtom).map((u) => [u.unit_id, u]));
   const added = get(addedUnitsAtom);
+  const surfaces = get(draftSurfacesAtom);
   const rows: UnitLong[] = [];
   for (const id of get(unitIDsInOrderAtom)) {
-    const unit = base.get(id) ?? added.get(id);
-    if (unit != null) rows.push(unit);
+    let unit = base.get(id) ?? added.get(id);
+    if (unit == null) continue;
+    if (isDraftUnit(unit)) unit = resolveDraftUnit(unit, surfaces);
+    rows.push(unit);
   }
-  return rows;
+  if (!get(isDraftColumnAtom)) return rows;
+  // A new column's rows follow its surfaces, top first
+  const index = new Map(get(draftSurfaceOrderAtom).map((id, i) => [id, i]));
+  const at = (unit: UnitLong, end: "t_surface" | "b_surface") =>
+    index.get((unit as DraftUnit)[end] ?? "") ?? Infinity;
+  return rows.sort(
+    (a, b) =>
+      at(a, "t_surface") - at(b, "t_surface") ||
+      at(a, "b_surface") - at(b, "b_surface")
+  );
 });
+
+/** A unit that names its surfaces, rather than carrying its boundaries. */
+export function isDraftUnit(unit: UnitLong): unit is DraftUnit {
+  const d = unit as DraftUnit;
+  return d.t_surface != null || d.b_surface != null;
+}
 
 /** The units as edited: the column as it now stands, in row order. What the
  * column is drawn from, what is validated and what is exported. */

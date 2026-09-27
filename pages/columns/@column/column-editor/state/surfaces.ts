@@ -10,16 +10,66 @@ import { atom } from "jotai";
 import type { UnitLong } from "@macrostrat/api-types";
 import { buildEditorSurfaces, type EditorSurface } from "../surfaces";
 import { unitBoundary } from "../boundaries";
-import { baseUnitsAtom, boundariesAtom, editedUnitsAtom } from "./column";
-import { boundaryKindAtom, surfaceAxisTypeAtom } from "./options";
+import {
+  draftEditorSurfaces,
+  placeDraftUnit,
+  workingCoordinates,
+  type DraftUnit,
+} from "../draft-surfaces";
+import {
+  baseUnitsAtom,
+  boundariesAtom,
+  draftSurfaceOrderAtom,
+  draftSurfacesAtom,
+  editedUnitsAtom,
+  isDraftColumnAtom,
+  isDraftUnit,
+} from "./column";
+import {
+  boundaryKindAtom,
+  positionAxisAtom,
+  surfaceAxisTypeAtom,
+} from "./options";
 
-/** The edited units that can be placed on the index in force: both
- * boundaries known. A unit just added to an age column has no ages until its
- * intervals are entered; it is in the sheets, flagged, but has nowhere to be
- * drawn and no surfaces to contribute. */
+/** Where each of a new column's surfaces sits: its constraint, or a guess
+ * between the constrained ones (see `../draft-surfaces`). */
+export const workingCoordinatesAtom = atom((get) =>
+  workingCoordinates(
+    get(draftSurfaceOrderAtom),
+    get(draftSurfacesAtom),
+    get(positionAxisAtom)
+  )
+);
+
+/** Whether a new column has nothing to place it yet: drawn by surface order
+ * alone, with no ages for a timescale to measure. */
+export const isSpeculativeColumnAtom = atom((get) => {
+  if (!get(isDraftColumnAtom)) return false;
+  for (const coord of get(workingCoordinatesAtom).values()) {
+    if (coord.anchored) return false;
+  }
+  return true;
+});
+
+/** The edited units that can be placed on the index in force. A new column's
+ * units are placed on their surfaces' working coordinates, so each one has
+ * somewhere to be from the start. A loaded column's need both boundaries: a
+ * unit just added to one has no ages until its intervals are entered, and is
+ * in the sheets, flagged, but not drawn. */
 export const drawableUnitsAtom = atom<UnitLong[]>((get) => {
+  const units = get(editedUnitsAtom);
+  if (get(isDraftColumnAtom)) {
+    const coords = get(workingCoordinatesAtom);
+    const axis = get(positionAxisAtom);
+    return units
+      .map((unit) => {
+        if (!isDraftUnit(unit)) return unit;
+        return placeDraftUnit(unit, coords, axis);
+      })
+      .filter((unit): unit is UnitLong => unit != null);
+  }
   const kind = get(boundaryKindAtom);
-  return get(editedUnitsAtom).filter(
+  return units.filter(
     (unit) =>
       unitBoundary(unit, "top", kind) != null &&
       unitBoundary(unit, "bottom", kind) != null
@@ -36,15 +86,25 @@ export const baseSurfacesAtom = atom<EditorSurface[]>((get) =>
 );
 
 /** The surfaces of the column as edited — the rows the sheet shows and the
- * lines the column draws. Re-projected rather than patched, so a surface that
- * an edit split or merged is simply gone or new. */
-export const surfacesAtom = atom<EditorSurface[]>((get) =>
-  buildEditorSurfaces(
+ * lines the column draws. A loaded column's are re-projected rather than
+ * patched, so a surface that an edit split or merged is simply gone or new; a
+ * new column's are its records, placed at their working coordinates. */
+export const surfacesAtom = atom<EditorSurface[]>((get) => {
+  if (get(isDraftColumnAtom)) {
+    return draftEditorSurfaces(
+      get(draftSurfaceOrderAtom),
+      get(draftSurfacesAtom),
+      get(editedUnitsAtom) as DraftUnit[],
+      get(workingCoordinatesAtom),
+      get(positionAxisAtom)
+    );
+  }
+  return buildEditorSurfaces(
     get(drawableUnitsAtom),
     get(boundariesAtom),
     get(surfaceAxisTypeAtom)
-  )
-);
+  );
+});
 
 /** Fields of the surfaces sheet that an edit can change. */
 const SURFACE_EDITABLE_FIELDS = ["age", "position", "proportion"] as const;

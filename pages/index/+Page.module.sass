@@ -50,14 +50,13 @@
   gap: 0.6rem !important
   transition: font-size 0.25s ease
 
-  // Tight under the wordmark, and sans-serif: the logo link sets Publico Text
-  // on everything inside it, which is right for the name and wrong for a line
-  // of running text.
+  // Tight under the wordmark, and sans-serif: the subtitle is an `h2`, which
+  // would otherwise take the heading font.
   h1
     line-height: 1.05
 
   .subtitle
-    font-family: var(--sans-serif-font) !important
+    font-family: var(--sans-serif-font)
     font-size: 0.95rem
     line-height: 1.2
     margin: 0

@@ -2,6 +2,7 @@
  *
  * - `column` — the loaded column and the transaction over it
  * - `structure` — adding, splitting and removing units
+ * - `draft` — a new column's surfaces, which are records
  * - `editing` — what a sheet's cell edits mean
  * - `focus` — the age window the column and the tables are narrowed to
  * - `options` — display and editing settings
@@ -12,6 +13,7 @@
  *   modeled age), read by the sheets to draw it accordingly
  */
 export * from "./column";
+export * from "./draft";
 export * from "./editing";
 export * from "./focus";
 export * from "./intervals";

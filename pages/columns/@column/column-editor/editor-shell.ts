@@ -50,6 +50,7 @@ import {
   editingModeAtom,
   inspectorOpenAtom,
   isDirtyAtom,
+  isSpeculativeColumnAtom,
   resetEditsAtom,
   sheetVisibleAtom,
   snapshotAtom,
@@ -362,6 +363,7 @@ function EditorContent() {
   const columnVisible = useAtomValue(columnVisibleAtom);
   const sheetVisible = useAtomValue(sheetVisibleAtom);
   const inspectorOpen = useAtomValue(inspectorOpenAtom);
+  const speculative = useAtomValue(isSpeculativeColumnAtom);
 
   let sheet = h(UnifiedSheet);
   if (mode === "surfaces") {
@@ -374,7 +376,7 @@ function EditorContent() {
   if (columnVisible) {
     column = h(
       "div.editor-column-pane",
-      { className: classNames(`mode-${mode}`) },
+      { className: classNames(`mode-${mode}`, { speculative }) },
       h(ErrorBoundary, h(EditorColumn))
     );
   }

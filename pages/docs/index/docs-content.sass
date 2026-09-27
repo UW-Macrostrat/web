@@ -4,11 +4,11 @@
 
 .docs-content
   .callout
-    margin: var(--pz-space-3, 1em) 0
-    padding: var(--pz-space-2, 0.6em) var(--pz-space-3, 1em)
-    border-left: 3px solid var(--callout-color, var(--pz-accent-color, #2d72d2))
-    border-radius: var(--pz-radius-sm, 3px)
-    background: color-mix(in srgb, var(--callout-color, var(--pz-accent-color, #2d72d2)) 8%, var(--pz-panel-background-color, transparent))
+    margin: var(--pz-space-3) 0
+    padding: var(--pz-space-2) var(--pz-space-3)
+    border-left: 3px solid var(--callout-color, var(--pz-accent-color))
+    border-radius: var(--pz-radius-sm)
+    background: color-mix(in srgb, var(--callout-color, var(--pz-accent-color)) 8%, var(--pz-panel-background-color))
     & > :last-child
       margin-bottom: 0
     &[data-callout="tip"], &[data-callout="hint"], &[data-callout="success"], &[data-callout="check"]
@@ -20,25 +20,25 @@
     &[data-callout="question"], &[data-callout="help"], &[data-callout="faq"]
       --callout-color: #7961db
     &[data-callout="quote"], &[data-callout="cite"]
-      --callout-color: var(--pz-text-subtle-color, #5f6b7c)
+      --callout-color: var(--pz-text-subtle-color)
 
   .callout-title
     font-weight: 600
-    color: var(--callout-color, var(--pz-accent-color, #2d72d2))
-    margin: 0 0 var(--pz-space-1, 0.3em)
+    color: var(--callout-color, var(--pz-accent-color))
+    margin: 0 0 var(--pz-space-1)
 
   table
     border-collapse: collapse
-    margin: var(--pz-space-3, 1em) 0
+    margin: var(--pz-space-3) 0
     max-width: 100%
     display: block
     overflow-x: auto
   th, td
-    border: 1px solid var(--pz-border-color, #ddd)
+    border: 1px solid var(--pz-border-color)
     padding: 0.3em 0.6em
     text-align: left
   th
-    background: var(--pz-panel-secondary-background-color, #f5f8fa)
+    background: var(--pz-panel-secondary-background-color)
 
   input[type="checkbox"][disabled]
     margin-right: 0.4em
@@ -56,6 +56,6 @@
 .docs-content
   video
     display: block
-    margin: var(--pz-space-3, 1em) 0
-    border-radius: var(--pz-radius-sm, 4px)
-    background: var(--pz-panel-secondary-background-color, #f5f8fa)
+    margin: var(--pz-space-3) 0
+    border-radius: var(--pz-radius-sm)
+    background: var(--pz-panel-secondary-background-color)

@@ -33,6 +33,7 @@ import {
   showSurfaceLinesAtom,
   drawableUnitsAtom,
   editedUnitsAtom,
+  isSpeculativeColumnAtom,
   showTimescaleAtom,
   surfacesAtom,
   targetUnitHeightAtom,
@@ -69,6 +70,7 @@ const SURFACE_LABEL_PADDING_LEFT = 20;
 export function EditorColumn() {
   const allUnits = useAtomValue(editedUnitsAtom);
   const units = useAtomValue(drawableUnitsAtom);
+  const speculative = useAtomValue(isSpeculativeColumnAtom);
   const surfaces = useAtomValue(surfacesAtom);
   const mode = useAtomValue(editingModeAtom);
   const selectedUnitID = useAtomValue(selectedUnitIDAtom);
@@ -118,9 +120,10 @@ export function EditorColumn() {
   }
 
   // A measured column's axis is metres, not time, so a timescale beside it
-  // would be measuring something else.
+  // would be measuring something else; and a new column placed by surface
+  // order alone has no ages for it to measure.
   let timescale = showTimescale;
-  if (isPositionAxis) timescale = false;
+  if (isPositionAxis || speculative) timescale = false;
 
   const unitHeight = targetUnitHeight ?? DEFAULT_UNIT_HEIGHT;
 

@@ -19,11 +19,17 @@ import { RegionCardinality } from "@blueprintjs/table";
 import { deleteRowsAction, type TableAction } from "@macrostrat/data-sheet";
 import type { UnitLong } from "@macrostrat/api-types";
 import {
+  addSurfaceAtom,
+  deleteSurfacesAtom,
+  draftSurfacesInUseAtom,
+  fillUnitsAtom,
   insertUnitAtom,
+  selectedSurfaceIDAtom,
   selectedUnitIDAtom,
   splitUnitAtom,
   useIntervalDefs,
 } from "./state";
+import type { EditorSurface } from "./surfaces";
 import type { InsertPlace } from "./structure";
 
 /** One identity for the life of the sheet, like the focus actions: the
@@ -112,4 +118,96 @@ export function useStructureActions(): TableAction<UnitLong>[] {
       },
     ] as TableAction<UnitLong>[];
   }, [insertUnit, splitUnit]);
+}
+
+/** A new column's surfaces sheet: a surface above or below the selected one,
+ * or at the top with nothing selected; *Fill units* between surfaces no unit
+ * spans; and removal of a surface no unit rests on. Only on a new column,
+ * whose surfaces are records — a loaded column's are a projection of its
+ * units, and are changed through them. */
+export function useSurfaceStructureActions(): TableAction<EditorSurface>[] {
+  const addSurface = useSetAtom(addSurfaceAtom);
+  const fillUnits = useSetAtom(fillUnitsAtom);
+  const deleteSurfaces = useSetAtom(deleteSurfacesAtom);
+  const selectedID = useAtomValue(selectedSurfaceIDAtom);
+  const selectedRef = useRef(selectedID);
+  selectedRef.current = selectedID;
+  const inUse = useAtomValue(draftSurfacesInUseAtom);
+  const inUseRef = useRef(inUse);
+  inUseRef.current = inUse;
+
+  return useMemo(() => {
+    const target = (ctx): string | null =>
+      (selectedRef.current as string) ?? ctx.getSelectedRows()[0]?.id ?? null;
+    const oneRow = (ctx) => ctx.selectionShape.rows === 1;
+    const rowTargets = [RegionCardinality.CELLS, RegionCardinality.FULL_ROWS];
+    const add = (place: InsertPlace) => (ctx) =>
+      addSurface({ surface_id: target(ctx), place });
+
+    const fill: TableAction<EditorSurface> = {
+      id: "fill-units",
+      name: "Fill units",
+      icon: "column-layout",
+      group: "structure",
+      requiresEditable: true,
+      description: "Put a unit between every pair of surfaces that has none",
+      targets: [RegionCardinality.FULL_TABLE, ...rowTargets],
+      run: () => fillUnits(),
+    };
+
+    return [
+      {
+        id: "surface-above",
+        name: "Surface above",
+        icon: "add-row-top",
+        group: "structure",
+        requiresEditable: true,
+        description: "Add a surface just above this one",
+        targets: rowTargets,
+        appliesTo: oneRow,
+        run: add("above"),
+      },
+      {
+        id: "surface-below",
+        name: "Surface below",
+        icon: "add-row-bottom",
+        group: "structure",
+        requiresEditable: true,
+        description: "Add a surface just below this one",
+        targets: rowTargets,
+        appliesTo: oneRow,
+        run: add("below"),
+      },
+      {
+        id: "delete-surface",
+        name: "Delete",
+        icon: "trash",
+        intent: "danger",
+        group: "structure",
+        requiresEditable: true,
+        description: "Remove this surface; only one no unit rests on",
+        targets: [RegionCardinality.FULL_ROWS],
+        appliesTo: oneRow,
+        disabled: () => {
+          const id = selectedRef.current as string;
+          return id == null || inUseRef.current.has(id);
+        },
+        run(ctx) {
+          const id = target(ctx);
+          if (id != null) deleteSurfaces([id]);
+        },
+      },
+      {
+        id: "add-surface",
+        name: "Add surface",
+        icon: "add-row-top",
+        group: "structure",
+        requiresEditable: true,
+        description: "Add a surface at the top of the column",
+        targets: [RegionCardinality.FULL_TABLE],
+        run: () => addSurface({ surface_id: null, place: "above" }),
+      },
+      fill,
+    ] as TableAction<EditorSurface>[];
+  }, [addSurface, fillUnits, deleteSurfaces]);
 }

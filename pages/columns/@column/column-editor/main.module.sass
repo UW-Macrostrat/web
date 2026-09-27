@@ -70,6 +70,13 @@
   // take their own width (`SURFACE_LABEL_WIDTH`) in flow. The pane reserved it
   // a second time, which left the labels adrift in a column of empty space.
 
+// A new column placed by surface order alone: its "ages" are an ordering, so
+// the library's age axis would label them as time. `Column` has no option to
+// leave its axis out, so it is hidden here.
+.editor-column-pane.speculative :global
+  [class*="age-axis"]
+    visibility: hidden
+
 // In place of the column, while there is no unit to draw
 .column-placeholder
   max-width: 14em

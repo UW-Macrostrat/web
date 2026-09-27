@@ -5,6 +5,9 @@
  * order in `unitOrderAtom` — so Reset undoes it like any edit, and selects
  * the unit it made, which scrolls the table to it. What the new units *are*
  * is in `../structure`.
+ *
+ * On a new column, whose surfaces are records, each action hands off to its
+ * surface-first counterpart in `./draft`.
  */
 import { atom, type Getter, type Setter } from "jotai";
 import type { UnitLong } from "@macrostrat/api-types";
@@ -23,9 +26,11 @@ import {
   baseUnitsAtom,
   deletedUnitIDsAtom,
   editedUnitsAtom,
+  isDraftColumnAtom,
   unitIDsInOrderAtom,
   unitOrderAtom,
 } from "./column";
+import { draftInsertUnitAtom, draftSplitUnitAtom } from "./draft";
 import { positionAxisAtom } from "./options";
 import { selectedUnitIDAtom } from "./view";
 
@@ -42,6 +47,10 @@ export const insertUnitAtom = atom(
       intervals,
     }: { unit_id: number | null; place: InsertPlace; intervals: IntervalMap }
   ) => {
+    if (get(isDraftColumnAtom)) {
+      set(draftInsertUnitAtom, { unit_id, place });
+      return;
+    }
     const opts = structureOptions(get, intervals);
     const units = get(editedUnitsAtom);
     const id = nextDraftID(allIDs(get));
@@ -78,6 +87,10 @@ export const splitUnitAtom = atom(
     set,
     { unit_id, intervals }: { unit_id: number; intervals: IntervalMap }
   ) => {
+    if (get(isDraftColumnAtom)) {
+      set(draftSplitUnitAtom, unit_id);
+      return;
+    }
     const unit = get(editedUnitsAtom).find((u) => u.unit_id === unit_id);
     if (unit == null) return;
     const id = nextDraftID(allIDs(get));
