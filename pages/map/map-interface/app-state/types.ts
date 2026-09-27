@@ -171,6 +171,8 @@ type SetPlateModel = {
 type GetAllColumns = { type: "get-all-columns" };
 type ClearColumnInfo = { type: "clear-column-info" };
 
+type SetCompilation = { type: "set-compilation"; compilation: string | null };
+
 type SetFocusedMapSource = {
   type: "set-focused-map-source";
   source_id: number | null;
@@ -222,6 +224,7 @@ export type CoreAction =
   | ToggleCrossSection
   | SetCrossSectionLine
   | SetFocusedMapSource
+  | SetCompilation
   | ClearColumnInfo
   | InitialLoadComplete
   | { type: "close-column-page" };
@@ -290,6 +293,8 @@ export interface CoreState extends MapState, AsyncRequestState {
   timeCursorAge: number | null;
   plateModelId: number | null;
   focusedMapSource: number | null;
+  /** The compilation the map draws; null is the default, `carto`. */
+  compilation: string | null;
   mapSettings: MapSettings;
   searchResults: any;
   inputFocus: boolean;

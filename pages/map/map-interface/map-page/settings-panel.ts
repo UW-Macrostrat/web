@@ -1,9 +1,7 @@
 // Settings panel for the map
 
 // TODO: re-integrate LinkButton to @macrostrat/router-components
-import { AnchorButton, Button, Switch, Tag } from "@blueprintjs/core";
-import { applyMapPositionToHash } from "@macrostrat/map-interface";
-import { buildQueryString } from "@macrostrat/ui-components";
+import { Button, Switch, Tag } from "@blueprintjs/core";
 import { useEffect, useState } from "react";
 import {
   MapLayer,
@@ -14,6 +12,7 @@ import {
 import h from "./settings-panel.module.sass";
 import { ThemeButton } from "~/components/theme-button.ts";
 import { ExpandablePanel } from "~/components";
+import { CompilationSelect } from "./compilation-select";
 
 const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
@@ -59,50 +58,11 @@ const SettingsPanel = (props) => {
           runAction({ type: "toggle-experiments-panel" });
         },
       },
-      [
-        h(LineSymbolsControl),
-        h(SourcesButton),
-        h(PaleogeographyButton),
-        h(GlobeLink),
-      ]
+      [h(CompilationSelect), h(LineSymbolsControl), h(SourcesButton)]
     ),
     // ])
   ]);
 };
-
-function GlobeLink() {
-  const mapPosition = useAppState((s) => s.mapPosition);
-  let args = {};
-  applyMapPositionToHash(args, mapPosition);
-
-  return h(AnchorButton, {
-    href:
-      "/dev/globe#" +
-      buildQueryString(args, { arrayFormat: "comma", sort: false }),
-    minimal: true,
-    intent: "warning",
-    icon: "globe-network",
-    text: "Switch to globe",
-  });
-}
-
-function PaleogeographyButton() {
-  const runAction = useAppActions();
-  const age = useAppState((s) => s.timeCursorAge);
-  return h(
-    Button,
-    {
-      onClick() {
-        runAction({ type: "set-time-cursor", age: age != null ? null : 0 });
-      },
-      icon: "time",
-      intent: "warning",
-      minimal: true,
-      active: age != null,
-    },
-    "Paleogeography"
-  );
-}
 
 function LineSymbolsControl() {
   const runAction = useAppActions();

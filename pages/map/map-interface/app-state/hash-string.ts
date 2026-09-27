@@ -13,6 +13,7 @@ interface HashParams {
   z?: string;
   a?: string;
   e?: string;
+  compilation?: string;
 }
 
 // function getFilterDescriptor(filter: Filter): string {
@@ -38,6 +39,11 @@ export function buildHashString(state: CoreState): string {
 
   const layers = getLayerDescriptionFromLayers(state.mapLayers);
   args = { ...args, ...layers };
+
+  // The default compilation stays out of the URL.
+  if (state.compilation != null) {
+    args["compilation"] = state.compilation;
+  }
 
   const hashString = buildQueryString(args, {
     arrayFormat: "comma",
@@ -189,12 +195,18 @@ export function updateMapPositionForHash(
     // Get time cursor information
     const { age, plate_model = 1 } = hashData;
 
+    let compilation: string | null = null;
+    if (typeof hashData.compilation == "string" && hashData.compilation != "") {
+      compilation = hashData.compilation;
+    }
+
     return {
       ...state,
       mapPosition: position,
       mapLayers,
       timeCursorAge: age != null ? Number(age) : null,
       plateModelId: Number(plate_model),
+      compilation,
     };
   } catch (e) {
     console.error("Invalid map state:", e);

@@ -26,6 +26,7 @@ export const mayHaveHashChange = keyChangeDetector<AppState>([
   "mapPosition",
   "mapLayers",
   "filters",
+  "compilation",
 ]);
 
 export function buildPathName(state: AppState): string | null {

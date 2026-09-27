@@ -43,6 +43,11 @@ export const emitMineralsToken = getRuntimeConfig(
   "MACROSTRAT_EMIT_MINERALS_TOKEN"
 );
 
+/** Delegated token for the tileserver's `/map/{slug}` tiles. `carto` is public;
+ * any other compilation needs this. Public in the same way as the token above:
+ * it names this app as the consumer and can be revoked, it is not a secret. */
+export const mapTilesToken = getRuntimeConfig("MACROSTRAT_MAP_TILES_TOKEN");
+
 export const baseURL = getRuntimeConfig("BASE_URL", "/");
 
 export const apiV2Prefix = getRuntimeConfig(
