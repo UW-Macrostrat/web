@@ -190,7 +190,7 @@ function footprintStyle(
       "compilation-maps": {
         type: "vector",
         tiles: [
-          `${burwellTileDomain}/dev/topology/maps/${slug}/{z}/{x}/{y}?expand=${expand}`,
+          `${burwellTileDomain}/dev/topology/maps/${slug}/{z}/{x}/{y}?level=${expand ? "map" : "member"}`,
         ],
       },
     },
@@ -245,7 +245,7 @@ function facesStyle(
       "compilation-faces": {
         type: "vector",
         tiles: [
-          `${burwellTileDomain}/dev/topology/faces/${slug}/{z}/{x}/{y}?expand=${expand}`,
+          `${burwellTileDomain}/dev/topology/faces/${slug}/{z}/{x}/{y}?level=${expand ? "map" : "member"}`,
         ],
       },
     },

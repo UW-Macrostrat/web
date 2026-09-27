@@ -5,11 +5,10 @@ export {
   nodeName,
   scaleOrder,
   type CompilationGraph,
-  type CompilationState,
   type GraphEdge,
   type GraphNode,
 } from "./graph";
-export { formatArea, NodeTags, stateTags } from "./node-tags";
+export { contentTag, contentTags, formatArea, NodeTags } from "./node-tags";
 export {
   compilationTreeAtoms,
   graphValueAtom,

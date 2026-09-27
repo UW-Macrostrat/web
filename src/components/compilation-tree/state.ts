@@ -86,8 +86,8 @@ export function compilationTreeAtoms(
     return get(graph)
       .nodes.filter((n) => n.is_compilation && !claimed.has(n.source_id))
       .sort((a, b) => {
-        if (a.is_served_layer !== b.is_served_layer) {
-          return a.is_served_layer ? -1 : 1;
+        if (a.has_faces !== b.has_faces) {
+          return a.has_faces ? -1 : 1;
         }
         return a.slug.localeCompare(b.slug);
       });
