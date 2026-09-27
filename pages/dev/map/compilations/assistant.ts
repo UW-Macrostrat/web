@@ -22,8 +22,10 @@ import {
   contentTags,
 } from "~/components/compilation-tree";
 
+import { FocusEditor } from "./editor";
 import {
   basemapAtom,
+  graphVersionAtom,
   expandMembersAtom,
   focusNodeAtom,
   focusSlugAtom,
@@ -43,6 +45,7 @@ export function CompilationAssistant() {
   return h("div.compilation-assistant", [
     h(PointLoader),
     h(FocusSummary),
+    h(FocusEditor),
     h(PointSummary),
     h(MapOptions),
     h(Legend),
@@ -57,6 +60,8 @@ export function CompilationAssistant() {
 function PointLoader() {
   const point = useAtomValue(pointAtom);
   const setGraph = useSetAtom(pointGraphAtom);
+  // Bumped by a save, so an edited graph is fetched again for the point.
+  const version = useAtomValue(graphVersionAtom);
   const [error, setError] = useState<Error | null>(null);
 
   const lng = point?.lng ?? null;
@@ -84,7 +89,7 @@ function PointLoader() {
     return () => {
       cancelled = true;
     };
-  }, [lng, lat, setGraph]);
+  }, [lng, lat, version, setGraph]);
 
   if (error == null) return null;
   return h(ErrorCallout, { error });

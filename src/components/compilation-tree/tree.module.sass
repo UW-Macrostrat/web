@@ -148,3 +148,70 @@
   display: flex
   flex-direction: column
   gap: 0.2em
+
+/* ---------------------------------------------------------------- editing */
+
+.node-row.editable
+  cursor: grab
+
+  &:hover .drag-handle
+    opacity: 0.8
+
+.drag-handle
+  width: 0.8em
+  flex-shrink: 0
+  opacity: 0.3
+  line-height: 24px
+  user-select: none
+
+.remove-member
+  flex-shrink: 0
+  opacity: 0.5
+
+  &:hover
+    opacity: 1
+
+// A drop target shows itself only while a drag is on, and lights up under it.
+.drop-target
+  border-radius: 3px
+  outline: 1px dashed transparent
+
+.drop-over
+  outline-color: var(--pz-accent-color, #2d72d2)
+  background-color: rgba(45, 114, 210, 0.12)
+
+.tier
+  list-style: none
+
+.tier-members
+  list-style: none
+  padding: 0
+  margin: 0
+
+.tier-label
+  display: flex
+  gap: 0.5em
+  align-items: baseline
+  margin-top: 0.3em
+  padding: 0 0.3em
+  font-size: 0.72em
+  text-transform: uppercase
+  letter-spacing: 0.04em
+  color: var(--secondary-color)
+
+.tier-count
+  opacity: 0.7
+
+// Collapsed to a hairline until a drag begins, so tiers read as a list.
+.tier-gap
+  list-style: none
+  height: 2px
+
+  &.active
+    height: auto
+    padding: 0.1em 0.4em
+    font-size: 0.72em
+    color: var(--secondary-color)
+    border: 1px dashed var(--panel-rule-color, rgba(128, 128, 128, 0.4))
+    border-radius: 3px
+    margin: 0.15em 0

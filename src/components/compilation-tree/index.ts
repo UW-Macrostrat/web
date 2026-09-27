@@ -8,6 +8,16 @@ export {
   type GraphEdge,
   type GraphNode,
 } from "./graph";
+export {
+  applyDraft,
+  compilationEditAtoms,
+  saveDraft,
+  SaveRefused,
+  type Change,
+  type CompilationEditAtoms,
+  type NodeEdit,
+  type SaveProblem,
+} from "./editing";
 export { contentTag, contentTags, formatArea, NodeTags } from "./node-tags";
 export {
   compilationTreeAtoms,

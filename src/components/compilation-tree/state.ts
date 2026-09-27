@@ -29,6 +29,8 @@ export interface CompilationTreeAtoms extends CompilationTreeSource {
   searchText: PrimitiveAtom<string>;
   /** Scale bands to keep. Empty means all of them. */
   scaleFilter: PrimitiveAtom<string[]>;
+  /** List every served compilation as a root, not only the unclaimed ones. */
+  servedAtTop: PrimitiveAtom<boolean>;
   nodesById: Atom<Map<number, GraphNode>>;
   /** Members of each compilation, highest priority first. */
   children: Atom<Map<number, GraphEdge[]>>;
@@ -46,7 +48,11 @@ export interface CompilationTreeAtoms extends CompilationTreeSource {
   focusAncestorIds: Atom<Set<number>>;
 }
 
-function nodeMatches(node: GraphNode, query: string, scales: string[]): boolean {
+function nodeMatches(
+  node: GraphNode,
+  query: string,
+  scales: string[]
+): boolean {
   if (scales.length > 0 && !scales.includes(node.scale ?? "")) return false;
   if (query === "") return true;
   return (
@@ -63,6 +69,7 @@ export function compilationTreeAtoms(
 
   const searchText = atom("");
   const scaleFilter = atom<string[]>([]);
+  const servedAtTop = atom(false);
 
   const nodesById = atom<Map<number, GraphNode>>(
     (get) => new Map(get(graph).nodes.map((n) => [n.source_id, n]))
@@ -80,11 +87,18 @@ export function compilationTreeAtoms(
 
   /** Served layers first — the structural roots most of the graph hangs from —
    * then any compilation not yet placed under one, which is worth seeing as a
-   * root in its own right. */
+   * root in its own right. With `servedAtTop`, every served compilation is a
+   * root too, wherever else it sits: the compilations a client can ask for by
+   * name, rather than the shape of the hierarchy. */
   const roots = atom<GraphNode[]>((get) => {
     const claimed = new Set(get(graph).edges.map((e) => e.member_id));
+    const showServed = get(servedAtTop);
     return get(graph)
-      .nodes.filter((n) => n.is_compilation && !claimed.has(n.source_id))
+      .nodes.filter(
+        (n) =>
+          n.is_compilation &&
+          (!claimed.has(n.source_id) || (showServed && n.is_served))
+      )
       .sort((a, b) => {
         if (a.has_faces !== b.has_faces) {
           return a.has_faces ? -1 : 1;
@@ -202,7 +216,12 @@ export function compilationTreeAtoms(
    * is excluded, so selecting a compilation reveals it without also unfolding
    * everything inside it. */
   const focusAncestorIds = atom<Set<number>>(
-    (get) => new Set(get(focusPath).slice(0, -1).map((n) => n.source_id))
+    (get) =>
+      new Set(
+        get(focusPath)
+          .slice(0, -1)
+          .map((n) => n.source_id)
+      )
   );
 
   return {
@@ -210,6 +229,7 @@ export function compilationTreeAtoms(
     focusSlug,
     searchText,
     scaleFilter,
+    servedAtTop,
     nodesById,
     children,
     roots,
