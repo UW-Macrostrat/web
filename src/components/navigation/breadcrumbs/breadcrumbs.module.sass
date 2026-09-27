@@ -1,3 +1,5 @@
+@use "~/styles/type"
+
 // The crumb that visually ends the trail. Usually the DOM-last one, but the
 // root is placed DOM-last when there is no crumb for the current page (it
 // collapses last), and `order` moves it back to the head — so the crumb before
@@ -102,12 +104,12 @@ $trail-end: "li:last-of-type:not(.root-crumb), li:has(+ .root-crumb:last-of-type
   min-width: 0
 
   h1
+    @include type.page-title
     min-width: 0
 
   .identifier
-    color: var(--secondary-color)
-    font-weight: 500
-    font-family: var(--monospace-font)
+    @include type.identifier
+    font-weight: var(--pz-font-weight-medium)
     flex: 0 0 auto
 
   // `lexPageInfo` renders the title as a name plus optional "aka" and kind

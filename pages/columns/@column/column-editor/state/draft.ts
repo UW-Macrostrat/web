@@ -9,9 +9,10 @@
  *   inserted next to it, which pushes whatever rested on that boundary along;
  * - **Split** inserts a surface inside a unit, which the unit and a copy of it
  *   then share;
- * - **A surface** can be added on its own, above or below another, and
- *   **Fill units** puts a unit in every gap between adjacent surfaces that no
- *   unit spans;
+ * - **A surface** can be added on its own, above or below another — or at a
+ *   height clicked on the column, splitting the units it falls in, or past
+ *   either end, reached by an *empty* unit — and **Fill units** puts a unit in
+ *   every gap between adjacent surfaces that no unit spans;
  * - **Constraining** a surface gives it a position, or an interval and a
  *   proportion; every unit resting on it follows.
  *
@@ -34,7 +35,10 @@ import {
   draftSurfaceOrderAtom,
   draftSurfacesAtom,
 } from "./column";
+import { positionAxisAtom } from "./options";
+import { workingCoordinatesAtom } from "./surfaces";
 import { selectedSurfaceIDAtom, selectedUnitIDAtom } from "./view";
+import { ColumnAxisType } from "@macrostrat/column-components";
 
 /** A unit above or below `unit_id`; with no reference, at the top of the
  * column, or the column's first unit when it has none. */
@@ -117,10 +121,82 @@ export const addSurfaceAtom = atom(
       at = index;
       if (place === "below") at += 1;
     }
-    const id = createSurface(get, set, at);
-    set(selectedSurfaceIDAtom, id);
+    placeNewSurface(get, set, at, null);
   }
 );
+
+/** A surface at `coord` on the column — a position on a measured section,
+ * where it is constrained there; an age otherwise, where it takes its place
+ * in the order unconstrained. Every unit spanning it is split at it; past
+ * either end of the column an empty unit reaches it. */
+export const draftAddSurfaceAtAtom = atom(
+  null,
+  (get, set, { coord }: { coord: number }) => {
+    const axis = get(positionAxisAtom);
+    const coords = get(workingCoordinatesAtom);
+    const before = get(draftSurfaceOrderAtom);
+    // Order runs top first, along a coordinate that grows downwards
+    let sign = 1;
+    if (axis === ColumnAxisType.HEIGHT) sign = -1;
+    const key = (id: string) => (coords.get(id)?.value ?? NaN) * sign;
+    let at = before.findIndex((id) => key(id) > coord * sign);
+    if (at < 0) at = before.length;
+
+    // A click is on the column as drawn: on a measured section, surfaces
+    // placed only by guess are fixed where they are drawn first, so that the
+    // one placed here doesn't move them
+    if (axis != null) {
+      for (const other of before) {
+        const surface = get(draftSurfacesAtom).get(other);
+        if (surface?.pos != null) continue;
+        const value = coords.get(other)?.value;
+        if (value == null) continue;
+        set(constrainSurfaceAtom, { id: other, changes: { pos: value } });
+      }
+    }
+    let pos: number | null = null;
+    if (axis != null) pos = coord;
+    placeNewSurface(get, set, at, pos);
+  }
+);
+
+/** Put a new surface at `at` in the order (at `pos`, if given), and make the
+ * column whole around it: every unit spanning it is split there — the unit
+ * keeps its base, a copy of it runs from here to its top — and past either
+ * end of the column an empty unit reaches it. Selects the surface. */
+function placeNewSurface(
+  get: Getter,
+  set: Setter,
+  at: number,
+  pos: number | null
+) {
+  const before = get(draftSurfaceOrderAtom);
+  const id = createSurface(get, set, at);
+  if (pos != null) set(constrainSurfaceAtom, { id, changes: { pos } });
+  const order = get(draftSurfaceOrderAtom);
+  const index = new Map(order.map((d, i) => [d, i]));
+
+  for (const unit of draftUnits(get)) {
+    const top = index.get(unit.t_surface ?? "");
+    const bottom = index.get(unit.b_surface ?? "");
+    if (top == null || bottom == null || !(top < at && at < bottom)) continue;
+    const { unit_id, ...attributes } = unit;
+    updateAddedUnit(get, set, unit_id, { t_surface: id });
+    addDraftUnit(get, set, { ...attributes, t_surface: unit.t_surface, b_surface: id });
+  }
+
+  // Past either end, an empty unit to reach it
+  if (before.length > 0 && at === 0) {
+    addDraftUnit(get, set, { t_surface: id, b_surface: before[0], unit_status: "empty" } as any);
+  } else if (before.length > 0 && at === before.length) {
+    addDraftUnit(get, set, {
+      t_surface: before[before.length - 1],
+      b_surface: id,
+      unit_status: "empty",
+    } as any);
+  }
+  set(selectedSurfaceIDAtom, id);
+}
 
 /** A unit in every gap between adjacent surfaces that no unit spans. */
 export const fillUnitsAtom = atom(null, (get, set) => {

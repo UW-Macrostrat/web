@@ -1,10 +1,16 @@
+@use "~/styles/type"
+
 .windowed-root
   position: relative
   width: 100%
 
 // The outer-section context bar. Always mounted (never windowed), so the
 // section you're inside stays named however deep you scroll. Sticks at the top
-// of the scroll container; the inner group headers stack beneath it.
+// of the scroll container; the inner group headers stack beneath it. It is the
+// page's own color, so it reads as the top edge of the content rather than as a
+// panel floating over it. It is the list's section heading (an `h2`); the group
+// headers beneath it are subsections (`h3`). Both sit in bands of a fixed
+// height, so neither keeps a heading's margins.
 .windowed-context-bar
   position: sticky
   // `top: 0` is already below the floating toolbar's mask band: sticky offsets
@@ -18,11 +24,10 @@
   flex-direction: row
   align-items: center
   gap: var(--pz-inline-gap)
+  @include type.section-heading
+  margin: 0
   padding: 0 var(--pz-space-2)
-  font-family: var(--pz-heading-font)
-  font-weight: 600
-  color: var(--pz-text-emphasized-color)
-  background-color: var(--pz-panel-background-color)
+  background-color: var(--pz-background-color)
   border-bottom: 1px solid var(--pz-border-color)
 
 .windowed-body
@@ -70,9 +75,10 @@
 // Inner group headers stick beneath the context bar. The window start snaps
 // back to include the enclosing one, so there is always something to stick.
 .windowed-group-header
+  @include type.subsection-heading
+  font-size: var(--pz-font-size-md)
+  margin: 0
   position: sticky
   top: var(--windowed-context-height, 1.75rem)
   z-index: 3
-  font-family: var(--pz-heading-font)
-  color: var(--pz-secondary-color)
   border-bottom: 1px solid var(--pz-panel-rule-color)

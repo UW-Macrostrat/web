@@ -11,7 +11,10 @@
  *   column. In the middle of a column that runs into the neighbour; the
  *   overlap is flagged, not prevented, like any other.
  * - **Splitting** a unit puts a new surface through it: the unit keeps its
- *   base, a copy of it takes its top, and the two meet halfway.
+ *   base, a copy of it takes its top, and the two meet — halfway, or at a
+ *   height clicked on the column.
+ * - **Extending** the column to a height past its end adds an *empty* unit
+ *   between its last boundary and that height.
  *
  * New units have negative ids, so they can't be mistaken for Macrostrat's.
  */
@@ -92,6 +95,133 @@ export function splitUnit(
       ...boundaryFields("bottom", middle),
     } as UnitLong,
   };
+}
+
+/** Split a unit at `coord` on the index in force (`kind`): a position, or an
+ * age. `null` unless the coordinate falls inside the unit. */
+export function splitUnitAt(
+  unit: UnitLong,
+  coord: number,
+  kind: "position" | "chrono",
+  unit_id: number,
+  opts: StructureOptions
+): { lower: Partial<UnitLong>; upper: UnitLong } | null {
+  const surface = boundaryAt(unit, coord, kind, opts);
+  if (surface == null) return null;
+  const { unit_id: _id, ...attributes } = unit;
+  return {
+    lower: boundaryFields("top", surface),
+    upper: {
+      ...attributes,
+      unit_id,
+      ...boundaryFields("bottom", surface),
+    } as UnitLong,
+  };
+}
+
+/** An empty unit from `reference`'s outer boundary (its top, `above`; its
+ * base, `below`) out to `coord`, extending the column to it. */
+export function extensionUnit(
+  reference: UnitLong,
+  place: InsertPlace,
+  coord: number,
+  kind: "position" | "chrono",
+  unit_id: number,
+  opts: StructureOptions
+): UnitLong {
+  let shared: BoundarySide = "bottom";
+  let far: BoundarySide = "top";
+  let onReference: BoundarySide = "top";
+  if (place === "below") {
+    shared = "top";
+    far = "bottom";
+    onReference = "bottom";
+  }
+  const boundary = boundaryOf(reference, onReference);
+  let outer: Boundary = { ...blankBoundary(), pos: coord };
+  if (kind === "chrono") outer = chronoBoundary(coord, [], opts.intervals);
+  return blankUnit(unit_id, {
+    section_id: reference.section_id,
+    col_id: reference.col_id,
+    unit_status: "empty",
+    ...boundaryFields(shared, boundary),
+    ...boundaryFields(far, outer),
+  } as Partial<UnitLong>);
+}
+
+/** Whether `coord` falls strictly inside a unit, on the index in force. */
+export function unitContains(
+  unit: UnitLong,
+  coord: number,
+  kind: "position" | "chrono"
+): boolean {
+  const [a, b] = unitExtent(unit, kind);
+  if (a == null || b == null) return false;
+  return Math.min(a, b) < coord && coord < Math.max(a, b);
+}
+
+/** A unit's top and base on one index. */
+export function unitExtent(
+  unit: UnitLong,
+  kind: "position" | "chrono"
+): [number | null, number | null] {
+  const top = boundaryOf(unit, "top");
+  const bottom = boundaryOf(unit, "bottom");
+  if (kind === "position") return [top.pos, bottom.pos];
+  return [top.age, bottom.age];
+}
+
+/** The boundary at `coord` inside a unit: the coordinate itself, and the other
+ * index's value at the same point, interpolated between the unit's own —
+ * with the age placed in an interval, as a split halfway is. */
+function boundaryAt(
+  unit: UnitLong,
+  coord: number,
+  kind: "position" | "chrono",
+  opts: StructureOptions
+): Boundary | null {
+  if (!unitContains(unit, coord, kind)) return null;
+  const top = boundaryOf(unit, "top");
+  const bottom = boundaryOf(unit, "bottom");
+  const [t, b] = unitExtent(unit, kind);
+  const f = (coord - (t as number)) / ((b as number) - (t as number));
+  let pos: number | null = null;
+  let age: number | null = null;
+  if (kind === "position") {
+    pos = coord;
+    if (top.age != null && bottom.age != null) age = top.age + f * (bottom.age - top.age);
+  } else {
+    age = coord;
+    if (top.pos != null && bottom.pos != null) pos = top.pos + f * (bottom.pos - top.pos);
+  }
+  if (age == null) return { ...blankBoundary(), pos };
+  const named = [top.int_id, bottom.int_id]
+    .map((id) => intervalFor(id, opts.intervals))
+    .filter((d): d is IntervalDef => d != null);
+  return { ...chronoBoundary(age, named, opts.intervals), pos };
+}
+
+/** An age as a boundary: the finest of `preferred` that holds it, else the
+ * finest of all, and the proportion within it. */
+function chronoBoundary(
+  age: number,
+  preferred: IntervalDef[],
+  intervals: IntervalMap
+): Boundary {
+  const interval =
+    finestContaining(preferred, age) ??
+    finestContaining(intervals?.values() ?? [], age);
+  return {
+    pos: null,
+    age,
+    int_id: interval?.int_id ?? null,
+    int_name: interval?.name ?? null,
+    prop: proportionForAge(interval, age),
+  };
+}
+
+function blankBoundary(): Boundary {
+  return { pos: null, age: null, int_id: null, int_name: null, prop: null };
 }
 
 /** The lowest id not yet used, counting down from −1. */

@@ -154,3 +154,17 @@ export function boundaryFields(isPositionAxis: boolean): {
   if (isPositionAxis) return { top: "t_pos", bottom: "b_pos" };
   return { top: "t_age", bottom: "b_age" };
 }
+
+/** A coordinate read off the column, to the precision the drawing resolves:
+ * the decimal place of what one pixel spans there (`perPixel`, in the
+ * coordinate's units). A click can't say more than a pixel does, so a
+ * surface added at 12.34817… m on a column drawn at a few centimetres a pixel
+ * is placed at 12.35. Unrounded when the resolution isn't known. */
+export function roundToResolution(
+  value: number,
+  perPixel: number | null | undefined
+): number {
+  if (perPixel == null || !isFinite(perPixel) || !(perPixel > 0)) return value;
+  const decimals = Math.min(Math.max(Math.ceil(-Math.log10(perPixel)), 0), 10);
+  return Number(value.toFixed(decimals));
+}

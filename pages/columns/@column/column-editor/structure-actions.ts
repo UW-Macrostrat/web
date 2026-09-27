@@ -6,12 +6,6 @@
  * Removal is the library's own `deleteRowsAction` (and Backspace on selected
  * rows): the sheet reports it as a `deleteRows` edit, which the unit sheets
  * turn into the transaction's removal (see `UnitBackedSheet`).
- *
- * The unit acted on is the editor's selected unit, which the sheet's row
- * selection is bridged to, rather than the rows the action context resolves:
- * the toolbar builds that context when the selection changes, not when the
- * rows do, so just after an insert — the new unit selected, the sheet not yet
- * holding it — the context's rows are the old ones.
  */
 import { useMemo, useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -25,7 +19,6 @@ import {
   fillUnitsAtom,
   insertUnitAtom,
   selectedSurfaceIDAtom,
-  selectedUnitIDAtom,
   splitUnitAtom,
   useIntervalDefs,
 } from "./state";
@@ -41,22 +34,16 @@ export function useStructureActions(): TableAction<UnitLong>[] {
   const intervals = useIntervalDefs();
   const intervalsRef = useRef(intervals);
   intervalsRef.current = intervals;
-  const selectedUnitID = useAtomValue(selectedUnitIDAtom);
-  const selectedRef = useRef(selectedUnitID);
-  selectedRef.current = selectedUnitID;
 
   return useMemo(() => {
-    // Read when the action runs, by which time the selection has reached the
-    // page; the context's rows are the fallback
     const target = (ctx): number | null =>
-      selectedRef.current ?? ctx.getSelectedRows()[0]?.unit_id ?? null;
+      ctx.getSelectedRows()[0]?.unit_id ?? null;
 
     const insert = (place: InsertPlace) => (ctx) => {
       insertUnit({ unit_id: target(ctx), place, intervals: intervalsRef.current });
     };
 
-    // The selection's shape, not its rows, which can lag (see above)
-    const oneRow = (ctx) => ctx.selectionShape.rows === 1;
+    const oneRow = (ctx) => ctx.getSelectedRows().length === 1;
     const rowTargets = [RegionCardinality.CELLS, RegionCardinality.FULL_ROWS];
 
     return [
@@ -129,17 +116,19 @@ export function useSurfaceStructureActions(): TableAction<EditorSurface>[] {
   const addSurface = useSetAtom(addSurfaceAtom);
   const fillUnits = useSetAtom(fillUnitsAtom);
   const deleteSurfaces = useSetAtom(deleteSurfacesAtom);
-  const selectedID = useAtomValue(selectedSurfaceIDAtom);
-  const selectedRef = useRef(selectedID);
-  selectedRef.current = selectedID;
   const inUse = useAtomValue(draftSurfacesInUseAtom);
   const inUseRef = useRef(inUse);
   inUseRef.current = inUse;
+  // `disabled` is handed the sheet's store state rather than an action
+  // context, so it reads the selection the page keeps
+  const selectedID = useAtomValue(selectedSurfaceIDAtom);
+  const selectedRef = useRef(selectedID);
+  selectedRef.current = selectedID;
 
   return useMemo(() => {
     const target = (ctx): string | null =>
-      (selectedRef.current as string) ?? ctx.getSelectedRows()[0]?.id ?? null;
-    const oneRow = (ctx) => ctx.selectionShape.rows === 1;
+      ctx.getSelectedRows()[0]?.id ?? null;
+    const oneRow = (ctx) => ctx.getSelectedRows().length === 1;
     const rowTargets = [RegionCardinality.CELLS, RegionCardinality.FULL_ROWS];
     const add = (place: InsertPlace) => (ctx) =>
       addSurface({ surface_id: target(ctx), place });
@@ -189,7 +178,7 @@ export function useSurfaceStructureActions(): TableAction<EditorSurface>[] {
         targets: [RegionCardinality.FULL_ROWS],
         appliesTo: oneRow,
         disabled: () => {
-          const id = selectedRef.current as string;
+          const id = selectedRef.current as string | null;
           return id == null || inUseRef.current.has(id);
         },
         run(ctx) {

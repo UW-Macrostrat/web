@@ -45,6 +45,7 @@ import {
 import {
   Column,
   HybridScaleType,
+  IntervalProportions,
   UnitComponent,
 } from "@macrostrat/column-views";
 import { ColumnAxisType } from "@macrostrat/column-components";
@@ -436,7 +437,9 @@ function hasLeftArea(
   if (focusState == null) return false;
   if (focusState >= PositionFocusState.OUT_OF_PADDING) return true;
   const dLat = Math.abs(center.lat - area.view.lat);
-  const dLng = Math.abs((((center.lng - area.view.lng) % 360) + 540) % 360 - 180);
+  const dLng = Math.abs(
+    ((((center.lng - area.view.lng) % 360) + 540) % 360) - 180
+  );
   return dLat > 45 || dLng > 45;
 }
 
@@ -479,7 +482,12 @@ interface HeroState {
   mapUnit: MapUnitMatch | null;
   mapSource: MapSourceRef | null;
   display: ColumnDisplay;
-  setCenter(lat: number, lng: number, zoom: number, userInitiated: boolean): void;
+  setCenter(
+    lat: number,
+    lng: number,
+    zoom: number,
+    userInitiated: boolean
+  ): void;
   /** A click on the map: ask what is there, and filter by it. */
   probeAt(lat: number, lng: number): void;
   selectUnit(unitID: number | null, unit: UnitLong | null): void;
@@ -898,7 +906,12 @@ function MapProbeHandler({
 function CenterReporter({
   onChange,
 }: {
-  onChange(lat: number, lng: number, zoom: number, userInitiated: boolean): void;
+  onChange(
+    lat: number,
+    lng: number,
+    zoom: number,
+    userInitiated: boolean
+  ): void;
 }) {
   const mapRef = useMapRef();
   const initialized = useMapInitialized();
@@ -1068,7 +1081,7 @@ function ColumnPanel({
         ),
         h(
           "p.column-inset-summary",
-          `${stats.n_units} units · ${formatAge(stats.b_age)}`
+          `${stats.n_units} units spanning ${formatAge(stats.b_age)}`
         ),
       ]),
       focusButton,
@@ -1218,6 +1231,16 @@ function TimeRangeFilter({
   if (timeRange == null || timeRange.intervals.length === 0) return null;
 
   return h("div.hero-filter", [
+    h(IntervalProportions, {
+      unit: {
+        b_int_id: timeRange.intervals[0].id,
+        b_int_name: timeRange.intervals[0].name,
+        b_age: timeRange.b_age,
+        t_int_id: timeRange.intervals[1].id,
+        t_int_name: timeRange.intervals[1].name,
+        t_age: timeRange.t_age,
+      },
+    }),
     h(IntervalField, { intervals: timeRange.intervals, showAgeRange: true }),
     h(Button, {
       minimal: true,
@@ -1284,6 +1307,6 @@ function MapSourceCitation({ source }: { source: MapSourceRef }) {
 }
 
 function formatAge(ma: number): string {
-  if (ma >= 1000) return `${(ma / 1000).toFixed(1)} Gyr of record`;
-  return `${Math.round(ma)} Myr of record`;
+  if (ma >= 1000) return `${(ma / 1000).toFixed(1)} Gyr`;
+  return `${Math.round(ma)} Myr`;
 }

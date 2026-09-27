@@ -6,7 +6,8 @@
  * write route exists this becomes a POST and a redirect to `edit/:col_id`.
  */
 import hyper from "@macrostrat/hyper";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { atom, Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   AnchorButton,
   Button,
@@ -36,8 +37,19 @@ const capabilities: Partial<LayoutCapabilities> = {
   contentScroll: "panel",
 };
 
+/** The page's state lives in a store of its own, so a new visit starts a new
+ * column: the page renders outside the editor frame's scope, and atoms in the
+ * default store would outlast it. */
 export function Page() {
-  const [draft, setDraft] = useState<ColumnEditorData | null>(null);
+  return h(Provider, h(NewColumnPage));
+}
+
+/** The column being built, once the form has started it. */
+const draftAtom = atom<ColumnEditorData | null>(null);
+
+function NewColumnPage() {
+  const draft = useAtomValue(draftAtom);
+  const setDraft = useSetAtom(draftAtom);
 
   if (draft != null) {
     return h(ColumnEditorPage, { ...draft, edit: true });
@@ -73,18 +85,21 @@ const axisTypeOptions = [
   { label: "Depth", value: "depth" },
 ];
 
+/** The form's fields. */
+const fieldsAtom = atom<ColumnFields>({
+  col_name: "",
+  col_group: "",
+  project_id: null,
+  col_type: "section",
+  axis_type: "height",
+});
+
 function NewColumnForm({
   onStart,
 }: {
   onStart: (data: ColumnEditorData) => void;
 }) {
-  const [fields, setFields] = useState<ColumnFields>({
-    col_name: "",
-    col_group: "",
-    project_id: null,
-    col_type: "section",
-    axis_type: "height",
-  });
+  const [fields, setFields] = useAtom(fieldsAtom);
 
   const set = useCallback((key: keyof ColumnFields, value: any) => {
     setFields((f) => ({ ...f, [key]: value }));

@@ -1,11 +1,10 @@
 // Records rendered into site pages. Prose around them is styled by docs-content.
 
+@use "~/styles/type"
+
 .tier-label
-  font-size: var(--pz-font-size-md)
-  color: var(--pz-text-subtle-color)
+  @include type.label
   margin: var(--pz-space-4) 0 var(--pz-space-2)
-  text-transform: uppercase
-  letter-spacing: 0.04em
 
 ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-list, ul.contact-list, ul.cite-list
   list-style: none
@@ -21,7 +20,7 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   display: flex
   gap: var(--pz-space-3)
   padding: var(--pz-space-3)
-  border: 1px solid var(--pz-border-color)
+  border: 1px solid var(--pz-border-muted-color)
   border-radius: var(--pz-radius-md)
   background: var(--pz-panel-background-color)
 
@@ -38,15 +37,12 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   min-width: 0
   p
     margin: 0.2em 0 0
-    font-size: 0.95em
 
 .supporter-name, .app-name, .person-name
-  font-weight: 600
-  font-family: var(--header-font)
+  @include type.item-title
 
 .supporter-program, .app-meta, .supporter-period, .person-title, .person-affiliation
-  font-size: 0.85em
-  color: var(--pz-text-subtle-color)
+  @include type.supporting
 
 .archived, .former
   .app-card, .person-card
@@ -69,7 +65,7 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
     justify-content: center
     background: var(--pz-purple-200)
     color: var(--pz-purple-700)
-    font-weight: 600
+    font-weight: var(--pz-font-weight-semibold)
 
 .person-tags
   display: flex
@@ -77,10 +73,10 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   gap: 0.3em
   margin-top: 0.3em
   align-items: center
-  font-size: 0.85em
+  font-size: var(--pz-font-size-sm)
 
 .person-note
-  font-size: 0.85em
+  font-size: var(--pz-font-size-sm)
 
 .directory-controls
   display: flex
@@ -105,10 +101,10 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   align-items: baseline
 
 .integration-name, .repo-name
-  font-weight: 600
+  font-weight: var(--pz-font-weight-semibold)
 
 .integration-direction
-  font-size: 0.8em
+  font-size: var(--pz-font-size-xs)
   color: var(--pz-text-subtle-color)
 
 .repo
@@ -129,8 +125,7 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   display: flex
   flex-direction: column
   .contact-label
-    font-size: 0.8em
-    color: var(--pz-text-subtle-color)
+    @include type.label
 
 .cite-item
   display: flex
@@ -142,11 +137,7 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   background: var(--pz-panel-secondary-background-color)
 
 .cite-note
-  font-size: 0.8em
-  text-transform: uppercase
-  letter-spacing: 0.04em
-  color: var(--pz-text-subtle-color)
+  @include type.label
 
 .cite-doi
-  font-family: var(--monospace-font)
-  font-size: 0.85em
+  @include type.identifier

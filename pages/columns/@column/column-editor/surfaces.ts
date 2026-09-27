@@ -37,6 +37,14 @@ export { AGE_TOLERANCE, POSITION_TOLERANCE };
  * it survives an edit and the selection holds. */
 export interface EditorSurface extends ColumnSurface {
   id: string;
+  /** The calibration interval's name, as its own field: what the
+   * spreadsheet view shows and takes as text. */
+  calibration_name?: string | null;
+}
+
+/** A surface with its calibration's name as a field. */
+export function withCalibrationName<T extends EditorSurface>(surface: T): T {
+  return { ...surface, calibration_name: surface.calibration?.name ?? null };
 }
 
 /** The unit field a surface is keyed on, for one side of a unit. */

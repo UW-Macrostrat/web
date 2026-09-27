@@ -1,6 +1,8 @@
 // Cross-lexicon omnibar search: the results list, the header button, and the
 // homepage search prompt.
 
+@use "~/styles/type"
+
 .lex-search-results
   max-height: 60vh
   overflow-y: auto
@@ -19,24 +21,20 @@
 
   .result-details
     margin-left: 0.5em
-    color: var(--secondary-color)
+    color: var(--pz-secondary-color)
 
   // The ID sits on the right of every row, in the same place regardless of
   // whether the label is a tag or plain text.
   .result-id
+    @include type.identifier
     flex-shrink: 0
-    color: var(--secondary-color)
-    font-family: var(--monospace-font)
-    font-size: 0.9em
 
 // Buttons that open the omnibar.
 .lex-search-control,
 .lex-search-prompt
   .hotkey
+    @include type.identifier
     margin-left: 0.5em
-    color: var(--secondary-color)
-    font-family: var(--monospace-font)
-    font-size: 0.9em
 
 .lex-search-control
   display: flex
@@ -51,11 +49,10 @@
   padding: 1.5em 0
 
   .search-hint
+    @include type.supporting
     margin: 0
     max-width: 34em
     text-align: center
-    color: var(--secondary-color)
-    font-size: 0.9em
 
 // The site search box. Shaped like a text field rather than like a button: it
 // is the page's search, not one action among several, and a field is what a
@@ -73,8 +70,9 @@
   color: var(--pz-text-subtle-color)
   background: var(--pz-panel-background-color)
   border: 1px solid var(--pz-border-color)
-  border-radius: 2em
+  border-radius: var(--pz-radius-full)
   transition: border-color 0.15s ease, color 0.15s ease
+  @include type.focus-ring
 
   &:hover
     color: var(--pz-text-color)
@@ -94,6 +92,6 @@
 
   .site-search-hotkey
     flex: 0 0 auto
-    font-family: var(--monospace-font)
-    font-size: 0.85em
+    font-family: var(--pz-font-mono)
+    font-size: var(--pz-font-size-sm)
     color: var(--pz-text-subtle-color)

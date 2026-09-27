@@ -52,7 +52,7 @@ const layerIndex: LayerInfo[] = [
   },
   {
     slug: "carto-v2",
-    tileset: tileserverDomain + "/dev/carto/{z}/{x}/{y}",
+    tileset: tileserverDomain + "/map/carto/{z}/{x}/{y}",
     type: "vector",
   },
   {

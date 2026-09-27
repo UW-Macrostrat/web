@@ -13,6 +13,7 @@ import {
   ageForProportion,
   boundaryFieldInfo,
   boundaryTolerance,
+  findIntervalByName,
   readBoundaryEdit,
   sideChanges,
   unitBoundary,
@@ -34,6 +35,8 @@ import { preserveSurfacesAtom } from "./options";
 import { surfacesAtom } from "./surfaces";
 import type { EditorSurface } from "../surfaces";
 import type { DraftSurface } from "../draft-surfaces";
+import type { PlainVocabularies } from "../cell-surfaces";
+import { parseEnvironments, parseLithologies } from "../plain-values";
 
 export type IntervalMap = Map<number, IntervalDef> | null;
 
@@ -149,10 +152,13 @@ export const editUnitCellsAtom = atom(
       event,
       intervals,
       columnSpec,
+      vocabularies = null,
     }: {
       event: EditEvent<UnitLong>;
       intervals: IntervalMap;
       columnSpec: ColumnSpec[];
+      /** For text typed into a lithology or environment cell */
+      vocabularies?: PlainVocabularies | null;
     }
   ) => {
     if (event.type === "resetChanges") {
@@ -181,11 +187,35 @@ export const editUnitCellsAtom = atom(
         if (value === "" || value == null) continue;
         next = Number(value);
       }
+      // The spreadsheet's text, read back into entries
+      if (typeof value === "string") next = readListText(column, value, vocabularies) ?? next;
+      // A cleared status is no status: the unit is defined
+      if (column === "unit_status" && (value === "" || value == null)) next = null;
       edits.push({ unit_id: row.unit_id, changes: { [column]: next } });
     }
     set(applyUnitEditsAtom, edits);
   }
 );
+
+/** A lithology or environment list from the template's text; `null` for
+ * any other field. Names are resolved where the vocabulary holds them. */
+function readListText(
+  column: string,
+  text: string,
+  vocabularies: PlainVocabularies | null
+) {
+  if (column === "lith") {
+    return parseLithologies(
+      text,
+      vocabularies?.lithologies ?? new Map(),
+      vocabularies?.lithAttributes
+    );
+  }
+  if (column === "environ") {
+    return parseEnvironments(text, vocabularies?.environments ?? new Map());
+  }
+  return null;
+}
 
 /** Cell edits on the surfaces sheet.
  *
@@ -234,13 +264,20 @@ export const editSurfaceCellsAtom = atom(
     const edits: UnitFieldEdit[] = [];
 
     for (const { row, column, value } of event.cells) {
-      if (row == null || column !== coordinateKey) continue;
-      const next = Number(value);
-      if (value === "" || isNaN(next)) continue;
+      if (row == null) continue;
       const surface = surfaces.find((s) => s.id === row.id);
       if (surface == null) continue;
 
-      const values = surfaceBoundaryValues(surface, coordinateKey, next);
+      // The contact is the units above's basal surface
+      if (column === "type") {
+        const type = value === "" ? null : value;
+        for (const unit_id of surface.unitsAbove) {
+          edits.push({ unit_id, changes: { basal_surface: type } as any });
+        }
+        continue;
+      }
+
+      const values = loadedSurfaceEdit(surface, column, value, intervals);
       if (values == null) continue;
 
       // The unit below a surface meets it with its top, the unit above with
@@ -257,6 +294,43 @@ export const editSurfaceCellsAtom = atom(
   }
 );
 
+/** An edit to a loaded column's surface, as the boundary values it gives
+ * every unit resting on it: a position, a proportion within its calibration,
+ * or a calibration — an interval, from the interval editor or by name, with
+ * the proportion it came with (else the surface's own) and the age they
+ * imply. `null` when the edit means nothing. */
+function loadedSurfaceEdit(
+  surface: EditorSurface,
+  column: string,
+  value: any,
+  intervals: IntervalMap
+): BoundaryValues | null {
+  if (column === "position" || column === "proportion") {
+    const next = Number(value);
+    if (value === "" || value == null || isNaN(next)) return null;
+    return surfaceBoundaryValues(surface, column, next);
+  }
+  if (column !== "calibration" && column !== "calibration_name") return null;
+  const def = intervalFromEdit(value, intervals);
+  if (def == null) return null;
+  const prop = value?.prop ?? surface.proportion ?? null;
+  const values: BoundaryValues = { int_id: def.int_id, int_name: def.name };
+  if (prop != null) values.prop = prop;
+  const age = ageForProportion(def, prop);
+  if (age != null) values.age = age;
+  return values;
+}
+
+/** The interval an edit names: the interval editor's pick, or a typed name. */
+function intervalFromEdit(value: any, intervals: IntervalMap): IntervalDef | null {
+  if (value == null || value === "") return null;
+  if (typeof value === "object") {
+    if (value.int_id == null) return null;
+    return intervals?.get(value.int_id) ?? null;
+  }
+  return findIntervalByName(intervals, String(value));
+}
+
 /** An edit to a new column's surface, as the constraint it sets: a position,
  * a proportion within the surface's interval, or an interval (with the
  * proportion it came with). A cleared cell removes that part of the
@@ -268,6 +342,7 @@ function draftSurfaceEdit(
   intervals: IntervalMap
 ): Partial<DraftSurface> | null {
   const blank = value == null || value === "";
+  if (column === "type") return { type: blank ? null : value };
   if (column === "position") {
     if (blank) return { pos: null };
     const pos = Number(value);
@@ -280,17 +355,20 @@ function draftSurfaceEdit(
     if (isNaN(prop)) return null;
     return { prop, age: ageForProportion(surface.interval, prop) };
   }
-  if (column === "calibration") {
-    if (blank || value?.int_id == null) {
+  if (column === "calibration" || column === "calibration_name") {
+    // Cleared, or the interval editor's ✕: the surface is unconstrained
+    if (blank || (typeof value === "object" && value?.int_id == null)) {
       return { int_id: null, int_name: null, prop: null, age: null, interval: null };
     }
-    const def = intervals?.get(value.int_id) ?? null;
-    const prop = value.prop ?? surface.prop ?? null;
+    // A name that matches nothing leaves the constraint as it was
+    const def = intervalFromEdit(value, intervals);
+    if (def == null) return null;
+    const prop = value?.prop ?? surface.prop ?? null;
     let interval: DraftSurface["interval"] = null;
     if (def != null) interval = { b_age: def.b_age, t_age: def.t_age };
     return {
-      int_id: value.int_id,
-      int_name: def?.name ?? value.int_name ?? null,
+      int_id: def.int_id,
+      int_name: def.name,
       prop,
       age: ageForProportion(def, prop),
       interval,

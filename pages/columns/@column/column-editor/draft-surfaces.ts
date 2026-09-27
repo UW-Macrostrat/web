@@ -14,9 +14,13 @@
  * interval's middle; the unconstrained ones between two placed surfaces are
  * spaced evenly between them, those past the last one continue at the
  * column's average spacing, and with nothing placed the surfaces are one unit
- * apart. A surface without an exact value is *speculative*, and is projected
- * with the age model's `modeled` status — it is an interpolation, which is
- * exactly what that status says.
+ * apart. A surface without an exact value is *speculative*.
+ *
+ * **Status and age.** A surface given an interval is a tie point of the age
+ * model (`relative`); one without is `modeled`, its age read off the tie
+ * points around it — by its place among them on a composite column, where
+ * the working coordinate is the age, and on a measured section linearly by
+ * height between the calibrated surfaces either side (`modeledAges`).
  *
  * Pure model; the atoms are in `./state/column` and `./state/draft`.
  */
@@ -39,6 +43,9 @@ export interface DraftSurface {
   /** The interval's span, kept with the constraint so the calibration can be
    * drawn without the definitions to hand. */
   interval: { b_age: number; t_age: number } | null;
+  /** The kind of contact (see `CONTACT_TYPES`) — the `basal_surface` of the
+   * units resting on it. */
+  type?: string | null;
 }
 
 /** A unit of a new column: an ordinary unit record that also names its
@@ -176,11 +183,14 @@ export function resolveDraftUnit(
   unit: DraftUnit,
   surfaces: DraftSurfaces
 ): DraftUnit {
+  const base = surfaces.get(unit.b_surface ?? "");
   return {
     ...unit,
     ...sideFields("top", surfaces.get(unit.t_surface ?? "")),
-    ...sideFields("bottom", surfaces.get(unit.b_surface ?? "")),
-  };
+    ...sideFields("bottom", base),
+    // The contact a unit rests on is its base surface's
+    basal_surface: base?.type ?? null,
+  } as DraftUnit;
 }
 
 /** A unit placed on its surfaces' working coordinates, for drawing: every
@@ -213,11 +223,61 @@ function sideFields(
   } as Partial<UnitLong>;
 }
 
+/** A measured section's surface ages: a calibrated surface's own (its
+ * interval and proportion, else the interval's middle), and the others'
+ * interpolated linearly by height between the two nearest calibrated ones —
+ * those either side, or the nearest two past the end. `null` with fewer than
+ * two to draw a line through. */
+export function modeledAges(
+  order: string[],
+  surfaces: DraftSurfaces,
+  coords: Map<string, WorkingCoordinate>
+): Map<string, number | null> {
+  const ties = order
+    .map((id, index) => ({ id, index, age: tieAge(surfaces.get(id)) }))
+    .filter((d): d is { id: string; index: number; age: number } => d.age != null)
+    .map((d) => ({ ...d, pos: coords.get(d.id)?.value ?? NaN }));
+  const out = new Map<string, number | null>();
+  order.forEach((id, index) => {
+    const own = tieAge(surfaces.get(id));
+    if (own != null) {
+      out.set(id, own);
+      return;
+    }
+    if (ties.length < 2) {
+      out.set(id, null);
+      return;
+    }
+    let above = [...ties].reverse().find((d) => d.index < index);
+    let below = ties.find((d) => d.index > index);
+    // Past the end, the line through the nearest two
+    if (above == null) [above, below] = [ties[0], ties[1]];
+    if (below == null) [above, below] = [ties[ties.length - 2], ties[ties.length - 1]];
+    const pos = coords.get(id)?.value ?? NaN;
+    const span = below.pos - above.pos;
+    if (!(Math.abs(span) > 0) || isNaN(pos)) {
+      out.set(id, null);
+      return;
+    }
+    out.set(id, above.age + ((below.age - above.age) * (pos - above.pos)) / span);
+  });
+  return out;
+}
+
+/** The age a surface's calibration gives it, if it has one. */
+function tieAge(surface: DraftSurface | null | undefined): number | null {
+  if (surface?.int_id == null) return null;
+  if (surface.age != null) return surface.age;
+  const interval = surface.interval;
+  if (interval == null) return null;
+  return (interval.b_age + interval.t_age) / 2;
+}
+
 /* ---------------------------------------------------------- projection */
 
 /** The surfaces of a new column as the editor's surface records, in order,
- * top first: placed at their working coordinates, `modeled` where that is a
- * guess, with the units each one separates. */
+ * top first: placed at their working coordinates, `relative` where they are
+ * calibrated and `modeled` otherwise, with the units each one separates. */
 export function draftEditorSurfaces(
   order: string[],
   surfaces: DraftSurfaces,
@@ -225,6 +285,8 @@ export function draftEditorSurfaces(
   coords: Map<string, WorkingCoordinate>,
   positionAxis: ColumnAxisType | null
 ): EditorSurface[] {
+  let ages: Map<string, number | null> | null = null;
+  if (positionAxis != null) ages = modeledAges(order, surfaces, coords);
   return order.map((id) => {
     const surface = surfaces.get(id) ?? blankSurface(id);
     const coord = coords.get(id);
@@ -237,18 +299,21 @@ export function draftEditorSurfaces(
         t_age: surface.interval.t_age,
       } as SurfaceCalibration;
     }
-    let age = surface.age ?? NaN;
+    let age = coord?.value ?? NaN;
     let position = surface.pos;
-    if (positionAxis == null) age = coord?.value ?? age;
-    if (positionAxis != null) position = coord?.value ?? position;
-    let status = "relative";
-    if (coord?.speculative ?? true) status = "modeled";
+    if (positionAxis != null) {
+      age = ages?.get(id) ?? NaN;
+      position = coord?.value ?? position;
+    }
+    // A tie point once it has an interval; an interpolation until then
+    let status = "modeled";
+    if (surface.int_id != null) status = "relative";
     return {
       id,
       age,
       position,
       status,
-      type: "",
+      type: surface.type ?? "",
       calibration,
       proportion: surface.prop,
       unitsAbove: units

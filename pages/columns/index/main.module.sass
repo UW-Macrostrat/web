@@ -55,14 +55,17 @@ $group-height: 34px
     font-size: 1em
     font-weight: 400
 
+  // State tints are translucent, so they are laid over the card's own surface
+  // (as a background image) rather than replacing it: the card keeps its
+  // raised color and the tint shades it, lighter in dark mode, darker in light.
   &:hover
     // No lift: see above.
     transform: none
     box-shadow: none
-    background-color: var(--pz-panel-secondary-background-color)
+    background-image: linear-gradient(var(--pz-hover-background-color), var(--pz-hover-background-color))
 
   &.selected
-    background-color: var(--pz-accent-secondary-color)
+    background-image: linear-gradient(var(--pz-selected-background-color), var(--pz-selected-background-color))
     border-color: var(--pz-accent-color)
     color: var(--pz-selected-text-color)
 
@@ -113,14 +116,15 @@ $group-height: 34px
 .col-identifier
   flex: 0 0 auto
 
-// A group or project header that leads somewhere.
+// A group or project header that leads somewhere. It is a heading first, so it
+// keeps the heading's color and darkens on hover the way a card title does.
 .header-link
   color: inherit
   text-decoration: none
 
   &:hover
-    color: var(--pz-link-hover-color)
-    text-decoration: underline
+    color: var(--pz-heading-hover-color)
+    text-decoration: none
 
 /* --------------------------------------------------------------- controls */
 
@@ -203,8 +207,8 @@ $group-height: 34px
   flex-direction: row
   align-items: center
   gap: 0.3em
-  background-color: var(--pz-panel-secondary-background-color)
-  border-radius: .2em
+  background-color: var(--pz-chip-background-color)
+  border-radius: var(--pz-radius-sm)
   padding-right: .5em
   cursor: pointer
 

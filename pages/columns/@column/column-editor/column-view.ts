@@ -4,8 +4,10 @@
  * timescale shows — comes from the display settings (`./display`, `./scale`).
  */
 import h from "@macrostrat/hyper";
-import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useMemo } from "react";
+import classNames from "classnames";
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
+import { type ReactNode, useCallback, useMemo } from "react";
+import { SegmentedControl } from "@blueprintjs/core";
 import {
   ColoredUnitComponent,
   Column,
@@ -17,7 +19,8 @@ import { MacrostratInteractionProvider } from "@macrostrat/data-components";
 import { type Timescale, useTimescales } from "@macrostrat/data-provider";
 import type { ComponentType } from "react";
 import type { ColumnTimescaleLike } from "@macrostrat/column-views";
-import { collapseUnconformities } from "./scale";
+import { collapseUnconformities, roundToResolution } from "./scale";
+import { unitStatus } from "./choices";
 import type { IntervalDef } from "./boundaries";
 import {
   selectedSurfaceAtom,
@@ -31,8 +34,13 @@ import {
   selectedSurfaceIDAtom,
   selectedUnitIDAtom,
   showSurfaceLinesAtom,
+  addSurfaceAtAtom,
+  columnToolAtom,
   drawableUnitsAtom,
+  editModeAtom,
   editedUnitsAtom,
+  hoveredCoordinateAtom,
+  type ColumnTool,
   isSpeculativeColumnAtom,
   showTimescaleAtom,
   surfacesAtom,
@@ -69,7 +77,13 @@ const SURFACE_LABEL_PADDING_LEFT = 20;
 
 export function EditorColumn() {
   const allUnits = useAtomValue(editedUnitsAtom);
-  const units = useAtomValue(drawableUnitsAtom);
+  const drawable = useAtomValue(drawableUnitsAtom);
+  // A covered unit is hatched by the column (`covered`); an empty one is
+  // drawn unfilled (see `withUnitStatus`)
+  const units = useMemo(
+    () => drawable.map((u) => ({ ...u, covered: unitStatus(u) === "covered" })),
+    [drawable]
+  );
   const speculative = useAtomValue(isSpeculativeColumnAtom);
   const surfaces = useAtomValue(surfacesAtom);
   const mode = useAtomValue(editingModeAtom);
@@ -94,6 +108,28 @@ export function EditorColumn() {
       setSelectedUnitID(unitID);
     },
     [setSelectedUnitID]
+  );
+
+  // Where the pointer is on the column's own index, for the add-surface tool,
+  // and how much of it a pixel spans there
+  const setHovered = useSetAtom(hoveredCoordinateAtom);
+  const onMouseOver = useCallback(
+    (_unit: any, height: number | null, evt: MouseEvent | null) => {
+      if (height == null || evt == null || isNaN(height)) {
+        setHovered(null);
+        return;
+      }
+      const clientY = evt.clientY;
+      setHovered((last) => {
+        let perPixel = last?.perPixel ?? null;
+        const dy = clientY - (last?.clientY ?? clientY);
+        if (last != null && dy !== 0) {
+          perPixel = Math.abs((height - last.value) / dy);
+        }
+        return { value: height, clientY, perPixel };
+      });
+    },
+    [setHovered]
   );
 
   const onSelectSurface = useCallback(
@@ -131,9 +167,9 @@ export function EditorColumn() {
   // their lithology colors the units read as context, and the surface lines
   // and their tags carry the color (as the library's surface-navigation story
   // does it).
-  let unitComponent: ComponentType<any> = ColoredUnitComponent;
+  let unitComponent: ComponentType<any> = ColoredUnitStatusComponent;
   if (mode === "surfaces") {
-    unitComponent = UnitComponent;
+    unitComponent = PlainUnitStatusComponent;
   }
 
   // Nothing is selected *as a surface* in the unified view — its rows are
@@ -170,7 +206,7 @@ export function EditorColumn() {
     );
   }
 
-  return h(
+  const column = h(
     Column,
     {
       // The timescale's click-to-zoom: the rendered age window, the level
@@ -181,6 +217,8 @@ export function EditorColumn() {
       unconformityLabels: "minimal",
       collapseSmallUnconformities: collapseUnconformities(unconformityCollapse),
       showTimescale: timescale,
+      // A column placed by surface order alone has no measure to label
+      showAgeAxis: !speculative,
       // Supersedes `timescaleLevels`, so the zoom's level window is folded
       // into the international entry (see `useColumnTimescales`).
       timescales,
@@ -195,10 +233,86 @@ export function EditorColumn() {
       keyboardNavigation: true,
       selectedUnit: selectedUnitID,
       onUnitSelected,
+      onMouseOver,
     },
     overlay
   );
+
+  return h("div.editor-column", [
+    h(ColumnToolControl),
+    h(ColumnClickTarget, column),
+  ]);
 }
+
+/** What a click on the column does, while editing: select, or add a surface
+ * where it lands. */
+function ColumnToolControl() {
+  const edit = useAtomValue(editModeAtom);
+  const [tool, setTool] = useAtom(columnToolAtom);
+  if (!edit) return null;
+  return h(SegmentedControl, {
+    small: true,
+    className: "column-tool",
+    options: [
+      { label: "Select", value: "select" },
+      { label: "Add surface", value: "add-surface" },
+    ],
+    value: tool,
+    onValueChange: (value: ColumnTool) => setTool(value),
+  });
+}
+
+/** With the add-surface tool, a click on the column is a new surface at the
+ * height under the pointer — taken before the column's own handlers, so it
+ * selects nothing. */
+function ColumnClickTarget({ children }: { children: ReactNode }) {
+  const edit = useAtomValue(editModeAtom);
+  const tool = useAtomValue(columnToolAtom);
+  const addSurfaceAt = useSetAtom(addSurfaceAtAtom);
+  const intervals = useIntervalDefs();
+  const store = useStore();
+  const adding = edit && tool === "add-surface";
+
+  const onClickCapture = useCallback(
+    (evt: React.MouseEvent) => {
+      if (!adding) return;
+      evt.stopPropagation();
+      evt.preventDefault();
+      const hovered = store.get(hoveredCoordinateAtom);
+      if (hovered == null || isNaN(hovered.value)) return;
+      // No finer than the drawing shows
+      const coord = roundToResolution(hovered.value, hovered.perPixel);
+      addSurfaceAt({ coord, intervals });
+    },
+    [adding, store, addSurfaceAt, intervals]
+  );
+
+  return h(
+    "div.column-click-target",
+    { className: classNames({ adding }), onClickCapture },
+    children
+  );
+}
+
+/** A unit component that draws an empty unit — a placeholder in the section
+ * — as an unfilled box, whatever `base` draws the rest as. */
+function withUnitStatus(base: ComponentType<any>): ComponentType<any> {
+  return function UnitStatusComponent(props: any) {
+    if (unitStatus(props.division) === "empty") return h(EmptyUnit, props);
+    return h(base, props);
+  };
+}
+
+/** An unfilled box. Its own component, so a unit that becomes empty is
+ * remounted: the library's unit calls its pattern hook only when it isn't
+ * handed a fill, and switching one instance between the two would change
+ * its hooks. */
+function EmptyUnit(props: any) {
+  return h(UnitComponent, { ...props, fill: "transparent", backgroundColor: null });
+}
+
+const ColoredUnitStatusComponent = withUnitStatus(ColoredUnitComponent);
+const PlainUnitStatusComponent = withUnitStatus(UnitComponent);
 
 /** Total width of the column, axis included. Without a timescale beside it
  * the axis needs far less room than the age column's. */

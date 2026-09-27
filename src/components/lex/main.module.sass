@@ -1,3 +1,5 @@
+@use "~/styles/type"
+
 .int-names
   display: flex
   gap: 5px
@@ -16,12 +18,20 @@
   display: flex
   justify-content: space-between
 
+// Sections of a detail page that carry their own heading.
+.int-references > h3,
+.taxa-header h3
+  @include type.section-heading
+
 .ref-list
   margin-top: 1em
 
 .table
-  background-color: var(--secondary-color)
-  color: var(--text-emphasized-color)
+  background-color: var(--pz-panel-background-color)
+  color: var(--pz-text-color)
+  border: 1px solid var(--pz-border-muted-color)
+  border-radius: var(--pz-radius-lg)
+  overflow: hidden
   display: grid
   grid-template-columns: 20% 80%
 
@@ -88,7 +98,7 @@
   line-height: 1.35
 
   a
-    color: var(--text-emphasized-color) !important
+    color: var(--pz-text-emphasized-color) !important
 
   p
     margin: 0
@@ -117,11 +127,9 @@
       text-align: center
 
 .chart-heading
+  @include type.label
   margin: 0 0 0.2em
   text-align: center
-  font-size: 0.85em
-  font-weight: 500
-  color: var(--secondary-color)
 
   a
     color: inherit
@@ -140,13 +148,13 @@
 
   // The hovered slice's share, in the donut's hole.
   .chart-value
-    fill: var(--text-emphasized-color)
-    font-size: 0.85em
+    fill: var(--pz-text-emphasized-color)
+    font-size: var(--pz-font-size-sm)
     font-variant-numeric: tabular-nums
 
 
 .range
-  color: var(--text-emphasized-color) !important
+  color: var(--pz-text-emphasized-color) !important
 
 .img-dark-mode
   filter: invert(1)
@@ -156,21 +164,9 @@
   flex-direction: column
   gap: .5em
 
-  h3
-    font-weight: bold
-    font-size: 1.8em
-
-  .concept-name
-    display: flex
-    gap: 5px
-    align-items: flex-end
-
-    .title
-      font-size: 1.2em
-
   .title
-    font-weight: bold
-    color: var(--text-emphasized-color)
+    font-weight: var(--pz-font-weight-semibold)
+    color: var(--pz-text-emphasized-color)
 
 .concept-item
   display: flex
@@ -188,11 +184,11 @@
   border: none
   width: 100px
   cursor: pointer
-  background-color: var(--accent-secondary-color)
+  background-color: var(--pz-hover-background-color)
   margin-top: 10px
 
   &:hover
-    background-color: var(--accent-secondary-hover-color)
+    background-color: var(--pz-active-background-color)
 
 .load-more-wrapper
   display: flex
@@ -219,5 +215,4 @@
   padding: .5em
 
 .via
-  color: var(--text-color)
-  font-size: 15px
+  @include type.supporting

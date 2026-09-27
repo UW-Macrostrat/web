@@ -111,9 +111,9 @@ const MAP_SOURCES: MapSource[] = [
   {
     slug: "carto-v2",
     label: "Carto v2",
-    description: "In-development tiles, assembled from the map topology.",
-    tiles: `${burwellTileDomain}/dev/carto/{z}/{x}/{y}`,
-    units: "carto-v2",
+    description: "This deployment's carto, assembled from the compilation system.",
+    tiles: `${burwellTileDomain}/map/carto/{z}/{x}/{y}`,
+    units: "carto",
   },
   {
     slug: "carto-slim",
@@ -557,10 +557,11 @@ async function fetchUnitDescriptions(
   });
   if (!res.ok) throw new Error(`Units request failed (${res.status})`);
 
+  // One answer per map: the route resolves `carto` to the zoom's member in the
+  // database, so the first row for a map is the one the tiles drew.
   const byMapID = new Map<number, any>();
   for (const unit of await res.json()) {
-    const existing = byMapID.get(unit.map_id);
-    if (existing != null && existing.is_current_layer) continue;
+    if (byMapID.has(unit.map_id)) continue;
     byMapID.set(unit.map_id, unit);
   }
   return byMapID;

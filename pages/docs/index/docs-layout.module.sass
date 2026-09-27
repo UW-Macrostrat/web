@@ -1,6 +1,8 @@
 // Frame for documentation pages: a sticky breadcrumb header (the primary
 // navigation), the article, and a subsidiary sidebar floating to the right.
 
+@use "~/styles/type"
+
 .docs-page
   --docs-header-height: 4.25em
 
@@ -21,7 +23,8 @@
     flex: 1
     min-width: 0
   h1
-    font-size: 1.5em
+    @include type.page-title
+    font-size: var(--pz-font-size-xl)
     margin: 0.1em 0 0
     white-space: nowrap
     overflow: hidden
@@ -46,8 +49,8 @@
   top: calc(var(--docs-header-height) + 1em)
   max-height: calc(100vh - var(--docs-header-height) - 2em)
   overflow-y: auto
-  font-size: 0.88em
-  line-height: 1.4
+  font-size: var(--pz-font-size-sm)
+  line-height: var(--pz-line-height-snug)
   color: var(--pz-text-subtle-color)
 
   ul
@@ -67,23 +70,19 @@
   margin-bottom: 1.5em
 
 .sidebar-heading
+  @include type.label
   margin: 0 0 0.4em
-  font-size: 0.75em
-  font-weight: 600
-  letter-spacing: 0.06em
-  text-transform: uppercase
-  color: var(--pz-text-subtle-color)
 
 // Pages beneath the current one are the important links: bold and highlighted.
 .child-pages a
-  font-weight: 600
+  font-weight: var(--pz-font-weight-semibold)
   color: var(--pz-link-color)
   padding: 0.2em 0.5em
   margin-left: -0.5em
   border-radius: var(--pz-radius-sm)
-  background: var(--pz-panel-secondary-background-color)
+  background: var(--pz-chip-background-color)
   &:hover
-    background: var(--pz-selected-background-color)
+    background: var(--pz-active-background-color)
 
 .descend-marker
   margin-left: 0.3em

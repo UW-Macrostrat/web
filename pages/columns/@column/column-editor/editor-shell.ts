@@ -50,7 +50,8 @@ import {
   editingModeAtom,
   inspectorOpenAtom,
   isDirtyAtom,
-  isSpeculativeColumnAtom,
+  sheetViewAtom,
+  type SheetView,
   resetEditsAtom,
   sheetVisibleAtom,
   snapshotAtom,
@@ -305,6 +306,7 @@ function EditorToolbar() {
   const [columnVisible, setColumnVisible] = useAtom(columnVisibleAtom);
   const [sheetVisible, setSheetVisible] = useAtom(sheetVisibleAtom);
   const [inspectorOpen, setInspectorOpen] = useAtom(inspectorOpenAtom);
+  const [view, setView] = useAtom(sheetViewAtom);
 
   return h("div.editor-toolbar", [
     h(SegmentedControl, {
@@ -318,6 +320,17 @@ function EditorToolbar() {
       ],
       value: mode,
       onValueChange: (value: EditingMode) => setMode(value),
+    }),
+    // How the table presents its values: the guided editor, or the
+    // template's own cells for copying to and from it
+    h(SegmentedControl, {
+      small: true,
+      options: [
+        { label: "Rich", value: "rich" },
+        { label: "Spreadsheet", value: "plain" },
+      ],
+      value: view,
+      onValueChange: (value: SheetView) => setView(value),
     }),
     h(FocusIndicator),
     h("div.spacer"),
@@ -363,7 +376,6 @@ function EditorContent() {
   const columnVisible = useAtomValue(columnVisibleAtom);
   const sheetVisible = useAtomValue(sheetVisibleAtom);
   const inspectorOpen = useAtomValue(inspectorOpenAtom);
-  const speculative = useAtomValue(isSpeculativeColumnAtom);
 
   let sheet = h(UnifiedSheet);
   if (mode === "surfaces") {
@@ -376,7 +388,7 @@ function EditorContent() {
   if (columnVisible) {
     column = h(
       "div.editor-column-pane",
-      { className: classNames(`mode-${mode}`, { speculative }) },
+      { className: classNames(`mode-${mode}`) },
       h(ErrorBoundary, h(EditorColumn))
     );
   }

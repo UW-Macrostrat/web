@@ -32,7 +32,7 @@
  */
 import hyper from "@macrostrat/hyper";
 import { RegionCardinality } from "@blueprintjs/table";
-import { useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { UnitLong } from "@macrostrat/api-types";
 import {
@@ -46,7 +46,6 @@ import {
   useStoreAPI,
 } from "@macrostrat/data-sheet";
 import {
-  formatProportion,
   surfaceStatusLabels,
 } from "@macrostrat/column-views";
 import {
@@ -67,6 +66,8 @@ import {
   selectedSurfaceIDAtom,
   selectedUnitIDAtom,
   sheetUnitsAtom,
+  sheetViewAtom,
+  type SheetView,
   showAgesAtom,
   showIdentifiersAtom,
   surfaceOverlayFor,
@@ -99,8 +100,23 @@ import {
   renderLithologyTags,
   renderSurfaceCalibration,
   SurfaceCalibrationDetail,
+  choiceCellDetail,
+  renderChoice,
+  usePlainVocabularies,
 } from "./cell-surfaces";
+import {
+  CONTACT_TYPES,
+  DEFAULT_UNIT_STATUS,
+  UNIT_STATUSES,
+  validateChoice,
+} from "./choices";
 import type { EditorSurface } from "./surfaces";
+import type { BoundarySide } from "./boundaries";
+import {
+  formatEnvironments,
+  formatLithologies,
+  unresolvedNames,
+} from "./plain-values";
 import {
   useStructureActions,
   useSurfaceStructureActions,
@@ -196,21 +212,24 @@ function usePresentation(): Presentation {
   );
 }
 
-/** Which optional columns are showing, and whether the column is measured.
- * Changing one rebuilds the spec, which is right: the table's shape changed. */
+/** Which optional columns are showing, whether the column is measured, and
+ * how values are presented (rich or plain, see `sheetViewAtom`). Changing one
+ * rebuilds the spec, which is right: the table's shape changed. */
 interface ColumnVisibility {
   identifiers: boolean;
   ages: boolean;
   measured: boolean;
+  view: SheetView;
 }
 
 function useColumnVisibility(): ColumnVisibility {
   const identifiers = useAtomValue(showIdentifiersAtom);
   const ages = useAtomValue(showAgesAtom);
   const measured = useAtomValue(positionAxisAtom) != null;
+  const view = useAtomValue(sheetViewAtom);
   return useMemo(
-    () => ({ identifiers, ages, measured }),
-    [identifiers, ages, measured]
+    () => ({ identifiers, ages, measured, view }),
+    [identifiers, ages, measured, view]
   );
 }
 
@@ -349,52 +368,70 @@ function ageColumns(
 }
 
 /** The chronostratigraphic position of each boundary, in the ingestion
- * format's terms: an interval (picked, and checked against the definitions)
- * and a proportion within it. The interval cell shows the interval's tag with
- * the position in it; its surface is the interval editor, which writes both
- * fields and the age they imply. */
-function chronoColumns({
-  validator,
-  intervalValidator,
-}: UnitSheetInputs): ColumnSpec[] {
+ * format's terms: an interval (checked against the definitions) and a
+ * proportion within it.
+ *
+ * Rich, the two are one position per boundary — *Base* and *Top* — drawn as
+ * the interval's tag with the position in it, and edited through the
+ * interval editor, which writes both fields and the age they imply. Plain,
+ * they are the template's four cells, `b_int`, `b_prop`, `t_int`, `t_prop`,
+ * typed as text and numbers. */
+function chronoColumns(inputs: UnitSheetInputs): ColumnSpec[] {
+  if (inputs.show.view === "plain") {
+    return [
+      ...plainBoundaryColumns("bottom", inputs),
+      ...plainBoundaryColumns("top", inputs),
+    ];
+  }
+  return [
+    richBoundaryColumn("bottom", inputs),
+    richBoundaryColumn("top", inputs),
+  ];
+}
+
+function richBoundaryColumn(
+  side: BoundarySide,
+  { validator, intervalValidator }: UnitSheetInputs
+): ColumnSpec {
+  const p = side === "top" ? "t" : "b";
+  return {
+    key: `${p}_int_name`,
+    name: side === "top" ? "Top" : "Base",
+    cellLabel: side === "top" ? "top" : "base",
+    dataType: "string",
+    width: 190,
+    detailPlacement: "bottom-start",
+    valueRenderer: renderBoundaryPosition(side),
+    cellDetail: intervalCellDetail(side),
+    // The proportion's issues are the position's, now that it is one field
+    validate: combineValidators(
+      intervalValidator,
+      validator(`${p}_int_name`),
+      validator(`${p}_prop`)
+    ),
+  };
+}
+
+function plainBoundaryColumns(
+  side: BoundarySide,
+  { validator, intervalValidator }: UnitSheetInputs
+): ColumnSpec[] {
+  const p = side === "top" ? "t" : "b";
   return [
     {
-      key: "b_int_name",
-      name: "b_int",
-      cellLabel: "base interval",
+      key: `${p}_int_name`,
+      name: `${p}_int`,
+      cellLabel: side === "top" ? "top interval" : "base interval",
       dataType: "string",
-      width: 170,
-      detailPlacement: "bottom-start",
-      valueRenderer: renderBoundaryPosition("bottom"),
-      cellDetail: intervalCellDetail("bottom"),
-      validate: intervalValidator,
+      width: 140,
+      validate: combineValidators(intervalValidator, validator(`${p}_int_name`)),
     },
     {
-      key: "b_prop",
-      name: "b_prop",
+      key: `${p}_prop`,
+      name: `${p}_prop`,
       dataType: "number",
       width: 80,
-      valueRenderer: (d) => formatProportion(d) ?? "",
-      validate: combineValidators(validateProportion, validator("b_prop")),
-    },
-    {
-      key: "t_int_name",
-      name: "t_int",
-      cellLabel: "top interval",
-      dataType: "string",
-      width: 170,
-      detailPlacement: "bottom-start",
-      valueRenderer: renderBoundaryPosition("top"),
-      cellDetail: intervalCellDetail("top"),
-      validate: intervalValidator,
-    },
-    {
-      key: "t_prop",
-      name: "t_prop",
-      dataType: "number",
-      width: 80,
-      valueRenderer: (d) => formatProportion(d) ?? "",
-      validate: combineValidators(validateProportion, validator("t_prop")),
+      validate: combineValidators(validateProportion, validator(`${p}_prop`)),
     },
   ];
 }
@@ -403,12 +440,16 @@ function chronoColumns({
  * they are called: the ingestion format's field names in the unified sheet,
  * readable titles in the units sheet.
  *
- * Lithology and environment are arrays of resolved definitions. They are
- * shown as tags and edited through pickers over the definitions — over
+ * Lithology and environment are arrays of resolved definitions. Rich, they
+ * are shown as tags and edited through pickers over the definitions — over
  * several rows at once, when several are selected — and a value that
- * restates the unit before it is drawn as a fill. */
+ * restates the unit before it is drawn as a fill. Plain, they are the
+ * template's text (`./plain-values`), read back against the vocabularies
+ * when typed or pasted. Either way a name Macrostrat doesn't hold is
+ * flagged. */
 type AttributeLabels = Record<
   | "unit_name"
+  | "status"
   | "strat_name"
   | "lithology"
   | "environment"
@@ -420,8 +461,83 @@ type AttributeLabels = Record<
 
 function attributeColumns(
   names: AttributeLabels,
-  { presentation }: UnitSheetInputs
+  { presentation, show }: UnitSheetInputs
 ): Record<keyof AttributeLabels, ColumnSpec> {
+  let lithology: ColumnSpec = {
+    key: "lith",
+    name: names.lithology,
+    cellLabel: "lithology",
+    dataType: "array",
+    width: 260,
+    multiCell: true,
+    detailPlacement: "bottom-start",
+    cellDetail: LithologyCellDetail,
+    valueRenderer: filledValue(
+      renderLithologyTags,
+      presentation.isRestated("lith")
+    ),
+    validate: validateResolved("lith_id", "lithology"),
+  };
+  let environment: ColumnSpec = {
+    key: "environ",
+    name: names.environment,
+    cellLabel: "environment",
+    dataType: "array",
+    width: 200,
+    multiCell: true,
+    detailPlacement: "bottom-start",
+    cellDetail: EnvironmentCellDetail,
+    valueRenderer: filledValue(
+      renderEnvironmentTags,
+      presentation.isRestated("environ")
+    ),
+    validate: validateResolved("environ_id", "environment"),
+  };
+  // The spreadsheet's cells hold text: drawn as text, so that the inline
+  // editor is handed it, and parsed back in the edit path
+  if (show.view === "plain") {
+    lithology = {
+      key: "lith",
+      name: names.lithology,
+      dataType: "string",
+      width: 260,
+      valueRenderer: (d) => formatLithologies(d),
+      validate: validateResolved("lith_id", "lithology"),
+    };
+    environment = {
+      key: "environ",
+      name: names.environment,
+      dataType: "string",
+      width: 200,
+      valueRenderer: (d) => formatEnvironments(d),
+      validate: validateResolved("environ_id", "environment"),
+    };
+  }
+  // A unit is defined unless it says otherwise: rich, a choice of the three;
+  // plain, the word, checked against them
+  let status: ColumnSpec = {
+    key: "unit_status",
+    name: names.status,
+    cellLabel: "status",
+    dataType: "string",
+    width: 100,
+    detailPlacement: "bottom-start",
+    valueRenderer: renderChoice(UNIT_STATUSES),
+    cellDetail: choiceCellDetail(UNIT_STATUSES, {
+      fallback: DEFAULT_UNIT_STATUS,
+    }),
+    validate: validateChoice(UNIT_STATUSES, "unit status"),
+  };
+  if (show.view === "plain") {
+    status = {
+      key: "unit_status",
+      name: names.status,
+      dataType: "string",
+      width: 90,
+      validate: validateChoice(UNIT_STATUSES, "unit status"),
+    };
+  }
+
   return {
     unit_name: {
       key: "unit_name",
@@ -429,6 +545,7 @@ function attributeColumns(
       dataType: "string",
       width: 200,
     },
+    status,
     strat_name: {
       key: "strat_name_long",
       name: names.strat_name,
@@ -439,34 +556,8 @@ function attributeColumns(
         presentation.isRestated("strat_name_long")
       ),
     },
-    lithology: {
-      key: "lith",
-      name: names.lithology,
-      cellLabel: "lithology",
-      dataType: "array",
-      width: 260,
-      multiCell: true,
-      detailPlacement: "bottom-start",
-      cellDetail: LithologyCellDetail,
-      valueRenderer: filledValue(
-        renderLithologyTags,
-        presentation.isRestated("lith")
-      ),
-    },
-    environment: {
-      key: "environ",
-      name: names.environment,
-      cellLabel: "environment",
-      dataType: "array",
-      width: 200,
-      multiCell: true,
-      detailPlacement: "bottom-start",
-      cellDetail: EnvironmentCellDetail,
-      valueRenderer: filledValue(
-        renderEnvironmentTags,
-        presentation.isRestated("environ")
-      ),
-    },
+    lithology,
+    environment,
     min_thickness: {
       key: "min_thick",
       name: names.min_thickness,
@@ -494,6 +585,7 @@ export function unitSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
   const attrs = attributeColumns(
     {
       unit_name: "Unit name",
+      status: "Status",
       strat_name: "Strat. name",
       lithology: "Lithology",
       environment: "Environment",
@@ -506,6 +598,7 @@ export function unitSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
   return [
     ...identifierColumns({ unit_id: "ID", section_id: "Section" }, inputs),
     attrs.unit_name,
+    attrs.status,
     attrs.strat_name,
     ...positionColumns(inputs, 70),
     ...ageColumns({ b_age: "Base age (Ma)", t_age: "Top age (Ma)" }, inputs),
@@ -542,6 +635,7 @@ function unifiedSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
   const attrs = attributeColumns(
     {
       unit_name: "unit_name",
+      status: "status",
       strat_name: "strat_name",
       lithology: "lithology",
       environment: "environment",
@@ -560,6 +654,7 @@ function unifiedSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
     ...chronoColumns(inputs),
     ...ageColumns({ b_age: "b_age", t_age: "t_age" }, inputs),
     attrs.unit_name,
+    attrs.status,
     attrs.strat_name,
     attrs.lithology,
     attrs.environment,
@@ -569,9 +664,15 @@ function unifiedSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
   ];
 }
 
-export function UnifiedSheet() {
+/** The unified sheet's columns, for the sheet and for the details pane's row
+ * editor, which shows a unit through the same spec. */
+export function useUnifiedSheetColumns(): ColumnSpec[] {
   const inputs = useUnitSheetInputs(useUnitFocusActions());
-  const columnSpec = useMemo(() => unifiedSheetColumns(inputs), [inputs]);
+  return useMemo(() => unifiedSheetColumns(inputs), [inputs]);
+}
+
+export function UnifiedSheet() {
+  const columnSpec = useUnifiedSheetColumns();
   return h(
     "div.editor-sheet.unified-sheet",
     h(UnitBackedSheet, { columnSpec, name: "Units and surfaces" })
@@ -617,7 +718,7 @@ function UnitBackedSheet({
   const intervals = useIntervalDefs();
   const focus = useUnitFocusActions();
   const structureActions = useStructureActions();
-  const storeRef = useRef<SheetStore | null>(null);
+  const vocabularies = usePlainVocabularies();
 
   const actions = useMemo(
     () => [focus.rowAction, ...structureActions],
@@ -638,17 +739,15 @@ function UnitBackedSheet({
   const onEdit = useCallback(
     (event: EditEvent<UnitLong>) => {
       if (event.type === "deleteRows") {
-        // Reported by index into the rows the sheet holds
-        const rows = storeRef.current?.getState().data ?? [];
-        const ids = event.rowIndices
-          .map((i) => rows[i]?.unit_id)
+        const ids = (event.rows ?? [])
+          .map((row) => row?.unit_id)
           .filter((id) => id != null);
         deleteUnits(ids);
         return;
       }
-      editCells({ event, intervals, columnSpec });
+      editCells({ event, intervals, columnSpec, vocabularies });
     },
-    [editCells, deleteUnits, intervals, columnSpec]
+    [editCells, deleteUnits, intervals, columnSpec, vocabularies]
   );
 
   return h(
@@ -666,18 +765,8 @@ function UnitBackedSheet({
     [
       h(UnitSelectionBridge, { key: "selection" }),
       h(FocusFilterBridge, { key: "focus" }),
-      h(StoreRefBridge, { key: "store", storeRef }),
     ]
   );
-}
-
-type SheetStore<T = UnitLong> = ReturnType<typeof useStoreAPI<T>>;
-
-/** Hands the sheet's store to the component that renders the sheet, which
- * sits outside the store's scope. */
-function StoreRefBridge({ storeRef }: { storeRef: { current: any } }) {
-  storeRef.current = useStoreAPI();
-  return null;
 }
 
 function unitRowStatus(
@@ -693,16 +782,16 @@ function unitRowStatus(
 
 /* ---------------------------------------------------------------- surfaces */
 
-/** The surfaces table. On an age column the editable coordinate is the
- * surface's position in its calibration interval, and the age follows; on a
- * measured one it is its position, and the modeled age comes along read-only
- * — a measured position and the age model that calibrates it are separate
- * records, so moving one doesn't move the other. */
-function surfaceColumns(
+/** The surfaces table. On an age column a surface is placed by its
+ * calibration — an interval and its position within it — and the age
+ * follows; on a measured one by its position, with the calibration a
+ * separate record, so moving one doesn't move the other. Editing either
+ * moves every unit resting on the surface. Exported for the details pane's
+ * row editor, which shows a surface through the same spec. */
+export function surfaceColumns(
   isPositionAxis: boolean,
   focus: FocusActions,
-  show: ColumnVisibility,
-  isDraft: boolean
+  show: ColumnVisibility
 ): ColumnSpec[] {
   // A `modeled` surface's age is an interpolation between the tie points
   // around it; the status is the row's own, so the predicate reads it there.
@@ -739,19 +828,8 @@ function surfaceColumns(
       editable: false,
       valueRenderer: (d) => surfaceStatusLabels[d] ?? d,
     },
-    { key: "type", name: "Contact", dataType: "string", width: 110 },
-    calibrationColumn(isDraft),
-    {
-      // On an age column this is the editable coordinate: a surface sits at a
-      // proportion of its calibration interval, and its age follows.
-      key: "proportion",
-      name: "Position in interval",
-      dataType: "number",
-      width: 120,
-      editable: !isPositionAxis,
-      validate: validateProportion,
-      valueRenderer: (d) => formatProportion(d) ?? "",
-    },
+    contactColumn(show),
+    ...calibrationColumns(show.view),
     {
       key: "section_id",
       name: "Section",
@@ -789,30 +867,59 @@ function surfaceColumns(
   ];
 }
 
-/** A surface's calibration: the interval it is tied to. A new column's
- * surfaces are constrained here, through the interval editor; a loaded
- * column's calibration comes from its age model and is shown by name. */
-function calibrationColumn(isDraft: boolean): ColumnSpec {
-  if (!isDraft) {
-    return {
+/** The kind of contact a surface is. A measured section logs it from a fixed
+ * list — a drop-down when rich, the word, checked, when plain; a composite
+ * column's age-model boundaries carry free text. */
+function contactColumn(show: ColumnVisibility): ColumnSpec {
+  const base = { key: "type", name: "Contact", dataType: "string" as const };
+  if (!show.measured) return { ...base, width: 110 };
+  const validate = validateChoice(CONTACT_TYPES, "contact type");
+  if (show.view === "plain") return { ...base, width: 120, validate };
+  return {
+    ...base,
+    cellLabel: "contact",
+    width: 130,
+    detailPlacement: "bottom-start",
+    valueRenderer: renderChoice(CONTACT_TYPES),
+    cellDetail: choiceCellDetail(CONTACT_TYPES, { select: true }),
+    validate,
+  };
+}
+
+/** A surface's calibration: the interval it is tied to, and its position
+ * within it. Rich, one field — the interval's tag with the position in it,
+ * edited through the interval editor, as a unit's boundaries are. Plain, the
+ * interval's name and the proportion, as two cells. */
+function calibrationColumns(view: SheetView): ColumnSpec[] {
+  if (view === "plain") {
+    return [
+      {
+        key: "calibration_name",
+        name: "Calibration",
+        dataType: "string",
+        width: 140,
+      },
+      {
+        key: "proportion",
+        name: "Position in interval",
+        dataType: "number",
+        width: 120,
+        validate: validateProportion,
+      },
+    ];
+  }
+  return [
+    {
       key: "calibration",
       name: "Calibration",
+      cellLabel: "calibration",
       dataType: "object",
-      width: 160,
-      editable: false,
-      valueRenderer: (d) => d?.name ?? "",
-    };
-  }
-  return {
-    key: "calibration",
-    name: "Calibration",
-    cellLabel: "calibration",
-    dataType: "object",
-    width: 170,
-    detailPlacement: "bottom-start",
-    valueRenderer: renderSurfaceCalibration,
-    cellDetail: SurfaceCalibrationDetail,
-  };
+      width: 190,
+      detailPlacement: "bottom-start",
+      valueRenderer: renderSurfaceCalibration,
+      cellDetail: SurfaceCalibrationDetail,
+    },
+  ];
 }
 
 /** Unit ids resolved to names, through a row-render context we don't have: the
@@ -822,6 +929,24 @@ let unitNameLookup = new Map<number, string>();
 function renderUnitNames(ids: number[] | null | undefined): string {
   if (ids == null) return "";
   return ids.map((id) => unitNameLookup.get(id) ?? `#${id}`).join("; ");
+}
+
+/** Bumped by each deletion from the surfaces sheet, so its overlay is
+ * re-derived even when nothing was removed (see `SurfacesSheet`'s `onEdit`).
+ * Scoped, like the rest, by the editor frame's store. */
+const surfaceDeletionsAtom = atom(0);
+
+/** The surfaces sheet's columns, for the sheet and for the details pane's
+ * row editor. */
+export function useSurfaceSheetColumns(): ColumnSpec[] {
+  const surfaces = useAtomValue(surfacesAtom);
+  const focus = useFocusActions(surfaces);
+  const { isPositionAxis } = useAtomValue(columnScaleOptionsAtom);
+  const show = useColumnVisibility();
+  return useMemo(
+    () => surfaceColumns(isPositionAxis, focus, show),
+    [isPositionAxis, focus, show]
+  );
 }
 
 export function SurfacesSheet() {
@@ -837,17 +962,14 @@ export function SurfacesSheet() {
   const intervals = useIntervalDefs();
   const show = useColumnVisibility();
   const draftActions = useSurfaceStructureActions();
-  const storeRef = useRef<SheetStore<EditorSurface> | null>(null);
+  const [deletions, setDeletions] = useAtom(surfaceDeletionsAtom);
 
   unitNameLookup = useMemo(
     () => new Map(units.map((u) => [u.unit_id, u.unit_name])),
     [units]
   );
 
-  const columnSpec = useMemo(
-    () => surfaceColumns(isPositionAxis, focus, show, isDraft),
-    [isPositionAxis, focus, show, isDraft]
-  );
+  const columnSpec = useSurfaceSheetColumns();
 
   // A new column's surfaces are records, and are added and removed here
   const actions = useMemo(() => {
@@ -864,14 +986,12 @@ export function SurfacesSheet() {
       if (event.type === "deleteRows") {
         // Backspace on surface rows: only a new column's surfaces are
         // records to remove, and only those no unit rests on. The sheet
-        // struck the rows through itself, so its statuses are cleared
-        // and the surfaces left standing show as they are.
-        const store = storeRef.current;
-        const rows = store?.getState().data ?? [];
+        // struck the rows through itself; re-deriving the overlay clears
+        // that, so the surfaces left standing show as they are.
         if (isDraft) {
-          deleteSurfaces(event.rowIndices.map((i) => rows[i]?.id));
+          deleteSurfaces((event.rows ?? []).map((row) => row?.id));
         }
-        store?.setState({ rowStatus: [] });
+        setDeletions((n) => n + 1);
         return;
       }
       editCells({ event, coordinateKey, intervals });
@@ -888,7 +1008,8 @@ export function SurfacesSheet() {
         rowStatus: [],
       };
     },
-    [baseSurfaces, isDraft]
+    // `deletions` only to re-run it
+    [baseSurfaces, isDraft, deletions]
   );
 
   return h(
@@ -909,7 +1030,6 @@ export function SurfacesSheet() {
       [
         h(SurfaceSelectionBridge, { key: "selection" }),
         h(FocusFilterBridge, { key: "focus" }),
-        h(StoreRefBridge, { key: "store", storeRef }),
       ]
     )
   );
@@ -1006,6 +1126,23 @@ function useSheetSelectionBridge<T>(
     setSelection([{ rows: [viewIndex, viewIndex] } as any]);
     scrollToRow?.(viewIndex);
   }, [selectedID, data, filteredRowIndices]);
+}
+
+/** A warning for the names in a lithology or environment list that
+ * Macrostrat's vocabulary doesn't hold — kept, as the format allows, but
+ * worth knowing about. */
+function validateResolved(
+  idField: "lith_id" | "environ_id",
+  noun: string
+): ColumnSpec["validate"] {
+  return (value: any) => {
+    const unknown = unresolvedNames(value, idField);
+    if (unknown.length === 0) return null;
+    return {
+      severity: "warning",
+      message: `Not a Macrostrat ${noun}: ${unknown.join(", ")}`,
+    };
+  };
 }
 
 /** Run several validators in order, first complaint wins. */

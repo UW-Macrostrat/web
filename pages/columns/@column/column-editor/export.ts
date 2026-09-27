@@ -2,6 +2,8 @@
  * (https://github.com/Macrostrat/column-ingestion) — the bridge back into
  * the ingestion pipeline until a write API exists. */
 import type { UnitLong } from "@macrostrat/api-types";
+import { formatEnvironments, formatLithologies } from "./plain-values";
+import { unitStatus } from "./choices";
 
 /** Columns of the ingestion `units` sheet that the v2 API can populate, in
  * the template's order. */
@@ -22,6 +24,8 @@ export const INGESTION_UNIT_COLUMNS = [
   "min_thickness",
   "max_thickness",
   "unit_description",
+  "basal_surface",
+  "covered",
 ] as const;
 
 export type IngestionUnitRow = Record<
@@ -46,11 +50,14 @@ export function unitToIngestionRow(unit: UnitLong): IngestionUnitRow {
     b_prop: numberOrNull(unit.b_prop),
     t_int: unit.t_int_name ?? "",
     t_prop: numberOrNull(unit.t_prop),
-    lithology: formatLithology(unit.lith),
-    environment: (unit.environ ?? []).map((d) => d.name).join("; "),
+    lithology: formatLithologies(unit.lith),
+    environment: formatEnvironments(unit.environ),
     min_thickness: numberOrNull(unit.min_thick),
     max_thickness: numberOrNull(unit.max_thick),
     unit_description: unit.notes ?? "",
+    basal_surface: (unit as any).basal_surface ?? "",
+    // An empty unit is a placeholder, so only `covered` has a column
+    covered: unitStatus(unit as any) === "covered" ? "TRUE" : "",
   };
 }
 
@@ -64,22 +71,6 @@ function stratNameChain(unit: UnitLong): string {
   if (unit.SGp) parts.push(`${unit.SGp} Supergroup`);
   if (parts.length > 0) return parts.join(", ");
   return unit.strat_name_long ?? "";
-}
-
-/** `<attribute> <lith> (<proportion>); …` */
-function formatLithology(liths: UnitLong["lith"]): string {
-  if (liths == null) return "";
-  return liths
-    .map((d) => {
-      const atts = (d.atts ?? []).join(" ");
-      let text = d.name;
-      if (atts !== "") text = `${atts} ${text}`;
-      if (d.prop != null) {
-        text += ` (${Math.round(d.prop * 100)}%)`;
-      }
-      return text;
-    })
-    .join("; ");
 }
 
 function numberOrNull(value: unknown): number | null {

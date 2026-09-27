@@ -9,8 +9,22 @@
  * asked for directly. The store's own `fetchedAll` flag keeps repeat calls
  * free. */
 import { useEffect } from "react";
+import { atom, useSetAtom } from "jotai";
 import { useMacrostratStore } from "@macrostrat/data-provider";
 import type { IntervalDef } from "../boundaries";
+
+/** The same definitions, for derived state that needs an interval's span —
+ * a surface recalibrated by an edit. Kept in step with the store by
+ * `useSyncIntervalDefs`. */
+export const intervalDefsAtom = atom<Map<number, IntervalDef> | null>(null);
+
+export function useSyncIntervalDefs() {
+  const intervals = useIntervalDefs();
+  const setIntervals = useSetAtom(intervalDefsAtom);
+  useEffect(() => {
+    setIntervals(intervals);
+  }, [intervals, setIntervals]);
+}
 
 export function useIntervalDefs(): Map<number, IntervalDef> | null {
   const intervals = useMacrostratStore((state) => state.intervals);

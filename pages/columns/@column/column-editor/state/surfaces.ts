@@ -8,8 +8,13 @@
  */
 import { atom } from "jotai";
 import type { UnitLong } from "@macrostrat/api-types";
-import { buildEditorSurfaces, type EditorSurface } from "../surfaces";
-import { unitBoundary } from "../boundaries";
+import {
+  buildEditorSurfaces,
+  type EditorSurface,
+  withCalibrationName,
+} from "../surfaces";
+import { unitBoundary, type IntervalDef } from "../boundaries";
+import { intervalDefsAtom } from "./intervals";
 import {
   draftEditorSurfaces,
   placeDraftUnit,
@@ -82,7 +87,7 @@ export const baseSurfacesAtom = atom<EditorSurface[]>((get) =>
     get(baseUnitsAtom),
     get(boundariesAtom),
     get(surfaceAxisTypeAtom)
-  )
+  ).map(withCalibrationName)
 );
 
 /** The surfaces of the column as edited — the rows the sheet shows and the
@@ -97,17 +102,74 @@ export const surfacesAtom = atom<EditorSurface[]>((get) => {
       get(editedUnitsAtom) as DraftUnit[],
       get(workingCoordinatesAtom),
       get(positionAxisAtom)
-    );
+    ).map(withCalibrationName);
   }
-  return buildEditorSurfaces(
-    get(drawableUnitsAtom),
-    get(boundariesAtom),
-    get(surfaceAxisTypeAtom)
-  );
+  return recalibrated(
+    buildEditorSurfaces(
+      get(drawableUnitsAtom),
+      get(boundariesAtom),
+      get(surfaceAxisTypeAtom)
+    ),
+    get(editedUnitsAtom),
+    get(baseUnitsAtom),
+    get(intervalDefsAtom)
+  ).map(withCalibrationName);
 });
 
+/** A loaded surface's calibration is the age model's, matched to it — until
+ * an edit gives the units resting on it another interval, which is then what
+ * the surface is calibrated to. Only an edited interval overrides: where the
+ * units' own intervals merely differ from the age model's as loaded, the age
+ * model is the record. Its contact, likewise, is the age model's until the
+ * units above are given a `basal_surface`. */
+function recalibrated(
+  surfaces: EditorSurface[],
+  units: UnitLong[],
+  base: UnitLong[],
+  intervals: Map<number, IntervalDef> | null
+): EditorSurface[] {
+  const edited = new Map(units.map((u) => [u.unit_id, u]));
+  const loaded = new Map(base.map((u) => [u.unit_id, u]));
+  return surfaces.map((input) => {
+    let surface = input;
+    const contact = surface.unitsAbove
+      .map((id) => (edited.get(id) as any)?.basal_surface)
+      .find((d) => d != null);
+    if (contact != null) surface = { ...surface, type: contact };
+    // A unit above rests on the surface with its base, one below with its top
+    const sides: [number, "b" | "t"][] = [
+      ...surface.unitsAbove.map((id): [number, "b"] => [id, "b"]),
+      ...surface.unitsBelow.map((id): [number, "t"] => [id, "t"]),
+    ];
+    for (const [id, p] of sides) {
+      const unit = edited.get(id);
+      const before = loaded.get(id);
+      const int_id = unit?.[`${p}_int_id`];
+      if (int_id == null || int_id === before?.[`${p}_int_id`]) continue;
+      const def = intervals?.get(int_id);
+      if (def == null) continue;
+      return {
+        ...surface,
+        calibration: {
+          id: def.int_id,
+          name: def.name,
+          b_age: def.b_age,
+          t_age: def.t_age,
+        } as EditorSurface["calibration"],
+        proportion: unit?.[`${p}_prop`] ?? surface.proportion,
+      };
+    }
+    return surface;
+  });
+}
+
 /** Fields of the surfaces sheet that an edit can change. */
-const SURFACE_EDITABLE_FIELDS = ["age", "position", "proportion"] as const;
+const SURFACE_EDITABLE_FIELDS = [
+  "age",
+  "position",
+  "proportion",
+  "calibration_name",
+] as const;
 
 /** The loaded surfaces by id, for diffing the edited ones against. */
 export const baseSurfaceIndexAtom = atom(

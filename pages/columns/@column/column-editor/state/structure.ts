@@ -10,11 +10,16 @@
  * surface-first counterpart in `./draft`.
  */
 import { atom, type Getter, type Setter } from "jotai";
+import { ColumnAxisType } from "@macrostrat/column-components";
 import type { UnitLong } from "@macrostrat/api-types";
 import {
+  extensionUnit,
   firstUnit,
   nextDraftID,
   splitUnit,
+  splitUnitAt,
+  unitContains,
+  unitExtent,
   unitNextTo,
   type InsertPlace,
   type IntervalMap,
@@ -30,8 +35,12 @@ import {
   unitIDsInOrderAtom,
   unitOrderAtom,
 } from "./column";
-import { draftInsertUnitAtom, draftSplitUnitAtom } from "./draft";
-import { positionAxisAtom } from "./options";
+import {
+  draftAddSurfaceAtAtom,
+  draftInsertUnitAtom,
+  draftSplitUnitAtom,
+} from "./draft";
+import { boundaryKindAtom, positionAxisAtom } from "./options";
 import { selectedUnitIDAtom } from "./view";
 
 /** A unit above or below `unit_id`; with no reference, at the top of the
@@ -103,6 +112,77 @@ export const splitUnitAtom = atom(
     addUnit(get, set, split.upper, at);
   }
 );
+
+/** A new surface at `coord` — a position on a measured column, an age
+ * otherwise — as a click on the column puts one: through every unit it falls
+ * in, each split there, or past the column's end, reached by an empty unit
+ * from the column's last boundary. A coordinate in a gap between units adds
+ * nothing. */
+export const addSurfaceAtAtom = atom(
+  null,
+  (
+    get,
+    set,
+    { coord, intervals }: { coord: number; intervals: IntervalMap }
+  ) => {
+    if (get(isDraftColumnAtom)) {
+      set(draftAddSurfaceAtAtom, { coord });
+      return;
+    }
+    const kind = get(boundaryKindAtom);
+    const opts = structureOptions(get, intervals);
+    const units = get(editedUnitsAtom);
+
+    const containing = units.filter((u) => unitContains(u, coord, kind));
+    if (containing.length > 0) {
+      for (const unit of containing) {
+        const id = nextDraftID(allIDs(get));
+        const split = splitUnitAt(unit, coord, kind, id, opts);
+        if (split == null) continue;
+        set(applyUnitEditsAtom, [{ unit_id: unit.unit_id, changes: split.lower }]);
+        const at = get(unitIDsInOrderAtom).indexOf(unit.unit_id);
+        addUnit(get, set, split.upper, at);
+      }
+      return;
+    }
+
+    // Past the column's end: an empty unit out to it, from the unit whose
+    // boundary is outermost on that side
+    const extreme = outermostUnit(units, coord, kind, opts.positionAxis);
+    if (extreme == null) return;
+    const id = nextDraftID(allIDs(get));
+    const unit = extensionUnit(extreme.unit, extreme.place, coord, kind, id, opts);
+    let at = 0;
+    if (extreme.place === "below") at = get(unitIDsInOrderAtom).length;
+    addUnit(get, set, unit, at);
+  }
+);
+
+/** The unit a coordinate past the column's end extends from — the one with
+ * the topmost top, or the lowest base — and on which side; `null` when the
+ * coordinate is within the column. Tops are youngest on an age column, and
+ * highest (or shallowest) on a measured one. */
+function outermostUnit(
+  units: UnitLong[],
+  coord: number,
+  kind: "position" | "chrono",
+  positionAxis: StructureOptions["positionAxis"]
+): { unit: UnitLong; place: InsertPlace } | null {
+  // A coordinate that grows downwards: age, depth, or negated height
+  let sign = 1;
+  if (kind === "position" && positionAxis === ColumnAxisType.HEIGHT) sign = -1;
+  let top: { unit: UnitLong; v: number } | null = null;
+  let bottom: { unit: UnitLong; v: number } | null = null;
+  for (const unit of units) {
+    const [t, b] = unitExtent(unit, kind);
+    if (t != null && (top == null || t * sign < top.v)) top = { unit, v: t * sign };
+    if (b != null && (bottom == null || b * sign > bottom.v)) bottom = { unit, v: b * sign };
+  }
+  const c = coord * sign;
+  if (top != null && c < top.v) return { unit: top.unit, place: "above" };
+  if (bottom != null && c > bottom.v) return { unit: bottom.unit, place: "below" };
+  return null;
+}
 
 /** Remove units. A loaded unit is marked removed, and stays in the sheets
  * until the transaction is reset; one made in the page is simply gone. */

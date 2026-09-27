@@ -27,6 +27,7 @@ import {
 } from "@macrostrat/column-views";
 import { columnScaleOptionsAtom } from "./options";
 import { drawableUnitsAtom, isSpeculativeColumnAtom } from "./surfaces";
+import { useSyncIntervalDefs } from "./intervals";
 
 /** How many timescale levels are drawn at once (the library's default is 3). */
 const TIMESCALE_LEVEL_WINDOW = 4;
@@ -34,6 +35,8 @@ const TIMESCALE_LEVEL_WINDOW = 4;
 const ColumnFocusContext = createContext<TimescaleZoom | null>(null);
 
 export function ColumnFocusProvider({ children }: { children: ReactNode }) {
+  // Mounted above the whole editor, so the definitions reach derived state
+  useSyncIntervalDefs();
   // The units as drawn: a new column's are placed on its surfaces' working
   // coordinates before they have ages of their own
   const units = useAtomValue(drawableUnitsAtom);
