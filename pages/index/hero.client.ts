@@ -1230,18 +1230,22 @@ function TimeRangeFilter({
   // was one more line of text over the map.
   if (timeRange == null || timeRange.intervals.length === 0) return null;
 
+  const firstInterval = timeRange.intervals[0];
+  const lastInterval = timeRange.intervals[timeRange.intervals.length - 1];
+
   return h("div.hero-filter", [
     h(IntervalProportions, {
       unit: {
-        b_int_id: timeRange.intervals[0].id,
-        b_int_name: timeRange.intervals[0].name,
+        b_int_id: firstInterval.id,
+        b_int_name: firstInterval.name,
         b_age: timeRange.b_age,
-        t_int_id: timeRange.intervals[1].id,
-        t_int_name: timeRange.intervals[1].name,
+        t_int_id: lastInterval.id,
+        t_int_name: lastInterval.name,
         t_age: timeRange.t_age,
       },
+      showProportions: false,
+      showAgeRange: true,
     }),
-    h(IntervalField, { intervals: timeRange.intervals, showAgeRange: true }),
     h(Button, {
       minimal: true,
       small: true,
