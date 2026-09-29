@@ -263,6 +263,8 @@ function TreeNode({
   const byId = useAtomValue(atoms.nodesById);
   const matching = useAtomValue(atoms.matchingIds);
   const focusAncestors = useAtomValue(atoms.focusAncestorIds);
+  const focusDescendants = useAtomValue(atoms.focusDescendantIds);
+  const focusResolved = useAtomValue(atoms.focusResolvedIds);
   const [focusSlug, setFocus] = useAtom(atoms.focusSlug);
   const editing = useEditing();
 
@@ -274,12 +276,14 @@ function TreeNode({
 
   // While a filter is active every surviving branch is on the path to a match,
   // so opening them is what shows the match rather than the ancestor that
-  // happens to contain it. The same goes for the route down to the selection:
-  // the tree opens itself far enough to show what the page is displaying.
-  const open = useDisclosure({
-    filtering: matching != null,
-    reveal: focusAncestors.has(node.source_id) || defaultOpen,
-  });
+  // happens to contain it. The same goes for the selection: the tree opens the
+  // route down to it, and everything inside it, to show what the page is
+  // displaying.
+  const reveal =
+    focusAncestors.has(node.source_id) ||
+    focusDescendants.has(node.source_id) ||
+    defaultOpen;
+  const open = useDisclosure({ filtering: matching != null, reveal });
 
   let chevron = "chevron-right";
   if (open.isOpen) chevron = "chevron-down";
@@ -310,11 +314,16 @@ function TreeNode({
 
   const isSelected = focusSlug === node.slug;
 
-  let selectedClass = undefined;
-  if (isSelected) selectedClass = "selected";
+  // The rows the selection is drawn from: where its resolution stops.
+  const classNames = [];
+  if (isSelected) classNames.push("selected");
+  if (focusResolved.has(node.source_id)) classNames.push("resolved");
 
   let selectTitle = "Show this compilation";
   if (isSelected) selectTitle = "Clear the selection";
+
+  let priority = edge?.priority ?? null;
+  if (editing) priority = null;
 
   const selectThis = () => {
     let next: string | null = node.slug;
@@ -323,11 +332,22 @@ function TreeNode({
     onSelect?.(next);
   };
 
-  // In a tier listing the tier carries the priority, so the row need not.
-  let priority = edge?.priority;
-  if (editing) priority = null;
+  // Only a served source can be requested by name, so only it has a map page;
+  // the link is how being served shows.
+  let pageLink = null;
+  if (node.is_served) {
+    pageLink = h(
+      Link,
+      {
+        href: mapPageHref(node),
+        className: "node-page-link",
+        title: "Open this map's page",
+      },
+      "↗"
+    );
+  }
 
-  return h("li.tree-node", { className: selectedClass }, [
+  return h("li.tree-node", { className: classNames.join(" ") }, [
     h(NodeRow, { node, edge }, [
       expander,
       h("div.node-body", [
@@ -339,18 +359,10 @@ function TreeNode({
             { onClick: selectThis, title: selectTitle },
             nodeName(node)
           ),
-          h(NodeTags, { node, priority }),
-          h(
-            Link,
-            {
-              href: mapPageHref(node),
-              className: "node-page-link",
-              title: "Open this map's page",
-            },
-            "↗"
-          ),
+          h(NodeTags, { node }),
+          pageLink,
         ]),
-        h(NodeStats, { node }),
+        h(NodeStats, { node, priority }),
       ]),
       h(RemoveButton, { node, edge }),
     ]),
@@ -417,7 +429,6 @@ function MemberList({ atoms, compilation, rows, onSelect, path, depth }) {
       h("li.tier", { key: `tier-${tier.priority}` }, [
         h(TierLabel, {
           target: { compilation_id: id, kind: "tier", priority: tier.priority },
-          count: tier.rows.length,
         }),
         h("ul.tier-members", tier.rows.map(renderRow)),
       ]),
@@ -435,16 +446,17 @@ function MemberList({ atoms, compilation, rows, onSelect, path, depth }) {
   return h("ul.tree.tiered", items);
 }
 
-function TierLabel({ target, count }: { target: DropTarget; count: number }) {
+function TierLabel({ target }: { target: DropTarget }) {
   const drop = useDropTarget(target);
   let label = "unranked";
   if (target.kind === "tier" && target.priority != null) {
     label = `priority ${target.priority}`;
   }
-  return h("div.tier-label", { ...drop.props, className: drop.className }, [
-    h("span.tier-priority", label),
-    h("span.tier-count", `${count}`),
-  ]);
+  return h(
+    "div.tier-label",
+    { ...drop.props, className: drop.className },
+    h("span.tier-priority", label)
+  );
 }
 
 /** Where a new tier goes. Only takes up room while something is being dragged. */
@@ -615,8 +627,18 @@ function useDisclosure({
   return { isOpen, toggle };
 }
 
-function NodeStats({ node }: { node: GraphNode }) {
-  const parts: string[] = [node.slug];
+/** The secondary line. Priority leads, since it is what decides a collision;
+ * in edit mode the tier carries it instead. */
+function NodeStats({
+  node,
+  priority,
+}: {
+  node: GraphNode;
+  priority: number | null;
+}) {
+  const parts: string[] = [];
+  if (priority != null) parts.push(`priority ${priority}`);
+  parts.push(`${node.slug} #${node.source_id}`);
 
   if (node.n_members > 0) {
     parts.push(`${node.n_members} members`);

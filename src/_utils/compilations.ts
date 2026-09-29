@@ -9,6 +9,7 @@
  * listed here rather than by the API. Every other compilation is drawn per
  * request and needs the delegated token below.
  */
+import { getTileToken } from "./tile-token";
 import {
   apiV3Prefix,
   burwellTileDomain,
@@ -73,7 +74,9 @@ export async function fetchCompilations(): Promise<CompilationSummary[]> {
   const data: CompilationSummary[] = await res.json();
   const drawable = data.filter(isDrawable);
   const carto = drawable.filter((c) => c.slug == DEFAULT_COMPILATION);
-  const rest = drawable.filter((c) => c.slug != DEFAULT_COMPILATION).sort(byName);
+  const rest = drawable
+    .filter((c) => c.slug != DEFAULT_COMPILATION)
+    .sort(byName);
   return [...carto, LEGACY_ENTRY, ...rest];
 }
 
@@ -101,7 +104,9 @@ export function applyCompilationTiles(
   style: mapboxgl.Style,
   slug: string | null
 ): mapboxgl.Style {
-  const source = style.sources?.["burwell"] as mapboxgl.VectorSource | undefined;
+  const source = style.sources?.["burwell"] as
+    | mapboxgl.VectorSource
+    | undefined;
   if (source != null) {
     source.tiles = [compilationTilesURL(slug)];
   }
@@ -110,15 +115,19 @@ export function applyCompilationTiles(
 
 const tilesPrefix = `${burwellTileDomain}/map/`;
 
-/** Attach the delegated token to compilation tile requests. The tileserver
- * ignores it for the public slugs, so it is sent for every `/map/` tile. */
+/** Attach the tile token to compilation tile requests: the short-lived one the
+ * web server mints (`~/_utils/tile-token`), else the static delegated token
+ * while a deployment has no signing key. Read on every request, so a refreshed
+ * token applies to the next tile. The tileserver ignores it for the public
+ * slugs, so it is sent for every `/map/` tile. */
 export const tileRequestTransform: mapboxgl.TransformRequestFunction = (
   url,
   resourceType
 ) => {
-  if (mapTilesToken == null) return { url };
+  const token = getTileToken() ?? mapTilesToken;
+  if (token == null) return { url };
   if (resourceType != "Tile" || !url.startsWith(tilesPrefix)) return { url };
-  return { url, headers: { Authorization: `Bearer ${mapTilesToken}` } };
+  return { url, headers: { Authorization: `Bearer ${token}` } };
 };
 
 /** Why the map's zoom is outside the band a scale-dependent compilation is

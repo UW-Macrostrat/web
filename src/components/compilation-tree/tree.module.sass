@@ -36,12 +36,27 @@
     border-left: 1px solid var(--panel-rule-color, rgba(128, 128, 128, 0.3))
     overflow-y: visible
 
+// The blue of the faces overlay (`map.client.ts`), which draws what these hold.
+$content-color: #2b6cb0
+$content-color-dark: #7bb5ff
+
 .tree-node
   list-style: none
 
   &.selected > .node-row
     background-color: var(--panel-background-color, rgba(128, 128, 128, 0.12))
     border-radius: 3px
+
+  // What the selection resolves to: the rows holding the polygons it is drawn
+  // from.
+  &.resolved > .node-row
+    box-shadow: inset 2px 0 0 $content-color
+    background-color: rgba($content-color, 0.08)
+    border-radius: 0 3px 3px 0
+
+    :global(.bp6-dark) &
+      box-shadow: inset 2px 0 0 $content-color-dark
+      background-color: rgba($content-color-dark, 0.1)
 
 .node-row
   display: flex
@@ -105,6 +120,31 @@
   gap: 0.25em
   align-items: baseline
   flex-wrap: wrap
+
+// One colour per kind, over Blueprint's minimal tag, whose two-class rule this
+// has to outrank.
+@mixin kind-color($light, $dark)
+  color: $light
+  background-color: rgba($light, 0.14)
+
+  :global(.bp6-dark) &
+    color: $dark
+    background-color: rgba($dark, 0.2)
+
+.tags :global(.bp6-tag).kind-tag
+  &.kind-map, &.kind-materialized
+    @include kind-color($content-color, $content-color-dark)
+  &.kind-topological
+    @include kind-color(#5b6472, #a7b0bd)
+  &.kind-mosaic
+    @include kind-color(#2c7a7b, #7fd6d0)
+  &.kind-multiscale
+    @include kind-color(#6b4fbb, #b9a3f0)
+
+// Content holders read first.
+.tags :global(.bp6-tag).kind-tag.kind-map,
+.tags :global(.bp6-tag).kind-tag.kind-materialized
+  font-weight: 600
 
 /* --------------------------------------------------------------- selector */
 
@@ -198,9 +238,6 @@
   text-transform: uppercase
   letter-spacing: 0.04em
   color: var(--secondary-color)
-
-.tier-count
-  opacity: 0.7
 
 // Collapsed to a hairline until a drag begins, so tiers read as a list.
 .tier-gap

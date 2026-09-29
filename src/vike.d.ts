@@ -19,6 +19,7 @@ import type {
 
 import { Item, PageInfo } from "~/_utils/helpers.ts";
 import type { GeoLocation } from "~/_utils/geolocation";
+import type { TileToken } from "~/_utils/tile-token";
 
 export type PageProps = Record<string, unknown>;
 export type PageStyle = "content" | "fullscreen";
@@ -43,6 +44,8 @@ declare global {
       pageInfo?: PageInfo;
       urlPathname: string;
       user?: User;
+      /** A short-lived token for guarded compilation tiles (`~/_utils/tile-token`). */
+      tileToken?: TileToken | null;
       geo?: GeoLocation | null;
       // Set server-side: access token gone/expired but a refresh token is
       // present, so the client should attempt one silent refresh on load.

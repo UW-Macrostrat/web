@@ -1,3 +1,4 @@
+import { TileTokenRecovery } from "~/components/tile-token-recovery";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
@@ -176,6 +177,7 @@ export default function MainMapView(props) {
       h(FlyToPlaceManager),
       h(HoveredFeatureManager),
       h(SelectedColumnManager),
+      h(TileTokenRecovery),
     ]
   );
 }

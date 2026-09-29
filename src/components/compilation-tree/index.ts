@@ -18,7 +18,7 @@ export {
   type NodeEdit,
   type SaveProblem,
 } from "./editing";
-export { contentTag, contentTags, formatArea, NodeTags } from "./node-tags";
+export { formatArea, kindTag, kindTags, NodeTags } from "./node-tags";
 export {
   compilationTreeAtoms,
   graphValueAtom,

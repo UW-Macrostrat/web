@@ -46,9 +46,9 @@ import {
   type Point,
 } from "./state";
 
-/** Fallback focus: the broadest served layer, so the map is never blank before
- * anything has been picked. */
-const DEFAULT_FOCUS = "carto-large";
+/** Fallback focus: `carto`, the served map, whose faces the tile routes pick by
+ * the tile's zoom band -- so the map is never blank before anything is picked. */
+const DEFAULT_FOCUS = "carto";
 
 export function CompilationMap() {
   return h(ErrorBoundary, h(CompilationMapShell));
