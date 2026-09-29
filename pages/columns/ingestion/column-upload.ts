@@ -2,6 +2,7 @@ import h from "@macrostrat/hyper";
 import { useCallback, useState } from "react";
 import { Button, Callout, Checkbox, FileInput } from "@blueprintjs/core";
 import { apiV3Prefix } from "@macrostrat-web/settings";
+import { usePageContext } from "vike-react/usePageContext";
 
 /**
  * Column-ingestion upload control.
@@ -39,10 +40,17 @@ async function pollStatus(taskId: string): Promise<any> {
 }
 
 export function ColumnUpload() {
+  const pageContext = usePageContext();
+  const isAdmin = (pageContext as any).user?.role === "web_admin";
+
   const [file, setFile] = useState<File | null>(null);
   const [dryRun, setDryRun] = useState(true);
   const [phase, setPhase] = useState<Phase>("idle");
   const [message, setMessage] = useState<string | null>(null);
+
+  // web_users may only dry-run; admins may toggle. The API enforces this too,
+  // so this just keeps the request and UI honest.
+  const effectiveDryRun = isAdmin ? dryRun : true;
 
   const onFileChange = useCallback((e: any) => {
     setFile((e.target as HTMLInputElement).files?.[0] ?? null);
@@ -57,7 +65,7 @@ export function ColumnUpload() {
     try {
       const data = new FormData();
       data.append("file", file, file.name);
-      data.append("dry_run", String(dryRun));
+      data.append("dry_run", String(effectiveDryRun));
 
       // No Content-Type header — the browser sets the multipart boundary itself.
       const res = await fetch(`${apiV3Prefix}/columns/ingest`, {
@@ -80,7 +88,7 @@ export function ColumnUpload() {
       }
 
       setPhase("done");
-      const prefix = dryRun
+      const prefix = effectiveDryRun
         ? "Dry run succeeded — nothing was saved. "
         : "Ingestion succeeded. ";
       setMessage(prefix + JSON.stringify(result.result ?? {}));
@@ -88,9 +96,13 @@ export function ColumnUpload() {
       setPhase("error");
       setMessage(e?.message ?? String(e));
     }
-  }, [file, dryRun]);
+  }, [file, effectiveDryRun]);
 
   const busy = phase === "working";
+
+  let checkboxLabel = "Dry run — validate only, don't save";
+  if (!isAdmin) checkboxLabel = "Dry run — required (only admins can save)";
+  const submitLabel = effectiveDryRun ? "Submit (dry run)" : "Submit";
 
   let callout = null;
   if (message != null) {
@@ -114,9 +126,9 @@ export function ColumnUpload() {
         onInputChange: onFileChange,
       }),
       h(Checkbox, {
-        checked: dryRun,
-        disabled: busy,
-        label: "Dry run — validate only, don't save",
+        checked: effectiveDryRun,
+        disabled: busy || !isAdmin,
+        label: checkboxLabel,
         onChange: (e: any) => setDryRun((e.target as HTMLInputElement).checked),
       }),
       h(
@@ -127,7 +139,7 @@ export function ColumnUpload() {
           disabled: file == null || busy,
           onClick: submit,
         },
-        dryRun ? "Submit (dry run)" : "Submit"
+        submitLabel
       ),
       callout,
     ]
