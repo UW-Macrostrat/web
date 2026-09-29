@@ -4,7 +4,7 @@ import { Button, Callout, Checkbox, FileInput } from "@blueprintjs/core";
 import { apiV3Prefix } from "@macrostrat-web/settings";
 
 /**
- * Column-ingestion upload control for the column editor.
+ * Column-ingestion upload control.
  *
  * Uploads a column spreadsheet (.xlsx) to the api-v3 `/columns/ingest` endpoint,
  * which enqueues a Celery worker task, then polls `/columns/ingest/{task_id}`
@@ -14,9 +14,6 @@ import { apiV3Prefix } from "@macrostrat-web/settings";
  * anything — the flag is forwarded to the worker, which rolls the ingest
  * transaction back instead of committing. See the "Column ingestion task"
  * feature-area note.
- *
- * NB: the api-v3 endpoints ship in a paired PR; until that lands these calls 404
- * and surface as an error here.
  */
 
 type Phase = "idle" | "working" | "done" | "error";
