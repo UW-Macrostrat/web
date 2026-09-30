@@ -1,3 +1,4 @@
+import { TileTokenRecovery } from "~/components/tile-token-recovery";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
@@ -34,6 +35,10 @@ import {
 } from "./map";
 import { getBaseMapStyle } from "@macrostrat-web/map-utils";
 import { buildOverlayStyle, mergeMapStyles } from "../map-styles";
+import {
+  applyCompilationTiles,
+  tileRequestTransform,
+} from "../../app-state/compilation";
 import h from "../main.module.sass";
 import { useSetAtom } from "jotai";
 
@@ -60,13 +65,17 @@ export default function MainMapView(props) {
   const runAction = useAppActions();
 
   const mapSettings = useAppState((state) => state.mapSettings);
+  const compilation = useAppState((state) => state.compilation);
 
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
     if (baseStyle == null) return null;
-    const macrostratStyle = buildMacrostratStyle({
-      tileserverDomain: SETTINGS.burwellTileDomain,
-    });
+    const macrostratStyle = applyCompilationTiles(
+      buildMacrostratStyle({
+        tileserverDomain: SETTINGS.burwellTileDomain,
+      }),
+      compilation
+    );
 
     const overlayStyle: any = buildOverlayStyle();
 
@@ -81,7 +90,7 @@ export default function MainMapView(props) {
     //   });
     // }
     return mergeMapStyles(baseStyle, macrostratStyle, overlayStyle);
-  }, [baseStyle, isDarkMode]);
+  }, [baseStyle, isDarkMode, compilation]);
 
   useEffect(() => {
     getMapboxStyle(baseMapURL, {
@@ -152,6 +161,7 @@ export default function MainMapView(props) {
       mapPosition,
       terrainSourceID,
       mapboxToken: SETTINGS.mapboxAccessToken,
+      transformRequest: tileRequestTransform,
       onMapMoved,
     },
     [
@@ -167,6 +177,7 @@ export default function MainMapView(props) {
       h(FlyToPlaceManager),
       h(HoveredFeatureManager),
       h(SelectedColumnManager),
+      h(TileTokenRecovery),
     ]
   );
 }

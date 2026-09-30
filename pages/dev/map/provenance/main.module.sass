@@ -1,0 +1,147 @@
+/* ------------------------------------------------------------------ list */
+
+.source-list-panel
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+  min-height: 0
+  height: 100%
+  padding: 0.5em
+
+.list-toolbar
+  display: flex
+  flex-direction: column
+  gap: 0.4em
+  flex-shrink: 0
+
+.list-filter
+  display: flex
+  gap: 0.2em
+
+.source-list
+  list-style: none
+  padding: 0
+  margin: 0
+  min-height: 0
+  overflow-y: auto
+
+.source-row
+  padding: 0.25em 0.3em
+  border-radius: 3px
+
+  &.selected
+    background-color: var(--panel-background-color, rgba(128, 128, 128, 0.12))
+
+// A button, not a link: selecting shows the map here rather than navigating.
+.source-name,
+.link-button
+  background: none
+  border: none
+  padding: 0
+  font: inherit
+  color: var(--link-color, inherit)
+  cursor: pointer
+  text-align: left
+
+  &:hover
+    text-decoration: underline
+
+.source-name
+  font-weight: 500
+
+.source-meta
+  display: flex
+  flex-wrap: wrap
+  align-items: baseline
+  gap: 0.3em
+  font-size: 0.78em
+  color: var(--secondary-color)
+
+/* ----------------------------------------------------------------- panel */
+
+.provenance-panel
+  display: flex
+  flex-direction: column
+  gap: 0.8em
+
+.detail-title
+  margin: 0
+
+.detail-links
+  display: flex
+  flex-wrap: wrap
+  gap: 0.6em
+  align-items: baseline
+  font-size: 0.85em
+
+.detail-section
+  h4
+    margin: 0 0 0.3em
+
+  h5
+    margin: 0.5em 0 0.2em
+
+.status
+  margin: 0 0 0.4em
+
+.picker-row
+  display: flex
+  gap: 0.3em
+  align-items: center
+
+.plain-list
+  list-style: none
+  padding: 0
+  margin: 0
+
+  li
+    margin: 0.1em 0
+
+.overlap-list
+  list-style: none
+  padding: 0
+  margin: 0
+  max-height: 16em
+  overflow-y: auto
+
+.overlap-row
+  padding: 0.2em 0.3em
+  border-radius: 3px
+
+  &:hover
+    background-color: var(--panel-background-color, rgba(128, 128, 128, 0.12))
+
+.overlap-meta
+  font-size: 0.78em
+  color: var(--secondary-color)
+
+.muted
+  margin: 0.2em 0
+  font-size: 0.85em
+  color: var(--secondary-color)
+
+.citation
+  margin: 0 0 0.3em
+  font-size: 0.9em
+
+.change-list
+  margin: 0 0 0.5em
+  padding-left: 1.2em
+  font-size: 0.9em
+
+.save-actions
+  display: flex
+  gap: 0.3em
+
+.save-error
+  margin-top: 0.5em
+
+.topo-banner
+  display: flex
+  align-items: flex-start
+  justify-content: space-between
+  gap: 0.5em
+  font-size: 0.85em
+
+  p
+    margin: 0

@@ -1,47 +1,42 @@
-body
-  margin: 0
-  padding: 0
-  
-.single-map
-  width: 100vh
-  height: 100vh
-  margin: 0
+// The column's header: breadcrumbs, the map's reference and description, its
+// tabs and controls. It is the panel's header element, so it stays put while
+// the legend scrolls beneath it.
+.page-header
   display: flex
-  flex-direction: row-reverse
-  //--map-context-stack-width: none
+  flex-direction: column
+  gap: 8px
+  padding: 10px 12px
+  border-bottom: 1px solid var(--panel-rule-color)
 
-.map-legend-container
-  overflow-y: scroll
-
-.map-legend
-  margin: 1em
-
-.legend-entry
-  margin: 0.5em 0
-
-.legend-title
-  display: flex
-  flex-direction: row
-  &:hover
-    cursor: pointer
-    background: #eee
-  h4
+  .page-description
     margin: 0
-    margin-right: 0.5em
-
-.legend-swatch
-  width: 1em
-  height: 1em
-  display: inline-block
-  margin-right: 0.5em
+    font-size: 12px
+    line-height: 1.4
+    opacity: 0.7
 
 .dev-links
-  display: block
-  text-align: right
-  &>*
-    display: block
-    margin: 1em
+  display: flex
+  justify-content: flex-end
+  gap: 0.5em
 
+.menu-buttons
+  display: flex
+  gap: 0.5em
+
+.map-controls
+  display: flex
+  flex-direction: column
+  gap: 6px
+
+  .control-row
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 0.5em
+
+  .control-label
+    font-size: 12px
+    opacity: 0.8
 .neighbor-maps
   padding: 0.5em 0
 

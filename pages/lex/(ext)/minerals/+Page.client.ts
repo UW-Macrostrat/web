@@ -1,4 +1,4 @@
-import h from "./main.module.sass";
+import h from "@macrostrat/hyper";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { LinkCard } from "~/components";

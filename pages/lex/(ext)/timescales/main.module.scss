@@ -1,8 +1,8 @@
-.timescale-list-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
+@use "~/styles/type";
+
+// The timescale list. Element selectors in a CSS module are not scoped, so the
+// resets below are nested under the page's own blocks: at the top level, a bare
+// `h1` or `tspan` would restyle every page loaded after this one.
 
 .filters {
   display: flex;
@@ -10,119 +10,50 @@
   gap: 1em;
 }
 
+.filters,
+.timescale-list {
+  h1,
+  h2,
+  h3,
+  p,
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+}
+
 .timescale-list {
   display: flex;
   flex-direction: column;
   gap: 1.3em;
 
-  h2 {
-    margin: 0.5em 0;
-  }
+  // Each timescale is a card: its name, then its age range and size.
+  .timescale-item {
+    h1 {
+      @include type.item-title;
+      font-size: var(--pz-font-size-lg);
+    }
 
-  .timescale-items {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    align-items: center;
-
-    .timescale-name {
-      padding: 2px 6px;
-      margin: 0.2em 0;
-      border-radius: 0.2em;
+    h3 {
+      @include type.supporting;
+      font-family: var(--pz-body-font);
     }
   }
-}
-
-.search-bar {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  justify-content: center;
-
-  input {
-    width: 100%;
-    padding: 0.5em;
-    border-radius: 0.2em;
-    border: none;
-    background-color: var(--background-color);
-    color: var(--text-emphasized-color);
-    font-size: 1em;
-    margin: 3px;
-
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 0.2em var(--text-emphasized-color);
-    }
-  }
-}
-
-.int-tooltip {
-  padding: 0.5em;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5em;
-}
-
-ul,
-li {
-  margin: 0;
 }
 
 .timescale {
   cursor: pointer;
 }
 
-ul,
-h1,
-h2,
-p,
-h3 {
-  margin: 0;
-  padding: 0;
-}
-
-.timescale-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-
 .timescale-container {
-  color: var(--text-emphasized-color) !important;
+  color: var(--pz-text-emphasized-color) !important;
 
   line {
-    stroke: var(--text-emphasized-color) !important;
-  }
-}
-
-tspan {
-  fill: var(--text-color); 
-  font-size: 14px;
-}
-
-.visx-line {
-  stroke: var(--text-color);
-}
-
-.int-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.3em;
-
-  h2 {
-    margin: 0.5em 0;
+    stroke: var(--pz-text-emphasized-color) !important;
   }
 
-  .int-items {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    align-items: center;
-
-    .int-name {
-      padding: 2px 6px;
-      margin: 0.2em 0;
-      border-radius: 0.2em;
-    }
+  tspan {
+    fill: var(--pz-text-color);
+    font-size: var(--pz-body-font-size);
   }
 }

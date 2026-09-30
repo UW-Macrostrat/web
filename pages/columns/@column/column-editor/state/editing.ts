@@ -1,0 +1,400 @@
+/** Turning a sheet's edits into transaction entries.
+ *
+ * This is the only place that knows what a cell edit *means*. A `DataSheet`
+ * reports one, structurally, through `onEdit`; these actions decide which
+ * units it touches and which of their fields change, and hand the result to
+ * `applyUnitEditsAtom`. Nothing is refused here — an edit that makes the
+ * column inconsistent is recorded and flagged (see `../validation`).
+ */
+import { atom } from "jotai";
+import type { UnitLong } from "@macrostrat/api-types";
+import type { ColumnSpec, EditEvent } from "@macrostrat/data-sheet";
+import {
+  ageForProportion,
+  boundaryFieldInfo,
+  boundaryTolerance,
+  findIntervalByName,
+  readBoundaryEdit,
+  sideChanges,
+  unitBoundary,
+  type BoundaryKind,
+  type BoundarySide,
+  type BoundaryValues,
+  type IntervalDef,
+} from "../boundaries";
+import {
+  applyUnitEditsAtom,
+  draftSurfacesAtom,
+  editedUnitsAtom,
+  isDraftColumnAtom,
+  resetEditsAtom,
+  type UnitFieldEdit,
+} from "./column";
+import { constrainSurfaceAtom, writeBoundaryToSurfaceAtom } from "./draft";
+import { preserveSurfacesAtom } from "./options";
+import { surfacesAtom } from "./surfaces";
+import type { EditorSurface } from "../surfaces";
+import type { DraftSurface } from "../draft-surfaces";
+import type { PlainVocabularies } from "../cell-surfaces";
+import { parseEnvironments, parseLithologies } from "../plain-values";
+
+export type IntervalMap = Map<number, IntervalDef> | null;
+
+/* --------------------------------------------------------- one boundary */
+
+/** Move one unit's boundary.
+ *
+ * With `preserveSurfaces` on, every unit that shared the old value comes
+ * along — a unit meeting it from below has its top moved, one from above its
+ * bottom — so the surface survives the edit. With it off only the row's own
+ * unit moves, which is how the ingestion spreadsheet behaves and how a shared
+ * surface gets split.
+ *
+ * On a new column the boundary *is* a surface record, so the edit constrains
+ * the surface and every unit resting on it follows (see `./draft`). */
+export const editBoundaryAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      unit_id,
+      side,
+      kind,
+      values,
+      intervals = null,
+    }: {
+      unit_id: number;
+      side: BoundarySide;
+      kind: BoundaryKind;
+      values: BoundaryValues;
+      intervals?: IntervalMap;
+    }
+  ) => {
+    if (get(isDraftColumnAtom)) {
+      const written = set(writeBoundaryToSurfaceAtom, {
+        unit_id,
+        side,
+        values,
+        intervals,
+      });
+      if (written) return;
+    }
+    set(
+      applyUnitEditsAtom,
+      boundaryEdits(get(editedUnitsAtom), {
+        unit_id,
+        side,
+        kind,
+        values,
+        preserveSurfaces: get(preserveSurfacesAtom),
+      })
+    );
+  }
+);
+
+function boundaryEdits(
+  units: UnitLong[],
+  opts: {
+    unit_id: number;
+    side: BoundarySide;
+    kind: BoundaryKind;
+    values: BoundaryValues;
+    preserveSurfaces: boolean;
+  }
+): UnitFieldEdit[] {
+  const { unit_id, side, kind, values, preserveSurfaces } = opts;
+  const unit = units.find((d) => d.unit_id === unit_id);
+  if (unit == null) return [];
+
+  const edits: UnitFieldEdit[] = [
+    { unit_id, changes: sideChanges(side, values) },
+  ];
+
+  const previous = unitBoundary(unit, side, kind);
+  const moved = kind === "position" ? values.pos : values.age;
+  if (!preserveSurfaces || previous == null || moved == null) return edits;
+
+  const tolerance = boundaryTolerance(kind);
+  for (const other of units) {
+    if (other.unit_id === unit_id) continue;
+    for (const otherSide of ["top", "bottom"] as BoundarySide[]) {
+      const value = unitBoundary(other, otherSide, kind);
+      if (value == null || Math.abs(value - previous) >= tolerance) continue;
+      edits.push({
+        unit_id: other.unit_id,
+        changes: sideChanges(otherSide, values),
+      });
+    }
+  }
+  return edits;
+}
+
+/* ------------------------------------------------- a sheet's edit events */
+
+/** Cell edits on a unit-backed sheet (units, unified).
+ *
+ * The **column spec decides what may be written**, and it is the only thing
+ * that does. A locked column is locked however the edit arrived: the cell
+ * renderer declines to offer an editor for one, but a fill or a paste writes
+ * across the whole column range of a selection without consulting the spec, so
+ * the check has to be made here too. It is also the only check — a second
+ * allow-list beside the spec is a second opinion waiting to disagree with it.
+ *
+ * A boundary column goes through `editBoundaryAtom`; anything else is the
+ * row's own field, coerced by the column's declared `dataType`. */
+export const editUnitCellsAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      event,
+      intervals,
+      columnSpec,
+      vocabularies = null,
+    }: {
+      event: EditEvent<UnitLong>;
+      intervals: IntervalMap;
+      columnSpec: ColumnSpec[];
+      /** For text typed into a lithology or environment cell */
+      vocabularies?: PlainVocabularies | null;
+    }
+  ) => {
+    if (event.type === "resetChanges") {
+      set(resetEditsAtom);
+      return;
+    }
+    if (event.type !== "setCells") return;
+
+    const specs = new Map(columnSpec.map((spec) => [spec.key, spec]));
+    const edits: UnitFieldEdit[] = [];
+
+    for (const { row, column, value } of event.cells) {
+      if (row == null) continue;
+      const spec = specs.get(column);
+      if (spec == null || spec.editable === false) continue;
+
+      if (boundaryFieldInfo(column) != null) {
+        const edit = readBoundaryEdit(row, column, value, intervals);
+        if (edit == null) continue;
+        set(editBoundaryAtom, { unit_id: row.unit_id, ...edit, intervals });
+        continue;
+      }
+
+      let next: any = value;
+      if (spec.dataType === "number" || spec.dataType === "integer") {
+        if (value === "" || value == null) continue;
+        next = Number(value);
+      }
+      // The spreadsheet's text, read back into entries
+      if (typeof value === "string") next = readListText(column, value, vocabularies) ?? next;
+      // A cleared status is no status: the unit is defined
+      if (column === "unit_status" && (value === "" || value == null)) next = null;
+      edits.push({ unit_id: row.unit_id, changes: { [column]: next } });
+    }
+    set(applyUnitEditsAtom, edits);
+  }
+);
+
+/** A lithology or environment list from the template's text; `null` for
+ * any other field. Names are resolved where the vocabulary holds them. */
+function readListText(
+  column: string,
+  text: string,
+  vocabularies: PlainVocabularies | null
+) {
+  if (column === "lith") {
+    return parseLithologies(
+      text,
+      vocabularies?.lithologies ?? new Map(),
+      vocabularies?.lithAttributes
+    );
+  }
+  if (column === "environ") {
+    return parseEnvironments(text, vocabularies?.environments ?? new Map());
+  }
+  return null;
+}
+
+/** Cell edits on the surfaces sheet.
+ *
+ * A surface is a projection, so an edit there is a boundary move on every unit
+ * hung on it — always, whatever `preserveSurfaces` says, because moving a
+ * surface *is* what that table is for.
+ *
+ * What moves it follows the axis. A measured column's surfaces have a position
+ * and that is the record. An age column's have a *calibration* — an interval
+ * and a proportion within it — and the age falls out of the two, so the
+ * proportion is the record and the age is read-only. A surface with no
+ * calibration has nothing to move it by, and is left alone. */
+export const editSurfaceCellsAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      event,
+      coordinateKey,
+      intervals = null,
+    }: {
+      event: EditEvent<any>;
+      coordinateKey: "position" | "proportion";
+      intervals?: IntervalMap;
+    }
+  ) => {
+    if (event.type === "resetChanges") {
+      set(resetEditsAtom);
+      return;
+    }
+    if (event.type !== "setCells") return;
+
+    if (get(isDraftColumnAtom)) {
+      for (const cell of event.cells) {
+        const surface = get(draftSurfacesAtom).get(cell.row?.id);
+        if (surface == null) continue;
+        const changes = draftSurfaceEdit(surface, cell.column, cell.value, intervals);
+        if (changes == null) continue;
+        set(constrainSurfaceAtom, { id: surface.id, changes });
+      }
+      return;
+    }
+
+    const surfaces = get(surfacesAtom);
+    const edits: UnitFieldEdit[] = [];
+
+    for (const { row, column, value } of event.cells) {
+      if (row == null) continue;
+      const surface = surfaces.find((s) => s.id === row.id);
+      if (surface == null) continue;
+
+      // The contact is the units above's basal surface
+      if (column === "type") {
+        const type = value === "" ? null : value;
+        for (const unit_id of surface.unitsAbove) {
+          edits.push({ unit_id, changes: { basal_surface: type } as any });
+        }
+        continue;
+      }
+
+      const values = loadedSurfaceEdit(surface, column, value, intervals);
+      if (values == null) continue;
+
+      // The unit below a surface meets it with its top, the unit above with
+      // its base.
+      for (const unit_id of surface.unitsBelow) {
+        edits.push({ unit_id, changes: sideChanges("top", values) });
+      }
+      for (const unit_id of surface.unitsAbove) {
+        edits.push({ unit_id, changes: sideChanges("bottom", values) });
+      }
+    }
+
+    set(applyUnitEditsAtom, edits);
+  }
+);
+
+/** An edit to a loaded column's surface, as the boundary values it gives
+ * every unit resting on it: a position, a proportion within its calibration,
+ * or a calibration — an interval, from the interval editor or by name, with
+ * the proportion it came with (else the surface's own) and the age they
+ * imply. `null` when the edit means nothing. */
+function loadedSurfaceEdit(
+  surface: EditorSurface,
+  column: string,
+  value: any,
+  intervals: IntervalMap
+): BoundaryValues | null {
+  if (column === "position" || column === "proportion") {
+    const next = Number(value);
+    if (value === "" || value == null || isNaN(next)) return null;
+    return surfaceBoundaryValues(surface, column, next);
+  }
+  if (column !== "calibration" && column !== "calibration_name") return null;
+  const def = intervalFromEdit(value, intervals);
+  if (def == null) return null;
+  const prop = value?.prop ?? surface.proportion ?? null;
+  const values: BoundaryValues = { int_id: def.int_id, int_name: def.name };
+  if (prop != null) values.prop = prop;
+  const age = ageForProportion(def, prop);
+  if (age != null) values.age = age;
+  return values;
+}
+
+/** The interval an edit names: the interval editor's pick, or a typed name. */
+function intervalFromEdit(value: any, intervals: IntervalMap): IntervalDef | null {
+  if (value == null || value === "") return null;
+  if (typeof value === "object") {
+    if (value.int_id == null) return null;
+    return intervals?.get(value.int_id) ?? null;
+  }
+  return findIntervalByName(intervals, String(value));
+}
+
+/** An edit to a new column's surface, as the constraint it sets: a position,
+ * a proportion within the surface's interval, or an interval (with the
+ * proportion it came with). A cleared cell removes that part of the
+ * constraint. `null` when the edit means nothing. */
+function draftSurfaceEdit(
+  surface: DraftSurface,
+  column: string,
+  value: any,
+  intervals: IntervalMap
+): Partial<DraftSurface> | null {
+  const blank = value == null || value === "";
+  if (column === "type") return { type: blank ? null : value };
+  if (column === "position") {
+    if (blank) return { pos: null };
+    const pos = Number(value);
+    if (isNaN(pos)) return null;
+    return { pos };
+  }
+  if (column === "proportion") {
+    if (blank) return { prop: null, age: null };
+    const prop = Number(value);
+    if (isNaN(prop)) return null;
+    return { prop, age: ageForProportion(surface.interval, prop) };
+  }
+  if (column === "calibration" || column === "calibration_name") {
+    // Cleared, or the interval editor's ✕: the surface is unconstrained
+    if (blank || (typeof value === "object" && value?.int_id == null)) {
+      return { int_id: null, int_name: null, prop: null, age: null, interval: null };
+    }
+    // A name that matches nothing leaves the constraint as it was
+    const def = intervalFromEdit(value, intervals);
+    if (def == null) return null;
+    const prop = value?.prop ?? surface.prop ?? null;
+    let interval: DraftSurface["interval"] = null;
+    if (def != null) interval = { b_age: def.b_age, t_age: def.t_age };
+    return {
+      int_id: def.int_id,
+      int_name: def.name,
+      prop,
+      age: ageForProportion(def, prop),
+      interval,
+    };
+  }
+  return null;
+}
+
+function surfaceBoundaryValues(
+  surface: EditorSurface,
+  coordinateKey: "position" | "proportion",
+  value: number
+): BoundaryValues | null {
+  if (coordinateKey === "position") return { pos: value };
+
+  const calibration = surface.calibration;
+  if (calibration == null) return null;
+  const age = ageForProportion(
+    { int_id: calibration.id, name: calibration.name, ...calibration },
+    value
+  );
+  if (age == null) return null;
+  return {
+    prop: value,
+    age,
+    int_id: calibration.id,
+    int_name: calibration.name,
+  };
+}

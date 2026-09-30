@@ -12,6 +12,8 @@
 
 import { atom } from "jotai";
 import {
+  applyDraft,
+  compilationEditAtoms,
   compilationTreeAtoms,
   emptyGraph,
   type CompilationGraph,
@@ -51,13 +53,24 @@ export const graphAtom = atom<CompilationGraph>(emptyGraph);
  * means "no point, or not loaded yet". */
 export const pointGraphAtom = atom<CompilationGraph | null>(null);
 
+/** Bumped after a save, so the point-scoped graph is fetched again. */
+export const graphVersionAtom = atom(0);
+
+/** Edits are drafted against the whole graph, never the point's: a point graph
+ * holds only the members covering the point, and a member list rebuilt from it
+ * would drop the rest. */
+export const editAtoms = compilationEditAtoms(graphAtom);
+
 /** Which graph the tree is showing: the point's if there is one, otherwise the
  * whole catalog. One node set, two provenances — so every filter and selection
- * works identically in both. */
+ * works identically in both. While editing, the draft is laid over it, so the
+ * tree shows what a save would write. */
 export const activeGraphAtom = atom<CompilationGraph>((get) => {
   const point = get(pointAtom);
-  if (point == null) return get(graphAtom);
-  return get(pointGraphAtom) ?? emptyGraph;
+  let graph = get(graphAtom);
+  if (point != null) graph = get(pointGraphAtom) ?? emptyGraph;
+  if (!get(editAtoms.editing)) return graph;
+  return applyDraft(graph, get(editAtoms.draft));
 });
 
 /** The selected node: what the map draws and the assistant describes. A slug, so

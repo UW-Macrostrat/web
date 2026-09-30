@@ -19,11 +19,13 @@ import {
   formatArea,
   mapPageHref,
   NodeTags,
-  contentTags,
+  kindTags,
 } from "~/components/compilation-tree";
 
+import { FocusEditor } from "./editor";
 import {
   basemapAtom,
+  graphVersionAtom,
   expandMembersAtom,
   focusNodeAtom,
   focusSlugAtom,
@@ -43,6 +45,7 @@ export function CompilationAssistant() {
   return h("div.compilation-assistant", [
     h(PointLoader),
     h(FocusSummary),
+    h(FocusEditor),
     h(PointSummary),
     h(MapOptions),
     h(Legend),
@@ -57,6 +60,8 @@ export function CompilationAssistant() {
 function PointLoader() {
   const point = useAtomValue(pointAtom);
   const setGraph = useSetAtom(pointGraphAtom);
+  // Bumped by a save, so an edited graph is fetched again for the point.
+  const version = useAtomValue(graphVersionAtom);
   const [error, setError] = useState<Error | null>(null);
 
   const lng = point?.lng ?? null;
@@ -84,7 +89,7 @@ function PointLoader() {
     return () => {
       cancelled = true;
     };
-  }, [lng, lat, setGraph]);
+  }, [lng, lat, version, setGraph]);
 
   if (error == null) return null;
   return h(ErrorCallout, { error });
@@ -147,22 +152,25 @@ function FocusSummary() {
     return h(
       Callout,
       { className: "focus-summary", icon: "layers" },
-      "The map is drawing carto-large. Pick a compilation in the list to draw it instead."
+      "The map is drawing carto, at the band for the zoom. Pick a compilation in the list to draw it instead."
     );
+  }
+
+  // As in the tree, only a served source links to its map page.
+  const label = node.name ?? node.slug;
+  let name = h("span.focus-name", label);
+  if (node.is_served) {
+    name = h(Link, { href: mapPageHref(node), className: "focus-name" }, label);
   }
 
   return h(Callout, { className: "focus-summary", icon: "layers" }, [
     h("div.focus-header", [
-      h(
-        Link,
-        { href: mapPageHref(node), className: "focus-name" },
-        node.name ?? node.slug
-      ),
+      name,
       h(Button, {
         minimal: true,
         small: true,
         icon: "cross",
-        title: "Back to carto-large",
+        title: "Back to carto",
         onClick: () => setFocus(null),
       }),
     ]),
@@ -174,7 +182,7 @@ function FocusSummary() {
 /** A leaf map has no members, so saying "0 members" is noise rather than
  * information; only a compilation gets a membership line. */
 function focusStats(node) {
-  const parts: string[] = [];
+  const parts: string[] = [`${node.slug} #${node.source_id}`];
   if (node.is_compilation) {
     parts.push(`${node.n_members} members`);
     if (node.n_sources !== node.n_members) {
@@ -237,7 +245,7 @@ function Legend() {
     { title: "Legend", className: "legend-panel", expanded: false },
     h(
       "dl.legend",
-      contentTags.flatMap((tag) => [
+      kindTags.flatMap((tag) => [
         h("dt", { key: `${tag.label}-t` }, tag.label),
         h("dd", { key: `${tag.label}-d` }, tag.title),
       ])

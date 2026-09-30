@@ -7,6 +7,8 @@
 // The ancestry carries no label (a `›` path implies it); the "Siblings" and
 // "Children" labels are set off by space rather than by weight or caps.
 
+@use "~/styles/type"
+
 .lex-hierarchy
   display: flex
   flex-direction: row
@@ -18,25 +20,25 @@
 // Quiet section cues. Contrast comes from the space in front of them, not from
 // capitalization or weight.
 .relation-label
-  color: var(--secondary-color)
-  font-size: 0.8em
+  color: var(--pz-secondary-color)
+  font-size: var(--pz-font-size-xs)
   letter-spacing: 0.03em
   margin-left: 1.4em
 
 // The descendants read as a separate movement from the peers around the item.
 .leads
   padding-left: 1em
-  border-left: 1px solid var(--tertiary-color)
+  border-left: 1px solid var(--pz-panel-rule-color)
 
 .path-separator
-  color: var(--secondary-color)
+  color: var(--pz-secondary-color)
 
 // A hierarchy level with no record of its own: shown for placement, but there's
 // nothing to navigate to. Smaller than a tag, since it isn't one.
 .unfilled-level
   font-style: italic
-  font-size: 0.85em
-  color: var(--secondary-color)
+  font-size: var(--pz-font-size-sm)
+  color: var(--pz-secondary-color)
 
 .tag-holder
   display: inline-flex
@@ -44,24 +46,14 @@
 // Controls that read as text rather than as buttons — "and 12 more…", a stripped
 // level's name, the collapse chevron. Clicking is the only affordance they need.
 .text-control
-  appearance: none
-  background: none
-  border: none
-  padding: 0
-  margin: 0
-  cursor: pointer
-  font-family: inherit
-  font-style: italic
-  font-size: 0.85em
-  color: var(--secondary-color)
+  @include type.text-control
   text-decoration: none
 
   &:hover
-    color: var(--text-emphasized-color)
     text-decoration: underline
 
   &.is-active
-    color: var(--text-emphasized-color)
+    color: var(--pz-text-emphasized-color)
 
 .collapse-control
   display: inline-flex
@@ -91,7 +83,7 @@
   flex-wrap: wrap
   align-items: baseline
   gap: 0.35em
-  font-size: 0.9em
+  font-size: var(--pz-font-size-sm)
   color: var(--pz-secondary-color)
 
 // The stratigraphic tree, as cards that contain the cards below them: a level
@@ -114,9 +106,7 @@
     display: block
 
     > h3
-      margin: 0
-      font-size: 1em
-      line-height: var(--pz-line-height-snug)
+      @include type.item-title
 
     // Quieted on its own head only — dimming the card itself would dim every
     // card nested inside it.
@@ -167,7 +157,7 @@
 
 .strat-units
   flex: 0 0 auto
-  font-size: 0.8em
+  font-size: var(--pz-font-size-xs)
   font-weight: 400
   color: var(--pz-secondary-color)
   white-space: nowrap
@@ -189,7 +179,7 @@
 
 // Names the block, the way the columns list beside it is named.
 .hierarchy-header
-  margin: 0 0 0.4em
+  @include type.section-heading
 
 .hierarchy-toggle
   margin-top: 0.75em

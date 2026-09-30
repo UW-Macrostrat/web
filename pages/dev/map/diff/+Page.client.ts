@@ -3,9 +3,10 @@
  * The page is a generalization of `/dev/map/carto-compare`: two synchronized
  * maps under a draggable divider, both drawn with the same Macrostrat style so
  * that any visible difference is a difference in the *data*. Which two
- * tilesets are compared is a choice, not a fixture — `MAP_SOURCES` is the
- * registry, and the pair defaults to production carto against this
- * deployment's own.
+ * tilesets are compared is a choice, not a fixture: every compilation the API
+ * serves (`~/_utils/compilations`) plus the fixed legacy tilesets in
+ * `FIXED_SOURCES`, and the pair defaults to the legacy carto build against
+ * this deployment's `carto` compilation.
  *
  * What the swipe can't answer is *what* changed at a particular place, since
  * only one side is visible there at a time. So clicking the map pins a
@@ -53,12 +54,22 @@ import mapboxgl from "mapbox-gl";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { atomWithSearchParam, locationAtom } from "~/_utils/url-atoms";
+import {
+  DEFAULT_COMPILATION,
+  LEGACY_COMPILATION,
+  compilationLabel,
+  compilationTilesURL,
+  compilationsAtom,
+  tileRequestTransform,
+  type CompilationSummary,
+} from "~/_utils/compilations";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import { hashWithMapPosition, initialMapPosition } from "~/_utils/map-position";
 import {
   BaseLayerForm,
   Basemap,
   basemapStyle,
+  CompilationZoomWarning,
   PageBreadcrumbs,
 } from "~/components";
 import { NavigationLinkProvider } from "~/_providers/navigation";
@@ -94,32 +105,28 @@ interface MapSource {
   /** The v3 compilation whose `/map/{slug}/units` route describes these tiles,
    * where there is one.
    *
-   * Only the dynamic tiles need it: they carry a legend entry's id, color and
-   * age range — enough to draw a unit, not enough to name one. The others
-   * already ship their text in the tile. A source without a route is not a
-   * problem, it just shows what its tiles carry. */
+   * Only the compilation tiles need it: they carry a legend entry's id, color
+   * and age range — enough to draw a unit, not enough to name one. The fixed
+   * legacy tilesets already ship their text in the tile. A source without a
+   * route is not a problem, it just shows what its tiles carry. */
   units?: string;
+  /** The compilation's summary, for the zoom-band warning. */
+  compilation?: CompilationSummary;
 }
 
-const MAP_SOURCES: MapSource[] = [
+/** The legacy tilesets, which are not compilations and have no API entry. */
+const FIXED_SOURCES: MapSource[] = [
   {
-    slug: "carto",
-    label: "Carto",
-    description: "This deployment's carto tiles (tile_layers.carto).",
+    slug: "legacy-carto",
+    label: "Carto (legacy tiles)",
+    description: "This deployment's legacy carto tiles (tile_layers.carto).",
     tiles: `${burwellTileDomain}/carto/{z}/{x}/{y}`,
   },
   {
-    slug: "carto-v2",
-    label: "Carto v2",
-    description: "In-development tiles, assembled from the map topology.",
-    tiles: `${burwellTileDomain}/dev/carto/{z}/{x}/{y}`,
-    units: "carto-v2",
-  },
-  {
     slug: "carto-slim",
-    label: "Carto slim",
+    label: "Carto slim (legacy tiles)",
     description:
-      "The slimmed tiles the main map draws (tile_layers.carto_slim).",
+      "The slimmed legacy tiles the main map used to draw (tile_layers.carto_slim).",
     tiles: `${burwellTileDomain}/carto-slim/{z}/{x}/{y}`,
   },
   {
@@ -130,13 +137,56 @@ const MAP_SOURCES: MapSource[] = [
   },
 ];
 
-const DEFAULT_LEFT = "carto";
-const DEFAULT_RIGHT = "carto-v2";
+const DEFAULT_LEFT = LEGACY_COMPILATION;
+const DEFAULT_RIGHT = DEFAULT_COMPILATION;
 
-function findSource(slug: string | null): MapSource | null {
-  if (slug == null) return null;
-  return MAP_SOURCES.find((d) => d.slug === slug) ?? null;
+function sourceForCompilation(c: CompilationSummary): MapSource {
+  return {
+    slug: c.slug,
+    label: compilationLabel(c),
+    description: `The ${c.name ?? c.slug} compilation, drawn by the tileserver.`,
+    tiles: compilationTilesURL(c.slug),
+    units: c.slug,
+    compilation: c,
+  };
 }
+
+/** The source a slug names. A fixed tileset by its slug; a compilation from
+ * the loaded list; and, before the list has loaded or for a compilation it
+ * does not know, a source built from the slug alone — the tileserver and the
+ * units route take any slug, so a shared link renders before the list does. */
+function sourceForSlug(
+  slug: string | null,
+  compilations: CompilationSummary[]
+): MapSource | null {
+  if (slug == null) return null;
+  const fixed = FIXED_SOURCES.find((d) => d.slug === slug);
+  if (fixed != null) return fixed;
+  const known = compilations.find((c) => c.slug === slug);
+  if (known != null) return sourceForCompilation(known);
+  return {
+    slug,
+    label: slug,
+    description: `The ${slug} compilation, drawn by the tileserver.`,
+    tiles: compilationTilesURL(slug),
+    units: slug,
+  };
+}
+
+/** Every source the pickers offer: the compilations first, then the fixed
+ * legacy tilesets. Empty of compilations until the list has loaded. */
+const sourcesAtom = atom((get): MapSource[] => {
+  const compilations = get(compilationsAtom);
+  let loaded: CompilationSummary[] = [];
+  if (compilations.state == "hasData") loaded = compilations.data;
+  return [...loaded.map(sourceForCompilation), ...FIXED_SOURCES];
+});
+
+const loadedCompilationsAtom = atom((get): CompilationSummary[] => {
+  const compilations = get(compilationsAtom);
+  if (compilations.state != "hasData") return [];
+  return compilations.data;
+});
 
 /** The Macrostrat overlay for one source: the shared style with its tile URL
  * swapped in, keeping the `burwell` source name and the `units`/`lines`
@@ -188,7 +238,10 @@ const mapPositionHashAtom = atom(null, (get, set, position: MapPosition) => {
 function sourceAtom(key: string, defaultSlug: string) {
   const paramAtom = atomWithSearchParam(key);
   return atom(
-    (get): MapSource => findSource(get(paramAtom)) ?? findSource(defaultSlug),
+    (get): MapSource => {
+      const compilations = get(loadedCompilationsAtom);
+      return sourceForSlug(get(paramAtom) ?? defaultSlug, compilations);
+    },
     (get, set, slug: string) => {
       let param: string | null = slug;
       if (slug === defaultSlug) param = null;
@@ -341,6 +394,8 @@ export function Page() {
       transformStyle,
       mapPosition,
       mapboxToken: mapboxAccessToken,
+      // Compilations other than `carto` are guarded on the tileserver.
+      transformRequest: tileRequestTransform,
       before,
       after,
       onSlide: setDivider,
@@ -557,10 +612,11 @@ async function fetchUnitDescriptions(
   });
   if (!res.ok) throw new Error(`Units request failed (${res.status})`);
 
+  // One answer per map: the route resolves `carto` to the zoom's member in the
+  // database, so the first row for a map is the one the tiles drew.
   const byMapID = new Map<number, any>();
   for (const unit of await res.json()) {
-    const existing = byMapID.get(unit.map_id);
-    if (existing != null && existing.is_current_layer) continue;
+    if (byMapID.has(unit.map_id)) continue;
     byMapID.set(unit.map_id, unit);
   }
   return byMapID;
@@ -904,30 +960,58 @@ function SourcePicker() {
     setRightSource(left);
   };
 
-  return h("div.source-picker", [
-    h("label.source-label", SIDE_LABELS.left),
-    h(SourceSelect, { source: leftSource, setSource: setLeftSource }),
-    h(Button, {
-      className: "swap-button",
-      icon: "swap-vertical",
-      minimal: true,
-      small: true,
-      title: "Swap sides",
-      onClick: swap,
-    }),
-    h("label.source-label", SIDE_LABELS.right),
-    h(SourceSelect, { source: rightSource, setSource: setRightSource }),
+  return h([
+    h("div.source-picker", [
+      h("label.source-label", SIDE_LABELS.left),
+      h(SourceSelect, { source: leftSource, setSource: setLeftSource }),
+      h(Button, {
+        className: "swap-button",
+        icon: "swap-vertical",
+        minimal: true,
+        small: true,
+        title: "Swap sides",
+        onClick: swap,
+      }),
+      h("label.source-label", SIDE_LABELS.right),
+      h(SourceSelect, { source: rightSource, setSource: setRightSource }),
+    ]),
+    h(ZoomBandWarnings, { left: leftSource, right: rightSource }),
   ]);
 }
 
 function SourceSelect({ source, setSource }) {
+  const sources = useAtomValue(sourcesAtom);
+  let options = sources.map((d) => ({ label: d.label, value: d.slug }));
+  // A slug the list does not know (not loaded yet, or a compilation it does
+  // not carry) is still shown as selected rather than silently reset.
+  if (!sources.some((d) => d.slug === source.slug)) {
+    options = [{ label: source.label, value: source.slug }, ...options];
+  }
   return h(HTMLSelect, {
     fill: true,
     minimal: true,
     value: source.slug,
     onChange: (e) => setSource(e.currentTarget.value),
-    options: MAP_SOURCES.map((d) => ({ label: d.label, value: d.slug })),
+    options,
   });
+}
+
+/** Whether either side is a scale-dependent compilation viewed outside the
+ * zoom band it is meant for. Follows the camera. */
+function ZoomBandWarnings({ left, right }: { left: MapSource; right: MapSource }) {
+  const zoom = useAtomValue(mapPositionAtom)?.target?.zoom ?? null;
+  return h([
+    h(CompilationZoomWarning, {
+      compilation: left.compilation ?? null,
+      zoom,
+      className: "zoom-band-warning",
+    }),
+    h(CompilationZoomWarning, {
+      compilation: right.compilation ?? null,
+      zoom,
+      className: "zoom-band-warning",
+    }),
+  ]);
 }
 
 function EmptyState() {
@@ -948,6 +1032,7 @@ function LocationDiff({ context, left, right }) {
   }
 
   return h("div.location-diff", [
+    h(ZoomBandWarnings, { left: left.source, right: right.source }),
     h(SideToggle, { side, setSide, left, right }),
     h(UnitList, { units: shown.units, context }),
   ]);

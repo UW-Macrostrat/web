@@ -20,8 +20,7 @@
  */
 
 import hyper from "@macrostrat/hyper";
-import { Button, NonIdealState, Spinner, Tag } from "@blueprintjs/core";
-import classNames from "classnames";
+import { NonIdealState, Spinner } from "@blueprintjs/core";
 import {
   DetailPanelStyle,
   LocationPanel,
@@ -29,16 +28,8 @@ import {
   MapView,
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
-import {
-  DataField,
-  IntervalField,
-  LithologyList,
-} from "@macrostrat/data-components";
-import {
-  MacrostratDataProvider,
-  useMacrostratDefs,
-} from "@macrostrat/data-provider";
-import { JSONView, useDarkMode } from "@macrostrat/ui-components";
+import { MacrostratDataProvider } from "@macrostrat/data-provider";
+import { useDarkMode } from "@macrostrat/ui-components";
 import { useMapElement, useMapStyleOperator } from "@macrostrat/mapbox-react";
 import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
 import {
@@ -49,7 +40,7 @@ import {
 } from "@macrostrat-web/settings";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { loadable } from "jotai/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { atomWithSearchParam, locationAtom } from "~/_utils/url-atoms";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import { hashWithMapPosition, initialMapPosition } from "~/_utils/map-position";
@@ -59,6 +50,11 @@ import {
   basemapStyle,
   PageBreadcrumbs,
 } from "~/components";
+import {
+  LegendEntries,
+  LegendEntryDetailView,
+  sortByAge,
+} from "~/components/map-legend";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -79,11 +75,6 @@ const macrostratOverlay = buildMacrostratStyle({
 /** Hoisted, and not rebuilt per render: `MapView` re-applies the map style —
  * which reloads every tile — whenever the identity of `overlayStyles` changes. */
 const OVERLAY_STYLES = [macrostratOverlay];
-
-/** The legend is assembled from carto's own scale-dependent unit selection, so
- * the request is keyed on a tile zoom several levels finer than the map's —
- * the offset the story arrived at. */
-const LEGEND_ZOOM_OFFSET = 4;
 
 /** Where to start when neither the URL nor the last-viewed position says
  * otherwise: roughly the story's South Dakota view. */
@@ -166,13 +157,6 @@ const selectedEntryAtom = atom((get) => {
   return res.data.find((d) => d.legend_id === id) ?? null;
 });
 
-enum LegendViewMode {
-  Pretty = "pretty",
-  JSON = "json",
-}
-
-const viewModeAtom = atom(LegendViewMode.Pretty);
-
 // --- Legend queries ---
 
 /** Five decimal places is ~1 m at the equator, well past the resolution of any
@@ -183,7 +167,9 @@ function roundCoord(value: number): number {
 
 function legendQueryFor(map: mapboxgl.Map): string {
   const bounds = map.getBounds().toArray().flat().map(roundCoord);
-  const zoom = Math.round(map.getZoom() + LEGEND_ZOOM_OFFSET);
+  // The legend is resolved the way the tiles are, so the map's own zoom picks
+  // the same `carto` layer the map is drawing.
+  const zoom = Math.floor(map.getZoom());
   return new URLSearchParams({
     bounds: bounds.join(","),
     zoom: String(zoom),
@@ -197,15 +183,6 @@ function legendEntries(payload: any): any[] {
   const entries = payload?.data ?? payload;
   if (!Array.isArray(entries)) return [];
   return entries;
-}
-
-/** Youngest unit first, the order a geologic legend is normally read in. */
-function sortByAge(entries: any[]): any[] {
-  return [...entries].sort((a, b) => bestAge(a) - bestAge(b));
-}
-
-function bestAge(unit: any): number {
-  return (unit.t_age + unit.b_age) / 2;
 }
 
 // --- Page ---
@@ -369,10 +346,14 @@ function useLegendClickHandler() {
  * details of the entry selected from it. */
 function LegendPanel() {
   const selectedEntry = useAtomValue(selectedEntryAtom);
+  const setSelectedID = useSetAtom(selectedLegendIDAtom);
 
   let content = h(LegendList);
   if (selectedEntry != null) {
-    content = h(LegendEntryDetailView, { entry: selectedEntry });
+    content = h(LegendEntryDetailView, {
+      entry: selectedEntry,
+      onClose: () => setSelectedID(null),
+    });
   }
 
   return h(LocationPanel, { headerElement: h(PageHeader) }, content);
@@ -399,6 +380,7 @@ function PageHeader() {
 /** The scrollable list of legend entries for the current viewport. */
 function LegendList() {
   const res = useAtomValue(legendResultAtom);
+  const setSelectedID = useSetAtom(selectedLegendIDAtom);
 
   if (res.state === "hasError") {
     return h(NonIdealState, {
@@ -408,196 +390,10 @@ function LegendList() {
     });
   }
   if (res.state === "hasData" && res.data != null) {
-    return h(LegendEntries, { data: res.data });
+    return h(LegendEntries, { data: res.data, onSelect: setSelectedID });
   }
   return h(NonIdealState, {
     icon: h(Spinner, { size: 24 }),
     title: "Loading legend data",
   });
-}
-
-/** A single selected legend entry, as details or as its raw record. */
-function LegendEntryDetailView({ entry }: { entry: any }) {
-  const setSelectedID = useSetAtom(selectedLegendIDAtom);
-  const [viewMode, setViewMode] = useAtom(viewModeAtom);
-
-  let content = h(LegendEntryDetails, { entry });
-  if (viewMode === LegendViewMode.JSON) {
-    content = h(JSONView, { data: entry, showRoot: false });
-  }
-
-  return h("div.legend-detail", [
-    h(LegendDetailHeader, {
-      entry,
-      viewMode,
-      setViewMode,
-      onClose: () => setSelectedID(null),
-    }),
-    content,
-  ]);
-}
-
-/** Names the selected unit above its details, with its color and the
- * view-mode toggle alongside. Mirrors the panel header
- * `@macrostrat/map-interface` builds from a `title`; the library's own header
- * component isn't part of its public API, so the markup lives here. */
-function LegendDetailHeader({ entry, viewMode, setViewMode, onClose }) {
-  return h("header.legend-detail-header", [
-    h(ColorSwatch, { color: entry.color }),
-    h("span.unit-name", entry.map_unit_name ?? "Unknown unit"),
-    h("div.spacer"),
-    h(JSONToggleButton, { viewMode, setViewMode }),
-    h(Button, { minimal: true, icon: "cross", onClick: onClose }),
-  ]);
-}
-
-/** Subtle toggle between the details and the raw record, revealed on hover of
- * the header (and held visible while the raw record is showing). */
-function JSONToggleButton({ viewMode, setViewMode }) {
-  const isJSON = viewMode === LegendViewMode.JSON;
-
-  let title = "Show raw record";
-  let nextMode = LegendViewMode.JSON;
-  if (isJSON) {
-    title = "Show details";
-    nextMode = LegendViewMode.Pretty;
-  }
-
-  return h(Button, {
-    className: classNames("json-toggle", { active: isJSON }),
-    icon: "code",
-    minimal: true,
-    small: true,
-    active: isJSON,
-    title,
-    onClick: () => setViewMode(nextMode),
-  });
-}
-
-function ColorSwatch({ color }: { color: string | null }) {
-  if (color == null || color === "") return null;
-  return h("span.color-swatch", { style: { backgroundColor: color } });
-}
-
-function LegendEntries({ data }: { data: any[] }) {
-  if (data.length === 0) {
-    return h(NonIdealState, {
-      icon: "map",
-      title: "No legend entries",
-      description: "No mapped units fall within the current view.",
-    });
-  }
-
-  return h(
-    "div.legend-entries",
-    data.map((entry) => h(LegendEntry, { key: entry.legend_id, entry }))
-  );
-}
-
-function LegendEntry({ entry }: { entry: any }) {
-  const setSelectedID = useSetAtom(selectedLegendIDAtom);
-  const { map_unit_name, color, age } = entry;
-
-  return h(
-    "div.legend-entry",
-    { onClick: () => setSelectedID(entry.legend_id) },
-    [
-      h(ColorSwatch, { color }),
-      h("span.unit-name", map_unit_name ?? "Unknown unit"),
-      h.if(age != null)(Tag, { minimal: true, className: "age-tag" }, age),
-    ]
-  );
-}
-
-function LegendEntryDetails({ entry }: { entry: any }) {
-  const {
-    strat_name,
-    lith,
-    descrip,
-    comments,
-    age,
-    b_age,
-    t_age,
-    b_interval,
-    t_interval,
-    lith_id,
-    lith_types,
-  } = entry;
-
-  const intervals = useResolvedIntervals([b_interval, t_interval]);
-  const lithologies = useResolvedLithologies(lith_id, lith_types);
-
-  return h("div.legend-entry-details", [
-    h.if(strat_name != null)(DataField, {
-      label: "Stratigraphic name",
-      value: strat_name,
-    }),
-    h.if(age != null && age !== "")(DataField, { label: "Age", value: age }),
-    h.if(intervals.length > 0)(IntervalField, { intervals }),
-    h.if(b_age != null && t_age != null)(DataField, {
-      label: "Age range",
-      value: `${b_age}–${t_age}`,
-      unit: "Ma",
-    }),
-    h.if(lith != null && lith !== "")(DataField, {
-      label: "Lithology",
-      value: lith,
-    }),
-    h.if(lithologies != null)(LithologyList, {
-      label: "Matched lithologies",
-      lithologies: lithologies ?? [],
-    }),
-    h.if(descrip != null)(DataField, { label: "Description", value: descrip }),
-    h.if(comments != null)(DataField, { label: "Comments", value: comments }),
-  ]);
-}
-
-/** Resolve interval IDs against the definitions the data provider manages. */
-function useResolvedIntervals(intervalIDs: (number | null)[]) {
-  const intervalMap = useMacrostratDefs("intervals");
-
-  const ids = intervalIDs.filter((d) => d != null);
-
-  return useMemo(() => {
-    if (intervalMap == null) return [];
-    return ids
-      .map((id) => intervalMap.get(id))
-      .filter((d) => d != null)
-      .map((d) => ({ ...d, id: d.int_id }));
-  }, [intervalMap, ids.join(",")]);
-}
-
-/** Resolve lithology IDs the same way, falling back to the entry's unmatched
- * lithology *types* when the IDs don't resolve — a legend entry whose liths
- * haven't been matched still has something to show. */
-function useResolvedLithologies(
-  lithIDs: number[] | null,
-  lithTypes: string[] | null
-) {
-  const lithMap = useMacrostratDefs("lithologies");
-
-  return useMemo(() => {
-    const resolved = resolveLithologies(lithMap, lithIDs);
-    if (resolved != null) return resolved;
-    return fallbackLithologies(lithTypes);
-  }, [lithMap, lithIDs, lithTypes]);
-}
-
-function resolveLithologies(lithMap: Map<number, any> | null, lithIDs) {
-  if (lithMap == null || lithIDs == null || lithIDs.length === 0) return null;
-  const resolved = lithIDs
-    .map((id) => lithMap.get(id))
-    .filter((d) => d != null)
-    .map((d) => ({ ...d, name: d.lith ?? d.name, color: d.color ?? "#888" }));
-  if (resolved.length === 0) return null;
-  return resolved;
-}
-
-function fallbackLithologies(lithTypes: string[] | null) {
-  if (lithTypes == null || lithTypes.length === 0) return null;
-  return lithTypes.map((type, i) => ({
-    name: type,
-    color: "#888",
-    lith_id: i,
-  }));
 }

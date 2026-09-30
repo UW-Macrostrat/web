@@ -2,6 +2,8 @@
 // system is imported globally in `src/styles/core.sass`, so there is no case
 // where one is missing and a literal fallback would only hide a mistake.
 
+@use "~/styles/type"
+
 .link-card
   display: block
   padding: var(--pz-space-4)
@@ -41,9 +43,7 @@
     transform: translateY(0)
     box-shadow: var(--pz-shadow-md)
 
-  &:focus-visible
-    outline: 2px solid var(--pz-focus-ring-color)
-    outline-offset: 2px
+  @include type.focus-ring
 
 // A card whose content carries links of its own (`nestedLinks`). Anchors can't
 // nest, so the card is a block with a full-bleed overlay link: it covers the
@@ -66,11 +66,7 @@
 // What the card links to, above its title: "Concept", "Name". Quiet — it is a
 // hint about the destination, not a heading.
 .card-kind
-  font-size: 0.72em
-  font-weight: 600
-  letter-spacing: 0.06em
-  text-transform: uppercase
-  color: var(--pz-secondary-color)
+  @include type.label
   margin-bottom: 0.1em
 
 // A card with nowhere to go (`href: null`) — the item you are already looking
@@ -101,7 +97,7 @@
 
   h3, h4
     margin: 0
-    font-size: 1em
+    font-size: var(--pz-font-size-md)
 
   &:hover
     box-shadow: none

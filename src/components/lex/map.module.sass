@@ -17,7 +17,7 @@
 
 .btn
     border-radius: 50%
-    background-color: var(--background-color)
+    background-color: var(--pz-floating-background-color)
     width: 50px
     height: 50px
     display: flex
@@ -27,7 +27,11 @@
 
 .selected
     border-radius: 50%
-    background-color: var(--secondary-color)
+    // The selection tint is translucent, so it is laid over the control's own
+    // surface rather than over the map.
+    background-color: var(--pz-floating-background-color)
+    background-image: linear-gradient(var(--pz-selected-background-color), var(--pz-selected-background-color))
+    color: var(--pz-selected-text-color)
     width: 50px
     height: 50px
     display: flex

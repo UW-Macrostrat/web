@@ -14,3 +14,4 @@ export * from "./infinite-scroll";
 export * from "./data-view-url-state";
 export { buildCrossSectionLayers } from "~/_utils/map-layers";
 export { Footer } from "~/layouts/footer.ts";
+export * from "./compilation-zoom-warning";

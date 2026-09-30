@@ -1,33 +1,35 @@
-ul,
-h1,
-h2,
-p,
-h3 {
-  margin: 0;
-  padding: 0;
-}
+@use "~/styles/type";
+
+// A timescale. Element selectors in a CSS module are not scoped, so the resets
+// are nested under the page's root: at the top level they would restyle every
+// page loaded after this one.
 
 .timescale-content {
   display: flex;
   flex-direction: column;
   gap: 1em;
-}
 
-.timescale-container {
-  color: var(--text-emphasized-color) !important;
-
-  line {
-    stroke: var(--text-emphasized-color) !important;
+  h1,
+  h2,
+  h3,
+  p,
+  ul {
+    margin: 0;
+    padding: 0;
   }
 }
 
-tspan {
-  fill: var(--text-color); 
-  font-size: 14px;
-}
+.timescale-container {
+  color: var(--pz-text-emphasized-color) !important;
 
-.visx-line {
-  stroke: var(--text-color);
+  line {
+    stroke: var(--pz-text-emphasized-color) !important;
+  }
+
+  tspan {
+    fill: var(--pz-text-color);
+    font-size: var(--pz-body-font-size);
+  }
 }
 
 .int-list {
@@ -36,6 +38,7 @@ tspan {
   gap: 1.3em;
 
   h2 {
+    @include type.section-heading;
     margin: 0.5em 0;
   }
 
@@ -44,11 +47,5 @@ tspan {
     gap: 5px;
     flex-wrap: wrap;
     align-items: center;
-
-    .int-name {
-      padding: 2px 6px;
-      margin: 0.2em 0;
-      border-radius: 0.2em;
-    }
   }
 }

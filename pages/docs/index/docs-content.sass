@@ -1,14 +1,104 @@
 // Styles for rendered documentation content. The markup is produced by the
 // text-toolchain (plain markdown + GFM + Obsidian callouts) and injected as
-// HTML, so these are global class selectors, not a CSS module.
+// HTML, so these are global class selectors, not a CSS module. Site pages
+// (`src/site-pages`) render their vault prose inside the same class.
+
+@use "~/styles/type"
+
+// ---------------------------------------------------------------- prose
+//
+// Running text is the prose style (serif, body size and line height);
+// headings and small print are the site's text styles. Element rules
+// sit inside `:where()`, which carries no specificity, so a component placed
+// among the prose (a site-page slot, a callout) keeps its own styling. Lists
+// are matched only when they have no class, which is what markdown emits.
 
 .docs-content
+  @include type.prose
+
+  > :where(h1, h2, h3, h4, h5, h6):first-child
+    margin-top: 0
+
+  // A page's name is in the header above; an `h1` in the body is rare.
+  :where(h1)
+    @include type.page-title
+    font-size: var(--pz-font-size-xl)
+    margin: 1.5em 0 0.5em
+
+  // A section: the pink section heading, a size up for long-form text, set
+  // off by a rule beneath it.
+  :where(h2)
+    @include type.section-heading
+    font-size: var(--pz-font-size-xl)
+    margin: 1.75em 0 0.6em
+    padding-bottom: 0.2em
+    border-bottom: 1px solid var(--pz-panel-rule-color)
+
+  :where(h3)
+    @include type.subsection-heading
+    margin: 1.5em 0 0.4em
+
+  :where(h4, h5, h6)
+    @include type.label
+    margin: 1.4em 0 0.4em
+
+  :where(p)
+    margin: 0 0 var(--pz-paragraph-spacing)
+
+  :where(ul:not([class]), ol:not([class]))
+    margin: 0 0 var(--pz-paragraph-spacing)
+    padding-left: var(--pz-space-5)
+
+    // A nested list continues its item rather than starting a paragraph.
+    :where(ul, ol)
+      margin: var(--pz-list-item-spacing) 0 0
+
+  :where(ul:not([class]), ol:not([class])) > :where(li + li)
+    margin-top: var(--pz-list-item-spacing)
+
+  :where(blockquote)
+    margin: 0 0 var(--pz-paragraph-spacing)
+    padding-left: var(--pz-space-4)
+    border-left: 3px solid var(--pz-panel-rule-color)
+    color: var(--pz-text-subtle-color)
+
+  :where(hr)
+    border: 0
+    border-top: 1px solid var(--pz-panel-rule-color)
+    margin: 2em 0
+
+  :where(code)
+    @include type.code
+
+  :where(pre)
+    margin: 0 0 var(--pz-paragraph-spacing)
+    padding: var(--pz-space-3)
+    border-radius: var(--pz-radius-md)
+    background: var(--pz-code-background-color)
+    font-size: var(--pz-font-size-sm)
+    line-height: var(--pz-line-height-snug)
+
+    :where(code)
+      padding: 0
+      background: none
+      font-size: inherit
+
+  :where(img)
+    border-radius: var(--pz-radius-md)
+
+  // An Obsidian link to a note that doesn't exist yet: it goes nowhere, so it
+  // reads as text rather than as a link.
+  :where(a.not-created-yet)
+    color: inherit
+    text-decoration: underline dotted var(--pz-secondary-color)
+    pointer-events: none
+
   .callout
-    margin: var(--pz-space-3, 1em) 0
-    padding: var(--pz-space-2, 0.6em) var(--pz-space-3, 1em)
-    border-left: 3px solid var(--callout-color, var(--pz-accent-color, #2d72d2))
-    border-radius: var(--pz-radius-sm, 3px)
-    background: color-mix(in srgb, var(--callout-color, var(--pz-accent-color, #2d72d2)) 8%, var(--pz-panel-background-color, transparent))
+    margin: var(--pz-space-3) 0
+    padding: var(--pz-space-2) var(--pz-space-3)
+    border-left: 3px solid var(--callout-color, var(--pz-accent-color))
+    border-radius: var(--pz-radius-sm)
+    background: color-mix(in srgb, var(--callout-color, var(--pz-accent-color)) 8%, var(--pz-panel-background-color))
     & > :last-child
       margin-bottom: 0
     &[data-callout="tip"], &[data-callout="hint"], &[data-callout="success"], &[data-callout="check"]
@@ -20,25 +110,28 @@
     &[data-callout="question"], &[data-callout="help"], &[data-callout="faq"]
       --callout-color: #7961db
     &[data-callout="quote"], &[data-callout="cite"]
-      --callout-color: var(--pz-text-subtle-color, #5f6b7c)
+      --callout-color: var(--pz-text-subtle-color)
 
   .callout-title
     font-weight: 600
-    color: var(--callout-color, var(--pz-accent-color, #2d72d2))
-    margin: 0 0 var(--pz-space-1, 0.3em)
+    color: var(--callout-color, var(--pz-accent-color))
+    margin: 0 0 var(--pz-space-1)
 
+  // Tables hold data, so they are set in the interface font, not the prose one.
   table
+    font-family: var(--pz-body-font)
+    font-size: var(--pz-font-size-sm)
     border-collapse: collapse
-    margin: var(--pz-space-3, 1em) 0
+    margin: var(--pz-space-3) 0
     max-width: 100%
     display: block
     overflow-x: auto
   th, td
-    border: 1px solid var(--pz-border-color, #ddd)
+    border: 1px solid var(--pz-border-color)
     padding: 0.3em 0.6em
     text-align: left
   th
-    background: var(--pz-panel-secondary-background-color, #f5f8fa)
+    background: var(--pz-panel-secondary-background-color)
 
   input[type="checkbox"][disabled]
     margin-right: 0.4em
@@ -56,6 +149,6 @@
 .docs-content
   video
     display: block
-    margin: var(--pz-space-3, 1em) 0
-    border-radius: var(--pz-radius-sm, 4px)
-    background: var(--pz-panel-secondary-background-color, #f5f8fa)
+    margin: var(--pz-space-3) 0
+    border-radius: var(--pz-radius-sm)
+    background: var(--pz-panel-secondary-background-color)

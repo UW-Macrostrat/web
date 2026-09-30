@@ -11,16 +11,17 @@
 
   .nav-list-item
     padding: 0.2em 0.5em
-    border-radius: 0.2em
+    border-radius: var(--pz-radius-md)
     text-decoration: none
     transition: background-color 0.3s ease
 
     &:hover
-      background-color: var(--secondary-background)
+      background-color: var(--pz-hover-background-color)
 
+  // The section you are in.
   .active
-    background-color: var(--tertiary-background)
+    background-color: var(--pz-selected-background-color)
     a
-      color: var(--text-color)
+      color: var(--pz-selected-text-color)
     &:hover
-      background-color: var(--tertiary-background)
+      background-color: var(--pz-selected-background-color)
