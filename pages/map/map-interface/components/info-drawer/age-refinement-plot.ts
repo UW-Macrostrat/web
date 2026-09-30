@@ -9,6 +9,9 @@ export function AgeRefinementPlot({ macrostrat, mapInfo }) {
   const mapData = mapInfo.mapData[0];
   const b_age = Math.max(mapData.b_int.b_age, macrostrat.b_age);
   const t_age = Math.min(mapData.t_int.t_age, macrostrat.t_age);
+  // The legend entry's color, as the map draws it. Water's is an empty string,
+  // so it falls back to the interval color like a missing one.
+  const legendColor = mapData.color || null;
 
   const scale = scaleLinear({
     domain: [1.02 * b_age, t_age * 0.98],
@@ -25,6 +28,7 @@ export function AgeRefinementPlot({ macrostrat, mapInfo }) {
     h(AgeRefinementBar, {
       scale,
       data: mapData,
+      color: legendColor,
       label: "Map legend",
     }),
     // Age axis
