@@ -26,6 +26,7 @@ import {
   draftColumn,
 } from "../@column/column-editor/data";
 import styles from "./new-column.module.sass";
+import { ColumnUpload } from "./column-upload.ts";
 
 const h = hyper.styled(styles);
 
@@ -36,6 +37,9 @@ const capabilities: Partial<LayoutCapabilities> = {
   itemName: "New column",
   contentScroll: "panel",
 };
+
+// Stable empty array so the slot doesn't re-target every render.
+const NO_SELECTION: number[] = [];
 
 /** The page's state lives in a store of its own, so a new visit starts a new
  * column: the page renders outside the editor frame's scope, and atoms in the
@@ -54,7 +58,8 @@ function NewColumnPage() {
   if (draft != null) {
     return h(ColumnEditorPage, { ...draft, edit: true });
   }
-  return h(NewColumnForm, { onStart: setDraft });
+
+  return h(NewColumnFormContainer, { onStart: setDraft });
 }
 
 /** The ingestion format's `col_type`: a measured section, whose units are
@@ -93,6 +98,47 @@ const fieldsAtom = atom<ColumnFields>({
   col_type: "section",
   axis_type: "height",
 });
+
+const showUploadFormAtom = atom<boolean>(true);
+
+function NewColumnFormContainer({
+  onStart,
+}: {
+  onStart: (data: ColumnEditorData) => void;
+}) {
+  const [showUploadForm, setShowUploadForm] = useAtom(showUploadFormAtom);
+
+  let formContent: any = h(NewColumnForm, { onStart });
+  if (showUploadForm) {
+    formContent = h("div.column-upload", [
+      h("h1", "Upload a spreadsheet"),
+      h(ColumnUpload),
+    ]);
+  }
+
+  const formTypePicker = h("div.form-type-picker", [
+    h(SegmentedControl, {
+      options: [
+        { label: "Upload data", value: true },
+        { label: "Start from scratch", value: false },
+      ],
+      value: showUploadForm,
+      onValueChange: (v: boolean) => setShowUploadForm(v),
+    }),
+  ]);
+
+  const content = h("div.new-column-page", [formTypePicker, formContent]);
+
+  return h(HybridPage, {
+    className: "new-column-page",
+    capabilities,
+    actions: h(AlphaTag, {
+      content:
+        "An experimental column editor. A new column lives in the page until you export it.",
+    }),
+    content,
+  });
+}
 
 function NewColumnForm({
   onStart,
@@ -142,82 +188,74 @@ function NewColumnForm({
 
   const canStart = fields.col_name.trim() !== "";
 
-  return h(HybridPage, {
-    className: "new-column-page",
-    capabilities,
-    actions: h(AlphaTag, {
-      content:
-        "An experimental column editor. A new column lives in the page until you export it.",
-    }),
-    content: h("div.new-column-form", [
-      h("h1", "New column"),
-      h(
-        "p.lead",
-        "Name the column and say what kind it is, then build up its units in the editor. Export writes a units sheet in the column-ingestion format."
-      ),
-      h(
-        FormGroup,
-        { label: "Column name", labelInfo: "(required)" },
-        h(InputGroup, {
-          value: fields.col_name,
-          placeholder: "e.g. Illinois Basin — Springfield",
-          autoFocus: true,
-          onValueChange: (v: string) => set("col_name", v),
-          onKeyDown(evt) {
-            if (evt.key === "Enter") start();
-          },
-        })
-      ),
-      h(
-        FormGroup,
-        {
-          label: "Column type",
-          helperText:
-            "A measured section places units by position; a composite column places them by age, with positions only as an ordering. This can't be changed once you start.",
+  return h("div.new-column-form", [
+    h("h1", "New column"),
+    h(
+      "p.lead",
+      "Name the column and say what kind it is, then build up its units in the editor. Export writes a units sheet in the column-ingestion format."
+    ),
+    h(
+      FormGroup,
+      { label: "Column name", labelInfo: "(required)" },
+      h(InputGroup, {
+        value: fields.col_name,
+        placeholder: "e.g. Illinois Basin — Springfield",
+        autoFocus: true,
+        onValueChange: (v: string) => set("col_name", v),
+        onKeyDown(evt) {
+          if (evt.key === "Enter") start();
         },
-        h(SegmentedControl, {
-          options: columnTypeOptions,
-          value: fields.col_type,
-          onValueChange: (v: string) => set("col_type", v),
-        })
-      ),
-      axisControl,
-      h(
-        FormGroup,
-        { label: "Group", helperText: "The column group this belongs to." },
-        h(InputGroup, {
-          value: fields.col_group,
-          placeholder: "e.g. Illinois Basin",
-          onValueChange: (v: string) => set("col_group", v),
-        })
-      ),
-      h(
-        FormGroup,
-        { label: "Project", helperText: "Macrostrat project ID, if known." },
-        h(NumericInput, {
-          value: fields.project_id ?? "",
-          min: 1,
-          buttonPosition: "none",
-          placeholder: "Project ID",
-          onValueChange: (n: number) => set("project_id", isNaN(n) ? null : n),
-          className: "project-id-input",
-        })
-      ),
-      h("div.form-actions", [
-        h(Button, {
-          icon: "arrow-right",
-          text: "Start editing",
-          intent: "primary",
-          disabled: !canStart,
-          onClick: start,
-        }),
-        h(AnchorButton, { text: "Cancel", href: COLUMNS_INDEX, minimal: true }),
-      ]),
-      h(
-        Callout,
-        { intent: "warning", icon: "warning-sign" },
-        "Nothing is saved. There is no write route yet, so the column exists only in this page until you export it."
-      ),
+      })
+    ),
+    h(
+      FormGroup,
+      {
+        label: "Column type",
+        helperText:
+          "A measured section places units by position; a composite column places them by age, with positions only as an ordering. This can't be changed once you start.",
+      },
+      h(SegmentedControl, {
+        options: columnTypeOptions,
+        value: fields.col_type,
+        onValueChange: (v: string) => set("col_type", v),
+      })
+    ),
+    axisControl,
+    h(
+      FormGroup,
+      { label: "Group", helperText: "The column group this belongs to." },
+      h(InputGroup, {
+        value: fields.col_group,
+        placeholder: "e.g. Illinois Basin",
+        onValueChange: (v: string) => set("col_group", v),
+      })
+    ),
+    h(
+      FormGroup,
+      { label: "Project", helperText: "Macrostrat project ID, if known." },
+      h(NumericInput, {
+        value: fields.project_id ?? "",
+        min: 1,
+        buttonPosition: "none",
+        placeholder: "Project ID",
+        onValueChange: (n: number) => set("project_id", isNaN(n) ? null : n),
+        className: "project-id-input",
+      })
+    ),
+    h("div.form-actions", [
+      h(Button, {
+        icon: "arrow-right",
+        text: "Start editing",
+        intent: "primary",
+        disabled: !canStart,
+        onClick: start,
+      }),
+      h(AnchorButton, { text: "Cancel", href: COLUMNS_INDEX, minimal: true }),
     ]),
-  });
+    h(
+      Callout,
+      { intent: "warning", icon: "warning-sign" },
+      "Nothing is saved. There is no write route yet, so the column exists only in this page until you export it."
+    ),
+  ]);
 }
