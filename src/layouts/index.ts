@@ -2,7 +2,7 @@ import h from "./main.module.sass";
 import { Spinner } from "@blueprintjs/core";
 import { usePageTransitionStore } from "~/renderer/usePageTransitionStore";
 import classNames from "classnames";
-import { PageBreadcrumbs, PageTitle, StickyHeader, usePageTitle } from "~/components";
+import { PageTitle, SitePageHeader, usePageTitle } from "~/components";
 import { useTransition } from "transition-hook";
 import { NavigationLinkProvider } from "~/_providers";
 import { Footer } from "./footer";
@@ -59,7 +59,7 @@ export function DocumentationPage({ children, className, ...rest }) {
   return h(
     CenteredContentPage,
     { className: classNames("documentation-page", className), ...rest },
-    h([h(PageBreadcrumbs), children])
+    h([h(SitePageHeader, { variant: "hybrid" }), children])
   );
 }
 
@@ -73,7 +73,7 @@ export function CenteredContentPage({ children, className }) {
 
 export function ContentPage({ children, className, ...rest }) {
   return h(BaseContentPage, { className, ...rest }, [
-    h(PageBreadcrumbs, { separateTitle: true }),
+    h(SitePageHeader, { variant: "hybrid" }),
     h("div.main", children),
     h(Footer),
   ]);
@@ -91,7 +91,7 @@ export function IndexPage({ children, className, ...rest }) {
   /** Similar to an index page, but with breadcrumbs that are not separated from the title, leading to easier mechanics for
    * content where the interior is not the focus */
   return h(BaseContentPage, { className, ...rest }, [
-    h(PageBreadcrumbs, { separateTitle: false }),
+    h(SitePageHeader, { variant: "compact" }),
     h("div.main", [children]),
     h(Footer),
   ]);
@@ -115,11 +115,7 @@ export function HybridFramePage({ children, className, ...rest }) {
  * shouldn't scroll away. */
 export function SitePage({ children, className, ...rest }) {
   return h(BaseContentPage, { className, ...rest }, [
-    h(
-      StickyHeader,
-      { className: "site-page-header" },
-      h(PageBreadcrumbs, { separateTitle: false })
-    ),
+    h(SitePageHeader, { variant: "compact", sticky: true }),
     h("div.main", [children]),
     h(Footer),
   ]);

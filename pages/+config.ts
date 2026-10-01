@@ -99,5 +99,12 @@ export default {
         server: true,
       },
     },
+    // Header controls a page or subtree hands to `SitePageHeader`.
+    headerActions: {
+      env: {
+        client: true,
+        server: true,
+      },
+    },
   },
 } satisfies Config;

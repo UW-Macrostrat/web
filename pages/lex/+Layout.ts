@@ -1,10 +1,7 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./layout.module.sass";
 import { ReactNode } from "react";
-import {
-  LexSearchControl,
-  LexSearchHost,
-} from "~/components/lex/search-omnibar";
+import { LexSearchHost } from "~/components/lex/search-omnibar";
 import { clientOnly } from "~/components/lex/client-only";
 
 const h = hyper.styled(styles);
@@ -19,17 +16,16 @@ const LexPersistentMap = clientOnly(() =>
 
 /**
  * Shared frame for every `/lex` page. Vike keeps a nested layout mounted across
- * client-side navigation within the subtree, so this is the home for chrome that
- * should persist between lexicon pages — the cross-lexicon search control
- * (top-right, ⌘K) and the one map instance.
+ * client-side navigation within the subtree, so this is the home for state that
+ * should persist between lexicon pages — the search omnibar and the one map
+ * instance.
  *
- * Page chrome above this (breadcrumbs, title, footer) still comes from the
- * `pageStyle` layout; this renders inside the content region and pins the
- * toolbar into the top-right corner of the content frame.
+ * Page chrome above this (header, footer) still comes from the `pageStyle`
+ * layout. The search *control* (⌘K) sits in that header's actions, declared in
+ * `+headerActions.ts`, so it travels with the sticky header bar.
  */
 export default function LexLayout({ children }: { children: ReactNode }) {
   return h("div.lex-layout", [
-    h("div.lex-toolbar", h(LexSearchControl)),
     children,
     // The single omnibar instance — opened from here, the homepage prompt, or ⌘K.
     h(LexSearchHost),

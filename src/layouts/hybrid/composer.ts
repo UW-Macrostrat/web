@@ -49,6 +49,11 @@ export interface ShellProps {
    * (which sit at the other end of the row). */
   titleAdornment?: ReactNode;
   controls?: ReactNode;
+  /** The page header as one assembled row (`SitePageHeader`), for the shells
+   * that show a header row (content, split). When given, it replaces the
+   * `breadcrumbs` / `titleAdornment` / `controls` row there; the map shell
+   * still assembles those parts into its floating navbar. */
+  header?: ReactNode;
   /** Second header row (active filters), at the content's width. */
   filterBar?: ReactNode;
   map?: ReactNode;
@@ -78,6 +83,7 @@ export function LayoutShellView(props: ShellProps) {
  * difference between the two modes. */
 function ContentShell({
   content,
+  header,
   breadcrumbs,
   titleAdornment,
   controls,
@@ -132,10 +138,7 @@ function ContentShell({
     },
     [
       h("header.content-header", [
-        h("div.header-row", [
-          h("div.header-titling", [breadcrumbs, titleAdornment]),
-          h("div.header-controls", controls),
-        ]),
+        h(HeaderRow, { header, breadcrumbs, titleAdornment, controls }),
         h.if(filterBar != null)("div.header-filters", filterBar),
       ]),
       h("div.content-main", [
@@ -145,6 +148,18 @@ function ContentShell({
       ]),
     ]
   );
+}
+
+/** The header row: the assembled page header when there is one, else the
+ * breadcrumbs, adornment and controls laid out side by side. */
+function HeaderRow({ header, breadcrumbs, titleAdornment, controls }) {
+  if (header != null) {
+    return h("div.header-row", header);
+  }
+  return h("div.header-row", [
+    h("div.header-titling", [breadcrumbs, titleAdornment]),
+    h("div.header-controls", controls),
+  ]);
 }
 
 /** A small overlay button on the map that switches to another layout mode —
@@ -180,6 +195,7 @@ function ModeSwitchButton({
  */
 function SplitShell({
   content,
+  header,
   breadcrumbs,
   titleAdornment,
   controls,
@@ -196,10 +212,7 @@ function SplitShell({
   return h("div.split-shell", [
     h("div.split-panel", [
       h("header.split-header", [
-        h("div.header-row", [
-          h("div.header-titling", [breadcrumbs, titleAdornment]),
-          h("div.header-controls", controls),
-        ]),
+        h(HeaderRow, { header, breadcrumbs, titleAdornment, controls }),
         h.if(filterBar != null)("div.header-filters", filterBar),
       ]),
       h("div.split-list", content),
