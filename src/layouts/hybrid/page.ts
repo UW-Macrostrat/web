@@ -15,7 +15,7 @@ import { OverlaysProvider } from "@blueprintjs/core";
 import { Provider, useAtomValue, type WritableAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import classNames from "classnames";
-import { PageBreadcrumbs } from "~/components";
+import { PageBreadcrumbs, SitePageHeader } from "~/components";
 
 import h from "./page.module.sass";
 import { FooterOverlayTrigger } from "./chrome";
@@ -102,11 +102,25 @@ function HybridPageInner({
   const shell = useAtomValue(layoutShellAtom);
   const contentScroll = useAtomValue(contentScrollAtom);
 
+  const controls = h(HeaderControls, { actions });
+  // The site header, title inline. A title adornment (the column editor's
+  // context) has no slot in it yet, so those pages keep the parts-built row.
+  let header: ReactNode = null;
+  if (titleAdornment == null) {
+    header = h(SitePageHeader, {
+      variant: "compact",
+      actions: controls,
+      collapseActions: "narrow",
+      className: "shell-page-header",
+    });
+  }
+
   let shellView: ReactNode = h(LayoutShellView, {
     content,
+    header,
     breadcrumbs: h(PageBreadcrumbs, { showLogo: true, separateTitle: false }),
     titleAdornment,
-    controls: h(HeaderControls, { actions }),
+    controls,
     filterBar,
     map,
     assistant,

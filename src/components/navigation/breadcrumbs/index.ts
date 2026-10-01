@@ -251,7 +251,7 @@ function overflowClass(
   return className + " " + overflow;
 }
 
-function nameForItem(
+export function nameForItem(
   item: Item | null | undefined,
   short: boolean = true
 ): ReactNode {

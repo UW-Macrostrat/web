@@ -38,6 +38,10 @@ declare global {
       description?: string;
       supportsDarkMode?: boolean;
       scripts?: string[];
+      /** Controls for the site header's action slot (`SitePageHeader`), for
+       * a page or a whole subtree: e.g. the lexicon's search. A component,
+       * rendered in the header so it moves with it (sticky, collapsing). */
+      headerActions?: () => React.ReactNode;
     }
     interface PageContext extends PageContextClient {
       pageProps?: PageProps;

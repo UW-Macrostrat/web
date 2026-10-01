@@ -30,6 +30,12 @@
   gap: var(--pz-inline-gap, 0.5rem)
   min-width: 0
 
+  // The assembled site header (from `HybridPage`) takes the whole row. Its
+  // class is set unscoped by the page, hence the :global.
+  & > :global(.shell-page-header)
+    flex: 1 1 auto
+    min-width: 0
+
 // Active filters, as a second row at the content's width. Collapses when the
 // page has nothing to show.
 .header-filters
