@@ -8,17 +8,25 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
 import { slotDataFiles } from "./slots";
+import { bibliography, platformPapers } from "./citations";
 
 const contentDirName = "../../content";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const contentDir = join(__dirname, contentDirName);
 
 const modules = import.meta.glob("../../content/**/*.{md,mdx}");
-const dataFiles = import.meta.glob("../../content/Site/data/*.yml", {
+const dataFiles = import.meta.glob("../../content/Site/data/*.{yml,json}", {
   query: "?raw",
   import: "default",
   eager: true,
 }) as Record<string, string>;
+
+/** Record sets web derives from a vault data file before handing them to a
+ * slot. A missing file gives an empty set, so the page renders either way. */
+const derivedData: Record<string, () => unknown> = {
+  publications: () => bibliography(readDataFile("publications") ?? []),
+  platformPapers: () => platformPapers(readDataFile("publications") ?? []),
+};
 
 /** route -> vault page, from the `route:` frontmatter of site pages. */
 const [, permalinkIndex] = buildPageIndex(contentDir, "/docs");
@@ -86,14 +94,33 @@ function crumbLabels(route: string): Record<string, string> {
 function loadSiteData(names: string[]): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const name of names) {
-    const raw = dataFiles[`../../content/Site/data/${name}.yml`];
-    if (raw == null) {
-      console.warn(`[site-pages] no data file Site/data/${name}.yml`);
+    const derive = derivedData[name];
+    if (derive != null) {
+      out[name] = derive();
       continue;
     }
-    out[name] = parseYaml(raw);
+    const data = readDataFile(name);
+    if (data != null) out[name] = data;
   }
   return out;
+}
+
+const parsedData = new Map<string, any>();
+
+/** `Site/data/<name>.yml` or `.json`, parsed once. */
+function readDataFile(name: string): any {
+  if (parsedData.has(name)) return parsedData.get(name);
+  const base = `../../content/Site/data/${name}`;
+  let data = null;
+  if (dataFiles[`${base}.yml`] != null) {
+    data = parseYaml(dataFiles[`${base}.yml`]);
+  } else if (dataFiles[`${base}.json`] != null) {
+    data = JSON.parse(dataFiles[`${base}.json`]);
+  } else {
+    console.warn(`[site-pages] no data file Site/data/${name}.yml or .json`);
+  }
+  parsedData.set(name, data);
+  return data;
 }
 
 function stripLeadingH1(html: string): string {

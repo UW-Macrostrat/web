@@ -8,7 +8,8 @@
  *
  * `component` is a name in `./components` (the page context is serialized, so
  * slots cannot carry the component itself); `data` names files in
- * `Site/data/` whose parsed contents the component receives. */
+ * `Site/data/` (`.yml` or `.json`) whose parsed contents the component
+ * receives, or a record set web derives from one (`derivedData` in `./server`). */
 
 export type SlotMode = "after" | "replace";
 
@@ -21,7 +22,7 @@ export interface SlotSpec {
 
 export const siteSlots: Record<string, SlotSpec[]> = {
   "/about": [
-    { at: "how-to-cite", mode: "after", component: "CiteMacrostrat" },
+    { at: "how-to-cite", mode: "after", component: "CiteMacrostrat", data: ["platformPapers"] },
     { at: "collaborate-with-us", mode: "after", component: "ContactBlock", data: ["contact"] },
   ],
   "/about/support": [
@@ -45,8 +46,8 @@ export const siteSlots: Record<string, SlotSpec[]> = {
     { at: "repositories", mode: "after", component: "RepositoryList" },
   ],
   "/publications": [
-    { at: "citing-macrostrat", mode: "after", component: "CiteMacrostrat" },
-    { at: "bibliography", mode: "after", component: "Bibliography" },
+    { at: "citing-macrostrat", mode: "after", component: "CiteMacrostrat", data: ["platformPapers"] },
+    { at: "bibliography", mode: "after", component: "Bibliography", data: ["publications"] },
   ],
 };
 

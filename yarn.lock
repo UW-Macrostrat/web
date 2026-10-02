@@ -1515,6 +1515,56 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@citation-js/core@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "@citation-js/core@npm:0.9.0"
+  dependencies:
+    "@citation-js/date": "npm:^0.5.0"
+    "@citation-js/name": "npm:^0.4.2"
+    sync-fetch-undici: "npm:^0.7.1"
+  checksum: 10c0/443ec59a598de9d4f3702c39eb555f47868e50ad9f554490cad8c2beb2bab0d1746e6862c424d47d478264bc2f2466f01841bc00bfcc29e54d52373bbd3906a7
+  languageName: node
+  linkType: hard
+
+"@citation-js/date@npm:^0.5.0":
+  version: 0.5.1
+  resolution: "@citation-js/date@npm:0.5.1"
+  checksum: 10c0/a2f9dd94f9ef01a0612fc688badb18914e75abf355fe39fb94beee6da4bceed4298dbdea4236dae3b87e9aa16d8d27455ca728a0f8a79337ecf9a6942ea691a5
+  languageName: node
+  linkType: hard
+
+"@citation-js/name@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@citation-js/name@npm:0.4.2"
+  checksum: 10c0/2d55469ad7badaca8fe4b08456c23230ca54ca678640c18d60909bfb6c0b12d177a51a1acf5668e5fc5f2f46d02bff51ed77b10c592eb80bb2cdfa654db559e9
+  languageName: node
+  linkType: hard
+
+"@citation-js/plugin-bibtex@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "@citation-js/plugin-bibtex@npm:0.9.0"
+  dependencies:
+    "@citation-js/date": "npm:^0.5.0"
+    "@citation-js/name": "npm:^0.4.2"
+    moo: "npm:^0.5.1"
+  peerDependencies:
+    "@citation-js/core": ^0.9.0
+  checksum: 10c0/ff58b3a8eaca6cb3150d6a387bfaf3a1dc627eacf9e2178a215ad8ad58744ebdc5d605f83f9d0a61e80c153898f3ad2ba98d8ce13f1da8f80ef3b45e98d2b4b9
+  languageName: node
+  linkType: hard
+
+"@citation-js/plugin-csl@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "@citation-js/plugin-csl@npm:0.9.0"
+  dependencies:
+    "@citation-js/date": "npm:^0.5.0"
+    citeproc: "npm:^2.4.6"
+  peerDependencies:
+    "@citation-js/core": ^0.9.0
+  checksum: 10c0/9c977e12042dcd1ff12bfb6609250582f99c1cc16b3beb543e195f8d9dad73c11014046e6e953fea956f1c8794c1b91d77badb6a6db3a8eafd6147ed60169d26
+  languageName: node
+  linkType: hard
+
 "@corelle/rotations@npm:^1.0.0":
   version: 1.0.0
   resolution: "@corelle/rotations@npm:1.0.0"
@@ -3054,6 +3104,9 @@ __metadata:
     "@blueprintjs/icons": "npm:^6.13.0"
     "@blueprintjs/select": "npm:^6.2.0"
     "@blueprintjs/table": "npm:^6.1.0"
+    "@citation-js/core": "npm:^0.9.0"
+    "@citation-js/plugin-bibtex": "npm:^0.9.0"
+    "@citation-js/plugin-csl": "npm:^0.9.0"
     "@corelle/svg-map-layers": "npm:^1.0.0"
     "@loadable/component": "npm:^5.14.1"
     "@macrostrat-web/column-builder": "workspace:*"
@@ -9076,6 +9129,13 @@ __metadata:
   version: 4.3.1
   resolution: "ci-info@npm:4.3.1"
   checksum: 10c0/7dd82000f514d76ddfe7775e4cb0d66e5c638f5fa0e2a3be29557e898da0d32ac04f231217d414d07fb968b1fbc6d980ee17ddde0d2c516f23da9cfff608f6c1
+  languageName: node
+  linkType: hard
+
+"citeproc@npm:^2.4.6":
+  version: 2.4.63
+  resolution: "citeproc@npm:2.4.63"
+  checksum: 10c0/56470784ebb0d06270fc5c6566c4b01f11d7d0c26c7db9d0c8b30938be3490c0bbb278b443136a711729c712a48815fced410f0f57fdefd360fa769f51046bf7
   languageName: node
   linkType: hard
 
@@ -15479,6 +15539,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"moo@npm:^0.5.1":
+  version: 0.5.3
+  resolution: "moo@npm:0.5.3"
+  checksum: 10c0/5c5e00d7c57a69ce1cc2f21a90655ff10556481cc10fa70528c01e91f00deff8a65fa8da6dc7b27d136d66085055aab238fd1b19a75070263e0028e8f07c8213
+  languageName: node
+  linkType: hard
+
 "mri@npm:^1.1.0":
   version: 1.2.0
   resolution: "mri@npm:1.2.0"
@@ -19887,6 +19954,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sync-fetch-undici@npm:^0.7.1":
+  version: 0.7.1
+  resolution: "sync-fetch-undici@npm:0.7.1"
+  dependencies:
+    whatwg-mimetype: "npm:^5.0.0"
+  checksum: 10c0/525a80bd03a16b33ff92d279094394d9235d1b2c01c91e7d1fa8b7656f08ed8504987a89f2157d2daf1e14bc661cff751199fe41259c9a84d88c629d07000f24
+  languageName: node
+  linkType: hard
+
 "sync-message-port@npm:^1.0.0":
   version: 1.1.3
   resolution: "sync-message-port@npm:1.1.3"
@@ -21449,6 +21525,13 @@ __metadata:
   version: 3.6.20
   resolution: "whatwg-fetch@npm:3.6.20"
   checksum: 10c0/fa972dd14091321d38f36a4d062298df58c2248393ef9e8b154493c347c62e2756e25be29c16277396046d6eaa4b11bd174f34e6403fff6aaca9fb30fa1ff46d
+  languageName: node
+  linkType: hard
+
+"whatwg-mimetype@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "whatwg-mimetype@npm:5.0.0"
+  checksum: 10c0/eead164fe73a00dd82f817af6fc0bd22e9c273e1d55bf4bc6bdf2da7ad8127fca82ef00ea6a37892f5f5641f8e34128e09508f92126086baba126b9e0d57feb4
   languageName: node
   linkType: hard
 
