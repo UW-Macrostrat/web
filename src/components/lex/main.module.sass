@@ -26,30 +26,42 @@
 .ref-list
   margin-top: 1em
 
-.table
+// An item's column statistics beside its map, as two distinct cards.
+.lex-summary
+  display: grid
+  grid-template-columns: minmax(10em, 1fr) 4fr
+  gap: var(--pz-stack-gap, 1rem)
+
+  @media (max-width: 700px)
+    grid-template-columns: 1fr
+
+  p
+    margin: 0
+
+.lex-stats-card,
+.lex-map-card
   background-color: var(--pz-panel-background-color)
   color: var(--pz-text-color)
   border: 1px solid var(--pz-border-muted-color)
   border-radius: var(--pz-radius-lg)
   overflow: hidden
-  display: grid
-  grid-template-columns: 20% 80%
 
-  p
-    margin: 0
+.lex-stats-card
+  padding: 1.5em 1em
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: space-between
+  gap: .5em
 
-  .table-content
-    padding: 2em
-    display: flex
-    flex-direction: column
-    align-items: center
-    justify-content: space-between
-    gap: .5em
+  // Placeholder while column data loads — the frame holds its shape (and the
+  // shared map stays mounted) rather than appearing once data arrives.
+  .stats-loading
+    margin: auto
 
-    // Placeholder while column data loads — the frame holds its shape (and the
-    // shared map stays mounted) rather than appearing once data arrives.
-    .stats-loading
-      margin: auto
+.lex-map-card
+  display: flex
+  flex-direction: column
 
 .int-page
   display: flex

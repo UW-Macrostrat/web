@@ -72,8 +72,8 @@
 
 /* -------------------------------------------------------------------- map */
 
-// Fills the frame's map slot (a fixed-aspect box); the hint overlays the map's
-// bottom edge so it costs no layout.
+// Fills the frame's map slot (a fixed-aspect box). The hint rides in the
+// settings bar beneath the map.
 .column-map-pane
   position: absolute
   inset: 0
@@ -87,15 +87,12 @@
     background-color: rgb(233, 252, 234)
 
 .map-hint
-  position: absolute
-  left: 0.5em
-  right: 0.5em
-  bottom: 0.3em
-  font-size: 0.7em
   line-height: 1.2
   text-align: right
+  white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
   color: var(--pz-text-subtle-color, var(--secondary-color))
-  pointer-events: none
 
 /* -------------------------------------------------------------- assistant */
 
