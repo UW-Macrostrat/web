@@ -1,36 +1,76 @@
+import { useState } from "react";
+import { Button } from "@blueprintjs/core";
 import h from "./components.module.sass";
-import { LegacyPublicationList } from "./legacy-publications";
+import type { Publication, PlatformPaper } from "../citations";
 
-/** The platform papers, kept here until they are published from the Zotero
- * library's Infrastructure collection. */
-const infrastructurePapers = [
-  {
-    citation:
-      "Quinn, D.P., C.R. Idzikowski, S.E. Peters. 2024. Building a multi-scale, collaborative, and time-integrated digital crust: The next stage of the Macrostrat data system. Geoscience Data Journal.",
-    doi: "10.1002/gdj3.189",
-    note: "Macrostrat v2",
-  },
-  {
-    citation:
-      "Peters, S.E., J.M. Husson, J. Czaplewski. 2018. Macrostrat: a platform for geological data integration and deep-time Earth crust research. Geochemistry, Geophysics, Geosystems.",
-    doi: "10.1029/2018GC007467",
-    note: "The platform",
-  },
-];
-
-export function CiteMacrostrat() {
+/** The papers to cite for the platform, at the top of /publications and on /about. */
+export function CiteMacrostrat({ platformPapers }: { platformPapers: PlatformPaper[] }) {
   return h(
     "ul.cite-list",
-    infrastructurePapers.map((p) =>
-      h("li.cite-item", { key: p.doi }, [
+    (platformPapers ?? []).map((p) =>
+      h("li.cite-item", { key: p.id }, [
         h("span.cite-note", p.note),
-        h("span.cite-text", p.citation),
-        h("a.cite-doi", { href: `https://doi.org/${p.doi}`, target: "_blank", rel: "noopener" }, `doi:${p.doi}`),
+        h(Citation, { publication: p }),
+        h(CopyActions, { publication: p }),
       ])
     )
   );
 }
 
-export function Bibliography() {
-  return h("div.bibliography", h(LegacyPublicationList));
+/** The library's bibliography, newest first, grouped by year. */
+export function Bibliography({ publications }: { publications: Publication[] }) {
+  const groups = groupByYear(publications ?? []);
+  return h(
+    "div.bibliography",
+    groups.map(([year, entries]) =>
+      h("section.pub-year", { key: year }, [
+        h("h3.tier-label", year),
+        h(
+          "ul.pub-entries",
+          entries.map((p) => h("li.pub-entry", { key: p.id }, [h(Citation, { publication: p }), h(CopyActions, { publication: p })]))
+        ),
+      ])
+    )
+  );
+}
+
+function groupByYear(publications: Publication[]): [string, Publication[]][] {
+  const groups = new Map<string, Publication[]>();
+  for (const p of publications) {
+    const year = String(p.year ?? "Undated");
+    if (!groups.has(year)) groups.set(year, []);
+    groups.get(year).push(p);
+  }
+  return [...groups.entries()];
+}
+
+function Citation({ publication }: { publication: Publication }) {
+  let link = null;
+  if (publication.url != null) {
+    link = h("a.pub-link", { href: publication.url, target: "_blank", rel: "noopener" }, "link");
+  }
+  return h("span.pub-citation", [h("span", { dangerouslySetInnerHTML: { __html: publication.html } }), link]);
+}
+
+function CopyActions({ publication }: { publication: Publication }) {
+  return h("span.pub-actions", [
+    h(CopyButton, { label: "Copy", title: "Copy citation", value: () => plainText(publication.html) }),
+    h(CopyButton, { label: "BibTeX", title: "Copy BibTeX", value: () => publication.bibtex }),
+  ]);
+}
+
+function CopyButton({ label, title, value }: { label: string; title: string; value: () => string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    await navigator.clipboard.writeText(value());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  let icon = "clipboard";
+  if (copied) icon = "tick";
+  return h(Button, { small: true, minimal: true, icon, onClick: copy, title }, label);
+}
+
+function plainText(html: string): string {
+  return new DOMParser().parseFromString(html, "text/html").body.textContent?.trim() ?? "";
 }

@@ -6,7 +6,7 @@
   @include type.label
   margin: var(--pz-space-4) 0 var(--pz-space-2)
 
-ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-list, ul.contact-list, ul.cite-list
+ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-list, ul.contact-list, ul.cite-list, ul.pub-entries
   list-style: none
   padding: 0
   margin: 0
@@ -139,5 +139,24 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
 .cite-note
   @include type.label
 
-.cite-doi
-  @include type.identifier
+
+.pub-entry
+  padding: 0.4em 0
+  border-bottom: 1px solid var(--pz-panel-rule-color)
+
+// Citations are citeproc HTML; the DOI link is the only anchor inside.
+.pub-citation
+  display: block
+  a
+    @include type.identifier
+
+.pub-link
+  margin-left: 0.4em
+
+.pub-actions
+  display: flex
+  gap: 0.2em
+  margin-top: 0.1em
+  opacity: 0.6
+  .pub-entry:hover &, .cite-item:hover &, &:focus-within
+    opacity: 1
