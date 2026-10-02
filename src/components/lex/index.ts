@@ -35,7 +35,7 @@ import { clientOnly } from "./client-only";
 const LexiconMapLazy = clientOnly(() =>
   import("./map.client").then((m) => m.LexiconMap)
 );
-import { LexMapSlot } from "./map-target";
+import { LexMapSettingsBar, LexMapSlot } from "./map-target";
 import { fetchPGData } from "~/_utils";
 import { ExpansionPanel } from "@macrostrat/data-components";
 
@@ -217,7 +217,19 @@ export function ColumnsTable({
     ];
   }
 
-  return h("div.table", [h("div.table-content", statsContent), mapElement]);
+  // Statistics and map are separate cards; the map's settings bar is part of
+  // its card, beneath whichever instance (shared or local) is above it.
+  return h("div.lex-summary", [
+    h("div.lex-stats-card", statsContent),
+    h("div.lex-map-card", [
+      mapElement,
+      h(LexMapSettingsBar, {
+        mapUrl,
+        fossilsExist: fossilsData?.features?.length > 0,
+        hasFilters: filters.length > 0,
+      }),
+    ]),
+  ]);
 }
 
 export function navigateToInterval(clickData) {

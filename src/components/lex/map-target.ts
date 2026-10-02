@@ -28,8 +28,9 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./map-slot.module.sass";
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { Spinner } from "@blueprintjs/core";
-import { atom, useSetAtom } from "jotai";
+import { AnchorButton, Spinner, Switch } from "@blueprintjs/core";
+import { atom, useAtom, useSetAtom } from "jotai";
+import { MapSettingsBar, mapSettingsStore } from "~/components/map-settings";
 
 const h = hyper.styled(styles);
 
@@ -53,6 +54,64 @@ export interface LexMapTarget {
  * last target (dimmed, under a loading overlay) so navigation never blanks it.
  */
 export const lexMapTargetAtom = atom<LexMapTarget | null>(null);
+
+/** The lexicon map's optional layers, toggled from the settings bar beneath the
+ * map. Lives in the shared `mapSettingsStore` alongside the basemap. Kept on
+ * across items; the map ignores a toggle the current item can't honor. */
+export const lexMapLayersAtom = atom({ fossils: false, outcrop: false });
+
+/** The shared settings bar, plus the lexicon's layer toggles and a link to the
+ * item on the main map. Rendered beneath the map by the page, whichever map
+ * instance (shared or local) is above it. */
+export function LexMapSettingsBar({
+  mapUrl,
+  fossilsExist,
+  hasFilters,
+}: {
+  mapUrl: string;
+  fossilsExist: boolean;
+  hasFilters: boolean;
+}) {
+  const [layers, setLayers] = useAtom(lexMapLayersAtom, {
+    store: mapSettingsStore,
+  });
+
+  let fossilsToggle = null;
+  if (fossilsExist) {
+    fossilsToggle = h(Switch, {
+      label: "Fossil collections",
+      checked: layers.fossils,
+      onChange: (e) => setLayers({ ...layers, fossils: e.currentTarget.checked }),
+    });
+  }
+
+  let outcropToggle = null;
+  if (hasFilters) {
+    outcropToggle = h(Switch, {
+      label: "Mapped outcrop",
+      checked: layers.outcrop,
+      onChange: (e) => setLayers({ ...layers, outcrop: e.currentTarget.checked }),
+    });
+  }
+
+  let settings = null;
+  if (fossilsToggle != null || outcropToggle != null) {
+    settings = [fossilsToggle, outcropToggle];
+  }
+
+  let mapLink = null;
+  if (mapUrl !== "") {
+    mapLink = h(AnchorButton, {
+      href: "/map/layers#" + mapUrl,
+      icon: "map",
+      text: "View on map",
+      minimal: true,
+      small: true,
+    });
+  }
+
+  return h(MapSettingsBar, { settings }, mapLink);
+}
 
 let mapNode: HTMLDivElement | null = null;
 let parkingNode: HTMLDivElement | null = null;

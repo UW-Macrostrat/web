@@ -5,8 +5,8 @@ import { SETTINGS } from "@macrostrat-web/settings";
 import { LngLatBoundsLike } from "mapbox-gl";
 
 /** Base map selector. By default offers all three basemaps; pass `options` (a
- * list of Basemap values) to restrict the choices, e.g. on pages where "none"
- * isn't meaningful. */
+ * list of Basemap values) to restrict and order the choices, e.g. on pages where
+ * "none" isn't meaningful. */
 export function BaseLayerSelector({ layer, setLayer, showTitle = true, options }) {
   const allOptions = [
     { label: "Satellite", value: Basemap.Satellite },
@@ -15,7 +15,10 @@ export function BaseLayerSelector({ layer, setLayer, showTitle = true, options }
   ];
   let opts = allOptions;
   if (options != null) {
-    opts = allOptions.filter((o) => options.includes(o.value));
+    // In the order given
+    opts = options
+      .map((value) => allOptions.find((o) => o.value === value))
+      .filter(Boolean);
   }
 
   let title = null;
