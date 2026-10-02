@@ -4,15 +4,14 @@
 import { buildPageIndex } from "@macrostrat-web/text-toolchain";
 import { renderToString } from "react-dom/server";
 import h from "@macrostrat/hyper";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { join } from "path";
 import { parse as parseYaml } from "yaml";
 import { slotDataFiles } from "./slots";
 import { bibliography, platformPapers } from "./citations";
 
 const contentDirName = "../../content";
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const contentDir = join(__dirname, contentDirName);
+// Not relative to this file: the production build moves it into dist/server/chunks.
+const contentDir = join(process.cwd(), "content");
 
 const modules = import.meta.glob("../../content/**/*.{md,mdx}");
 const dataFiles = import.meta.glob("../../content/Site/data/*.{yml,json}", {
