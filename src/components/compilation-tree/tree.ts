@@ -493,18 +493,10 @@ function NodeRow({ node, edge, children }) {
 
   if (!editing) return h("div.node-row", children);
 
-  // A top-level compilation is where maps are dropped, not something to move:
-  // it belongs to nothing, so there is no membership for a drag to change. The
-  // same compilation reached as a member (under "served at top level", say) can
-  // still be dragged from there.
-  if (edge == null && node.is_compilation) {
-    return h(
-      "div.node-row",
-      { ...drop.props, className: drop.className },
-      children
-    );
-  }
-
+  // Any row can be dragged, a top-level compilation included: it belongs to
+  // nothing, so dropping it adds a membership rather than moving one (`from` is
+  // null) -- how a newly materialized `bc-surface` goes into `carto-large`. A
+  // drop that would close a cycle is refused where it lands.
   return h(
     "div.node-row.editable",
     {
