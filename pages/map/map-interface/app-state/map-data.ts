@@ -41,6 +41,8 @@ const mapInfoDataAtom = atom<Promise<KeyedMapQueryData | null>>(
       lng: formatCoordForZoomLevel(lng, zoom),
       lat: formatCoordForZoomLevel(lat, zoom),
       z: zoom.toFixed(0),
+      source: compilationOrDefault(compilation),
+      // The earlier name of `source`, for an API v2 that predates it.
       compilation: compilationOrDefault(compilation),
     };
 

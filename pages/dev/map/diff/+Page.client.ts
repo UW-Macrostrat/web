@@ -46,7 +46,6 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
 import {
   apiV2Prefix,
-  apiV3Prefix,
   burwellTileDomain,
   mapboxAccessToken,
 } from "@macrostrat-web/settings";
@@ -102,14 +101,14 @@ interface MapSource {
   description: string;
   /** A `{z}/{x}/{y}` tile template. */
   tiles: string;
-  /** The v3 compilation whose `/map/{slug}/units` route describes these tiles,
-   * where there is one.
+  /** The source `map_query_v2?source=` describes these tiles with, where
+   * there is one.
    *
    * Only the compilation tiles need it: they carry a legend entry's id, color
    * and age range — enough to draw a unit, not enough to name one. The fixed
    * legacy tilesets already ship their text in the tile. A source without a
-   * route is not a problem, it just shows what its tiles carry. */
-  units?: string;
+   * query is not a problem, it just shows what its tiles carry. */
+  pointQuery?: string;
   /** The compilation's summary, for the zoom-band warning. */
   compilation?: CompilationSummary;
 }
@@ -146,7 +145,7 @@ function sourceForCompilation(c: CompilationSummary): MapSource {
     label: compilationLabel(c),
     description: `The ${c.name ?? c.slug} compilation, drawn by the tileserver.`,
     tiles: compilationTilesURL(c.slug),
-    units: c.slug,
+    pointQuery: c.slug,
     compilation: c,
   };
 }
@@ -154,7 +153,7 @@ function sourceForCompilation(c: CompilationSummary): MapSource {
 /** The source a slug names. A fixed tileset by its slug; a compilation from
  * the loaded list; and, before the list has loaded or for a compilation it
  * does not know, a source built from the slug alone — the tileserver and the
- * units route take any slug, so a shared link renders before the list does. */
+ * point query take any slug, so a shared link renders before the list does. */
 function sourceForSlug(
   slug: string | null,
   compilations: CompilationSummary[]
@@ -169,7 +168,7 @@ function sourceForSlug(
     label: slug,
     description: `The ${slug} compilation, drawn by the tileserver.`,
     tiles: compilationTilesURL(slug),
-    units: slug,
+    pointQuery: slug,
   };
 }
 
@@ -547,12 +546,12 @@ function useUnitsAtPosition(
   return units;
 }
 
-/** Fill in what a side's tiles don't carry, from its `/map/{slug}/units` route.
+/** Fill in what a side's tiles don't carry, from `map_query_v2` for its source.
  *
  * The tiles still decide *which* polygons are here — that is the comparison,
  * and keeping it a tile query is what lets the page compare sources the API has
- * never heard of. The route only supplies the text for polygons already found,
- * matched on `map_id`, so a source without a route (or a route that fails)
+ * never heard of. The query only supplies the text for polygons already found,
+ * matched on `map_id`, so a source without one (or a query that fails)
  * degrades to what its tiles carry rather than to nothing.
  */
 function useDescribedUnits(
@@ -582,47 +581,65 @@ function useUnitDescriptions(source: MapSource, pin: Pin | null) {
 
   useEffect(() => {
     setDetails(NO_DESCRIPTIONS);
-    if (source.units == null || pin == null) return;
+    if (source.pointQuery == null || pin == null) return;
 
     const controller = new AbortController();
-    fetchUnitDescriptions(source.units, pin, controller.signal).then(
+    fetchUnitDescriptions(source.pointQuery, pin, controller.signal).then(
       setDetails,
       () => setDetails(NO_DESCRIPTIONS)
     );
 
     return () => controller.abort();
-  }, [source.units, pin]);
+  }, [source.pointQuery, pin]);
 
   return details;
 }
 
 async function fetchUnitDescriptions(
-  compilation: string,
+  source: string,
   pin: Pin,
   signal: AbortSignal
 ): Promise<Map<number, any>> {
   const query = new URLSearchParams({
     lng: String(roundCoord(pin.lngLat.lng)),
     lat: String(roundCoord(pin.lngLat.lat)),
-    zoom: String(Math.round(pin.zoom)),
+    z: String(Math.round(pin.zoom)),
+    source,
+    // The earlier name of `source`, for an API v2 that predates it.
+    compilation: source,
   });
 
-  const res = await fetch(`${apiV3Prefix}/map/${compilation}/units?${query}`, {
+  const res = await fetch(`${apiV2Prefix}/mobile/map_query_v2?${query}`, {
     signal,
   });
-  if (!res.ok) throw new Error(`Units request failed (${res.status})`);
+  if (!res.ok) throw new Error(`Map query failed (${res.status})`);
 
-  // One answer per map: the route resolves `carto` to the zoom's member in the
-  // database, so the first row for a map is the one the tiles drew.
+  // One polygon answers at a point, resolved in the database the way the
+  // tiles draw it.
+  const body = await res.json();
   const byMapID = new Map<number, any>();
-  for (const unit of await res.json()) {
-    if (byMapID.has(unit.map_id)) continue;
-    byMapID.set(unit.map_id, unit);
+  for (const polygon of body.success.data.mapData) {
+    byMapID.set(polygon.map_id, describedFields(polygon));
   }
   return byMapID;
 }
 
-/** The tile's properties, with anything the route knows and the tile doesn't
+/** `map_query_v2`'s polygon in the field names the tiles and the cards use. */
+function describedFields(polygon: any): any {
+  return {
+    name: polygon.name,
+    age: polygon.age,
+    lith: polygon.lith,
+    descrip: polygon.descrip,
+    comments: polygon.comments,
+    color: polygon.color,
+    b_interval: polygon.b_int?.int_id,
+    t_interval: polygon.t_int?.int_id,
+    source_name: polygon.ref?.name,
+  };
+}
+
+/** The tile's properties, with anything the query knows and the tile doesn't
  * laid over them. Empty values don't overwrite: a legend entry with no
  * description shouldn't blank out one the tile happened to carry. */
 function describeUnit(unit: any, description: any | undefined): any {
