@@ -1,6 +1,4 @@
-// The columns a lexicon item is found in. Same idiom as the hierarchy tree on
-// the same page — compact cards in a flexible grid — so the two lists below the
-// map read as one family rather than as a strip and a tree.
+// The columns a lexicon item is found in: list-density cards in a flexible grid.
 
 @use "~/styles/type"
 
@@ -24,7 +22,7 @@
 .column-run
   display: grid
   grid-template-columns: repeat(auto-fill, minmax(13em, 1fr))
-  gap: 0.35em
+  gap: var(--pz-space-2)
   align-items: stretch
 
   // The control that reveals the rest of a long run belongs on its own line.

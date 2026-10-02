@@ -2,7 +2,8 @@
  *
  * A site page is prose from the documentation vault (`Site/` in Macrostrat/docs),
  * split at its H2 headings. A slot names a heading by its id and a component to
- * render `after` that section's prose or to `replace` it. A slot whose heading
+ * render `after` that section's prose, to `replace` it, or as an `aside` at the
+ * end of the heading's line. A slot whose heading
  * is missing is appended at the end of the page, so a renamed heading in the
  * vault reorders the page rather than breaking it.
  *
@@ -11,7 +12,7 @@
  * `Site/data/` (`.yml` or `.json`) whose parsed contents the component
  * receives, or a record set web derives from one (`derivedData` in `./server`). */
 
-export type SlotMode = "after" | "replace";
+export type SlotMode = "after" | "replace" | "aside";
 
 export interface SlotSpec {
   at: string;
@@ -23,7 +24,7 @@ export interface SlotSpec {
 export const siteSlots: Record<string, SlotSpec[]> = {
   "/about": [
     { at: "how-to-cite", mode: "after", component: "CiteMacrostrat", data: ["platformPapers"] },
-    { at: "collaborate-with-us", mode: "after", component: "ContactBlock", data: ["contact"] },
+    { at: "get-involved", mode: "after", component: "ContactBlock", data: ["contact"] },
   ],
   "/about/support": [
     { at: "supporters", mode: "after", component: "SupportersGrid", data: ["supporters"] },
@@ -31,10 +32,8 @@ export const siteSlots: Record<string, SlotSpec[]> = {
   ],
   "/about/brand": [],
   "/community": [
+    { at: "people", mode: "after", component: "ContributorDirectory", data: ["people"] },
     { at: "contact", mode: "after", component: "ContactBlock", data: ["contact"] },
-  ],
-  "/community/contributors": [
-    { at: "team", mode: "after", component: "ContributorDirectory", data: ["people"] },
   ],
   "/community/apps": [
     { at: "apps", mode: "after", component: "AppGallery", data: ["apps"] },
@@ -47,7 +46,8 @@ export const siteSlots: Record<string, SlotSpec[]> = {
   ],
   "/publications": [
     { at: "citing-macrostrat", mode: "after", component: "CiteMacrostrat", data: ["platformPapers"] },
-    { at: "bibliography", mode: "after", component: "Bibliography", data: ["publications"] },
+    { at: "publications-using-macrostrat", mode: "aside", component: "BibliographySummary", data: ["publications"] },
+    { at: "publications-using-macrostrat", mode: "after", component: "Bibliography", data: ["publications"] },
   ],
 };
 

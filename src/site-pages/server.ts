@@ -8,6 +8,7 @@ import { join } from "path";
 import { parse as parseYaml } from "yaml";
 import { slotDataFiles } from "./slots";
 import { bibliography, platformPapers } from "./citations";
+import { siteMarkdownComponents } from "./markdown-components";
 
 const contentDirName = "../../content";
 // Not relative to this file: the production build moves it into dist/server/chunks.
@@ -65,7 +66,7 @@ export async function renderSitePage(route: string): Promise<SitePageData | null
   if (pageModule == null) return null;
 
   const mod: any = await pageModule();
-  const html = stripLeadingH1(renderToString(h(mod.default)));
+  const html = stripLeadingH1(renderToString(h(mod.default, { components: siteMarkdownComponents })));
 
   return {
     siteRoute: route,
