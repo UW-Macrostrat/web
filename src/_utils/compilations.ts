@@ -1,8 +1,8 @@
 /** Compilations, as the map pages draw and describe them.
  *
  * A compilation is any source the tileserver serves by slug at
- * `/map/{slug}/{z}/{x}/{y}`, that API v3 describes at `/map/{slug}/units` and
- * API v2 answers for with `?compilation=`. `carto` is Macrostrat's served map:
+ * `/map/{slug}/{z}/{x}/{y}`, that API v2's `map_query_v2` answers a point for
+ * with `?source=`. `carto` is Macrostrat's served map:
  * public, cached, and the default. `sys:carto-legacy` is the materialized
  * build it replaces, addressed the same way so the two can be compared with
  * nothing but the name changing; it is not a `maps.sources` row, so it is
