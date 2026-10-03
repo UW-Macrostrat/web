@@ -507,6 +507,7 @@ function NameCard({ entry }: { entry: StratEntry }) {
     LinkCard,
     {
       className: "strat-card name-card",
+      density: "list",
       href: buildHrefForItem({ strat_name_id: entry.id }),
       title: h("span.card-title", [
         entry.name,
@@ -551,6 +552,7 @@ function ConceptCard({ entry, query }: { entry: StratEntry; query: string }) {
     LinkCard,
     {
       className: "strat-card concept-card",
+      density: "list",
       href: buildHrefForItem({ concept_id: entry.id }),
       title: entry.name,
       nestedLinks: true,

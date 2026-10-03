@@ -5,17 +5,15 @@
  * strings. */
 import { Cite, plugins } from "@citation-js/core";
 import "@citation-js/plugin-csl";
-import "@citation-js/plugin-bibtex";
 import gsaStyle from "./csl/the-geological-society-of-america.csl?raw";
 
 export interface Publication {
   id: string;
   year: number | null;
-  /** The formatted citation, with the DOI as a link. */
+  /** The formatted citation, without links: the card around it is the link. */
   html: string;
-  bibtex: string;
-  /** A link for entries without a DOI. */
-  url: string | null;
+  /** The DOI's resolver URL, or the record's URL when it has no DOI. */
+  href: string | null;
 }
 
 export interface PlatformPaper extends Publication {
@@ -80,17 +78,16 @@ export function platformPapers(records: any[]): PlatformPaper[] {
   return papers;
 }
 
-function formatRecord(csl: any): Publication {
+function formatRecord(record: any): Publication {
+  // The card links to the URL, so the style shouldn't print it.
+  const { URL, ...csl } = record;
   const cite = new Cite(csl);
   const bibliography = cite.format("bibliography", { format: "html", template: style, lang: "en-US" });
-  let url: string | null = null;
-  if (csl.DOI == null) url = csl.URL ?? null;
   return {
     id: csl.id,
     year: issuedYear(csl),
-    html: linkDOI(entryHTML(bibliography), csl.DOI),
-    bibtex: cite.format("bibtex").trim(),
-    url,
+    html: entryHTML(bibliography),
+    href: publicationHref(csl.DOI, URL),
   };
 }
 
@@ -107,9 +104,7 @@ function entryHTML(bibliography: string): string {
   return (m?.[1] ?? bibliography).trim();
 }
 
-function linkDOI(html: string, doi: string | undefined): string {
-  if (doi == null) return html;
-  const text = `doi:${doi}`;
-  const link = `<a href="https://doi.org/${encodeURI(doi)}" target="_blank" rel="noopener">${text}</a>`;
-  return html.replace(text, link);
+function publicationHref(doi: string | undefined, url: string | undefined): string | null {
+  if (doi != null) return `https://doi.org/${encodeURI(doi)}`;
+  return url ?? null;
 }

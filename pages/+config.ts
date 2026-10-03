@@ -39,7 +39,8 @@ export default {
   ],
   redirects: {
     // The v1 addresses of pages now under /about and /community.
-    "/people": "/community/contributors",
+    "/people": "/community",
+    "/community/contributors": "/community",
     "/support": "/about/support",
     // The map interface's usage guide and changelog, formerly panels of the
     // map page, are documentation pages (docs/map in this repository).

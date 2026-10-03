@@ -1,76 +1,49 @@
-import { useState } from "react";
-import { Button } from "@blueprintjs/core";
+import { MasonryScrollBody } from "@macrostrat/data-sheet";
+import { LinkCard } from "~/components/cards";
 import h from "./components.module.sass";
 import type { Publication, PlatformPaper } from "../citations";
+
+const zoteroLibrary = "https://www.zotero.org/groups/6644229/macrostrat/library";
 
 /** The papers to cite for the platform, at the top of /publications and on /about. */
 export function CiteMacrostrat({ platformPapers }: { platformPapers: PlatformPaper[] }) {
   return h(
-    "ul.cite-list",
+    "div.cite-list",
     (platformPapers ?? []).map((p) =>
-      h("li.cite-item", { key: p.id }, [
-        h("span.cite-note", p.note),
-        h(Citation, { publication: p }),
-        h(CopyActions, { publication: p }),
-      ])
+      h(LinkCard, { key: p.id, href: p.href, title: p.note }, h(Citation, { publication: p }))
     )
   );
 }
 
-/** The library's bibliography, newest first, grouped by year. */
+/** The library's bibliography, newest first, in two balanced columns. */
 export function Bibliography({ publications }: { publications: Publication[] }) {
-  const groups = groupByYear(publications ?? []);
   return h(
     "div.bibliography",
-    groups.map(([year, entries]) =>
-      h("section.pub-year", { key: year }, [
-        h("h3.tier-label", year),
-        h(
-          "ul.pub-entries",
-          entries.map((p) => h("li.pub-entry", { key: p.id }, [h(Citation, { publication: p }), h(CopyActions, { publication: p })]))
-        ),
-      ])
+    h(
+      MasonryScrollBody,
+      { columns: 2, minColumnWidth: 320 },
+      (publications ?? []).map((p) =>
+        // A DOM wrapper, because the masonry measures each item through its ref.
+        h("div", { key: p.id }, h(LinkCard, { href: p.href, density: "list" }, h(Citation, { publication: p })))
+      )
     )
   );
 }
 
-function groupByYear(publications: Publication[]): [string, Publication[]][] {
-  const groups = new Map<string, Publication[]>();
-  for (const p of publications) {
-    const year = String(p.year ?? "Undated");
-    if (!groups.has(year)) groups.set(year, []);
-    groups.get(year).push(p);
+/** The count and a link to the library, beside the bibliography's heading. */
+export function BibliographySummary({ publications }: { publications: Publication[] }) {
+  const entries = publications ?? [];
+  const years = entries.map((p) => p.year).filter((y) => y != null);
+  let count = `${entries.length} papers`;
+  if (years.length > 0) {
+    count += ` since ${Math.min(...years)}`;
   }
-  return [...groups.entries()];
-}
-
-function Citation({ publication }: { publication: Publication }) {
-  let link = null;
-  if (publication.url != null) {
-    link = h("a.pub-link", { href: publication.url, target: "_blank", rel: "noopener" }, "link");
-  }
-  return h("span.pub-citation", [h("span", { dangerouslySetInnerHTML: { __html: publication.html } }), link]);
-}
-
-function CopyActions({ publication }: { publication: Publication }) {
-  return h("span.pub-actions", [
-    h(CopyButton, { label: "Copy", title: "Copy citation", value: () => plainText(publication.html) }),
-    h(CopyButton, { label: "BibTeX", title: "Copy BibTeX", value: () => publication.bibtex }),
+  return h("div.pub-summary", [
+    h("span.pub-count", count),
+    h("a.pub-zotero", { href: zoteroLibrary, target: "_blank", rel: "noopener" }, "View in Zotero"),
   ]);
 }
 
-function CopyButton({ label, title, value }: { label: string; title: string; value: () => string }) {
-  const [copied, setCopied] = useState(false);
-  const copy = async () => {
-    await navigator.clipboard.writeText(value());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-  let icon = "clipboard";
-  if (copied) icon = "tick";
-  return h(Button, { small: true, minimal: true, icon, onClick: copy, title }, label);
-}
-
-function plainText(html: string): string {
-  return new DOMParser().parseFromString(html, "text/html").body.textContent?.trim() ?? "";
+function Citation({ publication }: { publication: Publication }) {
+  return h("span.pub-citation", { dangerouslySetInnerHTML: { __html: publication.html } });
 }

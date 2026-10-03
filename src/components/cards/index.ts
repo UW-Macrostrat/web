@@ -42,12 +42,13 @@ interface LinkCardProps {
    */
   onClick?: (event: React.MouseEvent) => void;
   /**
-   * `compact` is the rendition a dense list or a nested tree wants: the same
-   * card, without the page-level margin or the hover lift. The caller owns the
-   * spacing (a grid gap, an enclosing card's padding), and a tree of cards that
-   * each lifted under the pointer would be a page that moves as you read it.
+   * `list` is the card for a flat list or grid of many: tighter padding and no
+   * page-level margin, with the shadow and hover lift kept. `compact` is for a
+   * nested tree only: it also drops the shadow and the lift, since a tree of
+   * cards that each lifted under the pointer would be a page that moves as you
+   * read it. In both, the caller owns the spacing (a grid gap, a tree's indent).
    */
-  density?: "default" | "compact";
+  density?: "default" | "list" | "compact";
 }
 
 export function LinkCard(props: LinkCardProps) {
@@ -68,7 +69,7 @@ export function LinkCard(props: LinkCardProps) {
   // which doesn't define it — and so would never match this module's rule.
   const cardClass = classNames(
     "link-card",
-    { compact: density === "compact" },
+    { list: density === "list", compact: density === "compact" },
     className
   );
 

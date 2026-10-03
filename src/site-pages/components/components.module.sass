@@ -6,7 +6,7 @@
   @include type.label
   margin: var(--pz-space-4) 0 var(--pz-space-2)
 
-ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-list, ul.contact-list, ul.cite-list, ul.pub-entries
+ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-list, ul.contact-list
   list-style: none
   padding: 0
   margin: 0
@@ -88,6 +88,46 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   display: flex
   flex-wrap: wrap
   gap: 0.3em
+  align-items: center
+
+// A tag tinted by a hue from its id (`--tag-hue`); the mix keeps it legible in
+// both themes. Specific enough to beat Blueprint's minimal-tag backgrounds.
+.contributor-directory .color-tag:global(.bp6-tag.bp6-minimal)
+  --tag-color: oklch(0.62 0.13 var(--tag-hue))
+  background: color-mix(in srgb, var(--tag-color) 16%, transparent)
+  color: var(--pz-text-color)
+
+  &:global(.bp6-interactive):hover
+    background: color-mix(in srgb, var(--tag-color) 28%, transparent)
+
+  &.active, &.active:hover
+    background: color-mix(in srgb, var(--tag-color) 40%, transparent)
+    box-shadow: inset 0 0 0 1px var(--tag-color)
+
+// Popovers render in a portal, outside this module's scope.
+:global(.tag-definition-popover)
+  box-shadow: var(--pz-shadow-md)
+  border-radius: var(--pz-radius-sm)
+
+  :global(.bp6-popover-content)
+    padding: 0.2em 0.5em
+    border-radius: var(--pz-radius-sm)
+    background: var(--pz-floating-background-color)
+    color: var(--pz-text-color)
+    font-size: var(--pz-font-size-xs)
+    max-width: 20em
+
+// Separates the lab filter from the role filters.
+.filter-divider
+  align-self: stretch
+  width: 1px
+  margin: 0 0.3em
+  background: var(--pz-panel-rule-color)
+
+.person-contributions
+  @include type.supporting
+  margin: 0.3em 0 0
+  padding-left: 1.1em
 
 .integration
   padding: var(--pz-space-2) 0
@@ -127,36 +167,23 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   .contact-label
     @include type.label
 
-.cite-item
+.cite-list
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))
+  gap: var(--pz-space-3)
+  margin-bottom: var(--pz-space-4)
+  > a, > div
+    margin: 0
+
+.pub-summary
+  @include type.supporting
   display: flex
-  flex-direction: column
-  gap: 0.2em
-  padding: var(--pz-space-2) var(--pz-space-3)
-  margin-bottom: var(--pz-space-2)
-  border-left: 3px solid var(--pz-accent-color)
-  background: var(--pz-panel-secondary-background-color)
+  gap: var(--pz-space-3)
+  align-items: baseline
 
-.cite-note
-  @include type.label
+.bibliography
+  --data-panel-item-gap: var(--pz-space-3)
 
-
-.pub-entry
-  padding: 0.4em 0
-  border-bottom: 1px solid var(--pz-panel-rule-color)
-
-// Citations are citeproc HTML; the DOI link is the only anchor inside.
 .pub-citation
   display: block
-  a
-    @include type.identifier
-
-.pub-link
-  margin-left: 0.4em
-
-.pub-actions
-  display: flex
-  gap: 0.2em
-  margin-top: 0.1em
-  opacity: 0.6
-  .pub-entry:hover &, .cite-item:hover &, &:focus-within
-    opacity: 1
+  overflow-wrap: anywhere

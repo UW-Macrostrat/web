@@ -83,8 +83,13 @@
     h3, h4
       color: var(--pz-heading-color)
 
-// A denser rendition, for a list of cards or a tree of them (`density:
-// "compact"`). The card keeps its border, its background and its heading
+// A card in a flat list or grid of many (`density: "list"`): the default card,
+// shadow and lift included, at a tighter padding and without the page margin.
+.link-card.list
+  padding: var(--pz-space-2) var(--pz-space-3)
+  margin: 0
+
+// A denser rendition, for a tree of cards (`density: "compact"`). The card keeps its border, its background and its heading
 // color — what makes it read as a card — and gives up the things that only
 // work for one card at a time: the page-level margin, the shadow, and the lift
 // on hover. Spacing is the caller's, since what surrounds a compact card is a
