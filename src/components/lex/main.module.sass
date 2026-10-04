@@ -63,10 +63,11 @@
   display: flex
   flex-direction: column
 
+// The detail page's sections, spaced here rather than each by its own margins
 .int-page
   display: flex
   flex-direction: column
-  gap: 1em
+  gap: 2em
 
 .map-area-container
   width: 100% !important
@@ -121,30 +122,35 @@
   flex: 0 0 auto
   border-radius: 2px
 
-// The attribute breakdowns (lithologies / environments / economics). A
-// supporting figure, so the whole block is held to a fraction of the content
-// width rather than spanning it: three small pies in a row.
-.charts
-  display: flex
-  justify-content: center
-  gap: 1em
-  max-width: 42em
-  margin: 1em auto
+// The attribute breakdowns (lithologies / environments / economics): a
+// full-width card showing one at a time, picked from vertical tabs.
+.attribute-card
+  background-color: var(--pz-panel-background-color)
+  border: 1px solid var(--pz-border-muted-color)
+  border-radius: var(--pz-radius-lg)
+  padding: 1em
 
-  .chart
-    flex: 1 1 0
+  :global(.bp6-tab-list)
+    flex: 0 0 11em
+
+  :global(.bp6-tab-panel)
+    flex: 1 1 auto
     min-width: 0
+    padding-left: 1.5em
 
-    h3
-      text-align: center
+.chart-donut
+  flex: 0 0 200px
 
-.chart-heading
-  @include type.label
-  margin: 0 0 0.2em
-  text-align: center
+// Long breakdowns run to several columns rather than one tall list
+.legend
+  flex: 1 1 auto
+  min-width: 0
+  columns: 11em
+  column-gap: 1.5em
 
-  a
-    color: inherit
+  .legend-item
+    break-inside: avoid
+    padding: 0.1em 0
 
 .area
   display: flex
@@ -155,6 +161,11 @@
   height: 100%
 
 .chart-container
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 1.5em
+
   g
     cursor: pointer
 

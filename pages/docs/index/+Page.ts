@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
-import { Link, SitePageHeader } from "~/components";
-import { BaseContentPage, Footer } from "~/layouts";
+import { Link } from "~/components";
+import { BaseContentPage, ContentPageHeader, Footer } from "~/layouts";
 import { usePageContext } from "vike-react/usePageContext";
 import { Popover, Tag } from "@blueprintjs/core";
 import { findTrail, type DocsNavNode } from "./nav";
@@ -43,10 +43,11 @@ export function Page() {
     layoutClass = "with-sidebar";
   }
 
-  return h(BaseContentPage, { className: "docs-page" }, [
-    // A direct child of the page, so its sticky bar is bounded by the page
-    // rather than by a wrapper that ends with the title.
-    h(SitePageHeader, { variant: "hybrid", actions: h(BetaTagWithPopup) }),
+  const header = h(ContentPageHeader, {
+    variant: "hybrid",
+    actions: h(BetaTagWithPopup),
+  });
+  return h(BaseContentPage, { className: "docs-page", header }, [
     h("div.docs-layout", { className: layoutClass }, [
       h("article.docs-main", body),
       sidebar,

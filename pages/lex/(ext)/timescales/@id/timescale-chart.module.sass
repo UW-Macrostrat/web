@@ -1,0 +1,43 @@
+@use "~/styles/type"
+
+.timescale-chart
+  display: flex
+  flex-direction: row
+  align-items: flex-start
+  gap: 1em
+
+.column
+  display: flex
+  flex-direction: column
+
+  &.reference
+    width: 13em
+
+  &.subject
+    width: 18em
+
+.column-label
+  // Fixed so that the two columns' age scales start at the same height
+  height: 2.5em
+  overflow: hidden
+  @include type.item-title
+  font-size: var(--pz-font-size-sm)
+  line-height: 1.2
+
+.timescale
+  cursor: pointer
+
+  // The root interval, which only grows to the column's width when nothing
+  // follows it — and the age axis does
+  > div:first-child
+    flex-grow: 1
+
+  :global(.timescale-axis)
+    --text-color: var(--pz-text-color)
+
+  // Leaf boxes stretch to the column's width, so their names can read across
+  // it; parents keep the narrow box and the name along the axis. The library
+  // hashes `.interval-box`, hence the substring match.
+  :global([class*="interval-box"]:last-child .label-text)
+    writing-mode: horizontal-tb
+    transform: none

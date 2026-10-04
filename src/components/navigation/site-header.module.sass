@@ -1,9 +1,20 @@
-// The site header is placed inside layouts that already set the content
-// gutter (`.content-page-inner`, the hybrid frame's header), so it adds none
-// of its own and its text lines up with the page's. Element-qualified so it
-// outranks the library's own default on the same element.
+// The site header adds no gutter of its own: content pages centre it on the
+// column (`width: "constrained"`) and the hybrid frame's header row supplies
+// one, so its text lines up with the page's. Element-qualified so it outranks
+// the library's own default on the same element.
 header.site-page-header
   --page-header-padding-x: 0px
+  // The column editor's trail proportions: a smaller mark beside larger crumbs
+  --page-header-logo-size: 1.5rem
+  --page-header-crumb-font-size: var(--pz-font-size-lg)
+  // A title drawn as a chip (lexicon items) rises past the cap height the
+  // title is trimmed to, and would tuck under the sticky bar at rest
+  --page-header-title-spacing: var(--pz-space-4)
+
+  // The title row's identifier, scaled with the title it follows; the one in
+  // the collapsed bar has no heading before it and keeps the trail's size
+  h1 + span
+    font-size: clamp(var(--pz-font-size-lg), 4.5cqi, var(--pz-font-size-xl))
 
 .macrostrat-wordmark
   font-family: "Maven Pro", var(--pz-font-sans)

@@ -9,7 +9,7 @@ import {
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
 import { Link, LithologyTag, MacrostratLink } from "~/components";
-import { Card, Divider, Popover, Spinner } from "@blueprintjs/core";
+import { Card, Divider, Popover, Spinner, Tab, Tabs } from "@blueprintjs/core";
 import {
   AlphaTag,
   BetaTag,
@@ -22,7 +22,6 @@ import { asChromaColor } from "@macrostrat/color-utils";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { LinkCard } from "~/components/cards";
-import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
 import { clientOnly } from "./client-only";
 // NOTE: do NOT statically import "./map.client" here — it pulls in mapbox-gl,
@@ -72,7 +71,7 @@ function LexItemPageInner(props: LexItemPageProps) {
   // Guard: this renders server-side now (SSR doesn't catch a null destructure).
   const { name, strat_name_long } = resData || {};
 
-  return h("div", [
+  return h("div.int-page", [
     children,
     h(References, { refs }),
     h(SiftLink, {
@@ -242,20 +241,6 @@ export function navigateToInterval(clickData) {
   }
 }
 
-export function Intervals({ resData }) {
-  const { b_age, t_age } = resData;
-  return h(
-    "div.timescale",
-    h(Timescale, {
-      length: 970,
-      levels: [1, 5],
-      ageRange: [b_age, t_age],
-      absoluteAgeScale: true,
-      onClick: (e, d) => navigateToInterval(d),
-    })
-  );
-}
-
 function LexItemHeader({ resData, name, siftLink, id }) {
   const chromaColor = resData?.color ? asChromaColor(resData.color) : null;
   const luminance = 0.9;
@@ -312,42 +297,47 @@ function SiftLink({ id, siftLink }) {
   ]);
 }
 
+const ATTRIBUTE_BREAKDOWNS = [
+  { type: "lith", title: "Lithologies", route: "lithologies" },
+  { type: "environ", title: "Environments", route: "environments" },
+  { type: "econ", title: "Economics", route: "economics" },
+];
+
+/** The attribute breakdowns, one at a time, chosen from a list on the left. */
 export function Charts({ features }) {
-  const [activeIndex, setActiveIndex] = useState(null);
+  const breakdowns = useMemo(
+    () =>
+      ATTRIBUTE_BREAKDOWNS.map((b) => ({
+        ...b,
+        data: summarizeAttributes({ data: features, type: b.type }),
+      })).filter((b) => b.data?.length > 0),
+    [features]
+  );
+  const [selected, setSelected] = useState<string | null>(null);
 
-  const liths = summarizeAttributes({
-    data: features,
-    type: "lith",
-  });
-  const environs = summarizeAttributes({
-    data: features,
-    type: "environ",
-  });
-  const econs = summarizeAttributes({
-    data: features,
-    type: "econ",
-  });
+  if (breakdowns.length == 0) return null;
+  const current = breakdowns.find((b) => b.type === selected) ?? breakdowns[0];
 
-  return h("div.charts", [
-    h.if(liths?.length)(
-      "div.chart",
-      Chart(liths, "Lithologies", "lithologies", activeIndex, setActiveIndex)
-    ),
-    h.if(environs?.length)(
-      "div.chart",
-      Chart(
-        environs,
-        "Environments",
-        "environments",
-        activeIndex,
-        setActiveIndex
-      )
-    ),
-    h.if(econs?.length)(
-      "div.chart",
-      Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
-    ),
-  ]);
+  return h(
+    Tabs,
+    {
+      id: "attribute-breakdowns",
+      className: "attribute-card",
+      vertical: true,
+      renderActiveTabPanelOnly: true,
+      selectedTabId: current.type,
+      onChange: (id) => setSelected(String(id)),
+    },
+    breakdowns.map((b) =>
+      h(Tab, {
+        key: b.type,
+        id: b.type,
+        title: b.title,
+        tagContent: b.data.length,
+        panel: h(Chart, { data: b.data, route: b.route }),
+      })
+    )
+  );
 }
 
 function UpperCase(str) {
@@ -890,25 +880,25 @@ function parseAttributes(type, data) {
   return parsed;
 }
 
-/** Compact enough to read as a caption to the map above it, not a second
- * figure competing with it.
+/** One breakdown at a time, so the donut can be read rather than glanced at.
  *
  * The hole is sized to hold a percentage and no more — a donut again, but the
  * ring is the figure rather than a frame around a large empty middle. That hole
  * is where the hovered slice's share is shown, which is why the legend no
  * longer carries it: the same number in two places meant the legend labels
  * changed width as the pointer moved. */
-const CHART_HEIGHT = 120;
-const CHART_RADIUS = 52;
-const CHART_INNER_RADIUS = 28;
+const CHART_HEIGHT = 200;
+const CHART_RADIUS = 92;
+const CHART_INNER_RADIUS = 52;
 
-function Chart(data, title, route, activeIndex, setActiveIndex) {
+function Chart({ data, route }) {
+  const [activeIndex, setActiveIndex] = useState(null);
   const isDarkMode = useDarkMode().isEnabled;
   const reg = isDarkMode ? "#fff" : "#000";
   const hovered = isDarkMode ? "#000" : "#fff";
 
   // The hovered slice, matched the same way the cell stroke is — by index *and*
-  // label, since `activeIndex` is shared across the three charts on a page.
+  // label.
   const active = data?.find(
     (entry, index) =>
       activeIndex?.index === index && activeIndex?.label === entry.label
@@ -932,65 +922,65 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
     );
   }
 
-  // A small donut, not the 300px one this replaced: a supporting breakdown on a
-  // page about something else. The section title sits above the chart rather
-  // than in the hole, which is now only big enough for the percentage.
+  // The tab names the breakdown, so the hole only holds the percentage.
   return h("div.chart-container", [
-    h("h4.chart-heading", h(Link, { href: "/lex/" + route }, title)),
     h(
-      ResponsiveContainer,
-      { width: "100%", height: CHART_HEIGHT },
-      h(PieChart, { className: "lithology-chart" }, [
-        h(
-          Pie,
-          {
-            data,
-            dataKey: "value",
-            nameKey: "label",
-            outerRadius: CHART_RADIUS,
-            innerRadius: CHART_INNER_RADIUS,
-            cx: "50%",
-            cy: "50%",
-            fill: "#8884d8",
-            isAnimationActive: false,
-          },
-          data?.map((entry, index) =>
-            h(Cell, {
-              className: `id-${entry.id}`,
-              key: `cell-${index}`,
-              fill: entry.color,
-              stroke:
-                activeIndex?.index === index &&
-                activeIndex.label === entry.label
-                  ? reg
-                  : hovered,
-              strokeWidth: 2,
-              onMouseEnter: () => {
-                if (
-                  !activeIndex ||
-                  activeIndex.index !== index ||
-                  activeIndex.label !== entry.label
-                ) {
-                  setActiveIndex({ index, label: entry.label });
-                }
-              },
-              onMouseLeave: () => {
-                if (activeIndex) {
-                  setActiveIndex(null);
-                }
-              },
-              onClick: (e) => {
-                const id = e.target.className.baseVal
-                  .split(" ")[1]
-                  .split("-")[1];
-                const url = "/lex/" + route + "/" + id;
-                navigate(url);
-              },
-            })
-          )
-        ),
-        centerValue,
-      ])
+      "div.chart-donut",
+      h(
+        ResponsiveContainer,
+        { width: "100%", height: CHART_HEIGHT },
+        h(PieChart, { className: "lithology-chart" }, [
+          h(
+            Pie,
+            {
+              data,
+              dataKey: "value",
+              nameKey: "label",
+              outerRadius: CHART_RADIUS,
+              innerRadius: CHART_INNER_RADIUS,
+              cx: "50%",
+              cy: "50%",
+              fill: "#8884d8",
+              isAnimationActive: false,
+            },
+            data?.map((entry, index) =>
+              h(Cell, {
+                className: `id-${entry.id}`,
+                key: `cell-${index}`,
+                fill: entry.color,
+                stroke:
+                  activeIndex?.index === index &&
+                  activeIndex.label === entry.label
+                    ? reg
+                    : hovered,
+                strokeWidth: 2,
+                onMouseEnter: () => {
+                  if (
+                    !activeIndex ||
+                    activeIndex.index !== index ||
+                    activeIndex.label !== entry.label
+                  ) {
+                    setActiveIndex({ index, label: entry.label });
+                  }
+                },
+                onMouseLeave: () => {
+                  if (activeIndex) {
+                    setActiveIndex(null);
+                  }
+                },
+                onClick: (e) => {
+                  const id = e.target.className.baseVal
+                    .split(" ")[1]
+                    .split("-")[1];
+                  const url = "/lex/" + route + "/" + id;
+                  navigate(url);
+                },
+              })
+            )
+          ),
+          centerValue,
+        ])
+      )
     ),
     h(
       "div.legend",

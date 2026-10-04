@@ -3,6 +3,7 @@ import { Spinner } from "@blueprintjs/core";
 import { usePageTransitionStore } from "~/renderer/usePageTransitionStore";
 import classNames from "classnames";
 import { PageTitle, SitePageHeader, usePageTitle } from "~/components";
+import type { SitePageHeaderProps } from "~/components/navigation/site-header";
 import { useTransition } from "transition-hook";
 import { NavigationLinkProvider } from "~/_providers";
 import { Footer } from "./footer";
@@ -47,36 +48,51 @@ export function FullscreenPage({ children, className, ...rest }) {
   );
 }
 
-export function BaseContentPage({ children, className, ...rest }) {
+/** `header` sits outside the content column, so a sticky bar's background
+ * and rule span the page while its content keeps the column's measure. */
+export function BaseContentPage({ children, className, header = null, ...rest }) {
   return h(
     BasePage,
     { className: classNames("content-page", className), ...rest },
-    h(NavigationLinkProvider, h("div.content-page-inner", children))
+    h(NavigationLinkProvider, [header, h("div.content-page-inner", children)])
   );
+}
+
+/** The site header for a content page, spanning the page (see `BaseContentPage`). */
+export function ContentPageHeader(props: SitePageHeaderProps) {
+  return h(SitePageHeader, {
+    width: "constrained",
+    ...props,
+    className: classNames("content-page-header", props.className),
+  });
 }
 
 export function DocumentationPage({ children, className, ...rest }) {
   return h(
     CenteredContentPage,
-    { className: classNames("documentation-page", className), ...rest },
-    h([h(SitePageHeader, { variant: "hybrid" }), children])
+    {
+      className: classNames("documentation-page", className),
+      header: h(ContentPageHeader, { variant: "hybrid" }),
+      ...rest,
+    },
+    children
   );
 }
 
-export function CenteredContentPage({ children, className }) {
+export function CenteredContentPage({ children, className, header = null }) {
   return h(
     BaseContentPage,
-    { className: classNames("centered", className) },
+    { className: classNames("centered", className), header },
     children
   );
 }
 
 export function ContentPage({ children, className, ...rest }) {
-  return h(BaseContentPage, { className, ...rest }, [
-    h(SitePageHeader, { variant: "hybrid" }),
-    h("div.main", children),
-    h(Footer),
-  ]);
+  return h(
+    BaseContentPage,
+    { className, header: h(ContentPageHeader, { variant: "hybrid" }), ...rest },
+    [h("div.main", children), h(Footer)]
+  );
 }
 
 export function MetaPage({ children, className, ...rest }) {
@@ -90,11 +106,11 @@ export function MetaPage({ children, className, ...rest }) {
 export function IndexPage({ children, className, ...rest }) {
   /** Similar to an index page, but with breadcrumbs that are not separated from the title, leading to easier mechanics for
    * content where the interior is not the focus */
-  return h(BaseContentPage, { className, ...rest }, [
-    h(SitePageHeader, { variant: "compact" }),
-    h("div.main", [children]),
-    h(Footer),
-  ]);
+  return h(
+    BaseContentPage,
+    { className, header: h(ContentPageHeader, { variant: "compact" }), ...rest },
+    [h("div.main", [children]), h(Footer)]
+  );
 }
 
 /** Host for the hybrid content/map frame (`~/layouts/hybrid`). Deliberately
@@ -114,11 +130,15 @@ export function HybridFramePage({ children, className, ...rest }) {
  * the reader: these pages are long prose, and the trail back out of them
  * shouldn't scroll away. */
 export function SitePage({ children, className, ...rest }) {
-  return h(BaseContentPage, { className, ...rest }, [
-    h(SitePageHeader, { variant: "compact", sticky: true }),
-    h("div.main", [children]),
-    h(Footer),
-  ]);
+  return h(
+    BaseContentPage,
+    {
+      className,
+      header: h(ContentPageHeader, { variant: "compact", sticky: true }),
+      ...rest,
+    },
+    [h("div.main", [children]), h(Footer)]
+  );
 }
 
 /** The homepage: no breadcrumb bar (the page carries the site title itself),

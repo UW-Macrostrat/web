@@ -1,0 +1,25 @@
+// The timescale list. The hybrid frame owns the page and the data panel the
+// scroll container; these rules lay out the grid and describe one card.
+
+@use "~/styles/type"
+
+.timescale-search-input
+  min-width: 14em
+
+.timescale-grid
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(16em, 1fr))
+  gap: var(--pz-stack-gap, 1rem)
+
+.timescale-card
+  h3
+    @include type.item-title
+
+.timescale-summary
+  @include type.supporting
+  margin: 0.2em 0 0
+
+// The slider's labels need room at both ends inside the filter menu
+.age-range-input
+  width: 18em
+  padding: 0.5em 1em

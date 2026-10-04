@@ -29,6 +29,12 @@
   flex-direction: column
   min-height: 100vh
 
+  // Spans the page; its content takes the column's gutter on a narrow screen.
+  // The extra class outranks the site header's own zero gutter.
+  header.content-page-header
+    @media only screen and (max-width: 900px)
+      --page-header-padding-x: 1em
+
   .centered
     min-height: 100vh
     margin: auto

@@ -2344,7 +2344,7 @@ __metadata:
     "@blueprintjs/icons": "npm:^6.10.0"
     "@blueprintjs/select": "npm:^6.2.0"
     "@macrostrat-web/settings": "workspace:*"
-    "@macrostrat/column-components": "npm:^2.2.0"
+    "@macrostrat/column-components": "npm:^2.2.1"
     "@macrostrat/data-components": "npm:^1.8.0"
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"
@@ -2566,16 +2566,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-components@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@macrostrat/column-components@npm:2.2.0"
+"@macrostrat/column-components@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "@macrostrat/column-components@npm:2.2.1"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/stratigraphy-utils": "npm:^1.4.2"
     "@macrostrat/timescale": "npm:^3.3.0"
-    "@macrostrat/ui-components": "npm:^5.2.0"
+    "@macrostrat/ui-components": "npm:^5.3.0"
     classnames: "npm:^2.5.1"
     d3-axis: "npm:^3.0.0"
     d3-format: "npm:^3.1.2"
@@ -2592,18 +2592,18 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
     react-dom: ^18.0.0||^19.0.0
-  checksum: 10c0/e91921dd28d756d89f8adb9718fa04a8d9ea57f157bf39424822f7fa2db09f6dfc6fc932df89fc1a042ad091950526f25bddf1561d17cb6bf4b4aedc1eede714
+  checksum: 10c0/f1720879cc10de167eb3e53cf36ee27124782712e08383ce85096081adc97003ad16f016fc8d99a57b3aff8e1f957a73f516b3873e425f6ee46020a4efdf2f1f
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^3.14.0":
-  version: 3.14.0
-  resolution: "@macrostrat/column-views@npm:3.14.0"
+"@macrostrat/column-views@npm:^3.15.0":
+  version: 3.15.0
+  resolution: "@macrostrat/column-views@npm:3.15.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/api-types": "npm:^1.4.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
-    "@macrostrat/column-components": "npm:^2.2.0"
+    "@macrostrat/column-components": "npm:^2.2.1"
     "@macrostrat/data-components": "npm:^1.8.0"
     "@macrostrat/data-provider": "npm:^1.4.1"
     "@macrostrat/hyper": "npm:^3.1.1"
@@ -2611,7 +2611,7 @@ __metadata:
     "@macrostrat/scoped-store": "npm:^1.1.0"
     "@macrostrat/stratigraphy-utils": "npm:^1.4.2"
     "@macrostrat/timescale": "npm:^3.3.0"
-    "@macrostrat/ui-components": "npm:^5.2.0"
+    "@macrostrat/ui-components": "npm:^5.3.0"
     "@types/chroma-js": "npm:^3.1.1"
     "@types/d3-format": "npm:^3.0.4"
     "@types/d3-shape": "npm:^3.1.7"
@@ -2626,7 +2626,7 @@ __metadata:
     jotai: "npm:^2.20.0"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/f630c97fa2e5946b640e27ee5da9c631aaca8af81aa79ffbd111beddf8ea3b243bcf0e33dcda69fabf925968a6a229f04b673178cd62b100f8d0f4b0605f1d45
+  checksum: 10c0/b60aa998109bfb0f79511fc6ff6a17ab009d9a0598e0bd02bee87f924f2e756b2dd5d36c7f71ef64671928a4d37572c226f8ad06b1cc46bade11ababa9a5e72c
   languageName: node
   linkType: hard
 
@@ -2662,7 +2662,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/data-provider@npm:^1.3.0, @macrostrat/data-provider@npm:^1.3.1, @macrostrat/data-provider@npm:^1.4.1":
+"@macrostrat/data-provider@npm:^1.3.0, @macrostrat/data-provider@npm:^1.4.1":
   version: 1.4.1
   resolution: "@macrostrat/data-provider@npm:1.4.1"
   dependencies:
@@ -2990,13 +2990,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/timescale@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "@macrostrat/timescale@npm:3.3.0"
+"@macrostrat/timescale@npm:^3.3.0, @macrostrat/timescale@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "@macrostrat/timescale@npm:3.3.1"
   dependencies:
-    "@macrostrat/data-provider": "npm:^1.3.1"
+    "@macrostrat/data-provider": "npm:^1.4.1"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/ui-components": "npm:^5.2.0"
+    "@macrostrat/ui-components": "npm:^5.3.0"
     "@types/classnames": "npm:^2.3.4"
     "@types/d3-array": "npm:^3.2.1"
     "@types/d3-ease": "npm:^3.0.2"
@@ -3013,7 +3013,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
     react-dom: ^18.0.0||^19.0.0
-  checksum: 10c0/85afda27bef7bfd6b868cb058757627fc3934203e95a7bab397c7fb3beae6f5332d6bbfdd9d251cf01b8ccf2e8c5f6ba859b0465cbe8a06a4b65e6ff38cf8bb1
+  checksum: 10c0/dac3a615a70352a017420b50027b25641a1952ff515737777476f7ae720225a25a3d241dd998d228c16f8372529cb47ee69f84ff977a8f73ae4dd5a1ccfe15c4
   languageName: node
   linkType: hard
 
@@ -3121,8 +3121,8 @@ __metadata:
     "@macrostrat-web/utility-functions": "workspace:*"
     "@macrostrat/api-types": "npm:^1.4.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
-    "@macrostrat/column-components": "npm:^2.2.0"
-    "@macrostrat/column-views": "npm:^3.14.0"
+    "@macrostrat/column-components": "npm:^2.2.1"
+    "@macrostrat/column-views": "npm:^3.15.0"
     "@macrostrat/data-components": "npm:^1.8.0"
     "@macrostrat/data-provider": "npm:^1.4.1"
     "@macrostrat/data-sheet": "npm:^4.11.0"
@@ -3138,7 +3138,7 @@ __metadata:
     "@macrostrat/scoped-store": "npm:^1.1.0"
     "@macrostrat/style-system": "npm:^1.0.1"
     "@macrostrat/svg-map-components": "npm:^2.0.3"
-    "@macrostrat/timescale": "npm:^3.3.0"
+    "@macrostrat/timescale": "npm:^3.3.1"
     "@macrostrat/ui-components": "npm:^5.3.0"
     "@macrostrat/vite-plugin-hyperstyles": "npm:^2.0.2"
     "@mdx-js/rollup": "npm:^2.3.0"

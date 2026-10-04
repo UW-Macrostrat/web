@@ -7,7 +7,7 @@
 .timescale-content {
   display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 1.5em;
 
   h1,
   h2,
@@ -19,16 +19,19 @@
   }
 }
 
-.timescale-container {
-  color: var(--pz-text-emphasized-color) !important;
+.timescale-summary {
+  @include type.supporting;
+}
 
-  line {
-    stroke: var(--pz-text-emphasized-color) !important;
-  }
+// The chart is as tall as the timescale needs; the interval list sits beside it
+.timescale-body {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 2em;
+  align-items: start;
 
-  tspan {
-    fill: var(--pz-text-color);
-    font-size: var(--pz-body-font-size);
+  @media (max-width: 760px) {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
