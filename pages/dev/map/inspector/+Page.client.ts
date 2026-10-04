@@ -30,15 +30,17 @@ import {
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { useDarkMode } from "@macrostrat/ui-components";
 import type { MapPosition } from "@macrostrat/mapbox-utils";
-import {
-  burwellTileDomain,
-  mapboxAccessToken,
-} from "@macrostrat-web/settings";
+import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import {
+  basemapAtom,
+  showLabelsAtom,
+  useLabelTransform,
+} from "~/_utils/basemap";
 import { atomWithSearchParam, locationAtom } from "~/_utils/url-atoms";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import { hashWithMapPosition, initialMapPosition } from "~/_utils/map-position";
@@ -51,7 +53,12 @@ import {
   tileRequestTransform,
 } from "~/_utils/compilations";
 import { LineSymbolManager } from "~/_utils/map-layers.client";
-import { Basemap, basemapStyle, PageBreadcrumbs } from "~/components";
+import {
+  BaseLayerForm,
+  Basemap,
+  basemapStyle,
+  PageBreadcrumbs,
+} from "~/components";
 import { mainMapHref } from "~/_utils/tile-inspector";
 import styles from "./main.module.sass";
 
@@ -120,7 +127,9 @@ function parsePin(param: string | null): { lng: number; lat: number } | null {
 export function Page() {
   const compilation = useAtomValue(compilationAtom);
   const { xRay } = useAtomValue(displayOptionsAtom);
-  const style = useInspectorStyle(compilation, xRay);
+  const basemap = useAtomValue(basemapAtom);
+  const style = useInspectorStyle(compilation, basemap, xRay);
+  const transformStyle = useLabelTransform();
 
   const mapPosition = useInitialMapPosition();
   const onMapMoved = useMapMovedHandler();
@@ -153,6 +162,7 @@ export function Page() {
         mapboxToken: mapboxAccessToken,
         // Compilations other than `carto` are guarded on the tileserver.
         transformRequest: tileRequestTransform,
+        transformStyle,
         onMapMoved,
       },
       [
@@ -168,10 +178,14 @@ export function Page() {
   );
 }
 
-/** The basic basemap with the compilation's geologic map over it, run through
- * the inspector's x-ray treatment when asked. Built asynchronously, since the
+/** The basemap with the compilation's geologic map over it, run through the
+ * inspector's x-ray treatment when asked. Built asynchronously, since the
  * basemap is fetched to be merged. */
-function useInspectorStyle(compilation: string, xRay: boolean) {
+function useInspectorStyle(
+  compilation: string,
+  basemap: Basemap,
+  xRay: boolean
+) {
   const inDarkMode = useDarkMode()?.isEnabled ?? false;
   const [style, setStyle] = useState(null);
 
@@ -182,7 +196,7 @@ function useInspectorStyle(compilation: string, xRay: boolean) {
 
   useEffect(() => {
     let cancelled = false;
-    const baseStyle = basemapStyle(Basemap.Basic, inDarkMode);
+    const baseStyle = basemapStyle(basemap, inDarkMode);
     buildInspectorStyle(baseStyle, overlayStyle, {
       mapboxToken: mapboxAccessToken,
       inDarkMode,
@@ -193,7 +207,7 @@ function useInspectorStyle(compilation: string, xRay: boolean) {
     return () => {
       cancelled = true;
     };
-  }, [overlayStyle, inDarkMode, xRay]);
+  }, [overlayStyle, basemap, inDarkMode, xRay]);
 
   return style;
 }
@@ -272,25 +286,32 @@ function InspectorLayers({ features }) {
 
 function InspectorControls() {
   const [options, setOptions] = useAtom(displayOptionsAtom);
+  const [basemap, setBasemap] = useAtom(basemapAtom);
+  const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
   const update = (patch) => setOptions({ ...options, ...patch });
 
   return h(PanelCard, { className: "inspector-controls" }, [
-    h(PageBreadcrumbs, { title: "Tile inspector" }),
+    h(PageBreadcrumbs, { separateTitle: false }),
     h(
       "p.page-description",
-      "The geologic map tiles the main map draws. Click to inspect the features under a point."
+      "The main map's geologic tiles. Click to inspect the features under a point."
     ),
     h(CompilationSelect),
-    h(Switch, {
-      label: "X-ray mode",
-      checked: options.xRay,
-      onChange: () => update({ xRay: !options.xRay }),
-    }),
-    h(Switch, {
-      label: "Show line symbols",
-      checked: options.showLineSymbols,
-      onChange: () => update({ showLineSymbols: !options.showLineSymbols }),
-    }),
+    h("div.display-options", [
+      h(Switch, {
+        label: "X-ray",
+        checked: options.xRay,
+        inline: true,
+        onChange: () => update({ xRay: !options.xRay }),
+      }),
+      h(Switch, {
+        label: "Line symbols",
+        checked: options.showLineSymbols,
+        inline: true,
+        onChange: () => update({ showLineSymbols: !options.showLineSymbols }),
+      }),
+    ]),
+    h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),
     h(MainMapLink),
   ]);
 }
@@ -313,16 +334,14 @@ function CompilationSelect() {
     options.unshift({ value: compilation, label: compilation });
   }
 
-  return h("label.compilation-select", [
-    h("span.label", "Compilation"),
-    h(HTMLSelect, {
-      value: compilation,
-      options,
-      fill: true,
-      minimal: true,
-      onChange: (e) => setCompilation(e.currentTarget.value),
-    }),
-  ]);
+  return h(HTMLSelect, {
+    value: compilation,
+    options,
+    fill: true,
+    minimal: true,
+    "aria-label": "Compilation",
+    onChange: (e) => setCompilation(e.currentTarget.value),
+  });
 }
 
 /** Back to `/map` at the inspected point (or the camera), on the same
