@@ -31,7 +31,7 @@ import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { MacrostratDataProvider } from "@macrostrat/data-provider";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { useMapElement, useMapStyleOperator } from "@macrostrat/mapbox-react";
-import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
+import type { MapPosition } from "@macrostrat/mapbox-utils";
 import {
   apiV2Prefix,
   apiV3Prefix,
@@ -41,15 +41,15 @@ import {
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { loadable } from "jotai/utils";
 import { useCallback, useEffect, useState } from "react";
-import { atomWithSearchParam, locationAtom } from "~/_utils/url-atoms";
+import {
+  basemapAtom,
+  showLabelsAtom,
+  useLabelTransform,
+} from "~/_utils/basemap";
+import { locationAtom } from "~/_utils/url-atoms";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import { hashWithMapPosition, initialMapPosition } from "~/_utils/map-position";
-import {
-  BaseLayerForm,
-  Basemap,
-  basemapStyle,
-  PageBreadcrumbs,
-} from "~/components";
+import { BaseLayerForm, basemapStyle, PageBreadcrumbs } from "~/components";
 import {
   LegendEntries,
   LegendEntryDetailView,
@@ -100,34 +100,6 @@ const mapPositionHashAtom = atom(null, (get, set, position: MapPosition) => {
   const loc = get(locationAtom);
   set(locationAtom, { ...loc, hash: hashWithMapPosition(loc.hash, position) });
 });
-
-/** The base map style, persisted in the URL as on the other map pages. "basic"
- * is the default and is kept out of the query string. */
-const basemapParamAtom = atomWithSearchParam("basemap");
-const basemapAtom = atom(
-  (get): Basemap => {
-    const value = get(basemapParamAtom);
-    if (value === Basemap.Satellite) return value as Basemap;
-    return Basemap.Basic;
-  },
-  (get, set, value: Basemap) => {
-    let param: Basemap | null = value;
-    if (value === Basemap.Basic) param = null;
-    set(basemapParamAtom, param);
-  }
-);
-
-/** Whether the basemap's text labels are shown. On by default; the "off" state
- * is stored in the URL. */
-const labelsParamAtom = atomWithSearchParam("labels");
-const showLabelsAtom = atom(
-  (get) => get(labelsParamAtom) !== "off",
-  (get, set, value: boolean) => {
-    let param: string | null = null;
-    if (!value) param = "off";
-    set(labelsParamAtom, param);
-  }
-);
 
 /** The query string the legend is fetched with — bounds and zoom, already
  * rounded. Holding the *string* rather than the bounds object means a camera
@@ -249,20 +221,6 @@ function useMapMovedHandler() {
       setLegendQuery(legendQueryFor(map));
     },
     [setStoredPosition, setHashPosition, setLegendQuery]
-  );
-}
-
-/** Hide the basemap's own labels by stripping the label layers from the
- * resolved style, as the other map pages do. */
-function useLabelTransform() {
-  const showLabels = useAtomValue(showLabelsAtom);
-
-  return useCallback(
-    (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
-    },
-    [showLabels]
   );
 }
 

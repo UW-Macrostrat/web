@@ -21,7 +21,7 @@
 import hyper from "@macrostrat/hyper";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { Spacer, useDarkMode, ErrorCallout } from "@macrostrat/ui-components";
-import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
+import type { MapPosition } from "@macrostrat/mapbox-utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MapMarker,
@@ -44,10 +44,15 @@ import {
 } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { loadable } from "jotai/utils";
+import {
+  basemapAtom,
+  showLabelsAtom,
+  useLabelTransform,
+} from "~/_utils/basemap";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
-import { Link, BaseLayerForm, Basemap, basemapStyle } from "~/components";
+import { Link, BaseLayerForm, basemapStyle } from "~/components";
 import {
   CompilationPath,
   CompilationSelector,
@@ -153,36 +158,6 @@ const DISPLAY_MODES: DisplayModeInfo[] = [
   },
 ];
 
-/** The base map style, persisted in the URL (parallel to the main map page).
- * "basic" is the default and is kept out of the query string. */
-const basemapParamAtom = atomWithSearchParam("basemap");
-const basemapAtom = atom(
-  (get): Basemap => {
-    const value = get(basemapParamAtom);
-    if (value === Basemap.Satellite || value === Basemap.None) {
-      return value as Basemap;
-    }
-    return Basemap.Basic;
-  },
-  (get, set, value: Basemap) => {
-    let param: Basemap | null = value;
-    if (value === Basemap.Basic) param = null;
-    set(basemapParamAtom, param);
-  }
-);
-
-/** Whether the basemap's text labels are shown. On by default; the "off" state
- * is stored in the URL. */
-const labelsParamAtom = atomWithSearchParam("labels");
-const showLabelsAtom = atom(
-  (get) => get(labelsParamAtom) !== "off",
-  (get, set, value: boolean) => {
-    let param: string | null = null;
-    if (!value) param = "off";
-    set(labelsParamAtom, param);
-  }
-);
-
 /** Whether to overlay the live Macrostrat map (the carto_new tileserver layer).
  * Off by default; "on" is stored in the URL. */
 const cartoParamAtom = atomWithSearchParam("carto");
@@ -253,7 +228,6 @@ export function Page() {
   const selectedSlug = useAtomValue(selectedSlugAtom);
   const servedLayer = useAtomValue(servedLayerAtom);
   const displayMode = useAtomValue(displayModeAtom);
-  const showLabels = useAtomValue(showLabelsAtom);
   const showCarto = useAtomValue(showCartoAtom);
   const showErrors = useAtomValue(showErrorsAtom);
 
@@ -287,17 +261,7 @@ export function Page() {
     errors,
   ]);
 
-  // Toggle basemap labels by stripping label layers from the resolved style.
-  // TODO(upstream): a labels on/off toggle is a common need — consider baking a
-  // `showLabels` prop into @macrostrat/map-interface's MapView so each page
-  // doesn't re-implement this transformStyle.
-  const transformStyle = useCallback(
-    (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
-    },
-    [showLabels]
-  );
+  const transformStyle = useLabelTransform();
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);
