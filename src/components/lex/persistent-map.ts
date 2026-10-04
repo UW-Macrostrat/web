@@ -38,7 +38,6 @@ export function LexPersistentMap() {
       columns: target.columns,
       fossilsData: target.fossilsData,
       filters: target.filters,
-      mapUrl: target.mapUrl,
     }),
     node
   );

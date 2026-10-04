@@ -5,6 +5,11 @@ import { ContentPage } from "~/layouts";
 export function Page() {
   return h(ContentPage, [
     h(PageHeader, { title: "Layer inspectors", showLogo: true }),
+    h("p", [
+      "For the tiles the main map draws now, use the ",
+      h("a", { href: "/dev/map/inspector" }, "tile inspector"),
+      ".",
+    ]),
     h("h2", "Core layers"),
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),

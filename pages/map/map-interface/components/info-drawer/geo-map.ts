@@ -6,6 +6,10 @@ import {
 } from "@macrostrat/data-components";
 import { BaseMapReference, MapReference } from "~/components/map-info";
 import { AgeRange } from "@macrostrat/column-views";
+import { Icon } from "@blueprintjs/core";
+import { useAtomValue } from "jotai";
+import { infoMarkerPositionAtom, useAppState } from "../../app-state";
+import { tileInspectorHref } from "~/_utils/tile-inspector";
 
 function LongTextField(props) {
   const { name, text } = props;
@@ -96,6 +100,7 @@ export function GeologicMapInfo(props) {
       classes: { root: "regional-panel" },
       title: "Geologic map",
       helpText: "via providers, Macrostrat",
+      sideComponent: h(TileInspectorLink),
       expanded: bedrockExpanded,
     },
     [
@@ -125,6 +130,33 @@ export function GeologicMapInfo(props) {
         h(DataField, { label: "Source" }, refs),
       ]),
     ]
+  );
+}
+
+/** A quiet way under the hood: the tile inspector, at the info marker and on the
+ * same compilation, showing the raw tile features behind this description. */
+function TileInspectorLink() {
+  const position = useAtomValue(infoMarkerPositionAtom);
+  const compilation = useAppState((state) => state.compilation);
+  const zoom = useAppState((state) => state.mapPosition.target?.zoom);
+
+  if (position == null) return null;
+
+  const href = tileInspectorHref({
+    compilation,
+    position,
+    zoom: position.zoom ?? zoom ?? null,
+  });
+
+  return h(
+    "a.tile-inspector-link",
+    {
+      href,
+      title: "Inspect the map tiles at this location",
+      // The panel header toggles the section on click
+      onClick: (e) => e.stopPropagation(),
+    },
+    [h(Icon, { icon: "search-template", size: 12 }), " tiles"]
   );
 }
 

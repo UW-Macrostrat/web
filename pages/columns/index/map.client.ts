@@ -25,15 +25,16 @@ import {
   CORE_COLUMNS_PROJECT_ID,
   useMacrostratColumns,
 } from "@macrostrat/data-provider";
-import { getBasicMapStyle, MapView } from "@macrostrat/map-interface";
+import { MapView } from "@macrostrat/map-interface";
 import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
-import { ErrorBoundary, useInDarkMode } from "@macrostrat/ui-components";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 import { navigate } from "vike/client/router";
 
 import { hasContentPane, layoutModeAtom, layoutShellAtom } from "~/layouts/hybrid";
 import { ColumnMapSlot } from "~/components/column-map/target";
+import { useInsetMapStyleProps } from "~/components/map-settings";
 import {
   ColumnMapBoundsReporter,
   SelectedColumnsOverlay,
@@ -114,7 +115,9 @@ function FullMap({ projectID, standalone }) {
   const visibleColumnIDs = useVisibleColumnIDs();
   const selectedIDs = useAtomValue(selectedColumnsAtom);
   const onColumnClick = useColumnClickHandler();
-  const inDarkMode = useInDarkMode();
+  // Follows the same settings as the shared instance, so switching shells
+  // keeps the basemap.
+  const { mapStyle, columnColor } = useInsetMapStyleProps();
 
   const footprints =
     useMacrostratColumns(projectID ?? CORE_COLUMNS_PROJECT_ID, inProcess) ?? [];
@@ -125,11 +128,6 @@ function FullMap({ projectID, standalone }) {
     return footprints.filter((col) => visible.has(col.properties?.col_id));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on contents
   }, [footprints, visibleKey]);
-
-  const mapStyle = useMemo(
-    () => getBasicMapStyle({ inDarkMode }),
-    [inDarkMode]
-  );
 
   return h(
     MapView,
@@ -142,6 +140,7 @@ function FullMap({ projectID, standalone }) {
     [
       h(ColumnsNavigationLayer, {
         key: "columns",
+        color: columnColor,
         columns,
         projectID,
         selectedColumn: null,
