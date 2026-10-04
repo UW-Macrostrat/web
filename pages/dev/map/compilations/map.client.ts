@@ -20,20 +20,19 @@
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { MapView } from "@macrostrat/map-interface";
 import { MapboxMapProvider } from "@macrostrat/mapbox-react";
-import { removeMapLabels } from "@macrostrat/mapbox-utils";
 import { ErrorBoundary, useInDarkMode } from "@macrostrat/ui-components";
 import h from "@macrostrat/hyper";
 import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useMemo } from "react";
 
 import { basemapStyle, Basemap } from "~/components";
+import { basemapAtom, useLabelTransform } from "~/_utils/basemap";
 import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import { MapMarker } from "@macrostrat/map-interface";
 import { layoutShellAtom } from "~/layouts/hybrid";
 
 import {
-  basemapAtom,
   expandMembersAtom,
   focusNodeAtom,
   focusSlugAtom,
@@ -41,7 +40,6 @@ import {
   showCartoAtom,
   showFacesAtom,
   showFootprintsAtom,
-  showLabelsAtom,
   visibleSlugsAtom,
   type Point,
 } from "./state";
@@ -69,19 +67,12 @@ function CompilationMapShell() {
 function CompilationMapInner({ shell }) {
   const inDarkMode = useInDarkMode();
   const basemap = useAtomValue(basemapAtom);
-  const showLabels = useAtomValue(showLabelsAtom);
   const [mapPosition, setMapPosition] = useAtom(lastMapPositionAtom);
   const [point, setPoint] = useAtom(pointAtom);
 
   const overlayStyles = useOverlayStyles();
 
-  const transformStyle = useCallback(
-    (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
-    },
-    [showLabels]
-  );
+  const transformStyle = useLabelTransform();
 
   const setPosition = useCallback(
     (position: Point | null) => setPoint(position),

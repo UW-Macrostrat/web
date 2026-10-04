@@ -13,7 +13,7 @@
 import hyper from "@macrostrat/hyper";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { useDarkMode } from "@macrostrat/ui-components";
-import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
+import type { MapPosition } from "@macrostrat/mapbox-utils";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -24,9 +24,14 @@ import {
 } from "@macrostrat/map-interface";
 import { FormGroup, SegmentedControl, Switch, Tag } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
+import {
+  basemapAtom,
+  showLabelsAtom,
+  useLabelTransform,
+} from "~/_utils/basemap";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
-import { BaseLayerForm, Basemap, basemapStyle } from "~/components";
+import { BaseLayerForm, basemapStyle } from "~/components";
 import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
 import styles from "./main.module.sass";
 
@@ -117,34 +122,6 @@ const orientationAtom = atom(
   }
 );
 
-/** The base map style, persisted in the URL (parallel to the main map page).
- * "basic" is the default and is kept out of the query string. */
-const basemapParamAtom = atomWithSearchParam("basemap");
-const basemapAtom = atom(
-  (get): Basemap => {
-    const value = get(basemapParamAtom);
-    if (value === Basemap.Satellite) return value as Basemap;
-    return Basemap.Basic;
-  },
-  (get, set, value: Basemap) => {
-    let param: Basemap | null = value;
-    if (value === Basemap.Basic) param = null;
-    set(basemapParamAtom, param);
-  }
-);
-
-/** Whether the basemap's text labels are shown. On by default; the "off" state
- * is stored in the URL. */
-const labelsParamAtom = atomWithSearchParam("labels");
-const showLabelsAtom = atom(
-  (get) => get(labelsParamAtom) !== "off",
-  (get, set, value: boolean) => {
-    let param: string | null = null;
-    if (!value) param = "off";
-    set(labelsParamAtom, param);
-  }
-);
-
 /** The generation on each side of the divider, in [before, after] order. */
 const sidesAtom = atom((get): [CartoVersionInfo, CartoVersionInfo] => {
   if (get(v2FirstAtom)) return [CARTO_VERSIONS.v2, CARTO_VERSIONS.v1];
@@ -159,7 +136,6 @@ export function Page() {
   const baseStyle = basemapStyle(basemap, isEnabled);
 
   const orientation = useAtomValue(orientationAtom);
-  const showLabels = useAtomValue(showLabelsAtom);
   const [beforeVersion, afterVersion] = useAtomValue(sidesAtom);
 
   // Restore the last-viewed camera, and persist it on move.
@@ -185,14 +161,7 @@ export function Page() {
     [afterVersion]
   );
 
-  // Toggle basemap labels by stripping label layers from the resolved style.
-  const transformStyle = useCallback(
-    (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
-    },
-    [showLabels]
-  );
+  const transformStyle = useLabelTransform();
 
   // Mirror the navbar width, as the other map dev pages do.
   const contextPanel = h(
