@@ -10,6 +10,7 @@ import { webAssetsPrefix } from "@macrostrat-web/settings";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { buildDocsNav, crumbLabels, findTrail, type DocsNavNode } from "./nav";
+import { siteMarkdownComponents } from "~/site-pages/markdown-components";
 
 const modules = import.meta.glob("../../../content/**/*.{md,mdx}");
 
@@ -114,7 +115,8 @@ export async function onBeforeRender(
   }
 
   const mod: any = await pageModule();
-  const html = renderToString(h(mod.default));
+  // The same callout overrides as site pages, so `[!cards]` grids work in /docs.
+  const html = renderToString(h(mod.default, { components: siteMarkdownComponents }));
   const mdxContent = localizeAssetURLs(stripLeadingH1(html));
 
   return {
