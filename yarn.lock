@@ -3191,6 +3191,7 @@ __metadata:
     geologic-patterns: "npm:2.0.0-dev1"
     hex-to-css-filter: "npm:^5.4.0"
     history: "npm:^5.3.0"
+    http-proxy-middleware: "npm:^4.2.0"
     immutability-helper: "npm:^3.1.1"
     jose: "npm:^5.1.2"
     jotai: "npm:^2.20.0"
@@ -12860,6 +12861,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"http-proxy-middleware@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "http-proxy-middleware@npm:4.2.0"
+  dependencies:
+    debug: "npm:^4.4.3"
+    httpxy: "npm:^0.5.4"
+    is-glob: "npm:^4.0.3"
+    is-plain-obj: "npm:^4.1.0"
+    micromatch: "npm:^4.0.8"
+  checksum: 10c0/2e8cffa4ff39f3daa8e4c14a6ba5c227d882c29c9163f5e5a089c69f49245845a09697ed4f6858be7cb840c8bc1c8fa5df49406ed0f753fa84a96283b116dd0b
+  languageName: node
+  linkType: hard
+
 "http-signature@npm:~1.2.0":
   version: 1.2.0
   resolution: "http-signature@npm:1.2.0"
@@ -12888,6 +12902,13 @@ __metadata:
     agent-base: "npm:^7.1.2"
     debug: "npm:4"
   checksum: 10c0/f729219bc735edb621fa30e6e84e60ee5d00802b8247aac0d7b79b0bd6d4b3294737a337b93b86a0bd9e68099d031858a39260c976dc14cdbba238ba1f8779ac
+  languageName: node
+  linkType: hard
+
+"httpxy@npm:^0.5.4":
+  version: 0.5.5
+  resolution: "httpxy@npm:0.5.5"
+  checksum: 10c0/7be52cbfbd4157b4ac3aa22124d06081e8ffc50a185622e43c0ce8229bbcd7411d016f4a364fecb694325ed312823efbf51c70fa8049563a8b6b617642914cd3
   languageName: node
   linkType: hard
 
@@ -13375,7 +13396,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-plain-obj@npm:^4.0.0":
+"is-plain-obj@npm:^4.0.0, is-plain-obj@npm:^4.1.0":
   version: 4.1.0
   resolution: "is-plain-obj@npm:4.1.0"
   checksum: 10c0/32130d651d71d9564dc88ba7e6fda0e91a1010a3694648e9f4f47bb6080438140696d3e3e15c741411d712e47ac9edc1a8a9de1fe76f3487b0d90be06ac9975e
