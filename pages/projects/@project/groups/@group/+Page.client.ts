@@ -1,27 +1,21 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
-import {
-  LexItemPage,
-  ColumnsTable,
-  Charts,
-  PrevalentTaxa,
-  Timescales,
-} from "~/components/lex";
+import { LexItemPage, FossilsCard, Timescales } from "~/components/lex";
+import { ColumnsTable } from "~/components/lex/columns-card";
 
 export function Page() {
   const { resData, colData, taxaData, refs } = useData();
   
   const id = resData.col_group_id;
-  const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
   const children = [
+    // The Columns card includes the lithology / environment / economic breakdown
     h(ColumnsTable, {
       resData,
       colData,
     }),
-    h(Charts, { features }),
-    h(PrevalentTaxa, { taxaData }),
+    h(FossilsCard, { colData, taxaData }),
     h(Timescales, { timescales }),
   ];
 
