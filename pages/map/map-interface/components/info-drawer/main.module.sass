@@ -1,5 +1,8 @@
+@use "~/styles/type"
+
 .spacer
   flex-grow: 1
+  pointer-events: none
 
 .info-drawer
   h3:first-child
@@ -18,87 +21,63 @@
 .infodrawer-content
   margin: 0
 
-.macrostrat-detail
-  display: flex
-  align-items: center
-  margin: 0.2em 0 0.4em
-
-  .expansion-summary-title
-    margin-right: 0.8em
-
-    &:after
-      content: ":"
-
-.described-age, .macrostrat-detail
-  display: flex
-  align-items: center
-
-  .expansion-summary-title
-    margin-right: 0.8em
-
-    &:after
-      content: ":"
-
-  .description
-    font-style: italic
-    font-size: 0.7em
-    max-width: 100px
-    text-align: right
-
-  .age-chips
-    flex-grow: 1
-
-
-// &.loading
-//   max-height: 200px
-// max-height: calc(100vh - 60px)
-// transition: max-height 0.5s ease-in-out 0.25s
-
-.age-refinement
-  flex-direction: column
-  align-items: center
-
 .data-source
   font-size: 85%
   font-weight: 400
   margin-left: 1em
 
-.spacer
-  flex-grow: 1
-  pointer-events: none
-
-.macrostrat-unit
-  h3
-    margin: 0.5em 0 0.5em
-    flex-grow: 1
-
-  .description
-    margin-right: 1em
-
 .description
   font-style: italic
 
-.age-refinement-plot
-  position: relative
+// Geologic map section: fields sit close together, and the source's prose is
+// clipped until asked for.
+.map-source-attrs
+  > div
+    margin: 0.3em 0 0.6em
 
-  .age-refinement-bar
-    border-radius: 3px
-    margin-bottom: 1px
+  .unit-name
+    margin: 0 0 0.3em
 
 .long-text-field
-  p
-    display: inline
-  //text-align: justify
+  .inline-label
+    font-weight: bold
+    color: var(--secondary-color)
+    padding-right: 0.5em
 
-.unit-info
+  .long-text
+    margin: 0
+
+.clamped-text
+  margin: 0
+
+  &.is-clamped
+    display: -webkit-box
+    -webkit-box-orient: vertical
+    -webkit-line-clamp: var(--clamp-lines, 3)
+    overflow: hidden
+
+.clamp-toggle
+  @include type.text-control
+  display: block
+  margin-top: 0.1em
+
+// The source's own age wording, with its matched intervals beneath
+.described-age
   display: flex
-  flex-direction: row
+  align-items: baseline
+  gap: 0.4em
+  margin-bottom: 0.3em
+
+  .age-text
+    font-weight: 500
 
 .map-lines
-  padding-left: 1em
-  flex-grow: 2
+  margin: 0.2em 0 0
+  padding-left: 1.3em
 
 .line-info
+  margin-bottom: 0.2em
+
   .basic-info
     .line-name
       &:after
@@ -106,21 +85,95 @@
     &:after
       content: ": "
 
+// The quiet row at the foot of the section: the map's own page and, for anyone
+// who knows to hover, the tile inspector beside it.
+.map-source-footer
+  display: flex
+  align-items: center
+  gap: 0.5em
+  margin-top: 0.8em
+  font-size: var(--pz-font-size-sm)
+
+  .map-page-link
+    display: inline-flex
+    align-items: center
+    gap: 0.3em
+
+  .dev-inspector-link
+    display: inline-flex
+    align-items: center
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+    opacity: 0
+    transition: opacity 120ms
+
+  &:hover .dev-inspector-link, &:focus-within .dev-inspector-link
+    opacity: 1
+
+// Regional stratigraphy section
 .column-info
+  display: flex
+  align-items: center
+  gap: 0.8em
+  padding-bottom: 0.5em
   border-bottom: 1px solid var(--panel-rule-color)
 
-// The geologic map section's link to the tile inspector: present, but quiet
-// until hovered.
-.tile-inspector-link
-  margin-left: auto
-  display: inline-flex
-  align-items: center
-  gap: 2px
-  font-size: 11px
-  color: var(--pz-text-subtle-color, var(--secondary-color))
-  opacity: 0.6
-  text-decoration: none
+  h3
+    margin: 0 0 0.2em
+
+  .description
+    font-size: var(--pz-font-size-sm)
+    color: var(--pz-secondary-color)
+
+.column-thumbnail-link
+  display: block
+  flex-shrink: 0
+  line-height: 0
+  border-radius: 3px
 
   &:hover
-    opacity: 1
-    text-decoration: none
+    box-shadow: 0 0 0 2px var(--pz-focus-ring-color, var(--pz-intent-primary))
+
+.column-thumbnail
+  width: 44px
+  overflow: hidden
+  border-radius: 3px
+
+  &.placeholder
+    height: 72px
+    background-color: var(--secondary-background)
+
+.matched-units
+  display: flex
+  align-items: baseline
+  gap: 1em
+  margin: 0.5em 0
+
+  h3
+    margin: 0
+    flex-grow: 1
+
+// Matched attributes placed in their class › type hierarchy
+.attribute-hierarchy
+  display: flex
+  flex-direction: column
+  align-items: flex-end
+  gap: 0.3em
+
+.hierarchy-group
+  display: inline-flex
+  flex-wrap: wrap
+  align-items: baseline
+  justify-content: flex-end
+  gap: 0.3em
+
+.hierarchy-level
+  font-size: var(--pz-font-size-sm)
+  font-style: italic
+  color: var(--pz-secondary-color)
+
+.path-separator
+  color: var(--pz-secondary-color)
+
+.unit-info
+  display: flex
+  flex-direction: row

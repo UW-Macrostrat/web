@@ -5,17 +5,12 @@ import {
   Parenthetical,
 } from "@macrostrat/data-components";
 import { BaseMapReference, MapReference } from "~/components/map-info";
-import { AgeRange } from "@macrostrat/column-views";
+import { AgeRange, IntervalProportions } from "@macrostrat/column-views";
 import { Icon } from "@blueprintjs/core";
 import { useAtomValue } from "jotai";
 import { infoMarkerPositionAtom, useAppState } from "../../app-state";
 import { tileInspectorHref } from "~/_utils/tile-inspector";
-
-function LongTextField(props) {
-  const { name, text } = props;
-  if (!text || !text.length) return null;
-  return text && text.length ? h(LongText, { name, text }) : null;
-}
+import { ClampedText } from "./clamped-text";
 
 function GeoMapLines(props) {
   const { source } = props;
@@ -100,41 +95,52 @@ export function GeologicMapInfo(props) {
       classes: { root: "regional-panel" },
       title: "Geologic map",
       helpText: "via providers, Macrostrat",
-      sideComponent: h(TileInspectorLink),
       expanded: bedrockExpanded,
     },
     [
       h("div.map-source-attrs", [
         h.if(source.name && source.name.length)("h3.unit-name", source.name),
-        h(AgeField, {
-          b_age: source.b_int.b_age,
-          t_age: source.t_int.t_age,
-          age: source.age,
-        }),
+        h(AgeField, { source }),
         h.if(source.strat_name != source.name)(StratNamesField, {
           value: source.strat_name,
         }),
-        h(LongTextField, {
+        h(LongText, {
           name: "Description",
           text: source.descrip,
         }),
-        h(LongTextField, {
+        h(LongText, {
           name: "Lithology",
           text: source.lith?.replace(/,(\w)/g, ", $1"),
+          lines: null,
         }),
-        h(LongTextField, {
+        h(LongText, {
           name: "Comments",
           text: comments,
         }),
         h(GeoMapLines, { source }),
         h(DataField, { label: "Source" }, refs),
+        h(MapSourceFooter, { source }),
       ]),
     ]
   );
 }
 
-/** A quiet way under the hood: the tile inspector, at the info marker and on the
- * same compilation, showing the raw tile features behind this description. */
+/** The map's own page and, revealed on hover for those who know to look, the
+ * tile inspector at this point. */
+function MapSourceFooter({ source }) {
+  const { source_id } = source;
+  if (source_id == null) return null;
+  return h("div.map-source-footer", [
+    h("a.map-page-link", { href: `/maps/${source_id}` }, [
+      h(Icon, { icon: "map", size: 12 }),
+      "Map page",
+    ]),
+    h(TileInspectorLink),
+  ]);
+}
+
+/** The tile inspector, at the info marker and on the same compilation,
+ * showing the raw tile features behind this description. */
 function TileInspectorLink() {
   const position = useAtomValue(infoMarkerPositionAtom);
   const compilation = useAppState((state) => state.compilation);
@@ -149,14 +155,9 @@ function TileInspectorLink() {
   });
 
   return h(
-    "a.tile-inspector-link",
-    {
-      href,
-      title: "Inspect the map tiles at this location",
-      // The panel header toggles the section on click
-      onClick: (e) => e.stopPropagation(),
-    },
-    [h(Icon, { icon: "search-template", size: 12 }), " tiles"]
+    "a.dev-inspector-link",
+    { href, title: "Inspect the map tiles at this location" },
+    h(Icon, { icon: "code", size: 12 })
   );
 }
 
@@ -178,27 +179,35 @@ function processComments(comments) {
   return [commentsText, refs];
 }
 
-function AgeField(props) {
-  const { b_age, t_age, age } = props;
+/** The source's age as it wrote it, with the Macrostrat intervals it was
+ * matched to beneath. Both are always shown: the match alone read as if
+ * Macrostrat had dated the unit. */
+function AgeField({ source }) {
+  const { age, b_int, t_int } = source;
+  const b_age = b_int?.b_age;
+  const t_age = t_int?.t_age;
+  const hasIntervals = b_int?.int_id != null || t_int?.int_id != null;
 
-  if (!b_age || !t_age || !age) return null;
+  if (!age && !hasIntervals) return null;
 
-  let children = [];
+  let described = null;
   if (age) {
-    children.push(h("h4.age-interval", age));
-  }
-  if (b_age && t_age) {
-    const ageRange = h(AgeRange, {
-      data: { b_age, t_age },
-    });
-    if (age) {
-      children.push(h(Parenthetical, ageRange));
-    } else {
-      children.push(ageRange);
+    let range = null;
+    if (b_age != null && t_age != null) {
+      range = h(Parenthetical, h(AgeRange, { data: { b_age, t_age } }));
     }
+    described = h("div.described-age", [h("span.age-text", age), range]);
   }
 
-  return h(DataField, { label: "Age" }, children);
+  let intervals = null;
+  if (hasIntervals) {
+    intervals = h(IntervalProportions, {
+      unit: { b_int_id: b_int?.int_id, t_int_id: t_int?.int_id },
+      showAgeRange: !age,
+    });
+  }
+
+  return h(DataField, { label: "Age" }, [described, intervals]);
 }
 
 function StratNamesField(props) {
@@ -210,11 +219,16 @@ function StratNamesField(props) {
   return h(DataField, { label }, text);
 }
 
+/** A labelled run of prose. Long ones are clipped until asked for. */
 function LongText(props) {
-  const { name, text } = props;
+  const { name, text, lines = 3 } = props;
+  if (!text || !text.length) return null;
+  const label = h("span.inline-label", name);
+  if (lines == null) {
+    return h("div.long-text-field", h("p.long-text", [label, text]));
+  }
   return h(
-    DataField,
-    { label: name, inline: true, className: "long-text-field" },
-    h("p", text)
+    "div.long-text-field",
+    h(ClampedText, { text, lines, prefix: label })
   );
 }
