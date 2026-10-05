@@ -115,10 +115,19 @@ function HybridPageInner({
     });
   }
 
+  // The map shell's breadcrumbs sit in a narrow floating panel
+  let breadcrumbSize: "default" | "small" = "default";
+  if (shell === "map") {
+    breadcrumbSize = "small";
+  }
   let shellView: ReactNode = h(LayoutShellView, {
     content,
     header,
-    breadcrumbs: h(PageBreadcrumbs, { showLogo: true, separateTitle: false }),
+    breadcrumbs: h(PageBreadcrumbs, {
+      showLogo: true,
+      separateTitle: false,
+      size: breadcrumbSize,
+    }),
     titleAdornment,
     controls,
     filterBar,

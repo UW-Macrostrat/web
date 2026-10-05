@@ -48,6 +48,19 @@ export function FullscreenPage({ children, className, ...rest }) {
   );
 }
 
+/** A viewport-filling page under the site header's single row, whose body
+ * takes the remaining height: a data sheet, a chart. */
+export function FullscreenHeaderPage({ children, className, actions = null }) {
+  return h(
+    FullscreenPage,
+    { className: classNames("fullscreen-header-page", className) },
+    [
+      h(SitePageHeader, { variant: "compact", actions }),
+      h("div.fullscreen-page-body", children),
+    ]
+  );
+}
+
 /** `header` sits outside the content column, so a sticky bar's background
  * and rule span the page while its content keeps the column's measure. */
 export function BaseContentPage({ children, className, header = null, ...rest }) {

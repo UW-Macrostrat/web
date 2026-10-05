@@ -39,7 +39,11 @@ import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { useMapElement, useMapStyleOperator } from "@macrostrat/mapbox-react";
 import { removeMapLabels } from "@macrostrat/mapbox-utils";
 import { MacrostratDataProvider } from "@macrostrat/data-provider";
-import { ErrorBoundary, useDarkMode } from "@macrostrat/ui-components";
+import {
+  DataField,
+  ErrorBoundary,
+  useDarkMode,
+} from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
@@ -55,7 +59,7 @@ import {
   DevLink,
   MapReference,
   MenuButton,
-  PageBreadcrumbs,
+  SitePageHeader,
 } from "~/components";
 import {
   LegendEntries,
@@ -320,6 +324,9 @@ function viewOf(map: mapboxgl.Map): View {
 
 // --- The page's column ---
 
+/** One scroll container: the site header, expanded at rest, condenses into
+ * its sticky bar as the column scrolls. It is the header's sticky boundary,
+ * so the header must stay its direct child. */
 function PagePanel({ mapInfo, tileJSON }) {
   const activePage = useAtomValue(activePageAtom);
 
@@ -332,23 +339,21 @@ function PagePanel({ mapInfo, tileJSON }) {
   return h(
     MacrostratDataProvider,
     { baseURL: apiV2Prefix },
-    h(
-      LocationPanel,
-      { headerElement: h(PageHeader, { mapInfo, tileJSON }) },
-      h(ErrorBoundary, content)
-    )
+    h("div.page-panel", [
+      h(
+        SitePageHeader,
+        { variant: "hybrid", className: "panel-page-header" },
+        h(MapSummary, { mapInfo })
+      ),
+      h(PanelControls, { tileJSON }),
+      h("div.panel-body", h(ErrorBoundary, content)),
+    ])
   );
 }
 
-/** Everything above the legend: the way back out, the map's reference, and
- * its controls. It is the panel's header, so it stays put while the legend
- * scrolls beneath it. */
-function PageHeader({ mapInfo, tileJSON }) {
-  const [basemap, setBasemap] = useAtom(basemapAtom);
-  const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
-
-  return h("header.page-header", [
-    h(PageBreadcrumbs, { title: mapInfo.name }),
+/** Under the large title: the map's reference, description and slug. */
+function MapSummary({ mapInfo }) {
+  return h("div.map-summary", [
     h(
       ErrorBoundary,
       h(MapReference, { reference: mapInfo, showSourceID: false })
@@ -357,6 +362,11 @@ function PageHeader({ mapInfo, tileJSON }) {
       "p.page-description",
       mapInfo.description
     ),
+    h.if(mapInfo.slug != null)(DataField, {
+      label: "Slug",
+      value: h("code", mapInfo.slug),
+      inline: true,
+    }),
     h("div.dev-links", [
       h(DevLink, { href: `/maps/${mapInfo.source_id}/legend` }, "Legend table"),
       h(
@@ -365,6 +375,14 @@ function PageHeader({ mapInfo, tileJSON }) {
         "Correlation of units"
       ),
     ]),
+  ]);
+}
+
+function PanelControls({ tileJSON }) {
+  const [basemap, setBasemap] = useAtom(basemapAtom);
+  const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
+
+  return h("div.panel-controls", [
     h(MenuButtons),
     h(MapControls, { tileJSON }),
     h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),

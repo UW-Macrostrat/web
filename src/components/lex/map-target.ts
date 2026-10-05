@@ -60,30 +60,19 @@ export const lexMapTargetAtom = atom<LexMapTarget | null>(null);
  * across items; the map ignores a toggle the current item can't honor. */
 export const lexMapLayersAtom = atom({ fossils: false, outcrop: false });
 
-/** The shared settings bar, plus the lexicon's layer toggles and a link to the
- * item on the main map. Rendered beneath the map by the page, whichever map
- * instance (shared or local) is above it. */
+/** The shared settings bar, plus the outcrop toggle and a link to the item on
+ * the main map. Rendered beneath the map by the page, whichever map instance
+ * (shared or local) is above it. The fossils toggle is in the Fossils card. */
 export function LexMapSettingsBar({
   mapUrl,
-  fossilsExist,
   hasFilters,
 }: {
   mapUrl: string;
-  fossilsExist: boolean;
   hasFilters: boolean;
 }) {
   const [layers, setLayers] = useAtom(lexMapLayersAtom, {
     store: mapSettingsStore,
   });
-
-  let fossilsToggle = null;
-  if (fossilsExist) {
-    fossilsToggle = h(Switch, {
-      label: "Fossil collections",
-      checked: layers.fossils,
-      onChange: (e) => setLayers({ ...layers, fossils: e.currentTarget.checked }),
-    });
-  }
 
   let outcropToggle = null;
   if (hasFilters) {
@@ -95,8 +84,8 @@ export function LexMapSettingsBar({
   }
 
   let settings = null;
-  if (fossilsToggle != null || outcropToggle != null) {
-    settings = [fossilsToggle, outcropToggle];
+  if (outcropToggle != null) {
+    settings = [outcropToggle];
   }
 
   let mapLink = null;

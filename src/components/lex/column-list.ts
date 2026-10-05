@@ -70,10 +70,6 @@ export function LexColumnList({ colData }: { colData: any }) {
   }
 
   return h("div.lex-column-list", [
-    h("h3.column-list-header", { key: "header" }, [
-      "Columns",
-      h("span.column-count", { key: "count" }, entries.length.toLocaleString()),
-    ]),
     h("div.column-run", { key: "run" }, [
       shown.map((entry) => h(ColumnCard, { key: entry.col_id, entry })),
       more,

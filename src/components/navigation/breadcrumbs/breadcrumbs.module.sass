@@ -139,3 +139,16 @@ $trail-end: "li:last-of-type:not(.root-crumb), li:has(+ .root-crumb:last-of-type
   flex: 0 0 auto
   margin-left: var(--pz-inline-gap)
   align-self: baseline
+
+// A smaller trail for tight spaces, such as a map's context panel
+.page-nav.small
+  .logo-container img
+    width: 20px
+    height: 20px
+
+  .breadcrumbs :global(.bp6-breadcrumb),
+  .breadcrumbs :global(.bp6-breadcrumb-current)
+    font-size: var(--pz-font-size-md)
+
+  .title-block h1
+    font-size: var(--pz-font-size-xl)

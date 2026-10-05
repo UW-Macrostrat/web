@@ -9,6 +9,20 @@
   top: 0
   left: 0
 
+// The header and body share one gutter; the site header adds none of its own.
+.fullscreen-header-page
+  display: flex
+  flex-direction: column
+  box-sizing: border-box
+  padding: 0 var(--pz-content-padding)
+
+.fullscreen-page-body
+  flex: 1
+  min-height: 0
+  display: flex
+  flex-direction: column
+  padding-bottom: var(--pz-content-padding)
+
 .content-page-inner
   width: var(--pz-content-width)
   display: flex

@@ -19,6 +19,14 @@
   }
 }
 
+.timescale-toolbar {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 0.5em 1.5em;
+  min-height: 2em;
+}
+
 .timescale-summary {
   @include type.supporting;
 }

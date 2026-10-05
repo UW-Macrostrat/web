@@ -16,6 +16,30 @@ header.site-page-header
   h1 + span
     font-size: clamp(var(--pz-font-size-lg), 4.5cqi, var(--pz-font-size-xl))
 
+  // `lexPageInfo` titles: the name, then its "aka" and kind badges on the same
+  // line. One line in the bar, whose crumb has a fixed height; the large
+  // title may wrap. Set unscoped by that module, hence the :global.
+  :global(.lex-item-title)
+    display: inline-flex
+    flex-direction: row
+    align-items: center
+    gap: 0.4em
+    max-width: 100%
+
+  h1 :global(.lex-item-title)
+    flex-wrap: wrap
+
+  // The wordmark crumb is in Maven Pro and the rest in the body font, so
+  // centring each crumb's box left their baselines apart; align on baselines.
+  // The chevrons and the "…" menu have no text, so they stay centred.
+  ol,
+  li
+    align-items: baseline
+
+  li::after,
+  :global(.bp6-breadcrumbs-collapsed)
+    align-self: center
+
 .macrostrat-wordmark
   font-family: "Maven Pro", var(--pz-font-sans)
   font-weight: 400

@@ -8,8 +8,8 @@ import {
   FlexRow,
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
-import { Link, LithologyTag, MacrostratLink } from "~/components";
-import { Card, Divider, Popover, Spinner, Tab, Tabs } from "@blueprintjs/core";
+import { Link, LithologyTag } from "~/components";
+import { Divider, Popover, Switch, Tab, Tabs } from "@blueprintjs/core";
 import {
   AlphaTag,
   BetaTag,
@@ -23,20 +23,11 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { LinkCard } from "~/components/cards";
 import { LexItemPageProps } from "~/types";
-import { clientOnly } from "./client-only";
-// NOTE: do NOT statically import "./map.client" here — it pulls in mapbox-gl,
-// which touches `window` at module load and crashes SSR. `clientOnly()` dynamic-
-// imports it (below) so the barrel stays server-safe.
-//
-// This local instance is the fallback for consumers *outside* `/lex` (e.g. the
-// project column-group page). Lexicon pages pass a `targetKey` and get the
-// single shared map instance instead — see `./map-target`.
-const LexiconMapLazy = clientOnly(() =>
-  import("./map.client").then((m) => m.LexiconMap)
-);
-import { LexMapSettingsBar, LexMapSlot } from "./map-target";
+import { lexMapLayersAtom } from "./map-target";
+import { mapSettingsStore } from "~/components/map-settings";
+import { useAtom } from "jotai";
 import { fetchPGData } from "~/_utils";
-import { ExpansionPanel } from "@macrostrat/data-components";
+import { DataField, ExpansionPanel } from "@macrostrat/data-components";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -78,156 +69,6 @@ function LexItemPageInner(props: LexItemPageProps) {
       id,
       siftLink,
     }),
-  ]);
-}
-
-export function ColumnsTable({
-  resData,
-  colData,
-  fossilsData,
-  mapUrl,
-  targetKey = "",
-  loading = false,
-}) {
-  const hasColumns = colData?.features?.length > 0;
-  const summary = summarize(hasColumns ? colData.features : []);
-
-  // Hooks must run unconditionally and in a stable order, ahead of any early
-  // return (rules of hooks). `useAPIResult`/`getIntID` no-op on a null route, so
-  // pass null when the input is absent instead of skipping the hook.
-  const lithLegendIds = useAPIResult(
-    resData?.lith_id
-      ? apiV2Prefix + "/mobile/map_filter?lith_id=" + resData.lith_id
-      : null
-  );
-  const conceptLegendIds = useAPIResult(
-    resData?.concept_id
-      ? apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id
-      : null
-  );
-  const t_id = useIntervalID({ name: summary.t_int_name });
-  const b_id = useIntervalID({ name: summary.b_int_name });
-
-  // Nothing to show only once we *know* there are no columns. While they load,
-  // fall through and render the frame — that reserves the space and keeps the
-  // shared map mounted, so navigation doesn't make it blink out and back.
-  if (!hasColumns && !loading) return null;
-
-  let filters = [];
-
-  if (resData?.lith_id && lithLegendIds) {
-    filters.push({
-      category: "lithology",
-      type: "lithologies",
-      id: resData.lith_id,
-      name: resData.name,
-      legend_ids: lithLegendIds,
-    });
-  }
-
-  if (resData?.concept_id && conceptLegendIds) {
-    filters.push({
-      category: "strat_name",
-      type: "strat_name_concepts",
-      id: resData.concept_id,
-      name: resData.name,
-      legend_ids: conceptLegendIds,
-    });
-  }
-
-  if (resData?.int_id) {
-    filters.push({
-      ...resData,
-      category: "interval",
-      type: "intervals",
-      id: resData.int_id,
-      name: resData.name,
-    });
-  }
-
-  const { b_age, t_age } = resData ?? {};
-
-  const {
-    t_units,
-    t_sections,
-    t_int_name,
-    pbdb_collections,
-    b_int_name,
-    max_thick,
-    col_area,
-  } = summary;
-
-  const area = parseInt(col_area.toString().split(".")[0]);
-
-  // A `targetKey` means the caller is inside `/lex`, where one map instance is
-  // mounted by the layout: render the slot it moves into (no map of our own).
-  // Everywhere else, mount a local instance as before.
-  const mapProps = {
-    filters,
-    columns: colData,
-    className: "column-map-container",
-    fossilsData,
-    mapUrl,
-  };
-  let mapElement = null;
-  if (targetKey !== "") {
-    mapElement = h(LexMapSlot, {
-      targetKey,
-      loading: !hasColumns,
-      ...mapProps,
-    });
-  } else {
-    mapElement = h(LexiconMapLazy, { ...mapProps, fallback: h(Spinner) });
-  }
-
-  // While columns load, the stats are all zeros — show a placeholder instead, so
-  // the frame holds its shape without asserting numbers we don't have yet.
-  let statsContent: any = h("div.stats-loading", h(Spinner, { size: 24 }));
-  if (hasColumns) {
-    statsContent = [
-      h("div.packages", t_sections.toLocaleString() + " packages"),
-      h(Divider, { className: "divider" }),
-      h("div.units", t_units.toLocaleString() + " units"),
-      h(Divider, { className: "divider" }),
-      h("div.interval", [
-        h(
-          MacrostratLink,
-          { item: { int_id: b_id } },
-          b_int_name.toLocaleString()
-        ),
-        " - ",
-        h(
-          MacrostratLink,
-          { item: { int_id: t_id } },
-          t_int_name.toLocaleString()
-        ),
-      ]),
-      h.if(b_age && t_age)(Divider, { className: "divider" }),
-      h.if(b_age && t_age)("div.age-range", [
-        h("div.int-age", b_age + " - " + t_age + " Ma"),
-        // h(Parenthetical, { className: "range"}, h(Duration, { value: b_age - t_age })),
-      ]),
-      h(Divider, { className: "divider" }),
-      h("div.area", [h("p", area.toLocaleString() + " km"), h("sup", "2")]),
-      h(Divider, { className: "divider" }),
-      h("div.thickness", "≤ " + max_thick.toLocaleString() + "m thick"),
-      h(Divider, { className: "divider" }),
-      h("div.collections", pbdb_collections.toLocaleString() + " collections"),
-    ];
-  }
-
-  // Statistics and map are separate cards; the map's settings bar is part of
-  // its card, beneath whichever instance (shared or local) is above it.
-  return h("div.lex-summary", [
-    h("div.lex-stats-card", statsContent),
-    h("div.lex-map-card", [
-      mapElement,
-      h(LexMapSettingsBar, {
-        mapUrl,
-        fossilsExist: fossilsData?.features?.length > 0,
-        hasFilters: filters.length > 0,
-      }),
-    ]),
   ]);
 }
 
@@ -377,20 +218,56 @@ export function References({ refs }) {
   ]);
 }
 
-export function PrevalentTaxa({ taxaData }) {
-  const records = taxaData?.records;
+/** Fossil collections in the item's columns, the taxa most found in them, and
+ * the switch for their map layer. */
+export function FossilsCard({ colData, fossilsData, taxaData }) {
+  const [layers, setLayers] = useAtom(lexMapLayersAtom, {
+    store: mapSettingsStore,
+  });
+  const collections = summarize(colData?.features).pbdb_collections;
+  const records = taxaData?.records ?? [];
+  const hasFossils = fossilsData?.features?.length > 0;
 
-  if (!records || records.length === 0) return;
+  if (collections == 0 && records.length == 0 && !hasFossils) return null;
 
-  return h(Card, { className: "prevalent-taxa-container" }, [
-    h("div.taxa-header", [
-      h("h3", "Prevalent Taxa"),
-      h("div.link", [
-        h("p", "via"),
-        h("a", { href: pbdbDomain + "/#/" }, "PaleoBioDB"),
+  let mapToggle = null;
+  if (hasFossils) {
+    mapToggle = h(Switch, {
+      className: "map-toggle",
+      label: "Show on map",
+      checked: layers.fossils,
+      onChange: (e) => setLayers({ ...layers, fossils: e.currentTarget.checked }),
+    });
+  }
+
+  let taxa = null;
+  if (records.length > 0) {
+    taxa = h("div.prevalent-taxa", [
+      h("h3.taxa-heading", [
+        "Prevalent taxa ",
+        h("span.via", [
+          "via ",
+          h("a", { href: pbdbDomain + "/#/" }, "PaleoBioDB"),
+        ]),
       ]),
+      h(
+        "div.taxa-list",
+        records.map((record) => h(Taxa, { key: record.oid, record }))
+      ),
+    ]);
+  }
+
+  return h("div.lex-fossils-card", [
+    h("div.card-header", [
+      h("h2.card-title", "Fossils"),
+      h(DataField, {
+        label: "Collections",
+        value: collections.toLocaleString(),
+        inline: true,
+      }),
+      mapToggle,
     ]),
-    records?.map((record) => h(Taxa, { key: record.oid, record })),
+    taxa,
   ]);
 }
 
@@ -431,16 +308,6 @@ function ConceptHierarchy({ id }) {
       });
     }),
   ]);
-}
-
-function useIntervalID({ name }) {
-  const res = useAPIResult(
-    name ? apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name) : null
-  )?.success?.data;
-
-  const id = res?.filter((d) => d.name === name)[0]?.int_id;
-
-  return id;
 }
 
 /**
@@ -553,7 +420,8 @@ export function summarize(data) {
       t_sections,
     } = properties;
 
-    summary.col_area += col_area;
+    // The API sends area as a string
+    summary.col_area += Number(col_area);
     summary.pbdb_collections += pbdb_collections;
     summary.t_units += t_units;
     summary.t_sections += t_sections;

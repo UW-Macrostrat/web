@@ -1,9 +1,10 @@
 import hyper from "@macrostrat/hyper";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { scaleLinear } from "d3-scale";
 import {
   Timescale,
   TimescaleOrientation,
+  useZoomableScale,
   type Interval,
 } from "@macrostrat/timescale";
 import { navigateToInterval } from "~/components/lex";
@@ -22,13 +23,22 @@ interface TimescaleChartProps {
   name: string;
   intervals: any[];
   referenceIntervals: any[];
+  /** The international interval zoomed to, if any */
+  focus: Interval | null;
+  onFocus(interval: Interval): void;
 }
+
+// Pixels held around a zoomed interval, so its neighbors stay clickable
+const ZOOM_PADDING = 24;
+const ZOOM_DURATION = 600;
 
 /** A timescale beside the international timescale, on one age scale, after
  * `SharedScaleTimescales` in `@macrostrat/timescale` (whose columns don't yet
- * take a click handler). */
+ * take a click handler). Clicking the international column zooms both to the
+ * clicked interval. */
 export function TimescaleChart(props: TimescaleChartProps) {
-  const { timescaleID, name, intervals, referenceIntervals } = props;
+  const { timescaleID, name, intervals, referenceIntervals, focus, onFocus } =
+    props;
 
   const tree = useMemo(
     () => buildTimescaleTree(timescaleID, intervals, name),
@@ -44,8 +54,14 @@ export function TimescaleChart(props: TimescaleChartProps) {
     [referenceIntervals]
   );
 
-  const scale = useAgeScale(tree, intervals.length);
-  if (scale == null) return null;
+  const baseScale = useAgeScale(tree, intervals.length);
+  const zoom = useZoomableScale(baseScale ?? emptyScale, {
+    padding: ZOOM_PADDING,
+    duration: ZOOM_DURATION,
+  });
+  useFocusZoom(zoom, focus);
+
+  if (baseScale == null) return null;
 
   const [younger, older] = ageExtent(tree);
 
@@ -54,9 +70,12 @@ export function TimescaleChart(props: TimescaleChartProps) {
     referenceColumn = h(ChartColumn, {
       label: "International timescale",
       intervals: reference,
-      levels: referenceLevels(older - younger),
-      scale,
+      levels: focusedLevels(focus, older - younger),
+      scale: zoom.scale,
       className: "reference",
+      onClick: (e, d) => {
+        if (d.interval != null) onFocus(d.interval);
+      },
     });
   }
 
@@ -66,7 +85,7 @@ export function TimescaleChart(props: TimescaleChartProps) {
       label: name,
       intervals: tree,
       levels: [1, Math.max(treeDepth(tree), 1)],
-      scale,
+      scale: zoom.scale,
       className: "subject",
       showAgeAxis: referenceColumn == null,
     }),
@@ -80,6 +99,7 @@ function ChartColumn({
   scale,
   className,
   showAgeAxis = true,
+  onClick = (e, d) => navigateToInterval(d),
 }) {
   // `AgeAxis` reverses the range of the scale it's handed
   const columnScale = useMemo(() => scale.copy(), [scale]);
@@ -93,10 +113,33 @@ function ChartColumn({
       absoluteAgeScale: true,
       levels,
       showAgeAxis,
-      onClick: (e, d) => navigateToInterval(d),
+      onClick,
       className: "timescale",
     }),
   ]);
+}
+
+const emptyScale = scaleLinear().domain([1, 0]).range([0, 1]);
+
+/** Follow the focused interval: zoom to it, or back out when it's cleared. */
+function useFocusZoom(zoom, focus: Interval | null) {
+  useEffect(() => {
+    if (focus != null) {
+      zoom.zoomToInterval(focus);
+    } else if (!zoom.isFullExtent) {
+      zoom.reset();
+    }
+    // Only a change of focus starts a zoom, not a change in the zoom's state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focus]);
+}
+
+/** Finer international levels once zoomed: those suiting the focused span,
+ * and always the focused interval's own. */
+function focusedLevels(focus: Interval | null, span: number): [number, number] {
+  if (focus == null) return referenceLevels(span);
+  const [minLevel, maxLevel] = referenceLevels(focus.eag - focus.lag);
+  return [Math.min(minLevel, focus.lvl), Math.max(maxLevel, focus.lvl)];
 }
 
 function useAgeScale(tree: Interval[], count: number) {

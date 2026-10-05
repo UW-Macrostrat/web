@@ -2,20 +2,9 @@
 
 @use "~/styles/type"
 
+// Inside the Columns card, whose Columns field carries the count
 .lex-column-list
-  margin: 1em 0
-
-.column-list-header
-  @include type.section-heading
-  display: flex
-  flex-direction: row
-  align-items: baseline
-  gap: 0.5em
-
-  .column-count
-    font-family: var(--pz-body-font)
-    font-size: var(--pz-font-size-xs)
-    color: var(--pz-secondary-color)
+  margin-top: 1em
 
 // An ideal card width rather than a fixed count: the list sits in the content
 // column on a lexicon page but in a narrow panel on a hybrid one.
