@@ -1,12 +1,9 @@
-import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
 import { LexItemPage } from "~/components/lex";
-import { usePageContext } from "vike-react/usePageContext";
+import { useLexItemData } from "~/components/lex/data-loaders.ts";
 
 export function Page() {
-  const { resData } = useData();
-
-  const id = usePageContext().routeParams.id;
+  const { resData, id } = useLexItemData();
 
   const children = [h(LithologyAttributeDetails, { resData })];
 
@@ -22,7 +19,7 @@ export function Page() {
 }
 
 function LithologyAttributeDetails({ resData }) {
-  const { type, t_units } = resData;
+  const { type, t_units } = resData ?? {};
 
   return h("div", { class: "lith-att-details" }, [
     h("p", `Type: ${type}`),
