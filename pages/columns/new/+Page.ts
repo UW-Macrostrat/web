@@ -26,7 +26,7 @@ import {
   draftColumn,
 } from "../@column/column-editor/data";
 import styles from "./new-column.module.sass";
-import { ColumnUpload } from "./column-upload.ts";
+import { type ColumnPreview, ColumnUpload } from "./column-upload.ts";
 
 const h = hyper.styled(styles);
 
@@ -108,11 +108,18 @@ function NewColumnFormContainer({
 }) {
   const [showUploadForm, setShowUploadForm] = useAtom(showUploadFormAtom);
 
+  // A parsed upload opens as an unsaved draft, like a column started by hand.
+  const onPreview = useCallback(
+    (col: ColumnPreview) =>
+      onStart({ ...draftColumn(col.columnInfo), units: col.units }),
+    [onStart]
+  );
+
   let formContent: any = h(NewColumnForm, { onStart });
   if (showUploadForm) {
     formContent = h("div.column-upload", [
       h("h1", "Upload a spreadsheet"),
-      h(ColumnUpload),
+      h(ColumnUpload, { onPreview }),
     ]);
   }
 

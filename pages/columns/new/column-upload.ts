@@ -34,7 +34,9 @@ const POLL_INTERVAL_MS = 1500;
 const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
 function exampleDownloadUrl(key: string): string {
-  return `${apiV3Prefix}/columns/examples/download?key=${encodeURIComponent(key)}`;
+  return `${apiV3Prefix}/columns/examples/download?key=${encodeURIComponent(
+    key
+  )}`;
 }
 
 async function pollStatus(taskId: string): Promise<any> {
@@ -54,10 +56,51 @@ async function pollStatus(taskId: string): Promise<any> {
   throw new Error("Timed out waiting for the ingestion task to finish.");
 }
 
-export function ColumnUpload() {
+/** A column as parsed by the ingest, in the shape the column editor loads. */
+export interface ColumnPreview {
+  columnInfo: any;
+  units: any[];
+}
+
+function summaryMessage(summary: any, dryRun: boolean): string {
+  let prefix = "Ingestion succeeded. ";
+  if (dryRun) prefix = "Dry run succeeded — nothing was saved. ";
+  if (summary == null) return prefix;
+  return `${prefix}${summary.n_columns} column(s), ${summary.n_units} unit(s), ${summary.n_references} reference(s).`;
+}
+
+function PreviewButtons({
+  previews,
+  onPreview,
+}: {
+  previews: ColumnPreview[];
+  onPreview?: (col: ColumnPreview) => void;
+}) {
+  if (onPreview == null || previews.length < 2) return null;
+  return h(
+    "div.preview-buttons",
+    { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem" } },
+    previews.map((col, i) =>
+      h(Button, {
+        key: i,
+        icon: "edit",
+        text: `Open ${col.columnInfo.col_name ?? `column ${i + 1}`}`,
+        onClick: () => onPreview(col),
+      })
+    )
+  );
+}
+
+export function ColumnUpload({
+  onPreview,
+}: {
+  /** Opens a parsed column in the editor, unsaved. */
+  onPreview?: (col: ColumnPreview) => void;
+} = {}) {
   const pageContext = usePageContext();
   const isAdmin = (pageContext as any).user?.role === "web_admin";
 
+  const [previews, setPreviews] = useState<ColumnPreview[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [dryRun, setDryRun] = useState(true);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -89,44 +132,51 @@ export function ColumnUpload() {
   }, []);
 
   // Core upload + poll, shared by the file submit and the example dry run.
-  const runIngest = useCallback(async (toSend: File, dryRunValue: boolean) => {
-    setPhase("working");
-    setMessage(null);
-    try {
-      const data = new FormData();
-      data.append("file", toSend, toSend.name);
-      data.append("dry_run", String(dryRunValue));
+  const runIngest = useCallback(
+    async (toSend: File, dryRunValue: boolean) => {
+      setPhase("working");
+      setMessage(null);
+      setPreviews([]);
+      try {
+        const data = new FormData();
+        data.append("file", toSend, toSend.name);
+        data.append("dry_run", String(dryRunValue));
 
-      // No Content-Type header — the browser sets the multipart boundary itself.
-      const res = await fetch(`${apiV3Prefix}/columns/ingest`, {
-        method: "POST",
-        credentials: "include",
-        body: data,
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Upload failed (${res.status}): ${text}`);
-      }
+        // No Content-Type header — the browser sets the multipart boundary itself.
+        const res = await fetch(`${apiV3Prefix}/columns/ingest`, {
+          method: "POST",
+          credentials: "include",
+          body: data,
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Upload failed (${res.status}): ${text}`);
+        }
 
-      const { task_id } = await res.json();
-      const result = await pollStatus(task_id);
+        const { task_id } = await res.json();
+        const result = await pollStatus(task_id);
 
-      if (result.state === "FAILURE") {
+        if (result.state === "FAILURE") {
+          setPhase("error");
+          setMessage(result.error ?? "Ingestion task failed.");
+          return;
+        }
+
+        setPhase("done");
+        // The worker wraps the ingest summary as `result.result`.
+        const summary = result.result?.result;
+        const parsed: ColumnPreview[] = summary?.columns ?? [];
+        setPreviews(parsed);
+        setMessage(summaryMessage(summary, dryRunValue));
+        // One column needs no choosing: open it straight away.
+        if (parsed.length === 1) onPreview?.(parsed[0]);
+      } catch (e: any) {
         setPhase("error");
-        setMessage(result.error ?? "Ingestion task failed.");
-        return;
+        setMessage(e?.message ?? String(e));
       }
-
-      setPhase("done");
-      const prefix = dryRunValue
-        ? "Dry run succeeded — nothing was saved. "
-        : "Ingestion succeeded. ";
-      setMessage(prefix + JSON.stringify(result.result ?? {}));
-    } catch (e: any) {
-      setPhase("error");
-      setMessage(e?.message ?? String(e));
-    }
-  }, []);
+    },
+    [onPreview]
+  );
 
   const submit = useCallback(() => {
     if (file == null) return;
@@ -266,6 +316,7 @@ export function ColumnUpload() {
         ),
       ]),
       callout,
+      h(PreviewButtons, { previews, onPreview }),
     ]
   );
 }
