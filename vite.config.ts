@@ -142,31 +142,37 @@ function setupVersionEnvironmentVariables(pkg) {
     process.env["VITE_" + key] = value;
   }
 }
-
 function buildDevProxy() {
-  /** Mirror the container stack's `/api/*` and `/tiles/*` routes onto the dev
-   * server's own origin.
-   *
-   * The app is normally served from `https://dev.macrostrat.local`, where Caddy
-   * routes those paths for us. Loading it directly from `http://localhost:3000`
-   * skips Caddy, so the client would have to call the `.local` hosts
-   * cross-origin — which anything that can't resolve OrbStack's mDNS names
-   * (notably the Claude desktop app's browser pane) cannot do. With this proxy,
-   * a page served from localhost talks only to localhost.
-   *
-   * `macrostrat.local` is the target for both because it already serves the API
-   * routes *and* `/tiles/*` (to the same tileserver as `tiles.macrostrat.local`).
-   * `pages/+onCreatePageContext.server.ts` is the other half: it points the
-   * client at these paths when the request came in on localhost.
-   *
-   * Dev-only by construction — `server.proxy` is ignored by `vike build`. */
-  const target = loadEnvVar("MACROSTRAT_API_DOMAIN");
-  if (target == null) return undefined;
+  const apiTarget = loadEnvVar("MACROSTRAT_API_DOMAIN");
+  const kgTarget = loadEnvVar("MACROSTRAT_KG_API_DOMAIN");
 
-  // `secure: false` because the stack uses OrbStack's local CA, and
-  // `changeOrigin` because Caddy routes on the Host header.
-  const opts = { target, changeOrigin: true, secure: false };
-  return { "/api": opts, "/tiles": opts };
+  return {
+    ...(apiTarget
+      ? {
+          "/api": {
+            target: apiTarget,
+            changeOrigin: true,
+            secure: false,
+          },
+          "/tiles": {
+            target: apiTarget,
+            changeOrigin: true,
+            secure: false,
+          },
+        }
+      : {}),
+
+    ...(kgTarget
+      ? {
+          "/kg-api": {
+            target: kgTarget,
+            changeOrigin: true,
+            rewrite: (requestPath: string) =>
+              requestPath.replace(/^\/kg-api/, ""),
+          },
+        }
+      : {}),
+  };
 }
 
 function loadEnvVar(name: string): string | null {
