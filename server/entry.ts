@@ -4,7 +4,6 @@ import sirv from "sirv";
 import { mintTileToken } from "../src/_utils/tile-token.server.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createProxyMiddleware } from "http-proxy-middleware";
 
 const fgdcPatterns = join(
   dirname(fileURLToPath(import.meta.resolve("geologic-patterns"))),
@@ -13,17 +12,6 @@ const fgdcPatterns = join(
 
 function startServer() {
   const app = express();
-  const kgTarget = process.env.VITE_MACROSTRAT_KG_API_DOMAIN;
-  if (kgTarget !== undefined && !kgTarget.startsWith("http")) {
-    console.log("Proxying KG API requests to", kgTarget);
-    app.use(
-      "/kg-api",
-      createProxyMiddleware({
-        target: kgTarget,
-        changeOrigin: true,
-      })
-    );
-  }
   app.use("/assets/geologic-patterns", sirv(fgdcPatterns));
   // A fresh tile token, for a page that has outlived the one it arrived with.
   // Never cached: every response is a different credential.

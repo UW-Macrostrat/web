@@ -18,7 +18,6 @@ export const burwellTileDomain = getRuntimeConfig(
   "MACROSTRAT_TILESERVER_DOMAIN"
 );
 export const apiDomain = getRuntimeConfig("MACROSTRAT_API_DOMAIN");
-export const xDDapiDomain = getRuntimeConfig("MACROSTRAT_KG_API_DOMAIN");
 
 export const tileserverDomain = burwellTileDomain;
 // For now,
@@ -108,11 +107,12 @@ export const routerBasename = "/map";
 export const websiteDocsPrefix = "/docs/website";
 
 /** Base URL of the knowledge-graph (xDD extraction) API that records feedback
- * runs. `XDD_KNOWLEDGE_GRAPH_API_URL` is the canonical setting; the older
- * `MACROSTRAT_KG_API_DOMAIN` is honored as a fallback so existing deployments
- * keep working. Both the extraction pages and the feedback editor read this one
- * value — they used to read different settings for the same service. */
-export const knowledgeGraphAPIURL = "/kg-api";
+ * runs. The API gateway serves it under API v3, on the site's own origin so
+ * requests carry the auth cookie. */
+export const knowledgeGraphAPIURL = getRuntimeConfig(
+  "MACROSTRAT_KG_API_PREFIX",
+  apiV3Prefix + "/knowledge-graph"
+);
 
 export const macrostratInstance = getRuntimeConfig("MACROSTRAT_INSTANCE");
 
