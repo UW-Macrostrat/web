@@ -111,17 +111,6 @@ function SiftRouter() {
 }
 
 class App extends React.Component {
-  componentDidMount() {
-    const { pathname, hash } = window.location;
-
-    if (
-      (pathname === "/sift" || pathname === "/sift/") &&
-      hash.startsWith("#/")
-    ) {
-      const cleanPath = hash.replace("#", "");
-      window.location.replace(`/sift${cleanPath}`);
-    }
-  }
   constructor(props) {
     super(props);
     this.state = {

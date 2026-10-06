@@ -335,8 +335,48 @@ export function applyDrop(
     next = withMembers(graph, next, from, fromList);
   }
 
-  if (from !== to) next = reparent(graph, next, to, memberId);
+  if (from !== to) {
+    next = reparent(graph, next, to, memberId);
+    next = absorb(graph, next, to, memberId);
+  }
   return next;
+}
+
+/** The other direction: a compilation placed in `compilationId` stands there
+ * for its own members, so the direct edges `compilationId` held to any of
+ * them are withdrawn -- `bc-surface` dropped into `large` replaces `large`'s
+ * own edges to `bc_2017` and `bc_2017_quat`. Left in place they would be
+ * placed twice over, which `compilations lint` reports. */
+function absorb(
+  graph: CompilationGraph,
+  draft: Draft,
+  compilationId: number,
+  memberId: number
+): Draft {
+  const below = descendantsOf(graph, draft, memberId);
+  if (below.size === 0) return draft;
+  const list = membersOf(graph, draft, compilationId);
+  const kept = list.filter((e) => !below.has(e.member_id));
+  if (kept.length === list.length) return draft;
+  return withMembers(graph, draft, compilationId, kept);
+}
+
+function descendantsOf(
+  graph: CompilationGraph,
+  draft: Draft,
+  id: number
+): Set<number> {
+  const found = new Set<number>();
+  const queue = [id];
+  while (queue.length > 0) {
+    const next = queue.shift()!;
+    for (const e of membersOf(graph, draft, next)) {
+      if (found.has(e.member_id)) continue;
+      found.add(e.member_id);
+      queue.push(e.member_id);
+    }
+  }
+  return found;
 }
 
 /** The CLI's reparenting, done in the draft so it shows before the save: a map

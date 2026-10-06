@@ -112,10 +112,7 @@ export const websiteDocsPrefix = "/docs/website";
  * `MACROSTRAT_KG_API_DOMAIN` is honored as a fallback so existing deployments
  * keep working. Both the extraction pages and the feedback editor read this one
  * value — they used to read different settings for the same service. */
-export const knowledgeGraphAPIURL = getRuntimeConfig(
-  "XDD_KNOWLEDGE_GRAPH_API_URL",
-  xDDapiDomain ?? apiDomain + "/api/knowledge-graph"
-);
+export const knowledgeGraphAPIURL = "/kg-api";
 
 export const macrostratInstance = getRuntimeConfig("MACROSTRAT_INSTANCE");
 

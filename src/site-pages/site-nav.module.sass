@@ -1,0 +1,28 @@
+@use "~/styles/type"
+
+.site-nav
+  display: flex
+  gap: 0.2em
+  align-items: center
+
+  // The header's title needs the room on a phone; the footer carries the same links.
+  @media (max-width: 640px)
+    display: none
+
+.site-nav-link
+  padding: 0.2em 0.5em
+  border-radius: var(--pz-radius-md)
+  font-size: var(--pz-font-size-sm)
+  color: var(--pz-text-subtle-color)
+  text-decoration: none
+  transition: background-color 0.2s ease
+  @include type.focus-ring
+
+  &:hover
+    text-decoration: none
+    color: var(--pz-text-color)
+    background-color: var(--pz-hover-background-color)
+
+  &.active, &.active:hover
+    color: var(--pz-selected-text-color)
+    background-color: var(--pz-selected-background-color)

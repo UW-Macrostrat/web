@@ -19,7 +19,6 @@ import {
   type CompilationGraph,
 } from "~/components/compilation-tree";
 import { locationAtom } from "~/_utils/url-atoms";
-import { Basemap } from "~/components";
 
 export interface Point {
   lng: number;
@@ -141,24 +140,4 @@ const cartoParamAtom = searchParamAtom("carto");
 export const showCartoAtom = atom(
   (get) => get(cartoParamAtom) === "on",
   (get, set, value: boolean) => set(cartoParamAtom, value ? "on" : null)
-);
-
-const basemapParamAtom = searchParamAtom("basemap");
-export const basemapAtom = atom(
-  (get): Basemap => {
-    const value = get(basemapParamAtom);
-    if (value === Basemap.Satellite || value === Basemap.None) {
-      return value as Basemap;
-    }
-    return Basemap.Basic;
-  },
-  (get, set, value: Basemap) => {
-    set(basemapParamAtom, value === Basemap.Basic ? null : value);
-  }
-);
-
-const labelsParamAtom = searchParamAtom("labels");
-export const showLabelsAtom = atom(
-  (get) => get(labelsParamAtom) !== "off",
-  (get, set, value: boolean) => set(labelsParamAtom, value ? null : "off")
 );

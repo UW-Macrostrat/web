@@ -1,36 +1,49 @@
+import { MasonryScrollBody } from "@macrostrat/data-sheet";
+import { LinkCard } from "~/components/cards";
 import h from "./components.module.sass";
-import { LegacyPublicationList } from "./legacy-publications";
+import type { Publication, PlatformPaper } from "../citations";
 
-/** The platform papers, kept here until they are published from the Zotero
- * library's Infrastructure collection. */
-const infrastructurePapers = [
-  {
-    citation:
-      "Quinn, D.P., C.R. Idzikowski, S.E. Peters. 2024. Building a multi-scale, collaborative, and time-integrated digital crust: The next stage of the Macrostrat data system. Geoscience Data Journal.",
-    doi: "10.1002/gdj3.189",
-    note: "Macrostrat v2",
-  },
-  {
-    citation:
-      "Peters, S.E., J.M. Husson, J. Czaplewski. 2018. Macrostrat: a platform for geological data integration and deep-time Earth crust research. Geochemistry, Geophysics, Geosystems.",
-    doi: "10.1029/2018GC007467",
-    note: "The platform",
-  },
-];
+const zoteroLibrary = "https://www.zotero.org/groups/6644229/macrostrat/library";
 
-export function CiteMacrostrat() {
+/** The papers to cite for the platform, at the top of /publications and on /about. */
+export function CiteMacrostrat({ platformPapers }: { platformPapers: PlatformPaper[] }) {
   return h(
-    "ul.cite-list",
-    infrastructurePapers.map((p) =>
-      h("li.cite-item", { key: p.doi }, [
-        h("span.cite-note", p.note),
-        h("span.cite-text", p.citation),
-        h("a.cite-doi", { href: `https://doi.org/${p.doi}`, target: "_blank", rel: "noopener" }, `doi:${p.doi}`),
-      ])
+    "div.cite-list",
+    (platformPapers ?? []).map((p) =>
+      h(LinkCard, { key: p.id, href: p.href, title: p.note }, h(Citation, { publication: p }))
     )
   );
 }
 
-export function Bibliography() {
-  return h("div.bibliography", h(LegacyPublicationList));
+/** The library's bibliography, newest first, in two balanced columns. */
+export function Bibliography({ publications }: { publications: Publication[] }) {
+  return h(
+    "div.bibliography",
+    h(
+      MasonryScrollBody,
+      { columns: 2, minColumnWidth: 320 },
+      (publications ?? []).map((p) =>
+        // A DOM wrapper, because the masonry measures each item through its ref.
+        h("div", { key: p.id }, h(LinkCard, { href: p.href, density: "list" }, h(Citation, { publication: p })))
+      )
+    )
+  );
+}
+
+/** The count and a link to the library, beside the bibliography's heading. */
+export function BibliographySummary({ publications }: { publications: Publication[] }) {
+  const entries = publications ?? [];
+  const years = entries.map((p) => p.year).filter((y) => y != null);
+  let count = `${entries.length} papers`;
+  if (years.length > 0) {
+    count += ` since ${Math.min(...years)}`;
+  }
+  return h("div.pub-summary", [
+    h("span.pub-count", count),
+    h("a.pub-zotero", { href: zoteroLibrary, target: "_blank", rel: "noopener" }, "View in Zotero"),
+  ]);
+}
+
+function Citation({ publication }: { publication: Publication }) {
+  return h("span.pub-citation", { dangerouslySetInnerHTML: { __html: publication.html } });
 }

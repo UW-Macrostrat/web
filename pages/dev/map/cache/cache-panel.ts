@@ -28,11 +28,14 @@ import {
 } from "./lib.ts";
 import { useCallback } from "react";
 import { BaseLayerForm } from "~/components";
+import { basemapAtom, showLabelsAtom } from "~/_utils/basemap";
 import h from "./main.module.scss";
 import { PrimitiveAtom, useAtom, useAtomValue } from "jotai";
 
 export function CachePanel() {
   const [mode, setMode] = useAtom(expireModeAtom);
+  const [basemap, setBasemap] = useAtom(basemapAtom);
+  const [showLabels, setShowLabels] = useAtom(showLabelsAtom);
   const [selectedMaps, setSelectedMaps] = useAtom(selectedMapsAtom);
   const expireBbox = useAtomValue(viewportBboxAtom);
   const [zoom, setZoom] = useAtom(zoomAtom);
@@ -126,7 +129,7 @@ export function CachePanel() {
       label: "Macrostrat map",
       atom: showCartoAtom,
     }),
-    h(BaseLayerForm),
+    h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),
   ]);
 }
 

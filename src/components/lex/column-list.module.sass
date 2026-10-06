@@ -1,30 +1,17 @@
-// The columns a lexicon item is found in. Same idiom as the hierarchy tree on
-// the same page — compact cards in a flexible grid — so the two lists below the
-// map read as one family rather than as a strip and a tree.
+// The columns a lexicon item is found in: list-density cards in a flexible grid.
 
 @use "~/styles/type"
 
+// Inside the Columns card, whose Columns field carries the count
 .lex-column-list
-  margin: 1em 0
-
-.column-list-header
-  @include type.section-heading
-  display: flex
-  flex-direction: row
-  align-items: baseline
-  gap: 0.5em
-
-  .column-count
-    font-family: var(--pz-body-font)
-    font-size: var(--pz-font-size-xs)
-    color: var(--pz-secondary-color)
+  margin-top: 1em
 
 // An ideal card width rather than a fixed count: the list sits in the content
 // column on a lexicon page but in a narrow panel on a hybrid one.
 .column-run
   display: grid
   grid-template-columns: repeat(auto-fill, minmax(13em, 1fr))
-  gap: 0.35em
+  gap: var(--pz-space-2)
   align-items: stretch
 
   // The control that reveals the rest of a long run belongs on its own line.

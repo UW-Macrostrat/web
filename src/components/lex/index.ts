@@ -8,8 +8,8 @@ import {
   FlexRow,
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
-import { Link, LithologyTag, MacrostratLink } from "~/components";
-import { Card, Divider, Popover, Spinner } from "@blueprintjs/core";
+import { Link, LithologyTag } from "~/components";
+import { Divider, Popover, Switch, Tab, Tabs } from "@blueprintjs/core";
 import {
   AlphaTag,
   BetaTag,
@@ -22,22 +22,12 @@ import { asChromaColor } from "@macrostrat/color-utils";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { LinkCard } from "~/components/cards";
-import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
-import { clientOnly } from "./client-only";
-// NOTE: do NOT statically import "./map.client" here — it pulls in mapbox-gl,
-// which touches `window` at module load and crashes SSR. `clientOnly()` dynamic-
-// imports it (below) so the barrel stays server-safe.
-//
-// This local instance is the fallback for consumers *outside* `/lex` (e.g. the
-// project column-group page). Lexicon pages pass a `targetKey` and get the
-// single shared map instance instead — see `./map-target`.
-const LexiconMapLazy = clientOnly(() =>
-  import("./map.client").then((m) => m.LexiconMap)
-);
-import { LexMapSlot } from "./map-target";
+import { lexMapLayersAtom } from "./map-target";
+import { mapSettingsStore } from "~/components/map-settings";
+import { useAtom } from "jotai";
 import { fetchPGData } from "~/_utils";
-import { ExpansionPanel } from "@macrostrat/data-components";
+import { DataField, ExpansionPanel } from "@macrostrat/data-components";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -72,7 +62,7 @@ function LexItemPageInner(props: LexItemPageProps) {
   // Guard: this renders server-side now (SSR doesn't catch a null destructure).
   const { name, strat_name_long } = resData || {};
 
-  return h("div", [
+  return h("div.int-page", [
     children,
     h(References, { refs }),
     h(SiftLink, {
@@ -80,144 +70,6 @@ function LexItemPageInner(props: LexItemPageProps) {
       siftLink,
     }),
   ]);
-}
-
-export function ColumnsTable({
-  resData,
-  colData,
-  fossilsData,
-  mapUrl,
-  targetKey = "",
-  loading = false,
-}) {
-  const hasColumns = colData?.features?.length > 0;
-  const summary = summarize(hasColumns ? colData.features : []);
-
-  // Hooks must run unconditionally and in a stable order, ahead of any early
-  // return (rules of hooks). `useAPIResult`/`getIntID` no-op on a null route, so
-  // pass null when the input is absent instead of skipping the hook.
-  const lithLegendIds = useAPIResult(
-    resData?.lith_id
-      ? apiV2Prefix + "/mobile/map_filter?lith_id=" + resData.lith_id
-      : null
-  );
-  const conceptLegendIds = useAPIResult(
-    resData?.concept_id
-      ? apiV2Prefix + "/mobile/map_filter?concept_id=" + resData.concept_id
-      : null
-  );
-  const t_id = useIntervalID({ name: summary.t_int_name });
-  const b_id = useIntervalID({ name: summary.b_int_name });
-
-  // Nothing to show only once we *know* there are no columns. While they load,
-  // fall through and render the frame — that reserves the space and keeps the
-  // shared map mounted, so navigation doesn't make it blink out and back.
-  if (!hasColumns && !loading) return null;
-
-  let filters = [];
-
-  if (resData?.lith_id && lithLegendIds) {
-    filters.push({
-      category: "lithology",
-      type: "lithologies",
-      id: resData.lith_id,
-      name: resData.name,
-      legend_ids: lithLegendIds,
-    });
-  }
-
-  if (resData?.concept_id && conceptLegendIds) {
-    filters.push({
-      category: "strat_name",
-      type: "strat_name_concepts",
-      id: resData.concept_id,
-      name: resData.name,
-      legend_ids: conceptLegendIds,
-    });
-  }
-
-  if (resData?.int_id) {
-    filters.push({
-      ...resData,
-      category: "interval",
-      type: "intervals",
-      id: resData.int_id,
-      name: resData.name,
-    });
-  }
-
-  const { b_age, t_age } = resData ?? {};
-
-  const {
-    t_units,
-    t_sections,
-    t_int_name,
-    pbdb_collections,
-    b_int_name,
-    max_thick,
-    col_area,
-  } = summary;
-
-  const area = parseInt(col_area.toString().split(".")[0]);
-
-  // A `targetKey` means the caller is inside `/lex`, where one map instance is
-  // mounted by the layout: render the slot it moves into (no map of our own).
-  // Everywhere else, mount a local instance as before.
-  const mapProps = {
-    filters,
-    columns: colData,
-    className: "column-map-container",
-    fossilsData,
-    mapUrl,
-  };
-  let mapElement = null;
-  if (targetKey !== "") {
-    mapElement = h(LexMapSlot, {
-      targetKey,
-      loading: !hasColumns,
-      ...mapProps,
-    });
-  } else {
-    mapElement = h(LexiconMapLazy, { ...mapProps, fallback: h(Spinner) });
-  }
-
-  // While columns load, the stats are all zeros — show a placeholder instead, so
-  // the frame holds its shape without asserting numbers we don't have yet.
-  let statsContent: any = h("div.stats-loading", h(Spinner, { size: 24 }));
-  if (hasColumns) {
-    statsContent = [
-      h("div.packages", t_sections.toLocaleString() + " packages"),
-      h(Divider, { className: "divider" }),
-      h("div.units", t_units.toLocaleString() + " units"),
-      h(Divider, { className: "divider" }),
-      h("div.interval", [
-        h(
-          MacrostratLink,
-          { item: { int_id: b_id } },
-          b_int_name.toLocaleString()
-        ),
-        " - ",
-        h(
-          MacrostratLink,
-          { item: { int_id: t_id } },
-          t_int_name.toLocaleString()
-        ),
-      ]),
-      h.if(b_age && t_age)(Divider, { className: "divider" }),
-      h.if(b_age && t_age)("div.age-range", [
-        h("div.int-age", b_age + " - " + t_age + " Ma"),
-        // h(Parenthetical, { className: "range"}, h(Duration, { value: b_age - t_age })),
-      ]),
-      h(Divider, { className: "divider" }),
-      h("div.area", [h("p", area.toLocaleString() + " km"), h("sup", "2")]),
-      h(Divider, { className: "divider" }),
-      h("div.thickness", "≤ " + max_thick.toLocaleString() + "m thick"),
-      h(Divider, { className: "divider" }),
-      h("div.collections", pbdb_collections.toLocaleString() + " collections"),
-    ];
-  }
-
-  return h("div.table", [h("div.table-content", statsContent), mapElement]);
 }
 
 export function navigateToInterval(clickData) {
@@ -228,20 +80,6 @@ export function navigateToInterval(clickData) {
   if (intId != null) {
     navigate("/lex/intervals/" + intId);
   }
-}
-
-export function Intervals({ resData }) {
-  const { b_age, t_age } = resData;
-  return h(
-    "div.timescale",
-    h(Timescale, {
-      length: 970,
-      levels: [1, 5],
-      ageRange: [b_age, t_age],
-      absoluteAgeScale: true,
-      onClick: (e, d) => navigateToInterval(d),
-    })
-  );
 }
 
 function LexItemHeader({ resData, name, siftLink, id }) {
@@ -300,42 +138,47 @@ function SiftLink({ id, siftLink }) {
   ]);
 }
 
+const ATTRIBUTE_BREAKDOWNS = [
+  { type: "lith", title: "Lithologies", route: "lithologies" },
+  { type: "environ", title: "Environments", route: "environments" },
+  { type: "econ", title: "Economics", route: "economics" },
+];
+
+/** The attribute breakdowns, one at a time, chosen from a list on the left. */
 export function Charts({ features }) {
-  const [activeIndex, setActiveIndex] = useState(null);
+  const breakdowns = useMemo(
+    () =>
+      ATTRIBUTE_BREAKDOWNS.map((b) => ({
+        ...b,
+        data: summarizeAttributes({ data: features, type: b.type }),
+      })).filter((b) => b.data?.length > 0),
+    [features]
+  );
+  const [selected, setSelected] = useState<string | null>(null);
 
-  const liths = summarizeAttributes({
-    data: features,
-    type: "lith",
-  });
-  const environs = summarizeAttributes({
-    data: features,
-    type: "environ",
-  });
-  const econs = summarizeAttributes({
-    data: features,
-    type: "econ",
-  });
+  if (breakdowns.length == 0) return null;
+  const current = breakdowns.find((b) => b.type === selected) ?? breakdowns[0];
 
-  return h("div.charts", [
-    h.if(liths?.length)(
-      "div.chart",
-      Chart(liths, "Lithologies", "lithologies", activeIndex, setActiveIndex)
-    ),
-    h.if(environs?.length)(
-      "div.chart",
-      Chart(
-        environs,
-        "Environments",
-        "environments",
-        activeIndex,
-        setActiveIndex
-      )
-    ),
-    h.if(econs?.length)(
-      "div.chart",
-      Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
-    ),
-  ]);
+  return h(
+    Tabs,
+    {
+      id: "attribute-breakdowns",
+      className: "attribute-card",
+      vertical: true,
+      renderActiveTabPanelOnly: true,
+      selectedTabId: current.type,
+      onChange: (id) => setSelected(String(id)),
+    },
+    breakdowns.map((b) =>
+      h(Tab, {
+        key: b.type,
+        id: b.type,
+        title: b.title,
+        tagContent: b.data.length,
+        panel: h(Chart, { data: b.data, route: b.route }),
+      })
+    )
+  );
 }
 
 function UpperCase(str) {
@@ -375,20 +218,56 @@ export function References({ refs }) {
   ]);
 }
 
-export function PrevalentTaxa({ taxaData }) {
-  const records = taxaData?.records;
+/** Fossil collections in the item's columns, the taxa most found in them, and
+ * the switch for their map layer. */
+export function FossilsCard({ colData, fossilsData, taxaData }) {
+  const [layers, setLayers] = useAtom(lexMapLayersAtom, {
+    store: mapSettingsStore,
+  });
+  const collections = summarize(colData?.features).pbdb_collections;
+  const records = taxaData?.records ?? [];
+  const hasFossils = fossilsData?.features?.length > 0;
 
-  if (!records || records.length === 0) return;
+  if (collections == 0 && records.length == 0 && !hasFossils) return null;
 
-  return h(Card, { className: "prevalent-taxa-container" }, [
-    h("div.taxa-header", [
-      h("h3", "Prevalent Taxa"),
-      h("div.link", [
-        h("p", "via"),
-        h("a", { href: pbdbDomain + "/#/" }, "PaleoBioDB"),
+  let mapToggle = null;
+  if (hasFossils) {
+    mapToggle = h(Switch, {
+      className: "map-toggle",
+      label: "Show on map",
+      checked: layers.fossils,
+      onChange: (e) => setLayers({ ...layers, fossils: e.currentTarget.checked }),
+    });
+  }
+
+  let taxa = null;
+  if (records.length > 0) {
+    taxa = h("div.prevalent-taxa", [
+      h("h3.taxa-heading", [
+        "Prevalent taxa ",
+        h("span.via", [
+          "via ",
+          h("a", { href: pbdbDomain + "/#/" }, "PaleoBioDB"),
+        ]),
       ]),
+      h(
+        "div.taxa-list",
+        records.map((record) => h(Taxa, { key: record.oid, record }))
+      ),
+    ]);
+  }
+
+  return h("div.lex-fossils-card", [
+    h("div.card-header", [
+      h("h2.card-title", "Fossils"),
+      h(DataField, {
+        label: "Collections",
+        value: collections.toLocaleString(),
+        inline: true,
+      }),
+      mapToggle,
     ]),
-    records?.map((record) => h(Taxa, { key: record.oid, record })),
+    taxa,
   ]);
 }
 
@@ -429,16 +308,6 @@ function ConceptHierarchy({ id }) {
       });
     }),
   ]);
-}
-
-function useIntervalID({ name }) {
-  const res = useAPIResult(
-    name ? apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name) : null
-  )?.success?.data;
-
-  const id = res?.filter((d) => d.name === name)[0]?.int_id;
-
-  return id;
 }
 
 /**
@@ -551,7 +420,8 @@ export function summarize(data) {
       t_sections,
     } = properties;
 
-    summary.col_area += col_area;
+    // The API sends area as a string
+    summary.col_area += Number(col_area);
     summary.pbdb_collections += pbdb_collections;
     summary.t_units += t_units;
     summary.t_sections += t_sections;
@@ -878,25 +748,25 @@ function parseAttributes(type, data) {
   return parsed;
 }
 
-/** Compact enough to read as a caption to the map above it, not a second
- * figure competing with it.
+/** One breakdown at a time, so the donut can be read rather than glanced at.
  *
  * The hole is sized to hold a percentage and no more — a donut again, but the
  * ring is the figure rather than a frame around a large empty middle. That hole
  * is where the hovered slice's share is shown, which is why the legend no
  * longer carries it: the same number in two places meant the legend labels
  * changed width as the pointer moved. */
-const CHART_HEIGHT = 120;
-const CHART_RADIUS = 52;
-const CHART_INNER_RADIUS = 28;
+const CHART_HEIGHT = 200;
+const CHART_RADIUS = 92;
+const CHART_INNER_RADIUS = 52;
 
-function Chart(data, title, route, activeIndex, setActiveIndex) {
+function Chart({ data, route }) {
+  const [activeIndex, setActiveIndex] = useState(null);
   const isDarkMode = useDarkMode().isEnabled;
   const reg = isDarkMode ? "#fff" : "#000";
   const hovered = isDarkMode ? "#000" : "#fff";
 
   // The hovered slice, matched the same way the cell stroke is — by index *and*
-  // label, since `activeIndex` is shared across the three charts on a page.
+  // label.
   const active = data?.find(
     (entry, index) =>
       activeIndex?.index === index && activeIndex?.label === entry.label
@@ -920,65 +790,65 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
     );
   }
 
-  // A small donut, not the 300px one this replaced: a supporting breakdown on a
-  // page about something else. The section title sits above the chart rather
-  // than in the hole, which is now only big enough for the percentage.
+  // The tab names the breakdown, so the hole only holds the percentage.
   return h("div.chart-container", [
-    h("h4.chart-heading", h(Link, { href: "/lex/" + route }, title)),
     h(
-      ResponsiveContainer,
-      { width: "100%", height: CHART_HEIGHT },
-      h(PieChart, { className: "lithology-chart" }, [
-        h(
-          Pie,
-          {
-            data,
-            dataKey: "value",
-            nameKey: "label",
-            outerRadius: CHART_RADIUS,
-            innerRadius: CHART_INNER_RADIUS,
-            cx: "50%",
-            cy: "50%",
-            fill: "#8884d8",
-            isAnimationActive: false,
-          },
-          data?.map((entry, index) =>
-            h(Cell, {
-              className: `id-${entry.id}`,
-              key: `cell-${index}`,
-              fill: entry.color,
-              stroke:
-                activeIndex?.index === index &&
-                activeIndex.label === entry.label
-                  ? reg
-                  : hovered,
-              strokeWidth: 2,
-              onMouseEnter: () => {
-                if (
-                  !activeIndex ||
-                  activeIndex.index !== index ||
-                  activeIndex.label !== entry.label
-                ) {
-                  setActiveIndex({ index, label: entry.label });
-                }
-              },
-              onMouseLeave: () => {
-                if (activeIndex) {
-                  setActiveIndex(null);
-                }
-              },
-              onClick: (e) => {
-                const id = e.target.className.baseVal
-                  .split(" ")[1]
-                  .split("-")[1];
-                const url = "/lex/" + route + "/" + id;
-                navigate(url);
-              },
-            })
-          )
-        ),
-        centerValue,
-      ])
+      "div.chart-donut",
+      h(
+        ResponsiveContainer,
+        { width: "100%", height: CHART_HEIGHT },
+        h(PieChart, { className: "lithology-chart" }, [
+          h(
+            Pie,
+            {
+              data,
+              dataKey: "value",
+              nameKey: "label",
+              outerRadius: CHART_RADIUS,
+              innerRadius: CHART_INNER_RADIUS,
+              cx: "50%",
+              cy: "50%",
+              fill: "#8884d8",
+              isAnimationActive: false,
+            },
+            data?.map((entry, index) =>
+              h(Cell, {
+                className: `id-${entry.id}`,
+                key: `cell-${index}`,
+                fill: entry.color,
+                stroke:
+                  activeIndex?.index === index &&
+                  activeIndex.label === entry.label
+                    ? reg
+                    : hovered,
+                strokeWidth: 2,
+                onMouseEnter: () => {
+                  if (
+                    !activeIndex ||
+                    activeIndex.index !== index ||
+                    activeIndex.label !== entry.label
+                  ) {
+                    setActiveIndex({ index, label: entry.label });
+                  }
+                },
+                onMouseLeave: () => {
+                  if (activeIndex) {
+                    setActiveIndex(null);
+                  }
+                },
+                onClick: (e) => {
+                  const id = e.target.className.baseVal
+                    .split(" ")[1]
+                    .split("-")[1];
+                  const url = "/lex/" + route + "/" + id;
+                  navigate(url);
+                },
+              })
+            )
+          ),
+          centerValue,
+        ])
+      )
     ),
     h(
       "div.legend",

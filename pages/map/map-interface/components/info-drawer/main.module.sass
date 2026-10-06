@@ -108,3 +108,19 @@
 
 .column-info
   border-bottom: 1px solid var(--panel-rule-color)
+
+// The geologic map section's link to the tile inspector: present, but quiet
+// until hovered.
+.tile-inspector-link
+  margin-left: auto
+  display: inline-flex
+  align-items: center
+  gap: 2px
+  font-size: 11px
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  opacity: 0.6
+  text-decoration: none
+
+  &:hover
+    opacity: 1
+    text-decoration: none

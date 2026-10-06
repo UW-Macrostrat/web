@@ -177,8 +177,13 @@ export function EditorColumn() {
   let surfaceSelection: string | null = selectedSurfaceID;
   if (mode === "unified") surfaceSelection = null;
 
+  // Surface labels sit where the unit labels would, so only one set is drawn
+  const showSurfaceLabels = mode !== "units";
+  let showLabelColumn = true;
+  if (showSurfaceLabels) showLabelColumn = false;
+
   let overlay = null;
-  if (mode !== "units" || showSurfaceLines) {
+  if (showSurfaceLabels || showSurfaceLines) {
     overlay = h(
       MacrostratInteractionProvider,
       // A tag in the label column is a handle on its surface, not a way into
@@ -194,9 +199,8 @@ export function EditorColumn() {
         surfaces,
         selectedSurface: surfaceSelection,
         onSelectSurface,
-        // In units mode the surfaces are context, drawn as lines only; in
-        // surfaces mode they take the label column over from the unit labels.
-        showLabels: mode !== "units",
+        // In units mode the surfaces are context, drawn as lines only
+        showLabels: showSurfaceLabels,
         // `labelStatuses` is left at the library's default — the tie points,
         // the surfaces that actually constrain the age model. Everything else
         // falls out of the boundary ages and is drawn as a line only.
@@ -214,6 +218,7 @@ export function EditorColumn() {
       ...(zoom?.columnProps ?? {}),
       units,
       unitComponent,
+      showLabelColumn,
       unconformityLabels: "minimal",
       collapseSmallUnconformities: collapseUnconformities(unconformityCollapse),
       showTimescale: timescale,

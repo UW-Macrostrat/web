@@ -12,7 +12,6 @@
 import hyper from "@macrostrat/hyper";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { Spacer, useDarkMode } from "@macrostrat/ui-components";
-import { removeMapLabels } from "@macrostrat/mapbox-utils";
 import { useCallback, useMemo, useState } from "react";
 import {
   FloatingNavbar,
@@ -33,7 +32,6 @@ import {
   PageTitle,
   usePageBreadcrumbs,
   BaseLayerForm,
-  Basemap,
   basemapStyle,
 } from "~/components";
 import {
@@ -43,6 +41,11 @@ import {
   todayAccessStyle,
 } from "./layer-styles";
 import styles from "./main.module.scss";
+import {
+  basemapAtom,
+  showLabelsAtom,
+  useLabelTransform,
+} from "~/_utils/basemap";
 
 const h = hyper.styled(styles);
 
@@ -94,34 +97,6 @@ const showRequestsAtom = toggleAtom("requests", true);
 const showAccessAllAtom = toggleAtom("access", false);
 const showAccessTodayAtom = toggleAtom("today", false);
 
-/** Base map style, persisted in the URL ("basic" is default and omitted). */
-const basemapParamAtom = atomWithSearchParam("basemap");
-const basemapAtom = atom(
-  (get): Basemap => {
-    const value = get(basemapParamAtom);
-    if (value === Basemap.Satellite || value === Basemap.None) {
-      return value as Basemap;
-    }
-    return Basemap.Basic;
-  },
-  (get, set, value: Basemap) => {
-    let param: Basemap | null = value;
-    if (value === Basemap.Basic) param = null;
-    set(basemapParamAtom, param);
-  }
-);
-
-/** Whether basemap labels are shown (on by default; "off" stored in the URL). */
-const labelsParamAtom = atomWithSearchParam("labels");
-const showLabelsAtom = atom(
-  (get) => get(labelsParamAtom) !== "off",
-  (get, set, value: boolean) => {
-    let param: string | null = null;
-    if (!value) param = "off";
-    set(labelsParamAtom, param);
-  }
-);
-
 export function Page() {
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
@@ -138,7 +113,6 @@ export function Page() {
   const showRequests = useAtomValue(showRequestsAtom);
   const showAccessAll = useAtomValue(showAccessAllAtom);
   const showAccessToday = useAtomValue(showAccessTodayAtom);
-  const showLabels = useAtomValue(showLabelsAtom);
 
   // Order matters: the request-density fill sits beneath the access points.
   const overlayStyles = useMemo(() => {
@@ -149,13 +123,7 @@ export function Page() {
     return overlays;
   }, [showRequests, showAccessAll, showAccessToday]);
 
-  const transformStyle = useCallback(
-    (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
-    },
-    [showLabels]
-  );
+  const transformStyle = useLabelTransform();
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);

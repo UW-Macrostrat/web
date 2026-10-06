@@ -19,42 +19,114 @@
   justify-content: space-between
 
 // Sections of a detail page that carry their own heading.
-.int-references > h3,
-.taxa-header h3
+.int-references > h3
   @include type.section-heading
 
 .ref-list
   margin-top: 1em
 
-.table
+// An item's columns: a horizontal summary card above the map card.
+.lex-summary
+  display: flex
+  flex-direction: column
+  gap: var(--pz-stack-gap, 1rem)
+
+.lex-columns-card,
+.lex-fossils-card,
+.lex-map-card,
+.attribute-card
   background-color: var(--pz-panel-background-color)
   color: var(--pz-text-color)
   border: 1px solid var(--pz-border-muted-color)
   border-radius: var(--pz-radius-lg)
   overflow: hidden
-  display: grid
-  grid-template-columns: 20% 80%
 
-  p
-    margin: 0
+.lex-columns-card,
+.lex-fossils-card
+  padding: 1em 1.25em
 
-  .table-content
-    padding: 2em
+.card-title
+  @include type.subsection-heading
+  margin: 0
+
+.lex-columns-card
+  // Placeholder while column data loads — the frame holds its shape (and the
+  // shared map stays mounted) rather than appearing once data arrives.
+  .stats-loading
+    display: flex
+    justify-content: center
+    padding: 1em 0
+
+// The data fields run across the card and wrap, rather than stacking
+.count-fields,
+.columns-fields
+  display: flex
+  flex-flow: row wrap
+  align-items: baseline
+  column-gap: 2.5em
+
+// The counts are the card's heading: larger, with heading-style labels. The
+// label is the field's first child, since data-components hashes its class.
+.lex-columns-card .count-field
+  font-size: var(--pz-font-size-lg)
+  margin: 0 0 0.25em
+
+  > :first-child
+    font-family: var(--pz-heading-font)
+    font-weight: var(--pz-font-weight-normal)
+    color: var(--pz-text-emphasized-color)
+
+.interval-tags
+  display: inline-flex
+  flex-wrap: wrap
+  gap: 0.3em
+  margin-left: 0.5em
+
+.lex-fossils-card
+  .card-header
+    display: flex
+    flex-flow: row wrap
+    align-items: baseline
+    column-gap: 2em
+
+  .map-toggle
+    margin: 0 0 0 auto
+
+.prevalent-taxa
+  margin-top: 0.5em
+
+.taxa-heading
+  @include type.label
+  margin: 0 0 0.75em
+
+  .via
+    font-weight: var(--pz-font-weight-normal)
+
+.taxa-list
+  display: flex
+  flex-flow: row wrap
+  gap: 1em 1.5em
+
+  .taxa
     display: flex
     flex-direction: column
     align-items: center
-    justify-content: space-between
-    gap: .5em
+    gap: 0.5em
+    max-width: 7em
+    text-align: center
 
-    // Placeholder while column data loads — the frame holds its shape (and the
-    // shared map stays mounted) rather than appearing once data arrives.
-    .stats-loading
-      margin: auto
+    p
+      margin: 0
 
+.lex-map-card
+  display: flex
+  flex-direction: column
+
+// The detail page's sections, spaced here rather than each by its own margins
 .int-page
   display: flex
   flex-direction: column
-  gap: 1em
+  gap: 2em
 
 .map-area-container
   width: 100% !important
@@ -65,27 +137,6 @@
 
   .sift-link
     text-align: right
-
-.prevalent-taxa-container
-  display: flex
-  justify-content: space-between
-
-  .link
-    display: flex
-    gap: 5px
-    justify-content: center
-
-  .taxa-header
-    display: flex
-    flex-direction: column
-    align-items: center
-    justify-content: center
-
-  .taxa
-    display: flex
-    flex-direction: column
-    align-items: center
-    gap: 10px
 
 .divider
   width: 100%
@@ -109,30 +160,41 @@
   flex: 0 0 auto
   border-radius: 2px
 
-// The attribute breakdowns (lithologies / environments / economics). A
-// supporting figure, so the whole block is held to a fraction of the content
-// width rather than spanning it: three small pies in a row.
-.charts
-  display: flex
-  justify-content: center
-  gap: 1em
-  max-width: 42em
-  margin: 1em auto
+// The attribute breakdowns (lithologies / environments / economics): a
+// full-width card showing one at a time, picked from vertical tabs.
+.attribute-card
+  padding: 1em
 
-  .chart
-    flex: 1 1 0
+// Inside the Columns card, the breakdown is a section rather than a card
+.lex-columns-card .attribute-card
+  margin-top: 1em
+  padding: 1em 0 0
+  border: none
+  border-top: 1px solid var(--pz-border-muted-color)
+  border-radius: 0
+  background: none
+
+  :global(.bp6-tab-list)
+    flex: 0 0 11em
+
+  :global(.bp6-tab-panel)
+    flex: 1 1 auto
     min-width: 0
+    padding-left: 1.5em
 
-    h3
-      text-align: center
+.chart-donut
+  flex: 0 0 200px
 
-.chart-heading
-  @include type.label
-  margin: 0 0 0.2em
-  text-align: center
+// Long breakdowns run to several columns rather than one tall list
+.legend
+  flex: 1 1 auto
+  min-width: 0
+  columns: 11em
+  column-gap: 1.5em
 
-  a
-    color: inherit
+  .legend-item
+    break-inside: avoid
+    padding: 0.1em 0
 
 .area
   display: flex
@@ -143,6 +205,11 @@
   height: 100%
 
 .chart-container
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 1.5em
+
   g
     cursor: pointer
 

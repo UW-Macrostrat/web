@@ -1,34 +1,12 @@
-// Frame for documentation pages: a sticky breadcrumb header (the primary
-// navigation), the article, and a subsidiary sidebar floating to the right.
+// Frame for documentation pages: the site's hybrid header (the primary
+// navigation; its breadcrumb bar sticks), the article, and a subsidiary
+// sidebar floating to the right, held below the header's bar.
 
 @use "~/styles/type"
 
 .docs-page
-  --docs-header-height: 4.25em
-
-.docs-header
-  position: sticky
-  top: 0
-  z-index: 5
-  display: flex
-  align-items: center
-  gap: 1em
-  height: var(--docs-header-height)
-  background: var(--pz-background-color)
-  border-bottom: 1px solid var(--pz-panel-rule-color)
-  margin-bottom: 1.5em
-
-  // The breadcrumb component fills the row; the title inside it is kept to one line
-  & > :first-child
-    flex: 1
-    min-width: 0
-  h1
-    @include type.page-title
-    font-size: var(--pz-font-size-xl)
-    margin: 0.1em 0 0
-    white-space: nowrap
-    overflow: hidden
-    text-overflow: ellipsis
+  // The sticky part of the header is its breadcrumb bar.
+  --docs-header-height: 3rem
 
 .docs-layout
   display: grid

@@ -9,6 +9,20 @@
   top: 0
   left: 0
 
+// The header and body share one gutter; the site header adds none of its own.
+.fullscreen-header-page
+  display: flex
+  flex-direction: column
+  box-sizing: border-box
+  padding: 0 var(--pz-content-padding)
+
+.fullscreen-page-body
+  flex: 1
+  min-height: 0
+  display: flex
+  flex-direction: column
+  padding-bottom: var(--pz-content-padding)
+
 .content-page-inner
   width: var(--pz-content-width)
   display: flex
@@ -28,6 +42,12 @@
   display: flex
   flex-direction: column
   min-height: 100vh
+
+  // Spans the page; its content takes the column's gutter on a narrow screen.
+  // The extra class outranks the site header's own zero gutter.
+  header.content-page-header
+    @media only screen and (max-width: 900px)
+      --page-header-padding-x: 1em
 
   .centered
     min-height: 100vh

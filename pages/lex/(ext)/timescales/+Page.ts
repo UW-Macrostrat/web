@@ -1,88 +1,163 @@
-import h from "./main.module.scss";
-import { LinkCard } from "~/components";
-import { Card, Popover, RangeSlider, Divider } from "@blueprintjs/core";
-import { useState } from "react";
-import { Timescale } from "@macrostrat/timescale";
-import { SearchBar } from "~/components/general";
-import { navigateToInterval } from "~/components/lex";
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.sass";
+import { useEffect, useRef, useState } from "react";
 import { useData } from "vike-react/useData";
+import { InputGroup, RangeSlider } from "@blueprintjs/core";
+import {
+  createLocalProvider,
+  DataPanel,
+  DataPanelToolbarStyle,
+  SelectionInteractionStyle,
+  type ColumnSpec,
+  type ScrollBodyProps,
+  type TableFilter,
+} from "@macrostrat/data-sheet";
+import { HybridContentFooter, HybridPage } from "~/layouts/hybrid";
+import { LinkCard } from "~/components/cards";
+import { capitalizeWords } from "~/components/lex/timescale-data";
 
-export function Page() {
-  const [input, setInput] = useState("");
-  const [age, setAge] = useState([0, 4000]);
-  const { res } = useData();
+const h = hyper.styled(styles);
 
-  const handleChange = (event) => {
-    setInput(event.toLowerCase());
-  };
-
-  const filtered = res.filter((d) => {
-    const name = d.timescale?.toLowerCase() || "";
-    const max_age = d.max_age ? parseInt(d.max_age, 10) : 4000;
-    const min_age = d.min_age ? parseInt(d.min_age, 10) : 0;
-
-    const matchesName = name.includes(input);
-    const matchesAgeRange = max_age >= age[0] && min_age <= age[1];
-
-    return matchesName && matchesAgeRange;
-  });
-
-  return h([
-    h(Card, { className: "filters" }, [
-      h(SearchBar, {
-        placeholder: "Filter by name...",
-        onChange: handleChange,
-      }),
-      h("div.age-filter", [
-        h("p", "Filter by ages"),
-        h(RangeSlider, {
-          min: 0,
-          max: 4000,
-          stepSize: 10,
-          labelStepSize: 1000,
-          value: [age[0], age[1]],
-          onChange: (value) => {
-            setAge(value);
-          },
-        }),
-      ]),
-      h(
-        "div.timescale-container",
-        h(Timescale, {
-          length: 970 - 40,
-          levels: [1, 5],
-          ageRange: [age[0], age[1]],
-          absoluteAgeScale: true,
-          onClick: (e, d) => navigateToInterval(d),
-          className: "timescale",
-        })
-      ),
-    ]),
-    h(Divider),
-    h(
-      "div.timescale-list",
-      filtered.map((data) => TimescaleItem({ data }))
-    ),
-  ]);
+interface TimescaleRow {
+  timescale_id: number;
+  timescale: string;
+  max_age: number;
+  min_age: number;
+  n_intervals: number;
 }
 
-function TimescaleItem({ data }) {
-  const { timescale, min_age, max_age, n_intervals, timescale_id } = data;
+const OLDEST_AGE = 4600;
 
-  return h(
-    Popover,
-    {
-      className: "timescale-item-popover",
-      content: h("div.timescale-tooltip"),
-    },
-    h(
-      LinkCard,
-      { className: "timescale-item", href: "/lex/timescales/" + timescale_id },
-      [
-        h("h1.timescale-name", timescale),
-        h("h3", `${max_age} - ${min_age} Ma`),
-        h("p", `Intervals: ${n_intervals}`),
-      ]
-    )
+const searchFilter: TableFilter<TimescaleRow, { value: string }> = {
+  id: "timescale-search",
+  name: "Search",
+  icon: "search",
+  defaultState: { value: "" },
+  describeState: (s) => s?.value || null,
+  presentation: "inline",
+  filterForm: SearchInput,
+  predicate: (row, s) => {
+    const q = (s?.value ?? "").trim().toLowerCase();
+    return row.timescale?.toLowerCase().includes(q) ?? false;
+  },
+};
+
+const ageFilter: TableFilter<TimescaleRow, { range: [number, number] }> = {
+  id: "timescale-age",
+  name: "Age range",
+  icon: "time",
+  defaultState: { range: [0, OLDEST_AGE] },
+  describeState: (s) => `${s.range[1]}–${s.range[0]} Ma`,
+  filterForm: AgeRangeInput,
+  // Any overlap with the range, not containment
+  predicate: (row, s) => {
+    const [younger, older] = s.range;
+    return row.max_age >= younger && row.min_age <= older;
+  },
+};
+
+const listFilters = [searchFilter, ageFilter];
+
+const columnSpec: ColumnSpec[] = [
+  { key: "timescale", name: "Name", sortable: true },
+  { key: "max_age", name: "Oldest age", sortable: true },
+  { key: "n_intervals", name: "Intervals", sortable: true },
+];
+
+const capabilities = {
+  modes: ["content-only" as const],
+  defaultMode: "content-only" as const,
+  hasAssistant: false,
+  itemName: "Timescales",
+  contentScroll: "panel" as const,
+};
+
+export function Page() {
+  const { res } = useData<{ res: TimescaleRow[] }>();
+  const [provider] = useState(() =>
+    createLocalProvider(res, { identity: (row) => row.timescale_id })
   );
+
+  return h(HybridPage, {
+    className: "timescale-list-page",
+    capabilities,
+    content: h(DataPanel<TimescaleRow>, {
+      className: "timescale-panel",
+      name: "Timescales",
+      itemLabel: "timescale",
+      provider,
+      columnSpec,
+      filters: listFilters,
+      initialData: { rows: res, totalCount: res.length },
+      // The whole list in one page: there are a few dozen timescales
+      pageSize: 100,
+      itemComponent: TimescaleCard,
+      scrollBody: TimescaleGrid,
+      toolbarStyle: DataPanelToolbarStyle.FLOATING,
+      statusBar: false,
+      enableSelection: SelectionInteractionStyle.NEVER,
+      contentFooter: h(HybridContentFooter),
+    }),
+  });
+}
+
+function TimescaleGrid({ children, placeholders }: ScrollBodyProps) {
+  return h("div.timescale-grid", [children, placeholders]);
+}
+
+function TimescaleCard({ data }: { data: TimescaleRow }) {
+  const { timescale, min_age, max_age, n_intervals, timescale_id } = data;
+  return h(
+    LinkCard,
+    {
+      className: "timescale-card",
+      density: "list",
+      href: "/lex/timescales/" + timescale_id,
+      title: capitalizeWords(timescale),
+    },
+    h("p.timescale-summary", `${max_age}–${min_age} Ma · ${n_intervals} intervals`)
+  );
+}
+
+/** Locally controlled, committing on a short delay, as on the strat-names list:
+ * a commit per keystroke would reset the view under the typing. */
+function SearchInput({ state, setState }) {
+  const committed = state?.value ?? "";
+  const [text, setText] = useState(committed);
+
+  const pending = useRef<string | null>(null);
+  useEffect(() => {
+    if (pending.current != null && pending.current !== committed) return;
+    pending.current = null;
+    setText(committed);
+  }, [committed]);
+
+  useEffect(() => {
+    if (text === committed) return;
+    pending.current = text;
+    const handle = setTimeout(() => setState({ value: text }), 150);
+    return () => clearTimeout(handle);
+  }, [text, committed, setState]);
+
+  return h(InputGroup, {
+    className: "timescale-search-input",
+    leftIcon: "search",
+    placeholder: "Search timescales…",
+    value: text,
+    onValueChange: setText,
+  });
+}
+
+function AgeRangeInput({ state, setState }) {
+  const range = state?.range ?? ageFilter.defaultState.range;
+  return h("div.age-range-input", [
+    h(RangeSlider, {
+      min: 0,
+      max: OLDEST_AGE,
+      stepSize: 10,
+      labelStepSize: 1000,
+      value: range,
+      onChange: (value) => setState({ range: value }),
+    }),
+  ]);
 }

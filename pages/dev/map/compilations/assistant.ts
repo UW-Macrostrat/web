@@ -23,8 +23,8 @@ import {
 } from "~/components/compilation-tree";
 
 import { FocusEditor } from "./editor";
+import { basemapAtom, showLabelsAtom } from "~/_utils/basemap";
 import {
-  basemapAtom,
   graphVersionAtom,
   expandMembersAtom,
   focusNodeAtom,
@@ -34,7 +34,6 @@ import {
   showCartoAtom,
   showFacesAtom,
   showFootprintsAtom,
-  showLabelsAtom,
   type Point,
 } from "./state";
 import styles from "./main.module.sass";

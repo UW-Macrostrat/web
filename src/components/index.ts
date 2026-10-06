@@ -8,6 +8,7 @@ export * from "./navigation";
 export * from "./map-controls";
 export * from "./expandable-panel";
 export * from "./base-layer-panel";
+export * from "./map-settings";
 export * from "./general";
 export * from "./form-controls";
 export * from "./infinite-scroll";

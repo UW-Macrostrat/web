@@ -30,6 +30,7 @@ function Section({ section, slots, data }) {
   const own = slots.filter((slot) => slot.at === section.id);
   const replacing = own.find((slot) => slot.mode === "replace");
   const after = own.filter((slot) => slot.mode === "after");
+  const asides = own.filter((slot) => slot.mode === "aside");
 
   let heading = null;
   if (section.heading != null) {
@@ -37,6 +38,12 @@ function Section({ section, slots, data }) {
       id: section.id,
       dangerouslySetInnerHTML: { __html: section.heading },
     });
+  }
+  if (heading != null && asides.length > 0) {
+    heading = h("div.section-heading-row", [
+      heading,
+      asides.map((slot) => h(SlotComponent, { key: slot.component, slot, data })),
+    ]);
   }
 
   let body;

@@ -6,52 +6,26 @@ import {
   PanelCard,
 } from "@macrostrat/map-interface";
 import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
-import { removeMapLabels } from "@macrostrat/mapbox-utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDarkMode, FlexRow } from "@macrostrat/ui-components";
 import { MultiSelect } from "@blueprintjs/select";
 import { MenuItem, Switch, Divider, Icon } from "@blueprintjs/core";
 import { atom, useAtom, useAtomValue } from "jotai";
 import { fetchAPIV2Result, fetchPGData } from "~/_utils";
+import {
+  basemapAtom,
+  showLabelsAtom,
+  useLabelTransform,
+} from "~/_utils/basemap";
 import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
-import { BaseLayerForm, Basemap, basemapStyle } from "~/components";
+import { BaseLayerForm, basemapStyle } from "~/components";
 import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
 import { Measurement } from "./measurement.ts";
 import { usePageContext } from "vike-react/usePageContext";
 
 /** Shared width for the floating navbar and the context panel below it. */
 const PANEL_WIDTH = 320;
-
-/** The base map style, persisted in the URL (parallel to the other map pages).
- * "basic" is the default and is kept out of the query string. */
-const basemapParamAtom = atomWithSearchParam("basemap");
-const basemapAtom = atom(
-  (get): Basemap => {
-    const value = get(basemapParamAtom);
-    if (value === Basemap.Satellite || value === Basemap.None) {
-      return value as Basemap;
-    }
-    return Basemap.Basic;
-  },
-  (get, set, value: Basemap) => {
-    let param: Basemap | null = value;
-    if (value === Basemap.Basic) param = null;
-    set(basemapParamAtom, param);
-  }
-);
-
-/** Whether the basemap's text labels are shown. On by default; the "off" state
- * is stored in the URL. */
-const labelsParamAtom = atomWithSearchParam("labels");
-const showLabelsAtom = atom(
-  (get) => get(labelsParamAtom) !== "off",
-  (get, set, value: boolean) => {
-    let param: string | null = null;
-    if (!value) param = "off";
-    set(labelsParamAtom, param);
-  }
-);
 
 /** Whether to underlay the Macrostrat geologic map, for geological context
  * behind the measurement points. Off by default; "on" is stored in the URL. */
@@ -98,7 +72,6 @@ function Map({ types }) {
   const isEnabled = dark?.isEnabled;
 
   const basemap = useAtomValue(basemapAtom);
-  const showLabels = useAtomValue(showLabelsAtom);
   const showCarto = useAtomValue(showCartoAtom);
 
   const baseStyle = basemapStyle(basemap, isEnabled);
@@ -108,14 +81,7 @@ function Map({ types }) {
     showCarto,
   });
 
-  // Toggle basemap labels by stripping label layers from the resolved style.
-  const transformStyle = useCallback(
-    (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
-    },
-    [showLabels]
-  );
+  const transformStyle = useLabelTransform();
 
   const mapPosition = {
     camera: {

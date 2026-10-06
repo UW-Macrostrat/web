@@ -14,18 +14,16 @@ const fgdcPatterns = join(
 function startServer() {
   const app = express();
   const kgTarget = process.env.VITE_MACROSTRAT_KG_API_DOMAIN;
-
-  if (!kgTarget) {
-    throw new Error("VITE_MACROSTRAT_KG_API_DOMAIN is required");
+  if (kgTarget !== undefined && !kgTarget.startsWith("http")) {
+    console.log("Proxying KG API requests to", kgTarget);
+    app.use(
+      "/kg-api",
+      createProxyMiddleware({
+        target: kgTarget,
+        changeOrigin: true,
+      })
+    );
   }
-
-  app.use(
-    "/kg-api",
-    createProxyMiddleware({
-      target: kgTarget,
-      changeOrigin: true,
-    }),
-  );
   app.use("/assets/geologic-patterns", sirv(fgdcPatterns));
   // A fresh tile token, for a page that has outlived the one it arrived with.
   // Never cached: every response is a different credential.
