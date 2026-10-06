@@ -1,0 +1,117 @@
+// The location editor: a panel of sections and fields beside the map.
+
+// In the split shell the context panel clips overflow, so the panel scrolls itself
+.location-panel
+  display: flex
+  flex-direction: column
+  gap: 1.25em
+  padding: 0.75em
+  max-width: 36em
+  min-height: 0
+  overflow-y: auto
+
+.panel-section
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+  > h3
+    margin: 0
+    font-size: 1em
+    display: flex
+    flex-direction: row
+    align-items: center
+    gap: 0.5em
+  > h3 .section-note
+    font-weight: normal
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+    font-size: 0.9em
+
+.section-description
+  margin: 0
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  font-size: 0.9em
+
+.coordinate-entry
+  display: flex
+  flex-direction: column
+  gap: 0.35em
+
+.coordinate-entry-row
+  display: flex
+  flex-direction: row
+  gap: 0.5em
+  align-items: center
+  > :global(.bp6-input-group)
+    flex: 1 1 auto
+
+.coordinate-echo
+  font-size: 0.85em
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  &.error
+    color: var(--pz-danger-color, #c23030)
+
+.coordinate-fields
+  display: flex
+  flex-direction: row
+  gap: 0.75em
+  flex-wrap: wrap
+  > *
+    flex: 1 1 8em
+    margin-bottom: 0
+
+.geometry-note
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.5em
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  font-size: 0.9em
+
+.row-actions
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  gap: 0.5em
+  align-items: center
+
+.stored-footprint
+  font-size: 0.9em
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  dl
+    margin: 0.25em 0 0 0
+    display: grid
+    grid-template-columns: max-content 1fr
+    gap: 0.1em 0.75em
+  dt
+    font-weight: 500
+  dd
+    margin: 0
+
+.place-search
+  position: relative
+  .place-results
+    position: absolute
+    top: 100%
+    left: 0
+    right: 0
+    z-index: 20
+    max-height: 18em
+    overflow-y: auto
+    box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
+
+.map-hint
+  position: absolute
+  left: 50%
+  bottom: 1em
+  transform: translateX(-50%)
+  z-index: 10
+  padding: 0.3em 0.8em
+  border-radius: 1em
+  background: var(--pz-panel-background-color, rgba(255, 255, 255, 0.9))
+  color: var(--pz-text-color, inherit)
+  font-size: 0.85em
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2)
+  pointer-events: none
+
+.docs-link
+  font-size: 0.85em

@@ -10,11 +10,8 @@ header.site-page-header
   // A title drawn as a chip (lexicon items) rises past the cap height the
   // title is trimmed to, and would tuck under the sticky bar at rest
   --page-header-title-spacing: var(--pz-space-4)
-
-  // The title row's identifier, scaled with the title it follows; the one in
-  // the collapsed bar has no heading before it and keeps the trail's size
-  h1 + span
-    font-size: clamp(var(--pz-font-size-lg), 4.5cqi, var(--pz-font-size-xl))
+  // The title row's identifier scales with the title it follows
+  --page-header-identifier-font-size: clamp(var(--pz-font-size-lg), 4.5cqi, var(--pz-font-size-xl))
 
   // `lexPageInfo` titles: the name, then its "aka" and kind badges on the same
   // line. One line in the bar, whose crumb has a fixed height; the large

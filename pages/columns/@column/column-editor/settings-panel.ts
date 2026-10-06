@@ -8,7 +8,8 @@
  * the consequential one: see `./scale` for what each mode means.
  */
 import hyper from "@macrostrat/hyper";
-import { useAtom, useAtomValue, useSetAtom, type WritableAtom } from "jotai";
+import { type WritableAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "./state/ctx";
 import {
   Button,
   ControlGroup,

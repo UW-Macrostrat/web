@@ -2348,7 +2348,7 @@ __metadata:
     "@macrostrat/data-components": "npm:^1.8.0"
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/ui-components": "npm:^5.3.0"
+    "@macrostrat/ui-components": "npm:^5.4.0"
     "@mapbox/mapbox-gl-draw": "npm:^1.3.0"
     "@supabase/postgrest-js": "npm:^1.18.1"
     "@types/mapbox__mapbox-gl-draw": "npm:^1.4.9"
@@ -2388,7 +2388,7 @@ __metadata:
   dependencies:
     "@macrostrat-web/settings": "workspace:^"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/ui-components": "npm:^5.3.0"
+    "@macrostrat/ui-components": "npm:^5.4.0"
     "@visx/gradient": "npm:^3.3.0"
     "@visx/group": "npm:^3.3.0"
     "@visx/hierarchy": "npm:^3.3.0"
@@ -2419,7 +2419,7 @@ __metadata:
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/ui-components": "npm:^5.3.0"
+    "@macrostrat/ui-components": "npm:^5.4.0"
     chroma-js: "npm:^3.2.0"
     d3: "npm:^5.12.0"
     labella: "npm:^1.1.4"
@@ -2797,19 +2797,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-styles@npm:^2.2.7, @macrostrat/map-styles@npm:^2.2.8":
-  version: 2.2.8
-  resolution: "@macrostrat/map-styles@npm:2.2.8"
+"@macrostrat/map-styles@npm:^2.2.7, @macrostrat/map-styles@npm:^2.2.8, @macrostrat/map-styles@npm:^2.2.9":
+  version: 2.2.9
+  resolution: "@macrostrat/map-styles@npm:2.2.9"
   dependencies:
     "@macrostrat/color-utils": "npm:1.2.2"
-    "@macrostrat/ui-components": "npm:5.3.0"
+    "@macrostrat/ui-components": "npm:5.4.0"
     "@types/d3-selection": "npm:^3.0.11"
     axios: "npm:^1.13.2"
     d3-selection: "npm:^3.0.0"
     mapbox-gl: "npm:^3.0.0"
     maplibre-gl: "npm:^5.17.0"
     textures: "npm:^1.2.3"
-  checksum: 10c0/aa207736e19dd87cb5a9ba770b43d8c2c9b82da2360201d603cd352620edc38132be298d3b9cb02dee1cb7346b3b052f1398a1b8d7880f5fe0e92144436dd762
+  checksum: 10c0/cbe05486f6406cc4fe3b484878bbcf67623d760580ff73079241414e140280ab562647e1bf69809133f787bb51d0b3ea53bbaccc1925d48667ac57c063cc7a53
   languageName: node
   linkType: hard
 
@@ -3017,9 +3017,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/ui-components@npm:5.3.0, @macrostrat/ui-components@npm:^5.0.11, @macrostrat/ui-components@npm:^5.0.9, @macrostrat/ui-components@npm:^5.2.0, @macrostrat/ui-components@npm:^5.3.0":
-  version: 5.3.0
-  resolution: "@macrostrat/ui-components@npm:5.3.0"
+"@macrostrat/ui-components@npm:5.4.0, @macrostrat/ui-components@npm:^5.0.11, @macrostrat/ui-components@npm:^5.0.9, @macrostrat/ui-components@npm:^5.2.0, @macrostrat/ui-components@npm:^5.3.0, @macrostrat/ui-components@npm:^5.4.0":
+  version: 5.4.0
+  resolution: "@macrostrat/ui-components@npm:5.4.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@blueprintjs/datetime": "npm:^6.1.0"
@@ -3045,7 +3045,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0||^19.0.0
     react-dom: ^18.0.0||^19.0.0
-  checksum: 10c0/137a9d6a721eda996c310c97111845a8736739e743a191f87d123cfe8350184dc1fc7dd50a346125d4f406f445f7fd17c0487e1a77f6e419e3fe0ed1db0c141e
+  checksum: 10c0/96ee48c9ae95e25ee576f579b4aa3602fe9bdf2fa7965f41026937ea8d54c1d5dfad485e7a13dc17d711a2ee4a501a41f681fdcafb51ee626fcb14cdf09e9781
   languageName: node
   linkType: hard
 
@@ -3130,7 +3130,7 @@ __metadata:
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/map-interface": "npm:^2.5.1"
-    "@macrostrat/map-styles": "npm:^2.2.8"
+    "@macrostrat/map-styles": "npm:^2.2.9"
     "@macrostrat/map-views": "npm:^1.1.1"
     "@macrostrat/mapbox-react": "npm:^3.4.1"
     "@macrostrat/mapbox-utils": "npm:^1.8.0"
@@ -3139,8 +3139,9 @@ __metadata:
     "@macrostrat/style-system": "npm:^1.0.1"
     "@macrostrat/svg-map-components": "npm:^2.0.3"
     "@macrostrat/timescale": "npm:^3.3.1"
-    "@macrostrat/ui-components": "npm:^5.3.0"
+    "@macrostrat/ui-components": "npm:^5.4.0"
     "@macrostrat/vite-plugin-hyperstyles": "npm:^2.0.2"
+    "@mapbox/mapbox-gl-draw": "npm:^1.5.1"
     "@mdx-js/rollup": "npm:^2.3.0"
     "@photonjs/express": "npm:^0.1.13"
     "@react-hook/size": "npm:^2.1.2"
@@ -3152,7 +3153,9 @@ __metadata:
     "@turf/distance": "npm:^7.0.0"
     "@types/compression": "npm:^1.7.2"
     "@types/express": "npm:^5.0.6"
+    "@types/geodesy": "npm:^2"
     "@types/geojson": "npm:^7946.0.10"
+    "@types/mapbox__mapbox-gl-draw": "npm:^1.4.8"
     "@types/node": "npm:^20.4.10"
     "@types/prop-types": "npm:^15"
     "@types/react": "npm:^19.2.10"
@@ -3188,6 +3191,7 @@ __metadata:
     esprima: "npm:^4.0.1"
     express: "npm:^5.2.1"
     fuse.js: "npm:^7.0.0"
+    geodesy: "npm:^2.4.0"
     geologic-patterns: "npm:2.0.0-dev1"
     hex-to-css-filter: "npm:^5.4.0"
     history: "npm:^5.3.0"
@@ -3196,6 +3200,7 @@ __metadata:
     jotai: "npm:^2.20.0"
     jotai-devtools: "npm:^0.14.0"
     jotai-location: "npm:^0.6.2"
+    jotai-scope: "npm:^0.11.0"
     jotai-zustand: "npm:^0.6.0"
     mapbox-gl: "npm:^3.13.0"
     maxmind: "npm:^5.0.6"
@@ -6376,6 +6381,13 @@ __metadata:
     "@types/qs": "npm:*"
     "@types/serve-static": "npm:^1"
   checksum: 10c0/f42b616d2c9dbc50352c820db7de182f64ebbfa8dba6fb6c98e5f8f0e2ef3edde0131719d9dc6874803d25ad9ca2d53471d0fec2fbc60a6003a43d015bab72c4
+  languageName: node
+  linkType: hard
+
+"@types/geodesy@npm:^2":
+  version: 2.2.8
+  resolution: "@types/geodesy@npm:2.2.8"
+  checksum: 10c0/bd350e2e18a13603bec1b2644aa23f5cb1324c912cae08fbd3f479bf277bdb7473485a066f4439478e87d1a7fa075136c3557a2962e0c301ca4399e08cde73d9
   languageName: node
   linkType: hard
 
@@ -12084,6 +12096,13 @@ __metadata:
   version: 1.0.0-beta.2
   resolution: "gensync@npm:1.0.0-beta.2"
   checksum: 10c0/782aba6cba65b1bb5af3b095d96249d20edbe8df32dbf4696fd49be2583faf676173bf4809386588828e4dd76a3354fcbeb577bab1c833ccd9fc4577f26103f8
+  languageName: node
+  linkType: hard
+
+"geodesy@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "geodesy@npm:2.4.0"
+  checksum: 10c0/822c118d2a6d19de9f8e59399aaf977a8a788f0eff3637aa03072c6459f2767b0e36b704c2257b650ca24579750f3735e7f19d5a843f2f4fde5f522d50c9ad34
   languageName: node
   linkType: hard
 

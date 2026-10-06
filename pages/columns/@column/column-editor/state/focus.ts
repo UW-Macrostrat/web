@@ -11,7 +11,7 @@
  * over jotai would be rebuilding the library's own machinery again.
  */
 import h from "@macrostrat/hyper";
-import { useAtomValue } from "jotai";
+import { useAtomValue } from "./ctx";
 import {
   createContext,
   useCallback,

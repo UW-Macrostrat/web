@@ -16,6 +16,8 @@
  * and the age they imply.
  */
 import h from "@macrostrat/hyper";
+import { faciesIndexAtom, type FaciesIndex } from "./state/ingest";
+import { useAtomValue } from "./state/ctx";
 import { useMemo } from "react";
 import { atom, useAtom } from "jotai";
 import { HTMLSelect, InputGroup, SegmentedControl } from "@blueprintjs/core";
@@ -164,6 +166,8 @@ export interface PlainVocabularies {
   lithologies: NameIndex<any>;
   lithAttributes: Set<string>;
   environments: NameIndex<any>;
+  /** The dataset's own facies scheme, by id and name. */
+  facies: FaciesIndex;
 }
 
 /** The shared vocabularies (the pickers' own indexes), by name. */
@@ -171,6 +175,7 @@ export function usePlainVocabularies(): PlainVocabularies {
   const lithologies = useVocabularyIndex<any>("lithologies", undefined).list;
   const lithAttributes = useVocabularyIndex<any>("lithAttributes", undefined).list;
   const environments = useVocabularyIndex<any>("environments", undefined).list;
+  const facies = useAtomValue(faciesIndexAtom);
   return useMemo(
     () => ({
       lithologies: nameIndex(lithologies),
@@ -178,8 +183,9 @@ export function usePlainVocabularies(): PlainVocabularies {
         lithAttributes.map((d) => String(d.name ?? "").toLowerCase())
       ),
       environments: nameIndex(environments),
+      facies,
     }),
-    [lithologies, lithAttributes, environments]
+    [lithologies, lithAttributes, environments, facies]
   );
 }
 
