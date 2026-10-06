@@ -255,6 +255,15 @@
   min-width: 0
   border-bottom: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
 
+// One line: the trail ellipsizes rather than the controls wrapping under it
+.split-header
+  .header-row
+    flex: 1 1 auto
+    min-width: 0
+  .header-titling
+    flex-wrap: nowrap
+    overflow: hidden
+
 .split-list
   flex: 1 1 auto
   min-height: 0

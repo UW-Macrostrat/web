@@ -36,7 +36,7 @@ import { surfacesAtom } from "./surfaces";
 import type { EditorSurface } from "../surfaces";
 import type { DraftSurface } from "../draft-surfaces";
 import type { PlainVocabularies } from "../cell-surfaces";
-import { parseEnvironments, parseLithologies } from "../plain-values";
+import { parseEnvironments, parseFacies, parseLithologies } from "../plain-values";
 
 export type IntervalMap = Map<number, IntervalDef> | null;
 
@@ -197,8 +197,8 @@ export const editUnitCellsAtom = atom(
   }
 );
 
-/** A lithology or environment list from the template's text; `null` for
- * any other field. Names are resolved where the vocabulary holds them. */
+/** A lithology, environment or facies list from the template's text;
+ * `null` for any other field. Names are resolved where the vocabulary holds them. */
 function readListText(
   column: string,
   text: string,
@@ -213,6 +213,9 @@ function readListText(
   }
   if (column === "environ") {
     return parseEnvironments(text, vocabularies?.environments ?? new Map());
+  }
+  if (column === "facies") {
+    return parseFacies(text, vocabularies?.facies ?? new Map());
   }
   return null;
 }

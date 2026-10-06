@@ -6,8 +6,8 @@
  * write route exists this becomes a POST and a redirect to `edit/:col_id`.
  */
 import hyper from "@macrostrat/hyper";
-import { useCallback, useState } from "react";
-import { atom, Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useCallback, useMemo, useState } from "react";
+import { atom, createStore, Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   AnchorButton,
   Button,
@@ -25,12 +25,9 @@ import {
   COLUMNS_INDEX,
   draftColumn,
 } from "../@column/column-editor/data";
+import { EditorScopeProvider } from "../@column/column-editor/state";
 import styles from "./new-column.module.sass";
-import {
-  type ColumnPreview,
-  ColumnUpload,
-  previewFromOpener,
-} from "./column-upload.ts";
+import { ColumnUpload, previewFromOpener } from "./column-upload.ts";
 
 const h = hyper.styled(styles);
 
@@ -45,33 +42,22 @@ const capabilities: Partial<LayoutCapabilities> = {
 // Stable empty array so the slot doesn't re-target every render.
 const NO_SELECTION: number[] = [];
 
-/** The page's state lives in a store of its own, so a new visit starts a new
- * column: the page renders outside the editor frame's scope, and atoms in the
- * default store would outlast it. */
+/** The page's state lives in stores of its own, so a new visit starts a new
+ * column: the form's atoms in a jotai provider, the editor's in a fresh
+ * editing-session store (there is no column id to key one by). */
 export function Page() {
-  return h(Provider, h(NewColumnPage));
+  const session = useMemo(() => createStore(), []);
+  return h(Provider, h(EditorScopeProvider, { store: session }, h(NewColumnPage)));
 }
 
 /** The column being built, once the form has started it. */
 const draftAtom = atom<ColumnEditorData | null>(null);
 
-/** A parsed upload opens as an unsaved draft, like a column started by hand. */
-function previewDraft(col: ColumnPreview): ColumnEditorData {
-  return { ...draftColumn(col.columnInfo), units: col.units };
-}
-
-/** The draft for a tab opened from an upload's "Open in new tab". */
-function openerDraft(): ColumnEditorData | null {
-  const col = previewFromOpener();
-  if (col == null) return null;
-  return previewDraft(col);
-}
-
 function NewColumnPage() {
   const draft = useAtomValue(draftAtom);
   const setDraft = useSetAtom(draftAtom);
   // Read once, so the editor gets a stable draft rather than a new one per render.
-  const [fromOpener] = useState(openerDraft);
+  const [fromOpener] = useState(previewFromOpener);
 
   const current = draft ?? fromOpener;
   if (current != null) {
@@ -127,16 +113,11 @@ function NewColumnFormContainer({
 }) {
   const [showUploadForm, setShowUploadForm] = useAtom(showUploadFormAtom);
 
-  const onPreview = useCallback(
-    (col: ColumnPreview) => onStart(previewDraft(col)),
-    [onStart]
-  );
-
   let formContent: any = h(NewColumnForm, { onStart });
   if (showUploadForm) {
     formContent = h("div.column-upload", [
       h("h1", "Upload a spreadsheet"),
-      h(ColumnUpload, { onPreview }),
+      h(ColumnUpload, { onOpenColumn: onStart }),
     ]);
   }
 

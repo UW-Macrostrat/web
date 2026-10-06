@@ -18,7 +18,7 @@
 import hyper from "@macrostrat/hyper";
 import classNames from "classnames";
 import { useCallback, useMemo } from "react";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "./state/ctx";
 import {
   AnchorButton,
   Button,
@@ -34,11 +34,13 @@ import { PatternProvider } from "~/_providers";
 import { AlphaTag } from "~/components";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
 import type { ColumnEditorData } from "./data";
-import { COLUMNS_INDEX, columnHref, editorHref, tableHref } from "./data";
+import { editorHref, tableHref } from "./data";
 import { EditorColumn } from "./column-view";
 import { DisplaySettingsButton } from "./settings-panel";
 import { EditorInspector } from "./inspector";
 import { SurfacesSheet, UnifiedSheet, UnitsSheet } from "./sheets";
+import { NoticesButton } from "./notices";
+import { EditChrome, EditTitleContext } from "./edit-chrome";
 import {
   blockingIssuesAtom,
   ColumnFocusProvider,
@@ -50,11 +52,13 @@ import {
   editingModeAtom,
   inspectorOpenAtom,
   isDirtyAtom,
+  seedEditSession,
   sheetViewAtom,
   type SheetView,
   resetEditsAtom,
   sheetVisibleAtom,
   snapshotAtom,
+  useStore,
 } from "./state";
 import { downloadText, unitsToCSV } from "./export";
 import styles from "./main.module.sass";
@@ -84,21 +88,29 @@ export function ColumnEditorPage(props: ColumnEditorPageProps) {
   );
 }
 
-function ColumnEditorFrame(props: ColumnEditorPageProps) {
-  const { col_id, columnInfo, units, boundaries, isDraft, edit } = props;
+/** Put the loaded column into the editing session, and set the mode.
+ *
+ * The session's store is the layout's (`state/session`), shared by every
+ * page of the editor, so seeding is idempotent: a column already held keeps
+ * its transaction. Done during render, before any child reads the atoms. */
+export function useSeedEditor(data: ColumnEditorData, edit: boolean) {
+  const store = useStore();
+  useMemo(() => {
+    seedEditSession(store, data);
+    store.set(editModeAtom, edit);
+  }, [store, data, edit]);
+}
 
-  // The frame isolates every atom below it, so the column is seeded through
-  // `initialAtoms`; keying on the column remounts the frame (and re-seeds)
-  // when the route moves to another one.
-  // Only the snapshot and the mode are seeded: the snapshot *is* the input
-  // data, the mode is the route's, and the transaction starts empty.
-  const initialAtoms = useMemo(() => {
-    const snapshot = { col_id, columnInfo, units, boundaries, isDraft };
-    return [
-      [snapshotAtom, snapshot],
-      [editModeAtom, edit],
-    ] as [any, any][];
-  }, [col_id, columnInfo, units, boundaries, isDraft, edit]);
+function ColumnEditorFrame(props: ColumnEditorPageProps) {
+  const { col_id, edit } = props;
+  useSeedEditor(props, edit);
+
+  let titleAdornment = h(EditTitleContext);
+  let actions = h(EditChrome, { current: "units" });
+  if (!edit) {
+    titleAdornment = h(TableViewContext);
+    actions = h(TableViewNavigation);
+  }
 
   return h(HybridPage, {
     key: `${col_id ?? "draft"}:${edit}`,
@@ -107,15 +119,11 @@ function ColumnEditorFrame(props: ColumnEditorPageProps) {
       "table-mode": !edit,
     }),
     capabilities,
-    initialAtoms,
-    // Inside the frame's jotai scope, so the focused window is one thing the
-    // column, the sheets and the toolbar all read.
+    // The focused window is one thing the column, the sheets and the toolbar
+    // all read. The editor's own atoms live in the session, not the frame.
     wrap: (node) => h(ColumnFocusProvider, node),
-    // Context on the title row, the working controls beneath it: what column
-    // this is and how to leave it belong with the page's identity, while the
-    // things that act on the transaction belong above the sheet they act on.
-    titleAdornment: h(EditorContext),
-    actions: h(EditorNavigation),
+    titleAdornment,
+    actions,
     filterBar: h(EditorToolbar),
     content: h(EditorContent),
   });
@@ -123,85 +131,25 @@ function ColumnEditorFrame(props: ColumnEditorPageProps) {
 
 /* ---------------------------------------------------------------- header */
 
-/** What this page is: the editor's own warning and the column's unsaved
- * state, or the table view's tag. Sits with the title, not with the
- * controls. */
-function EditorContext() {
-  const snapshot = useAtomValue(snapshotAtom);
-  const isDirty = useAtomValue(isDirtyAtom);
-  const edit = useAtomValue(editModeAtom);
-
-  if (!edit) {
-    return h("span.editor-context", [
-      h(
-        Tag,
-        { minimal: true, icon: "th", className: "view-mode-tag" },
-        "Table view"
-      ),
-    ]);
-  }
-
-  let draftTag = null;
-  if (snapshot?.isDraft) {
-    draftTag = h(
-      Tag,
-      { intent: "warning", minimal: true, className: "draft-tag" },
-      "Unsaved column"
-    );
-  }
-
+/** The table view's tag, with the title. */
+function TableViewContext() {
   return h("span.editor-context", [
-    h(AlphaTag, {
-      content:
-        "An experimental editor. Edits stay in the page: reset discards them, export writes a units sheet in the column-ingestion format.",
-    }),
-    draftTag,
-    h.if(isDirty)("span.dirty-indicator", "Unsaved edits"),
+    h(Tag, { minimal: true, icon: "th", className: "view-mode-tag" }, "Table view"),
   ]);
 }
 
-/** Leaving, and moving between the two faces of this interface — navigation
- * actions, so they keep the title row. */
-function EditorNavigation() {
+/** From the table view into the editor; the breadcrumbs lead back. */
+function TableViewNavigation() {
   const snapshot = useAtomValue(snapshotAtom);
-  const edit = useAtomValue(editModeAtom);
   const col_id = snapshot?.col_id ?? null;
-
-  // A draft has no column page to return to; leaving it is leaving for the
-  // list, and there is no read-only face of a column that isn't written.
-  let backHref = COLUMNS_INDEX;
-  let sibling = null;
-  if (col_id != null) {
-    backHref = columnHref(col_id);
-    if (edit) {
-      sibling = h(AnchorButton, {
-        icon: "th",
-        text: "Table view",
-        minimal: true,
-        small: true,
-        href: tableHref(col_id),
-      });
-    } else {
-      sibling = h(AnchorButton, {
-        icon: "edit",
-        text: "Edit",
-        minimal: true,
-        small: true,
-        href: editorHref(col_id),
-      });
-    }
-  }
-
-  return h(ButtonGroup, { minimal: true }, [
-    sibling,
-    h(AnchorButton, {
-      icon: "cross",
-      text: "Close",
-      minimal: true,
-      small: true,
-      href: backHref,
-    }),
-  ]);
+  if (col_id == null) return null;
+  return h(AnchorButton, {
+    icon: "edit",
+    text: "Edit",
+    minimal: true,
+    small: true,
+    href: editorHref(col_id),
+  });
 }
 
 function exportTitle(errorCount: number): string | undefined {
@@ -335,6 +283,7 @@ function EditorToolbar() {
     h(FocusIndicator),
     h("div.spacer"),
     h(TransactionActions),
+    h(NoticesButton),
     h(DisplaySettingsButton),
     // Any pane gives way to the others: a wide table is the reason to hide the
     // column or the details, and the details pane's row editor is the reason

@@ -9,16 +9,24 @@
  * - `surfaces` — the surfaces projection of the transaction
  * - `view` — mode, selection and pane visibility
  * - `intervals` — interval definitions for chronostratigraphic edits
+ * - `ingest` — the ingestion pipeline's notices, and the facies scheme
+ * - `ctx` — the editor's isolated jotai hooks; `session` — the per-column store
+ * - `metadata` — the column's own fields; `location` — where it is
  * - `presentation` — what a cell's value *is* (a record, a restatement, a
  *   modeled age), read by the sheets to draw it accordingly
  */
+export * from "./ctx";
 export * from "./column";
 export * from "./draft";
 export * from "./editing";
 export * from "./focus";
+export * from "./ingest";
 export * from "./intervals";
 export * from "./options";
 export * from "./presentation";
 export * from "./structure";
 export * from "./surfaces";
 export * from "./view";
+export * from "./session";
+export * from "./metadata";
+export * from "./location";

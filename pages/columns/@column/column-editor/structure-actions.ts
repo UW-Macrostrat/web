@@ -8,7 +8,7 @@
  * turn into the transaction's removal (see `UnitBackedSheet`).
  */
 import { useMemo, useRef } from "react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "./state/ctx";
 import { RegionCardinality } from "@blueprintjs/table";
 import { deleteRowsAction, type TableAction } from "@macrostrat/data-sheet";
 import type { UnitLong } from "@macrostrat/api-types";

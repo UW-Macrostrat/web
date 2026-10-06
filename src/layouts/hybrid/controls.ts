@@ -34,11 +34,25 @@ const modeIcons: Record<LayoutMode, string> = {
   "map-only": "globe",
 };
 
-export function LayoutModeControl({ className = null }) {
+export interface LayoutModeControlProps {
+  className?: string | null;
+  /** Icon and caret only, the label as a tooltip — for the narrow panels of
+   * the map and split shells, where a labelled button wraps the header. */
+  compact?: boolean;
+}
+
+export function LayoutModeControl({
+  className = null,
+  compact = false,
+}: LayoutModeControlProps) {
   const { modes, itemName } = useAtomValue(capabilitiesAtom);
   const [mode, setMode] = useAtom(layoutModeAtom);
 
   if (modes.length < 2) return null;
+
+  const currentLabel = layoutModeLabel(mode, itemName);
+  let label = h("span.mode-label", currentLabel);
+  if (compact) label = null;
 
   const menu = h(
     Menu,
@@ -68,13 +82,20 @@ export function LayoutModeControl({ className = null }) {
           active: isOpen,
           icon: modeIcons[mode],
           rightIcon: "caret-down",
+          title: currentLabel,
         },
-        h("span.mode-label", layoutModeLabel(mode, itemName))
+        label
       ),
   });
 }
 
 /** The frame's controls. A page's own `actions` sit to the left of these. */
-export function ActionsPanel({ children }: { children?: ReactNode }) {
-  return h("div.actions-panel", [children, h(LayoutModeControl)]);
+export function ActionsPanel({
+  children,
+  compact = false,
+}: {
+  children?: ReactNode;
+  compact?: boolean;
+}) {
+  return h("div.actions-panel", [children, h(LayoutModeControl, { compact })]);
 }

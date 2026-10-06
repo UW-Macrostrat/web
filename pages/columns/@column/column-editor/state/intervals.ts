@@ -9,7 +9,8 @@
  * asked for directly. The store's own `fetchedAll` flag keeps repeat calls
  * free. */
 import { useEffect } from "react";
-import { atom, useSetAtom } from "jotai";
+import { atom } from "jotai";
+import { useSetAtom } from "./ctx";
 import { useMacrostratStore } from "@macrostrat/data-provider";
 import type { IntervalDef } from "../boundaries";
 

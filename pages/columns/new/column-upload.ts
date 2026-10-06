@@ -1,4 +1,15 @@
-import h from "@macrostrat/hyper";
+/** Column-ingestion upload control.
+ *
+ * Uploads a column spreadsheet (.xlsx) to api-v3's `/columns/ingest`, which
+ * hands it to a worker task, and waits for the result: the pipeline's graded
+ * notices, and — on a dry run — the ingested columns as the database would
+ * hold them, each of which can be opened straight in the editor.
+ *
+ * `dry_run` defaults to ON, and is all a non-admin can do; the API enforces
+ * that too. An example spreadsheet (served from `temp-storage`) can be
+ * downloaded to see the expected format, or run through a dry run.
+ */
+import hyper from "@macrostrat/hyper";
 import { useCallback, useEffect, useState } from "react";
 import {
   Button,
@@ -7,83 +18,43 @@ import {
   Checkbox,
   FileInput,
   HTMLSelect,
+  Tag,
 } from "@blueprintjs/core";
-import { apiV3Prefix } from "@macrostrat-web/settings";
 import { usePageContext } from "vike-react/usePageContext";
+import {
+  exampleDownloadUrl,
+  ingestColumnFile,
+  listExamples,
+  type IngestResult,
+} from "../@column/column-editor/ingest-api";
+import {
+  columnsFromIngestResult,
+  type ColumnEditorData,
+} from "../@column/column-editor/data";
+import { NoticeCountTags, NoticesList } from "../@column/column-editor/notices";
 import { newColumnHref } from "../@column/column-editor/data";
+import styles from "./new-column.module.sass";
 
-/**
- * Column-ingestion upload control.
- *
- * Uploads a column spreadsheet (.xlsx) to the api-v3 `/columns/ingest` endpoint,
- * which enqueues a Celery worker task, then polls `/columns/ingest/{task_id}`
- * until it finishes and shows the result or error.
- *
- * `dry_run` defaults to ON so the whole path can be exercised without persisting
- * anything — the flag is forwarded to the worker, which rolls the ingest
- * transaction back instead of committing. See the "Column ingestion task"
- * feature-area note.
- *
- * An example spreadsheet (served from `temp-storage` via `/columns/examples`)
- * can be downloaded to see the expected format, or run through a dry run to see
- * how the data is processed.
- */
+const h = hyper.styled(styles);
 
 type Phase = "idle" | "working" | "done" | "error";
 type Example = { key: string; filename: string; size: number };
 
-const POLL_INTERVAL_MS = 1500;
-const POLL_TIMEOUT_MS = 5 * 60 * 1000;
-
-function exampleDownloadUrl(key: string): string {
-  return `${apiV3Prefix}/columns/examples/download?key=${encodeURIComponent(
-    key
-  )}`;
-}
-
-async function pollStatus(taskId: string): Promise<any> {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < POLL_TIMEOUT_MS) {
-    const res = await fetch(`${apiV3Prefix}/columns/ingest/${taskId}`, {
-      credentials: "include",
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Status check failed (${res.status}): ${text}`);
-    }
-    const body = await res.json();
-    if (body.state === "SUCCESS" || body.state === "FAILURE") return body;
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
-  }
-  throw new Error("Timed out waiting for the ingestion task to finish.");
-}
-
-/** A column as parsed by the ingest, in the shape the column editor loads. */
-export interface ColumnPreview {
-  columnInfo: any;
-  units: any[];
-}
-
-function summaryMessage(summary: any, dryRun: boolean): string {
-  let prefix = "Ingestion succeeded. ";
-  if (dryRun) prefix = "Dry run succeeded — nothing was saved. ";
-  if (summary == null) return prefix;
-  return `${prefix}${summary.n_columns} column(s), ${summary.n_units} unit(s), ${summary.n_references} reference(s).`;
-}
-
-/** Where this tab keeps its parsed columns for the tabs it opens to read. */
+/** Where this tab keeps the columns of its last result, for the tabs it
+ * opens to read. */
 const OPENER_KEY = "__columnPreviews";
 const PREVIEW_PARAM = "preview";
 
-function openInNewTab(previews: ColumnPreview[], index: number) {
-  (window as any)[OPENER_KEY] = previews;
+function openInNewTab(columns: ColumnEditorData[], index: number) {
+  (window as any)[OPENER_KEY] = columns;
   // No `noopener`: the new tab reads the column through `window.opener`.
   window.open(`${newColumnHref}?${PREVIEW_PARAM}=${index}`, "_blank");
 }
 
 /** The column this tab was opened to edit, copied out of the tab that opened
  * it; `null` when there is none or that tab is gone. */
-export function previewFromOpener(): ColumnPreview | null {
+export function previewFromOpener(): ColumnEditorData | null {
+  if (typeof window === "undefined") return null;
   const index = new URLSearchParams(window.location.search).get(PREVIEW_PARAM);
   if (index == null) return null;
   try {
@@ -96,49 +67,20 @@ export function previewFromOpener(): ColumnPreview | null {
   }
 }
 
-function PreviewButtons({
-  previews,
-  onPreview,
-}: {
-  previews: ColumnPreview[];
-  onPreview?: (col: ColumnPreview) => void;
-}) {
-  if (onPreview == null || previews.length < 2) return null;
-  return h(
-    "div.preview-buttons",
-    { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem" } },
-    previews.map((col, i) =>
-      h(ButtonGroup, { key: i }, [
-        h(Button, {
-          icon: "edit",
-          text: `Open ${col.columnInfo.col_name ?? `column ${i + 1}`}`,
-          onClick: () => onPreview(col),
-        }),
-        h(Button, {
-          icon: "share",
-          title: "Open in new tab",
-          "aria-label": "Open in new tab",
-          onClick: () => openInNewTab(previews, i),
-        }),
-      ])
-    )
-  );
+export interface ColumnUploadProps {
+  /** Open a column from a dry run in the editor. */
+  onOpenColumn?: (column: ColumnEditorData) => void;
 }
 
-export function ColumnUpload({
-  onPreview,
-}: {
-  /** Opens a parsed column in the editor, unsaved. */
-  onPreview?: (col: ColumnPreview) => void;
-} = {}) {
+export function ColumnUpload({ onOpenColumn }: ColumnUploadProps) {
   const pageContext = usePageContext();
   const isAdmin = (pageContext as any).user?.role === "web_admin";
 
-  const [previews, setPreviews] = useState<ColumnPreview[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [dryRun, setDryRun] = useState(true);
   const [phase, setPhase] = useState<Phase>("idle");
-  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<IngestResult | null>(null);
   const [examples, setExamples] = useState<Example[]>([]);
   const [exampleKey, setExampleKey] = useState<string | null>(null);
 
@@ -148,10 +90,9 @@ export function ColumnUpload({
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${apiV3Prefix}/columns/examples`, { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : { examples: [] }))
-      .then((body) => {
-        if (!cancelled) setExamples(body.examples ?? []);
+    listExamples()
+      .then((list) => {
+        if (!cancelled) setExamples(list);
       })
       .catch(() => {});
     return () => {
@@ -162,55 +103,24 @@ export function ColumnUpload({
   const onFileChange = useCallback((e: any) => {
     setFile((e.target as HTMLInputElement).files?.[0] ?? null);
     setPhase("idle");
-    setMessage(null);
+    setError(null);
+    setResult(null);
   }, []);
 
   // Core upload + poll, shared by the file submit and the example dry run.
-  const runIngest = useCallback(
-    async (toSend: File, dryRunValue: boolean) => {
-      setPhase("working");
-      setMessage(null);
-      setPreviews([]);
-      try {
-        const data = new FormData();
-        data.append("file", toSend, toSend.name);
-        data.append("dry_run", String(dryRunValue));
-
-        // No Content-Type header — the browser sets the multipart boundary itself.
-        const res = await fetch(`${apiV3Prefix}/columns/ingest`, {
-          method: "POST",
-          credentials: "include",
-          body: data,
-        });
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`Upload failed (${res.status}): ${text}`);
-        }
-
-        const { task_id } = await res.json();
-        const result = await pollStatus(task_id);
-
-        if (result.state === "FAILURE") {
-          setPhase("error");
-          setMessage(result.error ?? "Ingestion task failed.");
-          return;
-        }
-
-        setPhase("done");
-        // The worker wraps the ingest summary as `result.result`.
-        const summary = result.result?.result;
-        const parsed: ColumnPreview[] = summary?.columns ?? [];
-        setPreviews(parsed);
-        setMessage(summaryMessage(summary, dryRunValue));
-        // One column needs no choosing: open it straight away.
-        if (parsed.length === 1) onPreview?.(parsed[0]);
-      } catch (e: any) {
-        setPhase("error");
-        setMessage(e?.message ?? String(e));
-      }
-    },
-    [onPreview]
-  );
+  const runIngest = useCallback(async (toSend: File, dryRunValue: boolean) => {
+    setPhase("working");
+    setError(null);
+    setResult(null);
+    try {
+      const res = await ingestColumnFile(toSend, dryRunValue);
+      setResult(res);
+      setPhase("done");
+    } catch (e: any) {
+      setPhase("error");
+      setError(e?.message ?? String(e));
+    }
+  }, []);
 
   const submit = useCallback(() => {
     if (file == null) return;
@@ -223,7 +133,8 @@ export function ColumnUpload({
   const runExample = useCallback(async () => {
     if (exampleKey == null) return;
     setPhase("working");
-    setMessage(null);
+    setError(null);
+    setResult(null);
     try {
       const res = await fetch(exampleDownloadUrl(exampleKey), {
         credentials: "include",
@@ -237,7 +148,7 @@ export function ColumnUpload({
       await runIngest(new File([blob], filename, { type: blob.type }), true);
     } catch (e: any) {
       setPhase("error");
-      setMessage(e?.message ?? String(e));
+      setError(e?.message ?? String(e));
     }
   }, [exampleKey, runIngest]);
 
@@ -266,26 +177,15 @@ export function ColumnUpload({
   ];
   const noExampleChosen = exampleKey == null;
 
-  let callout = null;
-  if (message != null) {
-    let intent: "primary" | "success" | "danger" = "primary";
-    if (phase === "done") intent = "success";
-    if (phase === "error") intent = "danger";
-    const title = phase === "error" ? "Error" : "Result";
-    callout = h(Callout, { intent, title }, message);
+  let outcome = null;
+  if (phase === "error") {
+    outcome = h(Callout, { intent: "danger", title: "Error" }, error);
+  } else if (result != null) {
+    outcome = h(IngestOutcome, { result, onOpenColumn });
   }
 
-  return h(
-    "div.column-upload",
-    {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-        maxWidth: "40rem",
-      },
-    },
-    [
+  return h("div.column-upload", [
+    h("div.upload-controls", [
       h(FileInput, {
         text: file?.name ?? "Choose a column spreadsheet (.xlsx)…",
         hasSelection: file != null,
@@ -310,47 +210,164 @@ export function ColumnUpload({
         },
         submitLabel
       ),
-      h("div.example-section", { style: { marginTop: "0.5rem" } }, [
+    ]),
+    h("div.example-section", [
+      h("div.example-label", "Or try an example spreadsheet"),
+      h("div.example-controls", [
+        h(HTMLSelect, {
+          value: exampleKey ?? "",
+          disabled: busy || noExamples,
+          options: exampleOptions,
+          onChange: (e: any) => setExampleKey(e.currentTarget.value || null),
+        }),
         h(
-          "div.example-label",
-          { style: { fontWeight: 500, marginBottom: "0.25rem" } },
-          "Or try an example spreadsheet"
+          Button,
+          {
+            icon: "download",
+            disabled: noExampleChosen || busy,
+            onClick: downloadExample,
+          },
+          "Download"
         ),
         h(
-          "div.example-controls",
-          { style: { display: "flex", gap: "0.5rem", alignItems: "center" } },
-          [
-            h(HTMLSelect, {
-              value: exampleKey ?? "",
-              disabled: busy || noExamples,
-              options: exampleOptions,
-              onChange: (e: any) =>
-                setExampleKey(e.currentTarget.value || null),
-            }),
-            h(
-              Button,
-              {
-                icon: "download",
-                disabled: noExampleChosen || busy,
-                onClick: downloadExample,
-              },
-              "Download"
-            ),
-            h(
-              Button,
-              {
-                icon: "play",
-                intent: "primary",
-                disabled: noExampleChosen || busy,
-                onClick: runExample,
-              },
-              "Run example (dry run)"
-            ),
-          ]
+          Button,
+          {
+            icon: "play",
+            intent: "primary",
+            disabled: noExampleChosen || busy,
+            onClick: runExample,
+          },
+          "Run example (dry run)"
         ),
       ]),
-      callout,
-      h(PreviewButtons, { previews, onPreview }),
-    ]
-  );
+    ]),
+    outcome,
+  ]);
+}
+
+/** What came back: the summary line, the columns (openable after a dry
+ * run), and the notices. */
+function IngestOutcome({
+  result,
+  onOpenColumn,
+}: {
+  result: IngestResult;
+  onOpenColumn?: (column: ColumnEditorData) => void;
+}) {
+  const columns = columnsFromIngestResult(result);
+  const summary = result.summary;
+
+  let intent: "success" | "warning" | "danger" = "success";
+  let title = "Ingestion succeeded";
+  if (result.dry_run) title = "Dry run finished — nothing was saved";
+  if (!result.ok) {
+    intent = "danger";
+    title = result.dry_run
+      ? "Dry run finished with errors — this data can't be written as it stands"
+      : "Not written — the data has errors";
+  } else if (result.notice_counts.warning > 0) {
+    intent = "warning";
+  }
+
+  let summaryLine = null;
+  if (summary != null) {
+    summaryLine = h("p", [
+      `${summary.n_columns} column${summary.n_columns === 1 ? "" : "s"}, `,
+      `${summary.n_units} unit${summary.n_units === 1 ? "" : "s"} `,
+      `in project `,
+      h("strong", summary.project.name),
+      ".",
+    ]);
+  }
+
+  let columnList = null;
+  if (columns.length > 0) {
+    columnList = h(
+      "ul.result-columns",
+      columns.map((column, index) =>
+        h(ResultColumn, {
+          key: column.columnInfo.local_id ?? column.columnInfo.col_name ?? index,
+          column,
+          index,
+          columns,
+          dryRun: result.dry_run,
+          onOpenColumn,
+        })
+      )
+    );
+  }
+
+  return h("div.ingest-result", [
+    h(Callout, { intent, title }, [
+      summaryLine,
+      h(NoticeCountTags, { counts: result.notice_counts }),
+    ]),
+    columnList,
+    h(NoticesList, { notices: result.notices, emptyText: null }),
+  ]);
+}
+
+function ResultColumn({
+  column,
+  index,
+  columns,
+  dryRun,
+  onOpenColumn,
+}: {
+  column: ColumnEditorData;
+  index: number;
+  columns: ColumnEditorData[];
+  dryRun: boolean;
+  onOpenColumn?: (column: ColumnEditorData) => void;
+}) {
+  const info = column.columnInfo;
+  const errors = (column.notices ?? []).filter((n) => n.level === "error").length;
+
+  let errorTag = null;
+  if (errors > 0) {
+    errorTag = h(
+      Tag,
+      { minimal: true, intent: "danger", size: "small" },
+      `${errors} error${errors === 1 ? "" : "s"}`
+    );
+  }
+
+  // A written column has a real id and a page of its own; a dry run's exists
+  // only in the result, so it opens in the editor from here
+  let action = null;
+  if (dryRun && onOpenColumn != null) {
+    action = h(ButtonGroup, { minimal: true }, [
+      h(Button, {
+        small: true,
+        icon: "edit",
+        text: "Open in editor",
+        onClick: () => onOpenColumn(column),
+      }),
+      h(Button, {
+        small: true,
+        icon: "share",
+        title: "Open in new tab",
+        "aria-label": "Open in new tab",
+        onClick: () => openInNewTab(columns, index),
+      }),
+    ]);
+  } else if (!dryRun && info.col_id > 0) {
+    action = h(Button, {
+      small: true,
+      minimal: true,
+      icon: "arrow-right",
+      text: "Open",
+      onClick: () => {
+        window.location.href = `/columns/${info.col_id}/edit`;
+      },
+    });
+  }
+
+  return h("li.result-column", [
+    h("span.column-name", info.col_name),
+    h("span.column-meta", `${column.units.length} units · ${info.col_type ?? "column"}`),
+    errorTag,
+    h("span.spacer"),
+    action,
+  ]);
 }

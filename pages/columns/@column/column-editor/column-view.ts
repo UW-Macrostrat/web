@@ -5,7 +5,7 @@
  */
 import h from "@macrostrat/hyper";
 import classNames from "classnames";
-import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
+import { useAtom, useAtomValue, useSetAtom, useStore } from "./state/ctx";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { SegmentedControl } from "@blueprintjs/core";
 import {

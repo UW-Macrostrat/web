@@ -178,20 +178,78 @@ export function parseEnvironments(
   });
 }
 
+/* --------------------------------------------------------------- facies */
+
+/** A unit's facies as the format writes them: `<facies> (<proportion>); …`,
+ * the proportion a percentage or a term. `facies_id` names the facies when it
+ * has an id, since that is what the facies sheet keys on. */
+export type FaciesRef = {
+  facies_id: string | null;
+  name: string;
+  prop: number | null;
+  prop_term: string | null;
+};
+
+export function formatFacies(refs: FaciesRef[] | string | null | undefined) {
+  if (refs == null) return "";
+  if (typeof refs === "string") return refs;
+  return refs.map(formatFaciesRef).join("; ");
+}
+
+function formatFaciesRef(d: FaciesRef): string {
+  let text = d.facies_id ?? d.name ?? "";
+  const prop = formatProportionTerm(d as any);
+  if (prop != null) text += ` (${prop})`;
+  return text;
+}
+
+/** Facies from the template's text, resolved against the scheme by id or
+ * name. An unknown name is kept without an id, which validation flags. */
+export function parseFacies(
+  text: string,
+  scheme: Map<string, { facies_id: string; facies: string }>
+): FaciesRef[] {
+  return splitList(text, /[;,](?![^()]*\))/).map((part) => {
+    let body = part;
+    let prop: number | null = null;
+    let prop_term: string | null = null;
+    const paren = body.match(/\(([^)]*)\)\s*$/);
+    if (paren != null) {
+      body = body.slice(0, paren.index).trim();
+      ({ prop, prop_term } = parseProportion(paren[1]));
+    }
+    const def = scheme.get(normalize(body));
+    return {
+      facies_id: def?.facies_id ?? null,
+      name: def?.facies ?? body,
+      prop,
+      prop_term,
+    };
+  });
+}
+
 /* ------------------------------------------------------------- checking */
 
 /** The names in a list that Macrostrat's vocabulary doesn't hold. */
 export function unresolvedNames(
-  entries: { name?: string; lith_id?: number | null; environ_id?: number | null }[] | null | undefined,
-  idField: "lith_id" | "environ_id"
+  entries:
+    | {
+        name?: string;
+        lith_id?: number | null;
+        environ_id?: number | null;
+        facies_id?: string | null;
+      }[]
+    | null
+    | undefined,
+  idField: "lith_id" | "environ_id" | "facies_id"
 ): string[] {
   if (!Array.isArray(entries)) return [];
   return entries.filter((d) => d?.[idField] == null).map((d) => d?.name ?? "");
 }
 
-function splitList(text: string): string[] {
+function splitList(text: string, separator: string | RegExp = ";"): string[] {
   return String(text ?? "")
-    .split(";")
+    .split(separator)
     .map((d) => d.trim())
     .filter(Boolean);
 }

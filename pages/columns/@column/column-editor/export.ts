@@ -2,7 +2,11 @@
  * (https://github.com/Macrostrat/column-ingestion) — the bridge back into
  * the ingestion pipeline until a write API exists. */
 import type { UnitLong } from "@macrostrat/api-types";
-import { formatEnvironments, formatLithologies } from "./plain-values";
+import {
+  formatEnvironments,
+  formatFacies,
+  formatLithologies,
+} from "./plain-values";
 import { unitStatus } from "./choices";
 
 /** Columns of the ingestion `units` sheet that the v2 API can populate, in
@@ -21,6 +25,7 @@ export const INGESTION_UNIT_COLUMNS = [
   "t_prop",
   "lithology",
   "environment",
+  "facies",
   "min_thickness",
   "max_thickness",
   "unit_description",
@@ -52,6 +57,7 @@ export function unitToIngestionRow(unit: UnitLong): IngestionUnitRow {
     t_prop: numberOrNull(unit.t_prop),
     lithology: formatLithologies(unit.lith),
     environment: formatEnvironments(unit.environ),
+    facies: formatFacies((unit as any).facies),
     min_thickness: numberOrNull(unit.min_thick),
     max_thickness: numberOrNull(unit.max_thick),
     unit_description: unit.notes ?? "",

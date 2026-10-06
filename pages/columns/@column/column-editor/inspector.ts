@@ -15,7 +15,8 @@
 import hyper from "@macrostrat/hyper";
 import classNames from "classnames";
 import { type ReactNode, useMemo } from "react";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "./state/ctx";
 import { Switch } from "@blueprintjs/core";
 import {
   MacrostratColumnStateProvider,

@@ -34,6 +34,8 @@ export interface ColumnSnapshot {
   units: UnitLong[];
   boundaries: AgeModelBoundary[];
   isDraft?: boolean;
+  /** `dry-run` for a column opened from the ingestion pipeline's dry run. */
+  source?: "api" | "dry-run";
 }
 
 /** The column as loaded. Seeded through the frame's `initialAtoms`. */

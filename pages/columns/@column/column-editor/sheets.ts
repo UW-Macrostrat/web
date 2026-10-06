@@ -32,7 +32,8 @@
  */
 import hyper from "@macrostrat/hyper";
 import { RegionCardinality } from "@blueprintjs/table";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "./state/ctx";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { UnitLong } from "@macrostrat/api-types";
 import {
@@ -77,6 +78,7 @@ import {
   unitIssuesAtom,
   unitOverlayFor,
   useIntervalDefs,
+  faciesSchemeAtom,
 } from "./state";
 import {
   issueForCell,
@@ -116,6 +118,7 @@ import {
   formatEnvironments,
   formatLithologies,
   unresolvedNames,
+  formatFacies,
 } from "./plain-values";
 import {
   useStructureActions,
@@ -219,6 +222,8 @@ interface ColumnVisibility {
   identifiers: boolean;
   ages: boolean;
   measured: boolean;
+  /** Whether the dataset has a facies scheme to read the column against. */
+  facies: boolean;
   view: SheetView;
 }
 
@@ -226,10 +231,11 @@ function useColumnVisibility(): ColumnVisibility {
   const identifiers = useAtomValue(showIdentifiersAtom);
   const ages = useAtomValue(showAgesAtom);
   const measured = useAtomValue(positionAxisAtom) != null;
+  const facies = useAtomValue(faciesSchemeAtom).length > 0;
   const view = useAtomValue(sheetViewAtom);
   return useMemo(
-    () => ({ identifiers, ages, measured, view }),
-    [identifiers, ages, measured, view]
+    () => ({ identifiers, ages, measured, facies, view }),
+    [identifiers, ages, measured, facies, view]
   );
 }
 
@@ -453,6 +459,7 @@ type AttributeLabels = Record<
   | "strat_name"
   | "lithology"
   | "environment"
+  | "facies"
   | "min_thickness"
   | "max_thickness"
   | "description",
@@ -513,6 +520,19 @@ function attributeColumns(
       validate: validateResolved("environ_id", "environment"),
     };
   }
+  // Facies are the dataset's own shorthand (`./plain-values`), read against
+  // the scheme the column arrived with; text in both views for now, since
+  // the scheme is per dataset rather than a Macrostrat vocabulary
+  const facies: ColumnSpec = {
+    key: "facies",
+    name: names.facies,
+    cellLabel: "facies",
+    dataType: "string",
+    width: 180,
+    hidden: !show.facies,
+    valueRenderer: (d) => formatFacies(d),
+    validate: validateResolved("facies_id", "facies of this dataset"),
+  };
   // A unit is defined unless it says otherwise: rich, a choice of the three;
   // plain, the word, checked against them
   let status: ColumnSpec = {
@@ -558,6 +578,7 @@ function attributeColumns(
     },
     lithology,
     environment,
+    facies,
     min_thickness: {
       key: "min_thick",
       name: names.min_thickness,
@@ -589,6 +610,7 @@ export function unitSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
       strat_name: "Strat. name",
       lithology: "Lithology",
       environment: "Environment",
+      facies: "Facies",
       min_thickness: "Min. thickness",
       max_thickness: "Max. thickness",
       description: "Notes",
@@ -604,6 +626,7 @@ export function unitSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
     ...ageColumns({ b_age: "Base age (Ma)", t_age: "Top age (Ma)" }, inputs),
     attrs.lithology,
     attrs.environment,
+    attrs.facies,
     attrs.min_thickness,
     attrs.max_thickness,
     attrs.description,
@@ -639,6 +662,7 @@ function unifiedSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
       strat_name: "strat_name",
       lithology: "lithology",
       environment: "environment",
+      facies: "facies",
       min_thickness: "min_thickness",
       max_thickness: "max_thickness",
       description: "unit_description",
@@ -658,6 +682,7 @@ function unifiedSheetColumns(inputs: UnitSheetInputs): ColumnSpec[] {
     attrs.strat_name,
     attrs.lithology,
     attrs.environment,
+    attrs.facies,
     attrs.min_thickness,
     attrs.max_thickness,
     attrs.description,
@@ -1132,7 +1157,7 @@ function useSheetSelectionBridge<T>(
  * Macrostrat's vocabulary doesn't hold — kept, as the format allows, but
  * worth knowing about. */
 function validateResolved(
-  idField: "lith_id" | "environ_id",
+  idField: "lith_id" | "environ_id" | "facies_id",
   noun: string
 ): ColumnSpec["validate"] {
   return (value: any) => {
