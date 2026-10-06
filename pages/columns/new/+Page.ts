@@ -6,7 +6,7 @@
  * write route exists this becomes a POST and a redirect to `edit/:col_id`.
  */
 import hyper from "@macrostrat/hyper";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { atom, Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   AnchorButton,
@@ -26,7 +26,11 @@ import {
   draftColumn,
 } from "../@column/column-editor/data";
 import styles from "./new-column.module.sass";
-import { type ColumnPreview, ColumnUpload } from "./column-upload.ts";
+import {
+  type ColumnPreview,
+  ColumnUpload,
+  previewFromOpener,
+} from "./column-upload.ts";
 
 const h = hyper.styled(styles);
 
@@ -51,12 +55,27 @@ export function Page() {
 /** The column being built, once the form has started it. */
 const draftAtom = atom<ColumnEditorData | null>(null);
 
+/** A parsed upload opens as an unsaved draft, like a column started by hand. */
+function previewDraft(col: ColumnPreview): ColumnEditorData {
+  return { ...draftColumn(col.columnInfo), units: col.units };
+}
+
+/** The draft for a tab opened from an upload's "Open in new tab". */
+function openerDraft(): ColumnEditorData | null {
+  const col = previewFromOpener();
+  if (col == null) return null;
+  return previewDraft(col);
+}
+
 function NewColumnPage() {
   const draft = useAtomValue(draftAtom);
   const setDraft = useSetAtom(draftAtom);
+  // Read once, so the editor gets a stable draft rather than a new one per render.
+  const [fromOpener] = useState(openerDraft);
 
-  if (draft != null) {
-    return h(ColumnEditorPage, { ...draft, edit: true });
+  const current = draft ?? fromOpener;
+  if (current != null) {
+    return h(ColumnEditorPage, { ...current, edit: true });
   }
 
   return h(NewColumnFormContainer, { onStart: setDraft });
@@ -108,10 +127,8 @@ function NewColumnFormContainer({
 }) {
   const [showUploadForm, setShowUploadForm] = useAtom(showUploadFormAtom);
 
-  // A parsed upload opens as an unsaved draft, like a column started by hand.
   const onPreview = useCallback(
-    (col: ColumnPreview) =>
-      onStart({ ...draftColumn(col.columnInfo), units: col.units }),
+    (col: ColumnPreview) => onStart(previewDraft(col)),
     [onStart]
   );
 

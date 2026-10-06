@@ -2,6 +2,7 @@ import h from "@macrostrat/hyper";
 import { useCallback, useEffect, useState } from "react";
 import {
   Button,
+  ButtonGroup,
   Callout,
   Checkbox,
   FileInput,
@@ -9,6 +10,7 @@ import {
 } from "@blueprintjs/core";
 import { apiV3Prefix } from "@macrostrat-web/settings";
 import { usePageContext } from "vike-react/usePageContext";
+import { newColumnHref } from "../@column/column-editor/data";
 
 /**
  * Column-ingestion upload control.
@@ -69,6 +71,31 @@ function summaryMessage(summary: any, dryRun: boolean): string {
   return `${prefix}${summary.n_columns} column(s), ${summary.n_units} unit(s), ${summary.n_references} reference(s).`;
 }
 
+/** Where this tab keeps its parsed columns for the tabs it opens to read. */
+const OPENER_KEY = "__columnPreviews";
+const PREVIEW_PARAM = "preview";
+
+function openInNewTab(previews: ColumnPreview[], index: number) {
+  (window as any)[OPENER_KEY] = previews;
+  // No `noopener`: the new tab reads the column through `window.opener`.
+  window.open(`${newColumnHref}?${PREVIEW_PARAM}=${index}`, "_blank");
+}
+
+/** The column this tab was opened to edit, copied out of the tab that opened
+ * it; `null` when there is none or that tab is gone. */
+export function previewFromOpener(): ColumnPreview | null {
+  const index = new URLSearchParams(window.location.search).get(PREVIEW_PARAM);
+  if (index == null) return null;
+  try {
+    const col = window.opener?.[OPENER_KEY]?.[Number(index)];
+    if (col == null) return null;
+    // A copy, so the draft doesn't depend on the opener's page staying alive.
+    return JSON.parse(JSON.stringify(col));
+  } catch {
+    return null;
+  }
+}
+
 function PreviewButtons({
   previews,
   onPreview,
@@ -81,12 +108,19 @@ function PreviewButtons({
     "div.preview-buttons",
     { style: { display: "flex", flexWrap: "wrap", gap: "0.5rem" } },
     previews.map((col, i) =>
-      h(Button, {
-        key: i,
-        icon: "edit",
-        text: `Open ${col.columnInfo.col_name ?? `column ${i + 1}`}`,
-        onClick: () => onPreview(col),
-      })
+      h(ButtonGroup, { key: i }, [
+        h(Button, {
+          icon: "edit",
+          text: `Open ${col.columnInfo.col_name ?? `column ${i + 1}`}`,
+          onClick: () => onPreview(col),
+        }),
+        h(Button, {
+          icon: "share",
+          title: "Open in new tab",
+          "aria-label": "Open in new tab",
+          onClick: () => openInNewTab(previews, i),
+        }),
+      ])
     )
   );
 }
