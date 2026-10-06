@@ -14,7 +14,7 @@ const fgdcPatterns = join(
 function startServer() {
   const app = express();
   const kgTarget = process.env.VITE_MACROSTRAT_KG_API_DOMAIN;
-  if (kgTarget !== undefined && !kgTarget.startsWith("http")) {
+  if (kgTarget !== undefined && !kgTarget.startsWith("https")) {
     console.log("Proxying KG API requests to", kgTarget);
     app.use(
       "/kg-api",
