@@ -39,6 +39,7 @@ const defaultState: CoreState = {
   pbdbData: [],
   mapIsLoading: false,
   isShowingColumnPage: false,
+  showSelectedColumnFootprint: true,
   mapCenter: {
     type: null,
   },
@@ -140,6 +141,8 @@ export function coreReducer(
         ...state,
         showExperimentsPanel: action.open ?? !state.showExperimentsPanel,
       };
+    case "open-column-page":
+      return { ...state, isShowingColumnPage: true };
     case "close-column-page":
       return { ...state, isShowingColumnPage: false };
     case "close-infodrawer":
@@ -173,6 +176,24 @@ export function coreReducer(
         ...state,
         filters: state.filters.filter((d) => !isTheSame(d, action.filter)),
       };
+    case "replace-interval-filter": {
+      const filters = state.filters.filter((d) => d.type != "intervals");
+      if (action.filter != null) filters.push(action.filter);
+      return { ...state, filters };
+    }
+    case "set-column-footprints": {
+      const mapLayers = new Set(state.mapLayers);
+      if (action.footprints == "all") {
+        mapLayers.add(MapLayer.COLUMNS);
+      } else {
+        mapLayers.delete(MapLayer.COLUMNS);
+      }
+      return {
+        ...state,
+        mapLayers,
+        showSelectedColumnFootprint: action.footprints != "none",
+      };
+    }
     case "clear-filters":
       return { ...state, filters: [] };
     case "start-map-query":

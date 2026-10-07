@@ -1,11 +1,14 @@
 import { getPBDBData } from "./filter-helpers";
 import {
   AppAction,
+  columnFootprintsAtom,
   MapLayer,
   selectedColumnMetadataAtom,
   useAppActions,
 } from "#/map/map-interface/app-state";
 import { useAtomValue } from "jotai";
+import type { ColumnFootprints } from "#/map/map-interface/app-state";
+import type { FilterData } from "#/map/map-interface/app-state/handlers/filters";
 import { ColumnProperties } from "#/map/map-interface/app-state/columns/columns.ts";
 import {
   useMapRef,
@@ -260,6 +263,7 @@ export function MacrostratLayerManager() {
   );
 
   useStyleReloader(pbdbPoints);
+  useColumnFootprints();
 
   // Map click handler
   const mapClickHandler = useMapClickHandler(pbdbPoints);
@@ -318,21 +322,6 @@ function useStyleReloader(pbdbPoints) {
         ) {
           setVisibility(map, layer.id, mapLayers.has(MapLayer.FOSSILS));
         }
-        if (layer.source === "columns") {
-          setVisibility(
-            map,
-            layer.id,
-            mapLayers.has(MapLayer.COLUMNS) && filters.length === 0
-          );
-        }
-
-        if (layer.source === "filteredColumns") {
-          setVisibility(
-            map,
-            layer.id,
-            mapLayers.has(MapLayer.COLUMNS) && filters.length !== 0
-          );
-        }
       }
 
       if (mapLayers.has(MapLayer.FOSSILS)) {
@@ -341,6 +330,54 @@ function useStyleReloader(pbdbPoints) {
     },
     [mapLayers, filters]
   );
+}
+
+/** Column footprints: every column, the selected one alone, or none. */
+function useColumnFootprints() {
+  const filters = useAppState((s) => s.filters);
+  const footprints = useAtomValue(columnFootprintsAtom);
+  const selectedColumnID =
+    useAtomValue(selectedColumnMetadataAtom)?.col_id ?? null;
+
+  useMapStyleOperator(
+    (map) => {
+      for (const layerID of ["column_fill", "column_stroke"]) {
+        applyColumnFootprints(
+          map,
+          layerID,
+          footprints,
+          selectedColumnID,
+          filters
+        );
+      }
+      // `filteredColumns` replaces the full set while filters are active
+      const showFiltered = footprints == "all" && filters.length !== 0;
+      for (const layerID of [
+        "filtered_column_fill",
+        "filtered_column_stroke",
+      ]) {
+        setVisibility(map, layerID, showFiltered);
+      }
+    },
+    [filters, footprints, selectedColumnID]
+  );
+}
+
+/** The full column set, or just the selected column drawn from it. */
+function applyColumnFootprints(
+  map,
+  layerID: string,
+  footprints: ColumnFootprints,
+  selectedColumnID: number | null,
+  filters: FilterData[]
+) {
+  if (footprints == "selected" && selectedColumnID != null) {
+    map.setFilter(layerID, ["==", ["get", "col_id"], selectedColumnID]);
+    setVisibility(map, layerID, true);
+    return;
+  }
+  map.setFilter(layerID, null);
+  setVisibility(map, layerID, footprints == "all" && filters.length === 0);
 }
 
 function setVisibility(map, layerID, visible) {

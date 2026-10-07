@@ -20,13 +20,17 @@
     h3
       color: var(--pz-text-color)
 
+  // The link lists wrap rather than squeeze as the footer narrows (beside a
+  // sidebar, say), and the logo shrinks with it
+  container-type: inline-size
   display: flex
   flex-direction: row
+  flex-wrap: wrap
   align-items: baseline
-  gap: 1rem
+  gap: 1.5rem 1rem
   justify-content: space-between
   &>*
-    flex: 1
+    flex: 1 1 8rem
 
   .nav-link-list
     :global(.bp6-button.bp6-minimal)
@@ -99,7 +103,7 @@
       opacity: 1
 
   .footer-logo
-    width: 100px
+    width: clamp(48px, 12cqi, 100px)
     aspect-ratio: 1/1
     // Tint the logo to match the text color
     filter: var(--filter)

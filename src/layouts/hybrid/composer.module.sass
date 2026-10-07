@@ -135,9 +135,11 @@
 .content-shell.has-sidebar
   // The header spans the same measure as content + sidebar, so its left edge
   // stays aligned with the content when the sidebar widens the shell.
+  --hybrid-shell-width: calc(var(--hybrid-content-width) + var(--hybrid-sidebar-width) + var(--pz-section-gap, 1.5rem))
+
   .content-header,
   .content-main
-    max-width: calc(var(--hybrid-content-width) + var(--hybrid-sidebar-width) + var(--pz-section-gap, 1.5rem))
+    max-width: var(--hybrid-shell-width)
 
   .content-main
     padding-bottom: 1em
@@ -146,8 +148,9 @@
     flex: 1 1 var(--hybrid-content-width)
     --data-panel-content-width: 100%
 
+// Fixed at its width, the content giving instead, so a drag tracks the pointer
 .content-sidebar
-  flex: 0 1 var(--hybrid-sidebar-width)
+  flex: 0 0 var(--hybrid-sidebar-width)
   min-width: 0
   min-height: 0
   display: flex
@@ -166,6 +169,11 @@
   aspect-ratio: 4 / 3
   overflow: hidden
   border-radius: var(--pz-radius-lg)
+
+  // The map's GL canvas is composited apart, so overflow alone leaves its
+  // corners square; clipped inside the card so the card keeps its shadow.
+  > :first-child
+    clip-path: inset(0 round var(--pz-radius-lg))
   background-color: var(--pz-panel-background-color, var(--panel-background-color))
   box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
 
@@ -214,7 +222,7 @@
   margin: 0 auto
 
 .sidebar-spacer
-  flex: 0 1 var(--hybrid-sidebar-width)
+  flex: 0 0 var(--hybrid-sidebar-width)
   min-width: 0
 
 .content-shell.has-sidebar .content-spacer
@@ -258,12 +266,69 @@
 
 /* ------------------------------------------------- page-scrolling variant */
 
-// `contentScroll: "page"`: the content grows with itself instead of filling
-// the region, so the region scrolls through one tall item and its footer.
-.content-shell.scroll-page .content-scroll > .content-main
-  height: auto
-  min-height: 100%
-  align-items: flex-start
+// `contentScroll: "page"`: the header, the content's row and the footer all
+// sit in the scroller, in flow (see `PageScrollBody`).
+.content-shell.scroll-page
+  // The page header's bar height (`ui-components`' default), which the sticky
+  // sidebar parks beneath
+  --hybrid-bar-height: 3rem
+
+  // Stretched, so the header's bar spans the window; the rest centre by margin
+  .content-scroll
+    display: flex
+    flex-direction: column
+
+  // The page header's bar and title block take the scroller as their sticky
+  // boundary, so nothing in between may form a box.
+  .content-header,
+  .header-row
+    display: contents
+
+  // The content's gutter and measure, so the header's text lines up with it
+  header:global(.shell-page-header)
+    --page-header-padding-x: 1em
+    --page-header-content-width: calc(var(--hybrid-shell-width) - 2em)
+
+  // Fills the window below the header, so a short page's footer sits at the
+  // bottom of it
+  .content-scroll > .content-main
+    flex: 1 0 auto
+    height: auto
+    min-height: 0
+
+  // Sticky, so the map stays in view through a long column. It keeps its
+  // width (a dragged one included) while the content gives, and scrolls with
+  // the page rather than on its own when it is taller than the window.
+  .content-sidebar
+    flex-shrink: 0
+    position: sticky
+    top: calc(var(--hybrid-bar-height) + 1em)
+    align-self: flex-start
+    overflow-y: visible
+
+  // The content, then (in content-only) the assistant, then the footer
+  .content-panel-holder
+    display: flex
+    flex-direction: column
+
+// A block, so a floated map's neighbours wrap around it
+.content-flow
+  display: flow-root
+
+// Without a sidebar, the assistant and links follow the content
+.content-after
+  padding-top: 1em
+  display: flex
+  flex-direction: column
+  gap: var(--pz-stack-gap, 1rem)
+
+  &:empty
+    display: none
+
+// Last in the content column, at the window's bottom when the page is short
+.content-page-footer
+  margin-top: auto
+  padding: 3em 0 1em
 
 // Narrow: the sidebar stops earning its column.
 @media (max-width: 1000px)
@@ -275,6 +340,7 @@
 /* ================================ split shell ============================ */
 
 .split-shell
+  position: relative
   display: grid
   grid-template-columns: var(--hybrid-split-panel-width) 1fr
   height: 100%

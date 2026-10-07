@@ -82,13 +82,20 @@ export function SearchResultLabel({ result, defs }: SearchResultLabelProps) {
 /** The tag for an active filter, by category: `IntervalTag` with its age range,
  * `LithologyTag` for a lithology or environment (the site-wide convention for
  * both), a plain `Tag` for stratigraphic names and for classes and types. */
-export function FilterItemTag({ filter }: { filter: FilterData }) {
+export function FilterItemTag({
+  filter,
+  compact = false,
+}: {
+  filter: FilterData;
+  /** Names only, for a summary row */
+  compact?: boolean;
+}) {
   const size = TagSize.Small;
   switch (filter.category) {
     case "interval": {
       const { int_id, id, name, b_age, t_age, color } = filter;
       const interval: any = { id: int_id ?? id, name, b_age, t_age, color };
-      return h(IntervalTag, { interval, showAgeRange: true, size });
+      return h(IntervalTag, { interval, showAgeRange: !compact, size });
     }
     case "lithology": {
       const { lith_id, name, color, type } = filter;

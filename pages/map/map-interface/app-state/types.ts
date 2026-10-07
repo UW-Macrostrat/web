@@ -178,6 +178,21 @@ type SetFocusedMapSource = {
   source_id: number | null;
 };
 
+/** Column footprints drawn on the map. "all" is the columns layer itself. */
+export type ColumnFootprints = "none" | "selected" | "all";
+
+type SetColumnFootprints = {
+  type: "set-column-footprints";
+  footprints: ColumnFootprints;
+};
+
+/** Make one interval the map's time filter, or clear it with null. */
+type SetIntervalFilter = { type: "set-interval-filter"; int_id: number | null };
+type ReplaceIntervalFilter = {
+  type: "replace-interval-filter";
+  filter: FilterData | null;
+};
+
 type InitialLoadComplete = {
   type: "initial-load-complete";
   filters: FilterData[];
@@ -227,6 +242,10 @@ export type CoreAction =
   | SetCompilation
   | ClearColumnInfo
   | InitialLoadComplete
+  | SetColumnFootprints
+  | SetIntervalFilter
+  | ReplaceIntervalFilter
+  | { type: "open-column-page" }
   | { type: "close-column-page" };
 
 interface AsyncRequestState {
@@ -309,6 +328,8 @@ export interface CoreState extends MapState, AsyncRequestState {
   allColumns: ColumnGeoJSONRecord[] | null;
   activeMenuPage: MenuPage | null;
   isShowingColumnPage: boolean;
+  /** Whether the selected column's footprint is drawn when the columns layer is off */
+  showSelectedColumnFootprint: boolean;
 }
 
 export type AppState = CoreState;

@@ -30,7 +30,12 @@ import styles from "./map-slot.module.sass";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { AnchorButton, Spinner, Switch } from "@blueprintjs/core";
 import { atom, useAtom, useSetAtom } from "jotai";
-import { MapSettingsBar, mapSettingsStore } from "~/components/map-settings";
+import classNames from "classnames";
+import {
+  MapSettingsBar,
+  MapSettingsOverlay,
+  mapSettingsStore,
+} from "~/components/map-settings";
 
 const h = hyper.styled(styles);
 
@@ -48,8 +53,9 @@ export interface LexMapTarget {
 }
 
 /**
- * What the shared map should be showing. Set by the mounted `LexMapSlot`; read by
- * the persistent map in the layout. It is deliberately *not* cleared when a slot
+ * What the shared map should be showing, in `mapSettingsStore`. Set by the
+ * mounted `LexMapSlot`; read by the persistent map in the layout. It is
+ * deliberately *not* cleared when a slot
  * unmounts, nor while the next item's columns are loading — the map keeps its
  * last target (dimmed, under a loading overlay) so navigation never blanks it.
  */
@@ -100,6 +106,23 @@ export function LexMapSettingsBar({
   }
 
   return h(MapSettingsBar, { settings }, mapLink);
+}
+
+/** The settings as a gear over the map, with the outcrop toggle among them */
+export function LexMapSettingsOverlay({ hasFilters }: { hasFilters: boolean }) {
+  const [layers, setLayers] = useAtom(lexMapLayersAtom, {
+    store: mapSettingsStore,
+  });
+  let outcropToggle = null;
+  if (hasFilters) {
+    outcropToggle = h(Switch, {
+      label: "Mapped outcrop",
+      checked: layers.outcrop,
+      onChange: (e) =>
+        setLayers({ ...layers, outcrop: e.currentTarget.checked }),
+    });
+  }
+  return h(MapSettingsOverlay, { settings: outcropToggle });
 }
 
 let mapNode: HTMLDivElement | null = null;
@@ -155,6 +178,8 @@ interface LexMapSlotProps extends Omit<LexMapTarget, "key"> {
   /** Columns are still loading: hold the previous target and dim the map rather
    * than dropping it (which is what made the map flash on navigation). */
   loading?: boolean;
+  /** Fill a container of definite height instead of taking a fixed one */
+  fill?: boolean;
   className?: string;
 }
 
@@ -170,9 +195,12 @@ export function LexMapSlot(props: LexMapSlotProps) {
     filters,
     mapUrl,
     loading = false,
+    fill = false,
     className,
   } = props;
-  const setTarget = useSetAtom(lexMapTargetAtom);
+  // The shared store, so a slot inside another jotai scope (the hybrid frame's)
+  // still reaches the map, which the layout mounts outside it
+  const setTarget = useSetAtom(lexMapTargetAtom, { store: mapSettingsStore });
   const ref = useRef<HTMLDivElement | null>(null);
 
   // `filters` is rebuilt on every render of the page body, so key the update on
@@ -207,7 +235,7 @@ export function LexMapSlot(props: LexMapSlotProps) {
     overlay = h("div.map-loading-overlay", h(Spinner));
   }
 
-  return h("div.lex-map-slot", { className }, [
+  return h("div.lex-map-slot", { className: classNames(className, { fill }) }, [
     // Kept free of React children: the shared map node is appended here
     // imperatively, so React must not manage siblings inside it.
     h("div.map-mount", { ref }),

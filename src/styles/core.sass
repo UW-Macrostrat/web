@@ -120,3 +120,11 @@ p
 .mapboxgl-user-location,
 .mapboxgl-user-location-accuracy-circle
   pointer-events: none
+
+// Column timescales size each level at 1.5em, a pixel short of a vertical
+// label with the library's padding. Upper levels stretch to fit their labels,
+// leaving the deepest level too narrow, so every one of its labels was hidden.
+.timescale.vertical .interval-label
+  padding-left: 1px
+  padding-right: 1px
+  line-height: 1.3

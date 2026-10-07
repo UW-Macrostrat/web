@@ -1,4 +1,5 @@
 import { ColumnNavigationMap } from "@macrostrat/map-views";
+import { MapResizer } from "~/components/map-resizer";
 import h from "./map.module.sass";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
@@ -94,6 +95,7 @@ function LexiconMapInner({
         h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }),
         h(FitBounds, { columnData: columnFeatures, targetKey }),
         h(MapDisposer),
+        h(MapResizer),
       ]
     ),
   ]);

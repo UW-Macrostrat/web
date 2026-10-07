@@ -19,6 +19,7 @@
  */
 
 import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 
 export type LayoutMode =
@@ -131,6 +132,10 @@ export interface LayoutCapabilities {
   itemName: string;
   /** Scrolling model of the content shell (see `ContentScrollMode`). */
   contentScroll: ContentScrollMode;
+  /** CSS widths of the content measure and the sidebar beside it, when a page
+   * wants a different split from the frame's default. */
+  contentWidth?: string;
+  sidebarWidth?: string;
 }
 
 export const defaultCapabilities: LayoutCapabilities = {
@@ -200,3 +205,23 @@ export const showAssistantAtom = atom(
 /** Open state of the site-links footer popover. Ephemeral, so it stays out of
  * the URL. */
 export const footerLinksOpenAtom = atom(false);
+
+/** The map floated beside the content, shown on request in the modes without
+ * a map of their own. Ephemeral, so it stays out of the URL. */
+export const floatingMapOpenAtom = atom(false);
+
+/** How many map placements the page's content has mounted. With none, the
+ * frame offers the map from the view menu and floats it at the top. */
+export const mapPlacementCountAtom = atom(0);
+
+/** Sidebar widths the reader has dragged to, in px, by page kind (`itemName`) */
+export const sidebarWidthsAtom = atomWithStorage<Record<string, number>>(
+  "macrostrat:hybrid-sidebar-widths",
+  {}
+);
+
+/** Split-shell panel widths the reader has dragged to, in px, by page kind */
+export const splitPanelWidthsAtom = atomWithStorage<Record<string, number>>(
+  "macrostrat:hybrid-split-panel-widths",
+  {}
+);

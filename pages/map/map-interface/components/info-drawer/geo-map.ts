@@ -10,39 +10,42 @@ import { useAtomValue } from "jotai";
 import { infoMarkerPositionAtom, useAppState } from "../../app-state";
 import { tileInspectorHref } from "~/_utils/tile-inspector";
 import { ClampedText } from "./clamped-text";
+import type { ReactNode } from "react";
 
 function GeoMapLines(props) {
   const { source } = props;
   if (!source.lines || source.lines.length == 0) {
     return null;
   }
-  const { lines } = source;
+  const lines = source.lines.map((line, i) => h(LineInfo, { line, key: i }));
   return h(
     DataField,
-    { label: "Lines", inline: false },
-    h(
-      "ul.map-lines",
-      lines.map((line, i) => {
-        return h(LineInfo, { line, key: i });
-      })
-    )
+    { label: "Lines" },
+    h("span.map-lines", addSeparators(lines))
   );
 }
 
 function LineInfo(props) {
   const { line } = props;
   const { name, type, direction, descrip } = line;
+  const details = [direction, descrip].filter(Boolean).join(" ");
 
-  const children = [
-    h("span.basic-info", [
-      h.if(name)("strong.line-name", name),
-      h("span.type", type),
-    ]),
-    h("span.direction", direction),
-    h("span.description", descrip),
-  ];
+  const children: ReactNode[] = [];
+  if (name) children.push(h("strong.line-name", name));
+  if (name && type) children.push(" – ");
+  if (type) children.push(h("span.type", type));
+  if (details) children.push(h("span.details", [" (", details, ")"]));
 
-  return h("li.line-info", children);
+  return h("span.line-info", children);
+}
+
+function addSeparators(values: ReactNode[]) {
+  const result: ReactNode[] = [];
+  values.forEach((val, i) => {
+    if (i > 0) result.push(", ");
+    result.push(val);
+  });
+  return result;
 }
 
 export function GeologicMapInfo(props) {
@@ -68,7 +71,13 @@ export function GeologicMapInfo(props) {
   if (additionalRefs.primary || additionalRefs.original) {
     mainPrefix = "Compiled in";
   }
-  refs.push(h(MapReference, { prefix: mainPrefix, reference: source.ref }));
+  refs.push(
+    h(
+      MapReference,
+      { prefix: mainPrefix, reference: source.ref },
+      h(MapSourceLinks, { source })
+    )
+  );
   if (additionalRefs.original) {
     refs.push(
       h(
@@ -118,7 +127,6 @@ export function GeologicMapInfo(props) {
         }),
         h(GeoMapLines, { source }),
         h(DataField, { label: "Source" }, refs),
-        h(MapSourceFooter, { source }),
       ]),
     ]
   );
@@ -126,14 +134,15 @@ export function GeologicMapInfo(props) {
 
 /** The map's own page and, revealed on hover for those who know to look, the
  * tile inspector at this point. */
-function MapSourceFooter({ source }) {
+function MapSourceLinks({ source }) {
   const { source_id } = source;
   if (source_id == null) return null;
-  return h("div.map-source-footer", [
-    h("a.map-page-link", { href: `/maps/${source_id}` }, [
-      h(Icon, { icon: "map", size: 12 }),
-      "Map page",
-    ]),
+  return h("span.map-source-links", [
+    h(
+      "a.map-page-link",
+      { href: `/maps/${source_id}`, title: "Map page" },
+      h(Icon, { icon: "map", size: 12 })
+    ),
     h(TileInspectorLink),
   ]);
 }

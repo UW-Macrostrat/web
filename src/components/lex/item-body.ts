@@ -1,5 +1,6 @@
 import h from "@macrostrat/hyper";
 import { ColumnsTable } from "./columns-card";
+import { LexSlotPortal } from "./item-slots";
 import {
   FossilsCard,
   Timescales,
@@ -106,6 +107,6 @@ export function LexItemBody(props: LexItemBodyProps) {
     //   href: relatedHref,
     // }),
     bottomExtra,
-    h(References, { refs }),
+    h(LexSlotPortal, { name: "assistant" }, h(References, { refs })),
   ]);
 }

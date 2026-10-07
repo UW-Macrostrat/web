@@ -72,37 +72,24 @@
   .age-text
     font-weight: 500
 
-.map-lines
-  margin: 0.2em 0 0
-  padding-left: 1.3em
-
 .line-info
-  margin-bottom: 0.2em
+  .type, .details
+    color: var(--pz-secondary-color)
 
-  .basic-info
-    .line-name
-      &:after
-        content: " – "
-    &:after
-      content: ": "
-
-// The quiet row at the foot of the section: the map's own page and, for anyone
-// who knows to hover, the tile inspector beside it.
-.map-source-footer
-  display: flex
+// The map's own page beside its citation and, for anyone who knows to hover,
+// the tile inspector after it.
+.map-source-links
+  display: inline-flex
   align-items: center
-  gap: 0.5em
-  margin-top: 0.8em
-  font-size: var(--pz-font-size-sm)
+  gap: 0.4em
+  margin-left: 0.4em
+  vertical-align: baseline
 
-  .map-page-link
+  .map-page-link, .dev-inspector-link
     display: inline-flex
     align-items: center
-    gap: 0.3em
 
   .dev-inspector-link
-    display: inline-flex
-    align-items: center
     color: var(--pz-text-subtle-color, var(--secondary-color))
     opacity: 0
     transition: opacity 120ms
@@ -116,30 +103,59 @@
   align-items: end
 
 // Regional stratigraphy section
-.column-info
+// Flatter than a page's cards: no resting shadow and no lift, so it sits in
+// the panel rather than over it. Two classes to outrank the shared card.
+.regional-stratigraphy .column-card
+  margin-bottom: 0.5em
+  box-shadow: none
+
+  &:hover
+    box-shadow: var(--pz-shadow-md)
+    transform: none
+
+  &:active
+    box-shadow: none
+
+.column-card-body
   display: flex
   align-items: center
   gap: 0.8em
-  padding-bottom: 0.5em
-  border-bottom: 1px solid var(--panel-rule-color)
 
-  h3
-    margin: 0 0 0.2em
+  .column-title
+    flex-grow: 1
+    min-width: 0
 
   .description
     font-size: var(--pz-font-size-sm)
     color: var(--pz-secondary-color)
 
-.column-thumbnail-link
-  display: block
-  flex-shrink: 0
-  line-height: 0
-  border-radius: 3px
+.column-name
+  margin: 0 0 0.2em
+  font-size: var(--pz-font-size-md)
 
-  &:hover
-    box-shadow: 0 0 0 2px var(--pz-focus-ring-color, var(--pz-intent-primary))
+.column-page-button
+  flex-shrink: 0
+
+.column-card-body .column-page-button
+  align-self: flex-start
+
+.footprint-control
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 0.5em
+
+.regional-stratigraphy .footprint-control
+  margin-top: 0.8em
+  padding-top: 0.5em
+  border-top: 1px solid var(--panel-rule-color)
+
+.footprint-label
+  font-size: var(--pz-font-size-sm)
+  color: var(--pz-secondary-color)
 
 .column-thumbnail
+  flex-shrink: 0
   width: 44px
   overflow: hidden
   border-radius: 3px

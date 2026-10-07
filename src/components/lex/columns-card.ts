@@ -15,7 +15,18 @@ import {
 import { AgeField, Duration } from "@macrostrat/column-views";
 import { clientOnly } from "./client-only";
 import { LexColumnList } from "./column-list";
-import { LexMapSettingsBar, LexMapSlot } from "./map-target";
+import {
+  LexMapSettingsBar,
+  LexMapSettingsOverlay,
+  LexMapSlot,
+} from "./map-target";
+import {
+  lexOnHybridFrameAtom,
+  LexSlotPortal,
+  useLexSlotElement,
+} from "./item-slots";
+import { useAtomValue } from "jotai";
+import classNames from "classnames";
 import { Charts, summarize } from "./index";
 
 // NOTE: do NOT statically import "./map.client" here — it pulls in mapbox-gl,
@@ -55,6 +66,10 @@ export function ColumnsTable({
   );
   const b_interval = useIntervalRecord(summary.b_int_name);
   const t_interval = useIntervalRecord(summary.t_int_name);
+  // On the hybrid frame, the map card goes to the slot the frame offers and
+  // fills its box; without one it isn't shown
+  const inSidebar = useLexSlotElement("map") != null;
+  const onHybridFrame = useAtomValue(lexOnHybridFrameAtom);
 
   // Nothing to show only once we *know* there are no columns. While they load,
   // fall through and render the frame — that reserves the space and keeps the
@@ -108,6 +123,7 @@ export function ColumnsTable({
     mapElement = h(LexMapSlot, {
       targetKey,
       loading: !hasColumns,
+      fill: inSidebar,
       ...mapProps,
     });
   } else {
@@ -120,11 +136,23 @@ export function ColumnsTable({
   if (showColumnList && hasColumns) {
     columnList = h(LexColumnList, { colData });
   }
+  // On the frame the settings are a gear over the map, and the link to the
+  // main map is among the page's actions
+  const hasFilters = filters.length > 0;
+  let settings = h(LexMapSettingsBar, { mapUrl, hasFilters });
+  if (onHybridFrame) {
+    settings = h(LexMapSettingsOverlay, { hasFilters });
+  }
+  let mapCard = h(
+    "div.lex-map-card",
+    { className: classNames({ "in-sidebar": inSidebar }) },
+    [mapElement, settings]
+  );
+  if (onHybridFrame && !inSidebar) {
+    mapCard = null;
+  }
   return h("div.lex-summary", [
-    h("div.lex-map-card", [
-      mapElement,
-      h(LexMapSettingsBar, { mapUrl, hasFilters: filters.length > 0 }),
-    ]),
+    h(LexSlotPortal, { name: "map" }, mapCard),
     h(
       ColumnsPanel,
       {
