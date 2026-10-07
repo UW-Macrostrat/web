@@ -1,6 +1,5 @@
-import { useAuth } from "@macrostrat/form-components";
 import { InfiniteScrollPage, initialViewStateFromURL } from "~/components";
-import { LoginButton } from "../components/navbar.ts";
+import { UserPersona } from "~/components/auth";
 import h from "./+Page.module.sass";
 import { apiV3Prefix } from "@macrostrat-web/settings";
 import {
@@ -35,7 +34,6 @@ const provider = createPostgRESTProvider<IngestMap>({
 });
 
 export function Page() {
-  const { user } = useAuth();
   // A linked view (`?q=…&status=…&sort=…`) is applied when the store is created,
   // so the first request is the right one — rather than fetching the unfiltered
   // queue and immediately superseding it. `IngestListEffects` keeps the two in
@@ -44,7 +42,7 @@ export function Page() {
   return h(InfiniteScrollPage, {
     className: "ingestion-page",
     provider,
-    headerElements: h(LoginButton, { user, minimal: true }),
+    headerElements: h(UserPersona, { compact: true }),
     itemComponent: MapCard,
     columnSpec,
     // Rows are maps — names the selection ("3 maps"), counters, and labels.

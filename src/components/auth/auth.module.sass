@@ -1,0 +1,78 @@
+// Sign-in surfaces: the persona button's panel and the login prompt.
+
+.user-persona
+  &.degraded
+    // A standing hint, beyond the intent color, that this session is unusual.
+    outline: 1px dashed var(--pz-warning-color, #c87619)
+    outline-offset: -1px
+
+.user-panel
+  padding: 0.75em
+  min-width: 18em
+  max-width: 24em
+  display: flex
+  flex-direction: column
+  gap: 0.6em
+
+.user-panel-header
+  display: flex
+  gap: 0.75em
+  align-items: flex-start
+
+.user-panel-identity
+  display: flex
+  flex-direction: column
+  gap: 0.25em
+  min-width: 0
+
+.user-panel-name
+  font-weight: 600
+  font-size: var(--pz-font-size-lg, 1.05em)
+
+.user-panel-detail
+  font-size: var(--pz-font-size-sm, 0.85em)
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  display: inline-flex
+  align-items: center
+  gap: 0.25em
+  font-family: var(--pz-font-mono, monospace)
+  word-break: break-all
+
+.user-panel-actions
+  display: flex
+  flex-direction: column
+  align-items: stretch
+  gap: 0.1em
+  :global(.bp6-button)
+    justify-content: flex-start
+
+.role-tags
+  display: flex
+  flex-wrap: wrap
+  gap: 0.25em
+  code
+    font-size: 0.9em
+    opacity: 0.8
+
+.degraded-notice
+  p
+    margin: 0 0 0.5em
+  .error
+    color: var(--pz-danger-color, #cd4246)
+  &.compact
+    font-size: var(--pz-font-size-sm, 0.85em)
+
+.login-prompt
+  margin: 2em auto
+  max-width: 32em
+
+.login-prompt-description
+  color: var(--pz-text-subtle-color, var(--secondary-color))
+  p
+    margin: 0.25em 0
+
+.login-prompt-actions
+  display: flex
+  gap: 0.5em
+  flex-wrap: wrap
+  justify-content: center
