@@ -10,18 +10,12 @@ import { useData } from "vike-react/useData";
 import { webAssetsPrefix } from "@macrostrat-web/settings";
 import h from "./+Page.module.sass";
 import { platformNavItems } from "~/layouts/footer";
-import { clientOnly } from "~/components/lex/client-only";
 import {
   LexSearchHost,
   SiteSearchPrompt,
 } from "~/components/lex/search-omnibar";
 import type { HeroData } from "./+data";
-
-/** The live map-and-column hero reaches mapbox-gl, so it loads on the client
- * only; the static cover photo stands in until it mounts. */
-const HeroLive = clientOnly(() =>
-  import("./hero.client").then((m) => m.HeroLive)
-);
+import { HeroStage } from "./hero-stage";
 
 /** The homepage: what Macrostrat is in a line, the data itself, a few entry
  * points, what is new, and an honest beta notice. Design notes live in the
@@ -88,14 +82,15 @@ function V2BetaTag() {
   );
 }
 
-/** The hero: the map, the column inset over it, and the age filter and credits
- * beneath — all of it live, with the cover photo standing in until it mounts. */
+/** The hero: a cached still of the map, which becomes the live map and its
+ * column once the reader reaches for it (`hero-stage.ts`). The cover photo
+ * stands in for an area with no still. */
 function Hero() {
   const { hero } = useData() as { hero: HeroData | null };
 
   let content;
   if (hero != null) {
-    content = h(HeroLive, { hero, fallback: h(HeroStatic) });
+    content = h(HeroStage, { hero, coverImage: coverImageURL });
   } else {
     // Only when the day's location couldn't be resolved at all.
     content = h(HeroStatic);
@@ -104,11 +99,11 @@ function Hero() {
   return h("section.hero", content);
 }
 
+const coverImageURL = `${webAssetsPrefix}/main-page/cover_large.jpg`;
+
 function HeroStatic() {
   return h("div.hero-static", {
-    style: {
-      backgroundImage: `url('${webAssetsPrefix}/main-page/cover_large.jpg')`,
-    },
+    style: { backgroundImage: `url('${coverImageURL}')` },
   });
 }
 
