@@ -166,6 +166,7 @@ export function RoleTags({ user }: { user: SessionUser | null | undefined }) {
   const role = sessionRole(user);
   const degraded = isDegraded(user);
   let intent: Intent = Intent.NONE;
+  if (role === "web_authorized") intent = Intent.SUCCESS;
   if (role === "web_admin") intent = Intent.PRIMARY;
   if (degraded) intent = Intent.WARNING;
 

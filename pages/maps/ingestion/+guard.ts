@@ -1,30 +1,10 @@
-import { redirect, render } from "vike/abort";
-import { isLocalTesting } from "~/_providers/localTestingAuth";
+import { requireAuthorized } from "~/_utils/auth-guards";
 
-export default function guard(pageContext: any) {
-  if (isLocalTesting()) return;
-
-  const path = pageContext?.urlPathname;
-  const user = pageContext?.user ?? null;
-  const roles: string[] = Array.isArray(user?.roles)
-    ? user.roles
-    : user?.role
-    ? [user.role]
-    : [];
-  const effectiveRoles = roles.length ? roles : ["web_anon"];
-  const groupNames: string[] = Array.isArray(user?.groups)
-    ? user.groups
-        .map((g: any) => (typeof g === "string" ? g : g?.name))
-        .filter(Boolean)
-    : [];
-
-  const allowed =
-    effectiveRoles.includes("web_anon") ||
-    effectiveRoles.includes("admin") ||
-    effectiveRoles.includes("web_admin") ||
-    groupNames.includes("web_admin");
-
-  if (!allowed) {
-    throw render(403, "Only admins are allowed to access this page.");
-  }
+// The ingestion queue shows maps that are works in progress, so viewing it
+// takes the "view anything" tier (authorized users and administrators);
+// anyone can sign in as a plain user, so sign-in alone is not enough. Edits
+// are an administrator's job and are gated again by the API. Vike runs only
+// the nearest guard, so the subtrees below declare their own.
+export default function guard(pageContext) {
+  requireAuthorized(pageContext);
 }

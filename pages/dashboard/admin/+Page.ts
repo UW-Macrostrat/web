@@ -16,6 +16,7 @@ import { isDegraded, UserPersona } from "~/components/auth";
 import { IntrospectionPanel, RoleSwitchPanel } from "./introspection";
 import { UsersHelp, UsersSheet } from "./users-sheet";
 import { TokensHelp, TokensSheet } from "./tokens-sheet";
+import { HistoryHelp, HistorySheet } from "./history-sheet";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -70,6 +71,19 @@ export function Page() {
         h(AdminOnly, { degraded, what: "manage tokens" }, [
           h(TokensHelp),
           h(TokensSheet),
+        ]),
+      ]
+    ),
+    h(
+      Section,
+      {
+        title: "Recent changes",
+        description: "The audit trail for accounts and tokens.",
+      },
+      [
+        h(AdminOnly, { degraded, what: "see the audit trail" }, [
+          h(HistoryHelp),
+          h(HistorySheet),
         ]),
       ]
     ),

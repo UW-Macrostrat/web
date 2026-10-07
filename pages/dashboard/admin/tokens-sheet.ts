@@ -14,9 +14,11 @@ import {
   FormGroup,
   InputGroup,
   Intent,
+  MenuItem,
   NumericInput,
   Tag,
 } from "@blueprintjs/core";
+import { Suggest } from "@blueprintjs/select";
 import { RegionCardinality } from "@blueprintjs/table";
 import {
   type ColumnSpec,
@@ -28,14 +30,23 @@ import {
   type TableDataProvider,
 } from "@macrostrat/data-sheet";
 import classNames from "classnames";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   createToken,
   fetchTokens,
+  fetchUsers,
   formatDateTime,
   type NewToken,
   revokeToken,
   type TokenRow,
+  userLabel,
+  type UserRow,
 } from "./api";
 import styles from "./main.module.sass";
 
@@ -158,12 +169,12 @@ export function TokensSheet() {
 
 interface TokenForm {
   label: string;
-  userID: string;
+  user: UserRow | null;
   scopes: string;
   days: number;
 }
 
-const emptyForm: TokenForm = { label: "", userID: "", scopes: "", days: 365 };
+const emptyForm: TokenForm = { label: "", user: null, scopes: "", days: 365 };
 
 function parseScopes(text: string): string[] | undefined {
   const scopes = text
@@ -198,7 +209,7 @@ function NewTokenDialog({ isOpen, onClose, onCreated }) {
   const update = (patch: Partial<TokenForm>) =>
     setForm((f) => ({ ...f, ...patch }));
 
-  const hasSubject = form.label.trim() !== "" || form.userID.trim() !== "";
+  const hasSubject = form.label.trim() !== "" || form.user != null;
   const canSubmit = hasSubject && form.days > 0 && !busy;
 
   const close = () => {
@@ -216,11 +227,9 @@ function NewTokenDialog({ isOpen, onClose, onCreated }) {
     try {
       const expiration =
         Math.floor(Date.now() / 1000) + form.days * 24 * 60 * 60;
-      const userID =
-        form.userID.trim() === "" ? undefined : Number(form.userID);
       const token = await createToken({
         label: form.label.trim() || undefined,
-        user_id: userID,
+        user_id: form.user?.id,
         scopes: parseScopes(form.scopes),
         expiration,
       });
@@ -293,15 +302,13 @@ function TokenFormFields({ form, update, error }) {
     h(
       FormGroup,
       {
-        label: "Delegated user ID",
-        helperText: "From the users table above; optional",
+        label: "Delegated user",
+        helperText: "Optional: the token acts with this user's authority",
       },
       [
-        h(InputGroup, {
-          value: form.userID,
-          placeholder: "e.g. 46",
-          onChange: (e) =>
-            update({ userID: e.target.value.replace(/[^0-9]/g, "") }),
+        h(UserPicker, {
+          value: form.user,
+          onChange: (user) => update({ user }),
         }),
       ]
     ),
@@ -326,6 +333,84 @@ function TokenFormFields({ form, update, error }) {
     ]),
     errorNode,
   ]);
+}
+
+/** Pick a user by name, email or ORCID iD; the API does the searching. */
+function UserPicker({
+  value,
+  onChange,
+}: {
+  value: UserRow | null;
+  onChange(user: UserRow | null): void;
+}) {
+  const [query, setQuery] = useState("");
+  const items = useUserSearch(query);
+
+  // `inputProps.rightElement` wants a JSX element, not any node.
+  let rightElement: JSX.Element | undefined = undefined;
+  if (value != null) {
+    rightElement = h(Button, {
+      minimal: true,
+      icon: "cross",
+      title: "Clear",
+      onClick: () => onChange(null),
+    });
+  }
+
+  return h(Suggest<UserRow>, {
+    items,
+    selectedItem: value,
+    query,
+    onQueryChange: setQuery,
+    itemsEqual: "id",
+    itemRenderer: (user, { handleClick, handleFocus, modifiers }) =>
+      h(MenuItem, {
+        key: user.id,
+        text: user.name?.trim() || user.display_name?.trim() || user.sub,
+        label: user.sub,
+        roleStructure: "listoption",
+        active: modifiers.active,
+        onClick: handleClick,
+        onFocus: handleFocus,
+      }),
+    inputValueRenderer: userLabel,
+    onItemSelect: (user) => onChange(user),
+    noResults: h(MenuItem, {
+      disabled: true,
+      text: query.trim() === "" ? "Type to search users" : "No matching users",
+      roleStructure: "listoption",
+    }),
+    fill: true,
+    resetOnClose: false,
+    popoverProps: { minimal: true, matchTargetWidth: true },
+    inputProps: {
+      placeholder: "Search users by name, email or ORCID iD…",
+      leftIcon: "user",
+      rightElement,
+    },
+  });
+}
+
+/** Users matching `query`, from the API, debounced. */
+function useUserSearch(query: string): UserRow[] {
+  const [items, setItems] = useState<UserRow[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    const handle = setTimeout(() => {
+      fetchUsers(query)
+        .then((rows) => {
+          if (!cancelled) setItems(rows.slice(0, 25));
+        })
+        .catch(() => {
+          if (!cancelled) setItems([]);
+        });
+    }, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(handle);
+    };
+  }, [query]);
+  return items;
 }
 
 function MintedToken({ token }: { token: NewToken }) {

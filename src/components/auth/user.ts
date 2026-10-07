@@ -13,8 +13,39 @@
  */
 
 export const ADMIN_ROLE = "web_admin";
+export const AUTHORIZED_ROLE = "web_authorized";
 export const USER_ROLE = "web_user";
 export const ANONYMOUS_ROLE = "web_anon";
+
+/** The tiers nest: each inherits the one below it. Anyone can become a
+ * `web_user` by signing in, so that tier confers nothing substantial; an
+ * administrator designates `web_authorized` users, who may view anything but
+ * edit nothing of record; only `web_admin` makes real edits. */
+const ROLE_RANK: Record<string, number> = {
+  [ANONYMOUS_ROLE]: 0,
+  [USER_ROLE]: 1,
+  [AUTHORIZED_ROLE]: 2,
+  [ADMIN_ROLE]: 3,
+};
+
+export function roleRank(role: string | null | undefined): number {
+  return ROLE_RANK[role ?? ANONYMOUS_ROLE] ?? 0;
+}
+
+/** Whether `role` carries at least the standing of `required`. */
+export function roleAtLeast(
+  role: string | null | undefined,
+  required: string
+): boolean {
+  return roleRank(role) >= roleRank(required);
+}
+
+/** The roles a session in `role` may be degraded to, highest first. */
+export function assumableRoles(role: string | null | undefined): string[] {
+  return [ADMIN_ROLE, AUTHORIZED_ROLE, USER_ROLE].filter(
+    (r) => roleRank(r) < roleRank(role)
+  );
+}
 
 export interface SessionUser {
   sub: string;
@@ -63,6 +94,13 @@ export function isAdminSession(user: SessionUser | null | undefined): boolean {
   return sessionRole(user) === ADMIN_ROLE;
 }
 
+/** Whether the session may view everything: an authorized user or an admin. */
+export function isAuthorizedSession(
+  user: SessionUser | null | undefined
+): boolean {
+  return roleAtLeast(sessionRole(user), AUTHORIZED_ROLE);
+}
+
 export function displayName(user: SessionUser | null | undefined): string {
   const name = user?.display_name ?? user?.name;
   if (typeof name === "string" && name.trim() !== "") return name.trim();
@@ -80,6 +118,8 @@ export function roleLabel(role: string | null | undefined): string {
   switch (role) {
     case ADMIN_ROLE:
       return "Administrator";
+    case AUTHORIZED_ROLE:
+      return "Authorized user";
     case USER_ROLE:
       return "User";
     case ANONYMOUS_ROLE:

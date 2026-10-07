@@ -21,8 +21,11 @@ import type { IconName } from "@blueprintjs/icons";
 import { usePageContext } from "vike-react/usePageContext";
 import { type ReactNode, useEffect, useState } from "react";
 import {
+  accountRole,
+  assumableRoles,
   DegradedNotice,
   isDegraded,
+  roleLabel,
   type SessionUser,
   useAssumeRole,
   useUserRecord,
@@ -170,7 +173,7 @@ function usePostgRESTStatus() {
   return { status, loading, error };
 }
 
-/** Degrade the session to `web_user`, or restore it. */
+/** Degrade the session to a lower tier, or restore it. */
 export function RoleSwitchPanel({ user }: { user: SessionUser | null }) {
   const { assume, busy, error } = useAssumeRole();
 
@@ -181,32 +184,50 @@ export function RoleSwitchPanel({ user }: { user: SessionUser | null }) {
   let errorNode: ReactNode = null;
   if (error != null) errorNode = h("p.error", error);
 
+  const options = assumableRoles(accountRole(user));
+
   return h(
     Callout,
     {
       className: "role-switch",
       icon: "eye-open",
-      title: "See the site as a user",
+      title: "See the site as someone else",
     },
     [
       h("p", [
-        "Re-issue this session's cookie with the ",
-        h("code", "web_user"),
-        " role. Every layer — page guards, the API, PostgREST's row security — ",
-        "then treats you as an ordinary signed-in user, and the persona ",
-        "indicator turns yellow. Restore the role from that indicator, from ",
-        "this page, or by logging out and in again.",
+        "Re-issue this session's cookie with a lower role. Every layer — page ",
+        "guards, the API, PostgREST's row security — then treats you as that ",
+        "tier, and the persona indicator turns yellow. Restore the role from ",
+        "that indicator, from this page, or by logging out and in again.",
+      ]),
+      h("ul.tier-list", [
+        h("li", [
+          h("code", "web_authorized"),
+          " — designated by an admin; may view anything, including work in ",
+          "progress, but edits nothing.",
+        ]),
+        h("li", [
+          h("code", "web_user"),
+          " — anyone who has signed in; gains nothing substantial over an ",
+          "anonymous visitor.",
+        ]),
       ]),
       errorNode,
       h(
-        Button,
-        {
-          intent: Intent.WARNING,
-          icon: "eye-open",
-          loading: busy,
-          onClick: () => assume("web_user"),
-        },
-        "Browse as web_user"
+        "div.role-switch-actions",
+        options.map((role) =>
+          h(
+            Button,
+            {
+              key: role,
+              intent: Intent.WARNING,
+              icon: "eye-open",
+              loading: busy,
+              onClick: () => assume(role),
+            },
+            `Browse as ${roleLabel(role).toLowerCase()} (${role})`
+          )
+        )
       ),
     ]
   );

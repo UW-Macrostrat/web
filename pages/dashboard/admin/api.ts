@@ -36,6 +36,17 @@ export interface TokenRow {
   active: boolean;
 }
 
+/** One row of the change-tracking trail for the account tables. */
+export interface AuthChange {
+  id: number;
+  changed_at: string;
+  actor_id: string | null;
+  table_name: string;
+  action: string;
+  record_pk: Record<string, any> | null;
+  changed: Record<string, any> | null;
+}
+
 export interface NewTokenRequest {
   label?: string;
   user_id?: number;
@@ -85,6 +96,17 @@ export function setUserRole(id: number, role: string): Promise<UserRow> {
     method: "PATCH",
     body: JSON.stringify({ role }),
   });
+}
+
+export function fetchHistory(limit = 200): Promise<AuthChange[]> {
+  return securityFetch(`/history?limit=${limit}`);
+}
+
+/** How a user is named in pickers and listings: their name, then their ORCID iD. */
+export function userLabel(user: UserRow): string {
+  const name = user.name?.trim() || user.display_name?.trim();
+  if (name) return `${name} (${user.sub})`;
+  return user.sub;
 }
 
 export function fetchRoles(): Promise<RoleInfo[]> {
