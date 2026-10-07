@@ -373,3 +373,23 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
   a
     color: inherit
+
+// The still's column: the server's static markup, once per theme. The wrappers
+// step out of the layout so the panel sits in the slot exactly as the live one
+// does; the theme class lands on <body> before first paint.
+.hero-still-column
+  cursor: pointer
+
+.still-column-light,
+.still-column-dark
+  display: contents
+
+.still-column-dark
+  display: none
+
+:global(body.dark-mode)
+  .still-column-light
+    display: none
+
+  .still-column-dark
+    display: contents

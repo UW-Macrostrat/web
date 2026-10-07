@@ -34,6 +34,10 @@ export interface FeaturedArea {
   view: MapCamera;
   /** Pin this column rather than taking whatever the map's centre is over. */
   columnID?: number;
+  /** The project the area is a view of, by slug. The pinned column's link
+   * carries it, so the column page's navigation map opens on this project's
+   * columns rather than its default (the core-columns composite). */
+  project?: string;
   /** Open with the age filter already set: an interval by name, resolved
    * against the international timescale, or explicit bounds in Ma, oldest
    * first. */
@@ -93,6 +97,7 @@ export const featuredAreas: FeaturedArea[] = [
       "Macrostrat's New Zealand project: measured sections down the South Island, Late Cretaceous to Recent. Overhead, because the point here is how much ground the project covers.",
     view: camera(-45.2, 170.2, 7.6, { pitch: 0, bearing: 0 }),
     columnID: 1030,
+    project: "new-zealand",
   },
   {
     id: "black-hills",
@@ -103,6 +108,17 @@ export const featuredAreas: FeaturedArea[] = [
     columnID: 512,
   },
 ];
+
+/** The column page for a column the hero is showing. Carries the area's
+ * project — in the hash, where the column page reads its project filter — only
+ * while the column is the one the area pinned: a column the reader panned to
+ * may belong to another project, and scoping its page to this one would leave
+ * it off its own map. */
+export function columnPageHref(colID: number, area: FeaturedArea): string {
+  const href = `/columns/${colID}`;
+  if (area.project == null || area.columnID !== colID) return href;
+  return `${href}#project_id=${encodeURIComponent(area.project)}`;
+}
 
 export function areaByID(id: string): FeaturedArea | null {
   return featuredAreas.find((area) => area.id === id) ?? null;

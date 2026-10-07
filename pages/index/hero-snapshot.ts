@@ -85,7 +85,7 @@ export async function heroSnapshotData(
 /** The international timescale, keyed by id — what the live hero resolves an
  * area's named age range against. An interval outside it (the Precambrian)
  * resolves to no filter here; no featured area names one yet. */
-async function fetchTimescale(): Promise<Map<number, any> | null> {
+export async function fetchTimescale(): Promise<Map<number, any> | null> {
   try {
     const records = await fetchAPIData("/defs/intervals", {
       timescale_id: INTERNATIONAL_TIMESCALE_ID,

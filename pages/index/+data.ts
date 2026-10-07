@@ -8,11 +8,12 @@ import {
 import { resolveMapSnapshots } from "~/map-snapshots/store.server";
 import type { MapSnapshotImage } from "~/map-snapshots/spec";
 import { heroSnapshotSpec } from "./hero-snapshot";
+import type { HeroColumn } from "./hero-data";
 import {
-  fetchColumnAtPoint,
-  fetchColumnByID,
-  type HeroColumn,
-} from "./hero-data";
+  featuredAreaColumn,
+  stillColumnFor,
+} from "./hero-column-static.server";
+import type { StaticHeroColumn } from "./hero-column";
 
 interface PageStats {
   columns: number;
@@ -38,6 +39,11 @@ export interface HeroData {
    * the carousel can move through them without loading the live map. Absent
    * for an area the renderer hasn't drawn in its current form. */
   snapshots: Record<string, MapSnapshotImage | null>;
+  /** That area's column as static markup, light and dark, for the still: the
+   * page opens with the column beside the map, and no column JavaScript loads
+   * until the reader engages. Other areas' come from `/_hero/still-column/`
+   * when the carousel reaches them. Null when the area has no column. */
+  stillColumn: StaticHeroColumn | null;
 }
 
 /** News posts are pages under `News/` in the documentation vault; drafts live
@@ -74,22 +80,18 @@ function latestNews(limit = 3): NewsItem[] {
   return items.slice(0, limit);
 }
 
-/** What the hero opens on: the day's featured area, and its column — pinned by
- * id when the area names one, otherwise whatever its view is centred over.
- * Neither failing takes the page down; the map renders on its own. */
+/** What the hero opens on: the day's featured area and its column — pinned by
+ * id when the area names one, otherwise whatever its view is centred over —
+ * that column as the still draws it, and every area's still map. None of it
+ * failing takes the page down; the map renders on its own. */
 async function heroData(): Promise<HeroData> {
   const area = featuredAreaForToday();
-  let columnRequest: Promise<HeroColumn | null>;
-  if (area.columnID != null) {
-    columnRequest = fetchColumnByID(area.columnID);
-  } else {
-    columnRequest = fetchColumnAtPoint(area.view.lat, area.view.lng);
-  }
-  const [column, snapshots] = await Promise.all([
-    columnRequest,
+  const [column, stillColumn, snapshots] = await Promise.all([
+    featuredAreaColumn(area),
+    stillColumnFor(area.id),
     heroSnapshots(),
   ]);
-  return { area, column, snapshots };
+  return { area, column, snapshots, stillColumn };
 }
 
 /** Every featured area's still, so the carousel can move through them without
