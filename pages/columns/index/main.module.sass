@@ -6,12 +6,11 @@
 // scroll body lays bands out by arithmetic, so it can't measure them.
 // `$row-height` is a *band* (one line of the three-column grid); `$row-gap` is
 // the vertical breathing room inside it, so the card itself takes the rest.
-$row-height: 40px
-$row-gap: 4px
+$row-height: 48px
+$row-gap: 12px
 $group-height: 34px
 
-// The panel is the scroller (the frame's `panel` mode), so its floating
-// toolbar stays put by construction.
+// The hybrid shell scrolls the panel and sticks its toolbar (its `panel` mode).
 .column-panel
   height: 100%
   min-height: 0
@@ -24,6 +23,17 @@ $group-height: 34px
   > div
     min-width: 0
 
+  // The floating toolbar spans the list, so the project picker and filter tags
+  // fit beside the search field instead of squeezing it.
+  [class*="data-panel-toolbar-content"]
+    max-width: none
+
+  // Cards have a fixed height, so a band needn't clip: letting it overflow
+  // shows the card's hover lift and shadow. The gap matches `$row-gap`.
+  [class*="windowed-row"]
+    overflow: visible
+    gap: $row-gap
+
 
 .list-loading
   display: flex
@@ -33,10 +43,8 @@ $group-height: 34px
 /* ------------------------------------------------------------------- rows */
 
 // A column is the shared `LinkCard`, re-geometried for a dense windowed grid:
-// the card's own padding and margin are far too generous at this density, and
-// its hover *lift* would be clipped by the fixed-height, `overflow: hidden`
-// band the windowed body puts it in. Surface, border, radius and focus ring
-// stay the card's.
+// the card's padding and margin are far too generous at this density. Its
+// surface, border, shadow, hover lift and focus ring stay the card's.
 .column-row
   display: flex
   flex-direction: column
@@ -46,7 +54,6 @@ $group-height: 34px
   padding: 0 var(--pz-space-2)
   cursor: pointer
   user-select: none
-  box-shadow: none
 
   // Geometry only: the card's heading *color* is the design system's role for a
   // card title (`--pz-heading-color`), and a column card is a card.
@@ -55,15 +62,7 @@ $group-height: 34px
     font-size: 1em
     font-weight: 400
 
-  // State tints are translucent, so they are laid over the card's own surface
-  // (as a background image) rather than replacing it: the card keeps its
-  // raised color and the tint shades it, lighter in dark mode, darker in light.
-  &:hover
-    // No lift: see above.
-    transform: none
-    box-shadow: none
-    background-image: linear-gradient(var(--pz-hover-background-color), var(--pz-hover-background-color))
-
+  // A translucent tint over the card's own surface, so it keeps its color.
   &.selected
     background-image: linear-gradient(var(--pz-selected-background-color), var(--pz-selected-background-color))
     border-color: var(--pz-accent-color)
@@ -144,21 +143,16 @@ $group-height: 34px
   color: var(--pz-secondary-color)
   font-size: 0.8rem
 
-// The project facet in the Filter menu: the same picker as the side panel's,
-// with the current selection under it.
-.source-projects
-  display: flex
-  flex-direction: column
-  align-items: flex-start
-  gap: 0.35em
-
 // A large search field, taking whatever width the toolbar has left. It shrinks
 // well past its comfortable size so the filter tags beside it never get
 // squeezed into wrapping.
 .search-input
   flex: 1 1 auto
   min-width: 10rem
-  max-width: 36rem
+
+  // In the frame's narrow list panel (see `hybrid-list`)
+  @container hybrid-list (max-width: 40rem)
+    min-width: 6rem
 
 .filter-toggle
   display: flex
@@ -231,37 +225,6 @@ $group-height: 34px
 
 .assistant-link
   margin: var(--pz-paragraph-spacing) 0 0
-
-.assistant-links
-  margin-top: var(--pz-stack-gap)
-  display: flex
-  flex-direction: column
-  gap: var(--pz-stack-gap)
-
-// The project picker and the link to the project pages read as one subject.
-.projects-section
-  display: flex
-  flex-direction: column
-  gap: 0.35em
-
-  .section-head
-    display: flex
-    flex-direction: row
-    align-items: baseline
-    justify-content: space-between
-    gap: var(--pz-inline-gap)
-
-    h3
-      margin: 0
-      font-size: 1rem
-
-  // Fills the panel rather than hugging its label, so it reads as the
-  // section's control instead of a stray button.
-  .project-picker
-    align-self: stretch
-
-.assistant-buttons
-  align-items: flex-start
 
 /* ------------------------------------------------------------ filter tags */
 

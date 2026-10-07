@@ -45,12 +45,11 @@ import {
   useMapStyleOperator,
   useOverlayStyle,
 } from "@macrostrat/mapbox-react";
-import { IntervalProportions } from "@macrostrat/column-views";
 import {
   MacrostratDataProvider,
   useMacrostratDefs,
 } from "@macrostrat/data-provider";
-import { IntervalField } from "@macrostrat/data-components";
+import { IntervalAgeRange, IntervalField } from "@macrostrat/data-components";
 import { ErrorBoundary, useInDarkMode } from "@macrostrat/ui-components";
 import { AnchorButton, Button, Spinner } from "@blueprintjs/core";
 import type { UnitLong } from "@macrostrat/api-types";
@@ -1077,7 +1076,7 @@ function TimeRangeFilter({
   const lastInterval = timeRange.intervals[timeRange.intervals.length - 1];
 
   return h("div.hero-filter", [
-    h(IntervalProportions, {
+    h(IntervalAgeRange, {
       unit: {
         b_int_id: firstInterval.id,
         b_int_name: firstInterval.name,
@@ -1086,8 +1085,8 @@ function TimeRangeFilter({
         t_int_name: lastInterval.name,
         t_age: timeRange.t_age,
       },
-      showProportions: false,
-      showAgeRange: true,
+      flavor: "ages",
+      verbose: true,
     }),
     h(Button, {
       minimal: true,

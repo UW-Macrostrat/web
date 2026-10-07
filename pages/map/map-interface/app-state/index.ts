@@ -5,4 +5,5 @@ export * from "./navigation";
 export * from "./map-data.ts";
 export * from "./elevation.ts";
 export * from "./columns";
+export * from "./time-filter.ts";
 export * from "./utils.ts";

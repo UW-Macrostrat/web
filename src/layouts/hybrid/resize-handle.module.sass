@@ -1,0 +1,71 @@
+// A drag handle on the boundary between content and map
+
+.resize-handle
+  --handle-width: 12px
+  width: var(--handle-width)
+  cursor: col-resize
+  touch-action: none
+  z-index: 12
+
+// In a row's gap, without widening it: its negative margins give back its own
+// width and the extra gap the row puts beside it.
+.edge-sidebar
+  flex: none
+  align-self: stretch
+  margin: 0 calc((var(--handle-width) + var(--pz-section-gap, 1.5rem)) / -2)
+  position: relative
+  pointer-events: auto
+
+// Over the split shell's panel border, the full height of the window
+.edge-split
+  position: absolute
+  top: 0
+  bottom: 0
+  left: calc(var(--hybrid-split-panel-width) - var(--handle-width) / 2)
+
+// A faint pill, there to be found rather than noticed; at the middle of the
+// window, for as long as the row lasts
+.grip
+  --grip-height: 4rem
+  position: sticky
+  top: calc(50dvh - var(--grip-height) / 2)
+  height: var(--grip-height)
+  width: 5px
+  margin: 0 auto
+  border-radius: 3px
+  background-color: var(--pz-border-muted-color)
+  opacity: 0.4
+  transition: opacity 150ms, background-color 150ms
+
+.edge-split .grip,
+.centered .grip
+  position: absolute
+  left: 0
+  right: 0
+  top: calc(50% - var(--grip-height) / 2)
+
+.resize-handle:hover .grip,
+.resize-handle:active .grip
+  opacity: 1
+  background-color: var(--pz-accent-color)
+
+// Dragged far enough to switch views: the release will change the layout
+.armed .grip
+  opacity: 1
+  width: 7px
+  background-color: var(--pz-accent-text-color, var(--pz-accent-color))
+
+// Beneath the grip, which is positioned at the window's middle
+.switch-hint
+  position: absolute
+  top: calc(100% + 0.75rem)
+  left: 50%
+  transform: translateX(-50%)
+  white-space: nowrap
+  padding: 0.2em 0.6em
+  border-radius: var(--pz-radius-md, 6px)
+  font-size: var(--pz-font-size-sm)
+  color: var(--pz-text-on-fill-color, white)
+  background-color: var(--pz-accent-color)
+  box-shadow: var(--pz-shadow-md)
+  pointer-events: none

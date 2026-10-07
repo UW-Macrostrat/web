@@ -10,21 +10,34 @@
  * the content shell scrolls with the document, the map shell locks the viewport.
  */
 
-import { useMemo, type ReactNode } from "react";
+import { useMemo, type CSSProperties, type ReactNode } from "react";
 import { OverlaysProvider } from "@blueprintjs/core";
-import { Provider, useAtomValue, type WritableAtom } from "jotai";
+import {
+  Provider,
+  useAtomValue,
+  type Atom,
+  type WritableAtom,
+} from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import classNames from "classnames";
 import { PageBreadcrumbs, SitePageHeader } from "~/components";
+import { Footer } from "~/layouts/footer";
 
 import h from "./page.module.sass";
 import { FooterOverlayTrigger } from "./chrome";
 import { LayoutShellView } from "./composer";
-import { ActionsPanel } from "./controls";
+import { ActionsPanel, SidebarViewLinks, type HybridLink } from "./controls";
+import { HybridMapContext } from "./map-placement";
 import {
   buildCapabilities,
   capabilitiesAtom,
   contentScrollAtom,
+  hasMapPane,
+  hasSidebar,
+  mapPlacementCountAtom,
+  sidebarWidthsAtom,
+  splitPanelWidthsAtom,
+  layoutModeAtom,
   layoutShellAtom,
   type LayoutCapabilities,
 } from "./state";
@@ -32,12 +45,19 @@ import {
 export interface HybridPageProps {
   /** Page-specific controls, shown left of the frame's own layout controls. */
   actions?: ReactNode;
+  /** Other views of the subject: buttons beside the view menu in the
+   * sidebar, or entries in that menu where there's no sidebar. */
+  links?: HybridLink[];
   /** Shown immediately after the page title (see `LayoutShellView`). */
   titleAdornment?: ReactNode;
   capabilities?: Partial<LayoutCapabilities>;
   content?: ReactNode;
   map?: ReactNode;
   assistant?: ReactNode;
+  /** True while the assistant has nothing to show (e.g. no selection), read
+   * in the frame's scope. The map shells then drop its floating panel. Derived
+   * state rather than a report from the assistant, which that panel unmounts. */
+  assistantIdle?: Atom<boolean>;
   /** Active filters and the like: a second header row above the content, at
    * the content's width. Render nothing when there's nothing to show. */
   filterBar?: ReactNode;
@@ -91,10 +111,12 @@ function HydrateAtoms({ atoms, children }) {
 
 function HybridPageInner({
   actions,
+  links,
   titleAdornment,
   content,
   map,
   assistant,
+  assistantIdle,
   filterBar,
   wrap,
   className,
@@ -105,17 +127,66 @@ function HybridPageInner({
   // The map and split shells put the header in a narrow panel, where labels
   // and the full-size trail wrap it onto several lines
   const compact = shell !== "content";
-  const controls = h(HeaderControls, { actions, compact });
+  // With a sidebar, the view menu and links sit at its foot instead
+  const mode = useAtomValue(layoutModeAtom);
+  const linksInSidebar = shell === "content" && hasSidebar(mode);
+  // Page-scrolling content without a map of its own offers one on request
+  const offerFloatingMap =
+    shell === "content" &&
+    contentScroll === "page" &&
+    map != null &&
+    !hasMapPane(mode);
+  // …in the view menu, unless the page has placed the map itself
+  const placements = useAtomValue(mapPlacementCountAtom);
+  const controls = h(HeaderControls, {
+    actions,
+    compact,
+    links,
+    showModeControl: !linksInSidebar,
+    mapItem: offerFloatingMap && placements == 0,
+  });
+  // One tall item scrolling with the page: the header and footer scroll too
+  const pageScroll = shell === "content" && contentScroll === "page";
+
+  let sidebarLinks: ReactNode = null;
+  if (linksInSidebar) {
+    sidebarLinks = h(SidebarViewLinks, { links });
+  } else if (pageScroll && links != null && links.length > 0) {
+    // Below the content, the mode menu already being in the header
+    sidebarLinks = h(SidebarViewLinks, { links, showModeControl: false });
+  }
+
   // The site header, title inline. A title adornment (the column editor's
   // context) has no slot in it yet, so those pages keep the parts-built row.
+  // Scrolling with the page, it opens with a large title that collapses into
+  // the bar, as on content pages, with active filters beneath the title.
   let header: ReactNode = null;
-  if (titleAdornment == null) {
+  let headerFilterBar = filterBar;
+  if (titleAdornment == null && pageScroll) {
+    header = h(
+      SitePageHeader,
+      {
+        variant: "hybrid",
+        width: "constrained",
+        actions: controls,
+        collapseActions: "narrow",
+        className: "shell-page-header",
+      },
+      filterBar
+    );
+    headerFilterBar = null;
+  } else if (titleAdornment == null) {
     header = h(SitePageHeader, {
       variant: "compact",
       actions: controls,
       collapseActions: "narrow",
       className: "shell-page-header",
     });
+  }
+
+  let footer: ReactNode = null;
+  if (pageScroll) {
+    footer = h(Footer, { className: "page-footer" });
   }
 
   // The map shell's breadcrumbs sit in a narrow floating panel; the split
@@ -134,18 +205,38 @@ function HybridPageInner({
     }),
     titleAdornment,
     controls,
-    filterBar,
+    filterBar: headerFilterBar,
     map,
     assistant,
+    assistantIdle,
+    sidebarLinks,
+    footer,
   });
+  // Placements inside the content render the map from here
+  shellView = h(HybridMapContext.Provider, { value: map }, shellView);
   if (wrap != null) {
     shellView = wrap(shellView);
   }
 
+  // A page's own split between content and sidebar, or the reader's
+  const { contentWidth, sidebarWidth, itemName } =
+    useAtomValue(capabilitiesAtom);
+  const draggedWidth = useAtomValue(sidebarWidthsAtom)[itemName];
+  const draggedPanelWidth = useAtomValue(splitPanelWidthsAtom)[itemName];
+  let sidebar = sidebarWidth;
+  if (draggedWidth != null) sidebar = `${draggedWidth}px`;
+  let splitPanel: string | undefined = undefined;
+  if (draggedPanelWidth != null) splitPanel = `${draggedPanelWidth}px`;
+  const style = {
+    "--hybrid-content-width": contentWidth,
+    "--hybrid-sidebar-width": sidebar,
+    "--hybrid-split-panel-width": splitPanel,
+  } as CSSProperties;
+
   if (shell !== "content") {
     return h(
       "div.hybrid-frame",
-      { className: classNames(className, `shell-${shell}`) },
+      { className: classNames(className, `shell-${shell}`), style },
       shellView
     );
   }
@@ -153,11 +244,16 @@ function HybridPageInner({
   // The site footer belongs at the end of the panel's scroll content, not the
   // frame — pages pass `HybridContentFooter` as the panel's `contentFooter`,
   // mirroring `InfiniteScrollPage`. The overlay button stays as a shortcut to
-  // the same links from anywhere in a long list.
+  // the same links from anywhere in a long list; a scrolling page ends in the
+  // footer itself, so needs no shortcut.
+  let footerShortcut = null;
+  if (!pageScroll) {
+    footerShortcut = h(FooterOverlayTrigger, { key: "footer-affordance" });
+  }
   return h(
     "div.hybrid-frame.shell-content",
-    { className: classNames(className, `scroll-${contentScroll}`) },
-    [shellView, h(FooterOverlayTrigger, { key: "footer-affordance" })]
+    { className: classNames(className, `scroll-${contentScroll}`), style },
+    [shellView, footerShortcut]
   );
 }
 
@@ -165,6 +261,15 @@ function HybridPageInner({
  * themselves — a sticky bar in the content shell, `MapAreaContainer`'s floating
  * navbar in the map shell — which is why they're handed down as a part rather
  * than an assembled header. */
-function HeaderControls({ actions, compact = false }) {
-  return h([actions, h(ActionsPanel, { compact })]);
+function HeaderControls({
+  actions,
+  compact = false,
+  links = [],
+  showModeControl = true,
+  mapItem = false,
+}) {
+  return h([
+    actions,
+    h(ActionsPanel, { compact, links, showModeControl, mapItem }),
+  ]);
 }

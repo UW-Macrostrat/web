@@ -13,6 +13,7 @@ import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import { useAtomValue } from "jotai";
 import { getLexMapNode, lexMapTargetAtom } from "./map-target";
+import { mapSettingsStore } from "~/components/map-settings";
 import { lazy } from "react";
 
 const LexiconMap = lazy(() =>
@@ -20,7 +21,7 @@ const LexiconMap = lazy(() =>
 );
 
 export function LexPersistentMap() {
-  const target = useAtomValue(lexMapTargetAtom);
+  const target = useAtomValue(lexMapTargetAtom, { store: mapSettingsStore });
   // The node is created in the browser only; resolving it in an effect also
   // guarantees the first render is portal-free (nothing to hydrate).
   const [node, setNode] = useState<HTMLDivElement | null>(null);

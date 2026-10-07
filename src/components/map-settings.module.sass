@@ -47,3 +47,19 @@
 
   :global(.bp6-control)
     margin-bottom: 0.25em
+
+// Floats over the map's top-left corner, clear of the frame's grow/shrink
+// button on the right.
+.map-settings-overlay
+  position: absolute
+  top: 0.4em
+  left: 0.4em
+  z-index: 2
+  pointer-events: none
+  font-size: 0.85em
+
+  .map-settings-button
+    pointer-events: auto
+    background-color: var(--pz-overlay-background-color, var(--translucent-panel-background-color))
+    box-shadow: var(--pz-shadow-md)
+

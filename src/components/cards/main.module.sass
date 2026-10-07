@@ -17,8 +17,9 @@
   // Cheap to animate and cheap to undo: only the lift and the shadow move.
   transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease
 
+  // The card is a link, so its title takes the link color.
   h3, h4
-    color: var(--pz-heading-color)
+    color: var(--pz-link-color)
     transition: color 0.18s ease
 
   :first-child
@@ -34,9 +35,8 @@
     border-color: var(--pz-accent-color)
     transform: translateY(-2px)
 
-    // The card is a link, so its heading darkens the way a link does.
     h3, h4
-      color: var(--pz-heading-hover-color)
+      color: var(--pz-link-hover-color)
 
   // The press should read as the lift coming back down.
   &:active
@@ -74,6 +74,9 @@
 // pointer, the lift, and the heading darkening all say "click me".
 .link-card.no-link
   cursor: default
+
+  h3, h4
+    color: var(--pz-heading-color)
 
   &:hover
     box-shadow: var(--pz-shadow-md)

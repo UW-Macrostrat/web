@@ -1,5 +1,6 @@
 import { fetchAllProjects } from "~/_utils/fetch-helpers";
 import {
+  isMostlyInProcess,
   parseProjectFilter,
   projectIDParam,
   resolveProjectIDs,
@@ -37,7 +38,11 @@ export async function data(pageContext) {
   // filter already on.
   const rawStatusCode =
     pageContext.urlParsed?.search?.[COLUMN_STATUS_FILTER_KEY] ?? null;
-  const showInProcess = parseStatusCodeParam(rawStatusCode);
+  let showInProcess = parseStatusCodeParam(rawStatusCode);
+  // A mostly in-process project would otherwise list next to nothing
+  if (rawStatusCode == null && isMostlyInProcess(projects, projectSlugs)) {
+    showInProcess = true;
+  }
 
   // Whether the *URL* said anything about the scope, as distinct from what it
   // resolved to — an absent `status_code` and one naming only `active` both

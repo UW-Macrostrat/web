@@ -1,0 +1,133 @@
+.boundary-panel
+  display: flex
+  flex-direction: column
+  gap: 1em
+  padding: 0.75em
+  height: 100%
+  box-sizing: border-box
+
+  section
+    display: flex
+    flex-direction: column
+    gap: 0.5em
+    flex: none
+
+  // The list takes the room left over and scrolls within it
+  .operations-section
+    flex: 1 1 12em
+    min-height: 8em
+
+  .operations-scroll
+    flex: 1
+    min-height: 0
+    overflow-y: auto
+
+  h3
+    margin: 0
+    font-size: 1em
+
+.summary
+  .map-title
+    margin: 0 0 0.3em
+
+  .tags
+    display: flex
+    flex-wrap: wrap
+    gap: 0.3em
+
+.error
+  display: flex
+  align-items: flex-start
+  justify-content: space-between
+
+.section-header
+  display: flex
+  align-items: center
+  justify-content: space-between
+
+.operations
+  list-style: none
+  margin: 0
+  padding: 0
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-2, 0.4em)
+  // `DataCard`'s selection colours are set by `DataPanel`, which isn't here
+  --data-panel-card-padding: 0.5em 0.6em
+  --data-panel-item-gap: 0.5em
+  --data-panel-selected-color: #2d72d2
+  --data-panel-selected-background: rgba(45, 114, 210, 0.1)
+
+.operation-item
+  &[draggable=true]
+    cursor: grab
+
+  &.dragging
+    opacity: 0.4
+
+  &.drop-target
+    box-shadow: 0 -2px 0 var(--data-panel-selected-color)
+
+.op-body
+  display: flex
+  flex-direction: column
+  gap: 0.3em
+  flex: 1
+  min-width: 0
+
+.op-header
+  display: flex
+  align-items: center
+  gap: 0.5em
+
+.op-swatch
+  flex: none
+  width: 0.6em
+  height: 0.6em
+  border-radius: 2px
+  background: var(--secondary-color)
+
+  &.add
+    background: #2b8a3e
+
+  &.subtract
+    background: #c92a2a
+
+.drag-handle
+  color: var(--secondary-color)
+
+.position
+  color: var(--secondary-color)
+  font-variant-numeric: tabular-nums
+
+.op-name
+  font-weight: 600
+
+.params
+  flex: 1
+  min-width: 0
+  font-size: 0.85em
+  color: var(--secondary-color)
+
+.note
+  font-size: 0.85em
+  font-style: italic
+
+.op-error
+  font-size: 0.85em
+  color: var(--pt-intent-danger, #c92a2a)
+
+.reshape
+  display: flex
+  gap: 0.4em
+
+.empty,
+.hint
+  margin: 0
+  font-size: 0.85em
+  color: var(--secondary-color)
+
+.draft
+  display: flex
+  flex-direction: column
+  gap: 0.5em

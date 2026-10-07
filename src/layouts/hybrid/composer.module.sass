@@ -80,6 +80,7 @@
 // The panel is the scroll region; it holds its own floating toolbar and its
 // `contentFooter` (load progress + the real site footer).
 .content-panel-holder
+  container: hybrid-list / inline-size
   position: relative
   flex: 1 1 auto
   min-width: 0
@@ -134,9 +135,11 @@
 .content-shell.has-sidebar
   // The header spans the same measure as content + sidebar, so its left edge
   // stays aligned with the content when the sidebar widens the shell.
+  --hybrid-shell-width: calc(var(--hybrid-content-width) + var(--hybrid-sidebar-width) + var(--pz-section-gap, 1.5rem))
+
   .content-header,
   .content-main
-    max-width: calc(var(--hybrid-content-width) + var(--hybrid-sidebar-width) + var(--pz-section-gap, 1.5rem))
+    max-width: var(--hybrid-shell-width)
 
   .content-main
     padding-bottom: 1em
@@ -145,8 +148,9 @@
     flex: 1 1 var(--hybrid-content-width)
     --data-panel-content-width: 100%
 
+// Fixed at its width, the content giving instead, so a drag tracks the pointer
 .content-sidebar
-  flex: 0 1 var(--hybrid-sidebar-width)
+  flex: 0 0 var(--hybrid-sidebar-width)
   min-width: 0
   min-height: 0
   display: flex
@@ -164,72 +168,179 @@
   width: 100%
   aspect-ratio: 4 / 3
   overflow: hidden
-  border-radius: var(--pz-radius-md, 6px)
+  border-radius: var(--pz-radius-lg)
+
+  // The map's GL canvas is composited apart, so overflow alone leaves its
+  // corners square; clipped inside the card so the card keeps its shadow.
+  > :first-child
+    clip-path: inset(0 round var(--pz-radius-lg))
   background-color: var(--pz-panel-background-color, var(--panel-background-color))
   box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
 
+// A column, so a card that scrolls its own body can shrink to the room left.
 .sidebar-assistant
   flex: 0 1 auto
   min-height: 0
   overflow-y: auto
+  display: flex
+  flex-direction: column
+
+/* ------------------------------------------------ panel-scrolling variant */
+
+// Everything below the header scrolls as one region, with its scrollbar at the
+// window's edge (see `ScrollBody`).
+.content-body
+  position: relative
+  flex: 1 1 auto
+  min-height: 0
+  width: 100%
+
+// The same gutter on both, so the overlay's measure lines up with the
+// scroller's whether or not the platform's scrollbars take up room.
+.content-scroll,
+.content-overlay
+  position: absolute
+  inset: 0
+  scrollbar-gutter: stable
+
+.content-scroll
+  overflow-y: auto
+
+.content-overlay
+  overflow: hidden
+  pointer-events: none
+
+  .content-sidebar,
+  .content-inset-map
+    pointer-events: auto
+
+// Exactly the scroller's height, so content that fills its pane still does.
+.content-scroll > .content-main,
+.content-overlay > .content-main
+  box-sizing: border-box
+  height: 100%
+  margin: 0 auto
+
+.sidebar-spacer
+  flex: 0 0 var(--hybrid-sidebar-width)
+  min-width: 0
+
+.content-shell.has-sidebar .content-spacer
+  flex: 1 1 var(--hybrid-content-width)
+  min-width: 0
+
+// A floating-toolbar data panel doesn't scroll itself here; the region does.
+// Its toolbar band sticks to the region's top over an opaque underlay, and the
+// windowed list's sticky headers park beneath that band.
+.content-shell.scroll-panel .content-panel-holder [class*="toolbar-style-floating"]
+  flex: 1 0 auto
+  height: auto
+  --windowed-sticky-top: var(--data-panel-top-margin)
+
+  [class*="data-panel-top-area"]
+    position: sticky
+    z-index: 5
+    box-sizing: border-box
+    height: var(--data-panel-top-margin)
+    background-color: var(--pz-background-color, var(--background-color))
+
+  [class*="data-panel-body"]
+    flex: 1 0 auto
+    overflow: visible
+    padding-top: 0
+    mask-image: none
+
+// A narrow list (the split shell's panel) keeps the toolbar on one row: any
+// control led by an icon drops its text, and dropdown carets go.
+@container hybrid-list (max-width: 40rem)
+  [class*="data-panel-toolbar-content"]
+    :global(.bp6-button):has(> :global(.bp6-icon):first-child) > :global(.bp6-button-text),
+    :global(.bp6-tag):has(> :global(.bp6-icon):first-child) > :global(.bp6-text-overflow-ellipsis),
+    :global(.bp6-icon-caret-down)
+      display: none
+
+    // The search field yields what's left; the library holds every item rigid
+    [class*="toolbar-item"]:has(:global(.bp6-input-group))
+      flex: 1 1 auto
+      min-width: 0
 
 /* ------------------------------------------------- page-scrolling variant */
 
-// `contentScroll: "page"`: the document scrolls instead of the content. The
-// shell grows with its content, the sidebar sticks below the top edge, and the
-// page's own footer sits at the end of the content in normal flow.
+// `contentScroll: "page"`: the header, the content's row and the footer all
+// sit in the scroller, in flow (see `PageScrollBody`).
 .content-shell.scroll-page
-  height: auto
-  min-height: 100vh
-  overflow: visible
+  // The page header's bar height (`ui-components`' default), which the sticky
+  // sidebar parks beneath
+  --hybrid-bar-height: 3rem
 
-  .content-header
-    position: sticky
-    top: 0
-    z-index: 5
-    margin-top: 0
-    padding-top: 1.5em
-    padding-bottom: 0.75em
-    background-color: var(--pz-background-color, var(--background-color))
+  // Stretched, so the header's bar spans the window; the rest centre by margin
+  .content-scroll
+    display: flex
+    flex-direction: column
 
-    // Content passing beneath the header fades out under it.
-    &::after
-      content: ""
-      position: absolute
-      left: 0
-      right: 0
-      bottom: -1em
-      height: 1em
-      pointer-events: none
-      background: linear-gradient(to bottom, var(--pz-background-color, var(--background-color)), transparent)
+  // The page header's bar and title block take the scroller as their sticky
+  // boundary, so nothing in between may form a box.
+  .content-header,
+  .header-row
+    display: contents
 
-  // Grows to fill the viewport, so a page's footer (at the end of its content)
-  // sits at the bottom even when the content is short.
-  .content-main
-    flex: 1 1 auto
+  // The content's gutter and measure, so the header's text lines up with it
+  header:global(.shell-page-header)
+    --page-header-padding-x: 1em
+    --page-header-content-width: calc(var(--hybrid-shell-width) - 2em)
+
+  // Fills the window below the header, so a short page's footer sits at the
+  // bottom of it
+  .content-scroll > .content-main
+    flex: 1 0 auto
+    height: auto
     min-height: 0
-    align-items: flex-start
 
+  // Sticky, so the map stays in view through a long column. It keeps its
+  // width (a dragged one included) while the content gives, and scrolls with
+  // the page rather than on its own when it is taller than the window.
+  .content-sidebar
+    flex-shrink: 0
+    position: sticky
+    top: calc(var(--hybrid-bar-height) + 1em)
+    align-self: flex-start
+    overflow-y: visible
+
+  // The content, then (in content-only) the assistant, then the footer
   .content-panel-holder
     display: flex
     flex-direction: column
-    min-height: 0
-    align-self: stretch
 
-  .content-sidebar
-    position: sticky
-    top: 4.5em
-    max-height: calc(100vh - 5.5em)
+// A block, so a floated map's neighbours wrap around it
+.content-flow
+  display: flow-root
+
+// Without a sidebar, the assistant and links follow the content
+.content-after
+  padding-top: 1em
+  display: flex
+  flex-direction: column
+  gap: var(--pz-stack-gap, 1rem)
+
+  &:empty
+    display: none
+
+// Last in the content column, at the window's bottom when the page is short
+.content-page-footer
+  margin-top: auto
+  padding: 3em 0 1em
 
 // Narrow: the sidebar stops earning its column.
 @media (max-width: 1000px)
   .content-shell.has-sidebar
-    .content-sidebar
+    .content-sidebar,
+    .sidebar-spacer
       display: none
 
 /* ================================ split shell ============================ */
 
 .split-shell
+  position: relative
   display: grid
   grid-template-columns: var(--hybrid-split-panel-width) 1fr
   height: 100%
@@ -257,6 +368,12 @@
 
 // One line: the trail ellipsizes rather than the controls wrapping under it
 .split-header
+  // The page header's bar is sized for a page top; here it need only hold the
+  // trail. Qualified to outrank the site header's own values; the class is the
+  // unscoped one `HybridPage` sets.
+  header:global(.shell-page-header)
+    --page-header-bar-height: 1.75rem
+
   .header-row
     flex: 1 1 auto
     min-width: 0
@@ -267,6 +384,16 @@
 .split-list
   flex: 1 1 auto
   min-height: 0
+  container: hybrid-list / inline-size
+
+  // The data panel scrolls itself here; its floating toolbar gets the same
+  // opaque underlay as in the content shell, over the band the body is padded
+  // by, so cards don't show around the toolbar.
+  [class*="toolbar-style-floating"] [class*="data-panel-top-area"]
+    z-index: 5
+    box-sizing: border-box
+    height: var(--data-panel-top-margin)
+    background-color: var(--pz-background-color, var(--background-color))
   // Without this the panel's rows set a min-content floor and the scroll body
   // overflows the fixed panel width.
   min-width: 0

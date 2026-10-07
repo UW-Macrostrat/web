@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import hyper from "@macrostrat/hyper";
-import { Button, Collapse, Switch } from "@blueprintjs/core";
+import { Button, Collapse, Icon, Switch } from "@blueprintjs/core";
 import { useAppActions } from "#/map/map-interface/app-state";
 import { useAdmoinshments } from "./admonishments";
 import { FilterItemTag } from "../search-tags";
@@ -52,17 +52,14 @@ function Filter({ filter }) {
 }
 
 function FiltersView({ filters }) {
-  const shouldFiltersBeOpen = filters.length > 0;
-  return h("div.filter-container", [
-    h.if(!shouldFiltersBeOpen)("div", [
-      "No Filters. To add filters begin searching..",
-    ]),
-    h.if(shouldFiltersBeOpen)(
-      filters.map((filter) =>
-        h(Filter, { key: `${filter.type}:${filter.id}`, filter })
-      )
-    ),
-  ]);
+  return h(
+    "div.filter-container",
+    filters.map((filter) => h(Filter, { key: filterKey(filter), filter }))
+  );
+}
+
+function filterKey(filter) {
+  return `${filter.type}:${filter.id}`;
 }
 
 function makeFilterString(filters) {
@@ -109,17 +106,34 @@ function FilterPanel({ filters, admonishments }) {
     runAction({ type: "clear-filters" });
   };
 
-  const iconName = open ? "chevron-up" : "chevron-down";
+  let iconName = "chevron-down";
+  if (open) iconName = "chevron-up";
 
   return h([
     h(Admonishments, { admonishments }),
     h.if(filters.length > 0)("div.filters", [
-      h("div.filter-name-container", [
-        h("p.filter-names", [h("b", "Filtering by: "), filterString]),
-        h("div.filter-tongue-actions", [
-          h("div.remove", { onClick: onRemoveAll }, ["remove all"]),
-          h(Button, { minimal: true, small: true, icon: iconName, onClick }),
-        ]),
+      h("div.filter-summary", { title: filterString }, [
+        h(Icon, { icon: "filter", size: 12, className: "filter-icon" }),
+        h(
+          "div.filter-tags",
+          filters.map((filter) =>
+            h(FilterItemTag, { key: filterKey(filter), filter, compact: true })
+          )
+        ),
+        h(Button, {
+          minimal: true,
+          small: true,
+          icon: "cross",
+          title: "Clear all filters",
+          onClick: onRemoveAll,
+        }),
+        h(Button, {
+          minimal: true,
+          small: true,
+          icon: iconName,
+          title: "Filter options",
+          onClick,
+        }),
       ]),
       h(Collapse, { isOpen: open }, [h(FiltersView, { filters })]),
     ]),

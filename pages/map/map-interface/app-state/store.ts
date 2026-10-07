@@ -71,6 +71,9 @@ const store = createStore<ZustandState>(
 
 const zustandStoreAtom = atomWithStore(store);
 export const appStateAtom = atom((get) => get(zustandStoreAtom).coreState);
+export const appActionsAtom = atom(
+  (get) => get(zustandStoreAtom).asyncDispatch
+);
 
 export const mapInstanceAtom = atom<mapboxgl.Map | null>();
 

@@ -19,6 +19,7 @@
  */
 
 import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 
 export type LayoutMode =
@@ -80,13 +81,13 @@ export function layoutModeLabel(
 
 const defaultItemName = "List";
 
-/** How the content shell scrolls.
+/** How the content shell scrolls. Either way, the region below the header
+ * scrolls, with its scrollbar at the window's edge and the sidebar held still.
  *
- *  - `panel` — viewport-locked; the content (a data panel) is its own scroll
- *    region, as on the column list page. Floating toolbars pin to its top.
- *  - `page`  — the document scrolls, the sidebar sticks, and the scrollbar sits
- *    at the far right of the page: a whole-page feel for a single tall item
- *    such as a stratigraphic column. */
+ *  - `panel` — the content is held to the region's height; a data panel
+ *    overflows it, its floating toolbar pinned to the region's top.
+ *  - `page`  — the content grows with itself: a single tall item such as a
+ *    stratigraphic column, followed by the site footer. */
 export type ContentScrollMode = "panel" | "page";
 
 export function shellForMode(mode: LayoutMode): LayoutShell {
@@ -131,6 +132,10 @@ export interface LayoutCapabilities {
   itemName: string;
   /** Scrolling model of the content shell (see `ContentScrollMode`). */
   contentScroll: ContentScrollMode;
+  /** CSS widths of the content measure and the sidebar beside it, when a page
+   * wants a different split from the frame's default. */
+  contentWidth?: string;
+  sidebarWidth?: string;
 }
 
 export const defaultCapabilities: LayoutCapabilities = {
@@ -200,3 +205,23 @@ export const showAssistantAtom = atom(
 /** Open state of the site-links footer popover. Ephemeral, so it stays out of
  * the URL. */
 export const footerLinksOpenAtom = atom(false);
+
+/** The map floated beside the content, shown on request in the modes without
+ * a map of their own. Ephemeral, so it stays out of the URL. */
+export const floatingMapOpenAtom = atom(false);
+
+/** How many map placements the page's content has mounted. With none, the
+ * frame offers the map from the view menu and floats it at the top. */
+export const mapPlacementCountAtom = atom(0);
+
+/** Sidebar widths the reader has dragged to, in px, by page kind (`itemName`) */
+export const sidebarWidthsAtom = atomWithStorage<Record<string, number>>(
+  "macrostrat:hybrid-sidebar-widths",
+  {}
+);
+
+/** Split-shell panel widths the reader has dragged to, in px, by page kind */
+export const splitPanelWidthsAtom = atomWithStorage<Record<string, number>>(
+  "macrostrat:hybrid-split-panel-widths",
+  {}
+);

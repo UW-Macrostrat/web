@@ -14,8 +14,10 @@ import {
   MacrostratColumnStateProvider,
   PBDBFossilsColumn,
   ReferencesField,
+  UnitSelectionStyle,
 } from "@macrostrat/column-views";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useAtom } from "jotai";
 import { AnchorButton } from "@blueprintjs/core";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { NavigationLinkProvider, PatternProvider } from "~/_providers";
@@ -27,28 +29,34 @@ import {
 import { StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
 import { ColumnMapSlot } from "~/components/column-map/target";
+import { MapSettingsSection } from "~/components/map-settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import { DataField } from "@macrostrat/data-components";
+import {
+  DataField,
+  MacrostratInteractionProvider,
+  type MacrostratItemIdentifier,
+} from "@macrostrat/data-components";
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
-import { Footer } from "~/layouts/footer";
 import {
   columnHashStateAtom,
   columnInfoAtom,
   columnInProcessFilterAtom,
   columnProjectFilterAtom,
-  ColumnSettingsButton,
   columnTimeFilterAtom,
   initialColumnHashState,
   useColumnSelection,
   useColumnState,
   useSetFacet,
+  viewSettingsOpenAtom,
+  ViewSettingsButton,
+  ViewSettingsPanel,
 } from "./state";
 import {
   PROJECT_FILTER_KEY,
   projectIDParam,
-  ProjectFilterControl,
+  ProjectFilterMenu,
   ProjectFilterProvider,
   ProjectFilterTag,
   useProjectFilter,
@@ -89,6 +97,9 @@ const columnPageCapabilities: Partial<LayoutCapabilities> = {
   itemName: "Column",
   contentScroll: "page",
 };
+
+/** A selected unit keeps its color while the rest of the column goes plain */
+const selectedUnitProps = { selectionStyle: UnitSelectionStyle.ColorSelected };
 
 export function ColumnPage(props) {
   return h(
@@ -142,6 +153,9 @@ function ColumnPageFrame({
     [columnInfo, carried]
   );
 
+  // Read outside the frame's scope and handed to the slots that need it
+  const [settingsOpen, setSettingsOpen] = useAtom(viewSettingsOpenAtom);
+
   return h(HybridPage, {
     className: "column-page",
     capabilities: columnPageCapabilities,
@@ -150,9 +164,12 @@ function ColumnPageFrame({
     // the map, the filter tags and the settings switch. `HybridPage` mounts its
     // own `Provider`, and the same atom read on either side of one is a
     // different cell.
-    wrap: (node) => h(ColumnScopeBridge, { status: columnInfo.status }, node),
-    // The project dropdown is a first-class control, beside the settings
-    actions: h([h(ProjectFilterControl), h(ColumnSettingsButton)]),
+    wrap: (node) =>
+      h(
+        ColumnScopeBridge,
+        { status: columnInfo.status },
+        h(ColumnUnitLinks, { columnInfo }, node)
+      ),
     // Active filters sit in a second header row above the column
     filterBar: h([
       h(ProjectFilterTag),
@@ -161,7 +178,13 @@ function ColumnPageFrame({
     ]),
     content: h(ColumnContentPane, { columnInfo }),
     map: h(ColumnMapPane, { columnInfo, linkPrefix, projectID }),
-    assistant: h(ColumnAssistantPane, { columnInfo, project, columnProjects }),
+    assistant: h(ColumnAssistantPane, {
+      columnInfo,
+      project,
+      columnProjects,
+      settingsOpen,
+      setSettingsOpen,
+    }),
   });
 }
 
@@ -236,6 +259,7 @@ function ColumnContentPane({ columnInfo }) {
             {
               units,
               unitComponent: ColoredUnitComponent,
+              unitComponentProps: selectedUnitProps,
               unconformityLabels: "minimal",
               collapseSmallUnconformities: true,
               showTimescale,
@@ -264,7 +288,6 @@ function ColumnContentPane({ columnInfo }) {
         )
       )
     ),
-    h(Footer, { className: "page-footer" }),
   ]);
 }
 
@@ -284,6 +307,37 @@ function ColumnScopeBridge({ status, children }) {
   // adopted value — there is nothing to race with.
   usePublishColumnScope(useProjectFilter().projects, useShowInProcess());
   return children;
+}
+
+/** Links to this column's units (e.g. the unit panel's units above and below)
+ * select the unit in place instead of opening its lexicon page.
+ *
+ * Vike routes every anchor click from a document listener and ignores
+ * `preventDefault`, so the handler must also stop propagation. */
+function ColumnUnitLinks({ columnInfo, children }) {
+  const { setSelectedUnitID } = useColumnSelection();
+  const { col_id, units } = columnInfo;
+
+  const interactionPropsForItem = useCallback(
+    (item: MacrostratItemIdentifier) => {
+      if (!("unit_id" in item)) return {};
+      const unitID = item.unit_id;
+      if (!units.some((d) => d.unit_id === unitID)) return {};
+      return {
+        href: `/columns/${col_id}#unit=${unitID}`,
+        target: undefined,
+        onClick(evt) {
+          if (evt.metaKey || evt.ctrlKey || evt.shiftKey) return;
+          evt.preventDefault();
+          evt.stopPropagation();
+          setSelectedUnitID(unitID);
+        },
+      };
+    },
+    [col_id, units, setSelectedUnitID]
+  );
+
+  return h(MacrostratInteractionProvider, { interactionPropsForItem }, children);
 }
 
 /* ----------------------------------------------------------------- the map */
@@ -355,8 +409,13 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
         selectedColumnIDs: EMPTY_SELECTION,
         selectedColumn: columnInfo.col_id,
         onSelectColumn,
-      },
-      h("div.map-hint", "Click a column to open it · ⌘/Ctrl-click to correlate")
+        // The project filter scopes only the map, so it lives with the map
+        settings: h(
+          MapSettingsSection,
+          { title: "Projects" },
+          h(ProjectFilterMenu, { inline: true })
+        ),
+      }
     ),
   ]);
 }
@@ -396,9 +455,20 @@ function openCorrelation(colIDs: number[]) {
 
 /* ----------------------------------------------------------- the assistant */
 
-function ColumnAssistantPane({ columnInfo, project, columnProjects }) {
+function ColumnAssistantPane({
+  columnInfo,
+  project,
+  columnProjects,
+  settingsOpen,
+  setSettingsOpen,
+}) {
   const { units } = columnInfo;
   const { selectedUnit, setSelectedUnitID } = useColumnSelection();
+
+  // Opened deliberately, so it takes the slot over a selected unit
+  if (settingsOpen) {
+    return h(ViewSettingsPanel, { onClose: () => setSettingsOpen(false) });
+  }
 
   if (selectedUnit != null) {
     // The one piece of assistant content that reads as a card. The panel
@@ -415,10 +485,15 @@ function ColumnAssistantPane({ columnInfo, project, columnProjects }) {
       })
     );
   }
-  return h(ColumnInfoPanel, { data: columnInfo, project, columnProjects });
+  return h(ColumnInfoPanel, {
+    data: columnInfo,
+    project,
+    columnProjects,
+    onOpenSettings: () => setSettingsOpen(true),
+  });
 }
 
-function ColumnInfoPanel({ data, project, columnProjects }) {
+function ColumnInfoPanel({ data, project, columnProjects, onOpenSettings }) {
   const setFacet = useSetFacet();
   return h("div.column-assistant", [
     h(ColumnBasicInfo, { data, project, columnProjects }),
@@ -447,6 +522,7 @@ function ColumnInfoPanel({ data, project, columnProjects }) {
         text: "Edit units",
         href: `/columns/${data.col_id}/edit`,
       }),
+      h(ViewSettingsButton, { onClick: onOpenSettings }),
     ]),
   ]);
 }

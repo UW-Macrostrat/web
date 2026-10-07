@@ -6,7 +6,7 @@ import {
   fetchFilteredColumns,
   getPBDBData,
 } from "./fetch";
-import { runFilter } from "./filters";
+import { FilterType, runFilter } from "./filters";
 
 import { LineString } from "geojson";
 import { StateGetter } from "../store";
@@ -126,6 +126,16 @@ export async function actionRunner(
         return { type: "stop-searching" };
       }
       return { type: "add-filter", filter };
+    }
+    case "set-interval-filter": {
+      let filter = null;
+      if (action.int_id != null) {
+        filter = await runFilter({
+          type: FilterType.Intervals,
+          id: action.int_id,
+        });
+      }
+      return { type: "replace-interval-filter", filter };
     }
     case "get-filtered-columns":
       const filters = getState((state) => state.filters);

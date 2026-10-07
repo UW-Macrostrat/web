@@ -1,45 +1,74 @@
+// The column view fills the drawer, with its own scroll region between a title
+// bar and a footer; the drawer body itself no longer scrolls. Every wrapper
+// between the drawer's content holder and this view takes the full height.
+:global(.infodrawer-content-holder):has(.strat-column-outer),
+:global(.infodrawer-content-holder) :has(.strat-column-outer)
+  height: 100%
+
+.strat-column-outer
+  // Selected units take the link color, as on the column page
+  --selection-overlay-color: var(--pz-link-color)
+  display: flex
+  flex-direction: column
+  height: 100%
+  pointer-events: auto
+
+.strat-column-header
+  flex: none
+  display: flex
+  align-items: center
+  gap: 0.5em
+  height: 2.75rem
+  padding: 0 0.5rem 0 1rem
+  background-color: var(--accent-color)
+  border-bottom: 1px solid var(--panel-rule-color)
+
+.column-heading
+  margin: 0
+  min-width: 0
+  font-size: var(--pz-font-size-lg)
+  white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
+
+.spacer
+  flex-grow: 1
+
+.strat-column-scroll
+  flex: 1 1 auto
+  min-height: 0
+  overflow-y: auto
+
+// Project, group and references close the column, at the panel's text size
+.column-metadata
+  padding: 0 1rem 1rem
+  margin-top: -0.5rem
+
 .strat-column-container
   padding: 0 1rem 1rem
   --column-background-color: var(--panel-background-color)
   --column-stroke-color: var(--text-color)
   --column-note-color: var(--text-color)
 
-.strat-column-panel h3
-  text-overflow: ellipsis
-  overflow: hidden
-
 .unit-details-panel
-  position: sticky
-  bottom: 0
+  flex: none
   // Note: this is a bit hacky way to sync the panel color schemes
   --panel-secondary-background-color: var(--accent-color)
   background-color: var(--panel-background-color)
   border-top: 1px solid var(--panel-rule-color)
-  height: 30vh
-
+  height: 40%
   font-size: 0.9em
-  //min-height: 200px
 
-.strat-column-outer
+.column-settings
+  flex: none
   display: flex
   flex-direction: column
-  pointer-events: auto
+  gap: 0.4em
+  padding: 0.6rem 1rem
+  border-top: 1px solid var(--panel-rule-color)
 
-.strat-column-header
-  // TODO: align with expansion panel header styles
-  display: flex
-  flex-direction: row
-  position: sticky
-  top: -1px
-  padding: 0 1rem
-  height: 40px
-  gap: 0.5em
-  align-items: center
-  background-color: var(--accent-color)
-  border: 1px solid var(--panel-rule-color)
-  margin-top: -1px
-  z-index: 100
-  &>*
-    margin: 0
-  .spacer
-    flex-grow: 1
+// A library rule colors every Blueprint control with this, `!important`
+.filter-map-switch
+  --text-subtle-color: var(--pz-secondary-color)
+  margin: 0
+  font-size: var(--pz-font-size-sm)

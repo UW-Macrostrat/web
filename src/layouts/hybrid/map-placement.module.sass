@@ -1,0 +1,34 @@
+// Floated at the top right of its container, so the content wraps beside and
+// below it; the content after it decides whether to clear it.
+.map-placement
+  position: relative
+  float: right
+  width: min(var(--hybrid-sidebar-width), 45%)
+  margin: 0 0 1em 1.5em
+  border-radius: var(--pz-radius-lg)
+
+// A placeholder where the map will go: the size of the map's width, but short
+.map-placement.closed
+  display: flex
+  align-items: center
+  justify-content: center
+  min-height: 6em
+  border: 1px dashed var(--pz-border-muted-color)
+
+.map-placement.open
+  aspect-ratio: 4 / 3
+  overflow: hidden
+
+  // The map's GL canvas is composited apart, so overflow alone leaves its
+  // corners square; clipped inside the panel so the panel keeps its shadow.
+  > :first-child
+    height: 100%
+    clip-path: inset(0 round var(--pz-radius-lg))
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
+
+.map-placement-close
+  position: absolute
+  top: 0.4em
+  right: 0.4em
+  z-index: 11
