@@ -7,6 +7,7 @@ import {
   mapSnapshotDir,
 } from "../src/map-snapshots/store.server.ts";
 import { MAP_SNAPSHOT_URL_PREFIX } from "../src/map-snapshots/spec.ts";
+import { stillColumnFor } from "../pages/index/hero-column-static.server.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -42,6 +43,17 @@ function startServer() {
       fallthrough: false,
     })
   );
+  // The homepage hero's column as static markup, for an area the still's
+  // carousel moves to (the opening one comes with the page).
+  app.get("/_hero/still-column/:area", async (req, res) => {
+    const column = await stillColumnFor(req.params.area);
+    if (column == null) {
+      res.status(404).json({ error: "No column for this area" });
+      return;
+    }
+    res.set("Cache-Control", "public, max-age=600");
+    res.json(column);
+  });
   apply(app);
   warmMapSnapshots();
   return serve(app);

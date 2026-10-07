@@ -13,13 +13,14 @@
  * stands in, as it did before.
  */
 import h from "./hero.module.sass";
-import { useCallback, useState, type ReactNode } from "react";
-import { AnchorButton, Icon } from "@blueprintjs/core";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { AnchorButton, Card, Icon } from "@blueprintjs/core";
 import { clientOnly } from "~/components/lex/client-only";
 import type { MapSnapshotImage } from "~/map-snapshots/spec";
 import { HeroContextBar, useFeaturedAreas, type Carousel } from "./hero-carousel";
 import type { FeaturedArea } from "./featured-areas";
 import type { HeroData } from "./+data";
+import type { StaticHeroColumn } from "./hero-column";
 
 const loadLiveHero = () => import("./hero.client");
 
@@ -37,8 +38,15 @@ export function HeroStage({
   const [live, setLive] = useState(false);
   const engage = useCallback(() => setLive(true), []);
   const still = hero.snapshots?.[carousel.area.id] ?? null;
+  const stillColumn = useStillColumn(hero, carousel.area);
 
-  const stillView = h(HeroStill, { carousel, still, coverImage, onEngage: engage });
+  const stillView = h(HeroStill, {
+    carousel,
+    still,
+    stillColumn,
+    coverImage,
+    onEngage: engage,
+  });
   if (!live) return stillView;
 
   // The live hero opens wherever the carousel was left, keeping the still on
@@ -48,6 +56,39 @@ export function HeroStage({
     still,
     fallback: stillView,
   });
+}
+
+/** The still's column for the area showing. The opening area's comes with the
+ * page; another's is fetched as static markup when the carousel reaches it,
+ * and kept. `undefined` while that fetch is out, null when there is none. */
+function useStillColumn(
+  hero: HeroData,
+  area: FeaturedArea
+): StaticHeroColumn | null | undefined {
+  const [columns, setColumns] = useState<
+    Record<string, StaticHeroColumn | null>
+  >(() => ({ [hero.area.id]: hero.stillColumn ?? null }));
+  const known = area.id in columns;
+
+  useEffect(() => {
+    if (known) return;
+    let cancelled = false;
+    fetch(`/_hero/still-column/${encodeURIComponent(area.id)}`)
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .catch(() => null)
+      .then((column) => {
+        if (cancelled) return;
+        setColumns((prev) => ({ ...prev, [area.id]: column }));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [area.id, known]);
+
+  return columns[area.id];
 }
 
 /** The server's seed describes the day's area. If the reader moved the
@@ -60,16 +101,33 @@ function heroOpeningOn(hero: HeroData, area: FeaturedArea): HeroData {
 function HeroStill({
   carousel,
   still,
+  stillColumn,
   coverImage,
   onEngage,
 }: {
   carousel: Carousel;
   still: MapSnapshotImage | null;
+  stillColumn: StaticHeroColumn | null | undefined;
   coverImage: string;
   onEngage(): void;
 }) {
   const engagement = useEngagement(onEngage);
   const { area } = carousel;
+
+  // The same two cells as the live hero, so engaging doesn't move anything.
+  // An area with a column keeps its slot while the markup is on its way, so
+  // the map doesn't widen and narrow as the carousel moves.
+  let frameTag = "div.hero-frame";
+  let columnSlot: ReactNode = h(
+    "div.hero-column-slot",
+    h(Card, { className: h["hero-column-panel"] })
+  );
+  if (stillColumn != null) {
+    columnSlot = h(StillColumn, { key: area.id, column: stillColumn, onEngage });
+  } else if (stillColumn === null) {
+    frameTag = "div.hero-frame.no-column";
+    columnSlot = null;
+  }
 
   let picture: ReactNode = h("div.hero-cover-photo", {
     style: { backgroundImage: `url('${coverImage}')` },
@@ -77,7 +135,7 @@ function HeroStill({
   if (still != null) picture = h(StillImage, { area, image: still });
 
   return h([
-    h("div.hero-frame.no-column", { key: "frame" }, [
+    h(frameTag, { key: "frame" }, [
       h(
         "div.hero-map-slot.hero-still",
         {
@@ -107,8 +165,36 @@ function HeroStill({
           h(StillAttribution),
         ]
       ),
+      columnSlot,
     ]),
     h(HeroContextBar, { key: "context", carousel }),
+  ]);
+}
+
+/** The column, as the server rendered it: static markup in both themes, one
+ * shown by CSS. No column JavaScript runs here; pressing the column loads the
+ * live hero, as pressing the map does — except on its name, which is a link. */
+function StillColumn({
+  column,
+  onEngage,
+}: {
+  column: StaticHeroColumn;
+  onEngage(): void;
+}) {
+  const onPointerDown = useCallback(
+    (event) => {
+      if (event.target.closest?.("a") != null) return;
+      onEngage();
+    },
+    [onEngage]
+  );
+  return h("div.hero-column-slot.hero-still-column", { onPointerDown }, [
+    h("div.still-column-light", {
+      dangerouslySetInnerHTML: { __html: column.light },
+    }),
+    h("div.still-column-dark", {
+      dangerouslySetInnerHTML: { __html: column.dark },
+    }),
   ]);
 }
 
