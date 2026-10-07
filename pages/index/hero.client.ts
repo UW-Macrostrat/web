@@ -5,7 +5,12 @@
  * "Explore" masthead top-left and, bottom-left, the area's name and the age
  * range showing. The carousel sits under the frame.
  *
- * Client-only (mapbox-gl); `+Page.ts` shows the cover photo until this mounts.
+ * Client-only (mapbox-gl), and loaded only once the reader reaches for the
+ * map: until then the page shows a snapshot of it (`hero-stage.ts`), and that
+ * snapshot stays over the live map until the map has drawn itself.
+ *
+ * `HeroMap` is also what the snapshot route renders, in its `snapshot` mode,
+ * so the still and the live map come from the same code.
  *
  * Two things are linked:
  *
@@ -19,9 +24,7 @@
  */
 import h from "./hero.module.sass";
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -43,22 +46,12 @@ import {
   useOverlayStyle,
 } from "@macrostrat/mapbox-react";
 import {
-  Column,
-  HybridScaleType,
-  UnitComponent,
-} from "@macrostrat/column-views";
-import { ColumnAxisType } from "@macrostrat/column-components";
-import {
   MacrostratDataProvider,
   useMacrostratDefs,
 } from "@macrostrat/data-provider";
 import { IntervalAgeRange, IntervalField } from "@macrostrat/data-components";
 import { ErrorBoundary, useInDarkMode } from "@macrostrat/ui-components";
-import {
-  asChromaColor,
-  getLuminanceAdjustedColorScheme,
-} from "@macrostrat/color-utils";
-import { AnchorButton, Button, Card, Spinner } from "@blueprintjs/core";
+import { AnchorButton, Button, Spinner } from "@blueprintjs/core";
 import type { UnitLong } from "@macrostrat/api-types";
 import {
   mapboxAccessToken,
@@ -74,7 +67,6 @@ import {
   fetchMapSource,
   fetchMapUnitAtPoint,
   roundCoordinate,
-  summarizeUnits,
   type AgedFeature,
   type HeroColumn,
   type HeroPoint,
@@ -82,17 +74,27 @@ import {
   type MapUnitMatch,
 } from "./hero-data";
 import {
-  colorForAgeRange,
   expandedTimeRange,
   intervalIDsFor,
-  overlapsRange,
   sortedIntervals,
   timeRangeForSpec,
   INTERNATIONAL_TIMESCALE_ID,
   type TimeRange,
 } from "./time-range";
-import { areaByID, featuredAreas, type FeaturedArea } from "./featured-areas";
+import {
+  HERO_BEARING,
+  HERO_PITCH,
+  columnPageHref,
+  type FeaturedArea,
+} from "./featured-areas";
+import {
+  ColumnDisplayContext,
+  ColumnPanel,
+  type ColumnDisplay,
+} from "./hero-column";
+import { HeroContextBar, useFeaturedAreas } from "./hero-carousel";
 import type { HeroData } from "./+data";
+import type { MapSnapshotImage } from "~/map-snapshots/spec";
 
 /* ------------------------------------------------------------ map styling */
 
@@ -163,15 +165,22 @@ const CENTER_SETTLE_MS = 400;
 
 /* --------------------------------------------------------------- the hero */
 
-export function HeroLive({ hero }: { hero: HeroData }) {
+export interface HeroLiveProps {
+  hero: HeroData;
+  /** The snapshot the reader was looking at, kept over the map until the map
+   * has drawn itself, so taking over from the still doesn't flash. */
+  still?: MapSnapshotImage | null;
+}
+
+export function HeroLive({ hero, still }: HeroLiveProps) {
   return h(
     MacrostratDataProvider,
     { baseURL: apiV2Prefix },
-    h(PatternProvider, h(ErrorBoundary, h(HeroPanel, { hero })))
+    h(PatternProvider, h(ErrorBoundary, h(HeroPanel, { hero, still })))
   );
 }
 
-function HeroPanel({ hero }: { hero: HeroData }) {
+function HeroPanel({ hero, still }: HeroLiveProps) {
   const { intervals, palette, requestIntervals } = useIntervalLookup();
   const carousel = useFeaturedAreas(hero.area);
   const state = useHeroState(
@@ -192,7 +201,12 @@ function HeroPanel({ hero }: { hero: HeroData }) {
   if (column != null) {
     columnPanel = h(
       "div.hero-column-slot",
-      h(ColumnPanel, { column, onSelectUnit: state.selectUnit })
+      h(ColumnPanel, {
+        column,
+        href: columnPageHref(column.info.col_id, carousel.area),
+        onSelectUnit: state.selectUnit,
+        focusButton: h(ColumnFocusButton, { column }),
+      })
     );
     frameTag = "div.hero-frame";
   }
@@ -217,6 +231,7 @@ function HeroPanel({ hero }: { hero: HeroData }) {
             onCenterChanged: state.setCenter,
             onProbe: state.probeAt,
           }),
+          h(StillCover, { key: "still", image: still }),
           h(HeroChrome, {
             key: "chrome",
             area: carousel.area,
@@ -343,83 +358,6 @@ function useIntervalLookup() {
 
 /* ---------------------------------------------------------- featured areas */
 
-interface Carousel {
-  areas: FeaturedArea[];
-  area: FeaturedArea;
-  index: number;
-  go(index: number): void;
-}
-
-/** The areas on offer and which one is showing. The list is the fixed one the
- * server also knows, so the browser opens on exactly what was rendered. */
-function useFeaturedAreas(serverArea: FeaturedArea): Carousel {
-  const areas = featuredAreas;
-
-  const [index, setIndex] = useState(() => {
-    const i = areas.findIndex((a) => a.id === serverArea.id);
-    return i < 0 ? 0 : i;
-  });
-
-  const go = useCallback(
-    (next: number) => {
-      const count = areas.length;
-      setIndex(((next % count) + count) % count);
-    },
-    [areas.length]
-  );
-
-  return { areas, area: areas[index], index, go };
-}
-
-function dotButton(
-  item: FeaturedArea,
-  i: number,
-  index: number,
-  go: (n: number) => void
-) {
-  let className = undefined;
-  if (i === index) className = "active";
-  return h("button.caption-dot", {
-    key: item.id,
-    className,
-    title: item.title,
-    "aria-label": item.title,
-    onClick: () => go(i),
-  });
-}
-
-/** Under the hero: the way through the featured areas, and nothing else. The
- * name and the age range moved onto the map itself, where what they describe
- * is. */
-function HeroContextBar({ carousel }: { carousel: Carousel }) {
-  const { areas, index, go } = carousel;
-  if (areas.length < 2) return null;
-
-  return h(
-    "div.hero-context",
-    h("div.caption-nav", [
-      h(Button, {
-        minimal: true,
-        small: true,
-        icon: "chevron-left",
-        title: "Previous area",
-        onClick: () => go(index - 1),
-      }),
-      h(
-        "div.caption-dots",
-        areas.map((item, i) => dotButton(item, i, index, go))
-      ),
-      h(Button, {
-        minimal: true,
-        small: true,
-        icon: "chevron-right",
-        title: "Next area",
-        onClick: () => go(index + 1),
-      }),
-    ])
-  );
-}
-
 /** Has the reader taken the map away from the featured area, far enough that
  * their own view is worth carrying over to `/map`?
  *
@@ -454,21 +392,6 @@ function useAreaFocusState(area: FeaturedArea) {
 }
 
 /* -------------------------------------------------------------- hero state */
-
-/** What each unit box needs to draw itself, in a context so the filter can
- * change without handing the column a new `unitComponent` and remounting every
- * unit in it. */
-interface ColumnDisplay {
-  timeRange: TimeRange | null;
-  intervals: any[] | null;
-  inDarkMode: boolean;
-}
-
-const ColumnDisplayContext = createContext<ColumnDisplay>({
-  timeRange: null,
-  intervals: null,
-  inDarkMode: false,
-});
 
 interface HeroState {
   center: HeroPoint;
@@ -744,13 +667,17 @@ interface HeroMapProps {
   area: FeaturedArea;
   footprint: GeoJSON.Feature | null;
   timeRange: TimeRange | null;
-  onCenterChanged(
+  onCenterChanged?(
     lat: number,
     lng: number,
     zoom: number,
     userInitiated: boolean
   ): void;
-  onProbe(lat: number, lng: number): void;
+  onProbe?(lat: number, lng: number): void;
+  /** Drawn for the snapshot route: static, readable back from its canvas, and
+   * with nothing that listens for a reader. Attribution and the wordmark are
+   * HTML, not canvas, so the page showing the snapshot draws its own. */
+  snapshot?: boolean;
 }
 
 /** Marks a camera move as the hero's own, so the centre reporter can tell a
@@ -758,12 +685,13 @@ interface HeroMapProps {
  * to the events the move raises. */
 const HERO_MOVE = { heroTransition: true };
 
-function HeroMap({
+export function HeroMap({
   area,
   footprint,
   timeRange,
   onCenterChanged,
   onProbe,
+  snapshot = false,
 }: HeroMapProps) {
   // The opening camera, read once: `AreaFlight` drives every later change.
   const initialView = useRef(area.view);
@@ -772,6 +700,7 @@ function HeroMap({
     setMapPosition(map, { lat: view.lat, lng: view.lng, zoom: view.zoom });
     map.setPitch(view.pitch ?? HERO_PITCH);
     map.setBearing(view.bearing ?? HERO_BEARING);
+    if (snapshot) return;
     // Attribution as the compact ⓘ rather than a line of credits across the
     // corner. Mapbox's constructor has no option for it, so the default one is
     // switched off below and the compact one added here.
@@ -780,6 +709,28 @@ function HeroMap({
       "bottom-right"
     );
   }, []);
+
+  let children = [
+    h(AreaFlight, { key: "flight", area }),
+    h(ColumnFootprintLayer, { key: "footprint", footprint }),
+    h(TimeRangeHighlight, { key: "highlight", timeRange }),
+    h(CenterReporter, { key: "centre", onChange: onCenterChanged }),
+    h(MapProbeHandler, { key: "probe", onProbe }),
+    h(ScrollZoomGate, { key: "scroll-zoom" }),
+  ];
+  let snapshotOptions = {};
+  if (snapshot) {
+    // What the picture shows — the camera, the footprint, the filter — and
+    // none of the listeners that wait for a reader.
+    children = children.slice(0, 3);
+    snapshotOptions = {
+      interactive: false,
+      // The canvas is read back after it has been composited.
+      preserveDrawingBuffer: true,
+      // Symbols appear at once rather than fading in over the capture.
+      fadeDuration: 0,
+    };
+  }
 
   // Standalone: with no `MapAreaContainer` around it the map is no longer
   // full-bleed behind panels, it is one cell of the hero's grid, and standalone
@@ -803,16 +754,40 @@ function HeroMap({
       pitch: area.view.pitch ?? HERO_PITCH,
       bearing: area.view.bearing ?? HERO_BEARING,
       onMapLoaded,
+      ...snapshotOptions,
     },
-    [
-      h(AreaFlight, { key: "flight", area }),
-      h(ColumnFootprintLayer, { key: "footprint", footprint }),
-      h(TimeRangeHighlight, { key: "highlight", timeRange }),
-      h(CenterReporter, { key: "centre", onChange: onCenterChanged }),
-      h(MapProbeHandler, { key: "probe", onProbe }),
-      h(ScrollZoomGate, { key: "scroll-zoom" }),
-    ]
+    children
   );
+}
+
+/** The snapshot the reader was looking at, left over the live map until the
+ * map is first idle — style, imagery and terrain all drawn — and then faded
+ * out. The two are registered: the snapshot is drawn from the same camera at
+ * the same scale, and shown unscaled from its centre. */
+function StillCover({ image }: { image: MapSnapshotImage | null | undefined }) {
+  const mapRef = useMapRef();
+  const initialized = useMapInitialized();
+  const [drawn, setDrawn] = useState(false);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || image == null) return;
+    const reveal = () => setDrawn(true);
+    map.once("idle", reveal);
+    return () => {
+      map.off("idle", reveal);
+    };
+  }, [initialized, image]);
+
+  if (image == null) return null;
+  let tag = "img.hero-still-cover";
+  if (drawn) tag = "img.hero-still-cover.is-revealed";
+  return h(tag, {
+    src: image.src,
+    srcSet: image.srcSet,
+    alt: "",
+    "aria-hidden": true,
+  });
 }
 
 /** Scroll-zoom stays off until the map has been clicked once.
@@ -1035,84 +1010,21 @@ function ageOverlapExpression(range: TimeRange) {
 
 /* ------------------------------------------------------------- the column */
 
-/** The inset's width in pixels. The column is drawn exactly this wide and the
- * box has no padding, so the units run edge to edge: the box *is* the column. */
-const COLUMN_WIDTH = 204;
-
-/** For a unit with neither an age color nor one of its own. A literal rather
- * than a token because it is handed to chroma and then to an SVG fill, neither
- * of which resolves a CSS variable. */
-const FALLBACK_UNIT_COLOR = "#c5cbd3";
-
-function ColumnPanel({
-  column,
-  onSelectUnit,
-}: {
-  column: HeroColumn;
-  onSelectUnit(unitID: number | null, unit: UnitLong | null): void;
-}) {
-  const { info, units, footprint } = column;
-  const stats = useMemo(() => summarizeUnits(units), [units]);
+/** The library's own focus control: it knows whether the target is already on
+ * screen, and fits the map to it when it isn't. Nothing for a column with no
+ * footprint. */
+function ColumnFocusButton({ column }: { column: HeroColumn }) {
   const bounds = useMemo(
-    () => boundsForGeometry(footprint?.geometry),
-    [footprint]
+    () => boundsForGeometry(column.footprint?.geometry),
+    [column.footprint]
   );
-
-  let focusButton = null;
-  if (bounds != null) {
-    // The library's own focus control: it knows whether the target is already
-    // on screen, and fits the map to it when it isn't.
-    focusButton = h(LocationFocusButton, {
-      className: "column-focus-button",
-      bounds,
-      small: true,
-      title: `Zoom to ${info.col_name}`,
-    });
-  }
-
-  return h(Card, { className: h["hero-column-panel"] }, [
-    h("div.column-inset-header", [
-      h("div.column-inset-titles", [
-        h(
-          Link,
-          { href: `/columns/${info.col_id}`, className: "col-name" },
-          info.col_name
-        ),
-        h(
-          "p.column-inset-summary",
-          `${stats.n_units} units spanning ${formatAge(stats.b_age)}`
-        ),
-      ]),
-      focusButton,
-    ]),
-    h(
-      "div.column-inset-scroll",
-      h(Column, {
-        units,
-        unitComponent: HeroUnit,
-        ageAxisComponent: NoAxis,
-        axisType: ColumnAxisType.AGE,
-        // Every unit gets the same room whatever its duration, so a thin
-        // member is as readable as a kilometre of basement.
-        hybridScale: { type: HybridScaleType.EquidistantSurfaces },
-        // On that scale this is the spacing between surfaces: tall enough for
-        // a line of text.
-        targetUnitHeight: 30,
-        // A gap in the record is worth marking, not worth a band of its own.
-        unconformityHeight: 8,
-        showTimescale: false,
-        showLabels: true,
-        showLabelColumn: false,
-        allowUnitSelection: true,
-        onUnitSelected: onSelectUnit,
-        unconformityLabels: "none",
-        collapseSmallUnconformities: true,
-        padding: 0,
-        width: COLUMN_WIDTH,
-        columnWidth: COLUMN_WIDTH,
-      })
-    ),
-  ]);
+  if (bounds == null) return null;
+  return h(LocationFocusButton, {
+    className: "column-focus-button",
+    bounds,
+    small: true,
+    title: `Zoom to ${column.info.col_name}`,
+  });
 }
 
 /** The bounding box of a footprint, as `LocationFocusButton` wants it. */
@@ -1145,75 +1057,6 @@ function boundsForGeometry(
     return [minLng - pad, minLat - pad, maxLng + pad, maxLat + pad];
   }
   return [minLng, minLat, maxLng, maxLat];
-}
-
-/** Replaces the composite age axis: the inset has no room for one, and the
- * equidistant-surfaces scale makes its ticks misleading anyway. */
-function NoAxis() {
-  return null;
-}
-
-/** The two ends of the age filter's contrast. It reads from both directions:
- * what is in range gains a little saturation, and what is out of it only
- * washes back — far enough to recede, not so far that the column stops being a
- * column. */
-const SELECTED_UNIT_SATURATION = 0.8;
-const DIMMED_UNIT_ALPHA = 0.45;
-
-/** A unit box colored by its age, adapted to the theme, and washed out when it
- * falls outside the selected range.
- *
- * The wash is applied to the **color itself**, not through a class. Only the
- * background is meant to back off — the lithology pattern, the outline and the
- * label all stay at full strength — and a class here would be worse than
- * useless: `LabeledUnit` spreads the props it doesn't recognise over its own
- * `className`, so passing one *replaces* `labeled-unit` and takes the unit's
- * background fill and label styling with it. */
-function HeroUnit(props) {
-  const { timeRange, intervals, inDarkMode } = useContext(ColumnDisplayContext);
-  const { division } = props;
-
-  const ageColor = useMemo(
-    () => colorForAgeRange(division.t_age, division.b_age, intervals),
-    [division.t_age, division.b_age, intervals]
-  );
-
-  const inRange =
-    timeRange == null ||
-    overlapsRange(timeRange, division.t_age, division.b_age);
-
-  const backgroundColor = useMemo(() => {
-    const base = ageColor ?? division.color ?? FALLBACK_UNIT_COLOR;
-    const adjusted = asUnitBackground(base, inDarkMode);
-    // Nothing selected: every unit at its own strength.
-    if (timeRange == null || inRange) return adjusted;
-    if (inRange) return saturateColor(adjusted);
-    return "var(--column-background-color)";
-  }, [ageColor, division.color, timeRange, inRange, inDarkMode]);
-
-  // Hack to use a simpler fill without text shadow
-  return h(UnitComponent, { ...props, backgroundColor });
-}
-
-/** A unit fill for the current theme: the same treatment `IntervalTag` gives a
- * chip, through the same helper, so an interval reads as the same color in the
- * column and in the filter above it. Chart colors are published for paper — a
- * pale Cretaceous green glows on a dark panel — and `getLuminanceAdjustedColorScheme`
- * keeps the hue while putting the lightness where the theme wants it. */
-function asUnitBackground(color: string, inDarkMode: boolean): string {
-  // Guarded: the helper reads `bkg.css()` without a null check, so a color it
-  // can't parse throws rather than falling back.
-  if (asChromaColor(color) == null) return color;
-  const scheme = getLuminanceAdjustedColorScheme(color, inDarkMode);
-  return scheme?.backgroundColor ?? color;
-}
-
-/** A unit inside the filter, lifted. Chroma saturates in LCH, so this stays at
- * the same lightness the theme put it at. */
-function saturateColor(color: string): string {
-  const c = asChromaColor(color);
-  if (c == null) return color;
-  return c.saturate(SELECTED_UNIT_SATURATION).hex();
 }
 
 /* ------------------------------------------------- filter and credits */
@@ -1307,9 +1150,4 @@ function MapSourceCitation({ source }: { source: MapSourceRef }) {
   }
 
   return h("span", [label, attribution]);
-}
-
-function formatAge(ma: number): string {
-  if (ma >= 1000) return `${(ma / 1000).toFixed(1)} Gyr`;
-  return `${Math.round(ma)} Myr`;
 }

@@ -1,11 +1,19 @@
 import { fetchAPIData } from "~/_utils";
 import { parse as parseYaml } from "yaml";
-import { featuredAreaForToday, type FeaturedArea } from "./featured-areas";
 import {
-  fetchColumnAtPoint,
-  fetchColumnByID,
-  type HeroColumn,
-} from "./hero-data";
+  featuredAreaForToday,
+  featuredAreas,
+  type FeaturedArea,
+} from "./featured-areas";
+import { resolveMapSnapshots } from "~/map-snapshots/store.server";
+import type { MapSnapshotImage } from "~/map-snapshots/spec";
+import { heroSnapshotSpec } from "./hero-snapshot";
+import type { HeroColumn } from "./hero-data";
+import {
+  featuredAreaColumn,
+  stillColumnFor,
+} from "./hero-column-static.server";
+import type { StaticHeroColumn } from "./hero-column";
 
 interface PageStats {
   columns: number;
@@ -22,12 +30,20 @@ interface NewsItem {
 }
 
 export interface HeroData {
-  /** The featured area the server opened on. The browser may put its own
-   * synthetic "near you" area in front of it. */
+  /** The featured area the server opened on. */
   area: FeaturedArea;
   /** That area's column, so the first paint has one. Null when the area's
    * point is outside the columns' coverage. */
   column: HeroColumn | null;
+  /** A cached still of each featured area's map, by area id — every area, so
+   * the carousel can move through them without loading the live map. Absent
+   * for an area the renderer hasn't drawn in its current form. */
+  snapshots: Record<string, MapSnapshotImage | null>;
+  /** That area's column as static markup, light and dark, for the still: the
+   * page opens with the column beside the map, and no column JavaScript loads
+   * until the reader engages. Other areas' come from `/_hero/still-column/`
+   * when the carousel reaches them. Null when the area has no column. */
+  stillColumn: StaticHeroColumn | null;
 }
 
 /** News posts are pages under `News/` in the documentation vault; drafts live
@@ -64,18 +80,32 @@ function latestNews(limit = 3): NewsItem[] {
   return items.slice(0, limit);
 }
 
-/** What the hero opens on: the day's featured area, and its column — pinned by
- * id when the area names one, otherwise whatever its view is centred over.
- * Neither failing takes the page down; the map renders on its own. */
+/** What the hero opens on: the day's featured area and its column — pinned by
+ * id when the area names one, otherwise whatever its view is centred over —
+ * that column as the still draws it, and every area's still map. None of it
+ * failing takes the page down; the map renders on its own. */
 async function heroData(): Promise<HeroData> {
   const area = featuredAreaForToday();
-  let column: HeroColumn | null;
-  if (area.columnID != null) {
-    column = await fetchColumnByID(area.columnID);
-  } else {
-    column = await fetchColumnAtPoint(area.view.lat, area.view.lng);
-  }
-  return { area, column };
+  const [column, stillColumn, snapshots] = await Promise.all([
+    featuredAreaColumn(area),
+    stillColumnFor(area.id),
+    heroSnapshots(),
+  ]);
+  return { area, column, snapshots, stillColumn };
+}
+
+/** Every featured area's still, so the carousel can move through them without
+ * the live map. Any the server hasn't drawn yet are queued, and show the cover
+ * photo until they exist. */
+async function heroSnapshots(): Promise<Record<string, MapSnapshotImage | null>> {
+  const images = await resolveMapSnapshots(featuredAreas.map(heroSnapshotSpec), {
+    complete: true,
+  });
+  const snapshots: Record<string, MapSnapshotImage | null> = {};
+  featuredAreas.forEach((area, i) => {
+    snapshots[area.id] = images[i];
+  });
+  return snapshots;
 }
 
 export async function data(pageContext) {

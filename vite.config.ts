@@ -54,7 +54,15 @@ export default defineConfig({
     }),
   ],
   ssr: {
-    noExternal: [...macrostratPackages, "jotai"],
+    noExternal: [
+      ...macrostratPackages,
+      "jotai",
+      // ES-module syntax with no `"type": "module"` and extensionless imports,
+      // so Node can't load it as an external. It's reached on the server
+      // through column-views → map-views → mapbox-react whenever a page
+      // server-renders a column (the homepage hero's still does).
+      "mapbox-gl-controls",
+    ],
   },
   define: {
     // Cesium base URL
