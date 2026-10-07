@@ -1,0 +1,82 @@
+.boundary-panel
+  display: flex
+  flex-direction: column
+  gap: 1em
+  padding: 0.5em 0
+
+  section
+    display: flex
+    flex-direction: column
+    gap: 0.5em
+
+  h3
+    margin: 0
+    font-size: 1em
+
+.summary
+  .map-title
+    margin: 0 0 0.3em
+
+  .tags
+    display: flex
+    flex-wrap: wrap
+    gap: 0.3em
+
+.error
+  display: flex
+  align-items: flex-start
+  justify-content: space-between
+
+.operations
+  list-style: none
+  margin: 0
+  padding: 0
+  display: flex
+  flex-direction: column
+  gap: 0.4em
+
+.operation
+  border-left: 3px solid var(--secondary-color)
+  padding: 0.2em 0 0.2em 0.6em
+
+  &.add
+    border-left-color: #2b8a3e
+
+  &.subtract
+    border-left-color: #c92a2a
+
+  .op-header
+    display: flex
+    align-items: center
+    gap: 0.5em
+
+  .position
+    color: var(--secondary-color)
+    font-variant-numeric: tabular-nums
+
+  .op-name
+    font-weight: 600
+
+  .params
+    flex: 1
+    font-size: 0.85em
+    color: var(--secondary-color)
+
+  .note
+    font-size: 0.85em
+    font-style: italic
+
+  .op-error
+    font-size: 0.85em
+    color: var(--pt-intent-danger, #c92a2a)
+
+.empty,
+.hint
+  margin: 0
+  font-size: 0.85em
+  color: var(--secondary-color)
+
+.draft
+  display: flex
+  flex-direction: column
+  gap: 0.5em
