@@ -14,7 +14,6 @@ import {
   Callout,
   FormGroup,
   InputGroup,
-  NumericInput,
   SegmentedControl,
 } from "@blueprintjs/core";
 import { AlphaTag } from "~/components";
@@ -26,6 +25,11 @@ import {
   draftColumn,
 } from "../@column/column-editor/data";
 import { EditorScopeProvider } from "../@column/column-editor/state";
+import {
+  GroupSelect,
+  ProjectSelect,
+  type GroupDef,
+} from "../@column/column-editor/project-fields";
 import styles from "./new-column.module.sass";
 import { ColumnUpload, previewFromOpener } from "./column-upload.ts";
 
@@ -73,32 +77,40 @@ function NewColumnPage() {
  * unit's position *is*. */
 type ColumnType = "section" | "column";
 
-/** Which way a measured section's positions run: up from a datum, or down
- * from a surface (a core). */
-type AxisType = "height" | "depth";
+/** What a unit's positions are: height up from a datum, depth down from a
+ * surface (a core), or only an order — the format's `age`. */
+type AxisType = "height" | "depth" | "age";
 
 interface ColumnFields {
   col_name: string;
-  col_group: string;
+  col_group_id: number | null;
+  col_group: string | null;
   project_id: number | null;
   col_type: ColumnType;
   axis_type: AxisType;
 }
 
 const columnTypeOptions = [
-  { label: "Measured section", value: "section" },
-  { label: "Composite column", value: "column" },
+  { label: "Measured", value: "section" },
+  { label: "Composite", value: "column" },
 ];
 
 const axisTypeOptions = [
   { label: "Height", value: "height" },
   { label: "Depth", value: "depth" },
+  { label: "Ordinal", value: "age" },
 ];
+
+const defaultAxisType: Record<ColumnType, AxisType> = {
+  section: "height",
+  column: "age",
+};
 
 /** The form's fields. */
 const fieldsAtom = atom<ColumnFields>({
   col_name: "",
-  col_group: "",
+  col_group_id: null,
+  col_group: null,
   project_id: null,
   col_type: "section",
   axis_type: "height",
@@ -158,38 +170,36 @@ function NewColumnForm({
 
   const start = useCallback(() => {
     if (fields.col_name.trim() === "") return;
-    // A composite column's axis is age; only a section declares a direction
-    let axis_type: string = "age";
-    if (fields.col_type === "section") axis_type = fields.axis_type;
     onStart(
       draftColumn({
         col_id: null,
         col_name: fields.col_name.trim(),
-        col_group: fields.col_group.trim() || null,
+        col_group_id: fields.col_group_id,
+        col_group: fields.col_group,
         project_id: fields.project_id,
         col_type: fields.col_type,
-        axis_type,
+        axis_type: fields.axis_type,
         t_units: 0,
       })
     );
   }, [fields, onStart]);
 
-  let axisControl = null;
-  if (fields.col_type === "section") {
-    axisControl = h(
-      FormGroup,
-      {
-        label: "Positions",
-        helperText:
-          "Height runs up from a datum, as in a measured section; depth runs down from the surface, as in a core.",
-      },
-      h(SegmentedControl, {
-        options: axisTypeOptions,
-        value: fields.axis_type,
-        onValueChange: (v: string) => set("axis_type", v),
-      })
-    );
-  }
+  const setProject = (project_id: number | null) => {
+    // A group belongs to one project
+    setFields((f) => ({ ...f, project_id, col_group_id: null, col_group: null }));
+  };
+
+  const setGroup = (group: GroupDef | null) => {
+    setFields((f) => ({
+      ...f,
+      col_group_id: group?.col_group_id ?? null,
+      col_group: group?.name ?? null,
+    }));
+  };
+
+  const setType = (col_type: ColumnType) => {
+    setFields((f) => ({ ...f, col_type, axis_type: defaultAxisType[col_type] }));
+  };
 
   const canStart = fields.col_name.trim() !== "";
 
@@ -217,34 +227,40 @@ function NewColumnForm({
       {
         label: "Column type",
         helperText:
-          "A measured section places units by position; a composite column places them by age, with positions only as an ordering. This can't be changed once you start.",
+          "A measured column places units by position; a composite column places them by age, with positions only as an ordering. This can't be changed once you start.",
       },
       h(SegmentedControl, {
         options: columnTypeOptions,
         value: fields.col_type,
-        onValueChange: (v: string) => set("col_type", v),
+        onValueChange: (v: string) => setType(v as ColumnType),
       })
     ),
-    axisControl,
+    h(
+      FormGroup,
+      {
+        label: "Positions",
+        helperText:
+          "Height runs up from a datum; depth runs down from the surface, as in a core; ordinal positions are only an order.",
+      },
+      h(SegmentedControl, {
+        options: axisTypeOptions,
+        value: fields.axis_type,
+        onValueChange: (v: string) => set("axis_type", v),
+      })
+    ),
+    h(
+      FormGroup,
+      { label: "Project" },
+      h(ProjectSelect, { value: fields.project_id, onChange: setProject })
+    ),
     h(
       FormGroup,
       { label: "Group", helperText: "The column group this belongs to." },
-      h(InputGroup, {
-        value: fields.col_group,
-        placeholder: "e.g. Illinois Basin",
-        onValueChange: (v: string) => set("col_group", v),
-      })
-    ),
-    h(
-      FormGroup,
-      { label: "Project", helperText: "Macrostrat project ID, if known." },
-      h(NumericInput, {
-        value: fields.project_id ?? "",
-        min: 1,
-        buttonPosition: "none",
-        placeholder: "Project ID",
-        onValueChange: (n: number) => set("project_id", isNaN(n) ? null : n),
-        className: "project-id-input",
+      h(GroupSelect, {
+        project_id: fields.project_id,
+        value: fields.col_group_id,
+        label: fields.col_group,
+        onChange: setGroup,
       })
     ),
     h("div.form-actions", [

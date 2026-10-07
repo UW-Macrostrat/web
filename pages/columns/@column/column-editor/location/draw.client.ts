@@ -11,7 +11,7 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import type mapboxgl from "mapbox-gl";
 import type { Feature, Geometry } from "geojson";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { partGeometry, roundCoordinate } from "./geometry";
 import {
   drawingAtom,
@@ -25,6 +25,8 @@ import {
 } from "../state";
 
 const FEATURE_ID = "footprint";
+// The control's source, present once it has attached its layers to the map
+const DRAW_SOURCE = "mapbox-gl-draw-cold";
 
 const DRAW_STYLES = drawStyles("#d9480f", "#ff922b");
 
@@ -37,13 +39,17 @@ export function FootprintDraw({ map }: { map: mapboxgl.Map | null }) {
   const setLine = useSetAtom(setLineAtom);
   const setRegion = useSetAtom(setRegionAtom);
   const drawRef = useRef<MapboxDraw | null>(null);
+  // A feature added before the control attaches its layers is never drawn
+  const [ready, setReady] = useState(false);
+  // A new style drops the control's layers, so it is mounted again
+  const [generation, setGeneration] = useState(0);
   // The geometry as last written to the control, so an echo of our own
   // change doesn't bounce back into the atoms
   const lastWritten = useRef<string>("");
 
   const kind = footprint.location.kind;
 
-  // Mount the control once per map
+  // Mount the control once per map and style
   useEffect(() => {
     if (map == null) return;
     const draw = new MapboxDraw({
@@ -54,6 +60,22 @@ export function FootprintDraw({ map }: { map: mapboxgl.Map | null }) {
     });
     map.addControl(draw, "top-left");
     drawRef.current = draw;
+    lastWritten.current = "";
+    setReady(false);
+
+    const checkReady = () => {
+      if (map.getSource(DRAW_SOURCE) == null) return;
+      map.off("sourcedata", checkReady);
+      setReady(true);
+    };
+    map.on("sourcedata", checkReady);
+    checkReady();
+
+    // The control's layers are gone once a new style has loaded
+    const onStyleLoad = () => {
+      if (map.getSource(DRAW_SOURCE) == null) setGeneration((g) => g + 1);
+    };
+    map.on("style.load", onStyleLoad);
 
     const onChange = (evt: { features: Feature[] }) => {
       const feature = evt.features?.[0];
@@ -84,6 +106,8 @@ export function FootprintDraw({ map }: { map: mapboxgl.Map | null }) {
     map.on("draw.modechange", onModeChange);
 
     return () => {
+      map.off("sourcedata", checkReady);
+      map.off("style.load", onStyleLoad);
       map.off("draw.create", onCreate);
       map.off("draw.update", onChange);
       map.off("draw.modechange", onModeChange);
@@ -94,13 +118,13 @@ export function FootprintDraw({ map }: { map: mapboxgl.Map | null }) {
       }
       drawRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- one control per map
-  }, [map]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one control per map and style
+  }, [map, generation]);
 
   // Keep the control's feature in step with the part being edited
   useEffect(() => {
     const draw = drawRef.current;
-    if (draw == null) return;
+    if (draw == null || !ready) return;
     const geometry = partGeometry(footprint, part);
     const key = JSON.stringify(geometry);
     if (key === lastWritten.current) return;
@@ -113,17 +137,17 @@ export function FootprintDraw({ map }: { map: mapboxgl.Map | null }) {
     } else {
       draw.changeMode("direct_select", { featureId: FEATURE_ID });
     }
-  }, [footprint, part, map]);
+  }, [footprint, part, ready, generation]);
 
   // Start drawing when the panel asks
   useEffect(() => {
     const draw = drawRef.current;
-    if (draw == null) return;
+    if (draw == null || !ready) return;
     if (!drawing) return;
     let mode = "draw_polygon";
     if (part === "location") mode = kind === "line" ? "draw_line_string" : "draw_point";
     draw.changeMode(mode as any);
-  }, [drawing, part, kind, map]);
+  }, [drawing, part, kind, ready]);
 
   return null;
 }

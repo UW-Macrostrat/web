@@ -5,12 +5,14 @@ import type { LineString, MultiPolygon, Polygon } from "geojson";
 import type mapboxgl from "mapbox-gl";
 import {
   EMPTY_FOOTPRINT,
+  locationWithinRegion,
   sameFootprint,
   type Footprint,
   type FootprintPart,
   type LngLat,
   type LocationKind,
 } from "../location/geometry";
+import { editedColumnInfoAtom } from "./metadata";
 
 /** The footprint as the database holds it; what Reset returns to. */
 export const loadedFootprintAtom = atom<Footprint>(EMPTY_FOOTPRINT);
@@ -19,6 +21,11 @@ export const footprintAtom = atom<Footprint>(EMPTY_FOOTPRINT);
 
 export const isLocationDirtyAtom = atom((get) =>
   !sameFootprint(get(footprintAtom), get(loadedFootprintAtom))
+);
+
+/** A location outside the region contradicts it. */
+export const locationOutsideRegionAtom = atom(
+  (get) => locationWithinRegion(get(footprintAtom)) === false
 );
 
 export const locationKindAtom = atom(
@@ -55,8 +62,24 @@ export const resetLocationAtom = atom(null, (get, set) => {
   set(footprintAtom, get(loadedFootprintAtom));
 });
 
-/** Which part of the footprint the map edits: the location or the region. */
-export const footprintPartAtom = atom<FootprintPart>("location");
+/** The part chosen on the page, if any. */
+const footprintPartChoiceAtom = atom<FootprintPart | null>(null);
+
+/** Which part of the footprint is being edited: the column type's own part
+ * until the other is chosen. */
+export const footprintPartAtom = atom(
+  (get) =>
+    get(footprintPartChoiceAtom) ??
+    primaryFootprintPart(get(editedColumnInfoAtom)?.col_type),
+  (_get, set, part: FootprintPart) => set(footprintPartChoiceAtom, part)
+);
+
+/** A measured column is located by where it was measured; a composite one by
+ * the area it stands for. */
+export function primaryFootprintPart(col_type: string | null | undefined): FootprintPart {
+  if (col_type === "section") return "location";
+  return "region";
+}
 
 /** Whether the map is in a drawing mode (a new point, line or polygon), as
  * opposed to selecting and dragging what is there. */

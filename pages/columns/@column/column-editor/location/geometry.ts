@@ -12,6 +12,7 @@
  *
  * A measured section can have both. Macrostrat's `cols` row holds a point
  * and a polygon; the radius and the line have nowhere to go yet. */
+import booleanContains from "@turf/boolean-contains";
 import type {
   Feature,
   FeatureCollection,
@@ -81,6 +82,14 @@ export function partGeometry(
 ): Point | LineString | Polygon | MultiPolygon | null {
   if (part === "region") return footprint.region;
   return locationGeometry(footprint.location);
+}
+
+/** Whether the location lies inside the region; `null` unless both are
+ * drawn. */
+export function locationWithinRegion(footprint: Footprint): boolean | null {
+  const location = locationGeometry(footprint.location);
+  if (footprint.region == null || location == null) return null;
+  return booleanContains(footprint.region, location);
 }
 
 export function sameFootprint(a: Footprint, b: Footprint): boolean {

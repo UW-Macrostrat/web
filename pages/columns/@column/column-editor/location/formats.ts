@@ -191,7 +191,7 @@ export function formatCoordinates(format: CoordinateFormat, p: LngLat): string {
     case "utm":
       return new LatLonUtm(p.lat, p.lng).toUtm().toString(0);
     case "mgrs":
-      return new LatLonMgrs(p.lat, p.lng).toUtm().toMgrs().toString(5);
+      return new LatLonMgrs(p.lat, p.lng).toUtm().toMgrs().toString(10);
     case "wkt":
       return `POINT(${roundCoordinate(p.lng)} ${roundCoordinate(p.lat)})`;
   }

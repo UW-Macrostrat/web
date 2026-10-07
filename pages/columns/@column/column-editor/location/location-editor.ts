@@ -5,7 +5,8 @@
  * measured sections and drill cores; a composite column has no single place.
  * **Region** is the area the column stands for, as a polygon: what a
  * composite column is, and what a measured section may also claim. A
- * measured section can have both.
+ * measured section can have both. One is edited at a time, the column
+ * type's own first; the other is marked optional.
  *
  * The map is the working surface — place, draw, drag — and the panel beside
  * it is the exact form: coordinates typed in a declared format and read
@@ -22,6 +23,7 @@ import {
   HTMLSelect,
   InputGroup,
   NumericInput,
+  OverlayToaster,
   SegmentedControl,
 } from "@blueprintjs/core";
 import type mapboxgl from "mapbox-gl";
@@ -56,14 +58,18 @@ import {
   type CoordinateFormat,
 } from "./formats";
 import { PlaceSearch, type PlaceResult } from "./place-search";
+import { saveColumnGeometry, storedFootprint, unstoredParts } from "./geometry-api";
 import {
   drawingAtom,
   editedColumnInfoAtom,
   footprintAtom,
   footprintPartAtom,
+  isLocationDirtyAtom,
   loadedFootprintAtom,
   locationKindAtom,
   locationMapAtom,
+  locationOutsideRegionAtom,
+  primaryFootprintPart,
   setLineAtom,
   setPointAtom,
   setRadiusAtom,
@@ -73,7 +79,6 @@ import {
   useAtomValue,
   useSetAtom,
 } from "../state";
-import { EditChrome, EditTitleContext } from "../edit-chrome";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -82,9 +87,11 @@ const FootprintDraw = onDemand(() =>
   import("./draw.client").then((mod) => mod.FootprintDraw)
 );
 
-/** Map first: the footprint is drawn, and the panel is its exact form. */
+/** Map only, under a breadcrumbs-only bar: the whole-column actions (Check,
+ * Write, Reset all) belong to the other editor pages, and the footprint has
+ * its own save. */
 const capabilities: Partial<LayoutCapabilities> = {
-  modes: ["map-primary", "content-primary"],
+  modes: ["map-primary"],
   defaultMode: "map-primary",
   hasAssistant: false,
   itemName: "Location",
@@ -99,8 +106,6 @@ export function LocationEditorPage() {
     key: snapshot?.col_id ?? "draft",
     className: "location-editor-page",
     capabilities,
-    titleAdornment: h(EditTitleContext),
-    actions: h(EditChrome, { current: "location" }),
     content: h(LocationPanel),
     map: h(LocationMap),
   });
@@ -108,25 +113,56 @@ export function LocationEditorPage() {
 
 /* ------------------------------------------------------------------ panel */
 
+const PART_LABELS: Record<FootprintPart, string> = {
+  location: "Location",
+  region: "Region",
+};
+
+/** The column type's own part first; the other marked optional. */
+function footprintPartOptions(primary: FootprintPart) {
+  let secondary: FootprintPart = "region";
+  if (primary === "region") secondary = "location";
+  return [
+    { label: PART_LABELS[primary], value: primary },
+    { label: `${PART_LABELS[secondary]} (optional)`, value: secondary },
+  ];
+}
+
 function LocationPanel() {
   const info = useAtomValue(editedColumnInfoAtom);
   const [part, setPart] = useAtom(footprintPartAtom);
+  const setDrawing = useSetAtom(drawingAtom);
+  const locationOutside = useAtomValue(locationOutsideRegionAtom);
   const isSection = info?.col_type === "section";
+
+  const choosePart = (value: FootprintPart) => {
+    setDrawing(false);
+    setPart(value);
+  };
+
+  let section = h(RegionSection, { isSection });
+  if (part === "location") section = h(LocationSection, { isSection });
+
+  let containmentError = null;
+  if (locationOutside) {
+    containmentError = h(
+      Callout,
+      { intent: "danger", icon: "error", compact: true },
+      "The location is outside the region. Move one so the region contains the location."
+    );
+  }
 
   return h("div.location-panel", [
     h(PlaceSearch, { onPick: useFramePlace() }),
     h(SegmentedControl, {
-      small: true,
       fill: true,
-      options: [
-        { label: "Edit location", value: "location" },
-        { label: "Edit region", value: "region" },
-      ],
+      options: footprintPartOptions(primaryFootprintPart(info?.col_type)),
       value: part,
-      onValueChange: (value: FootprintPart) => setPart(value),
+      onValueChange: (value: string) => choosePart(value as FootprintPart),
     }),
-    h(LocationSection, { isSection, active: part === "location" }),
-    h(RegionSection, { isSection, active: part === "region" }),
+    containmentError,
+    section,
+    h(SaveGeometry),
     h(ExportActions),
     h(StoredFootprint),
   ]);
@@ -151,22 +187,20 @@ function useFramePlace() {
   );
 }
 
-function LocationSection({ isSection, active }: { isSection: boolean; active: boolean }) {
+function LocationSection({ isSection }: { isSection: boolean }) {
   const [kind, setKind] = useAtom(locationKindAtom);
-  const setPart = useSetAtom(footprintPartAtom);
 
   let description =
     "Where the data were gathered: a point with how far it might be off, or the line a section was measured along.";
   if (!isSection) {
     description =
-      "A composite column has no single place — it is located by its region, and its point is derived from it. Give one only for a column that really was measured somewhere.";
+      "Optional. A composite column has no single place — it is located by its region, and its point is derived from it. Give one only for a column that really was measured somewhere.";
   }
 
-  let form = h(PointForm, { active });
-  if (kind === "line") form = h(LineForm, { active });
+  let form = h(PointForm);
+  if (kind === "line") form = h(LineForm);
 
-  return h("section.panel-section", { onFocusCapture: () => setPart("location") }, [
-    h("h3", ["Location", h.if(!isSection)("span.section-note", "optional for a composite column")]),
+  return h("section.panel-section", [
     h("p.section-description", description),
     h(SegmentedControl, {
       small: true,
@@ -178,27 +212,34 @@ function LocationSection({ isSection, active }: { isSection: boolean; active: bo
       onValueChange: (value: LocationKind) => setKind(value),
     }),
     form,
+    h(UnstoredNote),
   ]);
+}
+
+/** A line or a radius is kept in the session but not yet by the backend. */
+function UnstoredNote() {
+  const footprint = useAtomValue(footprintAtom);
+  const parts = unstoredParts(footprint);
+  if (parts.length === 0) return null;
+  return h(
+    Callout,
+    { intent: "warning", icon: "warning-sign", compact: true },
+    `Saving keeps the point and region only: the ${parts.join(" and ")} can't be stored yet.`
+  );
 }
 
 /** Lat/lng typed in a declared format and read back, or placed on the map;
  * and the radius the location is known to. */
-function PointForm({ active }: { active: boolean }) {
+function PointForm() {
   const footprint = useAtomValue(footprintAtom);
   const setPoint = useSetAtom(setPointAtom);
   const setRadius = useSetAtom(setRadiusAtom);
-  const setPart = useSetAtom(footprintPartAtom);
   const [drawing, setDrawing] = useAtom(drawingAtom);
   const point = footprint.location.point;
 
-  const startPlacing = () => {
-    setPart("location");
-    setDrawing(!drawing);
-  };
-
   let placeLabel = "Place on map";
   if (point != null) placeLabel = "Move on map";
-  if (drawing && active) placeLabel = "Click the map…";
+  if (drawing) placeLabel = "Click the map…";
 
   return h("div.coordinate-entry", [
     h(CoordinateEntry, { onPoint: setPoint }),
@@ -266,8 +307,8 @@ function PointForm({ active }: { active: boolean }) {
         icon: "map-marker",
         text: placeLabel,
         small: true,
-        active: drawing && active,
-        onClick: startPlacing,
+        active: drawing,
+        onClick: () => setDrawing(!drawing),
       }),
       h.if(point != null)(Button, {
         icon: "eraser",
@@ -354,10 +395,9 @@ function CoordinateEntry({ onPoint }: { onPoint: (p: { lat: number; lng: number 
   );
 }
 
-function LineForm({ active }: { active: boolean }) {
+function LineForm() {
   const footprint = useAtomValue(footprintAtom);
   const setLine = useSetAtom(setLineAtom);
-  const setPart = useSetAtom(footprintPartAtom);
   const [drawing, setDrawing] = useAtom(drawingAtom);
   const line = footprint.location.line;
 
@@ -368,7 +408,7 @@ function LineForm({ active }: { active: boolean }) {
   }
   let drawLabel = "Draw line";
   if (line != null) drawLabel = "Redraw";
-  if (drawing && active) drawLabel = "Drawing…";
+  if (drawing) drawLabel = "Drawing…";
 
   return h([
     h("p.geometry-note", note),
@@ -377,11 +417,8 @@ function LineForm({ active }: { active: boolean }) {
         icon: "draw",
         text: drawLabel,
         small: true,
-        active: drawing && active,
-        onClick: () => {
-          setPart("location");
-          setDrawing(!drawing);
-        },
+        active: drawing,
+        onClick: () => setDrawing(!drawing),
       }),
       h.if(line != null)(Button, {
         icon: "eraser",
@@ -394,10 +431,9 @@ function LineForm({ active }: { active: boolean }) {
   ]);
 }
 
-function RegionSection({ isSection, active }: { isSection: boolean; active: boolean }) {
+function RegionSection({ isSection }: { isSection: boolean }) {
   const footprint = useAtomValue(footprintAtom);
   const setRegion = useSetAtom(setRegionAtom);
-  const setPart = useSetAtom(footprintPartAtom);
   const [drawing, setDrawing] = useAtom(drawingAtom);
   const region = footprint.region;
 
@@ -405,7 +441,7 @@ function RegionSection({ isSection, active }: { isSection: boolean; active: bool
     "The area the column stands for. Its stored point is the polygon's representative point.";
   if (isSection) {
     description =
-      "The area this section is taken to represent, if it stands for more than the place it was measured.";
+      "Optional. The area this section is taken to represent, if it stands for more than the place it was measured.";
   }
 
   let note = "No region. Click around the area; click the first point to close.";
@@ -414,14 +450,13 @@ function RegionSection({ isSection, active }: { isSection: boolean; active: bool
   }
   let drawLabel = "Draw region";
   if (region != null) drawLabel = "Redraw";
-  if (drawing && active) drawLabel = "Drawing…";
+  if (drawing) drawLabel = "Drawing…";
 
   // The point's uncertainty circle is a fair first region
   const { point, radius_km } = footprint.location;
   const canCircle = point != null && (radius_km ?? 0) > 0;
 
-  return h("section.panel-section", { onFocusCapture: () => setPart("region") }, [
-    h("h3", ["Region", h.if(isSection)("span.section-note", "optional for a measured section")]),
+  return h("section.panel-section", [
     h("p.section-description", description),
     h("p.geometry-note", note),
     h("div.row-actions", [
@@ -429,11 +464,8 @@ function RegionSection({ isSection, active }: { isSection: boolean; active: bool
         icon: "polygon-filter",
         text: drawLabel,
         small: true,
-        active: drawing && active,
-        onClick: () => {
-          setPart("region");
-          setDrawing(!drawing);
-        },
+        active: drawing,
+        onClick: () => setDrawing(!drawing),
       }),
       h.if(canCircle)(Button, {
         icon: "circle",
@@ -451,6 +483,71 @@ function RegionSection({ isSection, active }: { isSection: boolean; active: bool
         onClick: () => setRegion(null),
       }),
     ]),
+  ]);
+}
+
+/* ------------------------------------------------------------------ save */
+
+let toasterPromise: Promise<OverlayToaster> | null = null;
+
+function getToaster() {
+  toasterPromise ??= OverlayToaster.createAsync({ position: "top" });
+  return toasterPromise;
+}
+
+/** Save the footprint on its own, for a column the database already holds. */
+function SaveGeometry() {
+  const snapshot = useAtomValue(snapshotAtom);
+  const footprint = useAtomValue(footprintAtom);
+  const dirty = useAtomValue(isLocationDirtyAtom);
+  const outside = useAtomValue(locationOutsideRegionAtom);
+  const setLoaded = useSetAtom(loadedFootprintAtom);
+  const [saving, setSaving] = useState(false);
+  const col_id = snapshot?.col_id ?? null;
+
+  let disabledReason: string | null = null;
+  if (col_id == null || snapshot?.isDraft || snapshot?.source === "dry-run") {
+    disabledReason = "Only a column already in the database can have its location saved";
+  } else if (!dirty) {
+    disabledReason = "No changes to the location or region";
+  } else if (outside) {
+    disabledReason = "The location must be inside the region";
+  }
+
+  const save = async () => {
+    setSaving(true);
+    const toaster = await getToaster();
+    try {
+      const result = await saveColumnGeometry(col_id!, footprint);
+      // What wasn't stored stays an unsaved edit
+      setLoaded(storedFootprint(footprint));
+      toaster.show({ message: "Location saved", intent: "success", icon: "tick-circle" });
+      for (const notice of result.notices) {
+        toaster.show({ message: notice.message, intent: "warning", icon: "warning-sign" });
+      }
+    } catch (err) {
+      toaster.show({
+        message: `Location not saved: ${err?.message ?? err}`,
+        intent: "danger",
+        icon: "error",
+        timeout: 0,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return h("div.row-actions", [
+    h(Button, {
+      icon: "floppy-disk",
+      text: "Save location",
+      intent: "primary",
+      small: true,
+      loading: saving,
+      disabled: disabledReason != null,
+      title: disabledReason ?? "Save the location and region to the database",
+      onClick: save,
+    }),
   ]);
 }
 
