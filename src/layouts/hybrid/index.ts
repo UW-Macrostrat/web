@@ -1,4 +1,5 @@
 export { HybridPage, type HybridPageProps } from "./page";
+export { HybridMapPlacement } from "./map-placement";
 export {
   ActionsPanel,
   LayoutModeControl,

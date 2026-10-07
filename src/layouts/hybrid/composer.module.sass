@@ -148,8 +148,9 @@
     flex: 1 1 var(--hybrid-content-width)
     --data-panel-content-width: 100%
 
+// Fixed at its width, the content giving instead, so a drag tracks the pointer
 .content-sidebar
-  flex: 0 1 var(--hybrid-sidebar-width)
+  flex: 0 0 var(--hybrid-sidebar-width)
   min-width: 0
   min-height: 0
   display: flex
@@ -168,6 +169,11 @@
   aspect-ratio: 4 / 3
   overflow: hidden
   border-radius: var(--pz-radius-lg)
+
+  // The map's GL canvas is composited apart, so overflow alone leaves its
+  // corners square; clipped inside the card so the card keeps its shadow.
+  > :first-child
+    clip-path: inset(0 round var(--pz-radius-lg))
   background-color: var(--pz-panel-background-color, var(--panel-background-color))
   box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
 
@@ -216,7 +222,7 @@
   margin: 0 auto
 
 .sidebar-spacer
-  flex: 0 1 var(--hybrid-sidebar-width)
+  flex: 0 0 var(--hybrid-sidebar-width)
   min-width: 0
 
 .content-shell.has-sidebar .content-spacer
@@ -283,26 +289,35 @@
     --page-header-padding-x: 1em
     --page-header-content-width: calc(var(--hybrid-shell-width) - 2em)
 
+  // Fills the window below the header, so a short page's footer sits at the
+  // bottom of it
   .content-scroll > .content-main
-    flex: none
+    flex: 1 0 auto
     height: auto
     min-height: 0
 
-  // In the row, so the row is as tall as the taller of content and sidebar;
-  // sticky, so the map stays in view through a long column.
+  // Sticky, so the map stays in view through a long column. It keeps its
+  // width (a dragged one included) while the content gives, and scrolls with
+  // the page rather than on its own when it is taller than the window.
   .content-sidebar
+    flex-shrink: 0
     position: sticky
     top: calc(var(--hybrid-bar-height) + 1em)
     align-self: flex-start
-    max-height: calc(100dvh - var(--hybrid-bar-height) - 2em)
+    overflow-y: visible
+
+  // The content, then (in content-only) the assistant, then the footer
+  .content-panel-holder
+    display: flex
+    flex-direction: column
+
+// A block, so a floated map's neighbours wrap around it
+.content-flow
+  display: flow-root
 
 // Without a sidebar, the assistant and links follow the content
 .content-after
-  box-sizing: border-box
-  width: 100%
-  max-width: var(--hybrid-shell-width)
-  margin: 0 auto
-  padding: 1em 1em 0
+  padding-top: 1em
   display: flex
   flex-direction: column
   gap: var(--pz-stack-gap, 1rem)
@@ -310,18 +325,10 @@
   &:empty
     display: none
 
-// At the viewport's bottom when the page is short. Its rule spans the page and
-// sidebar; its links keep the content's width, in line with the content.
+// Last in the content column, at the window's bottom when the page is short
 .content-page-footer
-  box-sizing: border-box
-  width: 100%
-  max-width: var(--hybrid-shell-width)
-  margin: auto auto 0
-  padding: 0 1em 2em
-
-.content-shell .content-page-footer > *
-  max-width: var(--hybrid-content-width)
-  margin-bottom: 0
+  margin-top: auto
+  padding: 3em 0 1em
 
 // Narrow: the sidebar stops earning its column.
 @media (max-width: 1000px)
@@ -333,6 +340,7 @@
 /* ================================ split shell ============================ */
 
 .split-shell
+  position: relative
   display: grid
   grid-template-columns: var(--hybrid-split-panel-width) 1fr
   height: 100%

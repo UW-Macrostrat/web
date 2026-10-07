@@ -34,8 +34,8 @@ export default function Page() {
         // module doesn't scope it — look the hashed name up instead.
         h(
           SiteTitle,
-          { className: h["main-title"], logo: h(DissolvingLogo) },
-          [h("h2.subtitle", "The data system for the crust")]
+          { className: h["main-title"], logo: h(DissolvingLogo) }
+          //[h("h2.subtitle", "The data system for the crust")]
         ),
         h(V2BetaTag),
         h("div.site-search", h(SiteSearchPrompt)),
@@ -44,8 +44,8 @@ export default function Page() {
     // The one omnibar instance the search prompt opens (also on ⌘K).
     h(LexSearchHost),
     h(Hero),
-    h(MacrostratStats),
     h(SiteLead),
+    h(MacrostratStats),
     h(EntryPoints),
     h(WhatsNew),
     h(PlatformLinks),
@@ -140,8 +140,9 @@ const entryPoints = [
  * now the wordmark and the search and nothing else. */
 function SiteLead() {
   return h("p.site-lead", [
-    "Geologic maps and stratigraphic columns, integrated into one model of ",
-    "the Earth's crust through time.",
+    "Macrostrat is a data system to describe the Earth's crust through time.",
+    // "Geologic maps and stratigraphic columns, integrated into one model of ",
+    // "the Earth's crust through time.",
   ]);
 }
 
@@ -228,6 +229,10 @@ function MacrostratStats() {
 
   return h("div.stats", {}, [
     h("div.stat", {}, [
+      h("span.top-stat#n_names", {}, formatNumber(projects)),
+      h("span.top-stat-label", {}, "projects"),
+    ]),
+    h("div.stat", {}, [
       h("span.top-stat#n_columns", {}, formatNumber(columns)),
       h("span.top-stat-label", {}, "columns"),
     ]),
@@ -238,10 +243,6 @@ function MacrostratStats() {
     h("div.stat", {}, [
       h("span.top-stat#n_polys", {}, formatNumber(polygons)),
       h("span.top-stat-label", {}, "map polygons"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_names", {}, formatNumber(projects)),
-      h("span.top-stat-label", {}, "projects"),
     ]),
   ]);
 }

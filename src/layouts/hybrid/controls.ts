@@ -28,6 +28,7 @@ import type { ReactNode } from "react";
 import h from "./controls.module.sass";
 import {
   capabilitiesAtom,
+  floatingMapOpenAtom,
   layoutModeAtom,
   layoutModeLabel,
   type LayoutMode,
@@ -59,15 +60,19 @@ export interface LayoutModeControlProps {
   compact?: boolean;
   /** Listed in the menu after the modes */
   links?: HybridLink[];
+  /** Offer the map on request, for a page that hasn't placed one */
+  mapItem?: boolean;
 }
 
 export function LayoutModeControl({
   className = null,
   compact = false,
   links = [],
+  mapItem = false,
 }: LayoutModeControlProps) {
   const { modes, itemName } = useAtomValue(capabilitiesAtom);
   const [mode, setMode] = useAtom(layoutModeAtom);
+  const [mapOpen, setMapOpen] = useAtom(floatingMapOpenAtom);
 
   if (modes.length < 2) return null;
 
@@ -91,6 +96,21 @@ export function LayoutModeControl({
     ];
   }
 
+  let mapItems = [];
+  if (mapItem) {
+    let text = "Show map";
+    if (mapOpen) text = "Hide map";
+    mapItems = [
+      h(MenuDivider, { key: "map-divider" }),
+      h(MenuItem, {
+        key: "map",
+        icon: "map",
+        text,
+        onClick: () => setMapOpen(!mapOpen),
+      }),
+    ];
+  }
+
   const menu = h(Menu, [
     ...modes.map((m) =>
       h(MenuItem, {
@@ -101,6 +121,7 @@ export function LayoutModeControl({
         onClick: () => setMode(m),
       })
     ),
+    ...mapItems,
     ...linkItems,
   ]);
 
@@ -138,15 +159,17 @@ export function ActionsPanel({
   compact = false,
   links = [],
   showModeControl = true,
+  mapItem = false,
 }: {
   children?: ReactNode;
   compact?: boolean;
   links?: HybridLink[];
   showModeControl?: boolean;
+  mapItem?: boolean;
 }) {
   let modeControl = null;
   if (showModeControl) {
-    modeControl = h(LayoutModeControl, { compact, links });
+    modeControl = h(LayoutModeControl, { compact, links, mapItem });
   }
   return h("div.actions-panel", [children, modeControl]);
 }
@@ -179,3 +202,4 @@ export function SidebarViewLinks({
     ),
   ]);
 }
+

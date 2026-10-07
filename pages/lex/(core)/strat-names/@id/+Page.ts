@@ -1,6 +1,7 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
-import { LexItemPage, ConceptInfo, LexItemBodyClient } from "~/components/lex";
+import { ConceptInfo, LexItemBodyClient } from "~/components/lex";
+import { LexHybridItemPage } from "~/components/lex/hybrid-item-page";
 import { StratNameHierarchy } from "~/components/lex/strat-hierarchy";
 import { ConceptRelationCard } from "~/components/lex/relation-cards";
 import { LexItemData } from "~/components/lex/data-loaders.ts";
@@ -29,22 +30,28 @@ export function Page() {
   // sits (the hierarchy) — above the attribute charts, since the hierarchy is
   // the more important of the two on a stratigraphic page. The relation card
   // block sits in the same position here as on the concept page.
-  return h(LexItemPage, { id, resData, siftLink: config.siftLink }, [
-    h(ConceptRelationCard, { concept }),
-    h(ConceptInfo, { concept_id: resData?.concept_id, record: concept }),
-    h(LexItemBodyClient, {
-      type,
-      id,
-      resData,
-      mapUrl: type + "=" + id,
-      relatedHref,
-      showUnits: true,
-      showMaps: true,
-      showFossils: true,
-      showColumnList: true,
-      afterColumns: h(StratNameHierarchy, { id }),
-    }),
-  ]);
+  const mapUrl = type + "=" + id;
+
+  return h(
+    LexHybridItemPage,
+    { id, resData, siftLink: config.siftLink, mapUrl },
+    [
+      h(ConceptRelationCard, { concept }),
+      h(ConceptInfo, { concept_id: resData?.concept_id, record: concept }),
+      h(LexItemBodyClient, {
+        type,
+        id,
+        resData,
+        mapUrl,
+        relatedHref,
+        showUnits: true,
+        showMaps: true,
+        showFossils: true,
+        showColumnList: true,
+        afterColumns: h(StratNameHierarchy, { id }),
+      }),
+    ]
+  );
 }
 
 // export function Page() {

@@ -28,6 +28,7 @@ import { buildGeoJSONSource, setGeoJSON } from "@macrostrat/mapbox-utils";
 import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useInsetMapStyleProps } from "~/components/map-settings";
+import { MapResizer } from "~/components/map-resizer";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -104,6 +105,7 @@ function ColumnNavigationMapView({ target }: { target: ColumnMapTarget }) {
         selectedIDs: target.selectedColumnIDs,
       }),
       h(ColumnMapBoundsReporter, { key: "bounds" }),
+      h(MapResizer, { key: "resizer" }),
     ]
   );
 }

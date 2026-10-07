@@ -21,10 +21,14 @@ import { Button } from "@blueprintjs/core";
 import { onDemand } from "~/_utils";
 
 import h from "./composer.module.sass";
+import { FloatingMapPanel } from "./map-placement";
+import { ResizeHandle } from "./resize-handle";
 import {
   capabilitiesAtom,
   contentScrollAtom,
+  floatingMapOpenAtom,
   hasInsetMap,
+  mapPlacementCountAtom,
   hasSidebar,
   isFullWidth,
   layoutModeAtom,
@@ -141,7 +145,21 @@ function ContentShell({
     ]);
   }
 
-  const holder = h("div.content-panel-holder", content);
+  // The map on request, at the top of the content, when the page hasn't
+  // placed it somewhere better (see `HybridMapPlacement`)
+  const floatingMapOpen = useAtomValue(floatingMapOpenAtom);
+  const placements = useAtomValue(mapPlacementCountAtom);
+  let floatingMap = null;
+  if (
+    contentScroll == "page" &&
+    !sidebar &&
+    !inset &&
+    floatingMapOpen &&
+    placements == 0
+  ) {
+    floatingMap = h(FloatingMapPanel, { key: "floating-map" }, map);
+  }
+  let holder = h("div.content-panel-holder", content);
 
   const className = classNames(`mode-${mode}`, `scroll-${contentScroll}`, {
     "has-sidebar": sidebar,
@@ -160,17 +178,17 @@ function ContentShell({
     if (!sidebar) {
       afterContent = h("div.content-after", [assistant, sidebarLinks]);
     }
+    // The footer ends the content column rather than spanning the sidebar, so
+    // a tall sidebar never has to be scrolled past to reach it
+    holder = h("div.content-panel-holder", [
+      h("div.content-flow", [floatingMap, content]),
+      afterContent,
+      h.if(footer != null)("div.content-page-footer", footer),
+    ]);
     return h(
       "div.content-shell",
       { className },
-      h(PageScrollBody, {
-        headerRegion,
-        holder,
-        sidebarRegion,
-        insetRegion,
-        afterContent,
-        footer,
-      })
+      h(PageScrollBody, { headerRegion, holder, sidebarRegion, insetRegion })
     );
   }
 
@@ -179,24 +197,18 @@ function ContentShell({
   return h("div.content-shell", { className }, [headerRegion, body]);
 }
 
-/** One tall item: the header, content and footer all scroll together, so the
+/** One tall item: the header and the content's row scroll together, so the
  * header can collapse to its bar as the page title passes under it. The
- * sidebar is a sticky column in the content's row rather than an overlay, so
- * the row — and the footer after it — clears whichever of the two is taller. */
-function PageScrollBody({
-  headerRegion,
-  holder,
-  sidebarRegion,
-  insetRegion,
-  afterContent,
-  footer,
-}) {
+ * sidebar is a sticky column in the row rather than an overlay. */
+function PageScrollBody({ headerRegion, holder, sidebarRegion, insetRegion }) {
+  let resizeHandle = null;
+  if (sidebarRegion != null) {
+    resizeHandle = h(ResizeHandle, { edge: "sidebar" });
+  }
   return h("div.content-body", [
     h("div.content-scroll", [
       headerRegion,
-      h("div.content-main", [holder, sidebarRegion, insetRegion]),
-      afterContent,
-      h.if(footer != null)("div.content-page-footer", footer),
+      h("div.content-main", [holder, resizeHandle, sidebarRegion, insetRegion]),
     ]),
   ]);
 }
@@ -211,13 +223,19 @@ function PageScrollBody({
  * free, so it never scrolls and never passes under the header. */
 function ScrollBody({ holder, sidebar, sidebarRegion, insetRegion }) {
   let spacer = null;
+  let resizeHandle = null;
   if (sidebar) {
     spacer = h("div.sidebar-spacer");
+    resizeHandle = h(ResizeHandle, { edge: "sidebar", centered: true });
   }
   return h("div.content-body", [
     h("div.content-scroll", h("div.content-main", [holder, spacer])),
     h("div.content-overlay", [
-      h("div.content-main", [h("div.content-spacer"), sidebarRegion]),
+      h("div.content-main", [
+        h("div.content-spacer"),
+        resizeHandle,
+        sidebarRegion,
+      ]),
       insetRegion,
     ]),
   ]);
@@ -290,6 +308,7 @@ function SplitShell({
       ]),
       h("div.split-list", content),
     ]),
+    h(ResizeHandle, { edge: "split" }),
     h("div.split-map", [map, assistantPanel]),
   ]);
 }
