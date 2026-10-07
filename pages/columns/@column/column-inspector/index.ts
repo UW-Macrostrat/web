@@ -28,7 +28,11 @@ import { StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
 import { ColumnMapSlot } from "~/components/column-map/target";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import { DataField } from "@macrostrat/data-components";
+import {
+  DataField,
+  MacrostratInteractionProvider,
+  type MacrostratItemIdentifier,
+} from "@macrostrat/data-components";
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
@@ -150,7 +154,12 @@ function ColumnPageFrame({
     // the map, the filter tags and the settings switch. `HybridPage` mounts its
     // own `Provider`, and the same atom read on either side of one is a
     // different cell.
-    wrap: (node) => h(ColumnScopeBridge, { status: columnInfo.status }, node),
+    wrap: (node) =>
+      h(
+        ColumnScopeBridge,
+        { status: columnInfo.status },
+        h(ColumnUnitLinks, { columnInfo }, node)
+      ),
     // The project dropdown is a first-class control, beside the settings
     actions: h([h(ProjectFilterControl), h(ColumnSettingsButton)]),
     // Active filters sit in a second header row above the column
@@ -284,6 +293,37 @@ function ColumnScopeBridge({ status, children }) {
   // adopted value — there is nothing to race with.
   usePublishColumnScope(useProjectFilter().projects, useShowInProcess());
   return children;
+}
+
+/** Links to this column's units (e.g. the unit panel's units above and below)
+ * select the unit in place instead of opening its lexicon page.
+ *
+ * Vike routes every anchor click from a document listener and ignores
+ * `preventDefault`, so the handler must also stop propagation. */
+function ColumnUnitLinks({ columnInfo, children }) {
+  const { setSelectedUnitID } = useColumnSelection();
+  const { col_id, units } = columnInfo;
+
+  const interactionPropsForItem = useCallback(
+    (item: MacrostratItemIdentifier) => {
+      if (!("unit_id" in item)) return {};
+      const unitID = item.unit_id;
+      if (!units.some((d) => d.unit_id === unitID)) return {};
+      return {
+        href: `/columns/${col_id}#unit=${unitID}`,
+        target: undefined,
+        onClick(evt) {
+          if (evt.metaKey || evt.ctrlKey || evt.shiftKey) return;
+          evt.preventDefault();
+          evt.stopPropagation();
+          setSelectedUnitID(unitID);
+        },
+      };
+    },
+    [col_id, units, setSelectedUnitID]
+  );
+
+  return h(MacrostratInteractionProvider, { interactionPropsForItem }, children);
 }
 
 /* ----------------------------------------------------------------- the map */

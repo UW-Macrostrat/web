@@ -4,10 +4,12 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { useMemo } from "react";
 import { Button, Menu, MenuDivider, MenuItem, PopoverNext } from "@blueprintjs/core";
-import { Tag, TagSize } from "@macrostrat/data-components";
+import { Identifier, Tag, TagSize } from "@macrostrat/data-components";
+import { CORE_COLUMNS_PROJECT_ID } from "@macrostrat/data-provider";
 import {
   findProject,
   projectSlug,
+  resolveProjectIDs,
   useProjectDefs,
   useProjectFilter,
   type ProjectDef,
@@ -52,8 +54,17 @@ export function ProjectFilterTag(props: ProjectFilterTagProps) {
 
 /** A dropdown listing every project; pick one or several. The first entry
  * returns to the default, the "Core columns" composite, which is what the API
- * serves when no project is asked for. */
-export function ProjectFilterControl({ className }: { className?: string }) {
+ * serves when no project is asked for. With `showSelection`, the button names
+ * the selection; otherwise it is a fixed label and tags show the selection. */
+export function ProjectFilterControl({
+  className,
+  showSelection = false,
+  large = false,
+}: {
+  className?: string;
+  showSelection?: boolean;
+  large?: boolean;
+}) {
   const { projects, toggleProject, clear } = useProjectFilter();
   const defs = useProjectDefs();
 
@@ -88,6 +99,16 @@ export function ProjectFilterControl({ className }: { className?: string }) {
     ),
   ]);
 
+  let label: any = "Projects";
+  if (showSelection) {
+    label = h(ProjectSelectionLabel, { defs, projects });
+  }
+
+  let size = "small";
+  if (large) {
+    size = "large";
+  }
+
   return h(PopoverNext, {
     className,
     minimal: true,
@@ -99,14 +120,46 @@ export function ProjectFilterControl({ className }: { className?: string }) {
         {
           ...targetProps,
           minimal: true,
-          small: true,
+          size,
           active: isOpen,
           icon: "projects",
           rightIcon: "caret-down",
           title: "Projects whose columns are shown",
         },
-        // A fixed label: the selection itself shows as tags elsewhere
-        "Projects"
+        label
       ),
   });
+}
+
+/** One project by name and ID; several by count and IDs. */
+function ProjectSelectionLabel({
+  defs,
+  projects,
+}: {
+  defs: ProjectDef[] | null;
+  projects: string[];
+}) {
+  if (projects.length > 1) {
+    const ids = resolveProjectIDs(defs, projects) ?? [];
+    return h("span.selection-label", [
+      h("span.selection-name", `${projects.length} projects`),
+      h("span.selection-id", h(Identifier, { id: ids.join(", ") })),
+    ]);
+  }
+
+  let def = findProject(defs, CORE_COLUMNS_PROJECT_ID);
+  let name = def?.project ?? "Core columns";
+  if (projects.length === 1) {
+    def = findProject(defs, projects[0]);
+    name = def?.project ?? projects[0];
+  }
+
+  let identifier = null;
+  if (def != null) {
+    identifier = h("span.selection-id", h(Identifier, { id: def.project_id }));
+  }
+  return h("span.selection-label", [
+    h("span.selection-name", name),
+    identifier,
+  ]);
 }

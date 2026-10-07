@@ -5,7 +5,9 @@
  * says drawing has finished or been abandoned. The control's own buttons are
  * off, so the caller's panel decides when drawing starts; everything else is
  * direct manipulation — drag a vertex, drag the point. One feature at a time.
- * Client only: the library touches `window` on import. */
+ * Delete or Backspace removes the vertex last placed while drawing, or the one
+ * last touched while reshaping. Client only: the library touches `window` on
+ * import. */
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import type mapboxgl from "mapbox-gl";
@@ -28,6 +30,8 @@ export interface GeometryDrawProps {
 const FEATURE_ID = "drawn";
 // The control's source, present once it has attached its layers to the map
 const DRAW_SOURCE = "mapbox-gl-draw-cold";
+// Modes in which Delete removes a vertex
+const VERTEX_MODES = new Set(["draw_polygon", "draw_line_string", "direct_select"]);
 
 export function GeometryDraw({
   map,
@@ -60,6 +64,7 @@ export function GeometryDraw({
       controls: {},
       userProperties: true,
       styles: drawStyles(color, activeColor),
+      modes: VERTEX_UNDO_MODES,
     });
     map.addControl(draw, "top-left");
     drawRef.current = draw;
@@ -79,6 +84,17 @@ export function GeometryDraw({
       if (map.getSource(DRAW_SOURCE) == null) setGeneration((g) => g + 1);
     };
     map.on("style.load", onStyleLoad);
+
+    // The library binds Delete only alongside its trash button, which is off
+    const container = map.getContainer();
+    const onKeyDown = (evt: KeyboardEvent) => {
+      if (evt.key !== "Backspace" && evt.key !== "Delete") return;
+      if (!(evt.target as HTMLElement)?.classList?.contains("mapboxgl-canvas")) return;
+      if (!VERTEX_MODES.has(draw.getMode())) return;
+      evt.preventDefault();
+      draw.trash();
+    };
+    container.addEventListener("keydown", onKeyDown);
 
     const handleChange = (evt: { features: Feature[] }) => {
       const feature = evt.features?.[0];
@@ -103,6 +119,7 @@ export function GeometryDraw({
     map.on("draw.modechange", handleModeChange);
 
     return () => {
+      container.removeEventListener("keydown", onKeyDown);
       map.off("sourcedata", checkReady);
       map.off("style.load", onStyleLoad);
       map.off("draw.create", handleCreate);
@@ -144,6 +161,58 @@ export function GeometryDraw({
 
   return null;
 }
+
+/* Delete as undo. The stock modes' trash deletes the whole feature while
+ * drawing, and while reshaping deletes it outright once too few vertices are
+ * left; these remove one vertex and never leave an invalid shape. */
+
+/** Drop the last placed vertex; the one following the pointer moves back. */
+function undoPolygonVertex(state: any) {
+  const position = state.currentVertexPosition;
+  if (position === 0) return;
+  // Edited directly: `removeCoordinate` drops a ring once it is under 3 points
+  const ring = state.polygon.coordinates[0];
+  ring.splice(position - 1, 1);
+  state.polygon.setCoordinates([ring]);
+  state.currentVertexPosition = position - 1;
+}
+
+function undoLineVertex(state: any) {
+  const position = state.currentVertexPosition;
+  if (state.direction !== "forward" || position === 0) return;
+  const coords = state.line.coordinates;
+  coords.splice(position - 1, 1);
+  state.line.setCoordinates(coords);
+  state.currentVertexPosition = position - 1;
+}
+
+/** The stock removal of the selected vertices, unless it would leave a ring
+ * under 3 vertices or a line under 2. */
+function removeSelectedVertices(this: any, state: any) {
+  const paths: string[] = state.selectedCoordPaths ?? [];
+  if (paths.length === 0) return;
+  const minimum = state.feature.type.endsWith("LineString") ? 2 : 3;
+  const removed = new Map<string, number>();
+  for (const path of paths) {
+    const parent = path.split(".").slice(0, -1).join(".");
+    removed.set(parent, (removed.get(parent) ?? 0) + 1);
+  }
+  for (const [parent, n] of removed) {
+    let coords = state.feature.coordinates;
+    for (const index of parent.split(".").filter((x) => x !== "")) {
+      coords = coords[Number(index)];
+    }
+    if (coords.length - n < minimum) return;
+  }
+  MapboxDraw.modes.direct_select.onTrash.call(this, state);
+}
+
+const VERTEX_UNDO_MODES = {
+  ...MapboxDraw.modes,
+  draw_polygon: { ...MapboxDraw.modes.draw_polygon, onTrash: undoPolygonVertex },
+  draw_line_string: { ...MapboxDraw.modes.draw_line_string, onTrash: undoLineVertex },
+  direct_select: { ...MapboxDraw.modes.direct_select, onTrash: removeSelectedVertices },
+};
 
 /** Five decimal places: about a metre, and past any Macrostrat dataset. */
 function roundGeometry<T extends Geometry>(geometry: T): T {

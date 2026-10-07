@@ -50,7 +50,6 @@ import {
   projectIDParam,
   ProjectFilterControl,
   ProjectFilterProvider,
-  ProjectFilterTag,
   resolveProjectIDs,
 } from "~/components/project-filter";
 import {
@@ -126,7 +125,7 @@ const ColumnListMap = onDemand(() =>
  * list: three cards share a band. Each card is one line — name, any status, and
  * the id — so the band is only a little taller than the row it replaced while
  * holding three times as much. */
-const ROW_HEIGHT = 40;
+const ROW_HEIGHT = 48;
 /** The width a column card wants. The grid fits as many as the body has room
  * for — three at the content measure, one in the ~350px panel beside the map. */
 const COLUMN_CARD_WIDTH = 280;
@@ -358,10 +357,13 @@ function ColumnScopeSync({ adopted, children }) {
  * tags (`.header-filters:empty`) — so selecting or clearing a project changed
  * the header's height and pushed the whole list down. The filter bar is a
  * single flex row with its own `min-height`, so a tag appearing or going away
- * costs no layout. Each tag's × drops just that filter; the project picker
- * itself lives in the side panel, with the link to the projects pages. */
+ * costs no layout. Each tag's × drops just that filter. The project picker
+ * names its own selection, so it stands in for a project tag. */
 function ColumnFilterTags() {
-  return h("div.filter-tags", [h(ProjectFilterTag), h(InProcessFilterTag)]);
+  return h("div.filter-tags", [
+    h(ProjectFilterControl, { showSelection: true, large: true }),
+    h(InProcessFilterTag),
+  ]);
 }
 
 /** The map follows the project filter as it changes, not just the initial id. */
@@ -763,9 +765,10 @@ function SelectionModeBridge() {
 /* ------------------------------------------------------------ source facets */
 
 /** The facets that change the *request* rather than filtering loaded rows —
- * the project, empty / in-process columns, and the lexicon facets. They live
- * in the library's Filter menu as one inline section ("Source"), beside the
- * row-local filters, so there is a single place to narrow the list. The
+ * empty / in-process columns and the lexicon facets. They live in the
+ * library's Filter menu as one inline section ("Source"), beside the
+ * row-local filters. The project picker is not among them: a popover nested in
+ * the Filter menu didn't work, so it stands alone in the toolbar. The
  * `TableFilter` is a carrier for the form: its predicate passes everything,
  * and the form drives the page's request atoms directly. */
 const sourceFilter: TableFilter<ColumnRow, any> = {
@@ -782,14 +785,6 @@ function SourceFacetsPanel() {
   const [showEmpty, setShowEmpty] = useAtom(showEmptyAtom);
 
   return h("div.source-facets", [
-    // The same picker as the side panel's, driving the same filter — people
-    // look for "which projects" under Filter as readily as in a panel, and a
-    // facet that changes the request belongs beside the others that do.
-    h("div.source-projects", [
-      h("p.filter-label", "Projects"),
-      h(ProjectFilterControl, { className: "project-picker" }),
-      h(ProjectFilterTag),
-    ]),
     h(Switch, {
       checked: showEmpty,
       label: "Show empty columns",
@@ -892,36 +887,22 @@ function ColumnAssistant() {
   ]);
 }
 
-/** The side panel's standing content, under whatever the selection shows.
- *
- * Projects are one subject, so the control that scopes the list to a project
- * and the link to the project pages sit together here rather than a filter
- * dropdown in the toolbar and an unrelated "Projects" button below. What the
- * picker selects still shows as tags in the filter bar, next to the list it
- * narrows. */
+/** The side panel's standing content, under whatever the selection shows. */
 function AssistantLinks() {
   return h("div.assistant-links", [
-    h("div.projects-section", [
-      h("div.section-head", [
-        h("h3", "Projects"),
-        h(
-          AnchorButton,
-          {
-            href: "/projects",
-            minimal: true,
-            small: true,
-            rightIcon: "arrow-right",
-            title: "All projects",
-          },
-          "Browse"
-        ),
-      ]),
-      h(ProjectFilterControl, { className: "project-picker" }),
+    h(ButtonGroup, { vertical: true, className: "assistant-buttons" }, [
+      h(
+        AnchorButton,
+        {
+          href: "/projects",
+          minimal: true,
+          small: true,
+          icon: "projects",
+          rightIcon: "arrow-right",
+        },
+        "Browse projects"
+      ),
+      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
     ]),
-    h(
-      ButtonGroup,
-      { vertical: true, className: "assistant-buttons" },
-      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart")
-    ),
   ]);
 }

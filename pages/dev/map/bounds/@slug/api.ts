@@ -69,7 +69,7 @@ export function appendOperation(slug: string, op: NewOperation): Promise<MapBoun
 export function editOperation(
   slug: string,
   id: number,
-  edit: { position?: number; note?: string }
+  edit: { position?: number; note?: string; geometry?: Geometry }
 ): Promise<MapBoundary> {
   return request(`/bounds/${encodeURIComponent(slug)}/operations/${id}`, "PATCH", edit);
 }

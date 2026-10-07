@@ -12,12 +12,15 @@ import {
   EditableText,
   FormGroup,
   HTMLSelect,
+  Icon,
   InputGroup,
+  Switch,
   Tag,
 } from "@blueprintjs/core";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useState } from "react";
+import { useState, type DragEvent } from "react";
 
+import { DataCard } from "@macrostrat/data-sheet";
 import { useIsAdmin } from "~/_utils/is-admin";
 import {
   appendOperation,
@@ -35,7 +38,12 @@ import {
   draftAtom,
   drawingAtom,
   errorAtom,
+  editedGeometryAtom,
   operationTypesAtom,
+  reorderingAtom,
+  selectedOpIdAtom,
+  selectOpAtom,
+  showDataAtom,
   tileVersionAtom,
   useBoundaryEdit,
 } from "./state";
@@ -80,7 +88,18 @@ function BoundarySummary() {
     h("h2.map-title", boundary.name ?? boundary.slug),
     h("div.tags", [h(Tag, { minimal: true }, boundary.slug), area, stale]),
     failure,
+    h(ShowDataSwitch),
   ]);
+}
+
+function ShowDataSwitch() {
+  const [showData, setShowData] = useAtom(showDataAtom);
+  return h(Switch, {
+    className: "show-data",
+    label: "Show map data",
+    checked: showData,
+    onChange: () => setShowData(!showData),
+  });
 }
 
 function ErrorCallout() {
@@ -96,67 +115,202 @@ function ErrorCallout() {
 
 function OperationList() {
   const boundary = useAtomValue(boundaryAtom)!;
+  const isAdmin = useIsAdmin();
   const ops = boundary.operations;
+  const drag = useDragReorder();
+
   let body: any = h("p.empty", "No operations yet: the boundary is the map's own.");
   if (ops.length > 0) {
     body = h(
       "ol.operations",
-      ops.map((op) => h(OperationRow, { key: op.id, op, last: op.position === ops.length - 1 }))
+      ops.map((op) => h(OperationRow, { key: op.id, op, drag }))
     );
   }
-  return h("section", [h("h3", "Operations"), body]);
+  let toggle = null;
+  if (isAdmin && ops.length > 2) toggle = h(ReorderToggle);
+  return h("section.operations-section", [
+    h("div.section-header", [h("h3", "Operations"), toggle]),
+    h("div.operations-scroll", body),
+  ]);
 }
 
-function OperationRow({ op, last }: { op: BoundaryOperation; last: boolean }) {
-  const isAdmin = useIsAdmin();
-  const actions = useOperationActions(op);
-  const opening = op.position === 0;
+/** Reorder mode: rows are dragged rather than selected. */
+function ReorderToggle() {
+  const [reordering, setReordering] = useAtom(reorderingAtom);
+  const select = useSetAtom(selectOpAtom);
+  const onClick = () => {
+    select(null);
+    setReordering(!reordering);
+  };
+  let label = "Reorder";
+  if (reordering) label = "Done";
+  return h(
+    Button,
+    { small: true, minimal: !reordering, icon: "drag-handle-vertical", active: reordering, onClick },
+    label
+  );
+}
 
-  let controls = null;
-  if (isAdmin && !opening) {
-    controls = h(ButtonGroup, { minimal: true }, [
-      h(Button, { icon: "arrow-up", small: true, disabled: op.position <= 1, onClick: actions.moveUp }),
-      h(Button, { icon: "arrow-down", small: true, disabled: last, onClick: actions.moveDown }),
-      h(Button, { icon: "trash", small: true, intent: "danger", onClick: actions.remove }),
-    ]);
-  }
+function OperationRow({ op, drag }: { op: BoundaryOperation; drag: DragReorder }) {
+  const isAdmin = useIsAdmin();
+  const reordering = useAtomValue(reorderingAtom);
+  const selectedId = useAtomValue(selectedOpIdAtom);
+  const select = useSetAtom(selectOpAtom);
+  const opening = op.position === 0;
+  const selected = selectedId === op.id;
+  const editable = selected && isAdmin && !opening;
+
+  const onSelect = () => {
+    if (reordering) return;
+    if (selected) select(null);
+    else select(op.id);
+  };
+
+  let handle = null;
+  if (reordering && !opening) handle = h(Icon, { icon: "drag-handle-vertical", className: "drag-handle" });
+  let remove = null;
+  if (editable) remove = h(DeleteButton, { op });
   let note = null;
-  if (isAdmin && !opening) {
-    note = h(EditableText, {
-      className: "note",
-      defaultValue: op.note ?? "",
-      placeholder: "Add a note…",
-      onConfirm: actions.setNote,
-    });
+  if (editable) {
+    note = h(NoteEditor, { op });
   } else if (op.note) {
     note = h("div.note", op.note);
   }
   let error = null;
   if (op.error) error = h("div.op-error", op.error);
+  let reshape = null;
+  if (editable) reshape = h(ReshapeControls, { op });
 
-  return h("li.operation", { className: op.operation }, [
-    h("div.op-header", [
-      h("span.position", String(op.position)),
-      h("span.op-name", op.operation),
-      h("span.params", describeParameters(op)),
-      controls,
-    ]),
-    note,
-    error,
+  return h("li.operation-item", { className: dragClasses(op, drag), ...drag.rowProps(op) }, [
+    h(
+      DataCard,
+      { className: "operation-card", selected, selectable: !reordering, onSelect },
+      h("div.op-body", [
+        h("div.op-header", [
+          handle,
+          h("span.op-swatch", { className: op.operation }),
+          h("span.position", String(op.position)),
+          h("span.op-name", op.operation),
+          h("span.params", describeParameters(op)),
+          remove,
+        ]),
+        note,
+        error,
+        reshape,
+      ])
+    ),
   ]);
 }
 
-function useOperationActions(op: BoundaryOperation) {
+function dragClasses(op: BoundaryOperation, drag: DragReorder) {
+  const classes = [];
+  if (drag.dragging === op.id) classes.push("dragging");
+  if (drag.over === op.id && drag.dragging !== op.id) classes.push("drop-target");
+  return classes.join(" ");
+}
+
+/** The note, editable in place; clicks stay out of the card's selection. */
+function NoteEditor({ op }: { op: BoundaryOperation }) {
   const edit = useBoundaryEdit();
-  return {
-    moveUp: () => edit((slug) => editOperation(slug, op.id, { position: op.position - 1 })),
-    moveDown: () => edit((slug) => editOperation(slug, op.id, { position: op.position + 1 })),
-    remove: () => edit((slug) => removeOperation(slug, op.id)),
-    setNote: (note: string) => {
-      if (note === (op.note ?? "")) return;
-      edit((slug) => editOperation(slug, op.id, { note }));
-    },
+  const onConfirm = (note: string) => {
+    if (note === (op.note ?? "")) return;
+    edit((slug) => editOperation(slug, op.id, { note }));
   };
+  return h("div.note", { onClick: stopPropagation }, [
+    h(EditableText, { defaultValue: op.note ?? "", placeholder: "Add a note…", onConfirm }),
+  ]);
+}
+
+/** Save or drop the selected polygon's unsaved reshape. */
+function ReshapeControls({ op }: { op: BoundaryOperation }) {
+  const busy = useAtomValue(busyAtom);
+  const geometry = useSelectedGeometry(op);
+  if (!geometry.edited) return null;
+  return h("div.reshape", { onClick: stopPropagation }, [
+    h(Button, { intent: "primary", small: true, disabled: busy, onClick: geometry.save }, "Save shape"),
+    h(Button, { small: true, onClick: geometry.revert }, "Revert"),
+  ]);
+}
+
+function DeleteButton({ op }: { op: BoundaryOperation }) {
+  const busy = useAtomValue(busyAtom);
+  const edit = useBoundaryEdit();
+  const select = useSetAtom(selectOpAtom);
+  const onClick = async (evt: React.MouseEvent) => {
+    evt.stopPropagation();
+    const ok = await edit((slug) => removeOperation(slug, op.id));
+    if (ok) select(null);
+  };
+  return h(Button, {
+    icon: "trash",
+    small: true,
+    minimal: true,
+    intent: "danger",
+    disabled: busy,
+    title: "Delete operation",
+    onClick,
+  });
+}
+
+/** The selected polygon's unsaved reshape, and saving or dropping it. */
+function useSelectedGeometry(op: BoundaryOperation) {
+  const [edited, setEdited] = useAtom(editedGeometryAtom);
+  const edit = useBoundaryEdit();
+  const save = async () => {
+    if (edited == null) return;
+    const ok = await edit((slug) => editOperation(slug, op.id, { geometry: edited }));
+    if (ok) setEdited(null);
+  };
+  return { edited: edited != null, save, revert: () => setEdited(null) };
+}
+
+interface DragReorder {
+  dragging: number | null;
+  over: number | null;
+  rowProps: (op: BoundaryOperation) => Record<string, any>;
+}
+
+/** Drag a row onto another to take its position. The opening stays put. */
+function useDragReorder(): DragReorder {
+  const reordering = useAtomValue(reorderingAtom);
+  const [dragging, setDragging] = useState<number | null>(null);
+  const [over, setOver] = useState<number | null>(null);
+  const edit = useBoundaryEdit();
+
+  const end = () => {
+    setDragging(null);
+    setOver(null);
+  };
+  const rowProps = (op: BoundaryOperation) => {
+    if (!reordering || op.position === 0) return {};
+    return {
+      draggable: true,
+      onDragStart: (evt: DragEvent) => {
+        // Firefox starts no drag without data
+        evt.dataTransfer.setData("text/plain", String(op.id));
+        evt.dataTransfer.effectAllowed = "move";
+        setDragging(op.id);
+      },
+      onDragEnd: end,
+      onDragOver: (evt: DragEvent) => {
+        if (dragging == null) return;
+        evt.preventDefault();
+        setOver(op.id);
+      },
+      onDrop: (evt: DragEvent) => {
+        evt.preventDefault();
+        const id = dragging;
+        end();
+        if (id == null || id === op.id) return;
+        edit((slug) => editOperation(slug, id, { position: op.position }));
+      },
+    };
+  };
+  return { dragging, over, rowProps };
+}
+
+function stopPropagation(evt: { stopPropagation: () => void }) {
+  evt.stopPropagation();
 }
 
 /* ---------------------------------------------------------------- drawing */
@@ -165,11 +319,21 @@ function DrawSection() {
   const isAdmin = useIsAdmin();
   const [drawing, setDrawing] = useAtom(drawingAtom);
   const draft = useAtomValue(draftAtom);
+  const select = useSetAtom(selectOpAtom);
   if (!isAdmin) return null;
 
+  const toggleDrawing = () => {
+    if (drawing) {
+      setDrawing(false);
+      return;
+    }
+    // A new polygon replaces whatever was selected for editing
+    select(null);
+    setDrawing(true);
+  };
   let body: any = h(
     Button,
-    { icon: "draw", active: drawing, onClick: () => setDrawing(!drawing) },
+    { icon: "draw", active: drawing, onClick: toggleDrawing },
     "Draw a polygon"
   );
   if (drawing) {
@@ -197,7 +361,6 @@ function DraftActions() {
   };
 
   return h("div.draft", [
-    h("p.hint", "Drag the vertices to adjust, then save it as an operation."),
     h(InputGroup, {
       placeholder: "Note, e.g. river gap",
       value: note,
