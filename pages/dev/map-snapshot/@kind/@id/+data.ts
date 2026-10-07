@@ -1,11 +1,13 @@
 import { render } from "vike/abort";
-import { mapSnapshotKey } from "@macrostrat-web/map-snapshots";
+import { mapSnapshotKey } from "~/map-snapshots/spec";
 import { findMapSnapshotSpec, mapSnapshotKinds } from "../../registry";
 
 export interface MapSnapshotPageData {
   kind: string;
   id: string;
-  key: string;
+  /** Not `key`: this object is spread into a component's props, and React
+   * keeps `key` for itself. */
+  snapshotKey: string;
   width: number;
   height: number;
   view: unknown;
@@ -22,7 +24,7 @@ export async function data(pageContext): Promise<MapSnapshotPageData> {
   return {
     kind,
     id,
-    key: mapSnapshotKey(spec),
+    snapshotKey: mapSnapshotKey(spec),
     width: spec.width,
     height: spec.height,
     view,

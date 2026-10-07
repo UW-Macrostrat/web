@@ -104,7 +104,7 @@ import {
 } from "./featured-areas";
 import { HeroContextBar, useFeaturedAreas } from "./hero-carousel";
 import type { HeroData } from "./+data";
-import type { MapSnapshotImage } from "~/map-snapshots/manifest";
+import type { MapSnapshotImage } from "~/map-snapshots/spec";
 
 /* ------------------------------------------------------------ map styling */
 

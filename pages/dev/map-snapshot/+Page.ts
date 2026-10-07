@@ -1,46 +1,56 @@
-/** The cached map views this deployment knows about, for people and for the
- * renderer. The table links each view's snapshot route; the JSON beside it is
- * what `@macrostrat-web/map-snapshot-renderer` reads, so what gets rendered, and the
- * key it is filed under, is always this deployment's answer. */
+/** The cached map views this server knows about, and where each one stands:
+ * drawn, queued, rendering, failed. Loading the page queues anything missing.
+ * Each view links to the snapshot route the server's own headless browser
+ * renders it from — open one to see exactly what the still will show. */
 import h from "@macrostrat/hyper";
 import { useData } from "vike-react/useData";
+import { Tag } from "@blueprintjs/core";
 import { Link } from "~/components";
-import {
-  MAP_SNAPSHOT_INDEX_ELEMENT_ID,
-  type MapSnapshotIndexEntry,
-} from "@macrostrat-web/map-snapshots";
+import type { MapSnapshotStatus } from "~/map-snapshots/spec";
+
+const stateIntents = {
+  ready: "success",
+  stale: "warning",
+  queued: "primary",
+  rendering: "primary",
+  failed: "danger",
+  missing: "none",
+} as const;
 
 export function Page() {
-  const { entries } = useData() as { entries: MapSnapshotIndexEntry[] };
+  const { statuses } = useData() as { statuses: MapSnapshotStatus[] };
 
   return h("div.map-snapshot-index", [
     h("h1", "Map snapshots"),
     h(
       "p",
-      "Map views rendered in a headless browser and served as images until a reader asks for the live map."
+      "Map views this server renders in headless Chromium and serves as images until a reader asks for the live map. Missing and stale ones are drawn in the background when a page — or this one — asks for them."
     ),
     h("table.bp6-html-table.bp6-compact", [
-      h("thead", h("tr", [h("th", "View"), h("th", "Size"), h("th", "Key")])),
       h(
-        "tbody",
-        entries.map((entry) =>
-          h("tr", { key: entry.key }, [
-            h("td", h(Link, { href: entry.route }, `${entry.kind}/${entry.id}`)),
-            h("td", `${entry.width}×${entry.height} @ ${entry.pixelRatios.join(", ")}x`),
-            h("td", h("code", entry.key)),
-          ])
-        )
+        "thead",
+        h("tr", [
+          h("th", "View"),
+          h("th", "State"),
+          h("th", "Rendered"),
+          h("th", "Size"),
+          h("th", "Key"),
+        ])
       ),
+      h("tbody", statuses.map(statusRow)),
     ]),
-    h("script", {
-      type: "application/json",
-      id: MAP_SNAPSHOT_INDEX_ELEMENT_ID,
-      dangerouslySetInnerHTML: { __html: toScriptJSON(entries) },
-    }),
   ]);
 }
 
-/** JSON that can't close the script element it sits in. */
-function toScriptJSON(value: unknown): string {
-  return JSON.stringify(value).replace(/</g, "\\u003c");
+function statusRow(status: MapSnapshotStatus) {
+  const { entry } = status;
+  let detail = null;
+  if (status.error != null) detail = h("div.map-snapshot-error", status.error);
+  return h("tr", { key: entry.key }, [
+    h("td", h(Link, { href: entry.route }, `${entry.kind}/${entry.id}`)),
+    h("td", [h(Tag, { minimal: true, intent: stateIntents[status.state] }, status.state), detail]),
+    h("td", status.renderedAt ?? "—"),
+    h("td", `${entry.width}×${entry.height} @ ${entry.pixelRatios.join(", ")}x`),
+    h("td", h("code", entry.key)),
+  ]);
 }

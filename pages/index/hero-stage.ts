@@ -16,7 +16,7 @@ import h from "./hero.module.sass";
 import { useCallback, useState, type ReactNode } from "react";
 import { AnchorButton, Icon } from "@blueprintjs/core";
 import { clientOnly } from "~/components/lex/client-only";
-import type { MapSnapshotImage } from "~/map-snapshots/manifest";
+import type { MapSnapshotImage } from "~/map-snapshots/spec";
 import { HeroContextBar, useFeaturedAreas, type Carousel } from "./hero-carousel";
 import type { FeaturedArea } from "./featured-areas";
 import type { HeroData } from "./+data";

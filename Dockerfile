@@ -32,6 +32,15 @@ RUN --mount=type=cache,target=/yarn-cache \
 # # Remove rsync
 RUN apt-get remove -y rsync
 
+# Chromium's headless shell, for the cached map views the server draws of
+# itself (src/map-snapshots). The shell only — not full Chromium, Firefox or
+# WebKit — at the build playwright-core expects, with its system libraries.
+# And tini, so Chromium's exited helper processes are reaped (see ENTRYPOINT).
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN yarn playwright-core install --with-deps chromium-headless-shell \
+  && apt-get install -y --no-install-recommends tini \
+  && rm -rf /var/lib/apt/lists/*
+
 # # Now we can run the full copy command
 
 COPY . ./
@@ -42,4 +51,8 @@ EXPOSE 3000
 
 ENV NODE_NO_WARNINGS=1
 
+# A real init as PID 1. Chromium's helpers outlive the browser that started
+# them and are re-parented to PID 1; yarn never reaps them, so without this each
+# render batch would leave zombies behind.
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["yarn", "node", "./dist/server/index.mjs"]

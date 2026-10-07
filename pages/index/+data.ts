@@ -5,11 +5,8 @@ import {
   featuredAreas,
   type FeaturedArea,
 } from "./featured-areas";
-import {
-  loadMapSnapshotManifest,
-  resolveMapSnapshot,
-  type MapSnapshotImage,
-} from "~/map-snapshots/manifest";
+import { resolveMapSnapshots } from "~/map-snapshots/store.server";
+import type { MapSnapshotImage } from "~/map-snapshots/spec";
 import { heroSnapshotSpec } from "./hero-snapshot";
 import {
   fetchColumnAtPoint,
@@ -95,12 +92,17 @@ async function heroData(): Promise<HeroData> {
   return { area, column, snapshots };
 }
 
+/** Every featured area's still, so the carousel can move through them without
+ * the live map. Any the server hasn't drawn yet are queued, and show the cover
+ * photo until they exist. */
 async function heroSnapshots(): Promise<Record<string, MapSnapshotImage | null>> {
-  const manifest = await loadMapSnapshotManifest();
+  const images = await resolveMapSnapshots(featuredAreas.map(heroSnapshotSpec), {
+    complete: true,
+  });
   const snapshots: Record<string, MapSnapshotImage | null> = {};
-  for (const area of featuredAreas) {
-    snapshots[area.id] = resolveMapSnapshot(manifest, heroSnapshotSpec(area));
-  }
+  featuredAreas.forEach((area, i) => {
+    snapshots[area.id] = images[i];
+  });
   return snapshots;
 }
 

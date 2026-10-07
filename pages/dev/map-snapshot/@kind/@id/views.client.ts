@@ -17,7 +17,7 @@ export function MapSnapshotView(props: MapSnapshotPageData) {
 
   return h(MapboxMapProvider, [
     h(View, { view: props.view }),
-    h(MapSnapshotReporter, { snapshotKey: props.key }),
+    h(MapSnapshotReporter, { snapshotKey: props.snapshotKey }),
   ]);
 }
 
