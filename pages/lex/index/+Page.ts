@@ -119,6 +119,11 @@ const dictionaries = [
     title: "Economics",
     text: "Economic uses of geologic materials.",
   },
+   {
+    href: "/lex/lith-match",
+    title: "Lithology matcher",
+    text: "Preview how the column-ingestion importer matches free lithology text to Macrostrat's lithology vocabulary.",
+  },
   {
     href: "/lex/minerals",
     title: "Minerals",
@@ -129,6 +134,7 @@ const dictionaries = [
     title: "Structures",
     text: "Names and descriptions of geologic structures.",
   },
+
 ];
 
 /** One figure in the row above the dictionaries. Linked when there is
