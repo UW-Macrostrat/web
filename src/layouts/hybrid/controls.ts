@@ -153,9 +153,17 @@ export function ActionsPanel({
 
 /** The view menu and the page's links as buttons, at the foot of the content
  * shell's sidebar: what to look at next, beside the map rather than the title. */
-export function SidebarViewLinks({ links = [] }: { links?: HybridLink[] }) {
+export function SidebarViewLinks({
+  links = [],
+  showModeControl = true,
+}: {
+  links?: HybridLink[];
+  showModeControl?: boolean;
+}) {
+  let modeControl = null;
+  if (showModeControl) modeControl = h(LayoutModeControl);
   return h("div.sidebar-view-links", [
-    h(LayoutModeControl),
+    modeControl,
     ...links.map((link) =>
       h(
         AnchorButton,

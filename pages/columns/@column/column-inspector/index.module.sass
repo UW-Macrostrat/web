@@ -7,9 +7,8 @@
   // Selected units take the link color
   --selection-overlay-color: var(--pz-link-color)
 
-// The content slot, in the frame's page-scrolling mode: normal flow, the
-// document scrolls, the footer follows the column — or sits at the bottom of
-// the viewport when the column is short.
+// The content slot, in the frame's page-scrolling mode; the frame adds the
+// footer after it.
 .column-content
   min-width: 0
   flex: 1 1 auto
@@ -17,12 +16,8 @@
   flex-direction: column
 
 .column-view
-  margin: 0 0 3em
+  margin: 0
   padding: 0
-
-.page-footer
-  margin-top: auto
-  padding-top: 2em
 
 /* --------------------------------------------------------------- settings */
 

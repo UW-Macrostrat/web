@@ -64,6 +64,8 @@ export interface ShellProps {
   sidebarLinks?: ReactNode;
   /** See `HybridPage` */
   assistantIdle?: Atom<boolean>;
+  /** The site footer, after the content in page-scroll mode */
+  footer?: ReactNode;
 }
 
 export function LayoutShellView(props: ShellProps) {
@@ -100,6 +102,7 @@ function ContentShell({
   map,
   assistant,
   sidebarLinks,
+  footer,
   mode,
   showAssistant,
 }: ShellProps & { mode: string; showAssistant: boolean }) {
@@ -140,25 +143,62 @@ function ContentShell({
 
   const holder = h("div.content-panel-holder", content);
 
+  const className = classNames(`mode-${mode}`, `scroll-${contentScroll}`, {
+    "has-sidebar": sidebar,
+    "has-inset": inset,
+    "full-width": fullWidth,
+  });
+
+  const headerRegion = h("header.content-header", [
+    h(HeaderRow, { header, breadcrumbs, titleAdornment, controls }),
+    h.if(filterBar != null)("div.header-filters", filterBar),
+  ]);
+
+  if (contentScroll == "page") {
+    // Without a sidebar, its content follows the page's own
+    let afterContent = null;
+    if (!sidebar) {
+      afterContent = h("div.content-after", [assistant, sidebarLinks]);
+    }
+    return h(
+      "div.content-shell",
+      { className },
+      h(PageScrollBody, {
+        headerRegion,
+        holder,
+        sidebarRegion,
+        insetRegion,
+        afterContent,
+        footer,
+      })
+    );
+  }
+
   const body = h(ScrollBody, { holder, sidebar, sidebarRegion, insetRegion });
 
-  return h(
-    "div.content-shell",
-    {
-      className: classNames(`mode-${mode}`, `scroll-${contentScroll}`, {
-        "has-sidebar": sidebar,
-        "has-inset": inset,
-        "full-width": fullWidth,
-      }),
-    },
-    [
-      h("header.content-header", [
-        h(HeaderRow, { header, breadcrumbs, titleAdornment, controls }),
-        h.if(filterBar != null)("div.header-filters", filterBar),
-      ]),
-      body,
-    ]
-  );
+  return h("div.content-shell", { className }, [headerRegion, body]);
+}
+
+/** One tall item: the header, content and footer all scroll together, so the
+ * header can collapse to its bar as the page title passes under it. The
+ * sidebar is a sticky column in the content's row rather than an overlay, so
+ * the row — and the footer after it — clears whichever of the two is taller. */
+function PageScrollBody({
+  headerRegion,
+  holder,
+  sidebarRegion,
+  insetRegion,
+  afterContent,
+  footer,
+}) {
+  return h("div.content-body", [
+    h("div.content-scroll", [
+      headerRegion,
+      h("div.content-main", [holder, sidebarRegion, insetRegion]),
+      afterContent,
+      h.if(footer != null)("div.content-page-footer", footer),
+    ]),
+  ]);
 }
 
 /** Everything below the header scrolls as one, with the scrollbar at the

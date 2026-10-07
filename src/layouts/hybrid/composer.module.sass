@@ -135,9 +135,11 @@
 .content-shell.has-sidebar
   // The header spans the same measure as content + sidebar, so its left edge
   // stays aligned with the content when the sidebar widens the shell.
+  --hybrid-shell-width: calc(var(--hybrid-content-width) + var(--hybrid-sidebar-width) + var(--pz-section-gap, 1.5rem))
+
   .content-header,
   .content-main
-    max-width: calc(var(--hybrid-content-width) + var(--hybrid-sidebar-width) + var(--pz-section-gap, 1.5rem))
+    max-width: var(--hybrid-shell-width)
 
   .content-main
     padding-bottom: 1em
@@ -258,12 +260,68 @@
 
 /* ------------------------------------------------- page-scrolling variant */
 
-// `contentScroll: "page"`: the content grows with itself instead of filling
-// the region, so the region scrolls through one tall item and its footer.
-.content-shell.scroll-page .content-scroll > .content-main
-  height: auto
-  min-height: 100%
-  align-items: flex-start
+// `contentScroll: "page"`: the header, the content's row and the footer all
+// sit in the scroller, in flow (see `PageScrollBody`).
+.content-shell.scroll-page
+  // The page header's bar height (`ui-components`' default), which the sticky
+  // sidebar parks beneath
+  --hybrid-bar-height: 3rem
+
+  // Stretched, so the header's bar spans the window; the rest centre by margin
+  .content-scroll
+    display: flex
+    flex-direction: column
+
+  // The page header's bar and title block take the scroller as their sticky
+  // boundary, so nothing in between may form a box.
+  .content-header,
+  .header-row
+    display: contents
+
+  // The content's gutter and measure, so the header's text lines up with it
+  header:global(.shell-page-header)
+    --page-header-padding-x: 1em
+    --page-header-content-width: calc(var(--hybrid-shell-width) - 2em)
+
+  .content-scroll > .content-main
+    flex: none
+    height: auto
+    min-height: 0
+
+  // In the row, so the row is as tall as the taller of content and sidebar;
+  // sticky, so the map stays in view through a long column.
+  .content-sidebar
+    position: sticky
+    top: calc(var(--hybrid-bar-height) + 1em)
+    align-self: flex-start
+    max-height: calc(100dvh - var(--hybrid-bar-height) - 2em)
+
+// Without a sidebar, the assistant and links follow the content
+.content-after
+  box-sizing: border-box
+  width: 100%
+  max-width: var(--hybrid-shell-width)
+  margin: 0 auto
+  padding: 1em 1em 0
+  display: flex
+  flex-direction: column
+  gap: var(--pz-stack-gap, 1rem)
+
+  &:empty
+    display: none
+
+// At the viewport's bottom when the page is short. Its rule spans the page and
+// sidebar; its links keep the content's width, in line with the content.
+.content-page-footer
+  box-sizing: border-box
+  width: 100%
+  max-width: var(--hybrid-shell-width)
+  margin: auto auto 0
+  padding: 0 1em 2em
+
+.content-shell .content-page-footer > *
+  max-width: var(--hybrid-content-width)
+  margin-bottom: 0
 
 // Narrow: the sidebar stops earning its column.
 @media (max-width: 1000px)

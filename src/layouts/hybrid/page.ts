@@ -21,6 +21,7 @@ import {
 import { useHydrateAtoms } from "jotai/utils";
 import classNames from "classnames";
 import { PageBreadcrumbs, SitePageHeader } from "~/components";
+import { Footer } from "~/layouts/footer";
 
 import h from "./page.module.sass";
 import { FooterOverlayTrigger } from "./chrome";
@@ -130,20 +131,48 @@ function HybridPageInner({
     links,
     showModeControl: !linksInSidebar,
   });
+  // One tall item scrolling with the page: the header and footer scroll too
+  const pageScroll = shell === "content" && contentScroll === "page";
+
   let sidebarLinks: ReactNode = null;
   if (linksInSidebar) {
     sidebarLinks = h(SidebarViewLinks, { links });
+  } else if (pageScroll && links != null && links.length > 0) {
+    // Below the content, the mode menu already being in the header
+    sidebarLinks = h(SidebarViewLinks, { links, showModeControl: false });
   }
+
   // The site header, title inline. A title adornment (the column editor's
   // context) has no slot in it yet, so those pages keep the parts-built row.
+  // Scrolling with the page, it opens with a large title that collapses into
+  // the bar, as on content pages, with active filters beneath the title.
   let header: ReactNode = null;
-  if (titleAdornment == null) {
+  let headerFilterBar = filterBar;
+  if (titleAdornment == null && pageScroll) {
+    header = h(
+      SitePageHeader,
+      {
+        variant: "hybrid",
+        width: "constrained",
+        actions: controls,
+        collapseActions: "narrow",
+        className: "shell-page-header",
+      },
+      filterBar
+    );
+    headerFilterBar = null;
+  } else if (titleAdornment == null) {
     header = h(SitePageHeader, {
       variant: "compact",
       actions: controls,
       collapseActions: "narrow",
       className: "shell-page-header",
     });
+  }
+
+  let footer: ReactNode = null;
+  if (pageScroll) {
+    footer = h(Footer, { className: "page-footer" });
   }
 
   // The map shell's breadcrumbs sit in a narrow floating panel; the split
@@ -162,11 +191,12 @@ function HybridPageInner({
     }),
     titleAdornment,
     controls,
-    filterBar,
+    filterBar: headerFilterBar,
     map,
     assistant,
     assistantIdle,
     sidebarLinks,
+    footer,
   });
   if (wrap != null) {
     shellView = wrap(shellView);

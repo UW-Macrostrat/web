@@ -39,7 +39,6 @@ import {
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
-import { Footer } from "~/layouts/footer";
 import {
   columnHashStateAtom,
   columnInfoAtom,
@@ -289,7 +288,6 @@ function ColumnContentPane({ columnInfo }) {
         )
       )
     ),
-    h(Footer, { className: "page-footer" }),
   ]);
 }
 
