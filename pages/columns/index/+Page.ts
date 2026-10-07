@@ -8,7 +8,6 @@
  */
 
 import {
-  AnchorButton,
   Button,
   ButtonGroup,
   Icon,
@@ -726,8 +725,10 @@ function ColumnRowCard({ data }) {
     // Inside the mode a plain click toggles — same as a footprint click on the
     // map, and the whole point of entering the mode. Modifier-clicks select
     // outside it too, so a selection can be started without reaching for the
-    // mode toggle first.
+    // mode toggle first. Vike routes any anchor click from the document and
+    // ignores `preventDefault`, so the click must not get that far.
     evt.preventDefault();
+    evt.stopPropagation();
     selectColumn(col_id, { additive: additive || selectionMode, range });
   };
 
@@ -890,19 +891,10 @@ function ColumnAssistant() {
 /** The side panel's standing content, under whatever the selection shows. */
 function AssistantLinks() {
   return h("div.assistant-links", [
-    h(ButtonGroup, { vertical: true, className: "assistant-buttons" }, [
-      h(
-        AnchorButton,
-        {
-          href: "/projects",
-          minimal: true,
-          small: true,
-          icon: "projects",
-          rightIcon: "arrow-right",
-        },
-        "Browse projects"
-      ),
-      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
-    ]),
+    h(
+      ButtonGroup,
+      { vertical: true, className: "assistant-buttons" },
+      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart")
+    ),
   ]);
 }

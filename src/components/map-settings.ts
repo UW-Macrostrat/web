@@ -70,8 +70,17 @@ export function useInsetMapStyleProps() {
 }
 
 /** The basemap and labels controls, plus any map-specific layer toggles passed
- * as children, behind a small settings button. */
-export function MapSettingsButton({ children }: { children?: ReactNode }) {
+ * as children and any further `sections`, behind a small settings button.
+ * `iconOnly` drops the label, for a button floating over the map. */
+export function MapSettingsButton({
+  children,
+  sections,
+  iconOnly = false,
+}: {
+  children?: ReactNode;
+  sections?: ReactNode;
+  iconOnly?: boolean;
+}) {
   const [settings, setSettings] = useInsetMapSettings();
   const { basemap, showLabels } = settings ?? defaultInsetMapSettings;
 
@@ -99,7 +108,13 @@ export function MapSettingsButton({ children }: { children?: ReactNode }) {
       }),
     ]),
     layerSection,
+    sections,
   ]);
+
+  let text = "Map settings";
+  if (iconOnly) {
+    text = undefined;
+  }
 
   return h(PopoverNext, {
     content,
@@ -109,7 +124,8 @@ export function MapSettingsButton({ children }: { children?: ReactNode }) {
         ...targetProps,
         active: isOpen,
         icon: "cog",
-        text: "Map settings",
+        text,
+        title: "Map settings",
         minimal: true,
         small: true,
         className: "map-settings-button",
@@ -133,4 +149,30 @@ export function MapSettingsBar({
     h(MapSettingsButton, null, settings),
     h("div.map-settings-bar-extra", children),
   ]);
+}
+
+/** A titled block in the settings popover, for page-specific controls. */
+export function MapSettingsSection({
+  title,
+  children,
+}: {
+  title: string;
+  children?: ReactNode;
+}) {
+  return h("div.settings-section", [h("h4", title), children]);
+}
+
+/** The settings button, floating over an inset map's top edge rather than
+ * taking a strip beneath it. */
+export function MapSettingsOverlay({
+  settings,
+  sections,
+}: {
+  settings?: ReactNode;
+  sections?: ReactNode;
+}) {
+  return h(
+    "div.map-settings-overlay",
+    h(MapSettingsButton, { sections, iconOnly: true }, settings)
+  );
 }

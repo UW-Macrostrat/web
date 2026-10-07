@@ -13,12 +13,11 @@
 // height, so neither keeps a heading's margins.
 .windowed-context-bar
   position: sticky
-  // `top: 0` is already below the floating toolbar's mask band: sticky offsets
-  // are measured from the scrollport's *padding* edge, and the floating style
-  // pads the scroll body by exactly `--data-panel-top-margin` (the masked
-  // height). Adding that token here double-counted it and parked both header
-  // levels 64px too low.
-  top: 0
+  // When the panel body scrolls, `top: 0` is already below the floating
+  // toolbar: sticky offsets are measured from the scrollport's *padding* edge,
+  // which the floating style sets at `--data-panel-top-margin`. When an
+  // ancestor scrolls instead (the hybrid shell), it sets the offset here.
+  top: var(--windowed-sticky-top, 0px)
   z-index: 4
   display: flex
   flex-direction: row
@@ -79,6 +78,6 @@
   font-size: var(--pz-font-size-md)
   margin: 0
   position: sticky
-  top: var(--windowed-context-height, 1.75rem)
+  top: calc(var(--windowed-sticky-top, 0px) + var(--windowed-context-height, 1.75rem))
   z-index: 3
   border-bottom: 1px solid var(--pz-panel-rule-color)

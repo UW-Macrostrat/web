@@ -80,13 +80,13 @@ export function layoutModeLabel(
 
 const defaultItemName = "List";
 
-/** How the content shell scrolls.
+/** How the content shell scrolls. Either way, the region below the header
+ * scrolls, with its scrollbar at the window's edge and the sidebar held still.
  *
- *  - `panel` — viewport-locked; the content (a data panel) is its own scroll
- *    region, as on the column list page. Floating toolbars pin to its top.
- *  - `page`  — the document scrolls, the sidebar sticks, and the scrollbar sits
- *    at the far right of the page: a whole-page feel for a single tall item
- *    such as a stratigraphic column. */
+ *  - `panel` — the content is held to the region's height; a data panel
+ *    overflows it, its floating toolbar pinned to the region's top.
+ *  - `page`  — the content grows with itself: a single tall item such as a
+ *    stratigraphic column, followed by the site footer. */
 export type ContentScrollMode = "panel" | "page";
 
 export function shellForMode(mode: LayoutMode): LayoutShell {

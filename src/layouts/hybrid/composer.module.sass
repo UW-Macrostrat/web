@@ -168,63 +168,93 @@
   background-color: var(--pz-panel-background-color, var(--panel-background-color))
   box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
 
+// A column, so a card that scrolls its own body can shrink to the room left.
 .sidebar-assistant
   flex: 0 1 auto
   min-height: 0
   overflow-y: auto
+  display: flex
+  flex-direction: column
+
+/* ------------------------------------------------ panel-scrolling variant */
+
+// Everything below the header scrolls as one region, with its scrollbar at the
+// window's edge (see `ScrollBody`).
+.content-body
+  position: relative
+  flex: 1 1 auto
+  min-height: 0
+  width: 100%
+
+// The same gutter on both, so the overlay's measure lines up with the
+// scroller's whether or not the platform's scrollbars take up room.
+.content-scroll,
+.content-overlay
+  position: absolute
+  inset: 0
+  scrollbar-gutter: stable
+
+.content-scroll
+  overflow-y: auto
+
+.content-overlay
+  overflow: hidden
+  pointer-events: none
+
+  .content-sidebar,
+  .content-inset-map
+    pointer-events: auto
+
+// Exactly the scroller's height, so content that fills its pane still does.
+.content-scroll > .content-main,
+.content-overlay > .content-main
+  box-sizing: border-box
+  height: 100%
+  margin: 0 auto
+
+.sidebar-spacer
+  flex: 0 1 var(--hybrid-sidebar-width)
+  min-width: 0
+
+.content-shell.has-sidebar .content-spacer
+  flex: 1 1 var(--hybrid-content-width)
+  min-width: 0
+
+// A floating-toolbar data panel doesn't scroll itself here; the region does.
+// Its toolbar band sticks to the region's top over an opaque underlay, and the
+// windowed list's sticky headers park beneath that band.
+.content-shell.scroll-panel .content-panel-holder [class*="toolbar-style-floating"]
+  flex: 1 0 auto
+  height: auto
+  --windowed-sticky-top: var(--data-panel-top-margin)
+
+  [class*="data-panel-top-area"]
+    position: sticky
+    z-index: 5
+    box-sizing: border-box
+    height: var(--data-panel-top-margin)
+    background-color: var(--pz-background-color, var(--background-color))
+
+  [class*="data-panel-body"]
+    flex: 1 0 auto
+    overflow: visible
+    padding-top: 0
+    mask-image: none
 
 /* ------------------------------------------------- page-scrolling variant */
 
-// `contentScroll: "page"`: the document scrolls instead of the content. The
-// shell grows with its content, the sidebar sticks below the top edge, and the
-// page's own footer sits at the end of the content in normal flow.
-.content-shell.scroll-page
+// `contentScroll: "page"`: the content grows with itself instead of filling
+// the region, so the region scrolls through one tall item and its footer.
+.content-shell.scroll-page .content-scroll > .content-main
   height: auto
-  min-height: 100vh
-  overflow: visible
-
-  .content-header
-    position: sticky
-    top: 0
-    z-index: 5
-    margin-top: 0
-    padding-top: 1.5em
-    padding-bottom: 0.75em
-    background-color: var(--pz-background-color, var(--background-color))
-
-    // Content passing beneath the header fades out under it.
-    &::after
-      content: ""
-      position: absolute
-      left: 0
-      right: 0
-      bottom: -1em
-      height: 1em
-      pointer-events: none
-      background: linear-gradient(to bottom, var(--pz-background-color, var(--background-color)), transparent)
-
-  // Grows to fill the viewport, so a page's footer (at the end of its content)
-  // sits at the bottom even when the content is short.
-  .content-main
-    flex: 1 1 auto
-    min-height: 0
-    align-items: flex-start
-
-  .content-panel-holder
-    display: flex
-    flex-direction: column
-    min-height: 0
-    align-self: stretch
-
-  .content-sidebar
-    position: sticky
-    top: 4.5em
-    max-height: calc(100vh - 5.5em)
+  min-height: 100%
+  align-items: flex-start
 
 // Narrow: the sidebar stops earning its column.
 @media (max-width: 1000px)
   .content-shell.has-sidebar
-    .content-sidebar
+    .content-sidebar,
+    .sidebar-spacer
       display: none
 
 /* ================================ split shell ============================ */

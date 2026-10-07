@@ -1,4 +1,8 @@
-import { ExtUnit, HybridScaleType } from "@macrostrat/column-views";
+import {
+  ExtUnit,
+  HybridScaleType,
+  LegendPanelHeader,
+} from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
 import { ReactNode, useEffect, useRef } from "react";
 import styles from "./index.module.sass";
@@ -13,7 +17,6 @@ import {
   FormGroup,
   HTMLSelect,
   NumericInput,
-  PopoverNext,
 } from "@blueprintjs/core";
 import { useHydrateAtoms } from "jotai/utils";
 import {
@@ -437,7 +440,6 @@ export function ColumnSettingsPanel() {
   }
 
   return h("div.column-settings-panel", [
-    h("h3", "Settings"),
     h(AxisTypeControl),
     h(FacetControl),
     // What the navigation map shows, rather than how the column is drawn — but
@@ -462,23 +464,31 @@ export function ColumnSettingsPanel() {
   ]);
 }
 
-/** The settings panel behind a toolbar button, so display controls sit apart
- * from the column's description in the assistant pane. */
-export function ColumnSettingsButton() {
-  return h(PopoverNext, {
+/** Whether the view settings are open beneath the map. Read outside the
+ * hybrid frame's scope and handed in; it lasts across column-to-column
+ * navigation, like the settings themselves. */
+export const viewSettingsOpenAtom = atom(false);
+
+/** Opens the view settings beneath the map, in place of the column's
+ * description or the selected unit. */
+export function ViewSettingsButton({ open, setOpen }) {
+  return h(Button, {
+    icon: "settings",
+    text: "View settings",
     minimal: true,
-    placement: "bottom-end",
-    content: h("div.settings-popover", h(ColumnSettingsPanel)),
-    renderTarget: ({ isOpen, ...targetProps }) =>
-      h(Button, {
-        ...targetProps,
-        icon: "settings",
-        minimal: true,
-        small: true,
-        active: isOpen,
-        title: "Column display settings",
-      }),
+    small: true,
+    active: open,
+    onClick: () => setOpen(!open),
   });
+}
+
+/** The view settings in the assistant slot beneath the map, as a card headed
+ * like the unit details panel. */
+export function ViewSettingsPanel({ onClose }) {
+  return h("div.view-settings-panel", [
+    h(LegendPanelHeader, { title: "View settings", onClose }),
+    h("div.view-settings-content", h(ColumnSettingsPanel)),
+  ]);
 }
 
 function ClearButton({ value, setValue, disabled = null }) {
