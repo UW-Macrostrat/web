@@ -266,6 +266,11 @@ export const visibleRowsAtom = atom<ColumnRow[]>([]);
  * never read them back. */
 export const selectedColumnsAtom = atom<number[]>([]);
 
+/** Nothing selected, so the assistant has nothing to show (`HybridPage`). */
+export const assistantIdleAtom = atom(
+  (get) => get(selectedColumnsAtom).length === 0
+);
+
 /** Anchor for shift-range selection (the last plain or additive click). */
 const selectionAnchorAtom = atom<number | null>(null);
 

@@ -8,8 +8,6 @@
  */
 
 import {
-  Button,
-  ButtonGroup,
   Icon,
   Spinner,
   Switch,
@@ -37,14 +35,18 @@ import { useData } from "vike-react/useData";
 import { navigate } from "vike/client/router";
 import classNames from "classnames";
 
-import { DevLinkButton, Link } from "~/components";
+import { Link } from "~/components";
 import { LinkCard } from "~/components/cards";
 import { LithologyTag } from "~/components/lex/tag";
 import {
   autoLoadPagesForItems,
   createWindowedScrollBody,
 } from "~/components/data-view";
-import { HybridContentFooter, HybridPage } from "~/layouts/hybrid";
+import {
+  HybridContentFooter,
+  HybridPage,
+  type HybridLink,
+} from "~/layouts/hybrid";
 import {
   projectIDParam,
   ProjectFilterControl,
@@ -79,6 +81,7 @@ import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   addFilterAtom,
   allRowsAtom,
+  assistantIdleAtom,
   clearAllFiltersAtom,
   columnFilterAtom,
   filterKeyFromType,
@@ -246,6 +249,15 @@ const columnSpec = [
   { key: "t_units", name: "Units", dataType: "integer" },
 ];
 
+const columnListLinks: HybridLink[] = [
+  {
+    label: "Correlation chart",
+    href: "/columns/correlation",
+    icon: "comparison",
+    tag: "Beta",
+  },
+];
+
 export function Page({ linkPrefix = "/" }) {
   const data = useData();
   const { allColumnGroups, projects } = data;
@@ -275,9 +287,11 @@ export function Page({ linkPrefix = "/" }) {
         // Inside the frame's jotai scope, so it sees the live filters.
         wrap: (node) => h(ColumnScopeSync, { adopted: scope.adopted }, node),
         actions: h(LoginButton),
+        links: columnListLinks,
         content: h(ColumnList),
         map: h(ColumnListMapSlot),
         assistant: h(ColumnAssistant),
+        assistantIdle: assistantIdleAtom,
       })
     )
   );
@@ -832,7 +846,6 @@ function ColumnFilterItem({ data }: { data: ColumnFilterDef & any }) {
 function ColumnAssistant() {
   const selectedIDs = useAtomValue(selectedColumnsAtom);
   const rows = useAtomValue(allRowsAtom);
-  const visible = useAtomValue(visibleRowsAtom);
   const columnHref = useColumnHref();
 
   const selected = useMemo(
@@ -842,12 +855,10 @@ function ColumnAssistant() {
 
   if (selected.length === 0) {
     return h("div.assistant", [
-      h("h2", "Columns"),
       h(
         "p.assistant-empty",
-        `${visible.length} of ${rows.length} columns shown. Select one in the list or on the map to see its details.`
+        "Select a column in the list or on the map to see its details."
       ),
-      h(AssistantLinks),
     ]);
   }
 
@@ -860,7 +871,6 @@ function ColumnAssistant() {
         "p.assistant-empty",
         "Turn on “Only selected” to narrow the list to these columns."
       ),
-      h(AssistantLinks),
     ]);
   }
 
@@ -878,23 +888,7 @@ function ColumnAssistant() {
     }),
     h(
       "p.assistant-link",
-      h(
-        Link,
-        { href: columnHref(row.col_id) },
-        "Open column page"
-      )
-    ),
-    h(AssistantLinks),
-  ]);
-}
-
-/** The side panel's standing content, under whatever the selection shows. */
-function AssistantLinks() {
-  return h("div.assistant-links", [
-    h(
-      ButtonGroup,
-      { vertical: true, className: "assistant-buttons" },
-      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart")
+      h(Link, { href: columnHref(row.col_id) }, "Open column page")
     ),
   ]);
 }

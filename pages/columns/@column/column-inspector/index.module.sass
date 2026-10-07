@@ -136,8 +136,12 @@
     align-items: baseline
     gap: 0.5em
 
+// One action per row, left-aligned
 .column-actions
   margin-top: 1em
+  display: flex
+  flex-direction: column
+  align-items: flex-start
 
 // The one piece of assistant content that is a card: the selected unit.
 .unit-details-panel

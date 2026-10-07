@@ -1,5 +1,10 @@
 @use "~/styles/type"
 
+// How far the sticky headers reach past the list's sides, so the shadows of
+// cards scrolling beneath them don't show beside them. Within the panel's
+// padding.
+$header-bleed: 8px
+
 .windowed-root
   position: relative
   width: 100%
@@ -24,8 +29,8 @@
   align-items: center
   gap: var(--pz-inline-gap)
   @include type.section-heading
-  margin: 0
-  padding: 0 var(--pz-space-2)
+  margin: 0 (-$header-bleed)
+  padding: 0 calc(var(--pz-space-2) + #{$header-bleed})
   background-color: var(--pz-background-color)
   border-bottom: 1px solid var(--pz-border-color)
 
@@ -67,7 +72,7 @@
   flex-direction: row
   align-items: center
   gap: var(--pz-inline-gap)
-  padding: 0 var(--pz-space-2)
+  padding: 0 calc(var(--pz-space-2) + #{$header-bleed})
   overflow: hidden
   background-color: var(--pz-background-color)
 
@@ -76,7 +81,7 @@
 .windowed-group-header
   @include type.subsection-heading
   font-size: var(--pz-font-size-md)
-  margin: 0
+  margin: 0 (-$header-bleed)
   position: sticky
   top: calc(var(--windowed-sticky-top, 0px) + var(--windowed-context-height, 1.75rem))
   z-index: 3

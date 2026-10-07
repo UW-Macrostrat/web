@@ -12,7 +12,12 @@
 
 import { useMemo, type ReactNode } from "react";
 import { OverlaysProvider } from "@blueprintjs/core";
-import { Provider, useAtomValue, type WritableAtom } from "jotai";
+import {
+  Provider,
+  useAtomValue,
+  type Atom,
+  type WritableAtom,
+} from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import classNames from "classnames";
 import { PageBreadcrumbs, SitePageHeader } from "~/components";
@@ -20,11 +25,13 @@ import { PageBreadcrumbs, SitePageHeader } from "~/components";
 import h from "./page.module.sass";
 import { FooterOverlayTrigger } from "./chrome";
 import { LayoutShellView } from "./composer";
-import { ActionsPanel } from "./controls";
+import { ActionsPanel, SidebarViewLinks, type HybridLink } from "./controls";
 import {
   buildCapabilities,
   capabilitiesAtom,
   contentScrollAtom,
+  hasSidebar,
+  layoutModeAtom,
   layoutShellAtom,
   type LayoutCapabilities,
 } from "./state";
@@ -32,12 +39,19 @@ import {
 export interface HybridPageProps {
   /** Page-specific controls, shown left of the frame's own layout controls. */
   actions?: ReactNode;
+  /** Other views of the subject: buttons beside the view menu in the
+   * sidebar, or entries in that menu where there's no sidebar. */
+  links?: HybridLink[];
   /** Shown immediately after the page title (see `LayoutShellView`). */
   titleAdornment?: ReactNode;
   capabilities?: Partial<LayoutCapabilities>;
   content?: ReactNode;
   map?: ReactNode;
   assistant?: ReactNode;
+  /** True while the assistant has nothing to show (e.g. no selection), read
+   * in the frame's scope. The map shells then drop its floating panel. Derived
+   * state rather than a report from the assistant, which that panel unmounts. */
+  assistantIdle?: Atom<boolean>;
   /** Active filters and the like: a second header row above the content, at
    * the content's width. Render nothing when there's nothing to show. */
   filterBar?: ReactNode;
@@ -91,10 +105,12 @@ function HydrateAtoms({ atoms, children }) {
 
 function HybridPageInner({
   actions,
+  links,
   titleAdornment,
   content,
   map,
   assistant,
+  assistantIdle,
   filterBar,
   wrap,
   className,
@@ -105,7 +121,19 @@ function HybridPageInner({
   // The map and split shells put the header in a narrow panel, where labels
   // and the full-size trail wrap it onto several lines
   const compact = shell !== "content";
-  const controls = h(HeaderControls, { actions, compact });
+  // With a sidebar, the view menu and links sit at its foot instead
+  const mode = useAtomValue(layoutModeAtom);
+  const linksInSidebar = shell === "content" && hasSidebar(mode);
+  const controls = h(HeaderControls, {
+    actions,
+    compact,
+    links,
+    showModeControl: !linksInSidebar,
+  });
+  let sidebarLinks: ReactNode = null;
+  if (linksInSidebar) {
+    sidebarLinks = h(SidebarViewLinks, { links });
+  }
   // The site header, title inline. A title adornment (the column editor's
   // context) has no slot in it yet, so those pages keep the parts-built row.
   let header: ReactNode = null;
@@ -137,6 +165,8 @@ function HybridPageInner({
     filterBar,
     map,
     assistant,
+    assistantIdle,
+    sidebarLinks,
   });
   if (wrap != null) {
     shellView = wrap(shellView);
@@ -165,6 +195,11 @@ function HybridPageInner({
  * themselves — a sticky bar in the content shell, `MapAreaContainer`'s floating
  * navbar in the map shell — which is why they're handed down as a part rather
  * than an assembled header. */
-function HeaderControls({ actions, compact = false }) {
-  return h([actions, h(ActionsPanel, { compact })]);
+function HeaderControls({
+  actions,
+  compact = false,
+  links = [],
+  showModeControl = true,
+}) {
+  return h([actions, h(ActionsPanel, { compact, links, showModeControl })]);
 }

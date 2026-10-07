@@ -1,7 +1,10 @@
 import h from "./main.module.sass";
-import { DataField, ExpansionPanel } from "@macrostrat/data-components";
+import {
+  DataField,
+  ExpansionPanel,
+  IntervalAgeRange,
+} from "@macrostrat/data-components";
 import { BaseMapReference, MapReference } from "~/components/map-info";
-import { AgeRange, IntervalProportions } from "@macrostrat/column-views";
 import { Icon } from "@blueprintjs/core";
 import { useAtomValue } from "jotai";
 import { infoMarkerPositionAtom, useAppState } from "../../app-state";
@@ -180,36 +183,27 @@ function processComments(comments) {
  * Macrostrat had dated the unit. */
 function AgeField({ source }) {
   const { age, b_int, t_int } = source;
-  const b_age = b_int?.b_age;
-  const t_age = t_int?.t_age;
   const hasIntervals = b_int?.int_id != null || t_int?.int_id != null;
-  const singleIntervalAgeRange =
-    hasIntervals && b_int?.int_id === t_int?.int_id;
 
   if (!age && !hasIntervals) return null;
 
   let described = null;
-  let range = null;
-
   if (age) {
-    if (b_age != null && t_age != null && !singleIntervalAgeRange) {
-      range = h(AgeRange, { data: { b_age, t_age } });
-    }
-
     described = h("div.described-age", h("span.age-text", age));
   }
 
-  let intervals = null;
   let resolved = null;
   if (hasIntervals) {
-    let vals = { b_int_id: b_int?.int_id, t_int_id: t_int?.int_id };
-    intervals = h(IntervalProportions, {
-      unit: vals,
-      showAgeRange: singleIntervalAgeRange,
-    });
-  }
-  if (intervals != null || range != null) {
-    resolved = h("div.resolved-age", [intervals, " ", range]);
+    const unit = {
+      b_int_id: b_int?.int_id,
+      t_int_id: t_int?.int_id,
+      b_age: b_int?.b_age,
+      t_age: t_int?.t_age,
+    };
+    resolved = h(
+      "div.resolved-age",
+      h(IntervalAgeRange, { unit, flavor: "ages", verbose: true })
+    );
   }
 
   return h(

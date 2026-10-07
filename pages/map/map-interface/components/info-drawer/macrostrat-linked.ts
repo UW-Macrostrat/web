@@ -9,13 +9,9 @@ import {
   Parenthetical,
   useInteractionProps,
   isClickable,
+  IntervalAgeRange,
 } from "@macrostrat/data-components";
-import {
-  AgeField,
-  ThicknessField,
-  IntervalProportions,
-  Duration,
-} from "@macrostrat/column-views";
+import { ThicknessField, Duration } from "@macrostrat/column-views";
 import h from "./main.module.sass";
 import type { ReactNode } from "react";
 
@@ -109,9 +105,9 @@ function MatchedUnitAge({ source }) {
     t_age,
   };
 
-  return h(AgeField, { unit }, [
+  return h(DataField, { label: "Age" }, [
+    h(IntervalAgeRange, { unit, flavor: "ages", verbose: true }),
     h(Parenthetical, h(Duration, { value: b_age - t_age })),
-    h(IntervalProportions, { unit }),
   ]);
 }
 

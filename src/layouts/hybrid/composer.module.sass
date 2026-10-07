@@ -80,6 +80,7 @@
 // The panel is the scroll region; it holds its own floating toolbar and its
 // `contentFooter` (load progress + the real site footer).
 .content-panel-holder
+  container: hybrid-list / inline-size
   position: relative
   flex: 1 1 auto
   min-width: 0
@@ -164,7 +165,7 @@
   width: 100%
   aspect-ratio: 4 / 3
   overflow: hidden
-  border-radius: var(--pz-radius-md, 6px)
+  border-radius: var(--pz-radius-lg)
   background-color: var(--pz-panel-background-color, var(--panel-background-color))
   box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
 
@@ -241,6 +242,20 @@
     padding-top: 0
     mask-image: none
 
+// A narrow list (the split shell's panel) keeps the toolbar on one row: any
+// control led by an icon drops its text, and dropdown carets go.
+@container hybrid-list (max-width: 40rem)
+  [class*="data-panel-toolbar-content"]
+    :global(.bp6-button):has(> :global(.bp6-icon):first-child) > :global(.bp6-button-text),
+    :global(.bp6-tag):has(> :global(.bp6-icon):first-child) > :global(.bp6-text-overflow-ellipsis),
+    :global(.bp6-icon-caret-down)
+      display: none
+
+    // The search field yields what's left; the library holds every item rigid
+    [class*="toolbar-item"]:has(:global(.bp6-input-group))
+      flex: 1 1 auto
+      min-width: 0
+
 /* ------------------------------------------------- page-scrolling variant */
 
 // `contentScroll: "page"`: the content grows with itself instead of filling
@@ -287,6 +302,12 @@
 
 // One line: the trail ellipsizes rather than the controls wrapping under it
 .split-header
+  // The page header's bar is sized for a page top; here it need only hold the
+  // trail. Qualified to outrank the site header's own values; the class is the
+  // unscoped one `HybridPage` sets.
+  header:global(.shell-page-header)
+    --page-header-bar-height: 1.75rem
+
   .header-row
     flex: 1 1 auto
     min-width: 0
@@ -297,6 +318,16 @@
 .split-list
   flex: 1 1 auto
   min-height: 0
+  container: hybrid-list / inline-size
+
+  // The data panel scrolls itself here; its floating toolbar gets the same
+  // opaque underlay as in the content shell, over the band the body is padded
+  // by, so cards don't show around the toolbar.
+  [class*="toolbar-style-floating"] [class*="data-panel-top-area"]
+    z-index: 5
+    box-sizing: border-box
+    height: var(--data-panel-top-margin)
+    background-color: var(--pz-background-color, var(--background-color))
   // Without this the panel's rows set a min-content floor and the scroll body
   // overflows the fixed panel width.
   min-width: 0

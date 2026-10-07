@@ -167,10 +167,6 @@ function ColumnPageFrame({
         { status: columnInfo.status },
         h(ColumnUnitLinks, { columnInfo }, node)
       ),
-    actions: h(ViewSettingsButton, {
-      open: settingsOpen,
-      setOpen: setSettingsOpen,
-    }),
     // Active filters sit in a second header row above the column
     filterBar: h([
       h(ProjectFilterTag),
@@ -184,7 +180,7 @@ function ColumnPageFrame({
       project,
       columnProjects,
       settingsOpen,
-      onCloseSettings: () => setSettingsOpen(false),
+      setSettingsOpen,
     }),
   });
 }
@@ -461,14 +457,14 @@ function ColumnAssistantPane({
   project,
   columnProjects,
   settingsOpen,
-  onCloseSettings,
+  setSettingsOpen,
 }) {
   const { units } = columnInfo;
   const { selectedUnit, setSelectedUnitID } = useColumnSelection();
 
   // Opened deliberately, so it takes the slot over a selected unit
   if (settingsOpen) {
-    return h(ViewSettingsPanel, { onClose: onCloseSettings });
+    return h(ViewSettingsPanel, { onClose: () => setSettingsOpen(false) });
   }
 
   if (selectedUnit != null) {
@@ -486,10 +482,15 @@ function ColumnAssistantPane({
       })
     );
   }
-  return h(ColumnInfoPanel, { data: columnInfo, project, columnProjects });
+  return h(ColumnInfoPanel, {
+    data: columnInfo,
+    project,
+    columnProjects,
+    onOpenSettings: () => setSettingsOpen(true),
+  });
 }
 
-function ColumnInfoPanel({ data, project, columnProjects }) {
+function ColumnInfoPanel({ data, project, columnProjects, onOpenSettings }) {
   const setFacet = useSetFacet();
   return h("div.column-assistant", [
     h(ColumnBasicInfo, { data, project, columnProjects }),
@@ -518,6 +519,7 @@ function ColumnInfoPanel({ data, project, columnProjects }) {
         text: "Edit units",
         href: `/columns/${data.col_id}/edit`,
       }),
+      h(ViewSettingsButton, { onClick: onOpenSettings }),
     ]),
   ]);
 }

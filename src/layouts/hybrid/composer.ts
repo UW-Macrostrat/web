@@ -13,7 +13,7 @@
  * layout mode picks which shell gets it.
  */
 
-import { useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtomValue, useSetAtom, type Atom } from "jotai";
 import classNames from "classnames";
 import type { ReactNode } from "react";
 import { Button } from "@blueprintjs/core";
@@ -32,6 +32,8 @@ import {
   showAssistantAtom,
   type LayoutMode,
 } from "./state";
+
+const neverIdleAtom = atom(false);
 
 const MapShell = onDemand(() =>
   import("./map-shell.client").then((mod) => mod.MapShell)
@@ -58,18 +60,25 @@ export interface ShellProps {
   filterBar?: ReactNode;
   map?: ReactNode;
   assistant?: ReactNode;
+  /** The view menu and page links, at the foot of the content sidebar */
+  sidebarLinks?: ReactNode;
+  /** See `HybridPage` */
+  assistantIdle?: Atom<boolean>;
 }
 
 export function LayoutShellView(props: ShellProps) {
   const shell = useAtomValue(layoutShellAtom);
   const mode = useAtomValue(layoutModeAtom);
   const showAssistant = useAtomValue(showAssistantAtom);
+  // An idle assistant isn't worth a panel floating over the map
+  const assistantIdle = useAtomValue(props.assistantIdle ?? neverIdleAtom);
+  const showFloatingAssistant = showAssistant && !assistantIdle;
 
   if (shell === "map") {
-    return h(MapShell, { ...props, mode, showAssistant });
+    return h(MapShell, { ...props, mode, showAssistant: showFloatingAssistant });
   }
   if (shell === "split") {
-    return h(SplitShell, { ...props, showAssistant });
+    return h(SplitShell, { ...props, showAssistant: showFloatingAssistant });
   }
   return h(ContentShell, { ...props, mode, showAssistant });
 }
@@ -90,6 +99,7 @@ function ContentShell({
   filterBar,
   map,
   assistant,
+  sidebarLinks,
   mode,
   showAssistant,
 }: ShellProps & { mode: string; showAssistant: boolean }) {
@@ -115,6 +125,7 @@ function ContentShell({
         h(ModeSwitchButton, { target: "content-inset", icon: "minimize" }),
       ]),
       assistantRegion,
+      sidebarLinks,
     ]);
   }
 

@@ -150,6 +150,10 @@ $group-height: 34px
   flex: 1 1 auto
   min-width: 10rem
 
+  // In the frame's narrow list panel (see `hybrid-list`)
+  @container hybrid-list (max-width: 40rem)
+    min-width: 6rem
+
 .filter-toggle
   display: flex
   flex-direction: column
@@ -221,15 +225,6 @@ $group-height: 34px
 
 .assistant-link
   margin: var(--pz-paragraph-spacing) 0 0
-
-.assistant-links
-  margin-top: var(--pz-stack-gap)
-  display: flex
-  flex-direction: column
-  gap: var(--pz-stack-gap)
-
-.assistant-buttons
-  align-items: flex-start
 
 /* ------------------------------------------------------------ filter tags */
 

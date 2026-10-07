@@ -469,16 +469,15 @@ export function ColumnSettingsPanel() {
  * navigation, like the settings themselves. */
 export const viewSettingsOpenAtom = atom(false);
 
-/** Opens the view settings beneath the map, in place of the column's
- * description or the selected unit. */
-export function ViewSettingsButton({ open, setOpen }) {
+/** Opens the view settings in place of the column's description, among the
+ * column's other actions. */
+export function ViewSettingsButton({ onClick }) {
   return h(Button, {
     icon: "settings",
     text: "View settings",
     minimal: true,
     small: true,
-    active: open,
-    onClick: () => setOpen(!open),
+    onClick,
   });
 }
 

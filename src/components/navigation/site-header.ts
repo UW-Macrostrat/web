@@ -40,6 +40,7 @@ export function SitePageHeader(props: SitePageHeaderProps) {
   return h(PageHeader, {
     ...headerContent(items),
     logo: h(SiteLogo),
+    titleAlignment: "left",
     actions: headerActions,
     className: classNames("site-page-header", className),
     ...rest,
