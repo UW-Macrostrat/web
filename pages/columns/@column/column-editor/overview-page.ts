@@ -12,11 +12,12 @@ import {
   FormGroup,
   HTMLSelect,
   InputGroup,
-  NumericInput,
   SegmentedControl,
   TextArea,
 } from "@blueprintjs/core";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import { PatternProvider } from "~/_providers";
+import { GroupSelect, ProjectSelect, type GroupDef } from "./project-fields";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
 import { EditorColumn } from "./column-view";
 import { EditChrome, EditTitleContext } from "./edit-chrome";
@@ -24,6 +25,7 @@ import {
   ColumnFocusProvider,
   editMetadataAtom,
   editedUnitsAtom,
+  loadedMetadataAtom,
   metadataAtom,
   snapshotAtom,
   useAtomValue,
@@ -48,7 +50,7 @@ export function OverviewPage() {
     key: snapshot?.col_id ?? "draft",
     className: "column-editor-page overview-page",
     capabilities,
-    wrap: (node) => h(ColumnFocusProvider, node),
+    wrap: (node) => h(PatternProvider, h(ColumnFocusProvider, node)),
     titleAdornment: h(EditTitleContext),
     actions: h(EditChrome, { current: "overview" }),
     content: h("div.overview-content", [
@@ -59,16 +61,20 @@ export function OverviewPage() {
 }
 
 const COLUMN_TYPES = [
-  { label: "Measured section", value: "section" },
-  { label: "Composite column", value: "column" },
+  { label: "Measured", value: "section" },
+  { label: "Composite", value: "column" },
 ];
 
-const AXIS_TYPES: Record<ColumnMetadata["col_type"], { label: string; value: string }[]> = {
-  section: [
-    { label: "Height", value: "height" },
-    { label: "Depth", value: "depth" },
-  ],
-  column: [{ label: "Age", value: "age" }],
+// The ingestion format spells ordinal positions `age`
+const AXIS_TYPES = [
+  { label: "Height", value: "height" },
+  { label: "Depth", value: "depth" },
+  { label: "Ordinal", value: "age" },
+];
+
+const DEFAULT_AXIS_TYPE: Record<ColumnMetadata["col_type"], ColumnMetadata["axis_type"]> = {
+  section: "height",
+  column: "age",
 };
 
 const STATUS_OPTIONS = [
@@ -80,20 +86,29 @@ const STATUS_OPTIONS = [
 function MetadataForm() {
   const metadata = useAtomValue(metadataAtom);
   const edit = useSetAtom(editMetadataAtom);
+  const loaded = useAtomValue(loadedMetadataAtom);
   const snapshot = useAtomValue(snapshotAtom);
 
-  const setType = (col_type: ColumnMetadata["col_type"]) => {
-    // A composite column's axis is age; a section declares a direction
-    let axis_type: ColumnMetadata["axis_type"] = "age";
-    if (col_type === "section") axis_type = metadata.axis_type === "age" ? "height" : metadata.axis_type;
-    edit({ col_type, axis_type });
+  const setProject = (project_id: number | null) => {
+    if (project_id === metadata.project_id) return;
+    // A group belongs to one project
+    edit({ project_id, col_group_id: null, col_group: null });
   };
 
+  const setGroup = (group: GroupDef | null) => {
+    edit({ col_group_id: group?.col_group_id ?? null, col_group: group?.name ?? null });
+  };
+
+  const setType = (col_type: ColumnMetadata["col_type"]) => {
+    edit({ col_type, axis_type: DEFAULT_AXIS_TYPE[col_type] });
+  };
+
+  const typeChanged = metadata.col_type !== loaded.col_type;
   let typeNote = null;
-  if ((snapshot?.units?.length ?? 0) > 0) {
+  if (typeChanged && (snapshot?.units?.length ?? 0) > 0) {
     typeNote = h(
       Callout,
-      { intent: "primary", icon: "info-sign", compact: true },
+      { intent: "warning", icon: "warning-sign", compact: true },
       "Changing the kind of column changes what a unit's position means. The units keep their values; check them on the Units page."
     );
   }
@@ -109,21 +124,17 @@ function MetadataForm() {
     ),
     h(
       FormGroup,
-      { label: "Group", helperText: "The column group this belongs to." },
-      h(InputGroup, {
-        value: metadata.col_group ?? "",
-        onValueChange: (value: string) => edit({ col_group: value || null }),
-      })
+      { label: "Project" },
+      h(ProjectSelect, { value: metadata.project_id, onChange: setProject })
     ),
     h(
       FormGroup,
-      { label: "Project", helperText: "Macrostrat project id." },
-      h(NumericInput, {
-        value: metadata.project_id ?? "",
-        min: 1,
-        buttonPosition: "none",
-        className: "project-id-input",
-        onValueChange: (n: number) => edit({ project_id: isNaN(n) ? null : n }),
+      { label: "Group", helperText: "The column group this belongs to." },
+      h(GroupSelect, {
+        project_id: metadata.project_id,
+        value: metadata.col_group_id,
+        label: metadata.col_group,
+        onChange: setGroup,
       })
     ),
     h(
@@ -131,7 +142,7 @@ function MetadataForm() {
       {
         label: "Column type",
         helperText:
-          "A measured section places units by position; a composite column places them by age.",
+          "A measured column places units by position; a composite column places them by age.",
       },
       h(SegmentedControl, {
         small: true,
@@ -145,7 +156,7 @@ function MetadataForm() {
       { label: "Positions" },
       h(SegmentedControl, {
         small: true,
-        options: AXIS_TYPES[metadata.col_type],
+        options: AXIS_TYPES,
         value: metadata.axis_type,
         onValueChange: (v: string) => edit({ axis_type: v as ColumnMetadata["axis_type"] }),
       })

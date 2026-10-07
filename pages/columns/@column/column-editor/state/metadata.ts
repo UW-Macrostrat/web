@@ -8,11 +8,13 @@ import { snapshotAtom } from "./column";
  * the database's. */
 export interface ColumnMetadata {
   col_name: string;
+  col_group_id: number | null;
+  /** The group's name */
   col_group: string | null;
   project_id: number | null;
   /** The format's `col_type`: `section` (measured) or `column` (composite). */
   col_type: "section" | "column";
-  /** `height`, `depth` or `age`. */
+  /** `height`, `depth` or `age` — the format's word for ordinal positions. */
   axis_type: "height" | "depth" | "age";
   status_code: "in process" | "active" | "obsolete";
   description: string | null;
@@ -20,6 +22,7 @@ export interface ColumnMetadata {
 
 export const METADATA_FIELDS: (keyof ColumnMetadata)[] = [
   "col_name",
+  "col_group_id",
   "col_group",
   "project_id",
   "col_type",
@@ -42,6 +45,7 @@ export function metadataFromColumnInfo(info: any): ColumnMetadata {
   }
   return {
     col_name: info?.col_name ?? "",
+    col_group_id: info?.col_group_id ?? null,
     col_group: info?.col_group ?? null,
     project_id: info?.project_id ?? null,
     col_type,

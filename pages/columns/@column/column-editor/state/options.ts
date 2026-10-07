@@ -47,10 +47,9 @@ export const positionAxisAtom = atom<ColumnAxisType | null>(
     inferPositionAxis(get(baseUnitsAtom))
 );
 
-/** A measured column says which way it runs, in the ingestion format's
- * `axis_type`; a composite one has no position axis to declare. */
+/** A column says which way its positions run, in the ingestion format's
+ * `axis_type`; ordinal positions (`age`) declare no direction. */
 function declaredPositionAxis(columnInfo: any): ColumnAxisType | null {
-  if (columnInfo?.col_type !== "section") return null;
   if (columnInfo?.axis_type === "depth") return ColumnAxisType.DEPTH;
   if (columnInfo?.axis_type === "height") return ColumnAxisType.HEIGHT;
   return null;
