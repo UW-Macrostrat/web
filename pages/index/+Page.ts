@@ -16,6 +16,7 @@ import {
 } from "~/components/lex/search-omnibar";
 import type { HeroData } from "./+data";
 import { HeroStage } from "./hero-stage";
+import classNames from "classnames";
 
 /** The homepage: what Macrostrat is in a line, the data itself, a few entry
  * points, what is new, and an honest beta notice. Design notes live in the
@@ -45,7 +46,6 @@ export default function Page() {
     h(LexSearchHost),
     h(Hero),
     h(SiteLead),
-    h(MacrostratStats),
     h(EntryPoints),
     h(WhatsNew),
     h(PlatformLinks),
@@ -110,28 +110,31 @@ function HeroStatic() {
 const entryPoints = [
   {
     title: "Map",
-    href: "/map/#3/40.78/-94.13",
+    href: "/map",
     text: "The world's geologic maps, harmonized into one.",
+    className: "major",
   },
   {
     title: "Columns",
     href: "/columns",
     text: "The rock record through time, region by region.",
+    className: "major",
   },
   {
     title: "Lexicon",
     href: "/lex",
     text: "Stratigraphic names, lithologies, intervals and environments.",
+    className: "major",
   },
   {
     title: "Projects",
     href: "/projects",
-    text: "Columns and maps for specific regions and problems.",
+    text: "Targeting specific regions and geological problems.",
   },
   {
     title: "Rockd",
     href: "https://rockd.org",
-    text: "The mobile field companion. Explore and record the geology around you.",
+    text: "Macrostrat's mobile field companion.",
     image: "rockd.png",
   },
 ];
@@ -139,10 +142,14 @@ const entryPoints = [
 /** What Macrostrat is, in a line. It used to sit in the header; the header is
  * now the wordmark and the search and nothing else. */
 function SiteLead() {
-  return h("p.site-lead", [
-    "Macrostrat is a data system to describe the Earth's crust through time.",
-    // "Geologic maps and stratigraphic columns, integrated into one model of ",
-    // "the Earth's crust through time.",
+  return h("div.site-lead-container", [
+    h("p.site-lead", [
+      "An geologic model of the Earth's crust through time.",
+      //"Macrostrat is a data system to describe the Earth's crust through time.",
+      // "Geologic maps and stratigraphic columns, integrated into one model of ",
+      // "the Earth's crust through time.",
+    ]),
+    h(MacrostratStats),
   ]);
 }
 
@@ -159,15 +166,19 @@ function EntryPoints() {
           height: "22px",
         });
       }
+
+      let title = item.title;
+      if (icon != null) title = h("span.entry-title", [icon, title]);
+
       return h(
         LinkCard,
         {
           key: item.href,
-          title: item.title,
+          title,
           href: item.href,
-          className: "entry-card",
+          className: classNames("entry-card", item.className),
         },
-        [h("p", [icon, item.text])]
+        [h("p", item.text)]
       );
     })
   );
