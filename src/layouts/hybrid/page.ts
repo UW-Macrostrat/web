@@ -15,7 +15,7 @@ import { OverlaysProvider } from "@blueprintjs/core";
 import { Provider, useAtomValue, type WritableAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import classNames from "classnames";
-import { PageBreadcrumbs } from "~/components";
+import { PageBreadcrumbs, SitePageHeader } from "~/components";
 
 import h from "./page.module.sass";
 import { FooterOverlayTrigger } from "./chrome";
@@ -102,11 +102,38 @@ function HybridPageInner({
   const shell = useAtomValue(layoutShellAtom);
   const contentScroll = useAtomValue(contentScrollAtom);
 
+  // The map and split shells put the header in a narrow panel, where labels
+  // and the full-size trail wrap it onto several lines
+  const compact = shell !== "content";
+  const controls = h(HeaderControls, { actions, compact });
+  // The site header, title inline. A title adornment (the column editor's
+  // context) has no slot in it yet, so those pages keep the parts-built row.
+  let header: ReactNode = null;
+  if (titleAdornment == null) {
+    header = h(SitePageHeader, {
+      variant: "compact",
+      actions: controls,
+      collapseActions: "narrow",
+      className: "shell-page-header",
+    });
+  }
+
+  // The map shell's breadcrumbs sit in a narrow floating panel; the split
+  // shell's in a fixed one
+  let breadcrumbSize: "default" | "small" = "default";
+  if (compact) {
+    breadcrumbSize = "small";
+  }
   let shellView: ReactNode = h(LayoutShellView, {
     content,
-    breadcrumbs: h(PageBreadcrumbs, { showLogo: true, separateTitle: false }),
+    header,
+    breadcrumbs: h(PageBreadcrumbs, {
+      showLogo: true,
+      separateTitle: false,
+      size: breadcrumbSize,
+    }),
     titleAdornment,
-    controls: h(HeaderControls, { actions }),
+    controls,
     filterBar,
     map,
     assistant,
@@ -138,6 +165,6 @@ function HybridPageInner({
  * themselves — a sticky bar in the content shell, `MapAreaContainer`'s floating
  * navbar in the map shell — which is why they're handed down as a part rather
  * than an assembled header. */
-function HeaderControls({ actions }) {
-  return h([actions, h(ActionsPanel)]);
+function HeaderControls({ actions, compact = false }) {
+  return h([actions, h(ActionsPanel, { compact })]);
 }

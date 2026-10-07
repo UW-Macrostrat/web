@@ -30,6 +30,7 @@ import hyper from "@macrostrat/hyper";
 import { atom, createStore, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
+import { MapSettingsBar } from "~/components/map-settings";
 import styles from "./map-slot.module.sass";
 
 const h = hyper.styled(styles);
@@ -137,7 +138,8 @@ interface ColumnMapSlotProps extends Omit<ColumnMapTarget, "key"> {
 
 /**
  * Where the shared map should appear on this page. Renders an empty, definitely
- * sized box and moves the shared map node into it.
+ * sized box and moves the shared map node into it, with the shared map settings
+ * bar beneath. `children` go in the bar (e.g. an interaction hint).
  */
 export function ColumnMapSlot(props: ColumnMapSlotProps) {
   const {
@@ -195,6 +197,6 @@ export function ColumnMapSlot(props: ColumnMapSlotProps) {
     // Kept free of React children: the shared map node is appended here
     // imperatively, so React must not manage siblings inside it.
     h("div.map-mount", { ref }),
-    children,
+    h(MapSettingsBar, null, children),
   ]);
 }

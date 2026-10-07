@@ -4,10 +4,11 @@
   z-index: 100
   margin: 0
   padding: 1em 0 0
+  --sticky-header-height: 3em
 
   .backdrop
-    height: 3em
-    background-color: var(--background-color)
+    height: var(--sticky-header-height)
+    background-color: var(--pz-background-color)
     width: 100vw
     position: fixed
     top: 0
@@ -17,9 +18,9 @@
 
   &:global(.is-stuck)
     .backdrop
-      border-bottom: 1px solid var(--panel-rule-color)
+      border-bottom: 1px solid var(--pz-panel-rule-color)
 
   &.fade-bottom
     .backdrop
-      background: linear-gradient(var(--background-color) 90%, rgba(255, 255, 255, 0))
+      background: linear-gradient(var(--pz-background-color) 90%, transparent)
       border-bottom: none

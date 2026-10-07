@@ -7,9 +7,9 @@
  * common route into "which columns carry this name".
  *
  * It reads the same `colData` GeoJSON the map already loads (`useLexColumns`),
- * so it costs no extra request. Presentation follows the hierarchy tree on the
- * same page: compact `LinkCard`s in a flexible grid, with long runs capped,
- * rather than a strip of tags or a table that grows the page.
+ * so it costs no extra request. List-density `LinkCard`s in a flexible grid,
+ * with long runs capped, rather than a strip of tags or a table that grows the
+ * page.
  */
 import hyper from "@macrostrat/hyper";
 import styles from "./column-list.module.sass";
@@ -70,10 +70,6 @@ export function LexColumnList({ colData }: { colData: any }) {
   }
 
   return h("div.lex-column-list", [
-    h("h3.column-list-header", { key: "header" }, [
-      "Columns",
-      h("span.column-count", { key: "count" }, entries.length.toLocaleString()),
-    ]),
     h("div.column-run", { key: "run" }, [
       shown.map((entry) => h(ColumnCard, { key: entry.col_id, entry })),
       more,
@@ -102,7 +98,7 @@ function ColumnCard({ entry }: { entry: LexColumnEntry }) {
     LinkCard,
     {
       className: "column-card",
-      density: "compact",
+      density: "list",
       href: buildHrefForItem({ col_id: entry.col_id })!,
       title: entry.col_name,
     },

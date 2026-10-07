@@ -12,12 +12,13 @@
 
 import { atom } from "jotai";
 import {
+  applyDraft,
+  compilationEditAtoms,
   compilationTreeAtoms,
   emptyGraph,
   type CompilationGraph,
 } from "~/components/compilation-tree";
 import { locationAtom } from "~/_utils/url-atoms";
-import { Basemap } from "~/components";
 
 export interface Point {
   lng: number;
@@ -51,13 +52,24 @@ export const graphAtom = atom<CompilationGraph>(emptyGraph);
  * means "no point, or not loaded yet". */
 export const pointGraphAtom = atom<CompilationGraph | null>(null);
 
+/** Bumped after a save, so the point-scoped graph is fetched again. */
+export const graphVersionAtom = atom(0);
+
+/** Edits are drafted against the whole graph, never the point's: a point graph
+ * holds only the members covering the point, and a member list rebuilt from it
+ * would drop the rest. */
+export const editAtoms = compilationEditAtoms(graphAtom);
+
 /** Which graph the tree is showing: the point's if there is one, otherwise the
  * whole catalog. One node set, two provenances — so every filter and selection
- * works identically in both. */
+ * works identically in both. While editing, the draft is laid over it, so the
+ * tree shows what a save would write. */
 export const activeGraphAtom = atom<CompilationGraph>((get) => {
   const point = get(pointAtom);
-  if (point == null) return get(graphAtom);
-  return get(pointGraphAtom) ?? emptyGraph;
+  let graph = get(graphAtom);
+  if (point != null) graph = get(pointGraphAtom) ?? emptyGraph;
+  if (!get(editAtoms.editing)) return graph;
+  return applyDraft(graph, get(editAtoms.draft));
 });
 
 /** The selected node: what the map draws and the assistant describes. A slug, so
@@ -128,24 +140,4 @@ const cartoParamAtom = searchParamAtom("carto");
 export const showCartoAtom = atom(
   (get) => get(cartoParamAtom) === "on",
   (get, set, value: boolean) => set(cartoParamAtom, value ? "on" : null)
-);
-
-const basemapParamAtom = searchParamAtom("basemap");
-export const basemapAtom = atom(
-  (get): Basemap => {
-    const value = get(basemapParamAtom);
-    if (value === Basemap.Satellite || value === Basemap.None) {
-      return value as Basemap;
-    }
-    return Basemap.Basic;
-  },
-  (get, set, value: Basemap) => {
-    set(basemapParamAtom, value === Basemap.Basic ? null : value);
-  }
-);
-
-const labelsParamAtom = searchParamAtom("labels");
-export const showLabelsAtom = atom(
-  (get) => get(labelsParamAtom) !== "off",
-  (get, set, value: boolean) => set(labelsParamAtom, value ? null : "off")
 );

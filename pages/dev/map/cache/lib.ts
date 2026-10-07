@@ -5,7 +5,6 @@ import { apiV3Prefix, burwellTileDomain } from "@macrostrat-web/settings";
 import { useCallback, useState } from "react";
 import { atom } from "jotai";
 import { atomWithLocation } from "jotai-location";
-import { Basemap } from "~/components";
 import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { loadable } from "jotai/utils";
 
@@ -108,18 +107,6 @@ export const expireModeAtom = atom(
   (get): ExpireMode => (get(modeParamAtom) === "map" ? "map" : "viewport"),
   (get, set, value: ExpireMode) => {
     set(modeParamAtom, value === "viewport" ? null : value);
-  }
-);
-
-const basemapParamAtom = atomWithSearchParam("basemap");
-export const basemapAtom = atom(
-  (get): Basemap => {
-    const v = get(basemapParamAtom);
-    if (v === Basemap.Satellite || v === Basemap.None) return v as Basemap;
-    return Basemap.Basic;
-  },
-  (get, set, value: Basemap) => {
-    set(basemapParamAtom, value === Basemap.Basic ? null : value);
   }
 );
 

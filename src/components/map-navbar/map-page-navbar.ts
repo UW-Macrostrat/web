@@ -66,6 +66,7 @@ export function MapPageNavbar({
           items: trail,
           showLogo: true,
           separateTitle,
+          size: "small",
         }),
       ]),
       children,

@@ -1,3 +1,5 @@
+@use "~/styles/type"
+
 // The crumb that visually ends the trail. Usually the DOM-last one, but the
 // root is placed DOM-last when there is no crumb for the current page (it
 // collapses last), and `order` moves it back to the head — so the crumb before
@@ -102,12 +104,12 @@ $trail-end: "li:last-of-type:not(.root-crumb), li:has(+ .root-crumb:last-of-type
   min-width: 0
 
   h1
+    @include type.page-title
     min-width: 0
 
   .identifier
-    color: var(--secondary-color)
-    font-weight: 500
-    font-family: var(--monospace-font)
+    @include type.identifier
+    font-weight: var(--pz-font-weight-medium)
     flex: 0 0 auto
 
   // `lexPageInfo` renders the title as a name plus optional "aka" and kind
@@ -135,5 +137,18 @@ $trail-end: "li:last-of-type:not(.root-crumb), li:has(+ .root-crumb:last-of-type
 // monospace as identifiers everywhere else in the app.
 .nav-identifier
   flex: 0 0 auto
-  margin-left: var(--pz-inline-gap, 0.5rem)
+  margin-left: var(--pz-inline-gap)
   align-self: baseline
+
+// A smaller trail for tight spaces, such as a map's context panel
+.page-nav.small
+  .logo-container img
+    width: 20px
+    height: 20px
+
+  .breadcrumbs :global(.bp6-breadcrumb),
+  .breadcrumbs :global(.bp6-breadcrumb-current)
+    font-size: var(--pz-font-size-md)
+
+  .title-block h1
+    font-size: var(--pz-font-size-xl)

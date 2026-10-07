@@ -52,6 +52,7 @@ const defaultState: CoreState = {
   timeCursorAge: null,
   plateModelId: 3,
   focusedMapSource: null,
+  compilation: null,
   mapPosition: {
     camera: {
       lng: 23,
@@ -279,6 +280,11 @@ export function coreReducer(
       return { ...state, timeCursorAge: action.age };
     case "set-plate-model":
       return { ...state, plateModelId: action.plateModel };
+    case "set-compilation": {
+      const compilation = action.compilation;
+      if (compilation === state.compilation) return state;
+      return { ...state, compilation };
+    }
     case "set-focused-map-source":
       let focusedMapSource = action.source_id;
       if (focusedMapSource === state.focusedMapSource) {

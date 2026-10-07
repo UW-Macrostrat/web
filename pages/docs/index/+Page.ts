@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
-import { Link, PageBreadcrumbs } from "~/components";
-import { BaseContentPage, Footer } from "~/layouts";
+import { Link } from "~/components";
+import { BaseContentPage, ContentPageHeader, Footer } from "~/layouts";
 import { usePageContext } from "vike-react/usePageContext";
 import { Popover, Tag } from "@blueprintjs/core";
 import { findTrail, type DocsNavNode } from "./nav";
@@ -43,11 +43,11 @@ export function Page() {
     layoutClass = "with-sidebar";
   }
 
-  return h(BaseContentPage, { className: "docs-page" }, [
-    h("header.docs-header", [
-      h(PageBreadcrumbs, { separateTitle: true }),
-      h(BetaTagWithPopup),
-    ]),
+  const header = h(ContentPageHeader, {
+    variant: "hybrid",
+    actions: h(BetaTagWithPopup),
+  });
+  return h(BaseContentPage, { className: "docs-page", header }, [
     h("div.docs-layout", { className: layoutClass }, [
       h("article.docs-main", body),
       sidebar,

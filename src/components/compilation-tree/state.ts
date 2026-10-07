@@ -29,6 +29,8 @@ export interface CompilationTreeAtoms extends CompilationTreeSource {
   searchText: PrimitiveAtom<string>;
   /** Scale bands to keep. Empty means all of them. */
   scaleFilter: PrimitiveAtom<string[]>;
+  /** List every served compilation as a root, not only the unclaimed ones. */
+  servedAtTop: PrimitiveAtom<boolean>;
   nodesById: Atom<Map<number, GraphNode>>;
   /** Members of each compilation, highest priority first. */
   children: Atom<Map<number, GraphEdge[]>>;
@@ -44,9 +46,18 @@ export interface CompilationTreeAtoms extends CompilationTreeSource {
    * reveal what is selected. */
   focusPath: Atom<GraphNode[]>;
   focusAncestorIds: Atom<Set<number>>;
+  /** Everything below the selection, which the tree opens in full. */
+  focusDescendantIds: Atom<Set<number>>;
+  /** Where resolution under the selection stops: the maps and materialized
+   * compilations whose polygons it is drawn from. */
+  focusResolvedIds: Atom<Set<number>>;
 }
 
-function nodeMatches(node: GraphNode, query: string, scales: string[]): boolean {
+function nodeMatches(
+  node: GraphNode,
+  query: string,
+  scales: string[]
+): boolean {
   if (scales.length > 0 && !scales.includes(node.scale ?? "")) return false;
   if (query === "") return true;
   return (
@@ -56,6 +67,22 @@ function nodeMatches(node: GraphNode, query: string, scales: string[]): boolean 
   );
 }
 
+/** Higher first; an unranked member after every ranked one. */
+function byPriorityDesc(a: number | null, b: number | null): number {
+  if (a === b) return 0;
+  if (a == null) return 1;
+  if (b == null) return -1;
+  return b - a;
+}
+
+/** Largest first; a node without bounds last, then by slug. */
+function bySize(a: GraphNode | undefined, b: GraphNode | undefined): number {
+  const area = (n: GraphNode | undefined) => n?.area_km ?? -1;
+  const diff = area(b) - area(a);
+  if (diff !== 0) return diff;
+  return (a?.slug ?? "").localeCompare(b?.slug ?? "");
+}
+
 export function compilationTreeAtoms(
   source: CompilationTreeSource
 ): CompilationTreeAtoms {
@@ -63,34 +90,47 @@ export function compilationTreeAtoms(
 
   const searchText = atom("");
   const scaleFilter = atom<string[]>([]);
+  const servedAtTop = atom(false);
 
   const nodesById = atom<Map<number, GraphNode>>(
     (get) => new Map(get(graph).nodes.map((n) => [n.source_id, n]))
   );
 
+  /** Highest priority first; where priority does not decide -- a tie, or a
+   * mosaic or multiscale compilation, whose members have none -- largest
+   * first. */
   const children = atom<Map<number, GraphEdge[]>>((get) => {
+    const byId = get(nodesById);
     const byParent = new Map<number, GraphEdge[]>();
     for (const edge of get(graph).edges) {
       const list = byParent.get(edge.compilation_id) ?? [];
       list.push(edge);
       byParent.set(edge.compilation_id, list);
     }
+    for (const list of byParent.values()) {
+      list.sort((a, b) => {
+        const byPriority = byPriorityDesc(a.priority, b.priority);
+        if (byPriority !== 0) return byPriority;
+        return bySize(byId.get(a.member_id), byId.get(b.member_id));
+      });
+    }
     return byParent;
   });
 
-  /** Served layers first — the structural roots most of the graph hangs from —
-   * then any compilation not yet placed under one, which is worth seeing as a
-   * root in its own right. */
+  /** Compilations nothing contains, largest first, which puts `carto` at the
+   * top. With `servedAtTop`, every served compilation is a
+   * root too, wherever else it sits: the compilations a client can ask for by
+   * name, rather than the shape of the hierarchy. */
   const roots = atom<GraphNode[]>((get) => {
     const claimed = new Set(get(graph).edges.map((e) => e.member_id));
+    const showServed = get(servedAtTop);
     return get(graph)
-      .nodes.filter((n) => n.is_compilation && !claimed.has(n.source_id))
-      .sort((a, b) => {
-        if (a.has_faces !== b.has_faces) {
-          return a.has_faces ? -1 : 1;
-        }
-        return a.slug.localeCompare(b.slug);
-      });
+      .nodes.filter(
+        (n) =>
+          n.is_compilation &&
+          (!claimed.has(n.source_id) || (showServed && n.is_served))
+      )
+      .sort(bySize);
   });
 
   /** Matching nodes plus every ancestor of one.
@@ -152,7 +192,7 @@ export function compilationTreeAtoms(
     return get(graph)
       .nodes.filter((n) => n.is_standalone)
       .filter((n) => keep == null || keep.has(n.source_id))
-      .sort((a, b) => a.slug.localeCompare(b.slug));
+      .sort(bySize);
   });
 
   const visibleSlugs = atom<string[] | null>((get) => {
@@ -198,18 +238,51 @@ export function compilationTreeAtoms(
     return [target];
   });
 
-  /** The selection's ancestors, which the tree keeps open. The selection itself
-   * is excluded, so selecting a compilation reveals it without also unfolding
-   * everything inside it. */
+  /** The selection's ancestors, which the tree keeps open to reveal it. */
   const focusAncestorIds = atom<Set<number>>(
-    (get) => new Set(get(focusPath).slice(0, -1).map((n) => n.source_id))
+    (get) =>
+      new Set(
+        get(focusPath)
+          .slice(0, -1)
+          .map((n) => n.source_id)
+      )
   );
+
+  /** Walk down from the selection, recording every node reached and, apart,
+   * the ones that hold content: descent stops there (`has_content`), so a
+   * materialized compilation's members are reached but not resolved to. */
+  const focusDescent = atom((get) => {
+    const target = get(focusNode);
+    const all = new Set<number>();
+    const resolved = new Set<number>();
+    if (target == null) return { all, resolved };
+
+    const childEdges = get(children);
+    const byId = get(nodesById);
+    const walk = (id: number, resolving: boolean) => {
+      const node = byId.get(id);
+      if (node == null) return;
+      const holdsContent = !node.is_compilation || node.is_materialized;
+      if (resolving && holdsContent) resolved.add(id);
+      if (all.has(id)) return;
+      all.add(id);
+      for (const edge of childEdges.get(id) ?? []) {
+        walk(edge.member_id, resolving && !holdsContent);
+      }
+    };
+    walk(target.source_id, true);
+    return { all, resolved };
+  });
+
+  const focusDescendantIds = atom((get) => get(focusDescent).all);
+  const focusResolvedIds = atom((get) => get(focusDescent).resolved);
 
   return {
     graph,
     focusSlug,
     searchText,
     scaleFilter,
+    servedAtTop,
     nodesById,
     children,
     roots,
@@ -219,6 +292,8 @@ export function compilationTreeAtoms(
     focusNode,
     focusPath,
     focusAncestorIds,
+    focusDescendantIds,
+    focusResolvedIds,
   };
 }
 

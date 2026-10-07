@@ -2,7 +2,9 @@ import { apiV2Prefix, postgrestPrefix } from "@macrostrat-web/settings";
 import fetch from "cross-fetch";
 
 export async function fetchAPIV2Result(apiURL: string, params: any) {
-  let url = new URL(apiV2Prefix + apiURL);
+  // The dev server rewrites the prefix to a same-origin path for hosts a
+  // browser can't resolve, so a relative prefix is resolved against the page
+  let url = new URL(apiV2Prefix + apiURL, globalThis.location?.href);
   if (params != null) {
     let p1 = params;
     // If we already have a URLSearchParams object, just use it directly

@@ -18,6 +18,7 @@ import {
   PanelCard,
 } from "@macrostrat/map-interface";
 import { atom, useAtomValue, useSetAtom } from "jotai";
+import { basemapAtom, useLabelTransform } from "~/_utils/basemap";
 import {
   basemapStyle,
   PageBreadcrumbsInternal,
@@ -25,7 +26,6 @@ import {
   usePageBreadcrumbs,
 } from "~/components";
 import {
-  basemapAtom,
   bboxFeature,
   bboxFromScreenRect,
   buildOverlayStyles,
@@ -55,6 +55,7 @@ export function Page() {
   const dark = useDarkMode();
   const basemap = useAtomValue(basemapAtom);
   const baseStyle = basemapStyle(basemap, dark?.isEnabled);
+  const transformStyle = useLabelTransform();
 
   const overlayStyles = useAtomValue(overlayStylesAtom);
   const onMapMoved = useSetAtom(mapMovedHandlerAtom);
@@ -78,6 +79,7 @@ export function Page() {
         projection: { name: "globe" },
         mapboxToken: mapboxAccessToken,
         overlayStyles,
+        transformStyle,
         onMapMoved,
       },
       mapChildren

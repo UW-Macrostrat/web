@@ -1,5 +1,7 @@
-// The homepage. Tokens come from the Paleozoic design system (--pz-*), with
-// fallbacks to the site's legacy variables.
+// The homepage. Tokens come from the Paleozoic design system (--pz-*) and text
+// styles from `~/styles/type`.
+
+@use "~/styles/type"
 
 .page-main
   display: flex
@@ -32,6 +34,7 @@
     // search stay on one line.
     .site-header-inner
       flex-wrap: nowrap
+      min-height: var(--sticky-header-height)
 
 .site-header-inner
   display: flex
@@ -49,14 +52,13 @@
   gap: 0.6rem !important
   transition: font-size 0.25s ease
 
-  // Tight under the wordmark, and sans-serif: the logo link sets Publico Text
-  // on everything inside it, which is right for the name and wrong for a line
-  // of running text.
+  // Tight under the wordmark, and sans-serif: the subtitle is an `h2`, which
+  // would otherwise take the heading font.
   h1
     line-height: 1.05
 
   .subtitle
-    font-family: var(--sans-serif-font) !important
+    font-family: var(--pz-body-font)
     font-size: 0.95rem
     line-height: 1.2
     margin: 0
@@ -91,7 +93,7 @@
   font-weight: 600
   letter-spacing: 0.02em
   padding: 0.15em 0.6em
-  border-radius: 2em
+  border-radius: var(--pz-radius-full)
   white-space: nowrap
   color: var(--pz-accent-text-color) !important
   background: color-mix(in srgb, var(--pz-accent-color) 15%, transparent)
@@ -113,9 +115,9 @@
 .site-lead
   margin: 0
   text-align: center
-  font-family: var(--header-font)
-  font-size: 1.15em
-  line-height: 1.35
+  font-family: var(--pz-heading-font)
+  font-size: var(--pz-font-size-lg)
+  line-height: var(--pz-line-height-snug)
   color: var(--pz-text-color)
 
 // ---------------------------------------------------------------- hero
@@ -146,16 +148,10 @@
     align-items: center
 
   .top-stat
-    font-weight: 600
-    font-size: 1.35em
-    font-variant-numeric: tabular-nums
-    color: var(--pz-accent-text-color)
+    @include type.figure
 
   .top-stat-label
-    font-size: 0.75em
-    text-transform: uppercase
-    letter-spacing: 0.05em
-    color: var(--pz-text-subtle-color)
+    @include type.label
 
 // ---------------------------------------------------------- entry points
 
@@ -169,9 +165,8 @@
     h3
       margin-top: 0
     p
+      @include type.supporting
       margin: 0
-      font-size: 0.9em
-      color: var(--pz-text-subtle-color)
 
   .entry-icon
     vertical-align: text-bottom
@@ -181,9 +176,7 @@
 
 .whats-new
   h2
-    font-size: 1.2em
-    margin-bottom: 0.5em
-    color: var(--pz-heading-color)
+    @include type.section-heading
 
   .news-list
     list-style: none
@@ -202,9 +195,8 @@
     font-variant-numeric: tabular-nums
 
   .news-summary
+    @include type.supporting
     grid-column: 2
-    font-size: 0.9em
-    color: var(--pz-text-subtle-color)
 
   .news-more
     display: inline-block
@@ -214,12 +206,10 @@
 
 .platform-links
   padding-top: var(--pz-space-4)
-  border-top: 2px solid color-mix(in srgb, var(--pz-accent-color) 35%, transparent)
+  border-top: 2px solid var(--pz-accent-rule-color)
 
   h2
-    font-size: 1.2em
-    margin: 0 0 0.5em
-    color: var(--pz-heading-color)
+    @include type.section-heading
 
   // The same boxes as the entry points above, on a narrower grid: these are
   // the quieter half of the page, but they are still the same kind of thing.
@@ -232,8 +222,7 @@
     margin: 0
     h3
       margin-top: 0
-      font-size: 1em
+      font-size: var(--pz-font-size-md)
     p
+      @include type.supporting
       margin: 0
-      font-size: 0.85em
-      color: var(--pz-text-subtle-color)

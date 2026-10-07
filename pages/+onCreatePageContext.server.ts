@@ -5,6 +5,7 @@ import maxmind, { type CityResponse, type Reader } from "maxmind";
 import type { GeoLocation } from "~/_utils/geolocation";
 import { buildBreadcrumbs } from "~/_utils/breadcrumbs/helpers.ts";
 import { getBreadcrumbs } from "~/_utils/breadcrumbs/server.ts";
+import { mintTileToken } from "~/_utils/tile-token.server.ts";
 
 // This hook is called upon new incoming HTTP requests
 export async function onCreatePageContext(pageContext: PageContextServer) {
@@ -34,6 +35,11 @@ export async function onCreatePageContext(pageContext: PageContextServer) {
 
   // Breadcrumb data
   pageContext.breadcrumbs = await getBreadcrumbs(pageContext);
+
+  // A short-lived token for guarded compilation tiles, minted for every visitor.
+  // Cheap (one HMAC), and it rides every page and every pageContext.json, so a
+  // navigation always hands the client a fresh one.
+  pageContext.tileToken = await mintTileToken();
 
   // Dev-only runtime-config override; see below.
   const environment = localhostEnvironment(pageContext);

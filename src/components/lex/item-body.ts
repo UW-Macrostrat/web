@@ -1,15 +1,13 @@
 import h from "@macrostrat/hyper";
+import { ColumnsTable } from "./columns-card";
 import {
-  ColumnsTable,
-  Charts,
-  PrevalentTaxa,
+  FossilsCard,
   Timescales,
   Units,
   Maps,
   Fossils,
   References,
 } from "./index";
-import { LexColumnList } from "./column-list";
 import {
   useLexColumnsState,
   useLexFossils,
@@ -80,7 +78,6 @@ export function LexItemBody(props: LexItemBodyProps) {
   // const mapsData = useLexMaps(itemRef);
   const refs = useLexRefs(itemRef);
 
-  const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
   return h([
@@ -94,11 +91,10 @@ export function LexItemBody(props: LexItemBodyProps) {
       mapUrl,
       targetKey: `${type}:${id}`,
       loading: columnsLoading,
+      showColumnList,
     }),
-    h.if(showColumnList)(LexColumnList, { colData }),
     afterColumns,
-    h(Charts, { features }),
-    h(PrevalentTaxa, { taxaData }),
+    h(FossilsCard, { colData, fossilsData, taxaData }),
     // The beta "Columns" / "Map Legends" / "Fossils" cards are held back for now
     // (per Daven) — the pages they link to aren't ready to show. Kept here rather
     // than deleted, along with the `showUnits`/`showMaps`/`showFossils` props and

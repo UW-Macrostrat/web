@@ -90,7 +90,7 @@ export function SearchBar({
   large = true,
   children,
 }) {
-  return h("div", { className: "search-bar " + className }, [
+  return h("div", { className: classNames("search-bar", className) }, [
     h(InputGroup, {
       fill: true,
       placeholder,

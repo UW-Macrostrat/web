@@ -1,0 +1,121 @@
+// The website's text styles, as mixins. A text style is a bundle — family,
+// size, weight, line height, color — which one CSS variable can't carry, so a
+// page module applies it with `@include`:
+//
+//   @use "~/styles/type"
+//   .section h2
+//     @include type.section-heading
+//
+// Every value is a `--pz-` token (set in `_paleozoic.sass`), so restyling
+// still happens at the token layer. Mixins only: this file emits no CSS of its
+// own, so any number of modules can use it.
+//
+// `prose` and `code` restate the library's `paleozoic/typography` mixins of the
+// same names: the package's `exports` map doesn't expose its `paleozoic/`
+// partials, so web can't `@use` them. Drop these once it does.
+
+// Running text: the prose font at body size and line height.
+@mixin prose
+  font-family: var(--pz-prose-font)
+  font-size: var(--pz-body-font-size)
+  line-height: var(--pz-body-line-height)
+  color: var(--pz-text-color)
+
+// Code inside running text.
+@mixin code
+  font-family: var(--pz-font-mono)
+  font-size: 0.9em
+  background-color: var(--pz-code-background-color)
+  border-radius: var(--pz-radius-sm)
+  padding: 0.1em 0.3em
+
+// A page's name: the `h1` in the breadcrumb header or at the top of a page.
+@mixin page-title
+  font-family: var(--pz-heading-font)
+  font-weight: var(--pz-font-weight-normal)
+  font-size: var(--pz-font-size-2xl)
+  line-height: var(--pz-line-height-tight)
+  color: var(--pz-text-color)
+
+// A section of a page: "Dictionaries", "What's new". Pink, in the heading
+// font.
+@mixin section-heading
+  font-family: var(--pz-heading-font)
+  font-weight: var(--pz-font-weight-normal)
+  font-size: var(--pz-font-size-lg)
+  line-height: var(--pz-line-height-tight)
+  color: var(--pz-heading-color)
+  margin: 0 0 var(--pz-heading-spacing)
+
+// A part of a section: a docs `h3`, a column group under its project. The
+// heading font in the text color, so it sits below the pink section heading.
+@mixin subsection-heading
+  font-family: var(--pz-heading-font)
+  font-weight: var(--pz-font-weight-normal)
+  font-size: var(--pz-font-size-lg)
+  line-height: var(--pz-line-height-tight)
+  color: var(--pz-text-emphasized-color)
+  margin: 0 0 var(--pz-heading-spacing)
+
+// A small label: what a card links to, the name under a figure, a
+// sidebar block's heading. A hint, not a heading.
+@mixin label
+  font-size: var(--pz-font-size-xs)
+  font-weight: var(--pz-font-weight-semibold)
+  line-height: var(--pz-line-height-snug)
+  color: var(--pz-text-subtle-color)
+
+// The title of one item in a list or a tree: a compact card's heading.
+@mixin item-title
+  font-size: var(--pz-font-size-md)
+  font-weight: var(--pz-font-weight-semibold)
+  line-height: var(--pz-line-height-snug)
+  color: var(--pz-heading-color)
+  margin: 0
+
+// Text that supports what is next to it: a card's description, a date, a
+// count. `--pz-text-subtle-color` is for supporting text; the fainter
+// `--pz-secondary-color` is for things deliberately set back, like a name no
+// unit carries.
+@mixin supporting
+  font-size: var(--pz-font-size-sm)
+  color: var(--pz-text-subtle-color)
+
+// A headline number: the stats on the homepage and the lexicon index.
+@mixin figure
+  font-family: var(--pz-heading-font)
+  font-size: var(--pz-font-size-xl)
+  line-height: var(--pz-line-height-tight)
+  font-variant-numeric: tabular-nums
+  color: var(--pz-accent-text-color)
+
+// An identifier: a record's ID, a DOI, a hotkey.
+@mixin identifier
+  font-family: var(--pz-font-mono)
+  font-size: var(--pz-font-size-sm)
+  color: var(--pz-secondary-color)
+
+// The keyboard focus ring, for controls Blueprint doesn't draw one on.
+@mixin focus-ring
+  &:focus-visible
+    outline: 2px solid var(--pz-focus-ring-color)
+    outline-offset: 2px
+
+// A button that reads as text: "and 12 more…", a collapse chevron. Clicking is
+// the only affordance it needs.
+@mixin text-control
+  appearance: none
+  background: none
+  border: none
+  padding: 0
+  margin: 0
+  cursor: pointer
+  font: inherit
+  font-size: var(--pz-font-size-sm)
+  font-style: italic
+  color: var(--pz-secondary-color)
+
+  &:hover
+    color: var(--pz-text-emphasized-color)
+
+  @include focus-ring

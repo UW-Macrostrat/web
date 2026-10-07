@@ -1,0 +1,37 @@
+@use "~/styles/type"
+
+.interval-timescales
+  display: flex
+  flex-direction: column
+  gap: 1.5em
+
+.row
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+
+.row-header
+  display: flex
+  flex-wrap: wrap
+  align-items: baseline
+  gap: 0.6em
+
+.row-title
+  @include type.section-heading
+  margin: 0
+
+  a
+    color: inherit
+
+.also
+  @include type.supporting
+  font-weight: var(--pz-font-weight-normal)
+
+  a
+    color: var(--pz-link-color)
+
+.timescale
+  cursor: pointer
+
+  :global(.timescale-axis)
+    --text-color: var(--pz-text-color)

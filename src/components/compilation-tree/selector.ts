@@ -115,7 +115,9 @@ export function CompilationPath({ atoms }: { atoms: CompilationTreeAtoms }) {
   const steps = [];
   for (const node of ancestors) {
     if (steps.length > 0) {
-      steps.push(h("span.path-separator", { key: `sep-${node.source_id}` }, "›"));
+      steps.push(
+        h("span.path-separator", { key: `sep-${node.source_id}` }, "›")
+      );
     }
     steps.push(
       h(

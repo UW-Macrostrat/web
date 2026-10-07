@@ -3,6 +3,8 @@ import type { PageContextServer } from "vike/types";
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { render } from "vike/abort";
 
+import { tileJSONURL, type TileJSON } from "./tilejson";
+
 const client = new PostgrestClient(postgrestPrefix, {
   headers: { Accept: "application/geo+json" },
 });
@@ -16,9 +18,47 @@ export async function data(pageContext: PageContextServer) {
     throw render(404, `No map matching '${id}'.`);
   }
 
+  const tileJSON = await fetchTileJSON(feature.properties.slug ?? id);
+
+  // PostgREST's GeoJSON gives a source without `rgeom` `{"type": null}`: a
+  // compilation, whose extent is its bounds, which the TileJSON carries.
+  let geometry = feature.geometry;
+  if (geometry?.type == null) {
+    geometry = boundsPolygon(tileJSON?.bounds ?? [-180, -90, 180, 90]);
+  }
+
   return {
-    mapInfo: feature?.properties,
-    geometry: feature?.geometry,
+    mapInfo: feature.properties,
+    geometry,
+    tileJSON,
+  };
+}
+
+/** The source's tile URL, bounds and zoom range (`/map/<slug>/tilejson.json`).
+ * Null for a source that is not served, which has no tiles to draw. */
+async function fetchTileJSON(ident: string): Promise<TileJSON | null> {
+  try {
+    const res = await fetch(tileJSONURL(ident));
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error(`Could not load the TileJSON of '${ident}':`, error);
+    return null;
+  }
+}
+
+function boundsPolygon([west, south, east, north]: number[]): GeoJSON.Polygon {
+  return {
+    type: "Polygon",
+    coordinates: [
+      [
+        [west, south],
+        [east, south],
+        [east, north],
+        [west, north],
+        [west, south],
+      ],
+    ],
   };
 }
 

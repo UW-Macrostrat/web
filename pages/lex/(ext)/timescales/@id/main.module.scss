@@ -1,33 +1,46 @@
-ul,
-h1,
-h2,
-p,
-h3 {
-  margin: 0;
-  padding: 0;
-}
+@use "~/styles/type";
+
+// A timescale. Element selectors in a CSS module are not scoped, so the resets
+// are nested under the page's root: at the top level they would restyle every
+// page loaded after this one.
 
 .timescale-content {
   display: flex;
   flex-direction: column;
-  gap: 1em;
-}
+  gap: 1.5em;
 
-.timescale-container {
-  color: var(--text-emphasized-color) !important;
-
-  line {
-    stroke: var(--text-emphasized-color) !important;
+  h1,
+  h2,
+  h3,
+  p,
+  ul {
+    margin: 0;
+    padding: 0;
   }
 }
 
-tspan {
-  fill: var(--text-color); 
-  font-size: 14px;
+.timescale-toolbar {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  gap: 0.5em 1.5em;
+  min-height: 2em;
 }
 
-.visx-line {
-  stroke: var(--text-color);
+.timescale-summary {
+  @include type.supporting;
+}
+
+// The chart is as tall as the timescale needs; the interval list sits beside it
+.timescale-body {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 2em;
+  align-items: start;
+
+  @media (max-width: 760px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .int-list {
@@ -36,6 +49,7 @@ tspan {
   gap: 1.3em;
 
   h2 {
+    @include type.section-heading;
     margin: 0.5em 0;
   }
 
@@ -44,11 +58,5 @@ tspan {
     gap: 5px;
     flex-wrap: wrap;
     align-items: center;
-
-    .int-name {
-      padding: 2px 6px;
-      margin: 0.2em 0;
-      border-radius: 0.2em;
-    }
   }
 }

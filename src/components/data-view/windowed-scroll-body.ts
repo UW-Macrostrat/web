@@ -203,9 +203,11 @@ export function createWindowedScrollBody<T = any>(
         );
         continue;
       }
+      // Group headers are the list's subsections, under the section named in
+      // the context bar: an `h3` beneath its `h2`, below the page's own `h1`.
       rendered.push(
         h(
-          `div.windowed-${item.type}-header`,
+          `h3.windowed-${item.type}-header`,
           {
             key: `${item.type}-${item.group.key}-${item.top}`,
             style: { height: item.height },
@@ -222,7 +224,7 @@ export function createWindowedScrollBody<T = any>(
       { ref: rootRef, style: rootStyle(sectionHeight, activeColumns) },
       [
       h.if(section != null)(
-        "div.windowed-context-bar",
+        "h2.windowed-context-bar",
         { key: "context", style: { height: sectionHeight } },
         section?.label
       ),

@@ -12,8 +12,15 @@
 
 import { Button, InputGroup, NonIdealState } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAtom, useAtomValue } from "jotai";
-import { useEffect, useState, type ReactNode } from "react";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type DragEvent,
+  type ReactNode,
+} from "react";
 
 import { Link } from "~/components";
 
@@ -24,6 +31,13 @@ import {
   type GraphEdge,
   type GraphNode,
 } from "./graph";
+import {
+  assemblyModeOf,
+  tiersOf,
+  type CompilationEditAtoms,
+  type DragItem,
+  type DropTarget,
+} from "./editing";
 import { formatArea, NodeTags } from "./node-tags";
 import type { CompilationTreeAtoms } from "./state";
 import styles from "./tree.module.sass";
@@ -41,18 +55,30 @@ export interface CompilationTreeProps {
   /** Called after a node is selected or cleared. A tree in a popover is a
    * control, and a control's job ends when the choice is made. */
   onSelect?: (slug: string | null) => void;
+  /** Edit state. Given, the tree offers drag, drop and removal while
+   * `editor.editing` is on; absent, it is read-only. */
+  editor?: CompilationEditAtoms | null;
 }
+
+/** The edit atoms, for rows at any depth — context rather than a prop threaded
+ * through every level of the recursion. */
+const EditorContext = createContext<CompilationEditAtoms | null>(null);
 
 export function CompilationTree({
   atoms,
   toolbar = null,
   showStandalone = true,
   onSelect = null,
+  editor = null,
 }: CompilationTreeProps) {
-  return h("div.compilation-tree", [
-    h(TreeToolbar, { atoms, toolbar }),
-    h(TreeBody, { atoms, showStandalone, onSelect }),
-  ]);
+  return h(
+    EditorContext.Provider,
+    { value: editor },
+    h("div.compilation-tree", [
+      h(TreeToolbar, { atoms, toolbar }),
+      h(TreeBody, { atoms, showStandalone, onSelect }),
+    ])
+  );
 }
 
 /* ------------------------------------------------------------------ toolbar */
@@ -237,7 +263,10 @@ function TreeNode({
   const byId = useAtomValue(atoms.nodesById);
   const matching = useAtomValue(atoms.matchingIds);
   const focusAncestors = useAtomValue(atoms.focusAncestorIds);
+  const focusDescendants = useAtomValue(atoms.focusDescendantIds);
+  const focusResolved = useAtomValue(atoms.focusResolvedIds);
   const [focusSlug, setFocus] = useAtom(atoms.focusSlug);
+  const editing = useEditing();
 
   const edges = children.get(node.source_id) ?? [];
   const memberRows = edges
@@ -247,12 +276,14 @@ function TreeNode({
 
   // While a filter is active every surviving branch is on the path to a match,
   // so opening them is what shows the match rather than the ancestor that
-  // happens to contain it. The same goes for the route down to the selection:
-  // the tree opens itself far enough to show what the page is displaying.
-  const autoOpen =
-    matching != null || focusAncestors.has(node.source_id) || defaultOpen;
-
-  const open = useDisclosure(autoOpen);
+  // happens to contain it. The same goes for the selection: the tree opens the
+  // route down to it, and everything inside it, to show what the page is
+  // displaying.
+  const reveal =
+    focusAncestors.has(node.source_id) ||
+    focusDescendants.has(node.source_id) ||
+    defaultOpen;
+  const open = useDisclosure({ filtering: matching != null, reveal });
 
   let chevron = "chevron-right";
   if (open.isOpen) chevron = "chevron-down";
@@ -271,29 +302,28 @@ function TreeNode({
 
   let members = null;
   if (open.isOpen && memberRows.length > 0) {
-    members = h(
-      "ul.tree",
-      memberRows.map(({ edge: e, node: child }) =>
-        h(TreeNode, {
-          key: `${path}/${child!.source_id}`,
-          atoms,
-          node: child!,
-          onSelect,
-          path: `${path}/${child!.source_id}`,
-          edge: e,
-          depth: depth + 1,
-        })
-      )
-    );
+    members = h(MemberList, {
+      atoms,
+      compilation: node,
+      rows: memberRows,
+      onSelect,
+      path,
+      depth,
+    });
   }
 
   const isSelected = focusSlug === node.slug;
 
-  let selectedClass = undefined;
-  if (isSelected) selectedClass = "selected";
+  // The rows the selection is drawn from: where its resolution stops.
+  const classNames = [];
+  if (isSelected) classNames.push("selected");
+  if (focusResolved.has(node.source_id)) classNames.push("resolved");
 
   let selectTitle = "Show this compilation";
   if (isSelected) selectTitle = "Clear the selection";
+
+  let priority = edge?.priority ?? null;
+  if (editing) priority = null;
 
   const selectThis = () => {
     let next: string | null = node.slug;
@@ -302,8 +332,23 @@ function TreeNode({
     onSelect?.(next);
   };
 
-  return h("li.tree-node", { className: selectedClass }, [
-    h("div.node-row", [
+  // Only a served source can be requested by name, so only it has a map page;
+  // the link is how being served shows.
+  let pageLink = null;
+  if (node.is_served) {
+    pageLink = h(
+      Link,
+      {
+        href: mapPageHref(node),
+        className: "node-page-link",
+        title: "Open this map's page",
+      },
+      "↗"
+    );
+  }
+
+  return h("li.tree-node", { className: classNames.join(" ") }, [
+    h(NodeRow, { node, edge }, [
       expander,
       h("div.node-body", [
         h("div.node-title", [
@@ -314,44 +359,278 @@ function TreeNode({
             { onClick: selectThis, title: selectTitle },
             nodeName(node)
           ),
-          h(NodeTags, { node, priority: edge?.priority }),
-          h(
-            Link,
-            {
-              href: mapPageHref(node),
-              className: "node-page-link",
-              title: "Open this map's page",
-            },
-            "↗"
-          ),
+          h(NodeTags, { node }),
+          pageLink,
         ]),
-        h(NodeStats, { node }),
+        h(NodeStats, { node, priority }),
       ]),
+      h(RemoveButton, { node, edge }),
     ]),
     members,
   ]);
 }
 
-/** Expansion that follows the tree's own cues until the reader overrides it.
- *
- * `autoOpen` covers the cases where a branch has to be visible — a filter is
- * on, or the selection is somewhere below. A click overrides it; the override is
- * dropped the next time `autoOpen` becomes true, so selecting a node reveals it
- * even inside a branch that was closed by hand. */
-function useDisclosure(autoOpen: boolean) {
-  const [override, setOverride] = useState<boolean | null>(null);
+/* ---------------------------------------------------------------- editing */
 
-  useEffect(() => {
-    if (autoOpen) setOverride(null);
-  }, [autoOpen]);
+const noEditing = atom(false);
+const noDrag = atom<DragItem | null>(null);
+const noDrop = atom(null, () => {});
+const noRemove = atom(null, (_get, _set, _c: number, _m: number) => {});
 
-  const isOpen = override ?? autoOpen;
-
-  return { isOpen, toggle: () => setOverride(!isOpen) };
+function useEditor() {
+  return useContext(EditorContext);
 }
 
-function NodeStats({ node }: { node: GraphNode }) {
-  const parts: string[] = [node.slug];
+function useEditing() {
+  const editor = useEditor();
+  return useAtomValue(editor?.editing ?? noEditing);
+}
+
+/** A compilation's members: a plain list, or — while editing a topological
+ * compilation — grouped into priority tiers, with a gap above, between and below
+ * them that a drop turns into a new tier. */
+function MemberList({ atoms, compilation, rows, onSelect, path, depth }) {
+  const editing = useEditing();
+  const graph = useAtomValue(atoms.graph);
+
+  const renderRow = ({ edge: e, node: child }) =>
+    h(TreeNode, {
+      key: `${path}/${child.source_id}`,
+      atoms,
+      node: child,
+      onSelect,
+      path: `${path}/${child.source_id}`,
+      edge: e,
+      depth: depth + 1,
+    });
+
+  let tiered = false;
+  if (editing) {
+    tiered = assemblyModeOf(graph, compilation.source_id) === "topological";
+  }
+  if (!tiered) return h("ul.tree", rows.map(renderRow));
+
+  const id = compilation.source_id;
+  const tiers = tiersOf(rows);
+  const items = [
+    h(TierGap, {
+      key: "gap-top",
+      target: {
+        compilation_id: id,
+        kind: "gap",
+        above: null,
+        below: tiers[0]?.priority ?? null,
+      },
+    }),
+  ];
+  tiers.forEach((tier, i) => {
+    const below = tiers[i + 1]?.priority ?? null;
+    items.push(
+      h("li.tier", { key: `tier-${tier.priority}` }, [
+        h(TierLabel, {
+          target: { compilation_id: id, kind: "tier", priority: tier.priority },
+        }),
+        h("ul.tier-members", tier.rows.map(renderRow)),
+      ]),
+      h(TierGap, {
+        key: `gap-${tier.priority}`,
+        target: {
+          compilation_id: id,
+          kind: "gap",
+          above: tier.priority,
+          below,
+        },
+      })
+    );
+  });
+  return h("ul.tree.tiered", items);
+}
+
+function TierLabel({ target }: { target: DropTarget }) {
+  const drop = useDropTarget(target);
+  let label = "unranked";
+  if (target.kind === "tier" && target.priority != null) {
+    label = `priority ${target.priority}`;
+  }
+  return h(
+    "div.tier-label",
+    { ...drop.props, className: drop.className },
+    h("span.tier-priority", label)
+  );
+}
+
+/** Where a new tier goes. Only takes up room while something is being dragged. */
+function TierGap({ target }: { target: DropTarget }) {
+  const editor = useEditor();
+  const dragging = useAtomValue(editor?.dragging ?? noDrag);
+  const drop = useDropTarget(target);
+  if (dragging == null) return h("li.tier-gap");
+  return h(
+    "li.tier-gap.active",
+    { ...drop.props, className: drop.className },
+    h("span", "new tier")
+  );
+}
+
+/** The row: draggable while editing, and a drop target. Dropped on a
+ * compilation, a map goes into it; dropped on a map, it joins that map's tier. */
+function NodeRow({ node, edge, children }) {
+  const editor = useEditor();
+  const editing = useEditing();
+  const setDragging = useSetAtom(editor?.dragging ?? noDrag);
+
+  let target: DropTarget | null = null;
+  if (node.is_compilation) {
+    target = { compilation_id: node.source_id, kind: "into" };
+  } else if (edge != null) {
+    target = {
+      compilation_id: edge.compilation_id,
+      kind: "tier",
+      priority: edge.priority,
+    };
+  }
+  const drop = useDropTarget(target);
+
+  if (!editing) return h("div.node-row", children);
+
+  // Any row can be dragged, a top-level compilation included: it belongs to
+  // nothing, so dropping it adds a membership rather than moving one (`from` is
+  // null) -- how a newly materialized `bc-surface` goes into `carto-large`. A
+  // drop that would close a cycle is refused where it lands.
+  return h(
+    "div.node-row.editable",
+    {
+      draggable: true,
+      onDragStart: (evt: DragEvent) => {
+        evt.stopPropagation();
+        // Firefox starts no drag without data.
+        evt.dataTransfer.setData("text/plain", node.slug);
+        evt.dataTransfer.effectAllowed = "copyMove";
+        setDragging({
+          member_id: node.source_id,
+          from: edge?.compilation_id ?? null,
+        });
+      },
+      onDragEnd: () => setDragging(null),
+      ...drop.props,
+      className: drop.className,
+    },
+    [
+      h("span.drag-handle", { title: "Drag to move; hold Alt to copy" }, "⠿"),
+      ...children,
+    ]
+  );
+}
+
+function RemoveButton({ node, edge }) {
+  const editor = useEditor();
+  const editing = useEditing();
+  const remove = useSetAtom(editor?.removeMember ?? noRemove);
+  if (!editing || edge == null) return null;
+  return h(Button, {
+    minimal: true,
+    small: true,
+    icon: "cross",
+    className: "remove-member",
+    title: "Remove from this compilation",
+    onClick: () => remove(edge.compilation_id, node.source_id),
+  });
+}
+
+/** Drop handling for one target. Alt (Option) copies rather than moves, which
+ * is the browser's own convention for a copying drag. */
+function useDropTarget(target: DropTarget | null) {
+  const editor = useEditor();
+  const dragging = useAtomValue(editor?.dragging ?? noDrag);
+  const setDragging = useSetAtom(editor?.dragging ?? noDrag);
+  const drop = useSetAtom(editor?.drop ?? noDrop);
+  const [over, setOver] = useState(false);
+
+  if (dragging == null || target == null) {
+    return { props: {}, className: undefined };
+  }
+
+  let className = "drop-target";
+  if (over) className = "drop-target drop-over";
+
+  const props = {
+    onDragOver: (evt: DragEvent) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+      let effect: "copy" | "move" = "move";
+      if (evt.altKey) effect = "copy";
+      evt.dataTransfer.dropEffect = effect;
+      if (!over) setOver(true);
+    },
+    onDragLeave: (evt: DragEvent) => {
+      const next = evt.relatedTarget as Node | null;
+      if (next != null && (evt.currentTarget as Node).contains(next)) return;
+      setOver(false);
+    },
+    onDrop: (evt: DragEvent) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+      setOver(false);
+      drop({ item: dragging, target, copy: evt.altKey });
+      setDragging(null);
+    },
+  };
+  return { props, className };
+}
+
+/** Expansion that follows the tree's own cues until the reader overrides it.
+ *
+ * Two cues, which differ in how long they last. `reveal` — the selection is
+ * somewhere below — opens the branch and leaves it open: the route to the
+ * selection can vanish under the reader (an edit removes the selected map from
+ * its compilation), and a branch that closed then would collapse the tree out
+ * from under them. `filtering` opens every surviving branch only while the
+ * filter is on, since those branches were opened by the search, not the reader.
+ * A click overrides either. */
+function useDisclosure({
+  filtering,
+  reveal,
+}: {
+  filtering: boolean;
+  reveal: boolean;
+}) {
+  const [isOpenByHand, setOpenByHand] = useState(reveal);
+  const [filterOverride, setFilterOverride] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (reveal) setOpenByHand(true);
+  }, [reveal]);
+
+  useEffect(() => {
+    setFilterOverride(null);
+  }, [filtering]);
+
+  let isOpen = isOpenByHand;
+  if (filtering) isOpen = filterOverride ?? true;
+
+  const toggle = () => {
+    if (filtering) {
+      setFilterOverride(!isOpen);
+    } else {
+      setOpenByHand(!isOpen);
+    }
+  };
+
+  return { isOpen, toggle };
+}
+
+/** The secondary line. Priority leads, since it is what decides a collision;
+ * in edit mode the tier carries it instead. */
+function NodeStats({
+  node,
+  priority,
+}: {
+  node: GraphNode;
+  priority: number | null;
+}) {
+  const parts: string[] = [];
+  if (priority != null) parts.push(`priority ${priority}`);
+  parts.push(`${node.slug} #${node.source_id}`);
 
   if (node.n_members > 0) {
     parts.push(`${node.n_members} members`);

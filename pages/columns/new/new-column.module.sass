@@ -1,0 +1,70 @@
+// The new-column form: a narrow column of fields, centered in the content.
+
+.new-column-form
+  max-width: 32em
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+  h1
+    margin: 0
+  .lead
+    margin: 0 0 1em 0
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.form-actions
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.5em
+  margin-bottom: 1.5em
+
+// The upload form and what came back from the pipeline
+.column-upload
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+  max-width: 40em
+  h1
+    margin: 0
+
+.upload-controls
+  display: flex
+  flex-direction: column
+  gap: 0.5em
+
+.example-section
+  margin-top: 0.5em
+  .example-label
+    font-weight: 500
+    margin-bottom: 0.25em
+  .example-controls
+    display: flex
+    gap: 0.5em
+    align-items: center
+
+.ingest-result
+  display: flex
+  flex-direction: column
+  gap: 0.75em
+  margin-top: 0.5em
+
+.result-columns
+  list-style: none
+  margin: 0
+  padding: 0
+  display: flex
+  flex-direction: column
+  gap: 0.25em
+
+.result-column
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: 0.5em
+  .column-name
+    font-weight: 500
+  .column-meta
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+    font-size: 0.9em
+  .spacer
+    flex: 1

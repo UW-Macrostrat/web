@@ -33,7 +33,7 @@ import {
 } from "@macrostrat-web/settings";
 import { Box, useDarkMode } from "@macrostrat/ui-components";
 import { Tag as ClassTag, TagSize } from "@macrostrat/data-components";
-import { removeMapLabels, type MapPosition } from "@macrostrat/mapbox-utils";
+import type { MapPosition } from "@macrostrat/mapbox-utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LocationPanel,
@@ -58,13 +58,13 @@ import {
 import { loadable } from "jotai/utils";
 import { useMapEaseTo } from "@macrostrat/mapbox-react";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
-import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
-  BaseLayerForm,
-  Basemap,
-  basemapStyle,
-  ExpandablePanel,
-} from "~/components";
+  basemapAtom,
+  showLabelsAtom,
+  useLabelTransform,
+} from "~/_utils/basemap";
+import { atomWithSearchParam } from "~/_utils/url-atoms";
+import { BaseLayerForm, basemapStyle, ExpandablePanel } from "~/components";
 import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import styles from "./main.module.sass";
@@ -118,7 +118,6 @@ export function Page() {
   const [mapPosition, setMapPosition] = useAtom(lastMapPositionAtom);
 
   const basemap = useAtomValue(basemapAtom);
-  const showLabels = useAtomValue(showLabelsAtom);
   const showGeology = useAtomValue(showGeologyAtom);
   const showFootprints = useAtomValue(showFootprintsAtom);
   const rasterOverlayStyle = useAtomValue(mapOverlayStyleAtom);
@@ -145,25 +144,18 @@ export function Page() {
     return styles;
   }, [rasterOverlayStyle, showGeology, showFootprints]);
 
-  // Labels are removed from the resolved style rather than toggled per-layer.
-  const transformStyle = useCallback(
-    (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
-    },
-    [showLabels]
-  );
+  const transformStyle = useLabelTransform();
 
   // Mapbox fetches the raster tiles and the footprints MVT itself, so the
   // delegated token has to be attached here rather than at a call site. Scoped
   // to this layer's prefix so no token is sent to any other tileserver route.
-const transformRequest = useCallback(
-  (url: string) => {
-    if (!emitMineralsToken || !url.startsWith(mosaicBaseURL)) return { url };
-    return { url, headers: { Authorization: `Bearer ${emitMineralsToken}` } };
-  },
-  [emitMineralsToken]
-);
+  const transformRequest = useCallback(
+    (url: string) => {
+      if (!emitMineralsToken || !url.startsWith(mosaicBaseURL)) return { url };
+      return { url, headers: { Authorization: `Bearer ${emitMineralsToken}` } };
+    },
+    [emitMineralsToken]
+  );
 
   let detailPanel = null;
   if (inspectPosition != null) {
@@ -226,34 +218,6 @@ const datasetParamAtom = atomWithSearchParam("dataset");
 const selectedDatasetAtom = atom(
   (get): string | null => get(datasetParamAtom),
   (get, set, value: string | null) => set(datasetParamAtom, value)
-);
-
-/** The base map style, and whether its labels are shown — the same URL-synced
- * pair used by the topology page. */
-const basemapParamAtom = atomWithSearchParam("basemap");
-const basemapAtom = atom(
-  (get): Basemap => {
-    const value = get(basemapParamAtom);
-    if (value === Basemap.Satellite || value === Basemap.None) {
-      return value as Basemap;
-    }
-    return Basemap.Basic;
-  },
-  (get, set, value: Basemap) => {
-    let param: Basemap | null = value;
-    if (value === Basemap.Basic) param = null;
-    set(basemapParamAtom, param);
-  }
-);
-
-const labelsParamAtom = atomWithSearchParam("labels");
-const showLabelsAtom = atom(
-  (get) => get(labelsParamAtom) !== "off",
-  (get, set, value: boolean) => {
-    let param: string | null = null;
-    if (!value) param = "off";
-    set(labelsParamAtom, param);
-  }
 );
 
 /** Whether the Macrostrat geologic map underlies the mineral maps. On by

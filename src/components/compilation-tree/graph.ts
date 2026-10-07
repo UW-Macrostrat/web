@@ -17,8 +17,8 @@ export interface GraphNode {
   slug: string;
   name: string | null;
   scale: string | null;
-  /** The compilation's faces are cached (a `map_layer` row). Today the scale and
-   * carto layers: structural containers, not maps anyone means to look at. */
+  /** The compilation's faces are cached (a `map_layer` row with rankings): every
+   * topological compilation with members and no polygons of its own. */
   has_faces: boolean;
   /** May be requested by name. A compilation that is not served exists to build
    * others. */

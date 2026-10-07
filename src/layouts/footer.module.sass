@@ -1,11 +1,13 @@
 .footer
-  border-top: 1px solid var(--secondary-background)
-  padding-top: 1em
-  color: var(--secondary-color)
+  border-top: 1px solid var(--pz-panel-rule-color)
+  padding-top: 4em
+  margin-top: 2em
+  line-height: 2em
+  color: var(--pz-secondary-color)
   --filter: grayscale(100%)
 
   h3, h4
-    color: var(--secondary-color)
+    color: var(--pz-secondary-color)
     margin: 0
 
   h4
@@ -14,9 +16,9 @@
 
   a:hover
     text-decoration: none
-    color: var(--text-color)
+    color: var(--pz-text-color)
     h3
-      color: var(--text-color)
+      color: var(--pz-text-color)
 
   display: flex
   flex-direction: row
@@ -28,8 +30,8 @@
 
   .nav-link-list
     :global(.bp6-button.bp6-minimal)
-      font-family: var(--sans-serif-font)
-      --button-color: var(--secondary-color)
+      font-family: var(--pz-body-font)
+      --button-color: var(--pz-secondary-color)
       color: var(--button-color)
       :global(.bp6-icon):not([class*="bp6-intent-"])
         color: var(--button-color)
@@ -38,7 +40,7 @@
         opacity: 0.5
 
       &:hover
-        --button-color: var(--text-color)
+        --button-color: var(--pz-text-color)
         img
           filter: unset
           opacity: 1
@@ -89,7 +91,7 @@
   flex: 0
   h3
     margin: 0
-    color: var(--secondary-color)
+    color: var(--pz-secondary-color)
 
   &:hover
     .footer-logo

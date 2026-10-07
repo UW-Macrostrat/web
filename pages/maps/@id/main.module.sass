@@ -1,47 +1,64 @@
-body
-  margin: 0
-  padding: 0
-  
-.single-map
-  width: 100vh
-  height: 100vh
-  margin: 0
+// The column: one scroll container holding the site header, the controls and
+// the legend, all on a single gutter.
+.page-panel
+  --panel-gutter: var(--pz-space-3)
+  flex: 1
+  min-height: 0
+  overflow-y: auto
+  pointer-events: all
+  background-color: var(--panel-background-color)
+
+  // Element-qualified to outrank the site header's own zero gutter.
+  header.panel-page-header
+    --page-header-padding-x: var(--panel-gutter)
+    --page-header-background: var(--panel-background-color)
+    --page-header-title-block-padding-bottom: var(--panel-gutter)
+
+.map-summary
   display: flex
-  flex-direction: row-reverse
-  //--map-context-stack-width: none
+  flex-direction: column
+  gap: 8px
 
-.map-legend-container
-  overflow-y: scroll
-
-.map-legend
-  margin: 1em
-
-.legend-entry
-  margin: 0.5em 0
-
-.legend-title
-  display: flex
-  flex-direction: row
-  &:hover
-    cursor: pointer
-    background: #eee
-  h4
+  .page-description
     margin: 0
-    margin-right: 0.5em
+    font-size: 12px
+    line-height: 1.4
+    opacity: 0.7
 
-.legend-swatch
-  width: 1em
-  height: 1em
-  display: inline-block
-  margin-right: 0.5em
+.panel-controls
+  display: flex
+  flex-direction: column
+  gap: 8px
+  padding: var(--panel-gutter)
+  border-top: 1px solid var(--panel-rule-color)
+  border-bottom: 1px solid var(--panel-rule-color)
+
+.panel-body
+  padding: 0 var(--panel-gutter)
 
 .dev-links
-  display: block
-  text-align: right
-  &>*
-    display: block
-    margin: 1em
+  display: flex
+  justify-content: flex-end
+  gap: 0.5em
 
+.menu-buttons
+  display: flex
+  gap: 0.5em
+
+.map-controls
+  display: flex
+  flex-direction: column
+  gap: 6px
+
+  .control-row
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 0.5em
+
+  .control-label
+    font-size: 12px
+    opacity: 0.8
 .neighbor-maps
   padding: 0.5em 0
 

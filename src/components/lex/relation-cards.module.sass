@@ -1,6 +1,8 @@
 // The concept ⇄ names cards. Several to a row where there's room: most concepts
 // group one or two names, but the long tail runs to eleven.
 
+@use "~/styles/type"
+
 .relation-cards
   display: grid
   grid-template-columns: repeat(auto-fill, minmax(18em, 1fr))
@@ -12,23 +14,23 @@
   padding: 0.6em 0.8em
 
   h3
-    margin: 0 0 0.2em
-    font-size: 1em
+    @include type.item-title
+    margin-bottom: 0.2em
 
 // A name at least one Macrostrat unit carries — the ones worth navigating to.
 .has-units
   h3
-    font-weight: 600
+    font-weight: var(--pz-font-weight-semibold)
 
 // One nothing in the column store uses: present in the lexicon, but not what
 // someone navigating the hierarchy is after.
 .no-units
   h3
-    font-weight: 400
+    font-weight: var(--pz-font-weight-normal)
 
   .card-kind, h3
-    color: var(--secondary-color)
+    color: var(--pz-secondary-color)
 
 .usage-units
-  font-size: 0.85em
-  color: var(--secondary-color)
+  font-size: var(--pz-font-size-sm)
+  color: var(--pz-secondary-color)

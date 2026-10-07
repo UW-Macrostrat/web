@@ -1,13 +1,12 @@
 import {
-  Popover,
+  PopoverNext,
   Spinner,
   SegmentedControl,
   FormGroup,
   Button,
 } from "@blueprintjs/core";
-import { FullscreenPage } from "~/layouts";
+import { FullscreenHeaderPage } from "~/layouts";
 import h from "./main.module.sass";
-import { PageBreadcrumbs } from "~/components";
 import { useData } from "vike-react/useData";
 import { useLegendData, MapInfo } from "../utils";
 import { useElementSize, useInDarkMode } from "@macrostrat/ui-components";
@@ -54,35 +53,27 @@ export function Page() {
     }),
   ]);
 
-  return h(FullscreenPage, [
-    h("div.page-inner", [
-      h("div.flex.row", [
-        h(PageBreadcrumbs, { separateTitle: false }),
-        h("div.spacer"),
-        h(
-          Popover,
-          {
-            content: settings,
-            usePortal: true,
-            rootBoundary: ref.current,
-            onOpening() {
-              setSelectedLegendID(null);
-            },
-          },
-          h(Button, { icon: "cog", minimal: true })
-        ),
-      ]),
-      h("div.vis-container", { ref }, [
-        h.if(legendData != null)(CorrelationChart, {
-          map: mapInfo,
-          ...size,
-          data: correlationChartData,
-          selectedItem,
-          setSelectedLegendID,
-          ageMode,
-          ageScale,
-        }),
-      ]),
+  const settingsButton = h(PopoverNext, {
+    content: settings,
+    placement: "bottom-end",
+    onInteraction(nextOpen) {
+      if (nextOpen) setSelectedLegendID(null);
+    },
+    renderTarget: ({ isOpen, ...targetProps }) =>
+      h(Button, { ...targetProps, icon: "cog", minimal: true, active: isOpen }),
+  });
+
+  return h(FullscreenHeaderPage, { actions: settingsButton }, [
+    h("div.vis-container", { ref }, [
+      h.if(legendData != null)(CorrelationChart, {
+        map: mapInfo,
+        ...size,
+        data: correlationChartData,
+        selectedItem,
+        setSelectedLegendID,
+        ageMode,
+        ageScale,
+      }),
     ]),
   ]);
 }

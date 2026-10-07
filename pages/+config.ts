@@ -24,6 +24,7 @@ export default {
     "supportsDarkMode",
     "routeParams",
     "user",
+    "tileToken",
     "geo",
     "canRefresh",
     "description",
@@ -38,12 +39,17 @@ export default {
   ],
   redirects: {
     // The v1 addresses of pages now under /about and /community.
-    "/people": "/community/contributors",
+    "/people": "/community",
+    "/community/contributors": "/community",
     "/support": "/about/support",
     // The map interface's usage guide and changelog, formerly panels of the
     // map page, are documentation pages (docs/map in this repository).
     "/map/usage": "/docs/website/map/usage",
     "/map/changelog": "/docs/website/map/changelog",
+    // The experimental column editor moved under the column it edits.
+    "/dev/column-editor-2": "/columns",
+    "/dev/column-editor-2/new": "/columns/new",
+    "/dev/column-editor-2/edit/@col_id": "/columns/@col_id/edit",
   },
   clientRouting: true,
   supportsDarkMode: true,
@@ -91,6 +97,13 @@ export default {
     breadcrumbs: {
       env: {
         client: false,
+        server: true,
+      },
+    },
+    // Header controls a page or subtree hands to `SitePageHeader`.
+    headerActions: {
+      env: {
+        client: true,
         server: true,
       },
     },

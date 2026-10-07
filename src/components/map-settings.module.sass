@@ -1,0 +1,49 @@
+// A thin strip beneath an inset map, inside the map's card.
+.map-settings-bar
+  flex: 0 0 auto
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 0.5em
+  padding: 0.15em 0.35em
+  min-height: 2em
+  border-top: 1px solid var(--pz-border-muted-color)
+  background-color: var(--pz-panel-background-color)
+  font-size: 0.85em
+
+.map-settings-button
+  flex: none
+  white-space: nowrap
+  color: var(--pz-text-subtle-color)
+
+.map-settings-bar-extra
+  display: flex
+  align-items: center
+  justify-content: flex-end
+  gap: 0.5em
+  min-width: 0
+  overflow: hidden
+  color: var(--pz-text-subtle-color)
+
+.map-settings-content
+  padding: 0.75em 1em
+  display: flex
+  flex-direction: column
+  gap: 0.75em
+  min-width: 12em
+
+.settings-section
+  display: flex
+  flex-direction: column
+  align-items: flex-start
+  gap: 0.25em
+
+  h4
+    margin: 0 0 0.25em
+    font-size: 0.75em
+    text-transform: uppercase
+    letter-spacing: 0.05em
+    color: var(--pz-text-subtle-color)
+
+  :global(.bp6-control)
+    margin-bottom: 0.25em

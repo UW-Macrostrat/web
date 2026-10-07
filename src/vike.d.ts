@@ -19,6 +19,7 @@ import type {
 
 import { Item, PageInfo } from "~/_utils/helpers.ts";
 import type { GeoLocation } from "~/_utils/geolocation";
+import type { TileToken } from "~/_utils/tile-token";
 
 export type PageProps = Record<string, unknown>;
 export type PageStyle = "content" | "fullscreen";
@@ -37,12 +38,18 @@ declare global {
       description?: string;
       supportsDarkMode?: boolean;
       scripts?: string[];
+      /** Controls for the site header's action slot (`SitePageHeader`), for
+       * a page or a whole subtree: e.g. the lexicon's search. A component,
+       * rendered in the header so it moves with it (sticky, collapsing). */
+      headerActions?: () => React.ReactNode;
     }
     interface PageContext extends PageContextClient {
       pageProps?: PageProps;
       pageInfo?: PageInfo;
       urlPathname: string;
       user?: User;
+      /** A short-lived token for guarded compilation tiles (`~/_utils/tile-token`). */
+      tileToken?: TileToken | null;
       geo?: GeoLocation | null;
       // Set server-side: access token gone/expired but a refresh token is
       // present, so the client should attempt one silent refresh on load.

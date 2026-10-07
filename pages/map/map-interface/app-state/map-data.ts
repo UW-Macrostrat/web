@@ -2,14 +2,21 @@ import { atom } from "jotai";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { appStateAtom, mapInstanceAtom } from "./store.ts";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
+import { compilationOrDefault } from "./compilation";
 import {} from "@macrostrat/mapbox-react";
-import { loadable } from "jotai/utils";
+import { loadable, selectAtom } from "jotai/utils";
 import mapboxgl from "mapbox-gl";
 
 export const infoMarkerPositionAtom = atom((get) => {
   const appState = get(appStateAtom);
   return appState.infoMarkerPosition;
 });
+
+/** The compilation the details are asked of. A `selectAtom`, so the query atom
+ * below depends on this one string and not on the whole app state -- reading
+ * the app state directly re-ran the query on every map move, and the panel
+ * flickered through a reload each time. */
+const compilationAtom = selectAtom(appStateAtom, (s) => s.compilation);
 
 interface KeyedMapQueryData extends MapQueryData {
   key: string;
@@ -21,17 +28,22 @@ const mapInfoDataAtom = atom<Promise<KeyedMapQueryData | null>>(
     if (map == null) return null;
     /** Atom to handle fetching of map data */
     const pos = get(infoMarkerPositionAtom);
+    const compilation = get(compilationAtom);
     if (pos == null) return null;
     const { lng, lat } = pos;
     // A marker restored from the URL (deep link / back-forward) carries no zoom,
     // so fall back to the current map zoom rather than crashing on `zoom.toFixed`
     const zoom = map.getZoom() ?? 7;
 
+    // The compilation the tiles are drawn from answers the click, so what the
+    // panel describes is what is on the map.
     const params = {
       lng: formatCoordForZoomLevel(lng, zoom),
       lat: formatCoordForZoomLevel(lat, zoom),
       z: zoom.toFixed(0),
-      //map_id: null,
+      source: compilationOrDefault(compilation),
+      // The earlier name of `source`, for an API v2 that predates it.
+      compilation: compilationOrDefault(compilation),
     };
 
     const queryParams = new URLSearchParams(params).toString();

@@ -5,8 +5,14 @@ set -e
 setsid yarn run dev &
 DEV_PID=$!
 
-# Wait for server to start
-sleep 20
+# Wait until the server accepts connections (up to ~2 minutes) rather than a
+# fixed delay: startup (docs assembly, Vite) runs close to any fixed figure,
+# and a request sent before the server listens fails outright (curl exit 7).
+# The first request may then wait out the cold compile, as before.
+for i in $(seq 1 60); do
+  curl -s -o /dev/null "${TEST_BASE_URL:-http://localhost:3000}/" && break
+  sleep 2
+done
 
 # Run acceptance tests
 echo "Running acceptance tests..."

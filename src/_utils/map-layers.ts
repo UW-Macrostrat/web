@@ -16,7 +16,7 @@ export function macrostratCartoStyle(): mapboxgl.Style {
     sources: {
       burwell: {
         type: "vector",
-        tiles: [`${burwellTileDomain}/dev/carto/{z}/{x}/{y}`],
+        tiles: [`${burwellTileDomain}/map/carto/{z}/{x}/{y}`],
       },
     },
     layers: buildMacrostratStyleLayers({

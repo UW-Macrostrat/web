@@ -1,0 +1,366 @@
+/** The editor itself: a column, its editing sheet, and an inspector — or, in
+ * table mode, the same interface read-only.
+ *
+ * Deliberately full-screen and map-free. An editor is a working surface, so
+ * the frame runs in `content-full` and the three panes divide the viewport
+ * between them rather than scrolling as a document; picking a *different*
+ * column is the column list's job, not something to do from inside a session.
+ *
+ * One store of units is shown three ways — as attributes, as the
+ * ingestion-format `units` table, or as the age model's surfaces — and the
+ * column redraws live. In edit mode (`/columns/:id/edit`) the sheets and the
+ * details pane take edits; edits are local (there is no write API yet): reset
+ * returns to the column as loaded, export writes a `units` sheet in the
+ * column-ingestion format. In table mode (`/columns/:id/table`) nothing is
+ * writable and export is the way out — the structure of a column and the age
+ * model behind it, for anyone.
+ */
+import hyper from "@macrostrat/hyper";
+import classNames from "classnames";
+import { useCallback, useMemo } from "react";
+import { useAtom, useAtomValue, useSetAtom } from "./state/ctx";
+import {
+  AnchorButton,
+  Button,
+  ButtonGroup,
+  SegmentedControl,
+  Tag,
+} from "@blueprintjs/core";
+import { MacrostratDataProvider } from "@macrostrat/data-provider";
+import { IntervalTag, TagSize } from "@macrostrat/data-components";
+import { ErrorBoundary } from "@macrostrat/ui-components";
+import { apiV2Prefix } from "@macrostrat-web/settings";
+import { PatternProvider } from "~/_providers";
+import { AlphaTag } from "~/components";
+import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
+import type { ColumnEditorData } from "./data";
+import { editorHref, tableHref } from "./data";
+import { EditorColumn } from "./column-view";
+import { DisplaySettingsButton } from "./settings-panel";
+import { EditorInspector } from "./inspector";
+import { SurfacesSheet, UnifiedSheet, UnitsSheet } from "./sheets";
+import { NoticesButton } from "./notices";
+import { EditChrome, EditTitleContext } from "./edit-chrome";
+import {
+  blockingIssuesAtom,
+  ColumnFocusProvider,
+  useColumnFocus,
+  columnVisibleAtom,
+  editModeAtom,
+  type EditingMode,
+  editedUnitsAtom,
+  editingModeAtom,
+  inspectorOpenAtom,
+  isDirtyAtom,
+  seedEditSession,
+  sheetViewAtom,
+  type SheetView,
+  resetEditsAtom,
+  sheetVisibleAtom,
+  snapshotAtom,
+  useStore,
+} from "./state";
+import { downloadText, unitsToCSV } from "./export";
+import styles from "./main.module.sass";
+
+const h = hyper.styled(styles);
+
+/** One mode only. The editor fills the window and owns its own scrolling; a
+ * map or a sidebar here would take room the working surface needs. */
+const capabilities: Partial<LayoutCapabilities> = {
+  modes: ["content-full"],
+  defaultMode: "content-full",
+  hasAssistant: false,
+  itemName: "Editor",
+  contentScroll: "panel",
+};
+
+export interface ColumnEditorPageProps extends ColumnEditorData {
+  /** Whether this is the editor or the read-only table view. */
+  edit: boolean;
+}
+
+export function ColumnEditorPage(props: ColumnEditorPageProps) {
+  return h(
+    MacrostratDataProvider,
+    { baseURL: apiV2Prefix },
+    h(PatternProvider, h(ColumnEditorFrame, props))
+  );
+}
+
+/** Put the loaded column into the editing session, and set the mode.
+ *
+ * The session's store is the layout's (`state/session`), shared by every
+ * page of the editor, so seeding is idempotent: a column already held keeps
+ * its transaction. Done during render, before any child reads the atoms. */
+export function useSeedEditor(data: ColumnEditorData, edit: boolean) {
+  const store = useStore();
+  useMemo(() => {
+    seedEditSession(store, data);
+    store.set(editModeAtom, edit);
+  }, [store, data, edit]);
+}
+
+function ColumnEditorFrame(props: ColumnEditorPageProps) {
+  const { col_id, edit } = props;
+  useSeedEditor(props, edit);
+
+  let titleAdornment = h(EditTitleContext);
+  let actions = h(EditChrome, { current: "units" });
+  if (!edit) {
+    titleAdornment = h(TableViewContext);
+    actions = h(TableViewNavigation);
+  }
+
+  return h(HybridPage, {
+    key: `${col_id ?? "draft"}:${edit}`,
+    className: classNames("column-editor-page", {
+      "edit-mode": edit,
+      "table-mode": !edit,
+    }),
+    capabilities,
+    // The focused window is one thing the column, the sheets and the toolbar
+    // all read. The editor's own atoms live in the session, not the frame.
+    wrap: (node) => h(ColumnFocusProvider, node),
+    titleAdornment,
+    actions,
+    filterBar: h(EditorToolbar),
+    content: h(EditorContent),
+  });
+}
+
+/* ---------------------------------------------------------------- header */
+
+/** The table view's tag, with the title. */
+function TableViewContext() {
+  return h("span.editor-context", [
+    h(Tag, { minimal: true, icon: "th", className: "view-mode-tag" }, "Table view"),
+  ]);
+}
+
+/** From the table view into the editor; the breadcrumbs lead back. */
+function TableViewNavigation() {
+  const snapshot = useAtomValue(snapshotAtom);
+  const col_id = snapshot?.col_id ?? null;
+  if (col_id == null) return null;
+  return h(AnchorButton, {
+    icon: "edit",
+    text: "Edit",
+    minimal: true,
+    small: true,
+    href: editorHref(col_id),
+  });
+}
+
+function exportTitle(errorCount: number): string | undefined {
+  if (errorCount === 0) return undefined;
+  return `${errorCount} cell${errorCount === 1 ? "" : "s"} need fixing first`;
+}
+
+/** Reset and export: they act on the transaction, so they sit on the toolbar
+ * row with the mode control rather than beside the title. Export stands in
+ * both modes — the table view's way to take a column away; reset only where
+ * there is a transaction to reset. */
+function TransactionActions() {
+  const snapshot = useAtomValue(snapshotAtom);
+  const isDirty = useAtomValue(isDirtyAtom);
+  const edit = useAtomValue(editModeAtom);
+  const resetEdits = useSetAtom(resetEditsAtom);
+  const units = useAtomValue(editedUnitsAtom);
+  const blockingIssues = useAtomValue(blockingIssuesAtom);
+
+  const onExport = useCallback(() => {
+    const csv = unitsToCSV(units);
+    downloadText(`column-${snapshot?.col_id ?? "draft"}-units.csv`, csv);
+  }, [units, snapshot?.col_id]);
+
+  return h(ButtonGroup, { minimal: true }, [
+    h.if(edit)(Button, {
+      icon: "reset",
+      text: "Reset",
+      small: true,
+      disabled: !isDirty,
+      onClick: resetEdits,
+    }),
+    h(Button, {
+      icon: "download",
+      text: "Export CSV",
+      small: true,
+      // An ingestion sheet with a unit overlapping its neighbour isn't worth
+      // writing out; the sheet says which cells are at fault.
+      disabled: blockingIssues.length > 0,
+      title: exportTitle(blockingIssues.length),
+      onClick: onExport,
+    }),
+  ]);
+}
+
+/** What the column is focused on, and the way back out of it. Nothing at all
+ * while the whole column is showing, which is most of the time.
+ *
+ * Named by the intervals that were clicked, as the timescale draws them,
+ * rather than by the ages they work out to — a period has a name and that is
+ * what you picked. A window focused from a row action has no interval behind
+ * it, so that one falls back to its age range. */
+function FocusIndicator() {
+  const zoom = useColumnFocus();
+  if (zoom == null || !zoom.enabled || zoom.isFullExtent) return null;
+
+  const intervals = zoom.selectedIntervals ?? [];
+  let label;
+  if (intervals.length > 0) {
+    label = intervals.map((interval) =>
+      h(IntervalTag, {
+        key: interval.oid,
+        size: TagSize.Small,
+        interval: {
+          id: interval.oid,
+          name: interval.nam,
+          b_age: interval.eag,
+          t_age: interval.lag,
+          color: interval.col,
+          rank: interval.lvl,
+        },
+      })
+    );
+  } else {
+    const { t_age, b_age } = zoom.window ?? {};
+    label = h("span.focus-ages", `${formatAge(b_age)}–${formatAge(t_age)} Ma`);
+  }
+
+  return h("span.focus-indicator", [
+    label,
+    h(Button, {
+      className: "clear-button",
+      icon: "cross",
+      minimal: true,
+      small: true,
+      title: "Show the whole column again",
+      onClick: () => zoom.reset(),
+    }),
+  ]);
+}
+
+function formatAge(age: number | undefined): string {
+  if (age == null) return "—";
+  return age.toFixed(age < 10 ? 2 : 0);
+}
+
+/** Everything that acts on the column: which table is showing, how it is
+ * drawn, which panes frame it, and what to do with the transaction. In the
+ * header's second row, directly above the sheet it acts on. */
+function EditorToolbar() {
+  const [mode, setMode] = useAtom(editingModeAtom);
+  const [columnVisible, setColumnVisible] = useAtom(columnVisibleAtom);
+  const [sheetVisible, setSheetVisible] = useAtom(sheetVisibleAtom);
+  const [inspectorOpen, setInspectorOpen] = useAtom(inspectorOpenAtom);
+  const [view, setView] = useAtom(sheetViewAtom);
+
+  return h("div.editor-toolbar", [
+    h(SegmentedControl, {
+      small: true,
+      options: [
+        // The ingestion sheet's own view, and the default: units with their
+        // boundaries, surfaces implicit
+        { label: "Unified", value: "unified" },
+        { label: "Units", value: "units" },
+        { label: "Surfaces", value: "surfaces" },
+      ],
+      value: mode,
+      onValueChange: (value: EditingMode) => setMode(value),
+    }),
+    // How the table presents its values: the guided editor, or the
+    // template's own cells for copying to and from it
+    h(SegmentedControl, {
+      small: true,
+      options: [
+        { label: "Rich", value: "rich" },
+        { label: "Spreadsheet", value: "plain" },
+      ],
+      value: view,
+      onValueChange: (value: SheetView) => setView(value),
+    }),
+    h(FocusIndicator),
+    h("div.spacer"),
+    h(TransactionActions),
+    h(NoticesButton),
+    h(DisplaySettingsButton),
+    // Any pane gives way to the others: a wide table is the reason to hide the
+    // column or the details, and the details pane's row editor is the reason
+    // to hide the table — one record at a time, with the column beside it.
+    h(ButtonGroup, { minimal: true }, [
+      h(Button, {
+        icon: "vertical-bar-chart-asc",
+        small: true,
+        active: columnVisible,
+        text: "Column",
+        onClick: () => setColumnVisible(!columnVisible),
+      }),
+      h(Button, {
+        icon: "th",
+        small: true,
+        active: sheetVisible,
+        text: "Table",
+        onClick: () => setSheetVisible(!sheetVisible),
+      }),
+      h(Button, {
+        icon: "panel-stats",
+        small: true,
+        active: inspectorOpen,
+        text: "Details",
+        onClick: () => setInspectorOpen(!inspectorOpen),
+      }),
+    ]),
+  ]);
+}
+
+/* --------------------------------------------------------------- content */
+
+/** Column, sheet and inspector, side by side, filling the viewport. The
+ * inspector is part of the working surface here rather than the frame's
+ * assistant slot, which `content-full` doesn't render. With the sheet hidden
+ * the inspector takes its room, so the row editor has space to be a form. */
+function EditorContent() {
+  const mode = useAtomValue(editingModeAtom);
+  const columnVisible = useAtomValue(columnVisibleAtom);
+  const sheetVisible = useAtomValue(sheetVisibleAtom);
+  const inspectorOpen = useAtomValue(inspectorOpenAtom);
+
+  let sheet = h(UnifiedSheet);
+  if (mode === "surfaces") {
+    sheet = h(SurfacesSheet);
+  } else if (mode === "units") {
+    sheet = h(UnitsSheet);
+  }
+
+  let column = null;
+  if (columnVisible) {
+    column = h(
+      "div.editor-column-pane",
+      { className: classNames(`mode-${mode}`) },
+      h(ErrorBoundary, h(EditorColumn))
+    );
+  }
+
+  let sheetPane = null;
+  if (sheetVisible) {
+    sheetPane = h("div.editor-sheet-pane", h(ErrorBoundary, sheet));
+  }
+
+  // With no table on screen the details pane is the working surface, and is
+  // always shown — otherwise the page would be a column and nothing else.
+  let inspector = null;
+  if (inspectorOpen || !sheetVisible) {
+    inspector = h(
+      "div.editor-inspector-pane",
+      { className: classNames({ wide: !sheetVisible }) },
+      h(ErrorBoundary, h(EditorInspector))
+    );
+  }
+
+  return h("div.editor-content", { className: classNames(`mode-${mode}`) }, [
+    column,
+    sheetPane,
+    inspector,
+  ]);
+}

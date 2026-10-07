@@ -14,6 +14,7 @@ export function pageInfo(ctx: any) {
     name: r.strat_name_long ?? r.strat_name,
     color: r.color,
     identifier: data.id,
-    kind: h(StratTag, { isConcept: false }),
+    // rem, so the badge stays the same size in the large title and the bar
+    kind: h(StratTag, { isConcept: false, fontSize: "0.75rem" }),
   });
 }

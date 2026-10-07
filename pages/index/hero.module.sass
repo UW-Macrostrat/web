@@ -98,9 +98,9 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
 .hero-title
   margin: 0
-  font-family: var(--header-font)
-  font-size: 1.4em
-  line-height: 1.2
+  font-family: var(--pz-heading-font)
+  font-size: var(--pz-font-size-xl)
+  line-height: var(--pz-line-height-tight)
   color: $over-imagery-text
   text-shadow: $over-imagery-shadow
   transition: opacity 0.45s ease, transform 0.45s ease
@@ -207,9 +207,9 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
   // A link, so it takes the heading role and darkens on hover with it.
   .col-name
     display: block
-    font-family: var(--header-font)
-    font-size: 0.95em
-    line-height: 1.2
+    font-family: var(--pz-heading-font)
+    font-size: var(--pz-font-size-md)
+    line-height: var(--pz-line-height-tight)
     color: var(--pz-heading-color)
     transition: color 0.18s ease
     &:hover
@@ -218,7 +218,7 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
   .column-inset-summary
     margin: 0.15em 0 0
-    font-size: 0.75em
+    font-size: var(--pz-font-size-xs)
     color: var(--pz-text-subtle-color)
 
   .column-focus-button
@@ -234,15 +234,15 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 .column-inset-scroll
   flex: 1 1 auto
   min-height: 0
-  overflow-y: auto
+  overflow-y: scroll
   overflow-x: hidden
   padding: 0
-  margin: 0 -2px
+  margin: 0 0
 
   // Unit labels: small, serif, upright. Family inherits into the label's
   // foreignObject; the size and style are the column's own variables.
-  font-family: var(--sans-serif-font)
-  --column-unit-font-size: 10px
+  font-family: var(--pz-body-font)
+  --column-unit-font-size: 0.8em
   --column-unit-font-style: normal
   // Theme-aware, through the design-system tokens: a hairline of the text
   // color rather than a fixed black, which vanishes on dark unit fills.
@@ -293,15 +293,15 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
   .hero-credit
     margin: 0
-    font-size: 0.8em
-    line-height: 1.35
+    font-size: var(--pz-font-size-xs)
+    line-height: var(--pz-line-height-snug)
     color: var(--pz-text-subtle-color)
 
   .credit-label
     text-transform: uppercase
-    letter-spacing: 0.04em
-    font-size: 0.85em
+    letter-spacing: 0.05em
     margin-right: 0.5em
+    font-weight: var(--pz-font-weight-semibold)
     color: var(--pz-accent-text-color)
 
   .credit-detail

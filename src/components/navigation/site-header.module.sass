@@ -1,0 +1,52 @@
+// The site header adds no gutter of its own: content pages centre it on the
+// column (`width: "constrained"`) and the hybrid frame's header row supplies
+// one, so its text lines up with the page's. Element-qualified so it outranks
+// the library's own default on the same element.
+header.site-page-header
+  --page-header-padding-x: 0px
+  // The column editor's trail proportions: a smaller mark beside larger crumbs
+  --page-header-logo-size: 1.5rem
+  --page-header-crumb-font-size: var(--pz-font-size-lg)
+  // A title drawn as a chip (lexicon items) rises past the cap height the
+  // title is trimmed to, and would tuck under the sticky bar at rest
+  --page-header-title-spacing: var(--pz-space-4)
+  // The title row's identifier scales with the title it follows
+  --page-header-identifier-font-size: clamp(var(--pz-font-size-lg), 4.5cqi, var(--pz-font-size-xl))
+
+  // `lexPageInfo` titles: the name, then its "aka" and kind badges on the same
+  // line. One line in the bar, whose crumb has a fixed height; the large
+  // title may wrap. Set unscoped by that module, hence the :global.
+  :global(.lex-item-title)
+    display: inline-flex
+    flex-direction: row
+    align-items: center
+    gap: 0.4em
+    max-width: 100%
+
+  h1 :global(.lex-item-title)
+    flex-wrap: wrap
+
+  // The wordmark crumb is in Maven Pro and the rest in the body font, so
+  // centring each crumb's box left their baselines apart; align on baselines.
+  // The chevrons and the "…" menu have no text, so they stay centred.
+  ol,
+  li
+    align-items: baseline
+
+  li::after,
+  :global(.bp6-breadcrumbs-collapsed)
+    align-self: center
+
+.macrostrat-wordmark
+  font-family: "Maven Pro", var(--pz-font-sans)
+  font-weight: 400
+  font-size: 1.05em
+
+.site-logo
+  display: flex
+  width: 100%
+  height: 100%
+
+  img
+    width: 100%
+    height: 100%

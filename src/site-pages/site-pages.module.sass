@@ -1,11 +1,71 @@
+@use "~/styles/type"
+
+// A site page. Its prose — section headings included — is styled by
+// `pages/docs/index/docs-content.sass`, which the page shares with /docs.
+
 .site-page
   max-width: 100%
-  h2
-    margin-top: var(--pz-space-5, 2em)
-    padding-bottom: 0.2em
-    border-bottom: 1px solid var(--pz-panel-rule-color, #ddd)
   .section-prose > p:first-child
     margin-top: 0.5em
 
+// A component among the prose: a directory, a list of supporters. It is
+// interface, not running text, so it takes the body font back from the prose
+// around it.
 .site-slot
-  margin: var(--pz-space-3, 1em) 0 var(--pz-space-4, 1.5em)
+  margin: var(--pz-space-3) 0 var(--pz-space-4)
+  font-family: var(--pz-body-font)
+
+// A heading with a slot at the end of its line: a count, a link out.
+.section-heading-row
+  display: flex
+  flex-wrap: wrap
+  align-items: baseline
+  justify-content: space-between
+  column-gap: var(--pz-space-4)
+  .site-slot
+    margin: 0
+
+// Link cards from a `> [!cards]` callout (`./markdown-components`).
+.card-grid
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
+  gap: var(--pz-space-3)
+  margin: var(--pz-space-3) 0 var(--pz-space-4)
+  font-family: var(--pz-body-font)
+
+  > a, > div
+    margin: 0
+
+  .card-title
+    display: inline-flex
+    align-items: center
+    gap: 0.4em
+
+  .card-description
+    @include type.supporting
+    margin: 0.3em 0 0
+
+// A `> [!logo]` callout: its text beside the Macrostrat logo.
+.logo-callout
+  display: flex
+  align-items: center
+  gap: var(--pz-space-4)
+  padding: var(--pz-space-4)
+  margin: 0 0 var(--pz-space-4)
+  border: 1px solid var(--pz-border-muted-color)
+  border-radius: var(--pz-radius-lg)
+  background: var(--pz-panel-background-color)
+
+  .logo-callout-icon
+    width: 72px
+    height: 72px
+    flex: none
+
+  .logo-callout-body
+    font-size: var(--pz-font-size-lg)
+    p
+      margin: 0
+
+  @media (max-width: 640px)
+    flex-direction: column
+    align-items: flex-start

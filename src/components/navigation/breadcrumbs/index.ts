@@ -5,6 +5,7 @@ import { buildBreadcrumbs, Item } from "./utils";
 import { BreadcrumbTrail, Crumb } from "./trail";
 import { Identifier } from "@macrostrat/data-components";
 import { isValidElement } from "react";
+import classNames from "classnames";
 
 import h from "./breadcrumbs.module.sass";
 
@@ -16,18 +17,22 @@ interface PageBreadcrumbsProps {
   showLogo?: boolean;
   separateTitle?: boolean;
   titleOverflow?: TitleOverflow;
+  /** `small` for tight spaces, such as a map's context panel. */
+  size?: "default" | "small";
 }
 
 export function PageBreadcrumbs({
   showLogo = true,
   separateTitle = true,
   titleOverflow,
+  size,
 }: PageBreadcrumbsProps) {
   const breadcrumbs = usePageBreadcrumbs();
   return h(PageBreadcrumbsInternal, {
     showLogo,
     separateTitle,
     titleOverflow,
+    size,
     items: breadcrumbs,
   });
 }
@@ -128,6 +133,7 @@ export function PageBreadcrumbsInternal({
   showLogo = false,
   separateTitle = false,
   titleOverflow,
+  size = "default",
   items,
 }: PageBreadcrumbsInternalProps) {
   const trail = [...items];
@@ -234,7 +240,11 @@ export function PageBreadcrumbsInternal({
     identifierElement,
   ]);
 
-  return h("div.page-nav", [breadCrumbs, titleElement]);
+  return h(
+    "div.page-nav",
+    { className: classNames({ small: size == "small" }) },
+    [breadCrumbs, titleElement]
+  );
 }
 
 function overflowClass(
@@ -251,7 +261,7 @@ function overflowClass(
   return className + " " + overflow;
 }
 
-function nameForItem(
+export function nameForItem(
   item: Item | null | undefined,
   short: boolean = true
 ): ReactNode {

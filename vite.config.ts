@@ -1,7 +1,7 @@
 import revisionInfo from "@macrostrat/revision-info-webpack";
 import react from "@vitejs/plugin-react";
 import vike from "vike/plugin";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, type ProxyOptions } from "vite";
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { cp } from "node:fs/promises";
@@ -160,13 +160,32 @@ function buildDevProxy() {
    * client at these paths when the request came in on localhost.
    *
    * Dev-only by construction — `server.proxy` is ignored by `vike build`. */
-  const target = loadEnvVar("MACROSTRAT_API_DOMAIN");
-  if (target == null) return undefined;
+  const proxy: Record<string, ProxyOptions> = {};
 
-  // `secure: false` because the stack uses OrbStack's local CA, and
-  // `changeOrigin` because Caddy routes on the Host header.
-  const opts = { target, changeOrigin: true, secure: false };
-  return { "/api": opts, "/tiles": opts };
+  // Opt-in: the local stack doesn't run the knowledge-graph API, so borrow
+  // another one. Listed first because Vite uses the first matching prefix.
+  const kgTarget = loadEnvVar("MACROSTRAT_KG_API_DEV_PROXY");
+  if (kgTarget != null) {
+    // Where the client calls the knowledge-graph API when served from localhost.
+    const kgAPIPath = "/api/v3/knowledge-graph";
+    proxy[kgAPIPath] = {
+      target: kgTarget,
+      changeOrigin: true,
+      rewrite: (url) => url.slice(kgAPIPath.length),
+    };
+  }
+
+  const target = loadEnvVar("MACROSTRAT_API_DOMAIN");
+  if (target != null) {
+    // `secure: false` because the stack uses OrbStack's local CA, and
+    // `changeOrigin` because Caddy routes on the Host header.
+    const opts = { target, changeOrigin: true, secure: false };
+    proxy["/api"] = opts;
+    proxy["/tiles"] = opts;
+  }
+
+  if (Object.keys(proxy).length == 0) return undefined;
+  return proxy;
 }
 
 function loadEnvVar(name: string): string | null {

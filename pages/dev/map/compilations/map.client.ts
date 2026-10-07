@@ -20,20 +20,19 @@
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { MapView } from "@macrostrat/map-interface";
 import { MapboxMapProvider } from "@macrostrat/mapbox-react";
-import { removeMapLabels } from "@macrostrat/mapbox-utils";
 import { ErrorBoundary, useInDarkMode } from "@macrostrat/ui-components";
 import h from "@macrostrat/hyper";
 import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useMemo } from "react";
 
 import { basemapStyle, Basemap } from "~/components";
+import { basemapAtom, useLabelTransform } from "~/_utils/basemap";
 import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import { MapMarker } from "@macrostrat/map-interface";
 import { layoutShellAtom } from "~/layouts/hybrid";
 
 import {
-  basemapAtom,
   expandMembersAtom,
   focusNodeAtom,
   focusSlugAtom,
@@ -41,14 +40,13 @@ import {
   showCartoAtom,
   showFacesAtom,
   showFootprintsAtom,
-  showLabelsAtom,
   visibleSlugsAtom,
   type Point,
 } from "./state";
 
-/** Fallback focus: the broadest served layer, so the map is never blank before
- * anything has been picked. */
-const DEFAULT_FOCUS = "carto-large";
+/** Fallback focus: `carto`, the served map, whose faces the tile routes pick by
+ * the tile's zoom band -- so the map is never blank before anything is picked. */
+const DEFAULT_FOCUS = "carto";
 
 export function CompilationMap() {
   return h(ErrorBoundary, h(CompilationMapShell));
@@ -69,19 +67,12 @@ function CompilationMapShell() {
 function CompilationMapInner({ shell }) {
   const inDarkMode = useInDarkMode();
   const basemap = useAtomValue(basemapAtom);
-  const showLabels = useAtomValue(showLabelsAtom);
   const [mapPosition, setMapPosition] = useAtom(lastMapPositionAtom);
   const [point, setPoint] = useAtom(pointAtom);
 
   const overlayStyles = useOverlayStyles();
 
-  const transformStyle = useCallback(
-    (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
-    },
-    [showLabels]
-  );
+  const transformStyle = useLabelTransform();
 
   const setPosition = useCallback(
     (position: Point | null) => setPoint(position),
@@ -190,7 +181,9 @@ function footprintStyle(
       "compilation-maps": {
         type: "vector",
         tiles: [
-          `${burwellTileDomain}/dev/topology/maps/${slug}/{z}/{x}/{y}?level=${expand ? "map" : "member"}`,
+          `${burwellTileDomain}/dev/topology/maps/${slug}/{z}/{x}/{y}?level=${
+            expand ? "map" : "member"
+          }`,
         ],
       },
     },
@@ -245,7 +238,9 @@ function facesStyle(
       "compilation-faces": {
         type: "vector",
         tiles: [
-          `${burwellTileDomain}/dev/topology/faces/${slug}/{z}/{x}/{y}?level=${expand ? "map" : "member"}`,
+          `${burwellTileDomain}/dev/topology/faces/${slug}/{z}/{x}/{y}?level=${
+            expand ? "map" : "member"
+          }`,
         ],
       },
     },

@@ -30,6 +30,12 @@
   gap: var(--pz-inline-gap, 0.5rem)
   min-width: 0
 
+  // The assembled site header (from `HybridPage`) takes the whole row. Its
+  // class is set unscoped by the page, hence the :global.
+  & > :global(.shell-page-header)
+    flex: 1 1 auto
+    min-width: 0
+
 // Active filters, as a second row at the content's width. Collapses when the
 // page has nothing to show.
 .header-filters
@@ -248,6 +254,15 @@
   padding: var(--pz-space-2, 0.5rem) var(--pz-space-3, 0.75rem)
   min-width: 0
   border-bottom: 1px solid var(--pz-panel-rule-color, var(--panel-rule-color))
+
+// One line: the trail ellipsizes rather than the controls wrapping under it
+.split-header
+  .header-row
+    flex: 1 1 auto
+    min-width: 0
+  .header-titling
+    flex-wrap: nowrap
+    overflow: hidden
 
 .split-list
   flex: 1 1 auto

@@ -27,6 +27,7 @@ import {
 import { buildGeoJSONSource, setGeoJSON } from "@macrostrat/mapbox-utils";
 import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import { useInsetMapStyleProps } from "~/components/map-settings";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
@@ -82,9 +83,13 @@ function ColumnNavigationMapView({ target }: { target: ColumnMapTarget }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on contents
   }, [footprints, visibleKey]);
 
+  // Basemap and labels, from the settings bar beneath the page's slot.
+  const styleProps = useInsetMapStyleProps();
+
   return h(
     ColumnNavigationMap,
     {
+      ...styleProps,
       style: { height: "100%" },
       accessToken: mapboxAccessToken,
       columns,

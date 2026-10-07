@@ -4,7 +4,7 @@ import { AppGallery } from "./apps";
 import { IntegrationList } from "./integrations";
 import { ContactBlock } from "./contact";
 import { ContributorDirectory } from "./contributors";
-import { CiteMacrostrat, Bibliography } from "./publications";
+import { CiteMacrostrat, Bibliography, BibliographySummary } from "./publications";
 import { RepositoryList } from "./repositories";
 
 export const siteComponents: Record<string, any> = {
@@ -15,5 +15,6 @@ export const siteComponents: Record<string, any> = {
   ContributorDirectory,
   CiteMacrostrat,
   Bibliography,
+  BibliographySummary,
   RepositoryList,
 };
