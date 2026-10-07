@@ -1,9 +1,5 @@
 import h from "./main.module.sass";
-import {
-  DataField,
-  ExpansionPanel,
-  Parenthetical,
-} from "@macrostrat/data-components";
+import { DataField, ExpansionPanel } from "@macrostrat/data-components";
 import { BaseMapReference, MapReference } from "~/components/map-info";
 import { AgeRange, IntervalProportions } from "@macrostrat/column-views";
 import { Icon } from "@blueprintjs/core";
@@ -187,27 +183,40 @@ function AgeField({ source }) {
   const b_age = b_int?.b_age;
   const t_age = t_int?.t_age;
   const hasIntervals = b_int?.int_id != null || t_int?.int_id != null;
+  const singleIntervalAgeRange =
+    hasIntervals && b_int?.int_id === t_int?.int_id;
 
   if (!age && !hasIntervals) return null;
 
   let described = null;
+  let range = null;
+
   if (age) {
-    let range = null;
-    if (b_age != null && t_age != null) {
-      range = h(Parenthetical, h(AgeRange, { data: { b_age, t_age } }));
+    if (b_age != null && t_age != null && !singleIntervalAgeRange) {
+      range = h(AgeRange, { data: { b_age, t_age } });
     }
-    described = h("div.described-age", [h("span.age-text", age), range]);
+
+    described = h("div.described-age", h("span.age-text", age));
   }
 
   let intervals = null;
+  let resolved = null;
   if (hasIntervals) {
+    let vals = { b_int_id: b_int?.int_id, t_int_id: t_int?.int_id };
     intervals = h(IntervalProportions, {
-      unit: { b_int_id: b_int?.int_id, t_int_id: t_int?.int_id },
-      showAgeRange: !age,
+      unit: vals,
+      showAgeRange: singleIntervalAgeRange,
     });
   }
+  if (intervals != null || range != null) {
+    resolved = h("div.resolved-age", [intervals, " ", range]);
+  }
 
-  return h(DataField, { label: "Age" }, [described, intervals]);
+  return h(
+    DataField,
+    { label: "Age" },
+    h("div.age-values", [described, resolved])
+  );
 }
 
 function StratNamesField(props) {
