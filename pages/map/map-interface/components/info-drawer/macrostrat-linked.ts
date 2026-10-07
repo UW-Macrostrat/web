@@ -15,8 +15,16 @@ import { ThicknessField, Duration } from "@macrostrat/column-views";
 import h from "./main.module.sass";
 import type { ReactNode } from "react";
 
-import { useLocation, Link } from "../../app-state";
-import { Spinner } from "@blueprintjs/core";
+import {
+  browserHistory,
+  columnFootprintsAtom,
+  useAppActions,
+  useLocation,
+  type ColumnFootprints,
+} from "../../app-state";
+import { AnchorButton, SegmentedControl, Spinner } from "@blueprintjs/core";
+import { LinkCard } from "~/components/cards";
+import { useAtomValue } from "jotai";
 import { AttributeField } from "./attribute-hierarchy";
 import { ColumnThumbnail } from "./column-thumbnail";
 
@@ -49,8 +57,9 @@ function RegionalStratigraphyContent(props) {
   if (columnInfo == null || mapInfo == null) return null;
 
   return h("div.regional-stratigraphy", [
-    h(ColumnHeader, { columnInfo, source }),
+    h(ColumnCard, { columnInfo, source }),
     h(MacrostratLinkedData, { mapInfo, source }),
+    h(FootprintControl),
   ]);
 }
 
@@ -70,24 +79,78 @@ export function MacrostratLinkedData(props) {
   ]);
 }
 
-/** The column's name, with a thumbnail of it as the cue that both open it */
-function ColumnHeader({ columnInfo, source }) {
+/** The column as one card: following it shows the column in this panel */
+function ColumnCard({ columnInfo, source }) {
+  const runAction = useAppActions();
   const { pathname } = useLocation();
-  const to = pathname + "/column";
-  const title = "Open the stratigraphic column";
-  return h("div.column-info", [
-    h(
-      Link,
-      { to, className: "column-thumbnail-link", title },
-      h(ColumnThumbnail, { source })
-    ),
-    h("div.column-title", [
-      h("h3", [
-        h(Link, { to }, columnInfo.col_name),
-        h.if(columnInfo.col_group)([" — ", columnInfo.col_group]),
+
+  const onClick = (evt) => {
+    if (evt.metaKey || evt.ctrlKey || evt.shiftKey) return;
+    // Vike routes anchors from a document listener that ignores preventDefault
+    evt.preventDefault();
+    evt.stopPropagation();
+    runAction({ type: "open-column-page" });
+  };
+
+  return h(
+    LinkCard,
+    {
+      className: "column-card",
+      density: "list",
+      href: browserHistory.createHref({ pathname: pathname + "/column" }),
+      label: "Show the stratigraphic column",
+      nestedLinks: true,
+      onClick,
+    },
+    h("div.column-card-body", [
+      h(ColumnThumbnail, { source }),
+      h("div.column-title", [
+        h(ColumnTitle, { columnInfo }),
+        h("div.description", "Stratigraphic column"),
       ]),
-      h("div.description", "Stratigraphic column"),
-    ]),
+      h(ColumnPageButton, { col_id: columnInfo.col_id }),
+    ])
+  );
+}
+
+export function ColumnTitle({ columnInfo }) {
+  return h("h3.column-name", [
+    columnInfo.col_name,
+    h.if(columnInfo.col_group)([" — ", columnInfo.col_group]),
+  ]);
+}
+
+export function ColumnPageButton({ col_id }) {
+  return h(AnchorButton, {
+    className: "column-page-button",
+    href: `/columns/${col_id}`,
+    icon: "share",
+    minimal: true,
+    small: true,
+    title: "Open the column page",
+  });
+}
+
+const footprintOptions = [
+  { label: "None", value: "none" },
+  { label: "Selected", value: "selected" },
+  { label: "All", value: "all" },
+];
+
+/** Which column footprints the map draws; applies across the page */
+export function FootprintControl() {
+  const footprints = useAtomValue(columnFootprintsAtom);
+  const runAction = useAppActions();
+  return h("div.footprint-control", [
+    h("span.footprint-label", "Show footprints"),
+    h(SegmentedControl, {
+      small: true,
+      options: footprintOptions,
+      value: footprints,
+      onValueChange(value: ColumnFootprints) {
+        runAction({ type: "set-column-footprints", footprints: value });
+      },
+    }),
   ]);
 }
 

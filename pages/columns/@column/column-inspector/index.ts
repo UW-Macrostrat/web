@@ -14,6 +14,7 @@ import {
   MacrostratColumnStateProvider,
   PBDBFossilsColumn,
   ReferencesField,
+  UnitSelectionStyle,
 } from "@macrostrat/column-views";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useAtom } from "jotai";
@@ -97,6 +98,9 @@ const columnPageCapabilities: Partial<LayoutCapabilities> = {
   itemName: "Column",
   contentScroll: "page",
 };
+
+/** A selected unit keeps its color while the rest of the column goes plain */
+const selectedUnitProps = { selectionStyle: UnitSelectionStyle.ColorSelected };
 
 export function ColumnPage(props) {
   return h(
@@ -256,6 +260,7 @@ function ColumnContentPane({ columnInfo }) {
             {
               units,
               unitComponent: ColoredUnitComponent,
+              unitComponentProps: selectedUnitProps,
               unconformityLabels: "minimal",
               collapseSmallUnconformities: true,
               showTimescale,

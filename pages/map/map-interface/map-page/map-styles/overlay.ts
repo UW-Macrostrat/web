@@ -124,10 +124,10 @@ function buildColumnLayers(): mapboxgl.Layer[] {
   const isEmphasized = ["any", isSelected, isHovered];
 
   const fillPaint = () => ({
-    // Invisible at rest; a wash only under the pointer or the selection, which
-    // is what makes a large footprint readable as one shape.
-    "fill-color": ["case", isSelected, selectedColor, hoverColor],
-    "fill-opacity": ["case", isEmphasized, 0.15, 0],
+    // A wash only under the pointer; the selection is its outline alone, so
+    // the geologic map inside it stays readable.
+    "fill-color": hoverColor,
+    "fill-opacity": ["case", isSelected, 0, isHovered, 0.15, 0],
   });
 
   // A `["zoom"]` expression is only allowed as the input to the outermost

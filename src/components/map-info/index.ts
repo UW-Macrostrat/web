@@ -1,8 +1,8 @@
 import h from "@macrostrat/hyper";
-import { ReactNode } from "react";
+import { Children, ReactNode } from "react";
 
 export function MapReference(props) {
-  const { prefix = null, reference: ref } = props;
+  const { prefix = null, reference: ref, children } = props;
   if (!ref || Object.keys(ref).length === 0) {
     return null;
   }
@@ -60,13 +60,13 @@ export function MapReference(props) {
 
   const txt = addSeparators(mainText);
 
-  return h(BaseMapReference, { prefix }, txt);
+  return h(BaseMapReference, { prefix }, [txt, children]);
 }
 
 export function BaseMapReference(props) {
   const { children, prefix = null } = props;
   const _prefix = prefix ? h("em.prefix", [prefix + " "]) : null;
-  return h("p.map-reference", [_prefix, children]);
+  return h("p.map-reference", [_prefix, ...Children.toArray(children)]);
 }
 
 function addSeparators(

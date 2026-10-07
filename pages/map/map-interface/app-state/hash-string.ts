@@ -190,7 +190,11 @@ export function updateMapPositionForHash(
     let { show = [], hide = [] } = hashData;
     // Set default view parameters
     const mapLayers = layerDescriptionToLayers(show, hide);
-    const position = getMapPositionForHash(hashData, state.infoMarkerPosition);
+    let position = state.mapPosition;
+    // Without coordinates the library centers on 0,0; keep the current view.
+    if (hashHasMapPosition(hashString) || state.infoMarkerPosition != null) {
+      position = getMapPositionForHash(hashData, state.infoMarkerPosition);
+    }
 
     // Get time cursor information
     const { age, plate_model = 1 } = hashData;
