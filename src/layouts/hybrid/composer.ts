@@ -13,7 +13,7 @@
  * layout mode picks which shell gets it.
  */
 
-import { useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtomValue, useSetAtom, type Atom } from "jotai";
 import classNames from "classnames";
 import type { ReactNode } from "react";
 import { Button } from "@blueprintjs/core";
@@ -32,6 +32,8 @@ import {
   showAssistantAtom,
   type LayoutMode,
 } from "./state";
+
+const neverIdleAtom = atom(false);
 
 const MapShell = onDemand(() =>
   import("./map-shell.client").then((mod) => mod.MapShell)
@@ -58,18 +60,25 @@ export interface ShellProps {
   filterBar?: ReactNode;
   map?: ReactNode;
   assistant?: ReactNode;
+  /** The view menu and page links, at the foot of the content sidebar */
+  sidebarLinks?: ReactNode;
+  /** See `HybridPage` */
+  assistantIdle?: Atom<boolean>;
 }
 
 export function LayoutShellView(props: ShellProps) {
   const shell = useAtomValue(layoutShellAtom);
   const mode = useAtomValue(layoutModeAtom);
   const showAssistant = useAtomValue(showAssistantAtom);
+  // An idle assistant isn't worth a panel floating over the map
+  const assistantIdle = useAtomValue(props.assistantIdle ?? neverIdleAtom);
+  const showFloatingAssistant = showAssistant && !assistantIdle;
 
   if (shell === "map") {
-    return h(MapShell, { ...props, mode, showAssistant });
+    return h(MapShell, { ...props, mode, showAssistant: showFloatingAssistant });
   }
   if (shell === "split") {
-    return h(SplitShell, { ...props, showAssistant });
+    return h(SplitShell, { ...props, showAssistant: showFloatingAssistant });
   }
   return h(ContentShell, { ...props, mode, showAssistant });
 }
@@ -90,6 +99,7 @@ function ContentShell({
   filterBar,
   map,
   assistant,
+  sidebarLinks,
   mode,
   showAssistant,
 }: ShellProps & { mode: string; showAssistant: boolean }) {
@@ -99,7 +109,7 @@ function ContentShell({
   const sidebar = hasSidebar(mode as LayoutMode);
   const inset = hasInsetMap(mode as LayoutMode);
   const fullWidth = isFullWidth(mode as LayoutMode);
-  // `panel`: the content is the scroller (data panel); `page`: the document is.
+  // `panel`: the content fills the scroll region; `page`: it grows with itself.
   const contentScroll = useAtomValue(contentScrollAtom);
 
   let sidebarRegion = null;
@@ -115,6 +125,7 @@ function ContentShell({
         h(ModeSwitchButton, { target: "content-inset", icon: "minimize" }),
       ]),
       assistantRegion,
+      sidebarLinks,
     ]);
   }
 
@@ -126,6 +137,10 @@ function ContentShell({
       h(ModeSwitchButton, { target: "content-primary", icon: "maximize" }),
     ]);
   }
+
+  const holder = h("div.content-panel-holder", content);
+
+  const body = h(ScrollBody, { holder, sidebar, sidebarRegion, insetRegion });
 
   return h(
     "div.content-shell",
@@ -141,13 +156,31 @@ function ContentShell({
         h(HeaderRow, { header, breadcrumbs, titleAdornment, controls }),
         h.if(filterBar != null)("div.header-filters", filterBar),
       ]),
-      h("div.content-main", [
-        h("div.content-panel-holder", content),
-        sidebarRegion,
-        insetRegion,
-      ]),
+      body,
     ]
   );
+}
+
+/** Everything below the header scrolls as one, with the scrollbar at the
+ * window's edge rather than the content's.
+ *
+ * In `panel` mode the content column is exactly as tall as the scroller, so a
+ * pane that fills its height (a chart, an editor) is unchanged and only an
+ * overflowing list scrolls it; in `page` mode it grows with its content. The
+ * sidebar rides in a layer over the scroller, in the column a spacer keeps
+ * free, so it never scrolls and never passes under the header. */
+function ScrollBody({ holder, sidebar, sidebarRegion, insetRegion }) {
+  let spacer = null;
+  if (sidebar) {
+    spacer = h("div.sidebar-spacer");
+  }
+  return h("div.content-body", [
+    h("div.content-scroll", h("div.content-main", [holder, spacer])),
+    h("div.content-overlay", [
+      h("div.content-main", [h("div.content-spacer"), sidebarRegion]),
+      insetRegion,
+    ]),
+  ]);
 }
 
 /** The header row: the assembled page header when there is one, else the

@@ -8,9 +8,6 @@
  */
 
 import {
-  AnchorButton,
-  Button,
-  ButtonGroup,
   Icon,
   Spinner,
   Switch,
@@ -38,19 +35,22 @@ import { useData } from "vike-react/useData";
 import { navigate } from "vike/client/router";
 import classNames from "classnames";
 
-import { DevLinkButton, Link } from "~/components";
+import { Link } from "~/components";
 import { LinkCard } from "~/components/cards";
 import { LithologyTag } from "~/components/lex/tag";
 import {
   autoLoadPagesForItems,
   createWindowedScrollBody,
 } from "~/components/data-view";
-import { HybridContentFooter, HybridPage } from "~/layouts/hybrid";
+import {
+  HybridContentFooter,
+  HybridPage,
+  type HybridLink,
+} from "~/layouts/hybrid";
 import {
   projectIDParam,
   ProjectFilterControl,
   ProjectFilterProvider,
-  ProjectFilterTag,
   resolveProjectIDs,
 } from "~/components/project-filter";
 import {
@@ -81,6 +81,7 @@ import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   addFilterAtom,
   allRowsAtom,
+  assistantIdleAtom,
   clearAllFiltersAtom,
   columnFilterAtom,
   filterKeyFromType,
@@ -126,7 +127,7 @@ const ColumnListMap = onDemand(() =>
  * list: three cards share a band. Each card is one line — name, any status, and
  * the id — so the band is only a little taller than the row it replaced while
  * holding three times as much. */
-const ROW_HEIGHT = 40;
+const ROW_HEIGHT = 48;
 /** The width a column card wants. The grid fits as many as the body has room
  * for — three at the content measure, one in the ~350px panel beside the map. */
 const COLUMN_CARD_WIDTH = 280;
@@ -248,6 +249,15 @@ const columnSpec = [
   { key: "t_units", name: "Units", dataType: "integer" },
 ];
 
+const columnListLinks: HybridLink[] = [
+  {
+    label: "Correlation chart",
+    href: "/columns/correlation",
+    icon: "comparison",
+    tag: "Beta",
+  },
+];
+
 export function Page({ linkPrefix = "/" }) {
   const data = useData();
   const { allColumnGroups, projects } = data;
@@ -277,9 +287,11 @@ export function Page({ linkPrefix = "/" }) {
         // Inside the frame's jotai scope, so it sees the live filters.
         wrap: (node) => h(ColumnScopeSync, { adopted: scope.adopted }, node),
         actions: h(LoginButton),
+        links: columnListLinks,
         content: h(ColumnList),
         map: h(ColumnListMapSlot),
         assistant: h(ColumnAssistant),
+        assistantIdle: assistantIdleAtom,
       })
     )
   );
@@ -358,10 +370,13 @@ function ColumnScopeSync({ adopted, children }) {
  * tags (`.header-filters:empty`) — so selecting or clearing a project changed
  * the header's height and pushed the whole list down. The filter bar is a
  * single flex row with its own `min-height`, so a tag appearing or going away
- * costs no layout. Each tag's × drops just that filter; the project picker
- * itself lives in the side panel, with the link to the projects pages. */
+ * costs no layout. Each tag's × drops just that filter. The project picker
+ * names its own selection, so it stands in for a project tag. */
 function ColumnFilterTags() {
-  return h("div.filter-tags", [h(ProjectFilterTag), h(InProcessFilterTag)]);
+  return h("div.filter-tags", [
+    h(ProjectFilterControl, { showSelection: true, large: true }),
+    h(InProcessFilterTag),
+  ]);
 }
 
 /** The map follows the project filter as it changes, not just the initial id. */
@@ -724,8 +739,10 @@ function ColumnRowCard({ data }) {
     // Inside the mode a plain click toggles — same as a footprint click on the
     // map, and the whole point of entering the mode. Modifier-clicks select
     // outside it too, so a selection can be started without reaching for the
-    // mode toggle first.
+    // mode toggle first. Vike routes any anchor click from the document and
+    // ignores `preventDefault`, so the click must not get that far.
     evt.preventDefault();
+    evt.stopPropagation();
     selectColumn(col_id, { additive: additive || selectionMode, range });
   };
 
@@ -763,9 +780,10 @@ function SelectionModeBridge() {
 /* ------------------------------------------------------------ source facets */
 
 /** The facets that change the *request* rather than filtering loaded rows —
- * the project, empty / in-process columns, and the lexicon facets. They live
- * in the library's Filter menu as one inline section ("Source"), beside the
- * row-local filters, so there is a single place to narrow the list. The
+ * empty / in-process columns and the lexicon facets. They live in the
+ * library's Filter menu as one inline section ("Source"), beside the
+ * row-local filters. The project picker is not among them: a popover nested in
+ * the Filter menu didn't work, so it stands alone in the toolbar. The
  * `TableFilter` is a carrier for the form: its predicate passes everything,
  * and the form drives the page's request atoms directly. */
 const sourceFilter: TableFilter<ColumnRow, any> = {
@@ -782,14 +800,6 @@ function SourceFacetsPanel() {
   const [showEmpty, setShowEmpty] = useAtom(showEmptyAtom);
 
   return h("div.source-facets", [
-    // The same picker as the side panel's, driving the same filter — people
-    // look for "which projects" under Filter as readily as in a panel, and a
-    // facet that changes the request belongs beside the others that do.
-    h("div.source-projects", [
-      h("p.filter-label", "Projects"),
-      h(ProjectFilterControl, { className: "project-picker" }),
-      h(ProjectFilterTag),
-    ]),
     h(Switch, {
       checked: showEmpty,
       label: "Show empty columns",
@@ -836,7 +846,6 @@ function ColumnFilterItem({ data }: { data: ColumnFilterDef & any }) {
 function ColumnAssistant() {
   const selectedIDs = useAtomValue(selectedColumnsAtom);
   const rows = useAtomValue(allRowsAtom);
-  const visible = useAtomValue(visibleRowsAtom);
   const columnHref = useColumnHref();
 
   const selected = useMemo(
@@ -846,12 +855,10 @@ function ColumnAssistant() {
 
   if (selected.length === 0) {
     return h("div.assistant", [
-      h("h2", "Columns"),
       h(
         "p.assistant-empty",
-        `${visible.length} of ${rows.length} columns shown. Select one in the list or on the map to see its details.`
+        "Select a column in the list or on the map to see its details."
       ),
-      h(AssistantLinks),
     ]);
   }
 
@@ -864,7 +871,6 @@ function ColumnAssistant() {
         "p.assistant-empty",
         "Turn on “Only selected” to narrow the list to these columns."
       ),
-      h(AssistantLinks),
     ]);
   }
 
@@ -882,46 +888,7 @@ function ColumnAssistant() {
     }),
     h(
       "p.assistant-link",
-      h(
-        Link,
-        { href: columnHref(row.col_id) },
-        "Open column page"
-      )
-    ),
-    h(AssistantLinks),
-  ]);
-}
-
-/** The side panel's standing content, under whatever the selection shows.
- *
- * Projects are one subject, so the control that scopes the list to a project
- * and the link to the project pages sit together here rather than a filter
- * dropdown in the toolbar and an unrelated "Projects" button below. What the
- * picker selects still shows as tags in the filter bar, next to the list it
- * narrows. */
-function AssistantLinks() {
-  return h("div.assistant-links", [
-    h("div.projects-section", [
-      h("div.section-head", [
-        h("h3", "Projects"),
-        h(
-          AnchorButton,
-          {
-            href: "/projects",
-            minimal: true,
-            small: true,
-            rightIcon: "arrow-right",
-            title: "All projects",
-          },
-          "Browse"
-        ),
-      ]),
-      h(ProjectFilterControl, { className: "project-picker" }),
-    ]),
-    h(
-      ButtonGroup,
-      { vertical: true, className: "assistant-buttons" },
-      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart")
+      h(Link, { href: columnHref(row.col_id) }, "Open column page")
     ),
   ]);
 }

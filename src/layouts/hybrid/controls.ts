@@ -13,7 +13,15 @@
  *    the content shell, which is a better home for it
  */
 
-import { Button, Menu, MenuItem, PopoverNext } from "@blueprintjs/core";
+import {
+  AnchorButton,
+  Button,
+  Menu,
+  MenuDivider,
+  MenuItem,
+  PopoverNext,
+  Tag,
+} from "@blueprintjs/core";
 import { useAtom, useAtomValue } from "jotai";
 import type { ReactNode } from "react";
 
@@ -34,16 +42,29 @@ const modeIcons: Record<LayoutMode, string> = {
   "map-only": "globe",
 };
 
+/** A page the frame links out to — another view of the same subject, such as
+ * the correlation chart beside the column list. */
+export interface HybridLink {
+  label: string;
+  href: string;
+  icon?: string;
+  /** A small tag after the label, e.g. "Beta" */
+  tag?: string;
+}
+
 export interface LayoutModeControlProps {
   className?: string | null;
   /** Icon and caret only, the label as a tooltip — for the narrow panels of
    * the map and split shells, where a labelled button wraps the header. */
   compact?: boolean;
+  /** Listed in the menu after the modes */
+  links?: HybridLink[];
 }
 
 export function LayoutModeControl({
   className = null,
   compact = false,
+  links = [],
 }: LayoutModeControlProps) {
   const { modes, itemName } = useAtomValue(capabilitiesAtom);
   const [mode, setMode] = useAtom(layoutModeAtom);
@@ -54,9 +75,24 @@ export function LayoutModeControl({
   let label = h("span.mode-label", currentLabel);
   if (compact) label = null;
 
-  const menu = h(
-    Menu,
-    modes.map((m) =>
+  let linkItems = [];
+  if (links.length > 0) {
+    linkItems = [
+      h(MenuDivider, { key: "links-divider" }),
+      ...links.map((link) =>
+        h(MenuItem, {
+          key: link.href,
+          icon: link.icon ?? "share",
+          text: link.label,
+          href: link.href,
+          labelElement: linkTag(link),
+        })
+      ),
+    ];
+  }
+
+  const menu = h(Menu, [
+    ...modes.map((m) =>
       h(MenuItem, {
         key: m,
         icon: modeIcons[m],
@@ -64,8 +100,9 @@ export function LayoutModeControl({
         selected: mode === m,
         onClick: () => setMode(m),
       })
-    )
-  );
+    ),
+    ...linkItems,
+  ]);
 
   return h(PopoverNext, {
     className,
@@ -89,13 +126,48 @@ export function LayoutModeControl({
   });
 }
 
-/** The frame's controls. A page's own `actions` sit to the left of these. */
+function linkTag(link: HybridLink) {
+  if (link.tag == null) return undefined;
+  return h(Tag, { minimal: true }, link.tag);
+}
+
+/** The frame's controls. A page's own `actions` sit to the left of these.
+ * Without `showModeControl` the mode menu lives elsewhere (the sidebar). */
 export function ActionsPanel({
   children,
   compact = false,
+  links = [],
+  showModeControl = true,
 }: {
   children?: ReactNode;
   compact?: boolean;
+  links?: HybridLink[];
+  showModeControl?: boolean;
 }) {
-  return h("div.actions-panel", [children, h(LayoutModeControl, { compact })]);
+  let modeControl = null;
+  if (showModeControl) {
+    modeControl = h(LayoutModeControl, { compact, links });
+  }
+  return h("div.actions-panel", [children, modeControl]);
+}
+
+/** The view menu and the page's links as buttons, at the foot of the content
+ * shell's sidebar: what to look at next, beside the map rather than the title. */
+export function SidebarViewLinks({ links = [] }: { links?: HybridLink[] }) {
+  return h("div.sidebar-view-links", [
+    h(LayoutModeControl),
+    ...links.map((link) =>
+      h(
+        AnchorButton,
+        {
+          key: link.href,
+          href: link.href,
+          icon: link.icon ?? "share",
+          minimal: true,
+          small: true,
+        },
+        [link.label, " ", linkTag(link)]
+      )
+    ),
+  ]);
 }

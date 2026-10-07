@@ -8,9 +8,11 @@
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   COLUMN_STATUS_FILTER_KEY,
+  statusCodeParam,
   statusCodeURLValue,
 } from "~/components/in-process-filter";
 import {
+  isMostlyInProcess,
   normalizeProjectFilter,
   projectIDParam,
   resolveProjectIDs,
@@ -91,6 +93,9 @@ export const projectFilterAtom = atom(
     set(projectSearchParamAtom, serializeProjectFilter(slugs));
     // A different list: the crawl cursor no longer describes it
     set(startAfterParamAtom, null);
+    if (isMostlyInProcess(get(projectsAtom), slugs)) {
+      set(showInProcessAtom, true);
+    }
   }
 );
 
@@ -153,7 +158,12 @@ export const showInProcessAtom = atom(
   (get) => get(showInProcessValueAtom),
   (get, set, value: boolean) => {
     set(showInProcessValueAtom, value);
-    set(statusCodeSearchParamAtom, statusCodeURLValue(value));
+    let param = statusCodeURLValue(value);
+    // Off isn't the default for a mostly in-process project, so the URL says so
+    if (!value && isMostlyInProcess(get(projectsAtom), get(projectSlugsAtom))) {
+      param = statusCodeParam(false);
+    }
+    set(statusCodeSearchParamAtom, param);
     // A different list: the crawl cursor no longer describes it
     set(startAfterParamAtom, null);
   }
@@ -255,6 +265,11 @@ export const visibleRowsAtom = atom<ColumnRow[]>([]);
  * therefore one-way: we push regions down for the selection-aware toolbar, and
  * never read them back. */
 export const selectedColumnsAtom = atom<number[]>([]);
+
+/** Nothing selected, so the assistant has nothing to show (`HybridPage`). */
+export const assistantIdleAtom = atom(
+  (get) => get(selectedColumnsAtom).length === 0
+);
 
 /** Anchor for shift-range selection (the last plain or additive click). */
 const selectionAnchorAtom = atom<number | null>(null);

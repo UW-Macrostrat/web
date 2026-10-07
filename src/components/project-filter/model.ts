@@ -45,6 +45,24 @@ export interface ProjectDef {
   members?: { id: number; name: string; slug?: string }[] | null;
   t_cols?: number;
   active_cols?: number;
+  in_process_cols?: number;
+}
+
+/** Whether most of the selected projects' columns are in process, so a list
+ * scoped to them would be largely empty without in-process columns. */
+export function isMostlyInProcess(
+  defs: ProjectDef[] | null | undefined,
+  value: ProjectFilterValue
+): boolean {
+  if (defs == null || value == null) return false;
+  let active = 0;
+  let inProcess = 0;
+  for (const key of value) {
+    const def = findProject(defs, key);
+    active += def?.active_cols ?? 0;
+    inProcess += def?.in_process_cols ?? 0;
+  }
+  return inProcess > active;
 }
 
 /** The slug to use for a project in URLs, falling back to its id. */

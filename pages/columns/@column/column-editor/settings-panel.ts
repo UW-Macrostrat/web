@@ -2,9 +2,8 @@
  * and how an edit behaves. The values themselves are atoms in
  * `./state/options` — this is only the controls for them.
  *
- * The same idiom as the column page's `ColumnSettingsButton`
- * (`pages/columns/@column/column-inspector`) — display options sit apart from
- * the editing controls rather than crowding the mode bar. The height scale is
+ * Display options sit apart from the editing controls rather than crowding
+ * the mode bar. The height scale is
  * the consequential one: see `./scale` for what each mode means.
  */
 import hyper from "@macrostrat/hyper";

@@ -24,17 +24,29 @@
 
 /* --------------------------------------------------------------- settings */
 
-.settings-popover
-  padding: 1em
-  width: 24em
-  max-width: min(24em, 90vw)
+// The cards that take the assistant slot beneath the map. Clipped, so the
+// header's own background follows the rounded corners.
+%sidebar-card
+  display: flex
+  flex-direction: column
+  flex: 0 1 auto
+  min-height: 0
+  overflow: hidden
+  border: 1px solid var(--pz-border-muted-color)
+  border-radius: var(--pz-radius-lg)
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
 
-  h3
-    margin-top: 0
-    color: var(--secondary-color)
+.view-settings-panel
+  @extend %sidebar-card
+
+.view-settings-content
+  min-height: 0
+  overflow-y: auto
+  padding: 0.75em 1em 1em
 
   // Inputs share the row instead of keeping their intrinsic width and
-  // overflowing the popover.
+  // overflowing the panel.
   :global(.bp6-control-group)
     flex-wrap: nowrap
     min-width: 0
@@ -86,13 +98,6 @@
   .land
     background-color: rgb(233, 252, 234)
 
-.map-hint
-  line-height: 1.2
-  text-align: right
-  white-space: nowrap
-  overflow: hidden
-  text-overflow: ellipsis
-  color: var(--pz-text-subtle-color, var(--secondary-color))
 
 /* -------------------------------------------------------------- assistant */
 
@@ -131,16 +136,16 @@
     align-items: baseline
     gap: 0.5em
 
+// One action per row, left-aligned
 .column-actions
   margin-top: 1em
+  display: flex
+  flex-direction: column
+  align-items: flex-start
 
 // The one piece of assistant content that is a card: the selected unit.
 .unit-details-panel
-  flex: 1
-  min-height: 0
-  border-radius: var(--pz-radius-md, 6px)
-  background-color: var(--pz-panel-background-color, var(--panel-background-color))
-  box-shadow: var(--pz-shadow-md, 0 1px 3px 0 rgba(0, 0, 0, 0.3))
+  @extend %sidebar-card
 
 .column-title-row
   display: flex
@@ -167,3 +172,4 @@ rect.selection-overlay
 .isotopes-column
   display: flex
   flex-direction: row
+

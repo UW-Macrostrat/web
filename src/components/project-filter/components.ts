@@ -3,8 +3,16 @@
  * `ProjectFilterProvider`. */
 import { hyperStyled } from "@macrostrat/hyper";
 import { useMemo } from "react";
-import { Button, Menu, MenuDivider, MenuItem, PopoverNext } from "@blueprintjs/core";
+import {
+  AnchorButton,
+  Button,
+  Menu,
+  MenuDivider,
+  MenuItem,
+  PopoverNext,
+} from "@blueprintjs/core";
 import { Tag, TagSize } from "@macrostrat/data-components";
+import { CORE_COLUMNS_PROJECT_ID } from "@macrostrat/data-provider";
 import {
   findProject,
   projectSlug,
@@ -50,10 +58,11 @@ export function ProjectFilterTag(props: ProjectFilterTagProps) {
   );
 }
 
-/** A dropdown listing every project; pick one or several. The first entry
+/** Every project as a checkable menu; pick one or several. The first entry
  * returns to the default, the "Core columns" composite, which is what the API
- * serves when no project is asked for. */
-export function ProjectFilterControl({ className }: { className?: string }) {
+ * serves when no project is asked for. `inline` keeps an enclosing popover open
+ * on every pick, for a menu embedded in another panel. */
+export function ProjectFilterMenu({ inline = false }: { inline?: boolean }) {
   const { projects, toggleProject, clear } = useProjectFilter();
   const defs = useProjectDefs();
 
@@ -68,14 +77,20 @@ export function ProjectFilterControl({ className }: { className?: string }) {
     return projects.includes(slug) || projects.includes(def.project_id.toString());
   };
 
-  const menu = h(Menu, { className: "project-menu" }, [
+  let coreIcon = "blank";
+  if (projects.length === 0) {
+    coreIcon = "tick";
+  }
+
+  return h(Menu, { className: "project-menu" }, [
     h(MenuItem, {
-      icon: projects.length === 0 ? "tick" : "blank",
+      icon: coreIcon,
       text: "Core columns",
       label: "default",
+      shouldDismissPopover: !inline,
       onClick: clear,
     }),
-    h(MenuDivider, { title: "Projects" }),
+    h(MenuDivider, { title: h(ProjectsDividerTitle) }),
     ...sorted.map((def) =>
       h(MenuItem, {
         key: def.project_id,
@@ -87,26 +102,77 @@ export function ProjectFilterControl({ className }: { className?: string }) {
       })
     ),
   ]);
+}
+
+/** The divider's title, with a way out to the project pages. */
+function ProjectsDividerTitle() {
+  return h("span.projects-divider-title", [
+    "Projects",
+    h(AnchorButton, {
+      href: "/projects",
+      icon: "share",
+      minimal: true,
+      small: true,
+      title: "Browse projects",
+      className: "browse-projects-button",
+    }),
+  ]);
+}
+
+/** The project menu behind a dropdown button. With `showSelection`, the button
+ * names the selection; otherwise it is a fixed label and tags show it. */
+export function ProjectFilterControl({
+  className,
+  showSelection = false,
+  large = false,
+}: {
+  className?: string;
+  showSelection?: boolean;
+  large?: boolean;
+}) {
+  const { projects } = useProjectFilter();
+  const defs = useProjectDefs();
+
+  let label: any = "Projects";
+  if (showSelection) {
+    label = projectSelectionLabel(defs, projects);
+  }
+
+  let size = "small";
+  if (large) {
+    size = "large";
+  }
 
   return h(PopoverNext, {
     className,
     minimal: true,
     placement: "bottom-start",
-    content: menu,
+    content: h(ProjectFilterMenu),
     renderTarget: ({ isOpen, ...targetProps }) =>
       h(
         Button,
         {
           ...targetProps,
           minimal: true,
-          small: true,
+          size,
           active: isOpen,
           icon: "projects",
           rightIcon: "caret-down",
           title: "Projects whose columns are shown",
         },
-        // A fixed label: the selection itself shows as tags elsewhere
-        "Projects"
+        label
       ),
   });
+}
+
+/** One project by name; several by count. */
+function projectSelectionLabel(
+  defs: ProjectDef[] | null,
+  projects: string[]
+): string {
+  if (projects.length > 1) return `${projects.length} projects`;
+  if (projects.length === 1) {
+    return findProject(defs, projects[0])?.project ?? projects[0];
+  }
+  return findProject(defs, CORE_COLUMNS_PROJECT_ID)?.project ?? "Core columns";
 }

@@ -30,7 +30,7 @@ import hyper from "@macrostrat/hyper";
 import { atom, createStore, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
-import { MapSettingsBar } from "~/components/map-settings";
+import { MapSettingsOverlay } from "~/components/map-settings";
 import styles from "./map-slot.module.sass";
 
 const h = hyper.styled(styles);
@@ -133,13 +133,14 @@ function parkColumnMapNodeSoon(from: HTMLElement | null) {
 interface ColumnMapSlotProps extends Omit<ColumnMapTarget, "key"> {
   targetKey: string;
   className?: string;
-  children?: any;
+  /** Extra sections for the map settings popover */
+  settings?: any;
 }
 
 /**
  * Where the shared map should appear on this page. Renders an empty, definitely
  * sized box and moves the shared map node into it, with the shared map settings
- * bar beneath. `children` go in the bar (e.g. an interaction hint).
+ * floating over it.
  */
 export function ColumnMapSlot(props: ColumnMapSlotProps) {
   const {
@@ -151,7 +152,7 @@ export function ColumnMapSlot(props: ColumnMapSlotProps) {
     selectedColumn,
     onSelectColumn,
     className,
-    children,
+    settings,
   } = props;
   const setTarget = useSetAtom(columnMapTargetAtom, { store: columnMapStore });
   const ref = useRef<HTMLDivElement | null>(null);
@@ -197,6 +198,6 @@ export function ColumnMapSlot(props: ColumnMapSlotProps) {
     // Kept free of React children: the shared map node is appended here
     // imperatively, so React must not manage siblings inside it.
     h("div.map-mount", { ref }),
-    h(MapSettingsBar, null, children),
+    h(MapSettingsOverlay, { sections: settings }),
   ]);
 }
