@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { LexItemPage } from "~/components/lex";
+import { LexHybridItemPage } from "~/components/lex/hybrid-item-page";
 import { useLexItemData } from "~/components/lex/data-loaders.ts";
 
 export function Page() {
@@ -7,11 +7,13 @@ export function Page() {
 
   const children = [h(StructureDetails, { resData })];
 
-  return h(LexItemPage, {
+  return h(LexHybridItemPage, {
     children,
     id,
     refs: [],
     resData,
+    // Nothing to map: a details view alone
+    hasMap: false,
     siftLink: "structure",
   });
 }

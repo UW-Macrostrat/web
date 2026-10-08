@@ -1,6 +1,8 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
-import { LexItemPage, ConceptInfo, LexItemBodyClient } from "~/components/lex";
+import { ConceptInfo, LexItemBodyClient } from "~/components/lex";
+import { LexHybridItemPage } from "~/components/lex/hybrid-item-page";
+import { LexMapPlacement } from "~/components/lex/item-slots";
 import { StratNameCards } from "~/components/lex/relation-cards";
 import { LexItemData } from "~/components/lex/data-loaders.ts";
 
@@ -26,19 +28,28 @@ export function Page() {
   // the one concept; here, the names it groups), the concept's description,
   // then the map / columns / charts body. No "Names" heading above the cards —
   // each card says what it links to.
-  return h(LexItemPage, { id, resData, siftLink: config.siftLink }, [
-    h(StratNameCards, { usages }),
-    h(ConceptInfo, { concept_id: resData?.concept_id }),
-    h(LexItemBodyClient, {
-      type,
-      id,
-      resData,
-      mapUrl: type + "=" + id,
-      relatedHref,
-      showUnits: true,
-      showMaps: true,
-      showFossils: true,
-      showColumnList: true,
-    }),
-  ]);
+  const mapUrl = type + "=" + id;
+
+  return h(
+    LexHybridItemPage,
+    { id, resData, siftLink: config.siftLink, mapUrl },
+    [
+      // Beside the name cards and description, above the full-width cards
+      h(LexMapPlacement),
+      h(StratNameCards, { usages }),
+      h(ConceptInfo, { concept_id: resData?.concept_id }),
+      h(LexItemBodyClient, {
+        type,
+        id,
+        resData,
+        mapUrl,
+        relatedHref,
+        showUnits: true,
+        showMaps: true,
+        showFossils: true,
+        showColumnList: true,
+      unitQuery: { strat_name_concept_id: id },
+      }),
+    ]
+  );
 }

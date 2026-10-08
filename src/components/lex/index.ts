@@ -1,6 +1,7 @@
 export * from "./list-page";
 export * from "./item-body-loader";
 import h from "./main.module.sass";
+import classNames from "classnames";
 import { navigate } from "vike/client/router";
 import {
   useAPIResult,
@@ -9,7 +10,7 @@ import {
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
 import { Link, LithologyTag } from "~/components";
-import { Divider, Popover, Switch, Tab, Tabs } from "@blueprintjs/core";
+import { Button, Divider, Popover, Switch, Tab, Tabs } from "@blueprintjs/core";
 import {
   AlphaTag,
   BetaTag,
@@ -207,14 +208,49 @@ export function Timescales({ timescales }) {
   ]);
 }
 
+/** References shown before the rest wait behind "Show all": a broadly used
+ * term (a lithology, an era) can cite a hundred. The rest stay in the
+ * document, only hidden. */
+const COLLAPSED_REF_COUNT = 10;
+
 export function References({ refs }) {
-  return h.if(refs?.length != 0)("div.int-references", [
-    h("h3", "Primary Sources"),
+  const [expanded, setExpanded] = useState(false);
+  if (refs == null || refs.length == 0) return null;
+
+  const collapsible = refs.length > COLLAPSED_REF_COUNT;
+  const collapsed = collapsible && !expanded;
+  let toggle = null;
+  if (collapsible) {
+    let text = `Show all ${refs.length}`;
+    if (expanded) text = "Show fewer";
+    toggle = h(Button, {
+      className: "ref-list-toggle",
+      minimal: true,
+      small: true,
+      text,
+      onClick: () => setExpanded(!expanded),
+    });
+  }
+
+  return h("div.int-references", [
+    h("h3", "References"),
     h(Divider),
     h(
       "ol.ref-list",
-      refs.map((r) => h("li.ref-item", r))
+      refs.map((r, i) =>
+        h(
+          "li.ref-item",
+          {
+            key: i,
+            className: classNames({
+              hidden: collapsed && i >= COLLAPSED_REF_COUNT,
+            }),
+          },
+          r
+        )
+      )
     ),
+    toggle,
   ]);
 }
 
@@ -236,7 +272,8 @@ export function FossilsCard({ colData, fossilsData, taxaData }) {
       className: "map-toggle",
       label: "Show on map",
       checked: layers.fossils,
-      onChange: (e) => setLayers({ ...layers, fossils: e.currentTarget.checked }),
+      onChange: (e) =>
+        setLayers({ ...layers, fossils: e.currentTarget.checked }),
     });
   }
 

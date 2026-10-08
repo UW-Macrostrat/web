@@ -21,7 +21,18 @@ import {
 /** The page's `map` slot, for placements inside its content */
 export const HybridMapContext = createContext<ReactNode>(null);
 
-export function HybridMapPlacement({ className }: { className?: string }) {
+export function HybridMapPlacement({
+  className,
+  available = true,
+  unavailableReason,
+}: {
+  className?: string;
+  /** False when the page has nothing to map: the placeholder stays, greyed
+   * out, and the placement keeps the frame from offering a map of its own */
+  available?: boolean;
+  /** Why there's no map, as the disabled placeholder's tooltip */
+  unavailableReason?: string;
+}) {
   const map = useContext(HybridMapContext);
   const mode = useAtomValue(layoutModeAtom);
   const [open, setOpen] = useAtom(floatingMapOpenAtom);
@@ -30,15 +41,19 @@ export function HybridMapPlacement({ className }: { className?: string }) {
   // With a map pane (the sidebar, an inset), the map is already on screen
   if (map == null || hasMapPane(mode)) return null;
 
-  if (!open) {
+  if (!open || !available) {
+    let title: string | undefined = undefined;
+    if (!available) title = unavailableReason;
     return h(
       "div.map-placement.closed",
-      { className },
+      // On the box: a disabled button shows no tooltip of its own
+      { className: classNames(className, { unavailable: !available }), title },
       h(Button, {
         large: true,
         minimal: true,
         icon: "map",
         text: "Show map",
+        disabled: !available,
         onClick: () => setOpen(true),
       })
     );

@@ -1,6 +1,5 @@
 import h from "@macrostrat/hyper";
 import { ColumnsTable } from "./columns-card";
-import { LexSlotPortal } from "./item-slots";
 import {
   FossilsCard,
   Timescales,
@@ -41,6 +40,9 @@ interface LexItemBodyProps {
    * universal: it is the stratigraphic pages that are routinely read as "which
    * columns carry this?", and it reuses `colData`, so it costs no request. */
   showColumnList?: boolean;
+  /** The units API query for the item's units, so the column list opens each
+   * column with the item's unit selected */
+  unitQuery?: Record<string, string | number>;
 }
 
 /**
@@ -64,6 +66,7 @@ export function LexItemBody(props: LexItemBodyProps) {
     afterColumns = null,
     bottomExtra = null,
     showColumnList = false,
+    unitQuery = null,
   } = props;
 
   const itemRef = { type, id: Number(id) };
@@ -93,6 +96,7 @@ export function LexItemBody(props: LexItemBodyProps) {
       targetKey: `${type}:${id}`,
       loading: columnsLoading,
       showColumnList,
+      unitQuery,
     }),
     afterColumns,
     h(FossilsCard, { colData, fossilsData, taxaData }),
@@ -107,6 +111,7 @@ export function LexItemBody(props: LexItemBodyProps) {
     //   href: relatedHref,
     // }),
     bottomExtra,
-    h(LexSlotPortal, { name: "assistant" }, h(References, { refs })),
+    // At the foot of the content, after the columns they're drawn from
+    h(References, { refs }),
   ]);
 }

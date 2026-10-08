@@ -1,6 +1,6 @@
 import { useData } from "vike-react/useData";
 import h from "./main.module.sass";
-import { LexItemPage } from "~/components/lex";
+import { LexHybridItemPage } from "~/components/lex/hybrid-item-page";
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
@@ -10,11 +10,13 @@ export function Page() {
 
   const children = [h(MineralDetails, { resData })];
 
-  return h(LexItemPage, {
+  return h(LexHybridItemPage, {
     children,
     id,
     refs: [],
     resData,
+    // Nothing to map: a details view alone
+    hasMap: false,
     siftLink: "mineral",
     header: h("div.strat-header", [h("h1.strat-title", resData?.mineral)]),
   });

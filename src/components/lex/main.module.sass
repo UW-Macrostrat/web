@@ -22,8 +22,18 @@
 .int-references > h3
   @include type.section-heading
 
+// Citations: a little quieter than the page's text, in the serif the site uses
+// for them
 .ref-list
   margin-top: 1em
+  font-family: var(--pz-font-serif)
+  color: var(--pz-text-subtle-color)
+
+  .hidden
+    display: none
+
+.ref-list-toggle
+  margin-top: 0.25em
 
 // An item's columns: a horizontal summary card above the map card.
 .lex-summary

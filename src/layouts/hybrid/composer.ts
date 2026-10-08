@@ -131,8 +131,10 @@ function ContentShell({
         // Shrink to the inset, when the page offers that mode
         h(ModeSwitchButton, { target: "content-inset", icon: "minimize" }),
       ]),
-      assistantRegion,
+      // The view menu and links beneath the map, ahead of the assistant's
+      // content, which can run long
       sidebarLinks,
+      assistantRegion,
     ]);
   }
 
@@ -176,7 +178,7 @@ function ContentShell({
     // Without a sidebar, its content follows the page's own
     let afterContent = null;
     if (!sidebar) {
-      afterContent = h("div.content-after", [assistant, sidebarLinks]);
+      afterContent = h("div.content-after", [sidebarLinks, assistant]);
     }
     // The footer ends the content column rather than spanning the sidebar, so
     // a tall sidebar never has to be scrolled past to reach it

@@ -1,5 +1,6 @@
 import hyper from "@macrostrat/hyper";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
+import { useElementSize } from "@macrostrat/ui-components";
 import type { CSSProperties } from "react";
 import { scaleLinear } from "d3-scale";
 import {
@@ -44,16 +45,21 @@ export function IntervalTimescales({ resData, windowIntervals }) {
     () => timescaleRows(resData, windowIntervals ?? [], ageWindow),
     [resData, windowIntervals]
   );
+  // The column's width, which the page's layout decides; the server draws at
+  // the full content measure until the browser has one
+  const ref = useRef<HTMLDivElement>(null);
+  const length = useElementSize(ref)?.width || WINDOW_LENGTH;
   const scale = useMemo(() => {
     if (ageWindow == null) return null;
-    return scaleLinear().domain(ageWindow).range([0, WINDOW_LENGTH]);
-  }, [ageWindow?.[0], ageWindow?.[1]]);
+    return scaleLinear().domain(ageWindow).range([0, length]);
+  }, [ageWindow?.[0], ageWindow?.[1], length]);
   const intervalStyle = useIntervalStyle(resData);
 
   if (scale == null || rows.length == 0) return null;
 
   return h(
     "div.interval-timescales",
+    { ref },
     rows.map((row, i) =>
       h(TimescaleRow, {
         key: row.id,

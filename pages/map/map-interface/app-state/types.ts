@@ -147,6 +147,7 @@ type ToggleExperimentsPanel = {
   open?: boolean;
 };
 type GoToExperimentsPanel = { type: "go-to-experiments-panel" };
+type DismissUnknownPath = { type: "dismiss-unknown-path" };
 
 type SelectSearchResult = {
   type: "select-search-result";
@@ -234,6 +235,7 @@ export type CoreAction =
   | SelectSearchResult
   | ToggleExperimentsPanel
   | GoToExperimentsPanel
+  | DismissUnknownPath
   | GetAllColumns
   | SetAllColumns
   | ToggleCrossSection
@@ -327,6 +329,8 @@ export interface CoreState extends MapState, AsyncRequestState {
   showExperimentsPanel: boolean;
   allColumns: ColumnGeoJSONRecord[] | null;
   activeMenuPage: MenuPage | null;
+  /** A `/map/...` path that names nothing, shown as not found until dismissed. */
+  unknownPath: string | null;
   isShowingColumnPage: boolean;
   /** Whether the selected column's footprint is drawn when the columns layer is off */
   showSelectedColumnFootprint: boolean;

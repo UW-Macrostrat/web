@@ -1,7 +1,7 @@
 /** Sidebar slots for a lexicon item on the hybrid frame.
  *
- * The item's body works out its map, settings and sources together, but on the
- * frame the map and sources belong in the sidebar, a separate slot. The sidebar
+ * The item's body works out its map and its settings together, but on the
+ * frame the map belongs in the sidebar, a separate slot. The sidebar
  * registers an element per slot here and the body renders those parts into it
  * through a portal; without a sidebar (the content-only mode, or any page off
  * the frame) the body renders them inline as before.
@@ -12,14 +12,30 @@ import styles from "./item-slots.module.sass";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { HybridMapPlacement } from "~/layouts/hybrid";
+import { Icon } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
-export type LexSlotName = "map" | "assistant";
+export type LexSlotName = "map";
 
 /** Set inside a lexicon item's hybrid frame, where the map shows only in a
  * slot the frame offers (the sidebar, or the map floated on request) */
 export const lexOnHybridFrameAtom = atom(false);
+
+const NO_COLUMNS_TEXT = "Found in no columns";
+
+/** False once the item's columns have loaded and there are none to map */
+export const lexMapAvailableAtom = atom(true);
+
+/** Where the item's map goes in the details-only view, if it has one */
+export function LexMapPlacement() {
+  const available = useAtomValue(lexMapAvailableAtom);
+  return h(HybridMapPlacement, {
+    available,
+    unavailableReason: NO_COLUMNS_TEXT,
+  });
+}
 
 const slotElementsAtom = atom<Partial<Record<LexSlotName, HTMLElement>>>({});
 
@@ -45,10 +61,22 @@ export function LexSidebarSlot({
     (element: HTMLElement | null) => setElement(name, element),
     [name, setElement]
   );
-  return h("div.lex-sidebar-slot", {
-    ref,
-    className: classNames(className, `slot-${name}`),
-  });
+  // An item with nothing to map says so where its map would be. The body
+  // renders nothing into the slot then, so the note doesn't share it.
+  const available = useAtomValue(lexMapAvailableAtom);
+  const unavailable = name == "map" && !available;
+  let note = null;
+  if (unavailable) {
+    note = h("div.no-map-note", [
+      h(Icon, { icon: "map", size: 14 }),
+      NO_COLUMNS_TEXT,
+    ]);
+  }
+  return h(
+    "div.lex-sidebar-slot",
+    { ref, className: classNames(className, `slot-${name}`, { unavailable }) },
+    note
+  );
 }
 
 /** Whether the frame's sidebar is showing this slot */

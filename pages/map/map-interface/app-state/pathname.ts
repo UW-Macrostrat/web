@@ -19,6 +19,7 @@ export const mayHavePathNameChange = keyChangeDetector<AppState>([
   "crossSectionLine",
   "activeMenuPage",
   "isShowingColumnPage",
+  "unknownPath",
 ]);
 
 export const mayHaveHashChange = keyChangeDetector<AppState>([
@@ -38,6 +39,9 @@ export function buildPathName(state: AppState): string | null {
    * 2. If a cross-section line is selected, set the cross-section path
    * 3. If an active page is selected, show that page
    */
+
+  // A path that names nothing is kept while it is shown as not found.
+  if (state.unknownPath != null) return state.unknownPath;
 
   const pos = state.infoMarkerPosition;
   let nextPathname: string = routerBasename;

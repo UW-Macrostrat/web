@@ -1,8 +1,10 @@
 /** A lexicon item on the hybrid frame: the item's body as the content, its
- * map and sources in the sidebar. Needs `pageStyle: "hybrid"`. */
+ * map and sources in the sidebar. Needs `pageStyle: "hybrid"`.
+ *
+ * Where the map goes in the details-only view depends on what the item's page
+ * leads with, so each page places `HybridMapPlacement` among its children. */
 import h from "@macrostrat/hyper";
 import {
-  HybridMapPlacement,
   HybridPage,
   type HybridLink,
   type LayoutCapabilities,
@@ -13,7 +15,8 @@ import { lexOnHybridFrameAtom, LexSidebarSlot } from "./item-slots";
 const lexItemCapabilities: Partial<LayoutCapabilities> = {
   modes: ["content-only", "content-primary"],
   defaultMode: "content-primary",
-  hasAssistant: true,
+  // The sidebar holds the map and the page's links; references end the content
+  hasAssistant: false,
   itemName: "Details",
   contentScroll: "page",
   // Prose and cards read well narrower than a column, and the map is a
@@ -22,20 +25,45 @@ const lexItemCapabilities: Partial<LayoutCapabilities> = {
   sidebarWidth: "clamp(320px, 36vw, 540px)",
 };
 
-export function LexHybridItemPage(props) {
-  const { siftLink, id, mapUrl, ...rest } = props;
+/** An item with nothing to map: its details alone */
+const unmappedItemCapabilities: Partial<LayoutCapabilities> = {
+  ...lexItemCapabilities,
+  modes: ["content-only"],
+  defaultMode: "content-only",
+};
+
+const frameAtoms: [any, any][] = [[lexOnHybridFrameAtom, true]];
+
+interface LexHybridItemPageProps {
+  id: number | string;
+  resData: any;
+  siftLink?: string | null;
+  /** `#`-fragment for the item on the main map; omit for items not mapped */
+  mapUrl?: string;
+  /** False for items with no map or columns, which get a details view only */
+  hasMap?: boolean;
+  refs?: any[];
+  children?: any;
+}
+
+export function LexHybridItemPage(props: LexHybridItemPageProps) {
+  const { siftLink, id, mapUrl, hasMap = true, children, ...rest } = props;
+
+  let capabilities = lexItemCapabilities;
+  let map = null;
+  if (hasMap) {
+    map = h(LexSidebarSlot, { name: "map" });
+  } else {
+    capabilities = unmappedItemCapabilities;
+  }
+
   return h(HybridPage, {
     className: "lex-item-page",
-    capabilities: lexItemCapabilities,
-    initialAtoms: [[lexOnHybridFrameAtom, true]],
+    capabilities,
+    initialAtoms: frameAtoms,
     links: itemLinks({ siftLink, id, mapUrl }),
-    // The map beside the item's description, above its full-width cards
-    content: h(LexItemPage, { ...rest, id, siftLink: null }, [
-      h(HybridMapPlacement, { key: "map" }),
-      rest.children,
-    ]),
-    map: h(LexSidebarSlot, { name: "map" }),
-    assistant: h(LexSidebarSlot, { name: "assistant" }),
+    content: h(LexItemPage, { ...rest, id, siftLink: null }, children),
+    map,
   });
 }
 

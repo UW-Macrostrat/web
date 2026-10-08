@@ -2,6 +2,7 @@ import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
 import { ConceptInfo, LexItemBodyClient } from "~/components/lex";
 import { LexHybridItemPage } from "~/components/lex/hybrid-item-page";
+import { LexMapPlacement } from "~/components/lex/item-slots";
 import { StratNameHierarchy } from "~/components/lex/strat-hierarchy";
 import { ConceptRelationCard } from "~/components/lex/relation-cards";
 import { LexItemData } from "~/components/lex/data-loaders.ts";
@@ -36,6 +37,8 @@ export function Page() {
     LexHybridItemPage,
     { id, resData, siftLink: config.siftLink, mapUrl },
     [
+      // Beside the concept card and description, above the full-width cards
+      h(LexMapPlacement),
       h(ConceptRelationCard, { concept }),
       h(ConceptInfo, { concept_id: resData?.concept_id, record: concept }),
       h(LexItemBodyClient, {
@@ -48,6 +51,7 @@ export function Page() {
         showMaps: true,
         showFossils: true,
         showColumnList: true,
+      unitQuery: { strat_name_id: id },
         afterColumns: h(StratNameHierarchy, { id }),
       }),
     ]

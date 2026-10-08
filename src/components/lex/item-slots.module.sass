@@ -1,3 +1,16 @@
 // The map slot fills the frame's fixed-aspect map box
 .lex-sidebar-slot.slot-map
   height: 100%
+
+// The frame's map card, around a slot with nothing to map: just tall enough
+// for the note, not the map's 4:3
+:global(*):has(> .lex-sidebar-slot.unavailable)
+  aspect-ratio: auto
+
+.no-map-note
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 0.5em
+  padding: 1.25em 1em
+  color: var(--pz-secondary-color)
