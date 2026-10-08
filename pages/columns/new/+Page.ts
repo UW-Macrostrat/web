@@ -15,6 +15,8 @@ import {
   FormGroup,
   InputGroup,
   SegmentedControl,
+  Tab,
+  Tabs,
 } from "@blueprintjs/core";
 import { AlphaTag } from "~/components";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
@@ -129,20 +131,32 @@ function NewColumnFormContainer({
   if (showUploadForm) {
     formContent = h("div.column-upload", [
       h("h1", "Upload a spreadsheet"),
+      h(
+        "p.upload-description",
+        "Upload a column spreadsheet (.xlsx) in Macrostrat's column-ingestion " +
+          "format. Keep dry run on to validate and preview it without saving — " +
+          "or download the example to see the expected layout."
+      ),
       h(ColumnUpload, { onOpenColumn: onStart }),
     ]);
   }
 
-  const formTypePicker = h("div.form-type-picker", [
-    h(SegmentedControl, {
-      options: [
-        { label: "Upload data", value: true },
-        { label: "Start from scratch", value: false },
-      ],
-      value: showUploadForm,
-      onValueChange: (v: boolean) => setShowUploadForm(v),
-    }),
-  ]);
+  const formTypePicker = h(
+    "div.form-type-picker",
+    h(
+      Tabs,
+      {
+        id: "new-column-source",
+        selectedTabId: showUploadForm ? "upload" : "scratch",
+        onChange: (id: string) => setShowUploadForm(id === "upload"),
+        large: true,
+      },
+      [
+        h(Tab, { id: "upload", title: "Upload data" }),
+        h(Tab, { id: "scratch", title: "Start from scratch" }),
+      ]
+    )
+  );
 
   const content = h("div.new-column-page", [formTypePicker, formContent]);
 

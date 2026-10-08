@@ -1,5 +1,9 @@
 // The new-column form: a narrow column of fields, centered in the content.
 
+// Separate the source tabs from the upload/form area below them.
+.form-type-picker
+  margin-bottom: 1em
+
 .new-column-form
   max-width: 32em
   display: flex
@@ -26,6 +30,9 @@
   max-width: 40em
   h1
     margin: 0
+  .upload-description
+    margin: 0
+    color: var(--pz-text-subtle-color, var(--secondary-color))
 
 .upload-controls
   display: flex
