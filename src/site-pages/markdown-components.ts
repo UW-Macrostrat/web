@@ -10,12 +10,14 @@
  *   > [!logo]
  *   > Macrostrat is a data system for the Earth's crust.
  *
- * sets its text beside the Macrostrat logo. Rendered to static HTML on the
+ * sets its text beside the Macrostrat logo, over the homepage's cover photo.
+ * Rendered to static HTML on the
  * server, so nothing here may depend on hydration. */
 import { Children, createElement, isValidElement, type ReactElement, type ReactNode } from "react";
 import { Tag } from "@blueprintjs/core";
 import { LinkCard } from "~/components/cards";
 import { MacrostratIcon } from "~/components/general";
+import { webAssetsPrefix } from "@macrostrat-web/settings";
 import h from "./site-pages.module.sass";
 
 export const siteMarkdownComponents = { div: CalloutOrDiv };
@@ -36,10 +38,12 @@ function calloutBody(children: ReactNode): ReactNode[] {
   });
 }
 
+const coverImageURL = `${webAssetsPrefix}/main-page/cover_large.jpg`;
+
 function LogoCallout({ body }: { body: ReactNode[] }) {
-  return h("div.logo-callout", [
-    h(MacrostratIcon, { key: "logo", className: "logo-callout-icon" }),
+  return h("div.logo-callout", { style: { backgroundImage: `url('${coverImageURL}')` } }, [
     h("div.logo-callout-body", { key: "body" }, body),
+    h(MacrostratIcon, { key: "logo", className: "logo-callout-icon" }),
   ]);
 }
 

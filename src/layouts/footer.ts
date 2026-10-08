@@ -45,7 +45,7 @@ export const platformNavItems: NavLinkItem[] = [
     href: "/community",
     text: "Community",
     icon: "people",
-    description: "Contributors, discussion, and how to get in touch.",
+    description: "Collaborators, supporters, and ways to contribute.",
   },
   {
     href: "/publications",

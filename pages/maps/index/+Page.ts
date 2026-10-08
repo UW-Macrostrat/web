@@ -1,182 +1,314 @@
-import { InfiniteScrollPage, DevLinkButton } from "~/components";
-import h from "./main.module.sass";
+/** The map catalog, on the hybrid content/map frame.
+ *
+ * Every map is held in memory (~860 rows), so the list's filters can apply to
+ * the map too: both read the same `TableFilter` predicates. */
+
+import { Button, Tag } from "@blueprintjs/core";
 import {
-  AnchorButton,
-  ButtonGroup,
-  InputGroup,
-  SegmentedControl,
-} from "@blueprintjs/core";
-import { apiDomain } from "@macrostrat-web/settings";
-import {
-  createPostgRESTProvider,
+  DataPanel,
+  DataPanelToolbarStyle,
   SelectionInteractionStyle,
-  standardizeFilter,
-  type ColumnSpec,
-  type TableFilter,
+  createLocalProvider,
+  useSelector,
+  type ActiveFilterEntry,
+  type InitialDataChunk,
 } from "@macrostrat/data-sheet";
-import { MapCard } from "./map-card";
+import { Identifier } from "@macrostrat/data-components";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useEffect, useMemo, useRef } from "react";
+import { useData } from "vike-react/useData";
 
-const endpoint = `${apiDomain}/api/pg`;
+import { initialViewStateFromURL } from "~/components";
+import { LinkCard } from "~/components/cards";
+import { mapPageHref } from "~/components/compilation-tree";
+import { autoLoadPagesForItems } from "~/components/data-view";
+import {
+  HybridContentFooter,
+  HybridPage,
+  type HybridLink,
+} from "~/layouts/hybrid";
+import { locationAtom } from "~/_utils/url-atoms";
+import { onDemand } from "~/_utils";
 
-// ---- Open text search across title (name) / slug / source_id ----
-// A first-class `TableFilter` (its `filterForm` is the search input), declared
-// on a synthetic "search" column so it surfaces through the standard filter UI.
-// It requests `presentation: "inline"` — an always-visible toolbar control —
-// which is **progressive**: a library version that understands `presentation`
-// renders it inline; older versions ignore the field and simply list it in the
-// Filter menu. Either way the state flows through the standard filter model
-// (store `activeFilters` → the provider's `translateFilter`).
-// Server translation: `or=(name.ilike.*q*, slug.ilike.*q*, source_id.eq.q)`.
-const SEARCH_FILTER_ID = "text-search";
+import type { CompilationOption, MapRow } from "./compilations";
+import {
+  compilationFilter,
+  mapURLBindings,
+  scaleFilter,
+  searchFilter,
+} from "./filters";
+import {
+  allMapsAtom,
+  assistantIdleAtom,
+  compilationsAtom,
+  inspectedMapsAtom,
+  inspectedPointAtom,
+  visibleMapsAtom,
+} from "./state";
 
-interface SearchState {
-  value: string;
-}
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.sass";
 
-/** The filter's `filterForm`: a search box bound to the filter state. Clearing
- * it (empty value) removes the filter via the shared filter wiring. */
-function SearchInput({
-  state,
-  setState,
-}: {
-  state: SearchState;
-  setState: (s: SearchState) => void;
-}) {
-  return h(InputGroup, {
-    className: "map-search",
-    leftIcon: "search",
-    placeholder: "Search maps by name, slug, or ID…",
-    value: state?.value ?? "",
-    onChange: (e: any) => setState({ value: e.target.value }),
-  });
-}
+const h = hyper.styled(styles);
 
-const searchFilter: TableFilter<any, SearchState> = {
-  id: SEARCH_FILTER_ID,
-  name: "Search",
-  icon: "search",
-  defaultState: { value: "" },
-  describeState: (s) => (s?.value ? s.value : null),
-  presentation: "inline",
-  filterForm: SearchInput,
-  // Client-side predicate (used only for an in-memory source; the live page
-  // applies this server-side via `translateFilter`).
-  predicate: (row, s) => {
-    const q = (s?.value ?? "").trim().toLowerCase();
-    if (q === "") return true;
-    return [row?.name, row?.slug, String(row?.source_id ?? "")].some((v) =>
-      v?.toLowerCase?.().includes(q)
-    );
-  },
-};
+const MapListMap = onDemand(() =>
+  import("./map.client").then((mod) => mod.MapListMap)
+);
 
-// ---- Filter by scale (tiny / small / medium / large) ----
-// A custom-UI filter (a segmented control) over the standard `{operator,value}`
-// state, so the provider's default scalar translation turns it into
-// `scale=eq.<value>`. `presentation: "menu-inline"` renders the segmented
-// control directly in the Filter menu (no submenu) where supported, and
-// degrades to a submenu on older library versions.
-const SCALES = ["tiny", "small", "medium", "large"];
+const PAGE_SIZE = 60;
+const AUTO_LOAD_PAGES = autoLoadPagesForItems(PAGE_SIZE);
 
-const scaleFilter: TableFilter<any, { operator: "eq"; value: string | null }> =
-  {
-    id: "scale-filter",
-    name: "Scale",
-    icon: "filter",
-    columnKey: "scale",
-    defaultState: { operator: "eq", value: null },
-    describeState: (s) => s?.value ?? null,
-    presentation: "menu-inline",
-    predicate: (row, s) => s?.value == null || row.scale === s.value,
-    filterForm: ({ state, setState }) =>
-      h(SegmentedControl, {
-        small: true,
-        options: SCALES.map((v) => ({ label: v, value: v })),
-        value: state?.value ?? "",
-        onValueChange: (value: string) => setState({ operator: "eq", value }),
-      }),
-  };
-
-// The facet columns: `source_id` sortable (ID asc/desc), `scale` carries the
-// scale filter. The multi-field search is NOT here — it's a sheet-level filter
-// (the `filters` prop below), since it spans several fields and maps to no
-// single column (a synthetic column whose key matches no data field isn't a
-// supported shape).
-const columnSpec: ColumnSpec[] = [
-  { key: "source_id", name: "ID", dataType: "integer", sortable: true },
-  { key: "scale", name: "Scale", dataType: "string", filters: [scaleFilter] },
+const columnSpec = [
+  { key: "source_id", name: "ID", dataType: "integer" },
+  { key: "name", name: "Name" },
+  { key: "scale", name: "Scale" },
 ];
 
-const provider = createPostgRESTProvider<any>({
-  endpoint,
-  table: "maps",
-  identityKey: "source_id",
-  // Default ordering: newest source_id first. Because this is the
-  // identity key's own default direction (not an active sort), it doesn't
-  // appear as a removable tag in the sort/filter bar.
-  identityAscending: false,
-  translateFilter: (f) => {
-    // The multi-field search is the one custom translation; every other filter
-    // (e.g. scale) is a standard scalar `columnKey=op.value`.
-    if (f.id !== SEARCH_FILTER_ID) {
-      const s = f.state;
-      const key = f.columnKey ?? s?.key;
-      if (
-        key != null &&
-        s?.operator != null &&
-        s?.value != null &&
-        s.value !== ""
-      ) {
-        return standardizeFilter({ key, operator: s.operator, value: s.value });
-      }
-      return null;
-    }
-    const q = (f.state?.value ?? "").trim();
-    if (q === "") return null;
-    // Quote the ilike pattern so commas/parens in the query don't break the
-    // `or(...)` logic tree; drop embedded quotes to keep the literal simple.
-    const like = `"*${q.replace(/"/g, "")}*"`;
-    const parts = [`name.ilike.${like}`, `slug.ilike.${like}`];
-    // A purely numeric query also matches an exact source_id.
-    if (/^\d+$/.test(q)) parts.push(`source_id.eq.${q}`);
-    return {
-      type: "filter",
-      apply: (req) => req.or(parts.join(",")),
-    };
-  },
-});
+const mapListLinks: HybridLink[] = [
+  { label: "Ingestion system", href: "/maps/ingestion", icon: "flows" },
+  { label: "Legend table", href: "/maps/legend", icon: "th", tag: "Dev" },
+];
+
+interface MapListData {
+  maps: MapRow[];
+  compilations: CompilationOption[];
+  search: string;
+}
 
 export function Page() {
-  return h(InfiniteScrollPage, {
-    className: "maps-list-page",
-    provider,
-    headerElements: h(MapsNavLinks),
-    itemComponent: MapCard,
-    columnSpec,
-    // The multi-field search is a sheet-level filter (spans several columns).
-    filters: [searchFilter],
-    // Debounce the search → refetch so typing doesn't fire a request per key.
-    filterDebounce: 300,
-    // Maps are browsed, not edited here — no selection.
-    enableSelection: SelectionInteractionStyle.NEVER,
-    scrollBody: ScrollBody,
+  const data = useData<MapListData>();
+
+  return h(HybridPage, {
+    capabilities: { defaultMode: "content-primary" },
+    initialAtoms: [
+      [allMapsAtom, data.maps ?? []],
+      [compilationsAtom, data.compilations ?? []],
+    ],
+    links: mapListLinks,
+    content: h(MapList, { search: data.search }),
+    map: h(MapListMap),
+    assistant: h(MapAssistant),
+    assistantIdle: assistantIdleAtom,
   });
 }
 
-/** The navigation links the legacy `/maps` page kept in its sidebar — recreated
- * as a header nav for parity with `/maps/ingestion`. */
-function MapsNavLinks() {
-  return h(ButtonGroup, { minimal: true, className: "maps-nav-links" }, [
-    h(
-      AnchorButton,
-      { icon: "flows", href: "/maps/ingestion" },
-      "Ingestion system"
-    ),
-    h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-    h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-  ]);
+/* ----------------------------------------------------------------- the list */
+
+function MapList({ search }) {
+  const rows = useAtomValue(allMapsAtom);
+  const compilations = useAtomValue(compilationsAtom);
+
+  // Passed as a provider rather than `data`, so the panel pages it
+  const provider = useMemo(
+    () => createLocalProvider<MapRow>(rows, { identity: (row) => row.source_id }),
+    [rows]
+  );
+
+  // Without the compilation graph there is nothing to filter by
+  const filters = useMemo(() => {
+    if (compilations.length === 0) return [searchFilter, scaleFilter];
+    return [searchFilter, scaleFilter, compilationFilter];
+  }, [compilations]);
+
+  // The URL is read once, here; afterwards it only follows the filters
+  const initialView = useMemo(
+    () => initialViewStateFromURL(mapURLBindings, { sortParam: null, search }),
+    []
+  );
+  const initialData = useMemo(
+    () => firstPage(applyRowFilters(rows, initialView.initialFilters)),
+    []
+  );
+
+  return h(
+    DataPanel<MapRow>,
+    {
+      className: "map-panel",
+      name: "Maps",
+      itemLabel: "map",
+      provider,
+      initialFilters: initialView.initialFilters,
+      initialData,
+      filterDebounce: 200,
+      pageSize: PAGE_SIZE,
+      autoLoadPages: AUTO_LOAD_PAGES,
+      columnSpec: columnSpec as any,
+      filters,
+      itemComponent: MapCard,
+      scrollBody: MapGrid,
+      toolbarStyle: DataPanelToolbarStyle.FLOATING,
+      statusBar: false,
+      enableSelection: SelectionInteractionStyle.NEVER,
+      contentFooter: h(HybridContentFooter),
+    },
+    [
+      h(VisibleRowsBridge, { key: "visible" }),
+      h(FilterURLWriter, { key: "url" }),
+    ]
+  );
 }
 
-function ScrollBody({ children }) {
-  return h("div.data-scroll-body", children);
+function MapGrid({ children }) {
+  return h("div.map-grid", children);
+}
+
+function applyRowFilters(rows: MapRow[], entries: ActiveFilterEntry[]) {
+  if (entries.length === 0) return rows;
+  return rows.filter((row) =>
+    entries.every(({ filter, state }) => {
+      if (filter?.predicate == null) return true;
+      return filter.predicate(row, state);
+    })
+  );
+}
+
+function firstPage(rows: MapRow[]): InitialDataChunk<MapRow> {
+  return { rows: rows.slice(0, PAGE_SIZE), totalCount: rows.length };
+}
+
+/** The whole filtered set for the map — the panel's own data is paged. */
+function VisibleRowsBridge() {
+  const activeFilters = useSelector((state) => state.activeFilters);
+  const rows = useAtomValue(allMapsAtom);
+  const setVisible = useSetAtom(visibleMapsAtom);
+
+  useEffect(() => {
+    const entries = [...(activeFilters?.values() ?? [])];
+    setVisible(applyRowFilters(rows, entries));
+  }, [rows, activeFilters, setVisible]);
+
+  return null;
+}
+
+const writeParamsAtom = atom(
+  null,
+  (get, set, params: Record<string, string | null>) => {
+    const loc = get(locationAtom);
+    const searchParams = new URLSearchParams(loc.searchParams);
+    for (const [param, value] of Object.entries(params)) {
+      if (value == null || value === "") {
+        searchParams.delete(param);
+      } else {
+        searchParams.set(param, value);
+      }
+    }
+    set(locationAtom, { ...loc, searchParams });
+  }
+);
+
+/** Writes the filters to the query string, one way and after a pause. */
+function FilterURLWriter() {
+  const activeFilters = useSelector((state) => state.activeFilters);
+  const writeParams = useSetAtom(writeParamsAtom);
+
+  const params = useMemo(() => {
+    const values: Record<string, string | null> = {};
+    for (const binding of mapURLBindings) {
+      const state = activeFilters?.get(binding.filter.id)?.state;
+      let next = Object.fromEntries(binding.params.map((p) => [p, null]));
+      if (state != null) next = { ...next, ...binding.toParams(state) };
+      Object.assign(values, next);
+    }
+    return values;
+  }, [activeFilters]);
+  const key = JSON.stringify(params);
+
+  // The first run restates the URL the page loaded with
+  const isFirstRun = useRef(true);
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    const handle = setTimeout(() => writeParams(params), 300);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on contents
+  }, [key, writeParams]);
+
+  return null;
+}
+
+/* ------------------------------------------------------------------ cards */
+
+function MapCard({ data }: { data: MapRow }) {
+  const { source_id, name, scale, ref_source, ref_year, ref_title } = data;
+
+  let scaleTag = null;
+  if (scale != null) {
+    scaleTag = h(
+      Tag,
+      { minimal: true, round: true, className: `scale-tag scale-${scale}` },
+      scale
+    );
+  }
+
+  const citation = [ref_source, ref_year].filter((v) => v != null && v !== "");
+
+  return h(
+    LinkCard,
+    {
+      className: "map-card",
+      density: "list",
+      href: mapPageHref(data),
+      title: h("span.map-head", [
+        h("span.map-name", { key: "name" }, name ?? data.slug),
+        scaleTag,
+      ]),
+      label: name ?? data.slug,
+    },
+    h("div.map-meta", [
+      h("span.map-citation", { title: ref_title ?? undefined }, citation.join(", ")),
+      h("span.map-identifier", h(Identifier, { id: source_id })),
+    ])
+  );
+}
+
+/* -------------------------------------------------------------- assistant */
+
+function MapAssistant() {
+  const [point, setPoint] = useAtom(inspectedPointAtom);
+  const maps = useAtomValue(inspectedMapsAtom);
+
+  if (point == null) {
+    return h("div.assistant", [
+      h(
+        "p.assistant-empty",
+        "Click the map to list the maps covering a point."
+      ),
+    ]);
+  }
+
+  let heading = `${maps.length} maps here`;
+  if (maps.length === 1) heading = "1 map here";
+
+  let body = h("p.assistant-empty", "No maps cover this point.");
+  if (maps.length > 0) {
+    body = h(
+      "ul.assistant-maps",
+      maps.map((row) =>
+        h("li", { key: row.source_id }, [
+          h("a", { href: mapPageHref(row) }, row.name ?? row.slug),
+          h("span.map-identifier", h(Identifier, { id: row.source_id })),
+        ])
+      )
+    );
+  }
+
+  return h("div.assistant", [
+    h("div.assistant-header", [
+      h("h2", heading),
+      h(Button, {
+        minimal: true,
+        small: true,
+        icon: "cross",
+        title: "Clear the point",
+        onClick: () => setPoint(null),
+      }),
+    ]),
+    h(
+      "p.assistant-point",
+      `${point.lat.toFixed(4)}°, ${point.lng.toFixed(4)}°`
+    ),
+    body,
+  ]);
 }

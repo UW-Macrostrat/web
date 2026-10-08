@@ -1,216 +1,146 @@
-.data-scroll-body
-  display: grid
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))
-  grid-auto-rows: minmax(80px, auto)
-  gap: 1em
-  // TODO: make this more flexible
-  --data-panel-card-padding: 0
+// Map list page content. The frame itself lives in `~/layouts/hybrid`.
 
-.map-card
+// The hybrid shell scrolls the panel and sticks its toolbar (its `panel` mode).
+.map-panel
   height: 100%
-  position: relative
+  min-height: 0
+  min-width: 0
 
-.map-card-content
-  height: 100%
-  width: 100%
-  padding: 0.5em 1em
-
-.title
-  display: flex
-  flex-direction: row
-  justify-content: space-between
-  align-items: baseline
-  h3
-    margin: 0
-    flex: 1
-    text-overflow: ellipsis
+  // `.data-panel-main` is a flex item; its min-content width would push the
+  // grid wider than the split shell's fixed panel. Scoped inside `data-sheet`.
+  > div
     min-width: 0
 
-.flex-row
+  [class*="data-panel-toolbar-content"]
+    max-width: none
+
+.map-grid
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr))
+  gap: var(--pz-space-2)
+  padding: var(--pz-space-1) 0
+  --data-panel-card-padding: 0
+
+/* ------------------------------------------------------------------ cards */
+
+// The shared `LinkCard` at list density: two lines, the name and scale over
+// the citation and identifier.
+.map-card
+  display: flex
+  flex-direction: column
+  justify-content: center
+  gap: 0.2em
+  height: 100%
+  min-width: 0
+  margin: 0
+  padding: var(--pz-space-2) var(--pz-space-3)
+
+  h3
+    margin: 0
+    font-size: 1em
+    font-weight: 500
+
+.map-head
   display: flex
   flex-direction: row
-  position: relative
-  gap: 2em
+  align-items: baseline
+  gap: var(--pz-inline-gap)
+  min-width: 0
 
-.main
-  flex: 5
+.map-name
+  flex: 1 1 auto
+  min-width: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
 
-.sidebar
-  flex: 1
-
-:root
-  --main-extra-width: 200px
-
-
-@media (min-width: 1100px)
-  .flex-row
-    margin-right: calc(-1 * var(--main-extra-width))
-
-  .sidebar
-    max-width: calc(50% - var(--main-extra-width) / 2)
-
-.sidebar-content
-  padding-top: 2em
-  position: sticky
-  top: 0
-  z-index: 1000
-
-.raster
-  color: white
-  background-color: lightgreen
-  padding: 0.2em 0.5em
-  border-radius: 0.2em
-  display: inline-block
-  font-size: 0.8em
-
-.maps-list
-  padding: 0
+.map-meta
   display: flex
-  flex-direction: column
-  column-gap: 1em
-  row-gap: 0
+  flex-direction: row
+  align-items: baseline
+  gap: var(--pz-inline-gap)
+  min-width: 0
+  color: var(--pz-secondary-color)
+  font-size: 0.85rem
 
-  .link-title
-    display: flex
-    justify-content: space-between
+.map-citation
+  flex: 1 1 auto
+  min-width: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
 
-    p
-      margin: 0
+.map-identifier
+  flex: 0 0 auto
+  margin-left: auto
+  color: var(--pz-secondary-color)
+  font-family: var(--monospace-font)
+  font-size: 0.8rem
 
-    a
-      display: flex
-      gap: 5px
-      align-items: center
-      justify-content: center
+// Scale bands keep their legacy hues, as a tint rather than a solid fill.
+.scale-tag
+  flex: 0 0 auto
+  font-size: 0.75rem
+  --scale-color: var(--pz-secondary-color)
+  color: var(--scale-color)
+  background-color: color-mix(in srgb, var(--scale-color) 15%, transparent)
 
-  p
-    font-size: 0.5em
+.scale-tiny,
+.scale-small
+  --scale-color: #2f9a85
 
-.source-id
-  &::before
-    content: "#"
-    color: var(--text-dim-color)
+.scale-medium
+  --scale-color: #d0692e
 
-  color: var(--text-subtle-color)
-  min-width: 3em
-  display: inline-block
+.scale-large
+  --scale-color: #2f7fc1
 
-.nav-list
-  list-style: none
-  padding: 0
-  margin: 0
+/* --------------------------------------------------------------- controls */
 
-  li
-    padding: 0.5em 0
+.search-input
+  flex: 1 1 auto
+  min-width: 10rem
 
-.pages
-  margin: 10px 0
-  width: 100%
-  display: flex
-  text-align: center
-  justify-content: center
+  @container hybrid-list (max-width: 40rem)
+    min-width: 6rem
 
-  .page-container
-    display: grid
-    grid-template-columns: 100px 50px 100px
-    color: var(--text-emphasized-color)
+.compilation-select
+  min-width: 16rem
 
-    .btn-content
-      display: flex
-      gap: 5px
-      align-items: center
-      justify-content: center
-      cursor: pointer
+/* -------------------------------------------------------------- assistant */
 
-    p
-      margin: 0
-      text-align: center
-
-.search-bar
-  display: flex
-  gap: 5px
-  align-items: center
-  justify-content: center
-
-  input
-    width: 100%
-    padding: 0.5em
-    border-radius: 0.2em
-    border: none
-    background-color: var(--background-color)
-    color: var(--text-emphasized-color)
-    font-size: 1em
-    margin: 3px
-
-    &:focus
-      outline: none
-      box-shadow: 0 0 0.2em var(--text-emphasized-color)
-
-.content
-  display: flex
-  justify-content: space-between
-  padding-top: 0.5em
-  align-items: center
-
-.tiny
-  background-color: #45b29d
-
-.small
-  background-color: #45b29d
-
-.medium
-  background-color: #e27a3f
-
-.large
-  background-color: #3498db
-
-.id
-  text-align: right
-  padding: 0.2em 0.5em
-  border-radius: 0.2em
-  color: var(--text-emphasized-color)
-  background-color: var(--background-color)
-  align-self: flex-end
-
-.size
-  color: var(--text-emphasized-color)
-  padding: 0.2em 0.5em
-  border-radius: 0.2em
-  align-self: flex-end
-
-.title
-  display: flex
-  justify-content: space-between
-  align-items: center
+.assistant
+  padding: var(--pz-content-padding)
 
   h2
+    font-size: 1rem
     margin: 0
 
-.header-container
+.assistant-header
   display: flex
-  flex-direction: column
+  flex-direction: row
   align-items: center
+  justify-content: space-between
+  gap: var(--pz-inline-gap)
 
-  .search
+.assistant-empty
+  color: var(--pz-secondary-color)
+  margin: 0
+
+.assistant-point
+  margin: 0.2em 0 var(--pz-paragraph-spacing)
+  color: var(--pz-secondary-color)
+  font-family: var(--monospace-font)
+  font-size: 0.8rem
+
+.assistant-maps
+  list-style: none
+  margin: 0
+  padding: 0
+
+  li
     display: flex
-    gap: 1em
-    align-items: center
-    justify-content: flex-end
-    width: 100%
-    max-width: 600px
-
-    .search-bar
-      flex: 1
-
-  .header
-    display: flex
-    justify-content: space-between
-    width: 100%
-    padding: 1em
-
-.assistant-links
-  flex: 1
-
-.top-row
-  display: flex
-  gap: .5em
+    flex-direction: row
+    align-items: baseline
+    gap: var(--pz-inline-gap)
+    padding: 0.25em 0

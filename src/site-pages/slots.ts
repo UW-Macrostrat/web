@@ -31,14 +31,18 @@ export const siteSlots: Record<string, SlotSpec[]> = {
     { at: "how-to-give", mode: "after", component: "ContactBlock", data: ["contact"] },
   ],
   "/about/brand": [],
-  "/community": [
-    { at: "people", mode: "after", component: "ContributorDirectory", data: ["people"] },
-    { at: "contact", mode: "after", component: "ContactBlock", data: ["contact"] },
-  ],
-  "/community/apps": [
+  "/about/version-2": [],
+  "/about/apps": [
     { at: "apps", mode: "after", component: "AppGallery", data: ["apps"] },
   ],
-  "/community/integrations": [
+  "/about/people": [
+    { at: "directory", mode: "after", component: "ContributorDirectory", data: ["people"] },
+  ],
+  "/community": [
+    { at: "contact", mode: "after", component: "ContactBlock", data: ["contact"] },
+  ],
+  "/community/contributing": [],
+  "/community/collaborators": [
     { at: "systems-and-organizations", mode: "after", component: "IntegrationList", data: ["integrations"] },
   ],
   "/community/open-source": [
