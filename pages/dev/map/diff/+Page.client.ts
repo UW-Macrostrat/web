@@ -73,6 +73,7 @@ import {
   BaseLayerForm,
   basemapStyle,
   CompilationZoomWarning,
+  MapReferenceList,
   PageBreadcrumbs,
 } from "~/components";
 import { NavigationLinkProvider } from "~/_providers/navigation";
@@ -602,6 +603,7 @@ function describedFields(polygon: any): any {
     b_interval: polygon.b_int?.int_id,
     t_interval: polygon.t_int?.int_id,
     source_name: polygon.ref?.name,
+    refs: polygon.refs,
   };
 }
 
@@ -1111,11 +1113,7 @@ function UnitDetails({ unit, context, record, reference }) {
     }),
     h(ColumnField, { record, column: context.column }),
     h(UnitProvenance, { unit }),
-    h.if(reference != null)(DataField, {
-      label: "Reference",
-      value: reference,
-      className: "reference",
-    }),
+    h(UnitReference, { unit, reference }),
     h("div.identifiers", [
       h.if(unit.map_id != null)(DataField, {
         label: "Map ID",
@@ -1127,6 +1125,17 @@ function UnitDetails({ unit, context, record, reference }) {
       }),
     ]),
   ]);
+}
+
+/** The polygon's references where its source's point query returns them (`refs`),
+ * else the citation `/geologic_units/map` gives for its map. */
+function UnitReference({ unit, reference }) {
+  let value = reference;
+  if (unit.refs?.length > 0) {
+    value = h(MapReferenceList, { refs: unit.refs });
+  }
+  if (value == null) return null;
+  return h(DataField, { label: "Reference", value, className: "reference" });
 }
 
 /** The matched stratigraphic names, each a link into the lexicon. Whether a map

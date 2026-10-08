@@ -14,6 +14,7 @@ import {
   MacrostratColumnStateProvider,
   PBDBFossilsColumn,
   ReferencesField,
+  UnitSelectionPopover,
   UnitSelectionStyle,
 } from "@macrostrat/column-views";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -48,6 +49,7 @@ import {
   initialColumnHashState,
   useColumnSelection,
   useColumnState,
+  useUnitPopover,
   useSetFacet,
   viewSettingsOpenAtom,
   ViewSettingsButton,
@@ -75,6 +77,8 @@ import {
 import {
   ageExtentOfUnits,
   TIME_FILTER_KEYS,
+  TimeFilterEmptyNotice,
+  TimeFilterOutsideState,
   TimeFilterProvider,
   TimeFilterTag,
   useTargetUnitHeight,
@@ -175,6 +179,7 @@ function ColumnPageFrame({
       h(ProjectFilterTag),
       h(InProcessFilterTag),
       h(TimeFilterTag),
+      h(TimeFilterEmptyNotice, { units: columnInfo.units }),
     ]),
     content: h(ColumnContentPane, { columnInfo }),
     map: h(ColumnMapPane, { columnInfo, linkPrefix, projectID }),
@@ -214,12 +219,12 @@ function ColumnContentPane({ columnInfo }) {
   // Narrowing the window expands the vertical scale slightly (a quarter-power
   // of the zoom ratio), and the few units visible in a tight window share the
   // column height rather than huddling at the library's default 20px. Keyed on
-  // the window the animation is heading to, so density settles once per filter
-  // change. A fixed pixel scale (set in the settings) makes this moot — the
-  // library ignores the target then.
+  // the animated window, not its destination: the destination's density over
+  // the starting window blows the column up before it contracts. A fixed pixel
+  // scale (set in the settings) makes this moot — the library ignores it then.
   const targetUnitHeight = useTargetUnitHeight(
     units,
-    timeWindow.targetWindow,
+    timeWindow.window ?? timeWindow.targetWindow,
     fullExtent,
     { base: 20, max: 120, fillHeight: 600 }
   );
@@ -235,11 +240,27 @@ function ColumnContentPane({ columnInfo }) {
     [setSelectedUnitID]
   );
 
-  let children = null;
+  let facet = null;
   let showLabelColumn = true;
   if (facetElement != null) {
     showLabelColumn = false;
-    children = h("div.facet-container", [facetElement]);
+    facet = h("div.facet-container", [facetElement]);
+  }
+
+  // As a child rather than `showUnitPopover`, which re-enables selection on a
+  // provider the page already owns (and warns about it).
+  const showUnitPopover = useUnitPopover();
+  let unitPopover = null;
+  if (showUnitPopover) {
+    unitPopover = h(UnitSelectionPopover);
+  }
+
+  // The full column, which the window falls back to, would only mislead
+  if (timeWindow.isOutsideExtent) {
+    return h(
+      "div.column-content",
+      h(TimeFilterOutsideState, { extent: fullExtent })
+    );
   }
 
   return h("div.column-content", [
@@ -280,10 +301,11 @@ function ColumnContentPane({ columnInfo }) {
               hideLabelsWhileTransitioning: true,
               onClickTimescaleInterval: timeWindow.onClickTimescaleInterval,
               timescaleIntervalStyle: timeWindow.timescaleIntervalStyle,
+              timescaleLevels: timeWindow.timescaleLevels,
               t_pos,
               b_pos,
             },
-            children
+            [facet, unitPopover]
           )
         )
       )
@@ -464,13 +486,14 @@ function ColumnAssistantPane({
 }) {
   const { units } = columnInfo;
   const { selectedUnit, setSelectedUnitID } = useColumnSelection();
+  const unitPopover = useUnitPopover();
 
   // Opened deliberately, so it takes the slot over a selected unit
   if (settingsOpen) {
     return h(ViewSettingsPanel, { onClose: () => setSettingsOpen(false) });
   }
 
-  if (selectedUnit != null) {
+  if (selectedUnit != null && !unitPopover) {
     // The one piece of assistant content that reads as a card. The panel
     // resolves adjacent units' names through the column state scope, so it
     // gets its own provider here (the column's is in the content slot).

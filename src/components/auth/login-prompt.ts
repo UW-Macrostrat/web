@@ -28,20 +28,16 @@ export function LoginPrompt({
   description,
   actions,
 }: LoginPromptProps) {
-  let detail: ReactNode = description;
-  if (detail == null) {
-    detail = h("p", [
-      "Macrostrat uses your ",
-      h("a", { href: "https://orcid.org", target: "_blank" }, "ORCID iD"),
-      " to sign you in. You'll be brought back here afterwards.",
-    ]);
+  let detail: ReactNode = null;
+  if (description != null) {
+    detail = h("div.login-prompt-description", description);
   }
 
   return h(NonIdealState, {
     className: "login-prompt",
     icon: "log-in",
     title,
-    description: h("div.login-prompt-description", detail),
+    description: detail,
     action: h("div.login-prompt-actions", [
       h(SignInButton, { returnURL }),
       actions,

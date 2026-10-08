@@ -39,6 +39,7 @@ import type {
 } from "@macrostrat/timescale";
 import {
   intervalShortFromTimescale,
+  levelsForSelected,
   useAnimatedAgeWindow,
   type AgeWindow,
 } from "@macrostrat/column-views";
@@ -451,6 +452,9 @@ export interface TimeFilterWindow {
   windowPadding: number;
   isAnimating: boolean;
   isFullExtent: boolean;
+  /** The filter's window lies wholly outside the data, so there is nothing to
+   * show (the window itself falls back to the full extent). */
+  isOutsideExtent: boolean;
   resolved: ResolvedTimeFilter | null;
   /** Timescale click handler: click an interval to select it; re-click the
    * selected interval to step out to its parent (clearing at the top);
@@ -458,6 +462,9 @@ export interface TimeFilterWindow {
   onClickTimescaleInterval: TimescaleClickHandler;
   /** Bolds the selected interval(s) on the timescale. */
   timescaleIntervalStyle: IntervalStyleBuilder;
+  /** Timescale levels to show: one coarser than the selection, the rest finer,
+   * so drilling in reaches finer intervals. */
+  timescaleLevels: [number, number];
 }
 
 /** Drive a column or correlation chart's age window from the shared filter,
@@ -503,10 +510,32 @@ export function useTimeFilterWindow(
     windowPadding,
     isAnimating: anim.isAnimating,
     isFullExtent: anim.isFullExtent,
+    isOutsideExtent: isOutside(resolved?.window ?? null, fullExtent),
     resolved,
     onClickTimescaleInterval,
     timescaleIntervalStyle,
+    timescaleLevels: timescaleLevelsFor(resolved),
   };
+}
+
+/** Column's default levels (era–epoch) anchor on the period. */
+const DEFAULT_TIMESCALE_LEVEL = 3;
+
+/** The level window for a selection, anchored on its finest interval. Explicit
+ * ages and non-ICS intervals (rank 0) keep the default. */
+export function timescaleLevelsFor(
+  resolved: ResolvedTimeFilter | null
+): [number, number] {
+  const intervals = [
+    resolved?.interval,
+    resolved?.intervalRange?.top,
+    resolved?.intervalRange?.bottom,
+  ];
+  let level = DEFAULT_TIMESCALE_LEVEL;
+  for (const interval of intervals) {
+    if (interval?.rank > 0) level = Math.max(level, interval.rank);
+  }
+  return levelsForSelected(level, { levelWindow: 3, minLevel: 1, maxLevel: 5 });
 }
 
 /** Interval navigation on a timescale (a column's own, or a picker): click to
@@ -736,6 +765,15 @@ function clampWindow(
   // is what gets drawn. Anything else inverted falls back to the extent.
   if (b_age < t_age) return extent;
   return { t_age, b_age };
+}
+
+/** No overlap at all; a window touching the extent's edge still overlaps. */
+export function isOutside(
+  window: AgeWindow | null,
+  extent: AgeWindow | null
+): boolean {
+  if (window == null || extent == null) return false;
+  return window.t_age > extent.b_age || window.b_age < extent.t_age;
 }
 
 function windowKey(window: AgeWindow | null): string | null {

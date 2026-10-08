@@ -58,8 +58,10 @@ import {
   basemapStyle,
   DevLink,
   MapReference,
+  MapReferenceList,
   MenuButton,
   SitePageHeader,
+  type MapRef,
 } from "~/components";
 import {
   LegendEntries,
@@ -85,6 +87,7 @@ interface MapData {
     slug: string | null;
     name: string;
     description: string;
+    refs: MapRef[];
   };
   geometry: GeoJSON.Geometry;
   tileJSON: (TileJSON & { faces?: string }) | null;
@@ -353,11 +356,12 @@ function PagePanel({ mapInfo, tileJSON }) {
 
 /** Under the large title: the map's reference, description and slug. */
 function MapSummary({ mapInfo }) {
+  let reference = h(MapReference, { reference: mapInfo, showSourceID: false });
+  if (mapInfo.refs?.length > 0) {
+    reference = h(MapReferenceList, { refs: mapInfo.refs });
+  }
   return h("div.map-summary", [
-    h(
-      ErrorBoundary,
-      h(MapReference, { reference: mapInfo, showSourceID: false })
-    ),
+    h(ErrorBoundary, reference),
     h.if(mapInfo.description != null)(
       "p.page-description",
       mapInfo.description

@@ -17,6 +17,7 @@ import {
   FormGroup,
   HTMLSelect,
   NumericInput,
+  Switch,
 } from "@blueprintjs/core";
 import { useHydrateAtoms } from "jotai/utils";
 import {
@@ -142,6 +143,8 @@ interface ColumnHashState {
   axis?: string;
   facet?: string;
   scale?: number;
+  /** Where a selected unit's details show; the sidebar when unset */
+  unit_details?: "popover";
 }
 
 function validateInt(value: string | null): number | undefined {
@@ -195,6 +198,9 @@ function getStateFromHash(): ColumnHashState {
     validFacets as string[]
   );
   state.axis = validateAxis(params.get("axis"));
+  state.unit_details = validateValues<"popover">(params.get("unit_details"), [
+    "popover",
+  ]);
   state.unit = validateInt(params.get("unit"));
   for (const key of ["int_id", "t_int_id", "b_int_id"]) {
     state[key] = validateInt(params.get(key));
@@ -347,6 +353,27 @@ const b_posAtom = atomWithHashParam<number>("b_pos");
 
 const pixelScaleAtom = atomWithHashParam<number>("scale");
 
+const unitDetailsAtom = atomWithHashParam<"popover" | null>("unit_details");
+
+/** Whether a selected unit's details show in a popover beside the column
+ * rather than in the sidebar. */
+export function useUnitPopover(): boolean {
+  return useAtomValue(unitDetailsAtom) === "popover";
+}
+
+function UnitPopoverSwitch() {
+  const [value, setValue] = useAtom(unitDetailsAtom);
+  return h(Switch, {
+    label: "Unit details in a popover",
+    checked: value === "popover",
+    onChange: (evt) => {
+      let next = null;
+      if ((evt.target as HTMLInputElement).checked) next = "popover";
+      setValue(next);
+    },
+  });
+}
+
 const h = hyperStyled(styles);
 
 function inferHeightAxisType(axisType: ColumnAxisType, units): ColumnAxisType {
@@ -442,6 +469,7 @@ export function ColumnSettingsPanel() {
   return h("div.column-settings-panel", [
     h(AxisTypeControl),
     h(FacetControl),
+    h(UnitPopoverSwitch),
     // What the navigation map shows, rather than how the column is drawn — but
     // it belongs with the other view controls rather than floating over the map
     // itself, where it read as part of the map.

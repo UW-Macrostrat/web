@@ -17,6 +17,7 @@ import {
   Tag,
 } from "@blueprintjs/core";
 import { postgrestPrefix } from "@macrostrat-web/settings";
+import { DataField } from "@macrostrat/data-components";
 import type { IconName } from "@blueprintjs/icons";
 import { usePageContext } from "vike-react/usePageContext";
 import { type ReactNode, useEffect, useState } from "react";
@@ -89,8 +90,8 @@ function AsyncClaims({ loading, error, claims }) {
   return h(ClaimsList, { claims });
 }
 
-/** A flat object as a definition list. Dates and the JWT `exp` are made
- * readable; anything structured is shown as JSON. */
+/** A flat object as data fields. Dates and the JWT `exp` are made readable;
+ * anything structured is shown as JSON. */
 function ClaimsList({
   claims,
   emptyText = "Nothing",
@@ -102,12 +103,14 @@ function ClaimsList({
   const entries = Object.entries(claims);
   if (entries.length === 0) return h("div.muted", emptyText);
   return h(
-    "dl.claims",
+    "div.claims",
     entries.map(([key, value]) =>
-      h([
-        h("dt", { key: `${key}-dt` }, key),
-        h("dd", { key }, h(ClaimValue, { name: key, value })),
-      ])
+      h(DataField, {
+        key,
+        row: true,
+        label: key,
+        value: h(ClaimValue, { name: key, value }),
+      })
     )
   );
 }
@@ -191,26 +194,12 @@ export function RoleSwitchPanel({ user }: { user: SessionUser | null }) {
     {
       className: "role-switch",
       icon: "eye-open",
-      title: "See the site as someone else",
+      title: "Browse with a reduced role",
     },
     [
-      h("p", [
-        "Re-issue this session's cookie with a lower role. Every layer — page ",
-        "guards, the API, PostgREST's row security — then treats you as that ",
-        "tier, and the persona indicator turns yellow. Restore the role from ",
-        "that indicator, from this page, or by logging out and in again.",
-      ]),
       h("ul.tier-list", [
-        h("li", [
-          h("code", "web_authorized"),
-          " — designated by an admin; may view anything, including work in ",
-          "progress, but edits nothing.",
-        ]),
-        h("li", [
-          h("code", "web_user"),
-          " — anyone who has signed in; gains nothing substantial over an ",
-          "anonymous visitor.",
-        ]),
+        h("li", [h("code", "web_authorized"), ": views everything, edits nothing"]),
+        h("li", [h("code", "web_user"), ": any signed-in user"]),
       ]),
       errorNode,
       h(

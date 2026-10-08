@@ -42,7 +42,7 @@ export function Page() {
   return h(InfiniteScrollPage, {
     className: "ingestion-page",
     provider,
-    headerElements: h(UserPersona, { compact: true }),
+    headerElements: h(UserPersona, { large: true }),
     itemComponent: MapCard,
     columnSpec,
     // Rows are maps — names the selection ("3 maps"), counters, and labels.

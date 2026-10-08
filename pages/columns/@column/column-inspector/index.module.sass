@@ -103,22 +103,13 @@
   h3
     color: var(--secondary-color)
 
-  .field-link
-    color: inherit
-    text-decoration: none
-    border-bottom: 1px dotted var(--pz-text-subtle-color, var(--secondary-color))
-
-    &:hover
-      color: var(--pz-link-color, var(--link-color))
-
+  .field-link,
   .facet-link
-    color: inherit
-    text-decoration: none
-    border-bottom: 1px dotted var(--pz-text-subtle-color, var(--secondary-color))
+    color: var(--pz-link-color)
     cursor: pointer
 
     &:hover
-      color: var(--pz-link-color, var(--link-color))
+      color: var(--pz-link-hover-color)
 
   // One line per project the column belongs to, id at the right like the group
   .project-list

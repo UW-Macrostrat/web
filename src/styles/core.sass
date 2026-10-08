@@ -10,9 +10,10 @@
   @each $name, $color in colorOverrides.$colors
     --#{$name}: #{$color}
 
-// Links are green, everywhere. A type selector, so anything that gives its
-// anchors a color of their own — a card, a Blueprint button — still wins.
-a
+// Links are green, everywhere. As specific as Blueprint's own `.bp6-dark a`,
+// and later, so it wins; anything coloring its own anchors still does.
+a,
+.bp6-dark a
   color: var(--pz-link-color)
 
   &:hover
@@ -50,7 +51,7 @@ body, body.bp6-dark
   background-color: var(--pz-background-color)
 
 body.bp6-dark
-  --background-color: pt.$black
+  --background-color: #{pt.$black}
 
 h1, h2, h3, h4, h5, h6
   font-family: var(--header-font)

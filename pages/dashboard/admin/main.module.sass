@@ -1,21 +1,12 @@
 .admin-page
   text-align: left
+  margin-top: 1em
 
   .muted
     color: var(--pz-text-subtle-color, var(--secondary-color))
 
   .error
     color: var(--pz-danger-color, #cd4246)
-
-  .admin-header
-    display: flex
-    align-items: flex-start
-    justify-content: space-between
-    gap: 1em
-    margin: 1em 0 2em
-    p
-      margin: 0
-      max-width: 40em
 
   .admin-section
     margin-bottom: 2.5em
@@ -50,18 +41,8 @@
       font-size: var(--pz-font-size-sm, 0.85em)
 
   .claims
-    display: grid
-    grid-template-columns: max-content 1fr
-    gap: 0.3em 0.75em
-    margin: 0
     font-size: var(--pz-font-size-sm, 0.9em)
-    dt
-      font-family: var(--pz-font-mono, monospace)
-      color: var(--pz-text-subtle-color, var(--secondary-color))
-    dd
-      margin: 0
-      min-width: 0
-      word-break: break-all
+    word-break: break-all
 
   .claim-json
     margin: 0

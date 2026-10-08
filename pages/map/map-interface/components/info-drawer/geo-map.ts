@@ -4,7 +4,11 @@ import {
   ExpansionPanel,
   IntervalAgeRange,
 } from "@macrostrat/data-components";
-import { BaseMapReference, MapReference } from "~/components/map-info";
+import {
+  BaseMapReference,
+  MapReference,
+  MapReferenceList,
+} from "~/components/map-info";
 import { Icon } from "@blueprintjs/core";
 import { useAtomValue } from "jotai";
 import { infoMarkerPositionAtom, useAppState } from "../../app-state";
@@ -28,7 +32,9 @@ function GeoMapLines(props) {
 function LineInfo(props) {
   const { line } = props;
   const { name, type, direction, descrip } = line;
-  const details = [direction, descrip].filter(Boolean).join(" ");
+  const details = [direction, withoutType(descrip, type)]
+    .filter(Boolean)
+    .join(" ");
 
   const children: ReactNode[] = [];
   if (name) children.push(h("strong.line-name", name));
@@ -37,6 +43,22 @@ function LineInfo(props) {
   if (details) children.push(h("span.details", [" (", details, ")"]));
 
   return h("span.line-info", children);
+}
+
+/** A line's description without the type it restates, which is shown beside
+ * it: under type "fault", "Fault, approximate" is "approximate" and "Fault" is
+ * nothing. Many maps' descriptions open with their type (SGMC's "Fault, sense of
+ * displacement unknown or undefined, certain"). */
+function withoutType(descrip: string | null, type: string | null) {
+  if (!descrip || !type) return descrip;
+  const words = type.toLowerCase().match(/[a-z0-9]+/g);
+  if (words == null) return descrip;
+  const restated = new RegExp(
+    "^\\W*" + words.join("[^a-z0-9]+") + "(?![a-z0-9])[\\W]*",
+    "i"
+  );
+  if (!restated.test(descrip)) return descrip;
+  return descrip.replace(restated, "").replace(/[()]/g, "").trim();
 }
 
 function addSeparators(values: ReactNode[]) {
@@ -60,42 +82,8 @@ export function GeologicMapInfo(props) {
   )
     return null;
 
-  const [comments, additionalRefs] = processComments(source.comments);
-
-  const refs = [];
-  /** Stopgap for refs from SGMC, which are stored in comments.
-   * TODO: Eventually the reference model will need to be improved, but
-   * this works for now.
-   */
-  let mainPrefix = null;
-  if (additionalRefs.primary || additionalRefs.original) {
-    mainPrefix = "Compiled in";
-  }
-  refs.push(
-    h(
-      MapReference,
-      { prefix: mainPrefix, reference: source.ref },
-      h(MapSourceLinks, { source })
-    )
-  );
-  if (additionalRefs.original) {
-    refs.push(
-      h(
-        BaseMapReference,
-        { prefix: "Originally from" },
-        additionalRefs.original
-      )
-    );
-  }
-  if (additionalRefs.primary) {
-    refs.push(
-      h(
-        BaseMapReference,
-        { prefix: "Primarily described in" },
-        additionalRefs.primary
-      )
-    );
-  }
+  const [comments, commentRefs] = processComments(source.comments);
+  const refs = h(SourceReferences, { source, commentRefs });
 
   return h(
     ExpansionPanel,
@@ -130,6 +118,40 @@ export function GeologicMapInfo(props) {
       ]),
     ]
   );
+}
+
+/** The polygon's references, as API v2 assembles them from every level where
+ * it can (`refs`); otherwise the map's citation, and for SGMC the original map
+ * and primary reference its comments name. */
+function SourceReferences({ source, commentRefs }) {
+  const links = h(MapSourceLinks, { source });
+  if (source.refs?.length > 0) {
+    return h(MapReferenceList, { refs: source.refs }, links);
+  }
+
+  const refs = [];
+  let mainPrefix = null;
+  if (commentRefs.primary || commentRefs.original) {
+    mainPrefix = "Compiled in";
+  }
+  refs.push(
+    h(MapReference, { prefix: mainPrefix, reference: source.ref }, links)
+  );
+  if (commentRefs.original) {
+    refs.push(
+      h(BaseMapReference, { prefix: "Originally from" }, commentRefs.original)
+    );
+  }
+  if (commentRefs.primary) {
+    refs.push(
+      h(
+        BaseMapReference,
+        { prefix: "Primarily described in" },
+        commentRefs.primary
+      )
+    );
+  }
+  return h(refs);
 }
 
 /** The map's own page and, revealed on hover for those who know to look, the
@@ -222,13 +244,16 @@ function AgeField({ source }) {
   );
 }
 
+/** A map can list dozens of names for one unit; long lists are clipped like
+ * the description. */
 function StratNamesField(props) {
   const { value: text } = props;
   if (!text || !text.length) return null;
   const isPlural =
     text.includes(",") || text.includes(";") || text.includes(" and ");
-  const label = "Stratigraphic name" + (isPlural ? "s" : "");
-  return h(DataField, { label }, text);
+  let name = "Stratigraphic name";
+  if (isPlural) name += "s";
+  return h(LongText, { name, text, lines: 2 });
 }
 
 /** A labelled run of prose. Long ones are clipped until asked for. */

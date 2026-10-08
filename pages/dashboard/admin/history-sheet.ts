@@ -6,7 +6,7 @@
  * CLI's are `system:cli` unless `--created-by` named someone.
  */
 import hyper from "@macrostrat/hyper";
-import { Callout, Intent, Tag } from "@blueprintjs/core";
+import { Intent, Tag } from "@blueprintjs/core";
 import {
   type ColumnSpec,
   compareRowsBySorts,
@@ -120,12 +120,5 @@ export function HistorySheet() {
       pageSize: 500,
       enableColumnReordering: false,
     }),
-  ]);
-}
-
-export function HistoryHelp() {
-  return h(Callout, { compact: true, icon: "history" }, [
-    "Every role change and every token minted or revoked, with who did it. ",
-    "Empty when the audit subsystem is not installed in this database.",
   ]);
 }

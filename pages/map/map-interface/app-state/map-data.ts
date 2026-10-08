@@ -6,6 +6,7 @@ import { compilationOrDefault } from "./compilation";
 import {} from "@macrostrat/mapbox-react";
 import { loadable, selectAtom } from "jotai/utils";
 import mapboxgl from "mapbox-gl";
+import type { MapRef } from "~/components/map-info";
 
 export const infoMarkerPositionAtom = atom((get) => {
   const appState = get(appStateAtom);
@@ -191,6 +192,8 @@ interface MapData {
   color: string;
   scale: string;
   ref: Reference;
+  /** Every level's references, where the API supports them. */
+  refs?: MapRef[];
   macrostrat: Record<string, any>;
   lines: Line[];
 }

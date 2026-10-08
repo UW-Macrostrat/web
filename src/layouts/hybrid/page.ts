@@ -159,22 +159,17 @@ function HybridPageInner({
   // The site header, title inline. A title adornment (the column editor's
   // context) has no slot in it yet, so those pages keep the parts-built row.
   // Scrolling with the page, it opens with a large title that collapses into
-  // the bar, as on content pages, with active filters beneath the title.
+  // the bar, as on content pages. Active filters follow as a row of their own,
+  // outside the title block, so they can stick beneath the bar.
   let header: ReactNode = null;
-  let headerFilterBar = filterBar;
   if (titleAdornment == null && pageScroll) {
-    header = h(
-      SitePageHeader,
-      {
-        variant: "hybrid",
-        width: "constrained",
-        actions: controls,
-        collapseActions: "narrow",
-        className: "shell-page-header",
-      },
-      filterBar
-    );
-    headerFilterBar = null;
+    header = h(SitePageHeader, {
+      variant: "hybrid",
+      width: "constrained",
+      actions: controls,
+      collapseActions: "narrow",
+      className: "shell-page-header",
+    });
   } else if (titleAdornment == null) {
     header = h(SitePageHeader, {
       variant: "compact",
@@ -205,7 +200,7 @@ function HybridPageInner({
     }),
     titleAdornment,
     controls,
-    filterBar: headerFilterBar,
+    filterBar,
     map,
     assistant,
     assistantIdle,
