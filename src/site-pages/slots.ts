@@ -32,6 +32,7 @@ export const siteSlots: Record<string, SlotSpec[]> = {
   ],
   "/about/brand": [],
   "/about/version-2": [],
+  "/about/scientific-approach": [],
   "/about/apps": [
     { at: "apps", mode: "after", component: "AppGallery", data: ["apps"] },
   ],
