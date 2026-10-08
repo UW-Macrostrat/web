@@ -88,7 +88,7 @@
     "@macrostrat/hyper": "^3.1.1",
     "@macrostrat/map-interface": "^2.5.1",
     "@macrostrat/map-styles": "^2.2.10",
-    "@macrostrat/map-views": "^1.1.1",
+    "@macrostrat/map-views": "^1.1.2",
     "@macrostrat/mapbox-react": "^3.4.1",
     "@macrostrat/mapbox-utils": "^1.8.0",
     "@macrostrat/scoped-store": "^1.1.0",

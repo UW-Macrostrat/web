@@ -336,7 +336,7 @@ function PagePanel({ mapInfo, tileJSON }) {
   let content = h(LegendContent, { mapInfo, tileJSON });
   if (activePage === MenuPage.Neighbors) {
     // Mounted only while its tab is open, so the overlap query runs on demand.
-    content = h(NeighborMaps, { mapInfo });
+    content = h(NeighborsTab, { mapInfo });
   }
 
   return h(
@@ -352,6 +352,12 @@ function PagePanel({ mapInfo, tileJSON }) {
       h("div.panel-body", h(ErrorBoundary, content)),
     ])
   );
+}
+
+/** Subscribes to the view only while the tab is open; its links follow it. */
+function NeighborsTab({ mapInfo }) {
+  const view = useAtomValue(viewAtom);
+  return h(NeighborMaps, { mapInfo, view });
 }
 
 /** Under the large title: the map's reference, description and slug. */
