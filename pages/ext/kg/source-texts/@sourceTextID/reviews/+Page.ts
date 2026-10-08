@@ -2,6 +2,7 @@ import hyper from "@macrostrat/hyper";
 import { useEffect, useState } from "react";
 import styles from "~/components/knowledge-graph/knowledge-graph.module.sass";
 import { useData } from "vike-react/useData";
+import { reload } from "vike/client/router";
 import {
   AnchorButton,
   Button,
@@ -13,6 +14,7 @@ import { AuthStatus } from "@macrostrat/form-components";
 import {
   ExtractionViewClient,
   FeedbackNotesView,
+  FeedbackRunEditorClient,
   formatDate,
   indexById,
   KGToolbar,
@@ -113,11 +115,13 @@ function HumanRuns({ humanRuns, notesByRun, lookups }) {
   }
 
   const models = indexById(lookups.models);
+  let accessWarning = null;
+  if (accessError) {
+    accessWarning = h(Callout, { intent: "warning" }, accessError);
+  }
 
   return h("div.source-text-sections", [
-    accessError
-      ? h(Callout, { intent: "warning" }, accessError)
-      : null,
+    accessWarning,
 
     ...visibleRuns.map((run: KGRun) =>
       h(HumanRun, {
@@ -126,7 +130,7 @@ function HumanRuns({ humanRuns, notesByRun, lookups }) {
         model: models.get(run.model_id),
         notes: notesByRun[run.model_run] ?? null,
         lookups,
-        canDelete: hasFeedbackAccess(access, Number(run.model_run)),
+        canManage: hasFeedbackAccess(access, Number(run.model_run)),
         onDeleted,
       }),
     ),
@@ -138,14 +142,16 @@ function HumanRun({
   model,
   notes,
   lookups,
-  canDelete,
+  canManage,
   onDeleted,
 }) {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   async function handleDelete() {
-    if (!canDelete || deleting) return;
+    if (!canManage || deleting || editing || saving) return;
 
     const runId = Number(run.model_run);
 
@@ -159,9 +165,9 @@ function HumanRun({
     try {
       await deleteFeedback(runId);
     } catch (error) {
-      setDeleteError(
-        error instanceof Error ? error.message : "Could not delete review.",
-      );
+      let message = "Could not delete review.";
+      if (error instanceof Error) message = error.message;
+      setDeleteError(message);
       setDeleting(false);
       return;
     }
@@ -169,37 +175,83 @@ function HumanRun({
     onDeleted(runId);
   }
 
+  function handleSaved() {
+    setEditing(false);
+    void reload();
+  }
+
+  let actions = null;
+  if (canManage) {
+    let editAction = h(
+      Button,
+      {
+        icon: "edit",
+        disabled: deleting,
+        onClick: () => setEditing(true),
+      },
+      "Edit",
+    );
+    if (editing) {
+      editAction = h(
+        Button,
+        {
+          icon: "cross",
+          disabled: saving,
+          onClick: () => setEditing(false),
+        },
+        "Cancel",
+      );
+    }
+    actions = h(ButtonGroup, { minimal: true }, [
+      editAction,
+      h(
+        Button,
+        {
+          icon: "trash",
+          intent: "danger",
+          loading: deleting,
+          disabled: deleting || editing || saving,
+          onClick: handleDelete,
+        },
+        "Delete",
+      ),
+    ]);
+  }
+
+  let errorMessage = null;
+  if (deleteError) {
+    errorMessage = h(Callout, { intent: "danger" }, deleteError);
+  }
+
+  let extraction = h(ExtractionViewClient, {
+    runs: [run],
+    models: lookups.models,
+    entityTypes: lookups.entityTypes,
+  });
+  if (editing && canManage) {
+    extraction = h(FeedbackRunEditorClient, {
+      key: run.model_run,
+      run,
+      models: lookups.models,
+      entityTypes: lookups.entityTypes,
+      overwrite: true,
+      onSavingChange: setSaving,
+      onSaved: handleSaved,
+    });
+  }
+
   return h("section.source-text-body", [
     h("div.run-header", [
       h("h3", ["Review ", `#${run.model_run}`]),
       h("span.bp6-text-muted", formatDate(notes?.date)),
 
-      canDelete
-        ? h(
-            Button,
-            {
-              icon: "trash",
-              intent: "danger",
-              minimal: true,
-              loading: deleting,
-              disabled: deleting,
-              onClick: handleDelete,
-            },
-            "Delete",
-          )
-        : null,
+      actions,
     ]),
 
-    deleteError
-      ? h(Callout, { intent: "danger" }, deleteError)
-      : null,
+    errorMessage,
 
     h(RunMeta, { run, model }),
     h(FeedbackNotesView, { notes }),
-    h(ExtractionViewClient, {
-      runs: [run],
-      models: lookups.models,
-      entityTypes: lookups.entityTypes,
-    }),
+    extraction,
   ]);
 }

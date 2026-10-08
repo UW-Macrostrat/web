@@ -20,7 +20,9 @@ export async function fetchKGRows<T = any>(
   view: string,
   params: Record<string, string | number | null | undefined> = {}
 ): Promise<T[]> {
-  const url = new URL(`${postgrestPrefix}/${view}`);
+  let baseURL: string | undefined;
+  if (typeof window !== "undefined") baseURL = window.location.origin;
+  const url = new URL(`${postgrestPrefix}/${view}`, baseURL);
   for (const [key, value] of Object.entries(params)) {
     if (value == null) continue;
     url.searchParams.set(key, String(value));

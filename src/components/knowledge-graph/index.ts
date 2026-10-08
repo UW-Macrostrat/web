@@ -20,3 +20,8 @@ export const ExtractionViewClient = clientOnly(() =>
 export const FeedbackEditorClient = clientOnly(() =>
   import("./editor.client").then((m) => m.FeedbackEditorForRuns)
 );
+
+/** Single-run editor, also used to overwrite an authorized review. */
+export const FeedbackRunEditorClient = clientOnly(() =>
+  import("./editor.client").then((m) => m.FeedbackEditor)
+);
