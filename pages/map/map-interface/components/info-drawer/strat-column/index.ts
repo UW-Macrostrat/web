@@ -1,4 +1,4 @@
-import { Column, ColoredUnitComponent } from "@macrostrat/column-views";
+import { Column } from "@macrostrat/column-views";
 
 import h from "./index.module.sass";
 import { ColumnSummary } from "../../../app-state/columns/columns.ts";
@@ -12,6 +12,10 @@ import {
 import { DataField } from "@macrostrat/data-components";
 import { useProjectDefs } from "~/components/project-filter";
 import { PatternProvider } from "~/_providers";
+import {
+  maxInternalColumnsFor,
+  unitComponentFor,
+} from "~/components/column-layout";
 import { useMemo, useState } from "react";
 import { ModalUnitPanel } from "#/columns/@column/column-inspector/modal-panel";
 import {
@@ -103,9 +107,11 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
       h("div.strat-column-container", [
         h(Column, {
           units,
-          unitComponent: ColoredUnitComponent,
+          unitComponent: unitComponentFor(columnInfo),
           unitComponentProps: selectedUnitProps,
           showLabelColumn: false,
+          // A section (an eODP hole) keeps its units in one column
+          maxInternalColumns: maxInternalColumnsFor(columnInfo),
           targetUnitHeight,
           unconformityLabels: "minimal",
           width: 280,

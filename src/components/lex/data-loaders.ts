@@ -196,15 +196,20 @@ export async function fetchStratConcept(conceptId: number | null | undefined) {
 
 /** Merged references from the fossils + columns endpoints (server-HTML).
  * Per-source failures degrade to an empty list rather than failing the page. */
+/** The item's references, keyed by id in the API's responses: kept, so the
+ * page can link to them there. A reference both routes cite appears once. */
 export async function fetchLexRefs(cfg: LexTypeConfig, id: number) {
   const [fossilRefs, columnRefs] = await Promise.all([
     fetchAPIRefs("/fossils", { [cfg.idParam]: id }).catch(() => null),
     fetchAPIRefs("/columns", { [cfg.idParam]: id }).catch(() => null),
   ]);
-  return [
-    ...(fossilRefs ? Object.values(fossilRefs) : []),
-    ...(columnRefs ? Object.values(columnRefs) : []),
-  ];
+  const refs = new Map<string, string>();
+  for (const source of [fossilRefs, columnRefs]) {
+    for (const [refID, text] of Object.entries(source ?? {})) {
+      if (!refs.has(refID)) refs.set(refID, text as string);
+    }
+  }
+  return Array.from(refs, ([refID, text]) => ({ id: Number(refID), text }));
 }
 
 /** Column GeoJSON — heavy; feeds the map island and derived stats/charts. */

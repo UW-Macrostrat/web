@@ -19,6 +19,15 @@ a,
   &:hover
     color: var(--pz-link-hover-color)
 
+// Tags and chips that are links (a lithology, an interval) color themselves;
+// the link color only muddies their text and the muted parts mixed from it.
+a[class*="tag"],
+.bp6-dark a[class*="tag"]
+  color: inherit
+
+  &:hover
+    color: inherit
+
 // An important button: the one action a page is really offering. Sits with the
 // other global utilities below because it is part of the language, not of any
 // one page.

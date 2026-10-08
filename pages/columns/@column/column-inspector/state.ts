@@ -38,6 +38,7 @@ import {
   type InProcessFilterAtom,
 } from "~/components/in-process-filter";
 import type { ColumnScope } from "~/components/column-scope";
+import { maxInternalColumnsFor } from "~/components/column-layout";
 
 export function useColumnState(columnInfo) {
   const { units, col_id } = columnInfo;
@@ -61,11 +62,10 @@ export function useColumnState(columnInfo) {
   // Set subsidiary options
 
   let hybridScale = null;
-  let maxInternalColumns = undefined;
+  let maxInternalColumns = maxInternalColumnsFor(columnInfo);
   let showTimescale = true;
 
   if (isSection) {
-    maxInternalColumns = 1;
     if (axisType !== ColumnAxisType.AGE) {
       showTimescale = false;
     }

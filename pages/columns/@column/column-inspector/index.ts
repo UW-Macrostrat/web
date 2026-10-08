@@ -6,7 +6,6 @@
  * so the assistant reads as the column's description and nothing else.
  */
 import {
-  ColoredUnitComponent,
   Column,
   DetritalColumn,
   FossilDataType,
@@ -21,6 +20,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useAtom } from "jotai";
 import { AnchorButton } from "@blueprintjs/core";
 import { apiV2Prefix } from "@macrostrat-web/settings";
+import { unitComponentFor } from "~/components/column-layout";
 import { NavigationLinkProvider, PatternProvider } from "~/_providers";
 import { navigate } from "vike/client/router";
 import {
@@ -279,7 +279,7 @@ function ColumnContentPane({ columnInfo }) {
             Column,
             {
               units,
-              unitComponent: ColoredUnitComponent,
+              unitComponent: unitComponentFor(columnInfo),
               unitComponentProps: selectedUnitProps,
               unconformityLabels: "minimal",
               collapseSmallUnconformities: true,
