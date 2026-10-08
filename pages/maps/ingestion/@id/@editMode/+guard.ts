@@ -1,5 +1,6 @@
 import { render } from "vike/abort";
 import type { PageContext } from "vike/types";
+import { requireAuthorized } from "~/_utils/auth-guards";
 
 const validEditModes = ["points", "lines", "polygons"];
 
@@ -12,4 +13,6 @@ export default function guard(pageContext: PageContext) {
   if (!validEditModes.includes(editMode)) {
     throw render(404, "Invalid edit mode");
   }
+  // Vike runs only the nearest guard, so the parent's check is repeated here.
+  requireAuthorized(pageContext);
 }

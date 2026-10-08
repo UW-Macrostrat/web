@@ -7,12 +7,7 @@
  * reconciled against it whenever the row set changes.
  */
 
-import {
-  Icon,
-  Spinner,
-  Switch,
-  Tag,
-} from "@blueprintjs/core";
+import { Icon, Spinner, Switch, Tag } from "@blueprintjs/core";
 import {
   DataPanel,
   DataPanelToolbarStyle,
@@ -76,7 +71,7 @@ import {
 } from "./filters";
 import { initialViewStateFromURL } from "~/components";
 import { columnPageLinks, rowsAfterColumn } from "./page-links";
-import { LoginButton } from "../login-button";
+import { HybridPersona } from "../persona";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   addFilterAtom,
@@ -286,7 +281,7 @@ export function Page({ linkPrefix = "/" }) {
         ],
         // Inside the frame's jotai scope, so it sees the live filters.
         wrap: (node) => h(ColumnScopeSync, { adopted: scope.adopted }, node),
-        actions: h(LoginButton),
+        actions: h(HybridPersona),
         links: columnListLinks,
         content: h(ColumnList),
         map: h(ColumnListMapSlot),
@@ -444,7 +439,10 @@ function ColumnList() {
       ),
     []
   );
-  const pageLinks = useMemo(() => columnPageLinks(pageLocation), [pageLocation]);
+  const pageLinks = useMemo(
+    () => columnPageLinks(pageLocation),
+    [pageLocation]
+  );
 
   if (isLoading && rows.length === 0) {
     return h("div.list-loading", h(Spinner));
@@ -607,7 +605,9 @@ function SearchURLWriter() {
   const activeFilters = useSelector((state) => state.activeFilters);
   const setParam = useSetAtom(searchParamAtom);
   const setStartAfterParam = useSetAtom(startAfterParamAtom);
-  const text: string = (activeFilters?.get(SEARCH_FILTER_ID)?.state?.text ?? "").trim();
+  const text: string = (
+    activeFilters?.get(SEARCH_FILTER_ID)?.state?.text ?? ""
+  ).trim();
 
   // The first run only restates the text the page loaded with; a later one is
   // a changed search, which also ends a `?after=` page (see `page-links.ts`).
@@ -727,7 +727,6 @@ function ColumnRowCard({ data }) {
     );
   }
 
-
   const onClick = (evt) => {
     const additive = evt.metaKey || evt.ctrlKey;
     const range = evt.shiftKey;
@@ -746,24 +745,17 @@ function ColumnRowCard({ data }) {
     selectColumn(col_id, { additive: additive || selectionMode, range });
   };
 
-  return h(
-    LinkCard,
-    {
-      className: classNames("column-row", { selected }),
-      href: columnHref(col_id),
-      onClick,
-      title: h("span.col-head", [
-        h("span.col-name", { key: "name" }, col_name),
-        h("span.col-tags", { key: "tags" }, [
-          statusTag,
-          packagesTag,
-          unitsTag,
-        ]),
-        h("span.col-identifier", { key: "id" }, h(Identifier, { id: col_id })),
-      ]),
-      label: col_name,
-    }
-  );
+  return h(LinkCard, {
+    className: classNames("column-row", { selected }),
+    href: columnHref(col_id),
+    onClick,
+    title: h("span.col-head", [
+      h("span.col-name", { key: "name" }, col_name),
+      h("span.col-tags", { key: "tags" }, [statusTag, packagesTag, unitsTag]),
+      h("span.col-identifier", { key: "id" }, h(Identifier, { id: col_id })),
+    ]),
+    label: col_name,
+  });
 }
 
 function SelectionModeBridge() {

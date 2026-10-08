@@ -1,4 +1,4 @@
 export default {
-  pageInfo: { name: "User information" },
+  pageInfo: { name: "Sign in" },
   pageStyle: "content2",
 };

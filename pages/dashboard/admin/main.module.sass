@@ -1,0 +1,137 @@
+.admin-page
+  text-align: left
+
+  .muted
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+  .error
+    color: var(--pz-danger-color, #cd4246)
+
+  .admin-header
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: 1em
+    margin: 1em 0 2em
+    p
+      margin: 0
+      max-width: 40em
+
+  .admin-section
+    margin-bottom: 2.5em
+
+  .section-header
+    margin-bottom: 0.75em
+    h2
+      margin: 0 0 0.2em
+      font-size: 1.3em
+    p
+      margin: 0
+
+  // ---- Introspection ----
+
+  .introspection-grid
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(17em, 1fr))
+    gap: 1em
+
+  .layer-card
+    min-width: 0
+
+  .layer-header
+    display: flex
+    gap: 0.5em
+    align-items: flex-start
+    margin-bottom: 0.75em
+    h3
+      margin: 0
+      font-size: 1.05em
+    .muted
+      font-size: var(--pz-font-size-sm, 0.85em)
+
+  .claims
+    display: grid
+    grid-template-columns: max-content 1fr
+    gap: 0.3em 0.75em
+    margin: 0
+    font-size: var(--pz-font-size-sm, 0.9em)
+    dt
+      font-family: var(--pz-font-mono, monospace)
+      color: var(--pz-text-subtle-color, var(--secondary-color))
+    dd
+      margin: 0
+      min-width: 0
+      word-break: break-all
+
+  .claim-json
+    margin: 0
+    font-size: 0.85em
+    white-space: pre-wrap
+
+  .role-switch
+    p
+      max-width: 48em
+    .tier-list
+      margin: 0 0 0.75em
+      padding-left: 1.25em
+      max-width: 48em
+      li
+        margin: 0.2em 0
+    .role-switch-actions
+      display: flex
+      gap: 0.5em
+      flex-wrap: wrap
+
+  // ---- Sheets ----
+
+  .admin-sheet
+    height: 24em
+    position: relative
+    border: 1px solid var(--pz-border-color, rgba(128, 128, 128, 0.3))
+    border-radius: 4px
+    overflow: hidden
+    margin-top: 0.75em
+
+  .user-search
+    min-width: 18em
+
+  .role-editor
+    padding: 0.5em
+    min-width: 14em
+    p
+      margin: 0.5em 0 0
+      font-size: var(--pz-font-size-sm, 0.85em)
+
+  .tokens-toolbar
+    display: flex
+    gap: 0.5em
+    margin-top: 0.75em
+
+  .token-form
+    display: flex
+    flex-direction: column
+    gap: 0.25em
+    p
+      margin: 0 0 0.75em
+
+  .minted-token
+    display: flex
+    flex-direction: column
+    gap: 0.75em
+
+  .token-value
+    font-family: var(--pz-font-mono, monospace)
+    font-size: 0.8em
+    word-break: break-all
+    white-space: pre-wrap
+    margin: 0
+    padding: 0.75em
+    background: var(--pz-panel-secondary-background-color, rgba(128, 128, 128, 0.1))
+    border-radius: 4px
+    user-select: all
+
+  .minted-actions
+    display: flex
+    align-items: center
+    gap: 0.75em
+    flex-wrap: wrap

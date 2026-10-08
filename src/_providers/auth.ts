@@ -7,8 +7,21 @@ import h from "@macrostrat/hyper";
 import { useEffect, useRef } from "react";
 import { authPrefix } from "../../packages/settings";
 import { isLocalTesting, mockUser } from "./localTestingAuth";
-import { reload } from 'vike/client/router'
 
+/** `login` may name where to come back to; the default is the current page. */
+type LoginAction = { type: "login"; returnURL?: string };
+
+/** The API's login entry point. `returnURL` may be a path or an absolute URL;
+ * it is resolved against this origin so the API hands the browser straight
+ * back to the page that asked. */
+export function loginURL(returnURL: string): string {
+  const absolute = new URL(returnURL, window.location.origin).toString();
+  return `${authPrefix}/login?return_url=${encodeURIComponent(absolute)}`;
+}
+
+function currentPageURL(): string {
+  return window.location.pathname + window.location.search;
+}
 
 async function authTransformer(
   action: AuthAction | AsyncAuthAction
@@ -25,11 +38,16 @@ async function authTransformer(
       } catch (error) {
         return { type: "update-status", payload: { error } };
       }
-    case "login":
-      // Assemble the return URL on click based on the current page
-      const return_url = window.location.origin + window.location.pathname;
-      console.log("Returning to", return_url);
-      window.location.href = `${authPrefix}/login?return_url=${return_url}`;
+    case "login": {
+      // Hand off to the API's OAuth flow (ORCID). Return to the page named on
+      // the action, else the one we are on — query string included, so a
+      // filtered view survives the round trip. `return null`: the action is
+      // the navigation itself, and the reducer has nothing to do (an earlier
+      // version fell through to the logout branch below here).
+      const returnURL = (action as LoginAction).returnURL ?? currentPageURL();
+      window.location.href = loginURL(returnURL);
+      return null;
+    }
     case "logout":
       // Delete the token from the session
       try {

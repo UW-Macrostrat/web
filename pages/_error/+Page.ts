@@ -7,10 +7,10 @@ import {
   AnchorButton,
 } from "@blueprintjs/core";
 import { ReactNode } from "react";
-import { AuthStatus } from "@macrostrat/form-components";
+import { LoginPrompt, UserPersona } from "~/components/auth";
 
 const authActions = [
-  h(AuthStatus),
+  h(UserPersona, { minimal: false, large: true }),
   h(AnchorButton, { icon: "home", href: "/" }, "Go home"),
 ];
 
@@ -33,9 +33,17 @@ export function Page() {
   ];
 
   if (ctx.abortStatusCode == 401) {
-    title = "Unauthorized";
-    description ??= "You are not authorized to view this page.";
-    actions = authActions;
+    // Not signed in: the standard sign-in prompt, returning to this page.
+    return h(LoginPrompt, {
+      returnURL: ctx.urlPathname,
+      title: "Sign in to view this page",
+      description: ctx.abortReason,
+      actions: h(
+        AnchorButton,
+        { large: true, minimal: true, icon: "home", href: "/" },
+        "Go home"
+      ),
+    });
   }
 
   if (ctx.abortStatusCode == 403) {
