@@ -62,10 +62,41 @@
 .neighbor-maps
   padding: 0.5em 0
 
-.neighbor-caveat
+.map-membership
+  display: flex
+  flex-direction: column
+  gap: 0.4em
+  padding-bottom: 0.8em
+  margin-bottom: 0.8em
+  border-bottom: 1px solid var(--panel-rule-color, rgba(128, 128, 128, 0.2))
+
+.carto-status
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.4em 0.6em
+
+.carto-detail
+  font-size: 0.85em
+
+.carto-links
+  display: flex
+  gap: 0.8em
+  font-size: 0.85em
+
+.membership-compilations
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.25em
+
+.membership-label
   font-size: 0.85em
   color: var(--secondary-color)
-  margin: 0 0 0.6em
+  margin-right: 0.2em
+
+.neighbor-heading
+  margin: 0 0 0.4em
 
 .neighbor-list
   list-style: none
@@ -89,9 +120,13 @@
   font-weight: 500
 
 .neighbor-coverage
+  margin-left: auto
   font-size: 0.8em
   color: var(--secondary-color)
   white-space: nowrap
+  flex-shrink: 0
+
+.neighbor-diff
   flex-shrink: 0
 
 .neighbor-meta

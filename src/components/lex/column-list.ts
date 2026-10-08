@@ -9,13 +9,16 @@
  * It reads the same `colData` GeoJSON the map already loads (`useLexColumns`),
  * so it costs no extra request. List-density `LinkCard`s in a flexible grid,
  * with long runs capped, rather than a strip of tags or a table that grows the
- * page.
+ * page. Given the item's units, each card opens its column with the item's unit
+ * selected.
  */
 import hyper from "@macrostrat/hyper";
 import styles from "./column-list.module.sass";
 import { useMemo, useState } from "react";
 import { LinkCard } from "~/components/cards";
 import { buildHrefForItem } from "~/_providers/navigation";
+import { useAPIResult } from "@macrostrat/ui-components";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 
 const h = hyper.styled(styles);
 
@@ -52,9 +55,43 @@ export function columnEntries(colData: any): LexColumnEntry[] {
     });
 }
 
-export function LexColumnList({ colData }: { colData: any }) {
+/** The item's units, to open each column with its unit selected: the
+ * column's topmost one where it has several. */
+function useMatchedUnits(
+  unitQuery: Record<string, string | number> | null
+): Map<number, number> {
+  let url: string | null = null;
+  if (unitQuery != null) {
+    const params = new URLSearchParams({
+      ...unitQuery,
+      response: "short",
+    } as any);
+    url = `${apiV2Prefix}/units?${params}`;
+  }
+  const units = useAPIResult(url)?.success?.data;
+  return useMemo(() => {
+    const topmost = new Map<number, { unit_id: number; t_age: number }>();
+    for (const unit of units ?? []) {
+      const current = topmost.get(unit.col_id);
+      if (current == null || unit.t_age < current.t_age) {
+        topmost.set(unit.col_id, unit);
+      }
+    }
+    return new Map([...topmost].map(([col, unit]) => [col, unit.unit_id]));
+  }, [units]);
+}
+
+export function LexColumnList({
+  colData,
+  unitQuery = null,
+}: {
+  colData: any;
+  /** The units API query for the item's units (e.g. `strat_name_id`) */
+  unitQuery?: Record<string, string | number> | null;
+}) {
   const entries = useMemo(() => columnEntries(colData), [colData]);
   const [expanded, setExpanded] = useState(false);
+  const units = useMatchedUnits(unitQuery);
 
   if (entries.length === 0) return null;
 
@@ -71,7 +108,13 @@ export function LexColumnList({ colData }: { colData: any }) {
 
   return h("div.lex-column-list", [
     h("div.column-run", { key: "run" }, [
-      shown.map((entry) => h(ColumnCard, { key: entry.col_id, entry })),
+      shown.map((entry) =>
+        h(ColumnCard, {
+          key: entry.col_id,
+          entry,
+          unitID: units.get(entry.col_id),
+        })
+      ),
       more,
     ]),
   ]);
@@ -79,7 +122,14 @@ export function LexColumnList({ colData }: { colData: any }) {
 
 /** One column: its name, the group it belongs to, and how many of its units
  * carry this item. */
-function ColumnCard({ entry }: { entry: LexColumnEntry }) {
+function ColumnCard({
+  entry,
+  unitID,
+}: {
+  entry: LexColumnEntry;
+  /** Selected on arrival at the column */
+  unitID?: number;
+}) {
   const meta = [];
   if (entry.col_group != null && entry.col_group !== "") {
     meta.push(entry.col_group);
@@ -99,9 +149,15 @@ function ColumnCard({ entry }: { entry: LexColumnEntry }) {
     {
       className: "column-card",
       density: "list",
-      href: buildHrefForItem({ col_id: entry.col_id })!,
+      href: columnHref(entry.col_id, unitID),
       title: entry.col_name,
     },
     metaNode
   );
+}
+
+function columnHref(col_id: number, unitID?: number): string {
+  const href = buildHrefForItem({ col_id })!;
+  if (unitID == null) return href;
+  return `${href}#unit=${unitID}`;
 }

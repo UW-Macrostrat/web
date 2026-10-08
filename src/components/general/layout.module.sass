@@ -93,7 +93,9 @@
 :root
   --macrostrat-logo-size: 30px
 
-a.macrostrat-logo-link
+// Qualified for dark mode as well, to outrank the site-wide link color there
+a.macrostrat-logo-link,
+:global(.bp6-dark) a.macrostrat-logo-link
   --macrostrat-wordmark-size-internal: var(--macrostrat-wordmark-size, calc(var(--macrostrat-logo-size) * 0.8))
   font-size: var(--macrostrat-wordmark-size-internal)
   display: flex

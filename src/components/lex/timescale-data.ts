@@ -164,7 +164,8 @@ export function referenceLevels(span: number): [number, number] {
   return [4, 5];
 }
 
-/** Pixel width of an interval's timescales: the content column */
+/** Reference width of an interval's timescales, which sets the window's
+ * padding below; the browser then draws them at the column's own width */
 export const WINDOW_LENGTH = 970;
 /** Neighboring time shown beyond each end of an interval, to click through to */
 const WINDOW_PADDING = 40;

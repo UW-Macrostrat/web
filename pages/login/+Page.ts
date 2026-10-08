@@ -11,7 +11,6 @@ import { AnchorButton, Callout } from "@blueprintjs/core";
 import { useAuth } from "@macrostrat/form-components";
 import { usePageContext } from "vike-react/usePageContext";
 import type { ReactNode } from "react";
-import { DocumentationPage } from "~/layouts";
 import { displayName, LoginPrompt, UserPersona } from "~/components/auth";
 import styles from "./main.module.sass";
 
@@ -25,12 +24,6 @@ function returnPath(pageContext: any): string | null {
   if (!raw.startsWith("/") || raw.startsWith("//")) return null;
   return raw;
 }
-
-const accountTools = [
-  { href: "/dashboard", name: "Your dashboard" },
-  { href: "/maps/ingestion", name: "Map ingestion" },
-  { href: "/columns", name: "Column editing" },
-];
 
 export function Page() {
   const pageContext = usePageContext();
@@ -53,39 +46,12 @@ export function Page() {
     });
   }
 
-  return h(DocumentationPage, { className: "login-page" }, [
-    body,
-    h("div.account-tools", [
-      h("h3", "What an account is for"),
-      h("p", [
-        "Most of Macrostrat is open to everyone. Signing in is needed for the ",
-        "tools that change data, and for your own dashboard:",
-      ]),
-      h(
-        "ul",
-        accountTools.map((d) => h("li", h("a", { href: d.href }, d.name)))
-      ),
-    ]),
-  ]);
+  return h("div.login-page", body);
 }
 
 function Reason({ returnURL }: { returnURL: string | null }) {
-  let target: ReactNode = null;
-  if (returnURL != null) {
-    target = h("p", [
-      "The page you asked for, ",
-      h("code", returnURL),
-      ", needs you to be signed in. You'll be returned there afterwards.",
-    ]);
-  }
-  return h([
-    target,
-    h("p", [
-      "Macrostrat uses your ",
-      h("a", { href: "https://orcid.org", target: "_blank" }, "ORCID iD"),
-      " to sign you in; an account is created the first time you do.",
-    ]),
-  ]);
+  if (returnURL == null) return null;
+  return h("p", ["Sign in to continue to ", h("code", returnURL), "."]);
 }
 
 function SignedIn({ user, returnURL }) {

@@ -46,6 +46,7 @@ export default {
     // map page, are documentation pages (docs/map in this repository).
     "/map/usage": "/docs/website/map/usage",
     "/map/changelog": "/docs/website/map/changelog",
+    "/dev/map/diff": "/maps/diff",
     // The user-identity diagnostic page grew into the dashboard.
     "/dev/me": "/dashboard",
     // The experimental column editor moved under the column it edits.

@@ -8,7 +8,9 @@ import {
   Button,
   ControlGroup,
   FormGroup,
+  Icon,
   MenuItem,
+  NonIdealState,
   NumericInput,
   type NumericInputProps,
 } from "@blueprintjs/core";
@@ -30,7 +32,11 @@ import {
 } from "@macrostrat/data-provider";
 import type { MacrostratInterval } from "@macrostrat/api-types";
 import {
+  ageExtentOfUnits,
+  countUnitsInWindow,
   intervalShortFromDefinition,
+  isOutside,
+  type ResolvedTimeFilter,
   useResolvedTimeFilter,
   useTimeFilter,
   useTimescaleIntervalInteraction,
@@ -54,6 +60,45 @@ export interface TimeFilterTagProps {
  * A single interval or an age range renders through `AgeWindowTag` from
  * `@macrostrat/column-views`; the other cases (an id still resolving, an
  * interval range, a single age, an open older bound) are site-side. */
+/** Says so when no unit overlaps the filter's own window but the window is
+ * within the data: one that falls in a gap. Outside the data altogether,
+ * `TimeFilterOutsideState` stands in for the view instead. */
+export function TimeFilterEmptyNotice({
+  units,
+}: {
+  units: Array<{ t_age?: any; b_age?: any }> | null | undefined;
+}) {
+  const resolved = useResolvedTimeFilter();
+  const window = resolved?.window;
+  if (units == null || window == null) return null;
+  if (countUnitsInWindow(units, window) > 0) return null;
+  if (isOutside(window, ageExtentOfUnits(units))) return null;
+  return h("span.time-filter-empty", [
+    h(Icon, { icon: "info-sign" }),
+    emptyFilterText(resolved),
+  ]);
+}
+
+/** In place of a view whose data lies wholly outside the filter. */
+export function TimeFilterOutsideState({ extent }: { extent: AgeWindow }) {
+  const resolved = useResolvedTimeFilter();
+  const { clear } = useTimeFilter();
+  const span = `${formatAge(extent.t_age)}–${formatAge(extent.b_age)} Ma`;
+  return h(NonIdealState, {
+    className: "time-filter-outside",
+    icon: "time",
+    title: emptyFilterText(resolved),
+    description: `This column spans ${span}.`,
+    action: h(Button, { icon: "cross", onClick: clear }, "Clear time filter"),
+  });
+}
+
+function emptyFilterText(resolved: ResolvedTimeFilter | null): string {
+  if (resolved?.kind === "age") return "No units at this age";
+  if (resolved?.kind === "age-range") return "No units in this age range";
+  return "No units in this interval";
+}
+
 export function TimeFilterTag(props: TimeFilterTagProps) {
   const { className, size = TagSize.Small, clearable = true } = props;
   const { filter, clear } = useTimeFilter();

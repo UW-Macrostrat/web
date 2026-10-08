@@ -124,9 +124,11 @@
   --pz-chip-background-color: color-mix(in srgb, var(--pz-text-color) 10%, transparent)
 
   // Pastel where it belongs: on a dark surface the light end of each ramp is
-  // the legible one, so the hover direction inverts with it.
-  --pz-link-color: var(--pz-mint-300)
-  --pz-link-hover-color: var(--pz-mint-100)
+  // the legible one, so the hover direction inverts with it. Links stay mint,
+  // as in light mode, but the saturated 500: pastel mint on dark grey reads as
+  // sickly, and the logo's pale sky sat too close to quieted text.
+  --pz-link-color: var(--pz-mint-500)
+  --pz-link-hover-color: var(--pz-mint-300)
   --pz-heading-color: var(--pz-pink-500)
   --pz-heading-hover-color: var(--pz-pink-200)
   --pz-accent-tertiary-text-color: var(--pz-pink-500)

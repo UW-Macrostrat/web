@@ -49,6 +49,7 @@ const defaultState: CoreState = {
   filtersInfo: [],
   filteredColumns: null,
   activeMenuPage: null,
+  unknownPath: null,
   showExperimentsPanel: false,
   timeCursorAge: null,
   plateModelId: 3,
@@ -98,7 +99,14 @@ export function coreReducer(
       if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false, mapIsMoving: false };
     case "set-menu-page":
-      return { ...state, activeMenuPage: action.page };
+      return { ...state, activeMenuPage: action.page, unknownPath: null };
+    case "dismiss-unknown-path":
+      return {
+        ...state,
+        unknownPath: null,
+        contextPanelOpen: false,
+        menuOpen: false,
+      };
     case "map-layers-changed":
       let columnInfo = state.columnInfo;
       let pbdbData = state.pbdbData;
@@ -116,6 +124,7 @@ export function coreReducer(
       return {
         ...state,
         activeMenuPage: action.page,
+        unknownPath: null,
         contextPanelOpen: shouldOpen,
         menuOpen: shouldOpen,
         isSearching: false,

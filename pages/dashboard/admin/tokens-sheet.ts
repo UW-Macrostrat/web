@@ -335,7 +335,7 @@ function TokenFormFields({ form, update, error }) {
   ]);
 }
 
-/** Pick a user by name, email or ORCID iD; the API does the searching. */
+/** Pick a user by name, email or ORCiD; the API does the searching. */
 function UserPicker({
   value,
   onChange,
@@ -384,7 +384,7 @@ function UserPicker({
     resetOnClose: false,
     popoverProps: { minimal: true, matchTargetWidth: true },
     inputProps: {
-      placeholder: "Search users by name, email or ORCID iD…",
+      placeholder: "Search users by name, email or ORCiD…",
       leftIcon: "user",
       rightElement,
     },
@@ -457,9 +457,6 @@ function MintedToken({ token }: { token: NewToken }) {
 
 export function TokensHelp() {
   return h(Callout, { compact: true, icon: "info-sign" }, [
-    "Select a token's row and choose ",
-    h("strong", "Revoke"),
-    " to expire it now; the record stays. Services cache token lookups ",
-    "briefly, so a revocation can take up to a minute to bite.",
+    "Revocation can take up to a minute to reach every service.",
   ]);
 }

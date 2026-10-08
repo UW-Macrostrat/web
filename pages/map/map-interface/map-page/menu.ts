@@ -65,9 +65,8 @@ export { MenuPage };
 export default function Menu(props: MenuProps) {
   let { className, menuPage, baseRoute = "/" } = props;
   const inputFocus = useAppState((s) => s.inputFocus);
+  const unknownPath = useAppState((s) => s.unknownPath);
   const runAction = useAppActions();
-
-  console.log("menu page", menuPage);
 
   const navigateHome = useHashNavigate(baseRoute);
 
@@ -77,6 +76,20 @@ export default function Menu(props: MenuProps) {
 
   if (inputFocus) {
     return h(SearchResults, { className });
+  }
+
+  if (menuPage == null && unknownPath != null) {
+    return h(
+      CloseableCard,
+      {
+        onClose() {
+          runAction({ type: "dismiss-unknown-path" });
+        },
+        insetContent: false,
+        className: classNames(className, "menu-card", "not-found"),
+      },
+      h(NotFoundPage, { path: unknownPath })
+    );
   }
 
   if (menuPage == null) return null;
@@ -296,20 +309,26 @@ function elementForMenuPage(page: MenuPage) {
   }
 }
 
-function NotFoundPage() {
-  const navigate = useHashNavigate("/");
+/** A `/map/...` link that names nothing the map can show. Dismissing it returns
+ * to the map where it is, keeping the view the link carried. */
+function NotFoundPage({ path }: { path: string }) {
+  const runAction = useAppActions();
   return h(
     "div.text-panel",
     h(NonIdealState, {
-      title: "Unknown page",
+      icon: "map",
+      title: "Page not found",
+      description: h("span", ["Nothing on the map is at ", h("code", path), "."]),
       action: h(
         Button,
         {
-          onClick: navigate,
+          onClick() {
+            runAction({ type: "dismiss-unknown-path" });
+          },
           minimal: true,
           rightIcon: "chevron-right",
         },
-        "Main page"
+        "Back to the map"
       ),
     })
   );

@@ -89,8 +89,12 @@ export default function MainMapView(props) {
     //     tileserverDomain: SETTINGS.burwellTileDomain,
     //   });
     // }
-    return mergeMapStyles(baseStyle, macrostratStyle, overlayStyle);
-  }, [baseStyle, isDarkMode, compilation]);
+    let base = baseStyle;
+    if (mapSettings.highResolutionTerrain) {
+      base = withSeparateTerrainSource(baseStyle);
+    }
+    return mergeMapStyles(base, macrostratStyle, overlayStyle);
+  }, [baseStyle, isDarkMode, compilation, mapSettings.highResolutionTerrain]);
 
   useEffect(() => {
     getMapboxStyle(baseMapURL, {
@@ -129,11 +133,6 @@ export default function MainMapView(props) {
     }
   }, []);
 
-  /* If we want to use a high resolution DEM, we need to use a different
-    source ID from the hillshade's source ID. This uses more memory but
-    provides a nicer-looking 3D map.
-    */
-
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
@@ -145,10 +144,9 @@ export default function MainMapView(props) {
 
   const terrainSourceID = useMemo(() => {
     if (mapStyle == null) return null;
-    if (!mapSettings.highResolutionTerrain) return null;
-    // TODO: use function from mapbox-react once it's exported
-    return getTerrainSourceID(mapStyle);
-  }, [mapSettings.highResolutionTerrain, mapStyle]);
+    if (mapStyle.sources?.[TERRAIN_SOURCE_ID] == null) return null;
+    return TERRAIN_SOURCE_ID;
+  }, [mapStyle]);
 
   return h(
     MapView,
@@ -180,6 +178,29 @@ export default function MainMapView(props) {
       h(TileTokenRecovery),
     ]
   );
+}
+
+/** The elevation source 3D terrain is drawn from, apart from the hillshade's.
+ *
+ * Terrain and a hillshade sharing one `raster-dem` source make Mapbox load that
+ * source at terrain resolution, and the hillshade loses its detail once terrain
+ * switches on. A second source with the same tiles keeps them independent, at
+ * the cost of loading the tiles twice. `setup3DTerrain` uses a named source as
+ * given, so the copy has to be in the style itself. */
+const TERRAIN_SOURCE_ID = "macrostrat-terrain-dem";
+
+function withSeparateTerrainSource(style) {
+  const demID = getTerrainSourceID(style);
+  if (demID == null) return style;
+
+  const next = {
+    ...style,
+    sources: { ...style.sources, [TERRAIN_SOURCE_ID]: { ...style.sources[demID] } },
+  };
+  if (style.terrain?.source == demID) {
+    next.terrain = { ...style.terrain, source: TERRAIN_SOURCE_ID };
+  }
+  return next;
 }
 
 function ColumnDataManager() {

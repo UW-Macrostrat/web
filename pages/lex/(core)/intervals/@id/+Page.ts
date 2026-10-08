@@ -1,6 +1,8 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { LexItemPage, LexItemBodyClient } from "~/components/lex";
+import { LexItemBodyClient } from "~/components/lex";
+import { LexHybridItemPage } from "~/components/lex/hybrid-item-page";
+import { LexMapPlacement } from "~/components/lex/item-slots";
 import { IntervalTimescales } from "~/components/lex/interval-timescales";
 import { useLexItemData } from "~/components/lex/data-loaders.ts";
 import { useData } from "vike-react/useData";
@@ -14,7 +16,11 @@ export function Page() {
   const relatedHref =
     "int_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name;
 
-  return h(LexItemPage, { id, resData, siftLink: "interval" }, [
+  const mapUrl = type + "=" + id;
+
+  return h(LexHybridItemPage, { id, resData, siftLink: "interval", mapUrl }, [
+    // Beside the interval's summary and timescales
+    h(LexMapPlacement),
     h("div.interval-overview", [
       h(IntervalSummary, { resData }),
       h(IntervalTimescales, { resData, windowIntervals }),
@@ -23,7 +29,7 @@ export function Page() {
       type,
       id,
       resData,
-      mapUrl: type + "=" + id,
+      mapUrl,
       relatedHref,
       showUnits: true,
       showMaps: true,

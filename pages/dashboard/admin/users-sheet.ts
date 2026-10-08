@@ -48,7 +48,7 @@ function SearchForm({
 }) {
   return h(InputGroup, {
     leftIcon: "search",
-    placeholder: "Search by name, email or ORCID iD…",
+    placeholder: "Search by name, email or ORCiD…",
     value: state ?? "",
     onChange: (e) => setState(e.target.value),
     className: "user-search",
@@ -174,7 +174,7 @@ const columnSpec: ColumnSpec[] = [
   { key: "display_name", name: "Display name", editable: false },
   { key: "name", name: "Name", editable: false },
   { key: "email", name: "Email", editable: false },
-  { key: "sub", name: "ORCID iD", editable: false },
+  { key: "sub", name: "ORCiD", editable: false },
   {
     key: "role",
     name: "Role",
@@ -217,9 +217,7 @@ export function UsersSheet() {
 
 export function UsersHelp() {
   return h(Callout, { compact: true, icon: "info-sign" }, [
-    "Change a user's role by selecting the cell and picking a new one, then ",
-    h("strong", "Save"),
-    ". A new role takes effect the next time that user's session is minted ",
-    "— at their next sign-in or token refresh — and you cannot change your own.",
+    "Role changes take effect at the user's next sign-in. ",
+    "You can't change your own.",
   ]);
 }

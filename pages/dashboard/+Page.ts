@@ -4,13 +4,12 @@
  * profile the account holds, the ORCID record it is tied to, the role this
  * session carries, and the way out — logging out, restoring a degraded role,
  * or, for administrators, the admin tools. Signed out, it is the sign-in
- * prompt; there is no guard, so the page itself explains what it is for.
+ * prompt; there is no guard.
  */
 import hyper from "@macrostrat/hyper";
 import {
   AnchorButton,
   Button,
-  Callout,
   Card,
   Icon,
   Intent,
@@ -18,8 +17,8 @@ import {
   Tag,
 } from "@blueprintjs/core";
 import { useAuth } from "@macrostrat/form-components";
+import { DataField } from "@macrostrat/data-components";
 import type { ReactNode } from "react";
-import { DocumentationPage } from "~/layouts";
 import {
   accountRole,
   DegradedNotice,
@@ -30,7 +29,6 @@ import {
   roleLabel,
   RoleTags,
   type SessionUser,
-  sessionRole,
   useLogout,
   useUserRecord,
 } from "~/components/auth";
@@ -51,22 +49,7 @@ export function Page() {
     body = h(Dashboard, { user });
   }
 
-  return h(DocumentationPage, { className: "dashboard-page" }, [
-    h(EarlyDevelopmentNotice),
-    body,
-  ]);
-}
-
-function EarlyDevelopmentNotice() {
-  return h(
-    Callout,
-    { className: "early-development", intent: Intent.PRIMARY, icon: "build" },
-    [
-      h("strong", "Early days. "),
-      "Macrostrat accounts are new, and this dashboard is the first thing ",
-      "built on them. Expect it to grow — and to change.",
-    ]
-  );
+  return h("div.dashboard-page", body);
 }
 
 function Dashboard({ user }: { user: SessionUser }) {
@@ -88,7 +71,7 @@ function Dashboard({ user }: { user: SessionUser }) {
 function ProfileCard({ user, loading, error }) {
   const orcid = orcidURL(user.sub);
 
-  let orcidNode: ReactNode = h("span.muted", "none");
+  let orcidNode: ReactNode = null;
   if (orcid != null) {
     orcidNode = h("a", { href: orcid, target: "_blank", rel: "noopener" }, [
       h(Icon, { icon: "id-number", size: 12 }),
@@ -113,15 +96,20 @@ function ProfileCard({ user, loading, error }) {
       h("h2", displayName(user)),
       status,
     ]),
-    h("dl.profile-details", [
-      h(Detail, { label: "Name", value: user.name }),
-      h(Detail, { label: "Email", value: user.email }),
-      h(Detail, { label: "ORCID iD", value: orcidNode }),
-      h(Detail, {
+    h("div.profile-details", [
+      h(DataField, { row: true, label: "Name", value: user.name }),
+      h(DataField, { row: true, label: "Email", value: user.email }),
+      h(DataField, { row: true, label: "ORCiD", value: orcidNode }),
+      h(DataField, {
+        row: true,
         label: "Account role",
         value: h(Tag, { minimal: true }, roleLabel(accountRole(user))),
       }),
-      h(Detail, { label: "Member since", value: formatDate(user.created_on) }),
+      h(DataField, {
+        row: true,
+        label: "Member since",
+        value: formatDate(user.created_on),
+      }),
     ]),
   ]);
 }
@@ -143,15 +131,7 @@ function SessionCard({ user }: { user: SessionUser }) {
       h(Icon, { icon: "key", size: 24 }),
       h("h2", "Session"),
     ]),
-    h("p.session-role", [
-      "This browser session acts as ",
-      h(RoleTags, { user }),
-    ]),
-    h("p.muted", [
-      "Data requests carry the ",
-      h("code", sessionRole(user)),
-      " role to the database, which decides what you can read and change.",
-    ]),
+    h(DataField, { row: true, label: "Role", value: h(RoleTags, { user }) }),
     h("div.session-actions", [
       adminLink,
       h(
@@ -188,7 +168,7 @@ function ToolsCard({ user }: { user: SessionUser }) {
   return h(Card, { className: "tools-card" }, [
     h("div.card-header", [
       h(Icon, { icon: "applications", size: 24 }),
-      h("h2", "Tools that use your account"),
+      h("h2", "Tools"),
     ]),
     h(
       "ul.tool-list",
@@ -203,12 +183,6 @@ function ToolsCard({ user }: { user: SessionUser }) {
       )
     ),
   ]);
-}
-
-function Detail({ label, value }: { label: string; value: ReactNode }) {
-  let shown: ReactNode = value;
-  if (value == null || value === "") shown = h("span.muted", "—");
-  return h([h("dt", label), h("dd", shown)]);
 }
 
 function formatDate(value: string | null | undefined): string | null {

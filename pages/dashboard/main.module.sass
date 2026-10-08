@@ -1,8 +1,6 @@
 .dashboard-page
   text-align: left
-
-  .early-development
-    margin: 1em 0
+  margin-top: 1em
 
   .dashboard
     display: flex
@@ -26,30 +24,10 @@
   .muted
     color: var(--pz-text-subtle-color, var(--secondary-color))
 
-  .profile-details
-    display: grid
-    grid-template-columns: max-content 1fr
-    gap: 0.4em 1em
-    margin: 0
-    dt
-      color: var(--pz-text-subtle-color, var(--secondary-color))
-      font-size: var(--pz-font-size-sm, 0.85em)
-      align-self: center
-    dd
-      margin: 0
-      min-width: 0
-      word-break: break-word
-    a
-      display: inline-flex
-      align-items: center
-      gap: 0.25em
-
-  .session-role
-    display: flex
-    gap: 0.5em
+  .profile-details a
+    display: inline-flex
     align-items: center
-    flex-wrap: wrap
-    margin: 0 0 0.5em
+    gap: 0.25em
 
   .session-actions
     display: flex

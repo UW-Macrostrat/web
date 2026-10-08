@@ -18,12 +18,107 @@
   display: flex
   justify-content: space-between
 
-// Sections of a detail page that carry their own heading.
-.int-references > h3
-  @include type.section-heading
+// The heading with a quiet count beside it, and the list from the API at right
+.references-header
+  display: flex
+  align-items: baseline
+  gap: 0.6em
 
+  h3
+    @include type.section-heading
+
+  .spacer
+    flex-grow: 1
+
+.reference-count
+  font-size: var(--pz-font-size-sm)
+  font-family: var(--pz-font-sans)
+  color: var(--pz-secondary-color)
+
+.reference-downloads
+  display: flex
+  gap: 0.8em
+  font-size: var(--pz-font-size-sm)
+
+// Citations: a little quieter than the page's text, in the serif the site uses
+// for them; bulleted, close together
 .ref-list
-  margin-top: 1em
+  margin: 1em 0 0
+  padding-left: 1.2em
+  font-family: var(--pz-font-serif)
+  color: var(--pz-text-subtle-color)
+
+.ref-item
+  margin-bottom: 0.35em
+
+// A series with several volumes: its name over them, open until closed
+.ref-series
+  margin: 0.6em 0
+  list-style: none
+  margin-left: -1.2em
+
+.series-name
+  cursor: pointer
+  font-family: var(--pz-font-sans)
+  font-weight: var(--pz-font-weight-semibold)
+  color: var(--pz-text-color)
+
+  .reference-count
+    margin-left: 0.6em
+    font-weight: normal
+
+.series-entries
+  margin: 0.35em 0 0
+  padding-left: 1.2em
+
+// Within a series, each volume leads with its number
+.volume-number
+  margin-right: 0.5em
+  font-family: var(--pz-font-sans)
+  font-weight: var(--pz-font-weight-semibold)
+  color: var(--pz-text-color)
+
+.volume-title
+  font-style: italic
+
+// A title is the link out where it can be; an icon only where there's none.
+// Both carry a faint underlay of the link color, which marks them among the
+// citations' quieted text.
+a.ref-title,
+a.ref-link
+  color: var(--pz-link-color)
+  padding: 0 0.15em
+  border-radius: 3px
+  background-color: color-mix(in srgb, var(--pz-link-color) 14%, transparent)
+  transition: background-color 120ms
+
+  &:hover
+    color: var(--pz-link-hover-color)
+    text-decoration: none
+    background-color: color-mix(in srgb, var(--pz-link-color) 26%, transparent)
+
+.ref-link
+  display: inline-flex
+  align-items: center
+  margin-left: 0.35em
+  padding: 0.15em 0.25em
+  vertical-align: baseline
+
+// The parts of one volume (an expedition's site reports), on a single wrapping
+// line beneath its citation
+// …or, where they're all sites, one sentence of them, continuing the citation
+.volume-parts.narrated
+  display: inline
+  margin-left: 0.3em
+  line-height: 1.7
+
+.volume-parts
+  display: flex
+  flex-wrap: wrap
+  gap: 0.15em 0.9em
+  margin: 0.15em 0 0
+  padding: 0
+  list-style: none
 
 // An item's columns: a horizontal summary card above the map card.
 .lex-summary

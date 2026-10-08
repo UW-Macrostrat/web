@@ -49,7 +49,7 @@ export function Link({ to, ...rest }: { to: To; children: React.ReactNode }) {
 }
 
 export function useContextPanelOpen() {
-  return useAppState((s) => s.activeMenuPage != null);
+  return useAppState((s) => s.activeMenuPage != null || s.unknownPath != null);
 }
 
 export function useContextClass() {

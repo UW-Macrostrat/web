@@ -1,5 +1,5 @@
 import h from "./infinite-scroll.module.sass";
-import { Footer, PageBreadcrumbs } from "~/components";
+import { Footer, SitePageHeader } from "~/components";
 import {
   useLoadControls,
   LoadProgressIndicator,
@@ -20,10 +20,14 @@ export function InfiniteScrollPage<T>({
   ...rest
 }: InfiniteScrollProps<T>) {
   return h("div.page", [
-    h("header.page-header", [
-      h(PageBreadcrumbs, { separateTitle: false }),
-      headerElements,
-    ]),
+    h(
+      "div.page-header",
+      h(SitePageHeader, {
+        variant: "compact",
+        actions: headerElements,
+        collapseActions: "narrow",
+      })
+    ),
     h(
       "div.data-panel-container",
       h(DataPanel<T>, {

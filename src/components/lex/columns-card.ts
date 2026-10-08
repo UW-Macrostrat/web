@@ -21,11 +21,13 @@ import {
   LexMapSlot,
 } from "./map-target";
 import {
+  lexMapAvailableAtom,
   lexOnHybridFrameAtom,
   LexSlotPortal,
   useLexSlotElement,
 } from "./item-slots";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useEffect, type ReactNode } from "react";
 import classNames from "classnames";
 import { Charts, summarize } from "./index";
 
@@ -47,6 +49,7 @@ export function ColumnsTable({
   targetKey = "",
   loading = false,
   showColumnList = false,
+  unitQuery = null,
 }) {
   const hasColumns = colData?.features?.length > 0;
   const summary = summarize(hasColumns ? colData.features : []);
@@ -70,6 +73,10 @@ export function ColumnsTable({
   // fills its box; without one it isn't shown
   const inSidebar = useLexSlotElement("map") != null;
   const onHybridFrame = useAtomValue(lexOnHybridFrameAtom);
+  // Tells the frame whether there is a map to place at all
+  const setMapAvailable = useSetAtom(lexMapAvailableAtom);
+  const mapAvailable = hasColumns || loading;
+  useEffect(() => setMapAvailable(mapAvailable), [mapAvailable]);
 
   // Nothing to show only once we *know* there are no columns. While they load,
   // fall through and render the frame — that reserves the space and keeps the
@@ -134,12 +141,12 @@ export function ColumnsTable({
   // card, beneath whichever instance (shared or local) is above it.
   let columnList = null;
   if (showColumnList && hasColumns) {
-    columnList = h(LexColumnList, { colData });
+    columnList = h(LexColumnList, { colData, unitQuery });
   }
   // On the frame the settings are a gear over the map, and the link to the
   // main map is among the page's actions
   const hasFilters = filters.length > 0;
-  let settings = h(LexMapSettingsBar, { mapUrl, hasFilters });
+  let settings: ReactNode = h(LexMapSettingsBar, { mapUrl, hasFilters });
   if (onHybridFrame) {
     settings = h(LexMapSettingsOverlay, { hasFilters });
   }

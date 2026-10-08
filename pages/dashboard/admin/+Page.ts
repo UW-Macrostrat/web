@@ -11,12 +11,11 @@ import hyper from "@macrostrat/hyper";
 import { Callout, HotkeysProvider, Intent } from "@blueprintjs/core";
 import { useAuth } from "@macrostrat/form-components";
 import type { ReactNode } from "react";
-import { DocumentationPage } from "~/layouts";
-import { isDegraded, UserPersona } from "~/components/auth";
+import { isDegraded } from "~/components/auth";
 import { IntrospectionPanel, RoleSwitchPanel } from "./introspection";
 import { UsersHelp, UsersSheet } from "./users-sheet";
 import { TokensHelp, TokensSheet } from "./tokens-sheet";
-import { HistoryHelp, HistorySheet } from "./history-sheet";
+import { HistorySheet } from "./history-sheet";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -25,26 +24,13 @@ export function Page() {
   const { user } = useAuth();
   const degraded = isDegraded(user);
 
-  return h(DocumentationPage, { className: "admin-page" }, [
-    h("div.admin-header", [
-      h("p.muted", [
-        "Tools for operating Macrostrat's user system. Everything here acts ",
-        "through the API with your session, so what you can do follows the ",
-        "role your session carries — shown on the persona indicator.",
-      ]),
-      h(UserPersona, { minimal: false }),
-    ]),
-    h(
-      Section,
-      { title: "Session", description: "Try the site with a reduced role." },
-      [h(RoleSwitchPanel, { user })]
-    ),
+  return h("div.admin-page", [
+    h(Section, { title: "Session" }, [h(RoleSwitchPanel, { user })]),
     h(
       Section,
       {
         title: "System",
-        description:
-          "How each layer reads the current session. They should agree.",
+        description: "How each layer reads the current session.",
       },
       [h(IntrospectionPanel)]
     ),
@@ -52,7 +38,6 @@ export function Page() {
       Section,
       {
         title: "Users",
-        description: "Every account, with the role it holds.",
       },
       [
         h(AdminOnly, { degraded, what: "manage users" }, [
@@ -65,7 +50,6 @@ export function Page() {
       Section,
       {
         title: "API tokens",
-        description: "Delegated tokens for services and third parties.",
       },
       [
         h(AdminOnly, { degraded, what: "manage tokens" }, [
@@ -78,11 +62,9 @@ export function Page() {
       Section,
       {
         title: "Recent changes",
-        description: "The audit trail for accounts and tokens.",
       },
       [
         h(AdminOnly, { degraded, what: "see the audit trail" }, [
-          h(HistoryHelp),
           h(HistorySheet),
         ]),
       ]
@@ -90,9 +72,20 @@ export function Page() {
   ]);
 }
 
-function Section({ title, description, children }) {
+function Section({
+  title,
+  description = null,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
   return h("section.admin-section", [
-    h("div.section-header", [h("h2", title), h("p.muted", description)]),
+    h("div.section-header", [
+      h("h2", title),
+      h.if(description != null)("p.muted", description),
+    ]),
     h(HotkeysProvider, children),
   ]);
 }
@@ -112,6 +105,6 @@ function AdminOnly({
   return h(
     Callout,
     { intent: Intent.WARNING, icon: "eye-open" },
-    `Restore your role (above) to ${what}; the API refuses a web_user session.`
+    `Restore your role to ${what}.`
   );
 }

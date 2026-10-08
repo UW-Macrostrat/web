@@ -36,6 +36,11 @@ export function updateStateFromLocation(
     isShowingColumnPage = true;
   }
 
+  let unknownPath = null;
+  if (!namesSomething(pathname, s1, activeMenuPage)) {
+    unknownPath = pathname;
+  }
+
   return {
     ...s1,
     ...coreState,
@@ -44,7 +49,23 @@ export function updateStateFromLocation(
     contextPanelOpen: isOpen,
     isShowingColumnPage,
     activeMenuPage,
+    unknownPath,
   };
+}
+
+/** Whether a path under the map is one the app draws: the map itself, a menu
+ * page, or a location or cross-section it could parse. */
+function namesSomething(
+  pathname: string,
+  state: AppState,
+  page: MenuPage | null
+): boolean {
+  const path = pathname.replace(/\/+$/, "");
+  if (path == routerBasename || path == "") return true;
+  if (page != null) return true;
+  if (state.crossSectionLine != null) return true;
+  if (state.infoMarkerPosition == null) return false;
+  return locationPathPattern.test(path);
 }
 
 export function isDetailPanelRouteInternal(pathname: string) {
@@ -83,6 +104,9 @@ const coordRegex = /(-?\d+(?:\.\d+)?)/;
 const crossSectionPageURL = partRegex`${mapPagePrefix}/cross-section/${coordRegex},${coordRegex}/${coordRegex},${coordRegex}`;
 
 const locationPageURL = partRegex`${mapPagePrefix}/loc/${coordRegex}/${coordRegex}`;
+
+/** A location path in full: nothing after the coordinates but `/column`. */
+const locationPathPattern = /\/loc\/-?\d+(?:\.\d+)?\/-?\d+(?:\.\d+)?(?:\/column)?$/;
 
 export function setInfoMarkerPosition(
   state: AppState,

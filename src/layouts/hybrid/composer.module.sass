@@ -272,6 +272,8 @@
   // The page header's bar height (`ui-components`' default), which the sticky
   // sidebar parks beneath
   --hybrid-bar-height: 3rem
+  // The active-filter row, which sticks beneath the bar
+  --hybrid-filter-bar-height: 2.5rem
 
   // Stretched, so the header's bar spans the window; the rest centre by margin
   .content-scroll
@@ -283,6 +285,20 @@
   .content-header,
   .header-row
     display: contents
+
+  // A sibling of the bar in the scroller (the header boxes are `contents`),
+  // so it can stick beneath it once the title has scrolled away
+  .header-filters
+    position: sticky
+    top: var(--hybrid-bar-height)
+    z-index: 9
+    box-sizing: border-box
+    width: 100%
+    max-width: var(--hybrid-shell-width)
+    min-height: var(--hybrid-filter-bar-height)
+    margin: 0 auto
+    padding: 0 1em
+    background-color: var(--pz-background-color)
 
   // The content's gutter and measure, so the header's text lines up with it
   header:global(.shell-page-header)
@@ -305,6 +321,10 @@
     top: calc(var(--hybrid-bar-height) + 1em)
     align-self: flex-start
     overflow-y: visible
+
+  // Parks beneath the filter row too, when there is one
+  &:has(.header-filters:not(:empty)) .content-sidebar
+    top: calc(var(--hybrid-bar-height) + var(--hybrid-filter-bar-height) + 1em)
 
   // The content, then (in content-only) the assistant, then the footer
   .content-panel-holder

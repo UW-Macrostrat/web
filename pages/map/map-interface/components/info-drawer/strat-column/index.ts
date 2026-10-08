@@ -12,6 +12,7 @@ import {
 import { DataField } from "@macrostrat/data-components";
 import { useProjectDefs } from "~/components/project-filter";
 import { PatternProvider } from "~/_providers";
+import { maxInternalColumnsFor } from "~/components/column-layout";
 import { useMemo, useState } from "react";
 import { ModalUnitPanel } from "#/columns/@column/column-inspector/modal-panel";
 import {
@@ -106,6 +107,8 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
           unitComponent: ColoredUnitComponent,
           unitComponentProps: selectedUnitProps,
           showLabelColumn: false,
+          // A section (an eODP hole) keeps its units in one column
+          maxInternalColumns: maxInternalColumnsFor(columnInfo),
           targetUnitHeight,
           unconformityLabels: "minimal",
           width: 280,

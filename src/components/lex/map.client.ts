@@ -134,12 +134,13 @@ function OutcropLayer({ showOutcrop, filters }) {
 
 const fossilsLayerID = "lex-fossils";
 
-/** Fossil collections: faint dots by default, emphasized (and clickable) when
- * the layer is turned on. */
+/** Fossil collections, drawn (and clickable) while the Fossils card's switch
+ * is on, which it is to begin with. One layer, so the switch shows and hides
+ * what is on the map rather than swapping it for a second look. */
 function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   useOverlayStyle(() => {
-    if (!(fossilsData?.features?.length > 0)) return null;
-    return buildFossilsStyle(fossilsData, showFossils);
+    if (!showFossils || !(fossilsData?.features?.length > 0)) return null;
+    return buildFossilsStyle(fossilsData);
   }, [fossilsData, showFossils]);
 
   useMapStyleOperator(
@@ -166,22 +167,13 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   return null;
 }
 
-function buildFossilsStyle(fossilsData, emphasized: boolean) {
-  let paint: any = {
+// The quiet look: small light dots that sit under the columns, not on them
+function buildFossilsStyle(fossilsData) {
+  const paint = {
     "circle-radius": 2,
     "circle-color": "white",
     "circle-opacity": 0.8,
   };
-  if (emphasized) {
-    paint = {
-      "circle-radius": 5,
-      "circle-color": "grey",
-      "circle-opacity": 0.5,
-      "circle-stroke-color": "white",
-      "circle-stroke-width": 2,
-      "circle-stroke-opacity": 1,
-    };
-  }
   return {
     sources: {
       [fossilsLayerID]: { type: "geojson", data: fossilsData },

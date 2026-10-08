@@ -45,10 +45,12 @@ export default function Head() {
     h("meta", { name: "darkreader-lock" }),
     // Paint the dark background before the stylesheets arrive. The theme class
     // itself is set by the inline script in +bodyHtmlBegin.ts; the color mirrors
-    // $dark-background in @macrostrat/style-system.
+    // `--pz-background-color` in dark mode (`--pz-black`). Zero specificity, so
+    // the stylesheets win once loaded, whatever their order.
     h("style", {
       dangerouslySetInnerHTML: {
-        __html: "body.bp6-dark{color-scheme:dark;background-color:#141a1e}",
+        __html:
+          ":where(body.bp6-dark){color-scheme:dark;background-color:#111418}",
       },
     }),
     h("script", {

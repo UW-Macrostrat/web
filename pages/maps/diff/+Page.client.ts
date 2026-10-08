@@ -13,6 +13,8 @@
  * location and lists the units each side draws at it, behind a Left/Right
  * toggle; an entry the other side doesn't have is marked.
  *
+ * Addressed as `/maps/diff/{left}...{right}`, after GitHub's compare links.
+ *
  * The layout follows `/dev/map/legend`: no navbar and no context panel, with
  * everything above the content in a single column on the right.
  */
@@ -68,11 +70,13 @@ import {
   type CompilationSummary,
 } from "~/_utils/compilations";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
+import { diffPath, parseDiffPath, type DiffSides } from "~/_utils/map-diff";
 import { hashWithMapPosition, initialMapPosition } from "~/_utils/map-position";
 import {
   BaseLayerForm,
   basemapStyle,
   CompilationZoomWarning,
+  MapReferenceList,
   PageBreadcrumbs,
 } from "~/components";
 import { NavigationLinkProvider } from "~/_providers/navigation";
@@ -239,24 +243,41 @@ const mapPositionHashAtom = atom(null, (get, set, position: MapPosition) => {
   set(locationAtom, { ...loc, hash: hashWithMapPosition(loc.hash, position) });
 });
 
-/** A side's tileset, by slug, in the query string. The default stays out. */
-function sourceAtom(key: string, defaultSlug: string) {
-  const paramAtom = atomWithSearchParam(key);
+/** Both sides' slugs, read from the path (`/maps/diff/{left}...{right}`) until
+ * the first change, then held here and written back to the path. */
+const chosenSidesAtom = atom<DiffSides | null>(null);
+
+const sidesAtom = atom(
+  (get): DiffSides => {
+    const chosen = get(chosenSidesAtom);
+    if (chosen != null) return chosen;
+    const fromPath = parseDiffPath(get(locationAtom).pathname ?? "");
+    return fromPath ?? { left: DEFAULT_LEFT, right: DEFAULT_RIGHT };
+  },
+  (get, set, sides: DiffSides) => {
+    set(chosenSidesAtom, sides);
+    let pathname = diffPath(sides.left, sides.right);
+    if (sides.left === DEFAULT_LEFT && sides.right === DEFAULT_RIGHT) {
+      pathname = "/maps/diff";
+    }
+    set(locationAtom, { ...get(locationAtom), pathname });
+  }
+);
+
+function sourceAtom(side: Side) {
   return atom(
     (get): MapSource => {
       const compilations = get(loadedCompilationsAtom);
-      return sourceForSlug(get(paramAtom) ?? defaultSlug, compilations);
+      return sourceForSlug(get(sidesAtom)[side], compilations);
     },
     (get, set, slug: string) => {
-      let param: string | null = slug;
-      if (slug === defaultSlug) param = null;
-      set(paramAtom, param);
+      set(sidesAtom, { ...get(sidesAtom), [side]: slug });
     }
   );
 }
 
-const leftSourceAtom = sourceAtom("left", DEFAULT_LEFT);
-const rightSourceAtom = sourceAtom("right", DEFAULT_RIGHT);
+const leftSourceAtom = sourceAtom("left");
+const rightSourceAtom = sourceAtom("right");
 
 /** The pinned location, in the query string — the page is about a place, so a
  * link to it has to carry which place. Rounded to the resolution any Macrostrat
@@ -602,6 +623,7 @@ function describedFields(polygon: any): any {
     b_interval: polygon.b_int?.int_id,
     t_interval: polygon.t_int?.int_id,
     source_name: polygon.ref?.name,
+    refs: polygon.refs,
   };
 }
 
@@ -1111,11 +1133,7 @@ function UnitDetails({ unit, context, record, reference }) {
     }),
     h(ColumnField, { record, column: context.column }),
     h(UnitProvenance, { unit }),
-    h.if(reference != null)(DataField, {
-      label: "Reference",
-      value: reference,
-      className: "reference",
-    }),
+    h(UnitReference, { unit, reference }),
     h("div.identifiers", [
       h.if(unit.map_id != null)(DataField, {
         label: "Map ID",
@@ -1127,6 +1145,17 @@ function UnitDetails({ unit, context, record, reference }) {
       }),
     ]),
   ]);
+}
+
+/** The polygon's references where its source's point query returns them (`refs`),
+ * else the citation `/geologic_units/map` gives for its map. */
+function UnitReference({ unit, reference }) {
+  let value = reference;
+  if (unit.refs?.length > 0) {
+    value = h(MapReferenceList, { refs: unit.refs });
+  }
+  if (value == null) return null;
+  return h(DataField, { label: "Reference", value, className: "reference" });
 }
 
 /** The matched stratigraphic names, each a link into the lexicon. Whether a map

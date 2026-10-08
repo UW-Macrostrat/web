@@ -6,7 +6,7 @@ import {
   Divider,
   Icon,
   Intent,
-  Popover,
+  PopoverNext,
   Tag,
 } from "@blueprintjs/core";
 import { useAuth } from "@macrostrat/form-components";
@@ -61,7 +61,6 @@ export function UserPersona({
   let title = "Not signed in";
   if (signedIn) {
     icon = "user";
-    intent = Intent.SUCCESS;
     text = compact ? null : displayName(user);
     title = `Signed in as ${displayName(user)}`;
   }
@@ -71,7 +70,7 @@ export function UserPersona({
   }
 
   return h(
-    Popover,
+    PopoverNext,
     {
       content: h(UserPanel, { user }),
       placement: "bottom-end",
@@ -102,10 +101,6 @@ function SignedOutPanel() {
       h(Icon, { icon: "blocked-person", size: 20 }),
       h("div.user-panel-identity", [
         h("div.user-panel-name", "Not signed in"),
-        h(
-          "div.user-panel-detail",
-          "Sign in to reach your dashboard and the editing tools."
-        ),
       ]),
     ]),
     h("div.user-panel-actions", [h(SignInButton, { large: false })]),

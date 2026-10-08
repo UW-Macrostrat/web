@@ -64,7 +64,7 @@ export const lexMapTargetAtom = atom<LexMapTarget | null>(null);
 /** The lexicon map's optional layers, toggled from the settings bar beneath the
  * map. Lives in the shared `mapSettingsStore` alongside the basemap. Kept on
  * across items; the map ignores a toggle the current item can't honor. */
-export const lexMapLayersAtom = atom({ fossils: false, outcrop: false });
+export const lexMapLayersAtom = atom({ fossils: true, outcrop: false });
 
 /** The shared settings bar, plus the outcrop toggle and a link to the item on
  * the main map. Rendered beneath the map by the page, whichever map instance

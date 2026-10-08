@@ -58,8 +58,10 @@ import {
   basemapStyle,
   DevLink,
   MapReference,
+  MapReferenceList,
   MenuButton,
   SitePageHeader,
+  type MapRef,
 } from "~/components";
 import {
   LegendEntries,
@@ -85,6 +87,7 @@ interface MapData {
     slug: string | null;
     name: string;
     description: string;
+    refs: MapRef[];
   };
   geometry: GeoJSON.Geometry;
   tileJSON: (TileJSON & { faces?: string }) | null;
@@ -333,7 +336,7 @@ function PagePanel({ mapInfo, tileJSON }) {
   let content = h(LegendContent, { mapInfo, tileJSON });
   if (activePage === MenuPage.Neighbors) {
     // Mounted only while its tab is open, so the overlap query runs on demand.
-    content = h(NeighborMaps, { mapInfo });
+    content = h(NeighborsTab, { mapInfo });
   }
 
   return h(
@@ -351,13 +354,20 @@ function PagePanel({ mapInfo, tileJSON }) {
   );
 }
 
+/** Subscribes to the view only while the tab is open; its links follow it. */
+function NeighborsTab({ mapInfo }) {
+  const view = useAtomValue(viewAtom);
+  return h(NeighborMaps, { mapInfo, view });
+}
+
 /** Under the large title: the map's reference, description and slug. */
 function MapSummary({ mapInfo }) {
+  let reference = h(MapReference, { reference: mapInfo, showSourceID: false });
+  if (mapInfo.refs?.length > 0) {
+    reference = h(MapReferenceList, { refs: mapInfo.refs });
+  }
   return h("div.map-summary", [
-    h(
-      ErrorBoundary,
-      h(MapReference, { reference: mapInfo, showSourceID: false })
-    ),
+    h(ErrorBoundary, reference),
     h.if(mapInfo.description != null)(
       "p.page-description",
       mapInfo.description

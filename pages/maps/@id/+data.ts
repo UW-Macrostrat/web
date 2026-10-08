@@ -4,6 +4,7 @@ import { PostgrestClient } from "@supabase/postgrest-js";
 import { render } from "vike/abort";
 
 import { tileJSONURL, type TileJSON } from "./tilejson";
+import type { MapRef } from "~/components/map-info";
 
 const client = new PostgrestClient(postgrestPrefix, {
   headers: { Accept: "application/geo+json" },
@@ -27,11 +28,30 @@ export async function data(pageContext: PageContextServer) {
     geometry = boundsPolygon(tileJSON?.bounds ?? [-180, -90, 180, 90]);
   }
 
+  const refs = await fetchMapRefs(feature.properties.source_id);
+
   return {
-    mapInfo: feature.properties,
+    mapInfo: { ...feature.properties, refs },
     geometry,
     tileJSON,
   };
+}
+
+/** The map's own references, labelled and ordered. Empty where the database
+ * has no `macrostrat_api.map_refs`, or the map no links yet. */
+async function fetchMapRefs(sourceID: number): Promise<MapRef[]> {
+  const query = new URLSearchParams({
+    source_id: `eq.${sourceID}`,
+    order: "position,ref_id",
+  });
+  try {
+    const res = await fetch(`${postgrestPrefix}/map_refs?${query}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (error) {
+    console.error(`Could not load the references of map ${sourceID}:`, error);
+    return [];
+  }
 }
 
 /** The source's tile URL, bounds and zoom range (`/map/<slug>/tilejson.json`).
