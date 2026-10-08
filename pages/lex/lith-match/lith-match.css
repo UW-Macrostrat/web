@@ -17,7 +17,8 @@
   font-family:inherit; resize:vertical; }
 .lm-input:focus { outline:2px solid var(--lm-accent); outline-offset:1px; border-color:var(--lm-accent); }
 .lm-hint { font-size:13px; color:var(--lm-muted); margin:8px 0 0; }
-.lm-hint code { background:var(--lm-panel); border:1px solid var(--lm-line); border-radius:4px; padding:0 4px; }
+.lm-hint code, .lm-hint kbd { background:var(--lm-panel); border:1px solid var(--lm-line); border-radius:4px; padding:0 4px; }
+.lm-hint kbd { font-family:inherit; font-size:12px; }
 .lm-actions { display:flex; gap:10px; margin-top:16px; }
 .lm-run { background:var(--lm-accent); color:#fff; border:none; border-radius:8px;
   padding:11px 20px; font-size:14px; font-weight:600; cursor:pointer; }
@@ -28,22 +29,20 @@
 .lm-reset:hover { border-color:var(--lm-accent); }
 .lm-results-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
 .lm-count { font-size:13px; color:var(--lm-muted); }
-.lm-url { display:block; font-size:12px; background:var(--lm-panel); border:1px solid var(--lm-line);
-  border-radius:6px; padding:8px 10px; margin:4px 0 14px; overflow:auto; white-space:nowrap; color:var(--lm-muted); }
 .lm-error { background:#fdecec; border:1px solid #f3c2c2; color:#9b2222;
   border-radius:8px; padding:11px 13px; font-size:14px; margin-bottom:12px; }
 .lm-muted { color:var(--lm-muted); }
 .lm-lith-results { display:flex; flex-direction:column; gap:12px; }
+.lm-tip { background:#eef3fb; border:1px solid #cdddf4; color:#1f5fb0;
+  border-radius:8px; padding:9px 12px; font-size:13px; line-height:1.5; }
+.lm-tip code { background:#fff; border:1px solid #cdddf4; border-radius:4px; padding:0 4px; }
+.lm-tip a { color:inherit; text-decoration:underline; }
 .lm-messages { margin-bottom:4px; display:flex; flex-direction:column; gap:8px; }
 .lm-message { border-radius:8px; padding:9px 12px; font-size:13px; border:1px solid; }
 .lm-code { font-weight:400; }
 .lm-message-info { background:#eef3fb; border-color:#cdddf4; color:#1f5fb0; }
 .lm-message-warning { background:#fdf3e3; border-color:#f0d6a8; color:#9a6512; }
 .lm-message-error { background:#fdecec; border-color:#f3c2c2; color:#9b2222; }
-.lm-rawtoggle { background:none; border:none; color:var(--lm-accent); cursor:pointer;
-  font-size:13px; font-weight:600; padding:8px 0 0; }
-.lm-raw { background:#0f1722; color:#d6e2ee; border-radius:8px; padding:14px;
-  font-size:12px; overflow:auto; max-height:420px; margin-top:8px; }
 @media (max-width:860px) {
   .lm-grid { grid-template-columns:1fr; }
 }

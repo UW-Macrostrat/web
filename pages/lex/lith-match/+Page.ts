@@ -1,30 +1,35 @@
 import h from "@macrostrat/hyper";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LithologyList } from "@macrostrat/data-components";
 import { apiV3Prefix } from "@macrostrat-web/settings";
 import "./lith-match.css";
 
 /*
- * Lith match console (/lex/lith-match).
+ * Lithology search (/lex/lith-match).
  *
- * Runs the column-ingestion lithology matcher (LithsProcessor) over free text
- * via GET /api/v3/dev/match/liths — the same parse `ingest_columns_from_file`
- * runs on a unit's lithology column — and renders the recognised lithologies
- * with the shared `LithologyList`, so they carry the lexicon's colors,
- * attributes, proportions and lexicon links (from `lith_id`) like UnitDetails.
+ * Type a lithology description and see the Macrostrat lithologies, attributes and
+ * proportions it resolves to, rendered with the shared `LithologyList` so results
+ * carry the lexicon's colors and links. The search runs on Enter, on the button,
+ * and shortly after the user stops typing.
  */
 
-const LITH_ENDPOINT = `${apiV3Prefix}/dev/match/liths`;
+const SEARCH_ENDPOINT = `${apiV3Prefix}/dev/match/liths`;
+
+// Auto-search this long after the user stops typing.
+const SEARCH_DEBOUNCE_MS = 1500;
 
 const PRESETS = [
-  "sandstone, shale (minor); limestone",
   "cross-bedded fine sandstone and siltstone",
   "dolomitic limestone (60%); chert (40%)",
+  // `andesitic porphyry` matches nothing (`porphyry` isn't a lithology name);
+  // rewritten as `porphyritic andesite` it resolves to andesite + the
+  // porphyritic attribute — a worked example of fixing unmatched wording.
   "andesitic porphyry",
+  "porphyritic andesite",
   "calcareous ooze",
 ];
 
-// Matched liths are grouped by abundance; each group renders as its own labelled
+// Results are grouped by abundance; each group renders as its own labelled
 // LithologyList (null `dom` — abundance unstated — falls under "Lithologies").
 const DOM_GROUPS = [
   { key: "dom", label: "Dominant" },
@@ -32,7 +37,7 @@ const DOM_GROUPS = [
   { key: null, label: "Lithologies" },
 ];
 
-/** Shape a matched lith into what the data-components lith components read.
+/** Shape a found lith into what the data-components lith components read.
  * `lith_id` is what earns each tag its lexicon link for free. */
 function toLithology(lith) {
   return {
@@ -49,65 +54,70 @@ export function Page() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [lastUrl, setLastUrl] = useState(null);
-  const [showRaw, setShowRaw] = useState(false);
+  const timer = useRef(null);
 
-  const runMatch = useCallback(async () => {
-    setError(null);
-    if (!text.trim()) {
-      setError("Enter some lithology text to match.");
+  const runSearch = useCallback(async (query) => {
+    if (timer.current != null) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+    const q = query.trim();
+    if (!q) {
+      setData(null);
+      setError(null);
       return;
     }
-    const url = `${LITH_ENDPOINT}?text=${encodeURIComponent(text.trim())}`;
-    setLastUrl(url);
+    setError(null);
     setLoading(true);
-    setData(null);
     try {
+      const url = `${SEARCH_ENDPOINT}?text=${encodeURIComponent(q)}`;
       const res = await fetch(url, { headers: { Accept: "application/json" } });
       const body = await res.json().catch(() => null);
-      if (!res.ok) {
-        const detail = body?.detail ? JSON.stringify(body.detail) : res.statusText;
-        throw new Error(`Request failed (${res.status}): ${detail}`);
-      }
+      if (!res.ok) throw new Error(`Search failed (${res.status}).`);
       setData(body);
     } catch (e) {
-      const unreachable = e?.message?.includes("Failed to fetch");
-      let message = e.message;
-      if (unreachable) {
-        message =
-          "Couldn't reach the API. Check that it's running and its certificate is trusted by your browser.";
-      }
-      setError(message);
+      setError("The search couldn't be completed. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [text]);
+  }, []);
+
+  // Run the search a short while after the user stops typing (and once on load
+  // for the default text). Enter and the button trigger it immediately.
+  useEffect(() => {
+    if (!text.trim()) {
+      setData(null);
+      return;
+    }
+    timer.current = setTimeout(() => runSearch(text), SEARCH_DEBOUNCE_MS);
+    return () => {
+      if (timer.current != null) clearTimeout(timer.current);
+    };
+  }, [text, runSearch]);
 
   const clear = useCallback(() => {
     setText("");
     setData(null);
     setError(null);
-    setLastUrl(null);
   }, []);
 
   return h("div.lith-console", [
     h(
       "p.lm-intro",
-      "Match free lithology text against Macrostrat's lithology vocabulary using " +
-        "the column-ingestion matcher — the same parse an ingest runs on a unit's " +
-        "lithology column. Enter a lithology description and run it."
+      "Search Macrostrat's lithology vocabulary. Type a lithology description — " +
+        "e.g. `cross-stratified sandstone` — and see the lithologies, attributes " +
+        "and proportions it resolves to."
     ),
     h(Presets, { onPick: setText }),
     h("div.lm-grid", [
-      h(InputPanel, { text, setText, loading, runMatch, clear }),
-      h(ResultsPanel, {
-        data,
-        error,
+      h(InputPanel, {
+        text,
+        setText,
         loading,
-        lastUrl,
-        showRaw,
-        onToggleRaw: () => setShowRaw(!showRaw),
+        onSearch: () => runSearch(text),
+        clear,
       }),
+      h(ResultsPanel, { data, error, loading }),
     ]),
   ]);
 }
@@ -125,14 +135,23 @@ function Presets({ onPick }) {
   ]);
 }
 
-function InputPanel({ text, setText, loading, runMatch, clear }) {
+function InputPanel({ text, setText, loading, onSearch, clear }) {
+  const onKeyDown = (e) => {
+    // Enter searches; Shift+Enter keeps a newline for multi-line input.
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      onSearch();
+    }
+  };
+
   return h("section.lm-panel", [
     h("h3.lm-h3", "Lithology text"),
     h("textarea.lm-input", {
       rows: 4,
       value: text,
-      placeholder: "sandstone, shale (minor); limestone",
+      placeholder: "sandstone; shale (minor); limestone",
       onChange: (e) => setText(e.target.value),
+      onKeyDown,
     }),
     h("p.lm-hint", [
       "Separate lithologies with ",
@@ -145,42 +164,32 @@ function InputPanel({ text, setText, loading, runMatch, clear }) {
       h("code", "(60%)"),
       " or ",
       h("code", "(major)"),
-      " for abundance.",
+      " for abundance. Press ",
+      h("kbd", "Enter"),
+      " to search.",
     ]),
     h("div.lm-actions", [
       h(
         "button.lm-run",
-        { type: "button", onClick: runMatch, disabled: loading },
-        loading ? "Matching…" : "Match liths"
+        { type: "button", onClick: onSearch, disabled: loading },
+        loading ? "Searching…" : "Search"
       ),
       h("button.lm-reset", { type: "button", onClick: clear }, "Clear"),
     ]),
   ]);
 }
 
-function ResultsPanel({ data, error, loading, lastUrl, showRaw, onToggleRaw }) {
+function ResultsPanel({ data, error, loading }) {
   const count = data?.liths.length ?? 0;
 
   let placeholder = null;
   if (!loading && error == null && data == null) {
-    placeholder = h("p.lm-muted", [
-      "Enter lithology text and choose ",
-      h("strong", "Match liths"),
-      " to see the recognised lithologies here.",
-    ]);
+    placeholder = h("p.lm-muted", "Type a lithology description to search.");
   }
 
   let results = null;
   if (data != null) {
-    results = [
-      h(LithResults, { data }),
-      h(
-        "button.lm-rawtoggle",
-        { type: "button", onClick: onToggleRaw },
-        showRaw ? "Hide raw JSON" : "Show raw JSON"
-      ),
-      h.if(showRaw)("pre.lm-raw", JSON.stringify(data, null, 2)),
-    ];
+    results = h(LithResults, { data });
   }
 
   return h("section.lm-panel.lm-results", { "aria-live": "polite" }, [
@@ -191,9 +200,8 @@ function ResultsPanel({ data, error, loading, lastUrl, showRaw, onToggleRaw }) {
         `${count} lith${count === 1 ? "" : "s"}`
       ),
     ]),
-    h.if(lastUrl != null)("code.lm-url", { title: lastUrl }, lastUrl),
     h.if(error != null)("div.lm-error", error),
-    h.if(loading)("p.lm-muted", "Matching…"),
+    h.if(loading)("p.lm-muted", "Searching…"),
     placeholder,
     results,
   ]);
@@ -205,7 +213,13 @@ function LithResults({ data }) {
     liths: data.liths.filter((lith) => (lith.dom ?? null) === group.key),
   })).filter((group) => group.liths.length > 0);
 
-  let body = h("p.lm-muted", "No lithologies recognised in this text.");
+  // Show the rewrite tip whenever a lithology went unrecognised — either nothing
+  // was found at all, or some words resolved and others didn't.
+  const hasUnmatched =
+    data.liths.length === 0 ||
+    (data.notices ?? []).some((notice) => notice.code === "unknown-lithology");
+
+  let body = h("p.lm-muted", "No lithologies found for this text.");
   if (groups.length > 0) {
     body = groups.map((group) =>
       h(LithologyList, {
@@ -216,7 +230,30 @@ function LithResults({ data }) {
     );
   }
 
-  return h("div.lm-lith-results", [h(Notices, { notices: data.notices }), body]);
+  return h("div.lm-lith-results", [
+    h(Notices, { notices: data.notices }),
+    h.if(hasUnmatched)(RewriteTip),
+    body,
+  ]);
+}
+
+/** Shown when a lithology wasn't found: text is read as `<attribute> <lithology>`,
+ * so reordering the words often resolves it. */
+function RewriteTip() {
+  return h("div.lm-tip", [
+    h("strong", "No result for a lithology? "),
+    "Text is read as ",
+    h("code", "<attribute> <lithology>"),
+    ", so try a variation of the wording — e.g. ",
+    h("code", "porphyritic andesite"),
+    " instead of ",
+    h("code", "andesitic porphyry"),
+    ". Browse valid names in the ",
+    h("a", { href: "/lex/lithologies" }, "lithology"),
+    " and ",
+    h("a", { href: "/lex/lith-atts" }, "attribute"),
+    " lexicons.",
+  ]);
 }
 
 function Notices({ notices }) {
