@@ -55,20 +55,8 @@ export class FeedbackRequestError extends Error {
   }
 }
 
-export interface FeedbackReplacement {
-  nodes: {
-    id: number | string;
-    type: number;
-    name: string;
-    txt_range: [number, number][];
-    macrostrat_terms_id?: number | null;
-  }[];
-  edges: {
-    source: number | string;
-    dest: number | string;
-    relationship_type_id: number;
-  }[];
-}
+/** Overwrites use the same graph payload as regular feedback saves. */
+export type FeedbackReplacement = ReturnType<typeof treeToGraph>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -261,6 +249,18 @@ export function hasFeedbackAccess(
 export async function deleteFeedback(runId: number): Promise<void> {
   parseId(runId, "feedback run ID");
   await feedbackRequest(`/feedback_runs/${runId}`, "DELETE");
+}
+
+/** Replace an existing review's graph, preserving its run ID and notes. */
+export async function overwriteFeedback(
+  runId: number,
+  tree: TreeData[],
+): Promise<number> {
+  parseId(runId, "feedback run ID");
+  const { nodes, edges } = treeToGraph(tree);
+  const payload: FeedbackReplacement = { nodes, edges };
+  await feedbackRequest(`/feedback_runs/${runId}`, "PUT", payload);
+  return runId;
 }
 
 async function postRows(
