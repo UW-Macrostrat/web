@@ -1,0 +1,88 @@
+.tasks-page
+  text-align: left
+  margin-top: 1em
+
+  .muted
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+  .error
+    color: var(--pz-danger-color, #cd4246)
+
+  .tasks-section
+    margin-bottom: 2.5em
+
+  .section-header
+    margin-bottom: 0.75em
+    h2
+      margin: 0 0 0.2em
+      font-size: 1.3em
+    p
+      margin: 0
+
+  .task-cards
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(20em, 1fr))
+    gap: 1em
+
+  .task-card
+    display: flex
+    flex-direction: column
+    gap: 0.5em
+    h3
+      margin: 0
+      font-size: 1.05em
+    p
+      margin: 0
+      flex: 1
+    .task-name
+      font-family: var(--pz-monospace-font, monospace)
+      font-size: 0.85em
+
+  .runs-table
+    width: 100%
+    .elapsed
+      font-variant-numeric: tabular-nums
+    .actions
+      white-space: nowrap
+      text-align: right
+
+  .run-header
+    display: flex
+    gap: 0.75em
+    align-items: center
+    flex-wrap: wrap
+    margin-bottom: 0.5em
+    h2
+      margin: 0
+    .run-actions
+      margin-left: auto
+      display: flex
+      gap: 0.5em
+
+  .run-fields
+    margin-bottom: 1em
+
+  .run-json
+    margin: 0 0 1em
+    font-size: 0.85em
+    white-space: pre-wrap
+    word-break: break-all
+
+.schema-form
+  .json-field
+    font-family: var(--pz-monospace-font, monospace)
+    min-height: 6em
+
+.run-terminal
+  .terminal-host
+    overflow-x: auto
+    border-radius: 4px
+    padding: 0.5em
+    background: #000
+  .stream-status
+    display: flex
+    align-items: center
+    gap: 0.5em
+    margin-top: 0.5em
+    font-size: var(--pz-font-size-sm, 0.85em)
+    color: var(--pz-text-subtle-color, var(--secondary-color))
