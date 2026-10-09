@@ -23,7 +23,6 @@ export interface SlotSpec {
 
 export const siteSlots: Record<string, SlotSpec[]> = {
   "/about": [
-    { at: "how-to-cite", mode: "after", component: "CiteMacrostrat", data: ["platformPapers"] },
     { at: "get-involved", mode: "after", component: "ContactBlock", data: ["contact"] },
   ],
   "/about/support": [
@@ -50,7 +49,6 @@ export const siteSlots: Record<string, SlotSpec[]> = {
     { at: "repositories", mode: "after", component: "RepositoryList" },
   ],
   "/publications": [
-    { at: "citing-macrostrat", mode: "after", component: "CiteMacrostrat", data: ["platformPapers"] },
     { at: "publications-using-macrostrat", mode: "aside", component: "BibliographySummary", data: ["publications"] },
     { at: "publications-using-macrostrat", mode: "after", component: "Bibliography", data: ["publications"] },
   ],

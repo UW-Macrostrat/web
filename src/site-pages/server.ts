@@ -5,9 +5,9 @@ import { buildPageIndex } from "@macrostrat-web/text-toolchain";
 import { renderToString } from "react-dom/server";
 import h from "@macrostrat/hyper";
 import { join } from "path";
-import { parse as parseYaml } from "yaml";
 import { slotDataFiles } from "./slots";
-import { bibliography, platformPapers } from "./citations";
+import { bibliography } from "./citations";
+import { readDataFile } from "./data-files";
 import { siteMarkdownComponents } from "./markdown-components";
 
 const contentDirName = "../../content";
@@ -15,17 +15,11 @@ const contentDirName = "../../content";
 const contentDir = join(process.cwd(), "content");
 
 const modules = import.meta.glob("../../content/**/*.{md,mdx}");
-const dataFiles = import.meta.glob("../../content/Site/data/*.{yml,json}", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-}) as Record<string, string>;
 
 /** Record sets web derives from a vault data file before handing them to a
  * slot. A missing file gives an empty set, so the page renders either way. */
 const derivedData: Record<string, () => unknown> = {
   publications: () => bibliography(readDataFile("publications") ?? []),
-  platformPapers: () => platformPapers(readDataFile("publications") ?? []),
 };
 
 /** route -> vault page, from the `route:` frontmatter of site pages. */
@@ -103,24 +97,6 @@ function loadSiteData(names: string[]): Record<string, unknown> {
     if (data != null) out[name] = data;
   }
   return out;
-}
-
-const parsedData = new Map<string, any>();
-
-/** `Site/data/<name>.yml` or `.json`, parsed once. */
-function readDataFile(name: string): any {
-  if (parsedData.has(name)) return parsedData.get(name);
-  const base = `../../content/Site/data/${name}`;
-  let data = null;
-  if (dataFiles[`${base}.yml`] != null) {
-    data = parseYaml(dataFiles[`${base}.yml`]);
-  } else if (dataFiles[`${base}.json`] != null) {
-    data = JSON.parse(dataFiles[`${base}.json`]);
-  } else {
-    console.warn(`[site-pages] no data file Site/data/${name}.yml or .json`);
-  }
-  parsedData.set(name, data);
-  return data;
 }
 
 function stripLeadingH1(html: string): string {

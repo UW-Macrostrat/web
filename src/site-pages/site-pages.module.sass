@@ -43,7 +43,88 @@
 
   .card-description
     @include type.supporting
+    // Interface text; the docs body would set every paragraph in the prose serif.
+    font-family: var(--pz-body-font)
     margin: 0.3em 0 0
+
+// Panels from a `> [!panels]` callout: headed groups of cards beside a
+// clickable panel, one row on a wide page.
+.panel-grid
+  display: grid
+  grid-template-columns: repeat(3, minmax(0, 1fr))
+  gap: var(--pz-space-3)
+  margin: var(--pz-space-3) 0 var(--pz-space-4)
+  font-family: var(--pz-body-font)
+
+  @media (max-width: 860px)
+    grid-template-columns: minmax(0, 1fr)
+
+  .card-title
+    display: inline-flex
+    align-items: center
+    gap: 0.4em
+
+  .card-description
+    @include type.supporting
+    font-family: var(--pz-body-font)
+    margin: 0.3em 0 0
+
+.panel-group
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-2)
+
+  .panel-title
+    margin: 0
+    font-size: var(--pz-font-size-xl)
+    color: var(--pz-heading-color)
+
+  .panel-description
+    @include type.supporting
+    font-family: var(--pz-body-font)
+    margin: 0
+
+  .panel-items
+    display: flex
+    flex-direction: column
+    gap: var(--pz-space-2)
+    > *
+      margin: 0
+
+.linked-panel
+  margin: 0
+  height: 100%
+
+  h3
+    font-size: var(--pz-font-size-xl)
+
+  .panel-topics
+    @include type.supporting
+    margin: var(--pz-space-3) 0 0
+    padding-left: 1.2em
+    li
+      margin: 0.2em 0
+
+// Papers from a `> [!cite]` callout: the label and when to cite, then the citation.
+.cite-list
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))
+  gap: var(--pz-space-3)
+  margin: var(--pz-space-3) 0 var(--pz-space-4)
+  font-family: var(--pz-body-font)
+
+  > a, > div
+    margin: 0
+
+  .card-description
+    @include type.supporting
+    font-family: var(--pz-body-font)
+    margin: 0.3em 0 var(--pz-space-2)
+
+  .cite-citation
+    display: block
+    font-size: var(--pz-font-size-sm)
+    overflow-wrap: anywhere
 
 // A `> [!logo]` callout: its text beside the Macrostrat logo.
 .logo-callout

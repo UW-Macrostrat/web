@@ -16,19 +16,8 @@ export interface Publication {
   href: string | null;
 }
 
-export interface PlatformPaper extends Publication {
-  note: string;
-}
-
 /** The collection the bibliography lists. */
 const bibliographyCollection = "Papers using Macrostrat";
-
-/** The papers to cite for the platform, until the library has an
- * Infrastructure collection. */
-const platformPaperDOIs = [
-  { doi: "10.1002/gdj3.189", note: "Macrostrat v2" },
-  { doi: "10.1029/2018gc007467", note: "The platform" },
-];
 
 const style = "gsa";
 plugins.config.get("@csl").styles.add(style, gsaStyle);
@@ -64,18 +53,9 @@ export function bibliography(records: any[]): Publication[] {
     .map((r) => r.publication);
 }
 
-export function platformPapers(records: any[]): PlatformPaper[] {
-  const byDOI = new Map(formatAll(records).map((r) => [r.doi, r.publication]));
-  const papers: PlatformPaper[] = [];
-  for (const { doi, note } of platformPaperDOIs) {
-    const publication = byDOI.get(doi);
-    if (publication == null) {
-      console.warn(`[citations] platform paper ${doi} is not in the library`);
-      continue;
-    }
-    papers.push({ ...publication, note });
-  }
-  return papers;
+export function publicationByDOI(records: any[], doi: string): Publication | null {
+  const key = doi.toLowerCase();
+  return formatAll(records).find((r) => r.doi === key)?.publication ?? null;
 }
 
 function formatRecord(record: any): Publication {

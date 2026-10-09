@@ -1,19 +1,9 @@
 import { MasonryScrollBody } from "@macrostrat/data-sheet";
 import { LinkCard } from "~/components/cards";
 import h from "./components.module.sass";
-import type { Publication, PlatformPaper } from "../citations";
+import type { Publication } from "../citations";
 
 const zoteroLibrary = "https://www.zotero.org/groups/6644229/macrostrat/library";
-
-/** The papers to cite for the platform, at the top of /publications and on /about. */
-export function CiteMacrostrat({ platformPapers }: { platformPapers: PlatformPaper[] }) {
-  return h(
-    "div.cite-list",
-    (platformPapers ?? []).map((p) =>
-      h(LinkCard, { key: p.id, href: p.href, title: p.note }, h(Citation, { publication: p }))
-    )
-  );
-}
 
 /** The library's bibliography, newest first, in two balanced columns. */
 export function Bibliography({ publications }: { publications: Publication[] }) {
