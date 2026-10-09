@@ -27,7 +27,14 @@ export async function fetchKGRows<T = any>(
     if (value == null) continue;
     url.searchParams.set(key, String(value));
   }
-  const res = await fetch(url.toString());
+  const res = await fetch(url.toString(), {
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Cache-Control": "no-cache, no-store, max-age=0",
+      Pragma: "no-cache",
+    },
+  });
   const text = await res.text();
   let body: any = null;
   try {
