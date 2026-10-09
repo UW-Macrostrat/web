@@ -72,6 +72,8 @@ export default defineConfig({
   server: {
     allowedHosts: ["localhost", "dev.macrostrat.local"],
     proxy: devProxy,
+    // Agent worktrees and state; watching them exhausts memory
+    watch: { ignored: ["**/.claude/**", "**/.worktrees/**"] },
     hmr: {
       // Basic setup for hot module reloading that bypasses local reverse proxy
       protocol: "ws", // Use 'wss' for secure connections over HTTPS
