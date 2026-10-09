@@ -1,5 +1,6 @@
 /** Administrator tools: see what the system makes of a session, browse the
- * site with a reduced role, and manage users and API tokens.
+ * site with a reduced role, see which build each service runs, and manage
+ * users and API tokens.
  *
  * Everything that changes state goes through api_v3's admin-gated `/security`
  * routes; this page is a window onto them, not an authority of its own. A
@@ -13,6 +14,7 @@ import { useAuth } from "@macrostrat/form-components";
 import type { ReactNode } from "react";
 import { isDegraded } from "~/components/auth";
 import { IntrospectionPanel, RoleSwitchPanel } from "./introspection";
+import { ServicesPanel } from "./services";
 import { UsersHelp, UsersSheet } from "./users-sheet";
 import { TokensHelp, TokensSheet } from "./tokens-sheet";
 import { HistorySheet } from "./history-sheet";
@@ -33,6 +35,14 @@ export function Page() {
         description: "How each layer reads the current session.",
       },
       [h(IntrospectionPanel)]
+    ),
+    h(
+      Section,
+      {
+        title: "Services",
+        description: "The build each service is running.",
+      },
+      [h(ServicesPanel)]
     ),
     h(
       Section,

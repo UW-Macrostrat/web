@@ -1,10 +1,14 @@
 name: Build image
 permissions: read-all
+
+# On a push to main, a package.json version with no `vX.Y.Z` tag yet is
+# released: the image is also tagged with the version and the git tag is created
+# on this commit. The tag is pushed here because a tag pushed with GITHUB_TOKEN
+# starts no other workflow.
+
 on:
   push:
     branches: ["main"]
-    tags:
-      - "v*.*.*" # glob for semver tags (including prereleases)
   pull_request:
     branches: [main]
   # Fired by github.com/Macrostrat/docs when the documentation vault changes,
@@ -15,6 +19,12 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # Serialized, so a second merge sees the tag the first one created
+    concurrency:
+      group: build-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -36,28 +46,45 @@ jobs:
         run: |
           corepack enable
           bash scripts/assemble-docs.sh
+      - name: Read release state
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}"
+          NEW=true
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" > /dev/null; then
+            NEW=false
+          fi
+          if [[ "$NEW" == true && "$VERSION" != *-* ]] && ! grep -Eq "^## \[?${VERSION//./\\.}\]?( |$)" docs/changelog.md; then
+            echo "::error::Releasing ${VERSION} needs a '## ${VERSION}' heading in docs/changelog.md"
+            exit 1
+          fi
+          RELEASE=false
+          if [[ "$NEW" == true && "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            RELEASE=true
+          fi
+          STABLE=false
+          if [[ "$VERSION" != *-* ]]; then
+            STABLE=true
+          fi
+          echo "${TAG}: new=${NEW} release=${RELEASE}"
+          {
+            echo "version=${VERSION}"
+            echo "tag=${TAG}"
+            echo "release=${RELEASE}"
+            echo "stable=${STABLE}"
+          } >> $GITHUB_OUTPUT
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: hub.opensciencegrid.org/macrostrat/web
-          # New: apply the 'latest' tag only to non-prerelease semver tags
           tags: |
             type=raw,value=sha-{{sha}}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')}}
             type=ref,event=pr,suffix=-{{date 'YYYYMMDDHHmmss'}}
             type=ref,event=branch,suffix=-{{date 'YYYYMMDDHHmmss'}}
-            type=ref,event=tag,suffix=-{{date 'YYYYMMDDHHmmss'}}
-            type=semver,pattern={{version}}
-            type=semver,pattern={{version}},suffix=-{{date 'YYYYMMDDHHmmss'}}
-            
-            # When a PRODUCTION tag (vX.Y.Z) is pushed → also tag staging and dev
-            type=raw,value=main-{{date 'YYYYMMDDHHmmss'}},enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-') }}
-            type=semver,pattern={{version}},suffix=-beta.{{date 'YYYYMMDDHHmmss'}},enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-') }}
-            type=semver,pattern={{version}},suffix=-beta,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-') }}
-
-            # When a STAGING prerelease tag (vX.Y.Z-*) is pushed → also tag dev
-            type=raw,value=main-{{date 'YYYYMMDDHHmmss'}},enable=${{ startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-') }}
+            type=raw,value=${{ steps.version.outputs.version }},enable=${{ steps.version.outputs.release == 'true' }}
+            type=raw,value=latest,enable=${{ steps.version.outputs.release == 'true' && steps.version.outputs.stable == 'true' }}
           flavor: |
             latest=false
       - name: Set up Docker Buildx
@@ -76,5 +103,21 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            MACROSTRAT_VERSION=${{ steps.version.outputs.version }}
+            MACROSTRAT_RELEASE=${{ steps.version.outputs.release }}
+            MACROSTRAT_COMMIT=${{ github.event.pull_request.head.sha || github.sha }}
+            MACROSTRAT_BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            MACROSTRAT_REPOSITORY=${{ github.repository }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Tag the release
+        if: steps.version.outputs.release == 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Version ${TAG#v}"
+          git push origin "$TAG"
