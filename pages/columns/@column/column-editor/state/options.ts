@@ -115,6 +115,26 @@ export const unconformityCollapseAtom = atom(
   }
 );
 
+/** Whether finer-grained units are drawn narrower (the library's `grainsize`).
+ * `auto` follows the column type: on for a measured column. Synced to
+ * `?grain=`, the default kept out. */
+export type GrainsizeSetting = "auto" | "on" | "off";
+
+const grainsizeParamAtom = atomWithSearchParam("grain");
+
+export const grainsizeAtom = atom(
+  (get): GrainsizeSetting => {
+    const raw = get(grainsizeParamAtom);
+    if (raw === "on" || raw === "off") return raw;
+    return "auto";
+  },
+  (get, set, mode: GrainsizeSetting) => {
+    let value: string | null = mode;
+    if (mode === "auto") value = null;
+    set(grainsizeParamAtom, value);
+  }
+);
+
 /* ------------------------------------------------- other display options */
 
 /** A number in the URL, cleared by writing `null`. */

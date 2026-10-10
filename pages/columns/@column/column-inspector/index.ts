@@ -16,6 +16,7 @@ import {
   ReferencesField,
   UnitSelectionPopover,
   UnitSelectionStyle,
+  columnTypeFromColType,
 } from "@macrostrat/column-views";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useAtom } from "jotai";
@@ -289,6 +290,8 @@ function ColumnContentPane({ columnInfo }) {
               collapseSmallUnconformities: true,
               showTimescale,
               axisType,
+              // `auto` grain size follows the column type, not the axis
+              columnType: columnTypeFromColType(columnInfo.col_type),
               columnWidth: 300,
               width: 450,
               maxInternalColumns,
