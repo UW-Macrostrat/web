@@ -3,17 +3,14 @@ import { Link } from "~/components";
 import { useData } from "vike-react/useData";
 import { Identifier } from "@macrostrat/data-components";
 
-/**
- * Jotai provides a composable approach to state management
- * that can be used to add behaviors iteratively
- */
-
 import { onDemand } from "~/_utils";
 
 const ColumnMapContainer = onDemand(() => {
   return import("#/columns/map.client.ts").then((d) => d.ColumnMapContainer);
 });
 
+/** A project's column groups, each linking to its own page, with the
+ * project's columns on a map beside them. */
 export function Page() {
   const { project, columnGroups } = useData();
   const project_id = project?.project_id;

@@ -5,7 +5,7 @@ import { ColumnsTable } from "~/components/lex/columns-card";
 
 export function Page() {
   const { resData, colData, taxaData, refs } = useData();
-  
+
   const id = resData.col_group_id;
   const timescales = resData?.timescales || [];
 

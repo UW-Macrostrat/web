@@ -1,5 +1,3 @@
 export default {
-  pageInfo: {
-    title: "Column groups",
-  },
+  pageInfo: { name: "Column groups" },
 };
