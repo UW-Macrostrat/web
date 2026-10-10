@@ -34,6 +34,35 @@ export interface HeroPoint {
   lng: number;
 }
 
+/** North America: the project the API answers for when none is named, and the
+ * one whose columns the hero takes as given. A column from any other project
+ * — New Zealand, the deep sea — is a window onto that project, so the hero
+ * draws the rest of it too. */
+export const STANDARD_PROJECT_ID = 1;
+
+export function isStandardProject(projectID: number | null | undefined) {
+  return projectID == null || projectID === STANDARD_PROJECT_ID;
+}
+
+/** Every active column in a project, as footprints to draw on the map. Null
+ * when the request fails; the map is no worse off without them. */
+export async function fetchProjectColumns(
+  projectID: number
+): Promise<GeoJSON.FeatureCollection | null> {
+  try {
+    const collection = await fetchAPIData("/columns", {
+      project_id: projectID,
+      status_code: "active",
+      format: "geojson",
+    });
+    if (collection?.type !== "FeatureCollection") return null;
+    return collection;
+  } catch (error) {
+    console.error(`Could not fetch columns for project ${projectID}:`, error);
+    return null;
+  }
+}
+
 /** Anything with an age range and the intervals that range sits in: a column
  * unit and a matched geologic map unit both answer this shape, which is what
  * lets a click on either one drive the same filter. */

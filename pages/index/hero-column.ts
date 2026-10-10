@@ -9,7 +9,14 @@
  * until the reader engages.
  */
 import h from "./hero.module.sass";
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from "react";
 import { Card } from "@blueprintjs/core";
 import {
   Column,
@@ -24,11 +31,7 @@ import {
 import type { UnitLong } from "@macrostrat/api-types";
 import { Link } from "~/components";
 import { summarizeUnits, type HeroColumn } from "./hero-data";
-import {
-  colorForAgeRange,
-  overlapsRange,
-  type TimeRange,
-} from "./time-range";
+import { colorForAgeRange, overlapsRange, type TimeRange } from "./time-range";
 
 /** What each unit box needs to draw itself, in a context so the filter can
  * change without handing the column a new `unitComponent` and remounting every
@@ -77,15 +80,13 @@ export function ColumnPanel({
 }) {
   const { info, units } = column;
   const stats = useMemo(() => summarizeUnits(units), [units]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useScrollToRange(scrollRef);
 
   return h(Card, { className: h["hero-column-panel"] }, [
     h("div.column-inset-header", [
       h("div.column-inset-titles", [
-        h(
-          Link,
-          { href, className: "col-name" },
-          info.col_name
-        ),
+        h(Link, { href, className: "col-name" }, info.col_name),
         h(
           "p.column-inset-summary",
           `${stats.n_units} units spanning ${formatAge(stats.b_age)}`
@@ -95,6 +96,7 @@ export function ColumnPanel({
     ]),
     h(
       "div.column-inset-scroll",
+      { ref: scrollRef },
       h(Column, {
         units,
         unitComponent: HeroUnit,
@@ -121,6 +123,35 @@ export function ColumnPanel({
       })
     ),
   ]);
+}
+
+/** A new age filter brings the units inside it into view: centred when they
+ * fit the panel, their top edge otherwise. They are found by the class
+ * `HeroUnit` marks them with, so this never has to know how the column orders
+ * or groups them. */
+function useScrollToRange(scrollRef: React.RefObject<HTMLDivElement>) {
+  const { timeRange } = useContext(ColumnDisplayContext);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (timeRange == null || scroller == null) return;
+    const marked = scroller.querySelectorAll("g.hero-unit.in-range");
+    if (marked.length === 0) return;
+    const box = scroller.getBoundingClientRect();
+    let top = Infinity;
+    let bottom = -Infinity;
+    marked.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      top = Math.min(top, rect.top);
+      bottom = Math.max(bottom, rect.bottom);
+    });
+    top += scroller.scrollTop - box.top;
+    bottom += scroller.scrollTop - box.top;
+    let target = top - 8;
+    if (bottom - top < box.height) {
+      target = top - (box.height - (bottom - top)) / 2;
+    }
+    scroller.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+  }, [timeRange, scrollRef]);
 }
 
 /** Replaces the composite age axis: the inset has no room for one, and the
@@ -167,8 +198,18 @@ export function HeroUnit(props) {
     return "var(--column-background-color)";
   }, [ageColor, division.color, timeRange, inRange, inDarkMode]);
 
+  // Wrapped in a group of our own so the filter can be read off the DOM
+  // (`useScrollToRange`): a class on the unit itself would be swallowed, see
+  // above. Not in the style module, so these names stay as written.
+  let groupClass = "hero-unit";
+  if (timeRange != null && inRange) groupClass = "hero-unit in-range";
+
   // Hack to use a simpler fill without text shadow
-  return h(UnitComponent, { ...props, backgroundColor });
+  return h(
+    "g",
+    { className: groupClass },
+    h(UnitComponent, { ...props, backgroundColor })
+  );
 }
 
 /** A unit fill for the current theme: the same treatment `IntervalTag` gives a

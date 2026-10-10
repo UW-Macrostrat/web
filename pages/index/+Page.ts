@@ -16,9 +16,8 @@ import {
 } from "~/components/lex/search-omnibar";
 import type { HeroData, PageStats } from "./+data";
 import { HeroStage } from "./hero-stage";
-import { AnchorButton } from "@blueprintjs/core";
-import type { IconName } from "@blueprintjs/icons";
 import type { ReactNode } from "react";
+import classNames from "classnames";
 
 /** The homepage: what Macrostrat is in a line, the data itself, a few entry
  * points, what is new, and an honest beta notice. Design notes live in the
@@ -116,13 +115,12 @@ interface EntryPoint {
   href: string;
   text: string;
   image?: string;
-  /** Set on the two the page is about. They come first and larger, each
-   * carrying the numbers behind it and a button into it. */
-  major?: {
-    stats: StatKey[];
-    action: string;
-    icon: IconName;
-  };
+  /** The two the page is about come first and larger, each carrying the
+   * numbers behind it, smallest first. */
+  stats?: StatKey[];
+  /** The main thing to do here. One card, set apart by a wash of the accent
+   * color rather than by a button. */
+  primary?: boolean;
 }
 
 const entryPoints: EntryPoint[] = [
@@ -130,21 +128,14 @@ const entryPoints: EntryPoint[] = [
     title: "Map",
     href: "/map",
     text: "The world's geologic maps, harmonized into one.",
-    major: {
-      stats: ["maps", "polygons"],
-      action: "Explore the map",
-      icon: "map",
-    },
+    stats: ["maps", "legendItems", "polygons"],
+    primary: true,
   },
   {
     title: "Columns",
     href: "/columns",
     text: "The rock record through time, region by region.",
-    major: {
-      stats: ["columns", "units", "projects"],
-      action: "Browse the columns",
-      icon: "list-columns",
-    },
+    stats: ["projects", "columns", "units"],
   },
   {
     title: "Lexicon",
@@ -198,29 +189,18 @@ function EntryCard({ item }: { item: EntryPoint }) {
   let title: ReactNode = item.title;
   if (icon != null) title = h("span.entry-title", [icon, title]);
 
-  if (item.major == null) {
-    return h(LinkCard, { title, href: item.href, className: "entry-card" }, [
-      h("p", item.text),
-    ]);
-  }
+  let stats: ReactNode = null;
+  if (item.stats != null) stats = h(EntryStats, { keys: item.stats });
 
-  // The panel is a link like the other cards, with a button inside saying the
-  // same destination out loud — which is what the overlay form exists for.
-  return h(
-    LinkCard,
-    { title, href: item.href, nestedLinks: true, className: "entry-card major" },
-    [
-      h("p", item.text),
-      h(EntryStats, { keys: item.major.stats }),
-      h(AnchorButton, {
-        className: "pz-important-button entry-action",
-        href: item.href,
-        icon: item.major.icon,
-        large: true,
-        text: item.major.action,
-      }),
-    ]
-  );
+  const className = classNames("entry-card", {
+    major: item.stats != null,
+    primary: item.primary,
+  });
+
+  return h(LinkCard, { title, href: item.href, className }, [
+    h("p", item.text),
+    stats,
+  ]);
 }
 
 function WhatsNew() {
@@ -275,6 +255,7 @@ function formatNumber(num: number) {
 
 const statLabels: Record<StatKey, string> = {
   maps: "maps",
+  legendItems: "legend items",
   polygons: "map polygons",
   columns: "columns",
   units: "rock units",

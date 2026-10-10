@@ -147,57 +147,62 @@
 
 // Six tracks: the two major panels take three each on the first row, the
 // three minor cards two each on the second. One column once a phone can't
-// hold the pair side by side.
+// hold the pair side by side. No border on these: the shadow and the gap
+// between them are enough to make them boxes.
 .entry-points
   display: grid
   grid-template-columns: repeat(6, minmax(0, 1fr))
-  gap: var(--pz-space-3)
+  gap: var(--pz-space-5)
 
   .entry-card
     grid-column: span 2
     margin: 0
+    border: none
+
+    // The title runs in: inline, with the description following on the same
+    // baseline, so every card's text starts on its first line.
     h3
-      margin-top: 0
+      display: inline
+      margin: 0 0.8em 0 0
+      font-size: var(--pz-font-size-lg)
     p
-      @include type.supporting
+      display: inline
       margin: 0
+      font-size: var(--pz-font-size-md)
+      color: var(--pz-text-subtle-color)
 
   .entry-icon
     vertical-align: text-bottom
     margin-right: 0.4em
 
+  // The two the page is about: wider, a larger title, and the figures
+  // behind them beneath the text.
+  .entry-card.major
+    grid-column: span 3
+    padding: var(--pz-space-5)
+
+    h3
+      font-size: var(--pz-font-size-xl)
+
+  // The main thing to do here, said with a slight outline in the accent color,
+  // not with a button.
+  .entry-card.primary
+    border: 1px solid color-mix(in srgb, var(--pz-accent-color) 40%, transparent)
+
+    &:hover
+      border-color: var(--pz-accent-color)
+
   @media (max-width: 620px)
-    .entry-card
+    .entry-card,
+    .entry-card.major
       grid-column: span 6
-
-// The two the page is about: a panel rather than a card, with its own numbers
-// and a button into it. Spaced as a column so the button sits at the bottom
-// however many stats the other panel has.
-.entry-card.major
-  grid-column: span 3
-  display: flex
-  flex-direction: column
-  gap: var(--pz-space-4)
-  padding: var(--pz-space-5)
-
-  h3
-    margin: 0
-    font-size: var(--pz-font-size-xl)
-
-  p
-    font-size: var(--pz-font-size-md)
-
-  .entry-action
-    align-self: flex-start
-    margin-top: auto
-
-  @media (max-width: 620px)
-    grid-column: span 6
 
 .stats
   display: flex
   gap: var(--pz-space-3) var(--pz-space-6)
   flex-wrap: wrap
+  justify-content: center
+  padding-top: var(--pz-space-4)
 
   .stat
     display: flex

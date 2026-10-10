@@ -7,7 +7,12 @@
 import { fetchAPIData } from "~/_utils";
 import type { MapSnapshotSpec } from "~/map-snapshots/spec";
 import { areaByID, featuredAreas, type FeaturedArea } from "./featured-areas";
-import { fetchColumnAtPoint, fetchColumnByID } from "./hero-data";
+import {
+  fetchColumnAtPoint,
+  fetchColumnByID,
+  fetchProjectColumns,
+  isStandardProject,
+} from "./hero-data";
 import {
   INTERNATIONAL_TIMESCALE_ID,
   timeRangeForSpec,
@@ -18,7 +23,7 @@ import {
  * base style, the geology's opacities, the footprint's line. Every hero key
  * changes with it, so the page falls back to the cover photo rather than show
  * last week's styling until the renderer runs again. */
-export const HERO_SNAPSHOT_VERSION = 1;
+export const HERO_SNAPSHOT_VERSION = 2;
 
 /** The largest the map cell gets: the full content width (no column beside
  * it) by the top of `--hero-height`'s clamp. The page shows the image
@@ -54,6 +59,8 @@ export function heroSnapshotSpecs(): MapSnapshotSpec[] {
 export interface HeroSnapshotData {
   area: FeaturedArea;
   footprint: GeoJSON.Feature | null;
+  /** The column's project around it, when it isn't the standard one. */
+  projectColumns: GeoJSON.FeatureCollection | null;
   timeRange: TimeRange | null;
 }
 
@@ -75,9 +82,16 @@ export async function heroSnapshotData(
     fetchTimescale(),
   ]);
 
+  let projectColumns = null;
+  const projectID = column?.info.project_id;
+  if (projectID != null && !isStandardProject(projectID)) {
+    projectColumns = await fetchProjectColumns(projectID);
+  }
+
   return {
     area,
     footprint: column?.footprint ?? null,
+    projectColumns,
     timeRange: timeRangeForSpec(area.ageRange, intervals),
   };
 }

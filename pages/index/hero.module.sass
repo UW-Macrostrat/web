@@ -35,6 +35,10 @@
   // past. `isolation` keeps the overlay's stacking to this box as well.
   overflow: hidden
   isolation: isolate
+  // Safari won't clip a composited layer — the WebGL canvas — to a rounded
+  // box unless the box is composited itself; the map otherwise squares off
+  // the corners once it goes live.
+  transform: translateZ(0)
   border-radius: var(--pz-radius-lg)
   border: 1px solid color-mix(in srgb, var(--pz-accent-color) 30%, transparent)
   background: var(--pz-panel-background-color)
@@ -62,41 +66,45 @@
 $over-imagery-text: #fff
 $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
-// What is on screen, bottom-left. Transparent to the pointer except where
-// there is something to click, so the map underneath stays draggable.
+// What is on screen, bottom-left: the area's name and the age range showing,
+// on one line in a rounded panel — the same treatment as the hint badge in
+// the opposite corner. Only the panel takes the pointer, so the map
+// underneath stays draggable.
 .hero-overlay
   position: absolute
-  left: 0
-  right: 0
-  bottom: 0
+  left: 0.85em
+  bottom: 0.6em
+  max-width: calc(100% - 1.7em)
   z-index: 10
-  display: flex
-  flex-direction: column
-  align-items: flex-start
-  gap: 0.25em
-  padding: 2.5em 0.85em 0.6em
   pointer-events: none
-  // Weighted into the corner the caption is in, so it reaches the text without
-  // washing over the whole bottom edge of the map.
-  background: linear-gradient(to top right, rgba(0, 0, 0, 0.65), transparent 65%)
 
-  > *
-    pointer-events: auto
+.hero-caption
+  display: flex
+  align-items: center
+  flex-wrap: wrap
+  gap: 0.3em 0
+  padding: 0.35em 0.75em
+  border-radius: var(--pz-radius-lg)
+  background: rgba(0, 0, 0, 0.6)
+  pointer-events: auto
 
 .hero-title
-  margin: 0
+  margin: 0 0.75em 0 0
+  max-width: 30em
   font-family: var(--pz-heading-font)
   font-size: var(--pz-font-size-xl)
   line-height: var(--pz-line-height-tight)
   color: $over-imagery-text
-  text-shadow: $over-imagery-shadow
-  transition: opacity 0.45s ease, transform 0.45s ease
+  white-space: nowrap
+  overflow: hidden
+  transition: opacity 0.45s ease, max-width 0.45s ease, margin-right 0.45s ease
 
   // Panned away from the area: the name stops describing what is on screen, so
-  // it leaves rather than being replaced by a sentence saying it has.
+  // it leaves — fading and closing up, so the filter beside it slides over.
   &.is-hidden
     opacity: 0
-    transform: translateY(0.4em)
+    max-width: 0
+    margin-right: 0
     pointer-events: none
 
 // ------------------------------------------------------- under the map
@@ -153,7 +161,6 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
       text-transform: uppercase
       letter-spacing: 0.04em
       color: $over-imagery-text
-      text-shadow: $over-imagery-shadow
 
   // The clear button, over imagery rather than over a panel.
   :global(.bp6-button)

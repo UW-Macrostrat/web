@@ -32,13 +32,19 @@ import {
   ColumnPanel,
   type StaticHeroColumn,
 } from "./hero-column";
-import { fetchColumnAtPoint, fetchColumnByID, type HeroColumn } from "./hero-data";
+import {
+  fetchColumnAtPoint,
+  fetchColumnByID,
+  type HeroColumn,
+} from "./hero-data";
 import { fetchTimescale } from "./hero-snapshot";
 import { sortedIntervals, timeRangeForSpec } from "./time-range";
 
 /** A featured area's column, as the live hero seeds itself with — from the
  * cache. */
-export function featuredAreaColumn(area: FeaturedArea): Promise<HeroColumn | null> {
+export function featuredAreaColumn(
+  area: FeaturedArea
+): Promise<HeroColumn | null> {
   return cached(columnCache, area.id, () => fetchArea(area));
 }
 
@@ -75,7 +81,7 @@ function renderStillColumn(
 ): StaticHeroColumn {
   const intervals = sortedIntervals(timescale);
   const timeRange = timeRangeForSpec(area.ageRange, timescale);
-  const href = columnPageHref(column.info.col_id, area);
+  const href = columnPageHref(column.info);
   const render = (inDarkMode: boolean) =>
     withPatternDefs(
       renderToStaticMarkup(
@@ -162,7 +168,11 @@ function cached<T>(
 ): Promise<T | null> {
   const hit = cache.get(key);
   if (hit != null && Date.now() - hit.at < hit.ttl) return hit.value;
-  const entry: CacheEntry<T | null> = { at: Date.now(), ttl: TTL_MS, value: fetch() };
+  const entry: CacheEntry<T | null> = {
+    at: Date.now(),
+    ttl: TTL_MS,
+    value: fetch(),
+  };
   cache.set(key, entry);
   entry.value.then((value) => {
     if (value == null) entry.ttl = FAILURE_TTL_MS;

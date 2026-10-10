@@ -17,6 +17,8 @@
 
 /** Where the hero's camera sits. Pitch and bearing are part of the model, not
  * a global constant, so an area can be flat, rotated or oblique as it suits. */
+import { isStandardProject } from "./hero-data";
+
 export interface MapCamera {
   lat: number;
   lng: number;
@@ -34,10 +36,6 @@ export interface FeaturedArea {
   view: MapCamera;
   /** Pin this column rather than taking whatever the map's centre is over. */
   columnID?: number;
-  /** The project the area is a view of, by slug. The pinned column's link
-   * carries it, so the column page's navigation map opens on this project's
-   * columns rather than its default (the core-columns composite). */
-  project?: string;
   /** Open with the age filter already set: an interval by name, resolved
    * against the international timescale, or explicit bounds in Ma, oldest
    * first. */
@@ -60,7 +58,14 @@ function camera(
   zoom: number,
   overrides: Partial<MapCamera> = {}
 ): MapCamera {
-  return { lat, lng, zoom, pitch: HERO_PITCH, bearing: HERO_BEARING, ...overrides };
+  return {
+    lat,
+    lng,
+    zoom,
+    pitch: HERO_PITCH,
+    bearing: HERO_BEARING,
+    ...overrides,
+  };
 }
 
 export const featuredAreas: FeaturedArea[] = [
@@ -97,7 +102,6 @@ export const featuredAreas: FeaturedArea[] = [
       "Macrostrat's New Zealand project: measured sections down the South Island, Late Cretaceous to Recent. Overhead, because the point here is how much ground the project covers.",
     view: camera(-45.2, 170.2, 7.6, { pitch: 0, bearing: 0 }),
     columnID: 1030,
-    project: "new-zealand",
   },
   {
     id: "black-hills",
@@ -109,25 +113,26 @@ export const featuredAreas: FeaturedArea[] = [
   },
 ];
 
-/** The column page for a column the hero is showing. Carries the area's
- * project — in the hash, where the column page reads its project filter — only
- * while the column is the one the area pinned: a column the reader panned to
- * may belong to another project, and scoping its page to this one would leave
- * it off its own map. */
-export function columnPageHref(colID: number, area: FeaturedArea): string {
-  const href = `/columns/${colID}`;
-  if (area.project == null || area.columnID !== colID) return href;
-  return `${href}#project_id=${encodeURIComponent(area.project)}`;
+/** The column page for a column the hero is showing. A column outside the
+ * standard project carries its own — in the hash, where the column page reads
+ * its project filter — so that page's navigation map opens on the project's
+ * columns rather than the core composite. */
+export function columnPageHref(info: {
+  col_id: number;
+  project_id: number;
+}): string {
+  const href = `/columns/${info.col_id}`;
+  if (isStandardProject(info.project_id)) return href;
+  return `${href}#project_id=${info.project_id}`;
 }
 
 export function areaByID(id: string): FeaturedArea | null {
   return featuredAreas.find((area) => area.id === id) ?? null;
 }
 
-/** The area the server opens on: the same one all day, so the page caches and a
- * reader who comes back sees what they saw. */
-export function featuredAreaForToday(date = new Date()): FeaturedArea {
-  const start = Date.UTC(date.getUTCFullYear(), 0, 1);
-  const dayOfYear = Math.floor((date.getTime() - start) / 86400000);
-  return featuredAreas[dayOfYear % featuredAreas.length];
+/** The area the server opens on: a different one each load, so a reader who
+ * comes back sees another part of the data. (It was one per day, for the sake
+ * of caching the page; the page isn't cached.) */
+export function randomFeaturedArea(): FeaturedArea {
+  return featuredAreas[Math.floor(Math.random() * featuredAreas.length)];
 }

@@ -23,13 +23,7 @@
  *   outside dims, on both the map and the column.
  */
 import h from "./hero.module.sass";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MapView } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import mapboxgl from "mapbox-gl";
@@ -71,6 +65,8 @@ import {
   type HeroPoint,
   type MapSourceRef,
   type MapUnitMatch,
+  fetchProjectColumns,
+  isStandardProject,
 } from "./hero-data";
 import {
   expandedTimeRange,
@@ -202,7 +198,7 @@ function HeroPanel({ hero, still }: HeroLiveProps) {
       "div.hero-column-slot",
       h(ColumnPanel, {
         column,
-        href: columnPageHref(column.info.col_id, carousel.area),
+        href: columnPageHref(column.info),
         onSelectUnit: state.selectUnit,
         focusButton: h(ColumnFocusButton, { column }),
       })
@@ -226,6 +222,7 @@ function HeroPanel({ hero, still }: HeroLiveProps) {
             key: "map",
             area: carousel.area,
             footprint: column?.footprint ?? null,
+            projectColumns: state.projectColumns,
             timeRange,
             onCenterChanged: state.setCenter,
             onProbe: state.probeAt,
@@ -246,8 +243,9 @@ function HeroPanel({ hero, still }: HeroLiveProps) {
   );
 }
 
-/** What sits over the map: the area's name and the age range showing, in the
- * bottom-left corner. */
+/** What sits over the map: the area's name and the age range showing, side by
+ * side in one panel in the bottom-left corner. Nothing at all once the name has
+ * left and there is no filter — an empty panel would be a smudge. */
 function HeroChrome({
   area,
   timeRange,
@@ -266,10 +264,16 @@ function HeroChrome({
   let titleTag = "h3.hero-title.is-hidden";
   if (onStory) titleTag = "h3.hero-title";
 
-  return h("div.hero-overlay", [
-    h(titleTag, area.title),
-    h(TimeRangeFilter, { timeRange, onClear: onClearTimeRange }),
-  ]);
+  const hasFilter = timeRange != null && timeRange.intervals.length > 0;
+  if (!onStory && !hasFilter) return null;
+
+  return h(
+    "div.hero-overlay",
+    h("div.hero-caption", [
+      h(titleTag, area.title),
+      h(TimeRangeFilter, { timeRange, onClear: onClearTimeRange }),
+    ])
+  );
 }
 
 /* -------------------------------------------------------------- intervals */
@@ -339,6 +343,8 @@ function useAreaFocusState(area: FeaturedArea) {
 interface HeroState {
   center: HeroPoint;
   column: HeroColumn | null;
+  /** The rest of the column's project, when it isn't the standard one. */
+  projectColumns: GeoJSON.FeatureCollection | null;
   loading: boolean;
   timeRange: TimeRange | null;
   mapUnit: MapUnitMatch | null;
@@ -438,6 +444,7 @@ function useHeroState(
     setProbe,
   });
   useHeroColumn(area, pinnedColumn, center, hero, setColumn, setLoading);
+  const projectColumns = useProjectColumns(column);
   useMapUnitAtPoint(probe, onMapUnitResolved, setMapSource);
 
   const selectUnit = useCallback(
@@ -469,6 +476,7 @@ function useHeroState(
   return {
     center,
     column,
+    projectColumns,
     loading,
     timeRange,
     mapUnit,
@@ -560,6 +568,37 @@ function useHeroColumn(
   }, [pinnedColumn, center.lat, center.lng]);
 }
 
+/** The other columns of the current column's project, for a project that isn't
+ * the standard one: a New Zealand column is one measured section of many, and
+ * the project's extent is the thing to see. Fetched once per project and kept;
+ * null for the standard project, or while a project's columns are on their
+ * way. */
+function useProjectColumns(
+  column: HeroColumn | null
+): GeoJSON.FeatureCollection | null {
+  const projectID = column?.info.project_id ?? null;
+  const [byProject, setByProject] = useState<
+    Record<number, GeoJSON.FeatureCollection | null>
+  >({});
+  const wanted = !isStandardProject(projectID);
+  const known = projectID != null && projectID in byProject;
+
+  useEffect(() => {
+    if (!wanted || known || projectID == null) return;
+    let cancelled = false;
+    fetchProjectColumns(projectID).then((collection) => {
+      if (cancelled) return;
+      setByProject((prev) => ({ ...prev, [projectID]: collection }));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectID, wanted, known]);
+
+  if (!wanted || projectID == null) return null;
+  return byProject[projectID] ?? null;
+}
+
 /** Asks what geologic map unit is at the probe point, and who published the map
  * it came from. Runs for the opening centre too, so the credit line is there
  * before anything is clicked. */
@@ -594,6 +633,8 @@ function useMapUnitAtPoint(
 interface HeroMapProps {
   area: FeaturedArea;
   footprint: GeoJSON.Feature | null;
+  /** The column's project, drawn around it when it isn't the standard one. */
+  projectColumns?: GeoJSON.FeatureCollection | null;
   timeRange: TimeRange | null;
   onCenterChanged?(lat: number, lng: number, userInitiated: boolean): void;
   onProbe?(lat: number, lng: number): void;
@@ -611,6 +652,7 @@ const HERO_MOVE = { heroTransition: true };
 export function HeroMap({
   area,
   footprint,
+  projectColumns = null,
   timeRange,
   onCenterChanged,
   onProbe,
@@ -635,6 +677,8 @@ export function HeroMap({
 
   let children = [
     h(AreaFlight, { key: "flight", area }),
+    // The project's columns go under the current column's outline.
+    h(ProjectColumnsLayer, { key: "project", columns: projectColumns }),
     h(ColumnFootprintLayer, { key: "footprint", footprint }),
     h(TimeRangeHighlight, { key: "highlight", timeRange }),
     h(CenterReporter, { key: "centre", onChange: onCenterChanged }),
@@ -643,9 +687,9 @@ export function HeroMap({
   ];
   let snapshotOptions = {};
   if (snapshot) {
-    // What the picture shows — the camera, the footprint, the filter — and
+    // What the picture shows — the camera, the footprints, the filter — and
     // none of the listeners that wait for a reader.
-    children = children.slice(0, 3);
+    children = children.slice(0, 4);
     snapshotOptions = {
       interactive: false,
       // The canvas is read back after it has been composited.
@@ -851,10 +895,63 @@ function ColumnFootprintLayer({
   return null;
 }
 
+/** The rest of a nonstandard project, as thin outlines under the current
+ * column's own. The source is always there, so the layer is, which is what
+ * lets the snapshot route wait on it. */
+function ProjectColumnsLayer({
+  columns,
+}: {
+  columns: GeoJSON.FeatureCollection | null;
+}) {
+  useOverlayStyle(() => projectColumnsStyle, []);
+  useMapStyleOperator(
+    (map) => {
+      if (map.getSource("hero-project-columns") == null) return;
+      setGeoJSON(
+        map,
+        "hero-project-columns",
+        columns ?? { type: "FeatureCollection", features: [] }
+      );
+    },
+    [columns]
+  );
+  return null;
+}
+
+/** The layers a still of the hero must have before it is captured: the
+ * geology and the column outlines, which arrive after the base style. */
+export const HERO_SNAPSHOT_LAYERS = [
+  "burwell_fill",
+  "hero-project-columns-outline",
+  "hero-column-outline",
+];
+
 /** Map paint sits over satellite imagery rather than over a themed surface, so
  * it can't read the design-system tokens — a Mapbox paint value is not CSS.
  * Named here so the one place to change it is obvious. */
 const FOOTPRINT_LINE_COLOR = "rgba(255, 255, 255, 0.8)";
+const PROJECT_LINE_COLOR = "rgba(255, 255, 255, 0.5)";
+
+const projectColumnsStyle = {
+  version: 8,
+  sources: {
+    "hero-project-columns": {
+      type: "geojson",
+      data: { type: "FeatureCollection", features: [] },
+    },
+  },
+  layers: [
+    {
+      id: "hero-project-columns-outline",
+      type: "line",
+      source: "hero-project-columns",
+      paint: {
+        "line-color": PROJECT_LINE_COLOR,
+        "line-width": 1,
+      },
+    },
+  ],
+};
 
 const columnFootprintStyle = {
   version: 8,

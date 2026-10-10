@@ -7,6 +7,12 @@
  * frame: style operators (a filter's `setPaintProperty`, a GeoJSON source
  * being filled) run *after* the first `idle` and trigger a second one.
  *
+ * That second idle is not guaranteed to come before the first one settles:
+ * overlay styles are merged in after the base style loads, and a base style
+ * that idles quickly — satellite imagery with no geology yet — can settle and
+ * be captured without them. `requiredLayers` names the layers the overlays
+ * add; the capture waits until every one of them is in the style.
+ *
  * The capture reads the WebGL canvas, so the map must be built with
  * `preserveDrawingBuffer: true`. It is the canvas only: HTML over the map —
  * controls, the Mapbox wordmark, attribution — is not in the image, and the
@@ -41,6 +47,8 @@ interface ReporterOptions {
   /** The key the server computed for this view. The renderer files the image
    * under it, so the deployed site's idea of the key is the one that counts. */
   snapshotKey: string;
+  /** Layers that must exist before the map counts as settled. */
+  requiredLayers?: string[];
   settleMs?: number;
   timeoutMs?: number;
 }
@@ -52,6 +60,7 @@ export function MapSnapshotReporter(props: ReporterOptions) {
 
 export function useMapSnapshotReporter({
   snapshotKey,
+  requiredLayers = [],
   settleMs = 750,
   timeoutMs = 90_000,
 }: ReporterOptions) {
@@ -85,6 +94,7 @@ export function useMapSnapshotReporter({
       cancelSettle();
       settleTimer = setTimeout(() => {
         if (!map.loaded() || !map.areTilesLoaded()) return;
+        if (requiredLayers.some((id) => map.getLayer(id) == null)) return;
         publish("ready");
       }, settleMs);
     };
@@ -106,5 +116,5 @@ export function useMapSnapshotReporter({
       map.off("idle", onIdle);
       map.off("render", cancelSettle);
     };
-  }, [initialized, snapshotKey, settleMs, timeoutMs]);
+  }, [initialized, snapshotKey, settleMs, timeoutMs, requiredLayers.join(",")]);
 }
