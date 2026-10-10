@@ -33,6 +33,7 @@ import {
   dimFilledValuesAtom,
   editModeAtom,
   editingModeAtom,
+  grainsizeAtom,
   positionAxisAtom,
   showAgesAtom,
   showIdentifiersAtom,
@@ -46,6 +47,7 @@ import {
   targetUnitHeightAtom,
   unconformityCollapseAtom,
 } from "./state";
+import type { GrainsizeSetting } from "./state";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -84,6 +86,7 @@ function DisplaySettingsPanel() {
     h("h3", "Display"),
     h(HeightScaleControl),
     h(UnconformityControl),
+    h(GrainsizeControl),
     h(TimescalesControl),
     h(NumberControl, {
       label: labelWithUnit("Fixed scale", scaleUnit),
@@ -274,6 +277,31 @@ function UnconformityControl() {
       value,
       onValueChange: (next: UnconformityCollapse) => setValue(next),
       disabled: hybridScale != null,
+    })
+  );
+}
+
+const grainsizeOptions = [
+  { label: "Auto", value: "auto" },
+  { label: "On", value: "on" },
+  { label: "Off", value: "off" },
+];
+
+/** Finer-grained units drawn narrower. `auto` is on for a measured column. */
+function GrainsizeControl() {
+  const [value, setValue] = useAtom(grainsizeAtom);
+  return h(
+    FormGroup,
+    {
+      label: "Grain size",
+      helperText: "Finer-grained units are drawn narrower. Auto shows it on measured columns.",
+    },
+    h(SegmentedControl, {
+      small: true,
+      fill: true,
+      options: grainsizeOptions,
+      value,
+      onValueChange: (next: GrainsizeSetting) => setValue(next),
     })
   );
 }
