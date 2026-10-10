@@ -51,6 +51,14 @@ EXPOSE 3000
 
 ENV NODE_NO_WARNINGS=1
 
+# Build information, set by CI. Last, so a new commit leaves the layers above cached.
+ARG MACROSTRAT_VERSION MACROSTRAT_RELEASE MACROSTRAT_COMMIT MACROSTRAT_BUILD_DATE MACROSTRAT_REPOSITORY
+ENV MACROSTRAT_VERSION=$MACROSTRAT_VERSION \
+    MACROSTRAT_RELEASE=$MACROSTRAT_RELEASE \
+    MACROSTRAT_COMMIT=$MACROSTRAT_COMMIT \
+    MACROSTRAT_BUILD_DATE=$MACROSTRAT_BUILD_DATE \
+    MACROSTRAT_REPOSITORY=$MACROSTRAT_REPOSITORY
+
 # A real init as PID 1. Chromium's helpers outlive the browser that started
 # them and are re-parented to PID 1; yarn never reaps them, so without this each
 # render batch would leave zombies behind.

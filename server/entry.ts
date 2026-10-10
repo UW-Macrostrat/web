@@ -54,9 +54,31 @@ function startServer() {
     res.set("Cache-Control", "public, max-age=600");
     res.json(column);
   });
+  // What this build is, for the admin page; and that it serves, for probes.
+  app.get("/_version", (_req, res) => {
+    res.set("Cache-Control", "no-store");
+    res.json(buildInfo());
+  });
+  app.get("/_health", (_req, res) => {
+    res.set("Cache-Control", "no-store");
+    res.json({ status: "ok" });
+  });
   apply(app);
   warmMapSnapshots();
   return serve(app);
+}
+
+/** The build this process runs, from the variables CI sets in the image. */
+function buildInfo() {
+  const env = (key: string) => process.env[key] || null;
+  return {
+    service: "web",
+    version: env("MACROSTRAT_VERSION"),
+    release: process.env.MACROSTRAT_RELEASE === "true",
+    commit: env("MACROSTRAT_COMMIT"),
+    build_date: env("MACROSTRAT_BUILD_DATE"),
+    repository: env("MACROSTRAT_REPOSITORY"),
+  };
 }
 
 /** Ask for the homepage once the server is up, so its stills are drawn before
