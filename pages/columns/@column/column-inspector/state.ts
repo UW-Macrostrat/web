@@ -50,6 +50,7 @@ export function useColumnState(columnInfo) {
   const validateSelectedUnitID = useSetAtom(validateSelectedUnitIDAtom);
 
   const pixelScale = useAtomValue(pixelScaleAtom);
+  const grainsize = useAtomValue(grainsizeAtom) ?? "auto";
 
   useEffect(() => {
     validateSelectedUnitID();
@@ -113,6 +114,7 @@ export function useColumnState(columnInfo) {
     t_pos,
     b_pos,
     pixelScale,
+    grainsize,
   };
 }
 
@@ -147,6 +149,8 @@ interface ColumnHashState {
   unit_details?: "popover";
   /** The age-model facet draws every surface, not just the tie points */
   surfaces?: "all";
+  /** Grain-size widths forced on or off; unset follows the column type */
+  grainsize?: "on" | "off";
 }
 
 function validateInt(value: string | null): number | undefined {
@@ -205,6 +209,10 @@ function getStateFromHash(): ColumnHashState {
     "popover",
   ]);
   state.surfaces = validateValues<"all">(params.get("surfaces"), ["all"]);
+  state.grainsize = validateValues<"on" | "off">(params.get("grainsize"), [
+    "on",
+    "off",
+  ]);
   state.unit = validateInt(params.get("unit"));
   for (const key of ["int_id", "t_int_id", "b_int_id"]) {
     state[key] = validateInt(params.get(key));
@@ -298,6 +306,7 @@ const validateSelectedUnitIDAtom = atom(null, (get, set) => {
 
 const axisTypeAtom = atomWithHashParam<ColumnAxisType>("axis");
 const facetAtom = atomWithHashParam<string | null>("facet");
+const grainsizeAtom = atomWithHashParam<"on" | "off" | null>("grainsize");
 
 /** Setter for the facet shown beside the column (e.g. from a fossils link). */
 export function useSetFacet() {
@@ -493,6 +502,7 @@ export function ColumnSettingsPanel() {
     h(AxisTypeControl),
     h(FacetControl),
     h(UnitPopoverSwitch),
+    h(GrainsizeControl),
     // What the navigation map shows, rather than how the column is drawn — but
     // it belongs with the other view controls rather than floating over the map
     // itself, where it read as part of the map.
@@ -669,6 +679,33 @@ function AxisTypeControl() {
         setValue: setAxisType,
         disabled: axisType === defaultAxisType,
       }),
+    ])
+  );
+}
+
+const grainsizeOptions = [
+  { label: "Auto", value: "auto" },
+  { label: "On", value: "on" },
+  { label: "Off", value: "off" },
+];
+
+/** Finer-grained units drawn narrower; `auto` (unset) is on for a measured column. */
+function GrainsizeControl() {
+  const [value, setValue] = useAtom(grainsizeAtom);
+  return h(
+    FormGroup,
+    { label: "Grain size", inline: true },
+    h(ControlGroup, { fill: true }, [
+      h(HTMLSelect, {
+        options: grainsizeOptions,
+        value: value ?? "auto",
+        onChange: (evt) => {
+          let next = evt.target.value;
+          if (next === "auto") next = null;
+          setValue(next);
+        },
+      }),
+      h(ClearButton, { value, setValue }),
     ])
   );
 }

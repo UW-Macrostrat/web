@@ -210,6 +210,7 @@ function ColumnContentPane({ columnInfo }) {
     t_pos,
     b_pos,
     pixelScale,
+    grainsize,
   } = useColumnState(columnInfo);
 
   // The rendered age window follows the shared time filter, animating between
@@ -292,6 +293,7 @@ function ColumnContentPane({ columnInfo }) {
               axisType,
               // `auto` grain size follows the column type, not the axis
               columnType: columnTypeFromColType(columnInfo.col_type),
+              grainsize,
               columnWidth: 300,
               width: 450,
               maxInternalColumns,
