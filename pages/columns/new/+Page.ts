@@ -4,10 +4,24 @@
  * column, then edit it. Nothing is written — a draft lives in the page until
  * it is exported as a units sheet, so the only way out is Export CSV. When a
  * write route exists this becomes a POST and a redirect to `edit/:col_id`.
+ *
+ * Signing in comes first, on the page itself rather than by a redirect to
+ * `/login`: any Macrostrat account will do, and the prompt says so.
+ *
+ * The form and the prompt are an ordinary content page — the standard header
+ * with the alpha tag beside the title, the content column's measure. Only the
+ * editor, once a column is started, takes the hybrid frame.
  */
 import hyper from "@macrostrat/hyper";
 import { useCallback, useMemo, useState } from "react";
-import { atom, createStore, Provider, useAtom, useAtomValue, useSetAtom } from "jotai";
+import {
+  atom,
+  createStore,
+  Provider,
+  useAtom,
+  useAtomValue,
+  useSetAtom,
+} from "jotai";
 import {
   AnchorButton,
   Button,
@@ -18,13 +32,16 @@ import {
   Tab,
   Tabs,
 } from "@blueprintjs/core";
-import { AlphaTag } from "~/components";
-import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
+import { useAuth } from "@macrostrat/form-components";
+import { AlphaTag, LinkCard, LoginPrompt } from "~/components";
+import { ContentPage, ContentPageHeader } from "~/layouts";
+import { matchingTools } from "../../lex/match/tools";
 import { ColumnEditorPage } from "../@column/column-editor/editor-shell";
 import {
   type ColumnEditorData,
   COLUMNS_INDEX,
   draftColumn,
+  newColumnHref,
 } from "../@column/column-editor/data";
 import { EditorScopeProvider } from "../@column/column-editor/state";
 import {
@@ -37,13 +54,25 @@ import { ColumnUpload, previewFromOpener } from "./column-upload.ts";
 
 const h = hyper.styled(styles);
 
-const capabilities: Partial<LayoutCapabilities> = {
-  modes: ["content-full"],
-  defaultMode: "content-full",
-  hasAssistant: false,
-  itemName: "New column",
-  contentScroll: "panel",
-};
+/** The content page the form and the sign-in prompt sit on. The persona
+ * control in the header comes from the route's `+headerActions.ts`, so the
+ * editor's frame carries it too. */
+function NewColumnFrame({ children }) {
+  return h(
+    ContentPage,
+    {
+      className: "new-column-page",
+      header: h(ContentPageHeader, {
+        variant: "hybrid",
+        titleAdornment: h(AlphaTag, {
+          content:
+            "An experimental column editor. A new column lives in the page until you export it.",
+        }),
+      }),
+    },
+    children
+  );
+}
 
 // Stable empty array so the slot doesn't re-target every render.
 const NO_SELECTION: number[] = [];
@@ -52,8 +81,56 @@ const NO_SELECTION: number[] = [];
  * column: the form's atoms in a jotai provider, the editor's in a fresh
  * editing-session store (there is no column id to key one by). */
 export function Page() {
+  const { user } = useAuth();
   const session = useMemo(() => createStore(), []);
-  return h(Provider, h(EditorScopeProvider, { store: session }, h(NewColumnPage)));
+  if (user == null) return h(SignInFirst);
+  return h(
+    Provider,
+    h(EditorScopeProvider, { store: session }, h(NewColumnPage))
+  );
+}
+
+/** The sign-in prompt, in the page's own frame. The editor asks only for an
+ * account — the `web_user` role every sign-in carries — not for any standing
+ * an administrator has to grant, and it is worth saying so: most of the site's
+ * guarded pages do want more. */
+function SignInFirst() {
+  return h(
+    NewColumnFrame,
+    h("div.sign-in-first", [
+      h(LoginPrompt, {
+        returnURL: newColumnHref,
+        title: "Sign in to start a column",
+        description: h("p", [
+          "The column editor is open to anyone with an ORCID account.",
+        ]),
+      }),
+      h(ToolsSection),
+    ])
+  );
+}
+
+/** The matching tools, for anyone preparing a column: they show how the
+ * importer will read a lithology description or a stratigraphic name. */
+function ToolsSection() {
+  return h("section.tools-section", [
+    h("h2", "Tools"),
+    h(
+      "div.tools-grid",
+      matchingTools.map((tool) =>
+        h(
+          LinkCard,
+          {
+            key: tool.href,
+            href: tool.href,
+            title: tool.title,
+            density: "list",
+          },
+          tool.text
+        )
+      )
+    ),
+  ]);
 }
 
 /** The column being built, once the form has started it. */
@@ -158,17 +235,10 @@ function NewColumnFormContainer({
     )
   );
 
-  const content = h("div.new-column-page", [formTypePicker, formContent]);
-
-  return h(HybridPage, {
-    className: "new-column-page",
-    capabilities,
-    actions: h(AlphaTag, {
-      content:
-        "An experimental column editor. A new column lives in the page until you export it.",
-    }),
-    content,
-  });
+  return h(
+    NewColumnFrame,
+    h("div.new-column-body", [formTypePicker, formContent, h(ToolsSection)])
+  );
 }
 
 function NewColumnForm({
@@ -200,7 +270,12 @@ function NewColumnForm({
 
   const setProject = (project_id: number | null) => {
     // A group belongs to one project
-    setFields((f) => ({ ...f, project_id, col_group_id: null, col_group: null }));
+    setFields((f) => ({
+      ...f,
+      project_id,
+      col_group_id: null,
+      col_group: null,
+    }));
   };
 
   const setGroup = (group: GroupDef | null) => {
@@ -212,7 +287,11 @@ function NewColumnForm({
   };
 
   const setType = (col_type: ColumnType) => {
-    setFields((f) => ({ ...f, col_type, axis_type: defaultAxisType[col_type] }));
+    setFields((f) => ({
+      ...f,
+      col_type,
+      axis_type: defaultAxisType[col_type],
+    }));
   };
 
   const canStart = fields.col_name.trim() !== "";

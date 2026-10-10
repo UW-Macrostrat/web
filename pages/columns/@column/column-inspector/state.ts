@@ -145,6 +145,8 @@ interface ColumnHashState {
   scale?: number;
   /** Where a selected unit's details show; the sidebar when unset */
   unit_details?: "popover";
+  /** The age-model facet draws every surface, not just the tie points */
+  surfaces?: "all";
 }
 
 function validateInt(value: string | null): number | undefined {
@@ -184,6 +186,7 @@ const facets = [
   { label: "Fossils (taxa)", value: "fossil-taxa" },
   { label: "Fossils (collections)", value: "fossil-collections" },
   { label: "Detrital zircons", value: "detrital-zircons" },
+  { label: "Age model", value: "age-model" },
 ];
 
 const validFacets = facets.map((d) => d.value).filter((d) => d != "none");
@@ -201,6 +204,7 @@ function getStateFromHash(): ColumnHashState {
   state.unit_details = validateValues<"popover">(params.get("unit_details"), [
     "popover",
   ]);
+  state.surfaces = validateValues<"all">(params.get("surfaces"), ["all"]);
   state.unit = validateInt(params.get("unit"));
   for (const key of ["int_id", "t_int_id", "b_int_id"]) {
     state[key] = validateInt(params.get(key));
@@ -359,6 +363,25 @@ const unitDetailsAtom = atomWithHashParam<"popover" | null>("unit_details");
  * rather than in the sidebar. */
 export function useUnitPopover(): boolean {
   return useAtomValue(unitDetailsAtom) === "popover";
+}
+
+const surfacesAtom = atomWithHashParam<"all" | null>("surfaces");
+
+export function useShowAllSurfaces(): boolean {
+  return useAtomValue(surfacesAtom) === "all";
+}
+
+function AllSurfacesSwitch() {
+  const [value, setValue] = useAtom(surfacesAtom);
+  return h(Switch, {
+    label: "Show all surfaces",
+    checked: value === "all",
+    onChange: (evt) => {
+      let next = null;
+      if ((evt.target as HTMLInputElement).checked) next = "all";
+      setValue(next);
+    },
+  });
 }
 
 function UnitPopoverSwitch() {
@@ -675,5 +698,6 @@ function FacetControl() {
         h(ClearButton, { value: facet, setValue: setFacet }),
       ])
     ),
+    h.if(facet === "age-model")(AllSurfacesSwitch),
   ]);
 }

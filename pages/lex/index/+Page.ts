@@ -4,6 +4,7 @@ import { useData } from "vike-react/useData";
 import { useState } from "react";
 import { Tag, Dialog, Icon } from "@blueprintjs/core";
 import { LexSearchPrompt } from "~/components/lex/search-omnibar";
+import { matchingTools } from "../match/tools";
 
 export function Page() {
   const { res } = useData();
@@ -51,29 +52,16 @@ export function Page() {
       h(Stat, { value: measurements, label: "measurements" }),
     ]),
     h("div.lex-search", h(LexSearchPrompt)),
-    h("section.dictionaries", [
-      h("h2", "Dictionaries"),
-      h(
-        "div.dictionary-grid",
-        dictionaries.map((item) =>
-          h(
-            LinkCard,
-            {
-              key: item.href,
-              href: item.href,
-              title: item.title,
-              // Global (matched with `:global()` in the stylesheet): the card's
-              // own class is hashed by the cards module, so the grid can only
-              // reach it through a name it passes in itself.
-              className: "dictionary-card",
-            },
-            item.text
-          )
-        )
-      ),
-    ]),
+    h(CardSection, { title: "Dictionaries", items: dictionaries }),
+    // What the dictionaries are *for*, in part: the importers read free text
+    // against them, and these show how.
+    h(CardSection, { title: "Tools", items: matchingTools }),
     h("p.lex-footnote", [
-      h("a", { href: "https://macrostrat.org/sift/#", target: "_blank" }, "Sift"),
+      h(
+        "a",
+        { href: "https://macrostrat.org/sift/#", target: "_blank" },
+        "Sift"
+      ),
       ", Macrostrat's legacy lexicon app, is still available while it is ",
       "gradually brought into this framework.",
     ]),
@@ -119,11 +107,6 @@ const dictionaries = [
     title: "Economics",
     text: "Economic uses of geologic materials.",
   },
-   {
-    href: "/lex/lith-match",
-    title: "Lithology matcher",
-    text: "Preview how the column-ingestion importer matches free lithology text to Macrostrat's lithology vocabulary.",
-  },
   {
     href: "/lex/minerals",
     title: "Minerals",
@@ -134,8 +117,32 @@ const dictionaries = [
     title: "Structures",
     text: "Names and descriptions of geologic structures.",
   },
-
 ];
+
+/** A titled grid of link cards: the dictionaries, the tools. */
+function CardSection({ title, items }) {
+  return h("section.dictionaries", [
+    h("h2", title),
+    h(
+      "div.dictionary-grid",
+      items.map((item) =>
+        h(
+          LinkCard,
+          {
+            key: item.href,
+            href: item.href,
+            title: item.title,
+            // Global (matched with `:global()` in the stylesheet): the card's
+            // own class is hashed by the cards module, so the grid can only
+            // reach it through a name it passes in itself.
+            className: "dictionary-card",
+          },
+          item.text
+        )
+      )
+    ),
+  ]);
+}
 
 /** One figure in the row above the dictionaries. Linked when there is
  * somewhere to go. */

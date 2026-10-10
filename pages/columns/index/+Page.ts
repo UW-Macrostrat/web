@@ -251,6 +251,12 @@ const columnListLinks: HybridLink[] = [
     icon: "comparison",
     tag: "Beta",
   },
+  {
+    label: "New column",
+    href: "/columns/new",
+    icon: "add",
+    tag: "Alpha",
+  },
 ];
 
 export function Page({ linkPrefix = "/" }) {

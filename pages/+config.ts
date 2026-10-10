@@ -44,6 +44,9 @@ export default {
     "/community/apps": "/about/apps",
     "/community/integrations": "/community/collaborators",
     "/support": "/about/support",
+    // The matching tools, moved under the lexicon's own tools section.
+    "/lex/lith-match": "/lex/match/lithologies",
+    "/dev/match-api": "/lex/match/strat-names",
     // The map interface's usage guide and changelog, formerly panels of the
     // map page, are documentation pages (docs/map in this repository).
     "/map/usage": "/docs/website/map/usage",

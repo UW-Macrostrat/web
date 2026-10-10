@@ -27,7 +27,7 @@ import {
   CORE_COLUMNS_PROJECT_ID,
   MacrostratDataProvider,
 } from "@macrostrat/data-provider";
-import { StableIsotopesColumn } from "./facets";
+import { AgeModelSurfaces, StableIsotopesColumn } from "./facets";
 import { ModalUnitPanel } from "./modal-panel";
 import { ColumnMapSlot } from "~/components/column-map/target";
 import { MapSettingsSection } from "~/components/map-settings";
@@ -242,7 +242,11 @@ function ColumnContentPane({ columnInfo }) {
 
   let facet = null;
   let showLabelColumn = true;
-  if (facetElement != null) {
+  if (facetType === "age-model") {
+    // Its labels take the label column; unwrapped, so its lines can measure the units
+    showLabelColumn = false;
+    facet = h(AgeModelSurfaces);
+  } else if (facetElement != null) {
     showLabelColumn = false;
     facet = h("div.facet-container", [facetElement]);
   }

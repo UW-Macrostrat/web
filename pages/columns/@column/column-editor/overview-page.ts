@@ -8,6 +8,7 @@
  * the units page shows here too — one session, three pages. */
 import hyper from "@macrostrat/hyper";
 import {
+  Button,
   Callout,
   FormGroup,
   HTMLSelect,
@@ -16,6 +17,11 @@ import {
   TextArea,
 } from "@blueprintjs/core";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import { useAuth } from "@macrostrat/form-components";
+import { useCallback, useState } from "react";
+import { isAdminSession } from "~/components/auth";
+import { updateColumnPlacement } from "./ingest-api";
+import { metadataEditsAtom } from "./state/metadata";
 import { PatternProvider } from "~/_providers";
 import { GroupSelect, ProjectSelect, type GroupDef } from "./project-fields";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
@@ -60,6 +66,82 @@ export function OverviewPage() {
   });
 }
 
+/** For a column already in the database: write a changed project or group
+ * straight away, without re-ingesting the units. Administrators only. */
+function MovePlacement({
+  metadata,
+  changed,
+}: {
+  metadata: ColumnMetadata;
+  changed: boolean;
+}) {
+  const snapshot = useAtomValue(snapshotAtom);
+  const setSnapshot = useSetAtom(snapshotAtom);
+  const setEdits = useSetAtom(metadataEditsAtom);
+  const { user } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const colID = snapshot?.col_id ?? 0;
+
+  const save = useCallback(async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await updateColumnPlacement(colID, {
+        project_id: metadata.project_id,
+        col_group_id: metadata.col_group_id,
+        col_group: metadata.col_group_id == null ? metadata.col_group : null,
+      });
+      // The saved placement is the loaded one now, so the edits for it clear.
+      setSnapshot((prev) => {
+        if (prev == null) return prev;
+        return {
+          ...prev,
+          columnInfo: {
+            ...prev.columnInfo,
+            project_id: result.project_id,
+            project: result.project,
+            col_group_id: result.col_group_id,
+            col_group: result.col_group,
+          },
+        };
+      });
+      setEdits(({ project_id, col_group_id, col_group, ...rest }) => rest);
+    } catch (e: any) {
+      setError(e?.message ?? String(e));
+    } finally {
+      setBusy(false);
+    }
+  }, [colID, metadata, setSnapshot, setEdits]);
+
+  if (colID <= 0 || !changed) return null;
+
+  if (!isAdminSession(user)) {
+    return h(
+      Callout,
+      { intent: "primary", icon: "info-sign", compact: true },
+      "Only an administrator can move a column to another project or group."
+    );
+  }
+
+  let errorNode = null;
+  if (error != null)
+    errorNode = h(Callout, { intent: "danger", compact: true }, error);
+
+  return h("div.move-placement", [
+    h(Button, {
+      icon: "exchange",
+      intent: "primary",
+      text: "Move column",
+      loading: busy,
+      disabled: metadata.project_id == null,
+      title: "Change the project and group of this column in the database",
+      onClick: save,
+    }),
+    errorNode,
+  ]);
+}
+
 const COLUMN_TYPES = [
   { label: "Measured", value: "section" },
   { label: "Composite", value: "column" },
@@ -72,7 +154,10 @@ const AXIS_TYPES = [
   { label: "Ordinal", value: "age" },
 ];
 
-const DEFAULT_AXIS_TYPE: Record<ColumnMetadata["col_type"], ColumnMetadata["axis_type"]> = {
+const DEFAULT_AXIS_TYPE: Record<
+  ColumnMetadata["col_type"],
+  ColumnMetadata["axis_type"]
+> = {
   section: "height",
   column: "age",
 };
@@ -96,8 +181,16 @@ function MetadataForm() {
   };
 
   const setGroup = (group: GroupDef | null) => {
-    edit({ col_group_id: group?.col_group_id ?? null, col_group: group?.name ?? null });
+    edit({
+      col_group_id: group?.col_group_id ?? null,
+      col_group: group?.name ?? null,
+    });
   };
+
+  const placementChanged =
+    metadata.project_id !== loaded.project_id ||
+    metadata.col_group_id !== loaded.col_group_id ||
+    metadata.col_group !== loaded.col_group;
 
   const setType = (col_type: ColumnMetadata["col_type"]) => {
     edit({ col_type, axis_type: DEFAULT_AXIS_TYPE[col_type] });
@@ -129,14 +222,20 @@ function MetadataForm() {
     ),
     h(
       FormGroup,
-      { label: "Group", helperText: "The column group this belongs to." },
+      {
+        label: "Group",
+        helperText:
+          "The column group this belongs to; a new one is created on write.",
+      },
       h(GroupSelect, {
         project_id: metadata.project_id,
         value: metadata.col_group_id,
         label: metadata.col_group,
+        allowCreate: true,
         onChange: setGroup,
       })
     ),
+    h(MovePlacement, { metadata, changed: placementChanged }),
     h(
       FormGroup,
       {
@@ -158,7 +257,8 @@ function MetadataForm() {
         small: true,
         options: AXIS_TYPES,
         value: metadata.axis_type,
-        onValueChange: (v: string) => edit({ axis_type: v as ColumnMetadata["axis_type"] }),
+        onValueChange: (v: string) =>
+          edit({ axis_type: v as ColumnMetadata["axis_type"] }),
       })
     ),
     h(
@@ -171,7 +271,10 @@ function MetadataForm() {
         value: metadata.status_code,
         options: STATUS_OPTIONS,
         onChange: (evt: any) =>
-          edit({ status_code: evt.currentTarget.value as ColumnMetadata["status_code"] }),
+          edit({
+            status_code: evt.currentTarget
+              .value as ColumnMetadata["status_code"],
+          }),
       })
     ),
     h(
@@ -181,7 +284,8 @@ function MetadataForm() {
         value: metadata.description ?? "",
         fill: true,
         autoResize: true,
-        onChange: (evt: any) => edit({ description: evt.currentTarget.value || null }),
+        onChange: (evt: any) =>
+          edit({ description: evt.currentTarget.value || null }),
       })
     ),
     typeNote,
@@ -192,7 +296,10 @@ function MetadataForm() {
 function ColumnPreview() {
   const units = useAtomValue(editedUnitsAtom);
   if (units.length === 0) {
-    return h("div.column-placeholder", "No units yet — add them on the Units page.");
+    return h(
+      "div.column-placeholder",
+      "No units yet — add them on the Units page."
+    );
   }
   return h(EditorColumn);
 }
