@@ -145,10 +145,32 @@
 
 // ---------------------------------------------------------- entry points
 
+// The card every link on this page is: the entry points and the project pages
+// below them alike. No border — the shadow and the gap between them are
+// enough to make them boxes.
+.entry-card
+  margin: 0
+  border: none
+
+  // The title runs in: inline, with the description following on the same
+  // baseline, so every card's text starts on its first line.
+  h3
+    display: inline
+    margin: 0 0.8em 0 0
+    font-size: var(--pz-font-size-lg)
+  p
+    display: inline
+    margin: 0
+    font-size: var(--pz-font-size-md)
+    color: var(--pz-text-subtle-color)
+
+.entry-icon
+  vertical-align: text-bottom
+  margin-right: 0.4em
+
 // Six tracks: the two major panels take three each on the first row, the
 // three minor cards two each on the second. One column once a phone can't
-// hold the pair side by side. No border on these: the shadow and the gap
-// between them are enough to make them boxes.
+// hold the pair side by side.
 .entry-points
   display: grid
   grid-template-columns: repeat(6, minmax(0, 1fr))
@@ -156,24 +178,6 @@
 
   .entry-card
     grid-column: span 2
-    margin: 0
-    border: none
-
-    // The title runs in: inline, with the description following on the same
-    // baseline, so every card's text starts on its first line.
-    h3
-      display: inline
-      margin: 0 0.8em 0 0
-      font-size: var(--pz-font-size-lg)
-    p
-      display: inline
-      margin: 0
-      font-size: var(--pz-font-size-md)
-      color: var(--pz-text-subtle-color)
-
-  .entry-icon
-    vertical-align: text-bottom
-    margin-right: 0.4em
 
   // The two the page is about: wider, a larger title, and the figures
   // behind them beneath the text.
@@ -183,6 +187,9 @@
 
     h3
       font-size: var(--pz-font-size-xl)
+
+    p
+      font-size: var(--pz-font-size-lg)
 
   // The main thing to do here, said with a slight outline in the accent color,
   // not with a button.
@@ -196,6 +203,7 @@
     .entry-card,
     .entry-card.major
       grid-column: span 6
+
 
 .stats
   display: flex
@@ -249,23 +257,16 @@
 
 .platform-links
   padding-top: var(--pz-space-4)
-  border-top: 2px solid var(--pz-accent-rule-color)
 
   h2
     @include type.section-heading
 
-  // The same boxes as the entry points above, on a narrower grid: these are
-  // the quieter half of the page, but they are still the same kind of thing.
+  // The same cards as the minor entry points above, three to a row as they
+  // are, and one column at the same width they drop to.
   .platform-cards
     display: grid
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr))
-    gap: var(--pz-space-3)
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    gap: var(--pz-space-5)
 
-  :global(.platform-card)
-    margin: 0
-    h3
-      margin-top: 0
-      font-size: var(--pz-font-size-md)
-    p
-      @include type.supporting
-      margin: 0
+    @media (max-width: 620px)
+      grid-template-columns: minmax(0, 1fr)

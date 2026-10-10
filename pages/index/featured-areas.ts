@@ -88,14 +88,6 @@ export const featuredAreas: FeaturedArea[] = [
     ageRange: "Mesozoic",
   },
   {
-    id: "escalante",
-    title: "Grand Staircase–Escalante",
-    description:
-      "The stepped Mesozoic plateaus of southern Utah, where the same formations climb north one cliff at a time.",
-    view: camera(37.4, -111.4, 10),
-    ageRange: "Mesozoic",
-  },
-  {
     id: "new-zealand",
     title: "New Zealand",
     description:

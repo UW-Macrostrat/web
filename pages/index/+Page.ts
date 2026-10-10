@@ -127,14 +127,14 @@ const entryPoints: EntryPoint[] = [
   {
     title: "Map",
     href: "/map",
-    text: "The world's geologic maps, harmonized into one.",
+    text: "A unified view of the world's geologic maps.",
     stats: ["maps", "legendItems", "polygons"],
     primary: true,
   },
   {
     title: "Columns",
     href: "/columns",
-    text: "The rock record through time, region by region.",
+    text: "The rock record through time.",
     stats: ["projects", "columns", "units"],
   },
   {
@@ -145,7 +145,7 @@ const entryPoints: EntryPoint[] = [
   {
     title: "Projects",
     href: "/projects",
-    text: "Targeting specific regions and geological problems.",
+    text: "Specific regions and geological problems.",
   },
   {
     title: "Rockd",
@@ -225,12 +225,12 @@ function WhatsNew() {
 
 /** The pages about the project, below the data rather than in a header. Same
  * list the footer uses, so the two never disagree — and the same card as the
- * entry points above, quieter, so the page reads as one set of boxes rather
- * than as content followed by a row of buttons. */
+ * minor entry points above, so the page reads as one set of boxes rather than
+ * as content followed by a row of buttons. */
 function PlatformLinks() {
   const items = platformNavItems.filter((item) => item.href !== "/heatmap");
   return h("nav.platform-links", [
-    h("h2", "About the project"),
+    h("h2", "Platform"),
     h(
       "div.platform-cards",
       items.map((item) =>
@@ -240,7 +240,7 @@ function PlatformLinks() {
             key: item.href,
             title: item.text,
             href: item.href,
-            className: "platform-card",
+            className: "entry-card",
           },
           [h("p", item.description)]
         )

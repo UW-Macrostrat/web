@@ -51,11 +51,11 @@ export const platformNavItems: NavLinkItem[] = [
     href: "/publications",
     text: "Publications",
     icon: "book",
-    description: "Papers built on Macrostrat, and how to cite it.",
+    description: "Macrostrat's scientific impact.",
   },
   {
     href: "/about/support",
-    text: "Support us",
+    text: "Support",
     icon: "heart",
     description: "Funders, and what keeps the system running.",
   },

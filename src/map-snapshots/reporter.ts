@@ -31,6 +31,8 @@ export type MapSnapshotStatus = "loading" | "ready" | "timeout";
 export interface MapSnapshotHandle {
   key: string;
   status: MapSnapshotStatus;
+  /** On `timeout`: what the map was still waiting on. */
+  reason?: string;
   /** Canvas size in device pixels. */
   width: number;
   height: number;
@@ -71,17 +73,37 @@ export function useMapSnapshotReporter({
     const map = mapRef.current;
     if (map == null) return;
 
-    const publish = (status: MapSnapshotStatus) => {
+    const publish = (status: MapSnapshotStatus, reason?: string) => {
       const canvas = map.getCanvas();
       window.__macrostratMapSnapshot = {
         key: snapshotKey,
         status,
+        reason,
         width: canvas.width,
         height: canvas.height,
         capture: (mimeType, quality) => canvas.toDataURL(mimeType, quality),
       };
       document.documentElement.dataset.mapSnapshot = status;
     };
+
+    // Why the map isn't settled yet, for the renderer's error message: the
+    // sources still loading, the layers still missing, a camera still moving.
+    const unsettled = (): string => {
+      const parts: string[] = [];
+      if (!map.loaded()) parts.push("map not loaded");
+      if (!map.areTilesLoaded()) parts.push("tiles loading");
+      if (map.isMoving?.()) parts.push("camera moving");
+      const sources = Object.keys(map.getStyle()?.sources ?? {});
+      const pending = sources.filter((id) => !map.isSourceLoaded(id));
+      if (pending.length > 0)
+        parts.push(`sources pending: ${pending.join(", ")}`);
+      const missing = requiredLayers.filter((id) => map.getLayer(id) == null);
+      if (missing.length > 0)
+        parts.push(`layers missing: ${missing.join(", ")}`);
+      parts.push(`${idles} idle event(s)`);
+      return parts.join("; ");
+    };
+    let idles = 0;
 
     publish("loading");
 
@@ -91,6 +113,7 @@ export function useMapSnapshotReporter({
       settleTimer = null;
     };
     const onIdle = () => {
+      idles += 1;
       cancelSettle();
       settleTimer = setTimeout(() => {
         if (!map.loaded() || !map.areTilesLoaded()) return;
@@ -101,7 +124,7 @@ export function useMapSnapshotReporter({
 
     const deadline = setTimeout(() => {
       if (window.__macrostratMapSnapshot?.status !== "ready") {
-        publish("timeout");
+        publish("timeout", unsettled());
       }
     }, timeoutMs);
 

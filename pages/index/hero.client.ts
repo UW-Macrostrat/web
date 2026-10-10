@@ -25,7 +25,6 @@
 import h from "./hero.module.sass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MapView } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import mapboxgl from "mapbox-gl";
 import { setGeoJSON, setMapPosition } from "@macrostrat/mapbox-utils";
 import {
@@ -107,11 +106,55 @@ const GEOLOGY_STROKE_OPACITY = 0.18;
 const HIGHLIGHT_FILL_OPACITY = 0.6;
 const DIMMED_FILL_OPACITY = 0.2;
 
-const geologyStyle = buildMacrostratStyle({
-  tileserverDomain,
-  fillOpacity: GEOLOGY_FILL_OPACITY,
-  strokeOpacity: GEOLOGY_STROKE_OPACITY,
-});
+/** The geology, as little of it as the hero needs: one vector source on the
+ * carto tiles, the unit polygons filled and outlined in their own color, and
+ * the structural lines over them. The library's full style brings twenty-odd
+ * layers across several sources the hero never draws; this is what it shows. */
+const geologyStyle = {
+  version: 8,
+  sources: {
+    burwell: {
+      type: "vector",
+      tiles: [`${tileserverDomain}/carto-slim/{z}/{x}/{y}`],
+      tileSize: 512,
+      maxzoom: 14,
+    },
+  },
+  layers: [
+    {
+      id: "burwell_fill",
+      type: "fill",
+      source: "burwell",
+      "source-layer": "units",
+      paint: {
+        "fill-color": ["get", "color"],
+        "fill-opacity": GEOLOGY_FILL_OPACITY,
+      },
+    },
+    {
+      id: "burwell_stroke",
+      type: "line",
+      source: "burwell",
+      "source-layer": "units",
+      paint: {
+        "line-color": ["get", "color"],
+        "line-width": 0.5,
+        "line-opacity": GEOLOGY_STROKE_OPACITY,
+      },
+    },
+    {
+      id: "burwell_lines",
+      type: "line",
+      source: "burwell",
+      "source-layer": "lines",
+      paint: {
+        "line-color": "#333333",
+        "line-width": 0.8,
+        "line-opacity": 0.7,
+      },
+    },
+  ],
+};
 
 /** The elevation source terrain is drawn from, and a sky to put over it.
  *
