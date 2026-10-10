@@ -1,9 +1,9 @@
 /** The live homepage hero: a pitched, terrain-lit satellite map with
  * Macrostrat's geology over it, the stratigraphic column beneath the map's
  * centre standing beside it — beside, not over: the two are cells of one grid,
- * so the column never covers the map it came from. Over the map itself: the
- * "Explore" masthead top-left and, bottom-left, the area's name and the age
- * range showing. The carousel sits under the frame.
+ * so the column never covers the map it came from. Over the map itself,
+ * bottom-left: the area's name and the age range showing. The carousel sits
+ * under the frame; the way into the full map is the Map panel below it.
  *
  * Client-only (mapbox-gl), and loaded only once the reader reaches for the
  * map: until then the page shows a snapshot of it (`hero-stage.ts`), and that
@@ -37,7 +37,6 @@ import { setGeoJSON, setMapPosition } from "@macrostrat/mapbox-utils";
 import {
   LocationFocusButton,
   MapboxMapProvider,
-  PositionFocusState,
   isCentered,
   useFocusState,
   useMapInitialized,
@@ -51,7 +50,7 @@ import {
 } from "@macrostrat/data-provider";
 import { IntervalAgeRange, IntervalField } from "@macrostrat/data-components";
 import { ErrorBoundary, useInDarkMode } from "@macrostrat/ui-components";
-import { AnchorButton, Button, Spinner } from "@blueprintjs/core";
+import { Button, Spinner } from "@blueprintjs/core";
 import type { UnitLong } from "@macrostrat/api-types";
 import {
   mapboxAccessToken,
@@ -235,8 +234,6 @@ function HeroPanel({ hero, still }: HeroLiveProps) {
           h(HeroChrome, {
             key: "chrome",
             area: carousel.area,
-            center: state.center,
-            zoom: state.zoom,
             timeRange,
             onClearTimeRange: state.clearTimeRange,
           }),
@@ -249,36 +246,19 @@ function HeroPanel({ hero, still }: HeroLiveProps) {
   );
 }
 
-/** What sits over the map: the way into the full map in one corner, and what is
- * on screen — the area's name and the age range — in the other.
- *
- * One component for both because they answer the same question, "is the area
- * still what we are looking at", and `useFocusState` recomputes it on every
- * `move` event. Asking twice would double that for no gain. */
+/** What sits over the map: the area's name and the age range showing, in the
+ * bottom-left corner. */
 function HeroChrome({
   area,
-  center,
-  zoom,
   timeRange,
   onClearTimeRange,
 }: {
   area: FeaturedArea;
-  center: HeroPoint;
-  zoom: number;
   timeRange: TimeRange | null;
   onClearTimeRange(): void;
 }) {
   const focusState = useAreaFocusState(area);
   const onStory = focusState == null || isCentered(focusState);
-
-  // The map page, at no particular place. A featured area is one of a fixed
-  // list the server also knows, so a reader still on one is best sent to the
-  // plain `/map` — it can be cached, and eventually prerendered. Only once they
-  // have taken the map somewhere of their own is their own view worth carrying.
-  let href = "/map";
-  if (hasLeftArea(focusState, area, center)) {
-    href = `/map/#${zoom}/${center.lat}/${center.lng}`;
-  }
 
   // Once the reader has taken the map off the area, its name is no longer
   // describing what is on screen — so it fades out rather than being replaced
@@ -286,24 +266,9 @@ function HeroChrome({
   let titleTag = "h3.hero-title.is-hidden";
   if (onStory) titleTag = "h3.hero-title";
 
-  return h([
-    h(
-      AnchorButton,
-      {
-        key: "explore",
-        // The house purple, through the shared `pz-important-button` role: on
-        // this page it is the one action being proposed.
-        className: `pz-important-button ${h["hero-explore"]}`,
-        href,
-        icon: "map",
-        large: true,
-      },
-      "Explore the map"
-    ),
-    h("div.hero-overlay", { key: "overlay" }, [
-      h(titleTag, area.title),
-      h(TimeRangeFilter, { timeRange, onClear: onClearTimeRange }),
-    ]),
+  return h("div.hero-overlay", [
+    h(titleTag, area.title),
+    h(TimeRangeFilter, { timeRange, onClear: onClearTimeRange }),
   ]);
 }
 
@@ -358,28 +323,6 @@ function useIntervalLookup() {
 
 /* ---------------------------------------------------------- featured areas */
 
-/** Has the reader taken the map away from the featured area, far enough that
- * their own view is worth carrying over to `/map`?
- *
- * "Away" is the area's centre no longer being in the frame, which is what
- * `useFocusState` reports as `OUT_OF_PADDING` / `OUT_OF_VIEW`. One case it
- * cannot: `getFocusState` short-circuits anything past ~45° of arc to
- * `OFF_CENTER` without projecting it, so a jump right across the globe reads as
- * a mild pan. That case is checked here instead. */
-function hasLeftArea(
-  focusState: PositionFocusState | null,
-  area: FeaturedArea,
-  center: HeroPoint
-): boolean {
-  if (focusState == null) return false;
-  if (focusState >= PositionFocusState.OUT_OF_PADDING) return true;
-  const dLat = Math.abs(center.lat - area.view.lat);
-  const dLng = Math.abs(
-    ((((center.lng - area.view.lng) % 360) + 540) % 360) - 180
-  );
-  return dLat > 45 || dLng > 45;
-}
-
 /** How far the area's centre has drifted from the viewport's — the
  * map-interface way of asking whether the area is still what we are looking at.
  * Null until the map is up. */
@@ -395,21 +338,13 @@ function useAreaFocusState(area: FeaturedArea) {
 
 interface HeroState {
   center: HeroPoint;
-  /** The map's own zoom, for the one link that carries the reader's view over
-   * to `/map`. Reported on the same settle as the centre. */
-  zoom: number;
   column: HeroColumn | null;
   loading: boolean;
   timeRange: TimeRange | null;
   mapUnit: MapUnitMatch | null;
   mapSource: MapSourceRef | null;
   display: ColumnDisplay;
-  setCenter(
-    lat: number,
-    lng: number,
-    zoom: number,
-    userInitiated: boolean
-  ): void;
+  setCenter(lat: number, lng: number, userInitiated: boolean): void;
   /** A click on the map: ask what is there, and filter by it. */
   probeAt(lat: number, lng: number): void;
   selectUnit(unitID: number | null, unit: UnitLong | null): void;
@@ -427,7 +362,6 @@ function useHeroState(
   requestIntervals: (ids: number[]) => void
 ): HeroState {
   const [center, setCenterState] = useState<HeroPoint>(area.view);
-  const [zoom, setZoom] = useState<number>(area.view.zoom);
   const [column, setColumn] = useState<HeroColumn | null>(() => {
     if (area.id !== hero.area.id) return null;
     return hero.column;
@@ -469,10 +403,9 @@ function useHeroState(
   });
 
   const setCenter = useCallback(
-    (lat: number, lng: number, nextZoom: number, userInitiated: boolean) => {
+    (lat: number, lng: number, userInitiated: boolean) => {
       const next = { lat: roundCoordinate(lat), lng: roundCoordinate(lng) };
       setCenterState(next);
-      setZoom(Math.round(nextZoom * 10) / 10);
       setProbe({ ...next, filter: false });
       // Panning is how you leave a featured area's column behind.
       if (userInitiated) setPinnedColumn(null);
@@ -502,7 +435,6 @@ function useHeroState(
     setSelection,
     setAreaSpec,
     setCenterState,
-    setZoom,
     setProbe,
   });
   useHeroColumn(area, pinnedColumn, center, hero, setColumn, setLoading);
@@ -536,7 +468,6 @@ function useHeroState(
 
   return {
     center,
-    zoom,
     column,
     loading,
     timeRange,
@@ -555,7 +486,6 @@ interface AreaSetters {
   setSelection(f: AgedFeature | null): void;
   setAreaSpec(spec: FeaturedArea["ageRange"] | null): void;
   setCenterState(p: HeroPoint): void;
-  setZoom(z: number): void;
   setProbe(p: HeroPoint & { filter: boolean }): void;
 }
 
@@ -568,7 +498,6 @@ function useAreaSelection(area: FeaturedArea, setters: AreaSetters) {
     setSelection,
     setAreaSpec,
     setCenterState,
-    setZoom,
     setProbe,
   } = setters;
 
@@ -577,7 +506,6 @@ function useAreaSelection(area: FeaturedArea, setters: AreaSetters) {
     // A new area is a new story: whatever was clicked in the last one goes.
     setSelection(null);
     setAreaSpec(area.ageRange ?? null);
-    setZoom(area.view.zoom);
     if (area.columnID != null) return;
     const next = {
       lat: roundCoordinate(area.view.lat),
@@ -667,12 +595,7 @@ interface HeroMapProps {
   area: FeaturedArea;
   footprint: GeoJSON.Feature | null;
   timeRange: TimeRange | null;
-  onCenterChanged?(
-    lat: number,
-    lng: number,
-    zoom: number,
-    userInitiated: boolean
-  ): void;
+  onCenterChanged?(lat: number, lng: number, userInitiated: boolean): void;
   onProbe?(lat: number, lng: number): void;
   /** Drawn for the snapshot route: static, readable back from its canvas, and
    * with nothing that listens for a reader. Attribution and the wordmark are
@@ -880,12 +803,7 @@ function MapProbeHandler({
 function CenterReporter({
   onChange,
 }: {
-  onChange(
-    lat: number,
-    lng: number,
-    zoom: number,
-    userInitiated: boolean
-  ): void;
+  onChange(lat: number, lng: number, userInitiated: boolean): void;
 }) {
   const mapRef = useMapRef();
   const initialized = useMapInitialized();
@@ -899,7 +817,7 @@ function CenterReporter({
       if (timer != null) clearTimeout(timer);
       timer = setTimeout(() => {
         const c = map.getCenter();
-        onChange(c.lat, c.lng, map.getZoom(), userInitiated);
+        onChange(c.lat, c.lng, userInitiated);
       }, CENTER_SETTLE_MS);
     };
     map.on("moveend", report);

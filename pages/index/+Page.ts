@@ -14,9 +14,11 @@ import {
   LexSearchHost,
   SiteSearchPrompt,
 } from "~/components/lex/search-omnibar";
-import type { HeroData } from "./+data";
+import type { HeroData, PageStats } from "./+data";
 import { HeroStage } from "./hero-stage";
-import classNames from "classnames";
+import { AnchorButton } from "@blueprintjs/core";
+import type { IconName } from "@blueprintjs/icons";
+import type { ReactNode } from "react";
 
 /** The homepage: what Macrostrat is in a line, the data itself, a few entry
  * points, what is new, and an honest beta notice. Design notes live in the
@@ -76,7 +78,7 @@ function V2BetaTag() {
     {
       href: "/community",
       className: h["v2-beta-tag"],
-      title: "Macrostrat v2 is in beta — tell us what you find",
+      title: "Macrostrat v2 is in public beta!",
     },
     "v2 beta 🎉"
   );
@@ -107,24 +109,47 @@ function HeroStatic() {
   });
 }
 
-const entryPoints = [
+type StatKey = keyof PageStats;
+
+interface EntryPoint {
+  title: string;
+  href: string;
+  text: string;
+  image?: string;
+  /** Set on the two the page is about. They come first and larger, each
+   * carrying the numbers behind it and a button into it. */
+  major?: {
+    stats: StatKey[];
+    action: string;
+    icon: IconName;
+  };
+}
+
+const entryPoints: EntryPoint[] = [
   {
     title: "Map",
     href: "/map",
     text: "The world's geologic maps, harmonized into one.",
-    className: "major",
+    major: {
+      stats: ["maps", "polygons"],
+      action: "Explore the map",
+      icon: "map",
+    },
   },
   {
     title: "Columns",
     href: "/columns",
     text: "The rock record through time, region by region.",
-    className: "major",
+    major: {
+      stats: ["columns", "units", "projects"],
+      action: "Browse the columns",
+      icon: "list-columns",
+    },
   },
   {
     title: "Lexicon",
     href: "/lex",
     text: "Stratigraphic names, lithologies, intervals and environments.",
-    className: "major",
   },
   {
     title: "Projects",
@@ -149,38 +174,52 @@ function SiteLead() {
       // "Geologic maps and stratigraphic columns, integrated into one model of ",
       // "the Earth's crust through time.",
     ]),
-    h(MacrostratStats),
   ]);
 }
 
 function EntryPoints() {
   return h(
     "nav.entry-points",
-    entryPoints.map((item) => {
-      let icon = null;
-      if (item.image != null) {
-        icon = h(Image, {
-          className: "entry-icon",
-          src: item.image,
-          width: "22px",
-          height: "22px",
-        });
-      }
+    entryPoints.map((item) => h(EntryCard, { key: item.href, item }))
+  );
+}
 
-      let title = item.title;
-      if (icon != null) title = h("span.entry-title", [icon, title]);
+function EntryCard({ item }: { item: EntryPoint }) {
+  let icon = null;
+  if (item.image != null) {
+    icon = h(Image, {
+      className: "entry-icon",
+      src: item.image,
+      width: "22px",
+      height: "22px",
+    });
+  }
 
-      return h(
-        LinkCard,
-        {
-          key: item.href,
-          title,
-          href: item.href,
-          className: classNames("entry-card", item.className),
-        },
-        [h("p", item.text)]
-      );
-    })
+  let title: ReactNode = item.title;
+  if (icon != null) title = h("span.entry-title", [icon, title]);
+
+  if (item.major == null) {
+    return h(LinkCard, { title, href: item.href, className: "entry-card" }, [
+      h("p", item.text),
+    ]);
+  }
+
+  // The panel is a link like the other cards, with a button inside saying the
+  // same destination out loud — which is what the overlay form exists for.
+  return h(
+    LinkCard,
+    { title, href: item.href, nestedLinks: true, className: "entry-card major" },
+    [
+      h("p", item.text),
+      h(EntryStats, { keys: item.major.stats }),
+      h(AnchorButton, {
+        className: "pz-important-button entry-action",
+        href: item.href,
+        icon: item.major.icon,
+        large: true,
+        text: item.major.action,
+      }),
+    ]
   );
 }
 
@@ -230,30 +269,32 @@ function PlatformLinks() {
   ]);
 }
 
-function formatNumber(num) {
+function formatNumber(num: number) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function MacrostratStats() {
-  const { stats } = useData() as any;
-  const { columns, units, polygons, projects } = stats;
+const statLabels: Record<StatKey, string> = {
+  maps: "maps",
+  polygons: "map polygons",
+  columns: "columns",
+  units: "rock units",
+  projects: "projects",
+};
 
-  return h("div.stats", {}, [
-    h("div.stat", {}, [
-      h("span.top-stat#n_names", {}, formatNumber(projects)),
-      h("span.top-stat-label", {}, "projects"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_columns", {}, formatNumber(columns)),
-      h("span.top-stat-label", {}, "columns"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_units", {}, formatNumber(units)),
-      h("span.top-stat-label", {}, "rock units"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_polys", {}, formatNumber(polygons)),
-      h("span.top-stat-label", {}, "map polygons"),
-    ]),
-  ]);
+/** The numbers behind one entry point. A stat the server couldn't get is left
+ * out rather than shown as zero. */
+function EntryStats({ keys }: { keys: StatKey[] }) {
+  const { stats } = useData() as { stats: PageStats };
+  const items: ReactNode[] = [];
+  for (const key of keys) {
+    const value = stats[key];
+    if (value == null) continue;
+    items.push(
+      h("div.stat", { key }, [
+        h("span.top-stat", formatNumber(value)),
+        h("span.top-stat-label", statLabels[key]),
+      ])
+    );
+  }
+  return h("div.stats", items);
 }

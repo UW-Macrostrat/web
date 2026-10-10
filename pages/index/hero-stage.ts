@@ -14,7 +14,7 @@
  */
 import h from "./hero.module.sass";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { AnchorButton, Card, Icon } from "@blueprintjs/core";
+import { Card, Icon } from "@blueprintjs/core";
 import { clientOnly } from "~/components/lex/client-only";
 import type { MapSnapshotImage } from "~/map-snapshots/spec";
 import { HeroContextBar, useFeaturedAreas, type Carousel } from "./hero-carousel";
@@ -146,17 +146,6 @@ function HeroStill({
         },
         [
           picture,
-          h(AnchorButton, {
-            className: `pz-important-button ${h["hero-explore"]}`,
-            href: "/map",
-            icon: "map",
-            large: true,
-            // A way out, not a way in: following the link shouldn't also
-            // start loading the map it leaves behind.
-            onPointerDown: stopPropagation,
-            onKeyDown: stopPropagation,
-            text: "Explore the map",
-          }),
           h("div.hero-engage-hint", [
             h(Icon, { icon: "hand-up", size: 12 }),
             "Interactive map",
@@ -249,8 +238,4 @@ function useEngagement(onEngage: () => void) {
     onPointerDown: onEngage,
     onKeyDown,
   };
-}
-
-function stopPropagation(event) {
-  event.stopPropagation();
 }

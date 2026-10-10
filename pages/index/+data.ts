@@ -1,4 +1,4 @@
-import { fetchAPIData } from "~/_utils";
+import { fetchAPIData, fetchPGData } from "~/_utils";
 import { parse as parseYaml } from "yaml";
 import {
   featuredAreaForToday,
@@ -15,7 +15,9 @@ import {
 } from "./hero-column-static.server";
 import type { StaticHeroColumn } from "./hero-column";
 
-interface PageStats {
+export interface PageStats {
+  /** Finalized map sources. Null when the count couldn't be had. */
+  maps: number | null;
   columns: number;
   units: number;
   polygons: number;
@@ -108,9 +110,23 @@ async function heroSnapshots(): Promise<Record<string, MapSnapshotImage | null>>
   return snapshots;
 }
 
+/** The maps the site lists: the same finalized set `/maps` reads, from the
+ * same route, so the two figures agree. Ids only — a few kilobytes. */
+async function fetchMapCount(): Promise<number | null> {
+  try {
+    const rows = await fetchPGData("/maps", { select: "source_id" });
+    if (!Array.isArray(rows)) return null;
+    return rows.length;
+  } catch (error) {
+    console.error("Could not count maps:", error);
+    return null;
+  }
+}
+
 export async function data(pageContext) {
-  const [statsData, hero] = await Promise.all([
+  const [statsData, maps, hero] = await Promise.all([
     fetchAPIData("/stats", { all: true }),
+    fetchMapCount(),
     heroData(),
   ]);
 
@@ -125,6 +141,7 @@ export async function data(pageContext) {
   });
 
   const stats: PageStats = {
+    maps,
     columns,
     units,
     polygons,

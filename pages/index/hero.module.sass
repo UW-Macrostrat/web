@@ -1,9 +1,9 @@
 // The live hero. A two-cell grid — the map, then the stratigraphic column
-// beside it — with the area carousel underneath. Over the map: the "Explore"
-// masthead in one corner and the caption (the area's name, the age range) in
-// the other, both over a scrim because satellite imagery is neither light nor
-// dark. It was a `MapAreaContainer` with the column floating over the map;
-// taking the column out of the frame is what left room for the caption in it.
+// beside it — with the area carousel underneath. Over the map: the caption
+// (the area's name, the age range) in one corner, over a scrim because
+// satellite imagery is neither light nor dark. It was a `MapAreaContainer`
+// with the column floating over the map; taking the column out of the frame
+// is what left room for the caption in it.
 
 .hero-frame
   // Wide enough for the column the library draws at `COLUMN_WIDTH`
@@ -61,19 +61,6 @@
 // shadow, in literal colors: there is no token for "legible over a photograph".
 $over-imagery-text: #fff
 $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
-
-// The way into the full map. A proper button, in the corner the reader starts
-// from: the hero is an invitation, and a button is what says so.
-.hero-explore
-  position: absolute
-  top: 0.7em
-  left: 0.7em
-  z-index: 10
-  font-size: 1.05em
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important
-
-  @media (max-width: 620px)
-    font-size: 1em
 
 // What is on screen, bottom-left. Transparent to the pointer except where
 // there is something to click, so the map underneath stays draggable.
