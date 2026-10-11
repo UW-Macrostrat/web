@@ -9,7 +9,12 @@
  * would refuse them anyway.
  */
 import hyper from "@macrostrat/hyper";
-import { Callout, HotkeysProvider, Intent } from "@blueprintjs/core";
+import {
+  AnchorButton,
+  Callout,
+  HotkeysProvider,
+  Intent,
+} from "@blueprintjs/core";
 import { useAuth } from "@macrostrat/form-components";
 import type { ReactNode } from "react";
 import { isDegraded } from "~/components/auth";
@@ -43,6 +48,21 @@ export function Page() {
         description: "The build each service is running.",
       },
       [h(ServicesPanel)]
+    ),
+    h(
+      Section,
+      {
+        title: "Management tasks",
+        description:
+          "Topology updates and other maintenance, run on the worker with live output.",
+      },
+      [
+        h(
+          AnchorButton,
+          { href: "/dashboard/admin/tasks", icon: "console" },
+          "Open the task runner"
+        ),
+      ]
     ),
     h(
       Section,
