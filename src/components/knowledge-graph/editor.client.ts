@@ -21,12 +21,13 @@ import {
 import { MultiSelect } from "@blueprintjs/select";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchFeedbackTypes, indexById } from "./api";
 import { MATCH_LINKS } from "./match-links";
 import {
   EMPTY_FEEDBACK_NOTES,
   type FeedbackNotes,
+  overwriteFeedback,
   saveFeedback,
 } from "./feedback-api";
 import type { KGEntityType, KGFeedbackType, KGModel, KGRun } from "./types";
@@ -36,7 +37,10 @@ const h = hyper.styled(styles);
 /** The terms view the editor's "Add match" search queries. Passed explicitly so
  * the search follows this deployment's API rather than the library's
  * development-database default. */
-const TERMS_ENDPOINT = `${postgrestPrefix}/kg_macrostrat_terms`;
+const TERMS_ENDPOINT = new URL(
+  `${postgrestPrefix}/kg_macrostrat_terms`,
+  window.location.origin,
+).href;
 
 export interface RunViewProps {
   run: KGRun;
@@ -81,7 +85,10 @@ export function ExtractionView({
 }
 
 export interface FeedbackEditorProps extends RunViewProps {
-  /** Called with the new run id after a successful save. */
+  /** Replace this run instead of creating a new feedback run. */
+  overwrite?: boolean;
+  onSavingChange?: (saving: boolean) => void;
+  /** Called with the saved run id after a successful save. */
   onSaved?: (runId: number) => void;
 }
 
@@ -122,30 +129,48 @@ function EditableRun({
   models,
   entityTypes,
   autoSelect = [],
+  overwrite = false,
+  onSavingChange,
   onSaved,
 }: FeedbackEditorProps) {
   const { data, entityTypeIndex } = useEnhancedRun(run, models, entityTypes);
   const [notes, setNotes] = useState<FeedbackNotes>(EMPTY_FEEDBACK_NOTES);
+  const [isSaving, setIsSaving] = useState(false);
+  const saving = useRef(false);
 
   const onSave = useCallback(
     async (tree) => {
-      const runId = await withSaveToasts(() =>
-        saveFeedback({
-          tree,
-          sourceTextId: run.source_text,
-          supersedesRunIds: [run.model_run],
-          modelId: run.model_id,
-          versionId: run.version_id,
-          notes,
-        })
-      );
-      if (runId != null) onSaved?.(runId);
+      if (saving.current) return;
+      saving.current = true;
+      setIsSaving(true);
+      onSavingChange?.(true);
+      try {
+        const runId = await withSaveToasts(() => {
+          if (overwrite) return overwriteFeedback(Number(run.model_run), tree);
+          return saveFeedback({
+            tree,
+            sourceTextId: run.source_text,
+            supersedesRunIds: [run.model_run],
+            modelId: run.model_id,
+            versionId: run.version_id,
+            notes,
+          });
+        });
+        if (runId != null) onSaved?.(runId);
+      } finally {
+        saving.current = false;
+        setIsSaving(false);
+        onSavingChange?.(false);
+      }
     },
-    [run, notes, onSaved]
+    [run, notes, overwrite, onSaved, onSavingChange]
   );
 
+  let notesEditor = null;
+  if (!overwrite) notesEditor = h(FeedbackNotesCard, { notes, setNotes });
+
   return h(OverlaysProvider, [
-    h("div.feedback-editor", [
+    h("div.feedback-editor", { inert: isSaving, "aria-busy": isSaving }, [
       h(FeedbackComponent, {
         entities: data.entities ?? [],
         text: data.paragraph_text,
@@ -157,7 +182,7 @@ function EditableRun({
         autoSelect,
         onSave,
       }),
-      h(FeedbackNotesCard, { notes, setNotes }),
+      notesEditor,
     ]),
   ]);
 }
