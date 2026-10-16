@@ -1,1 +1,1 @@
-export { SiteNav as default } from "~/site-pages/site-nav";
+export { SiteHeaderSearch as default } from "~/site-pages/site-search";

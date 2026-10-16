@@ -4,7 +4,7 @@
  * the `tile_cache.tile` table (L2) the tileserver renders into. This page drops
  * L1, which is the fix for "the cache is serving something stale" — tiles come
  * back from L2 without being re-rendered. Expiring L2 as well, for a region or a
- * set of source maps, is what /dev/map/cache does.
+ * set of source maps, is what /dashboard/admin/map-cache does.
  *
  * Everything here goes through api_v3's admin-gated `/cache/*` routes; the
  * tileserver's own cache routes are not reachable from outside the network.
@@ -39,7 +39,7 @@ export function Page() {
       ]),
       h("p", [
         "To expire the database cache too, for a region or a set of maps, use ",
-        h("a", { href: "/dev/map/cache" }, "map cache management"),
+        h("a", { href: "/dashboard/admin/map-cache" }, "map cache management"),
         ".",
       ]),
       h(FlushPanel),
