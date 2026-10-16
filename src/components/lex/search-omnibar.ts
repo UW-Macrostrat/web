@@ -14,13 +14,7 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./search.module.sass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Button,
-  Icon,
-  Menu,
-  MenuDivider,
-  MenuItem,
-} from "@blueprintjs/core";
+import { Button, Icon, Menu, MenuDivider, MenuItem } from "@blueprintjs/core";
 import { Omnibar } from "@blueprintjs/select";
 import { navigate } from "vike/client/router";
 import { atom, useAtom, useSetAtom } from "jotai";
@@ -164,6 +158,9 @@ function renderResultList(
     children.push(renderItem(item, index));
   });
   if (children.length === 0) {
+    if (emptyState == null) {
+      return null;
+    }
     children.push(emptyState);
   }
   return h(
@@ -192,17 +189,20 @@ function LexSearchOmnibar({
     [onClose]
   );
 
-  let emptyMessage = "Search Macrostrat…";
+  let emptyMessage = null;
+  let emptyState = null;
   if (loading) {
     emptyMessage = "Searching…";
   } else if (query.trim().length >= MIN_QUERY_LENGTH) {
     emptyMessage = "No matches";
   }
-  const emptyState = h(MenuItem, {
-    disabled: true,
-    text: emptyMessage,
-    key: "empty",
-  });
+  if (emptyMessage != null) {
+    emptyState = h(MenuItem, {
+      disabled: true,
+      text: emptyMessage,
+      key: "empty",
+    });
+  }
 
   return h(Omnibar<LexSearchItem>, {
     isOpen,
@@ -217,7 +217,8 @@ function LexSearchOmnibar({
     onItemSelect,
     resetOnSelect: true,
     inputProps: {
-      placeholder: "Search Macrostrat: names, lithologies, intervals, minerals…",
+      placeholder:
+        "Search Macrostrat: names, lithologies, intervals, minerals…",
     },
   });
 }
