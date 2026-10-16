@@ -58,6 +58,11 @@ export default {
     "/dev/column-editor-2": "/columns",
     "/dev/column-editor-2/new": "/columns/new",
     "/dev/column-editor-2/edit/@col_id": "/columns/@col_id/edit",
+    // Admin tools, moved out of /dev. `/dev/security/endpoint` stays put: it
+    // is `secureFetch`'s sign-in return page, open to every user.
+    "/dev/cache": "/dashboard/admin/cache",
+    "/dev/map/cache": "/dashboard/admin/map-cache",
+    "/dev/security": "/dashboard/admin/security",
   },
   clientRouting: true,
   supportsDarkMode: true,

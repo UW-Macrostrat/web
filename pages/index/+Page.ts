@@ -69,13 +69,12 @@ function DissolvingLogo() {
 }
 
 /** That this is v2 and a beta is worth one tag beside the wordmark, not a
- * banner across the top of the page. It leads to `/community`, which is where
- * the feedback the banner used to ask for actually goes. */
+ * banner across the top of the page. It leads to the account of what v2 is. */
 function V2BetaTag() {
   return h(
     Link,
     {
-      href: "/community",
+      href: "/about/version-2",
       className: h["v2-beta-tag"],
       title: "Macrostrat v2 is in public beta!",
     },
