@@ -5,7 +5,7 @@ import { defineConfig, loadEnv, type Plugin, type ProxyOptions } from "vite";
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { cp } from "node:fs/promises";
-import textToolchain from "./packages/text-toolchain/src";
+import textToolchain from "./packages/text-toolchain/src/index.ts";
 import { cjsInterop } from "vite-plugin-cjs-interop";
 import hyperStyles from "@macrostrat/vite-plugin-hyperstyles";
 import cesium from "vite-plugin-cesium";
@@ -46,7 +46,7 @@ export default defineConfig({
     }),
     // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
-      contentDir: requireDocsContent(path.resolve(__dirname, "content")),
+      contentDir: requireDocsContent(path.resolve(import.meta.dirname, "content")),
       wikiPrefix: "/docs",
     }),
     cesiumPlugin({
@@ -133,13 +133,13 @@ function cesiumPlugin(options) {
   const plugin = cesium(options);
   const { cesiumBuildPath } = options;
 
-  let clientOutDir = path.resolve(__dirname, "dist/client");
+  let clientOutDir = path.resolve(import.meta.dirname, "dist/client");
 
   return {
     ...plugin,
     configResolved(config) {
       const env = config.environments?.client ?? config;
-      clientOutDir = path.resolve(config.root ?? __dirname, env.build.outDir);
+      clientOutDir = path.resolve(config.root ?? import.meta.dirname, env.build.outDir);
     },
     async closeBundle() {
       // Only the client build ships static assets
@@ -172,7 +172,7 @@ function requireDocsContent(contentDir: string): string {
 
 function getPackageJSONContents(packageJSONPath: string) {
   return JSON.parse(
-    readFileSync(path.resolve(__dirname, packageJSONPath), "utf-8")
+    readFileSync(path.resolve(import.meta.dirname, packageJSONPath), "utf-8")
   );
 }
 

@@ -5,13 +5,13 @@ import gfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeRaw from "rehype-raw";
 import { nodeTypes } from "@mdx-js/mdx";
-import callouts from "./remark-callouts";
-import relativeLinks from "./remark-relative-links";
-import mediaSources, { WEB_ASSETS_STORE } from "./rehype-media-sources";
+import callouts from "./remark-callouts.ts";
+import relativeLinks from "./remark-relative-links.ts";
+import mediaSources, { WEB_ASSETS_STORE } from "./rehype-media-sources.ts";
 import slugify from "@sindresorhus/slugify";
 import { join } from "path";
 
-import { buildPageIndex } from "./utils";
+import { buildPageIndex } from "./utils.ts";
 
 export { buildPageIndex, WEB_ASSETS_STORE };
 
