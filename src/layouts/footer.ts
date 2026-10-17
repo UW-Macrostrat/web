@@ -45,7 +45,7 @@ export const platformNavItems: NavLinkItem[] = [
     href: "/community",
     text: "Community",
     icon: "people",
-    description: "Collaborators, supporters, and ways to contribute.",
+    description: "Apps, integrations and data providers.",
   },
   {
     href: "/publications",
@@ -58,6 +58,12 @@ export const platformNavItems: NavLinkItem[] = [
     text: "Support",
     icon: "heart",
     description: "Funders, and what keeps the system running.",
+  },
+  {
+    href: "/contact",
+    text: "Contact",
+    icon: "envelope",
+    description: "Ways to reach the Macrostrat team.",
   },
   {
     href: "/heatmap",

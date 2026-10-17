@@ -4,7 +4,7 @@ import h from "@macrostrat/hyper";
  * pairs are in the served HTML; change the two together. */
 const legacyAnchors = {
   about: "/about",
-  apps: "/about/apps",
+  apps: "/community/apps",
   api: "/docs/data-services",
   people: "/about/people",
   donate: "/about/support",

@@ -36,21 +36,21 @@ export const siteSlots: Record<string, SlotSpec[]> = {
   "/about/brand": [],
   "/about/version-2": [],
   "/about/scientific-approach": [],
-  "/about/apps": [
-    { at: "apps", mode: "after", component: "AppGallery", data: ["apps"] },
-  ],
   "/about/people": [
     { at: "directory", mode: "after", component: "ContributorDirectory", data: ["people"] },
   ],
-  "/community": [
-    { at: "contact", mode: "after", component: "ContactBlock", marker: "Contact", data: ["contact"] },
+  "/community": [],
+  "/community/apps": [
+    { at: "apps", mode: "after", component: "AppGallery", data: ["apps"] },
   ],
-  "/community/contributing": [],
-  "/community/collaborators": [
+  "/community/integrations": [
     { at: "systems-and-organizations", mode: "after", component: "IntegrationList", data: ["integrations"] },
   ],
-  "/community/open-source": [
-    { at: "repositories", mode: "after", component: "RepositoryList" },
+  "/community/providers": [
+    { at: "systems-and-organizations", mode: "after", component: "ProviderList", data: ["integrations"] },
+  ],
+  "/contact": [
+    { at: "contact", mode: "after", component: "ContactBlock", marker: "Contact", data: ["contact"] },
   ],
   "/publications": [
     { at: "publications-using-macrostrat", mode: "aside", component: "BibliographySummary", data: ["publications"] },

@@ -36,8 +36,6 @@ export default {
     // The v1 addresses of pages now under /about and /community.
     "/people": "/about/people",
     "/community/contributors": "/about/people",
-    "/community/apps": "/about/apps",
-    "/community/integrations": "/community/collaborators",
     "/support": "/about/support",
     // The matching tools, moved under the lexicon's own tools section.
     "/lex/lith-match": "/lex/match/lithologies",
