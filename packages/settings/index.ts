@@ -123,7 +123,7 @@ export const knowledgeGraphAPIURL = getRuntimeConfig(
   apiV3Prefix + "/knowledge-graph"
 );
 
-export const macrostratInstance = getRuntimeConfig("MACROSTRAT_INSTANCE");
+export const macrostratInstance = macrostratEnv();
 
 export const elevationLayerURL = getRuntimeConfig("ELEVATION_LAYER_URL");
 

@@ -1,8 +1,6 @@
-import { LinkCard, StickyHeader } from "~/components";
+import { LinkCard } from "~/components";
 import h from "./+Page.module.sass";
 import { useData } from "vike-react/useData";
-import { useState } from "react";
-import { Tag, Dialog, Icon } from "@blueprintjs/core";
 import { LexSearchPrompt } from "~/components/lex/search-omnibar";
 import { matchingTools } from "../match/tools";
 
@@ -59,13 +57,12 @@ export function Page() {
     h("p.lex-footnote", [
       h(
         "a",
-        { href: "https://macrostrat.org/sift/#", target: "_blank" },
+        { href: "https://v1.macrostrat.org/sift/", target: "_blank" },
         "Sift"
       ),
       ", Macrostrat's legacy lexicon app, is still available while it is ",
       "gradually brought into this framework.",
     ]),
-    h(UpdatesExpandableDialog),
   ]);
 }
 
@@ -159,67 +156,4 @@ function Stat({ value, label, href = null }) {
 
 function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-function UpdatesExpandableDialog() {
-  const [updateOpen, setUpdateOpen] = useState(false);
-
-  return h("div.header", [
-    h(
-      Tag,
-      {
-        intent: "PRIMARY",
-        active: updateOpen,
-        onClick: () => setUpdateOpen(true),
-      },
-      "Updates"
-    ),
-    h(
-      Dialog,
-      {
-        isOpen: updateOpen,
-      },
-      h(Updates, { setUpdateOpen })
-    ),
-  ]);
-}
-
-function Updates({ setUpdateOpen }) {
-  const updates = [
-    {
-      title: "Added dictionaries",
-      description:
-        "Added new lexicon dictionaries for lithology attributes, environments, economic uses, minerals, and structures.",
-      slug: "version-4.1.0/save-location",
-      version: "2.0.0",
-    },
-  ];
-
-  return h("div.update-container", [
-    h(
-      StickyHeader,
-      h("div.update-title", [
-        h("h2", "Recent Updates"),
-        h(Icon, {
-          className: "close-btn",
-          icon: "cross",
-          onClick: () => setUpdateOpen(false),
-        }),
-      ])
-    ),
-    h("div.update-list", [
-      updates.map((update) =>
-        h("div.update", [
-          h("div.update-title", [
-            h("h3.title", update.title),
-            h(Tag, { intent: "success" }, `v${update.version}`),
-          ]),
-          // h("div.description", [
-          //   h(DocsVideo, { slug: update.slug }),
-          //   h("p", update.description),
-          // ]),
-        ])
-      ),
-    ]),
-  ]);
 }
