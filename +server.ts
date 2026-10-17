@@ -19,6 +19,8 @@ const fgdcPatterns = join(
 
 function createApp() {
   const app = express();
+  // TLS ends at the proxy; redirects need its X-Forwarded-Proto, not plain http
+  app.set("trust proxy", 1);
   // Before any route: vike(app) refuses to install after one
   vike(app);
   app.use("/assets/geologic-patterns", sirv(fgdcPatterns));
