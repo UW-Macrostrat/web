@@ -4,6 +4,8 @@ FROM node:22
 RUN apt-get update && apt-get install -y rsync
 
 ENV NODE_ENV=production
+# The layer cache below rsyncs .yarn/cache, so install there, not to the global cache
+ENV YARN_ENABLE_GLOBAL_CACHE=false
 
 WORKDIR /usr/src/app
 COPY .yarn/releases .yarn/releases
