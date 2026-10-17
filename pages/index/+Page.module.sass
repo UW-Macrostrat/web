@@ -8,6 +8,9 @@
   flex-direction: column
   gap: var(--pz-section-gap)
 
+  h2
+    @include type.section-heading
+
 // The header. It is the wordmark, the tagline, the beta tag and the search —
 // everything else that used to live here pushed the hero below the fold. Once
 // it sticks, the title shrinks; `.is-stuck` comes from the shared
@@ -226,8 +229,6 @@
 // -------------------------------------------------------------- news
 
 .whats-new
-  h2
-    @include type.section-heading
 
   .news-list
     list-style: none
@@ -258,15 +259,16 @@
 .platform-links
   padding-top: var(--pz-space-4)
 
-  h2
-    @include type.section-heading
-
   // The same cards as the minor entry points above, three to a row as they
   // are, and one column at the same width they drop to.
   .platform-cards
     display: grid
     grid-template-columns: repeat(3, minmax(0, 1fr))
     gap: var(--pz-space-5)
+
+    .entry-card
+      margin: 0px
+      border: none
 
     @media (max-width: 620px)
       grid-template-columns: minmax(0, 1fr)
