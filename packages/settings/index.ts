@@ -20,18 +20,17 @@ export const burwellTileDomain = getRuntimeConfig(
 export const apiDomain = getRuntimeConfig("MACROSTRAT_API_DOMAIN");
 
 export const tileserverDomain = burwellTileDomain;
-// For now,
 
-function looseCompare(a: string, b: string) {
-  if (a == null) return b == null;
-  if (b == null) return a == null;
-  return a.toLowerCase() === b.toLowerCase();
+/** The deployment tier (`MACROSTRAT_ENV`: development, staging, production).
+ * Set unprefixed on the server; `onCreateGlobalContext` forwards it to the
+ * browser. */
+function macrostratEnv(): string | null {
+  if (typeof window === "undefined") return process.env.MACROSTRAT_ENV ?? null;
+  return getRuntimeConfig("MACROSTRAT_ENV", null);
 }
 
-export const isDev = !looseCompare(
-  getRuntimeConfig("MACROSTRAT_INSTANCE"),
-  "Production"
-);
+/** Every tier but production, including a local stack that sets none. */
+export const isDev = macrostratEnv()?.toLowerCase() !== "production";
 
 export const gddDomain = "https://xdd.wisc.edu";
 export const pbdbDomain = "https://paleobiodb.org";

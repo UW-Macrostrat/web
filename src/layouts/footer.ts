@@ -109,16 +109,21 @@ export function Footer({ className }) {
     },
   ];
 
-  return h("div.footer", { className }, [
-    h("a.homepage-link", { href: "/" }, [
-      h("h3", "Macrostrat"),
-      h(MacrostratIcon, { className: "footer-logo" }),
-    ]),
-    h(NavLinkList, { items: navItems, title: "Data" }),
-    h(NavLinkList, { items: metaItems, title: "Platform" }),
-    h(NavLinkList, { items: externalLinks, title: "Links" }),
-    h(NavLinkList, { items: actions, title: "Actions" }),
-  ]);
+  // The inner box lays out against the footer's width (a container query)
+  return h(
+    "div.footer",
+    { className },
+    h("div.footer-inner", [
+      h("a.homepage-link", { href: "/" }, [
+        h("h3", "Macrostrat"),
+        h(MacrostratIcon, { className: "footer-logo" }),
+      ]),
+      h(NavLinkList, { items: navItems, title: "Data" }),
+      h(NavLinkList, { items: metaItems, title: "Platform" }),
+      h(NavLinkList, { items: externalLinks, title: "Links" }),
+      h(NavLinkList, { items: actions, title: "Actions" }),
+    ])
+  );
 }
 
 function NavLinkList({ items, title }) {

@@ -71,7 +71,6 @@ import {
 } from "./filters";
 import { initialViewStateFromURL } from "~/components";
 import { columnPageLinks, rowsAfterColumn } from "./page-links";
-import { HybridPersona } from "../persona";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   addFilterAtom,
@@ -291,7 +290,6 @@ export function Page({ linkPrefix = "/" }) {
         ],
         // Inside the frame's jotai scope, so it sees the live filters.
         wrap: (node) => h(ColumnScopeSync, { adopted: scope.adopted }, node),
-        actions: h(HybridPersona),
         links: columnListLinks,
         content: h(ColumnList),
         map: h(ColumnListMapSlot),

@@ -20,17 +20,19 @@
     h3
       color: var(--pz-text-color)
 
+  container-type: inline-size
+
   // The link lists wrap rather than squeeze as the footer narrows (beside a
   // sidebar, say), and the logo shrinks with it
-  container-type: inline-size
-  display: flex
-  flex-direction: row
-  flex-wrap: wrap
-  align-items: baseline
-  gap: 1.5rem 1rem
-  justify-content: space-between
-  &>*
-    flex: 1 1 8rem
+  .footer-inner
+    display: flex
+    flex-direction: row
+    flex-wrap: wrap
+    align-items: baseline
+    gap: 1.5rem 1rem
+    justify-content: space-between
+    &>*
+      flex: 1 1 8rem
 
   .nav-link-list
     :global(.bp6-button.bp6-minimal)
@@ -119,3 +121,37 @@
   align-items: center
   justify-content: space-between
   flex-grow: 1
+
+// Narrow footers: the logo and name span a row of their own, the lists sit
+// two to a row beneath, centred, and the type is set smaller and closer
+@container (max-width: 48rem)
+  .footer .footer-inner
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    align-items: start
+    gap: 1rem
+    font-size: var(--pz-font-size-sm, 0.875rem)
+    line-height: 1.5em
+
+  .homepage-link
+    grid-column: 1 / -1
+    flex-direction: row
+    justify-content: center
+
+    .footer-logo
+      order: -1
+      width: 40px
+
+  // Qualified to outrank the footer's own list margin
+  .footer .nav-link-list
+    margin: 0.2em 0 0.5em
+
+    :global(.bp6-button)
+      min-height: 24px
+      padding-top: 2px
+      padding-bottom: 2px
+      font-size: inherit
+
+@container (max-width: 18rem)
+  .footer .footer-inner
+    grid-template-columns: minmax(0, 1fr)

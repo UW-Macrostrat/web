@@ -146,33 +146,10 @@
   pointer-events: none
   z-index: 1
 
-// Narrow: the panels run edge to edge, so their corners are square.
+// Narrow: panels run edge to edge, so cards drop the rounding set above
 @include breakpoints.map-narrow
-  .macrostrat-map-container
-    // Set below the container, which the library's own value sits on
-    & > *
-      --map-panel-border-radius: 0
-
-    :global(.bp6-card)
-      border-radius: 0
-
-  // The library caps this stack at 70% height; as a flex column, the drawer
-  // shrinks to fit the cap and its body scrolls instead of being clipped.
-  .map-detail-stack
-    display: flex
-    flex-direction: column
-    min-height: 0
-
-  // As on desktop, the map fills the area behind the panels and is padded
-  // rather than resized: an ease to the selected location aims at the canvas
-  // center it started with, so a resize mid-ease leaves it under the drawer.
-  .macrostrat-map-container :global(.main-view)
-    position: unset
-
-  // Kept above the map, which is now positioned behind it
-  .map-context-stack
-    position: relative
-    z-index: 10
+  .macrostrat-map-container :global(.bp6-card)
+    border-radius: 0
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */

@@ -126,9 +126,6 @@ function MapPage({
         bottomPanel: h(ElevationChart, null),
         contextPanelOpen: contextPanelOpen || inputFocus,
         detailPanelOpen: infoDrawerOpen,
-        // The library hashes its own class names, so ours is how we reach them
-        contextStackProps: { className: h["map-context-stack"] },
-        detailStackProps: { className: h["map-detail-stack"] },
         className: classNames(
           "macrostrat-map-container",
           inputFocus ? "searching" : contextClass,

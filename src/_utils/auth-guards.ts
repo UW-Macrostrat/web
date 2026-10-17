@@ -13,6 +13,7 @@
  */
 import { redirect, render } from "vike/abort";
 import { isLocalTesting } from "~/_providers/localTestingAuth";
+import { isDev } from "@macrostrat-web/settings";
 
 const ADMIN_ROLE = "web_admin";
 const AUTHORIZED_ROLE = "web_authorized";
@@ -91,4 +92,10 @@ export function requireAdmin(
     "Only administrators can access this page.",
     allowDegraded
   );
+}
+
+/** Hide a page outside development instances (`isDev`): it answers 404, as if
+ * it did not exist. */
+export function requireDevInstance() {
+  if (!isDev) throw render(404, "This page is not available.");
 }

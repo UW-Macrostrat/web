@@ -18,7 +18,15 @@ import {
   UnitSelectionStyle,
   columnTypeFromColType,
 } from "@macrostrat/column-views";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import { useAtom } from "jotai";
 import { AnchorButton } from "@blueprintjs/core";
 import { apiV2Prefix, isDev } from "@macrostrat-web/settings";
@@ -40,7 +48,11 @@ import {
 } from "@macrostrat/data-components";
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
-import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
+import {
+  HybridBottomSheet,
+  HybridPage,
+  type LayoutCapabilities,
+} from "~/layouts/hybrid";
 import { useIsBelow } from "~/styles/breakpoints";
 import {
   columnHashStateAtom,
@@ -254,7 +266,9 @@ function ColumnContentPane({ columnInfo }) {
     facet = h("div.facet-container", [facetElement]);
   }
 
-  const { columnWidth, width } = useColumnSize(facet != null);
+  const { columnWidth, width, viewRef, viewClassName } = useColumnSize(
+    facet != null
+  );
 
   // As a child rather than `showUnitPopover`, which re-enables selection on a
   // provider the page already owns (and warns about it).
@@ -284,6 +298,7 @@ function ColumnContentPane({ columnInfo }) {
         },
         h(
           "div.column-view",
+          { ref: viewRef, className: viewClassName },
           h(
             Column,
             {
@@ -325,18 +340,76 @@ function ColumnContentPane({ columnInfo }) {
   ]);
 }
 
-/** A phone gets a narrower column and label column; the smallest phones have
- * no room for labels, though a facet keeps the space it draws into. */
+const UNIT_COLUMN_WIDTH = 300;
+const MIN_UNIT_COLUMN_WIDTH = 120;
+const LABEL_COLUMN_WIDTH = 150;
+const NARROW_INSET = 10;
+
+/** The unit and label columns' widths, from the room beside the axis and
+ * timescale. Short of room, the label column goes first (a facet keeps its
+ * space), then the unit column narrows to fill what is left, so the margins
+ * either side stay even. */
 function useColumnSize(hasFacet: boolean) {
-  const isPhone = useIsBelow("phone");
-  const isSmallPhone = useIsBelow("smallPhone");
-  if (!isPhone) {
-    return { columnWidth: 300, width: 450 };
+  const viewRef = useRef<HTMLDivElement>(null);
+  const widthRef = useRef(UNIT_COLUMN_WIDTH + LABEL_COLUMN_WIDTH);
+  const room = useColumnRoom(viewRef, widthRef);
+  const size = columnSizeForRoom(room, hasFacet);
+  widthRef.current = size.width;
+  // The server can't measure, so its full-width column waits to be sized
+  let viewClassName: string | undefined = undefined;
+  if (room == null) viewClassName = "unmeasured";
+  return { ...size, viewRef, viewClassName };
+}
+
+function columnSizeForRoom(room: number | null, hasFacet: boolean) {
+  const full = UNIT_COLUMN_WIDTH + LABEL_COLUMN_WIDTH;
+  if (room == null || room >= full) {
+    return { columnWidth: UNIT_COLUMN_WIDTH, width: full };
   }
-  if (!isSmallPhone || hasFacet) {
-    return { columnWidth: 180, width: 300 };
-  }
-  return { columnWidth: 180, width: 180 };
+  let labelWidth = 0;
+  if (hasFacet) labelWidth = LABEL_COLUMN_WIDTH;
+  // A little short of the room, to balance the mostly empty scale beside it
+  const columnWidth = Math.round(
+    Math.min(
+      UNIT_COLUMN_WIDTH,
+      Math.max(MIN_UNIT_COLUMN_WIDTH, room - labelWidth - NARROW_INSET)
+    )
+  );
+  return { columnWidth, width: columnWidth + labelWidth };
+}
+
+/** Width the unit and label columns could take: the content column's width
+ * less what the column draws beside them (axis, timescale), measured since
+ * that varies with the settings. The library takes widths only as numbers. */
+function useColumnRoom(
+  viewRef: RefObject<HTMLDivElement>,
+  widthRef: RefObject<number>
+) {
+  const [room, setRoom] = useState<number | null>(null);
+  const measure = useCallback(() => {
+    const view = viewRef.current;
+    const parent = view?.parentElement;
+    if (view == null || parent == null) return;
+    const beside = view.offsetWidth - widthRef.current;
+    const next = parent.clientWidth - beside;
+    setRoom((prev) => {
+      if (prev != null && Math.abs(prev - next) < 2) return prev;
+      return next;
+    });
+  }, []);
+  // After every render, since the axis and timescale change with settings
+  useLayoutEffect(measure);
+  // And as the room, or what loads beside the column, changes size
+  useEffect(() => {
+    const view = viewRef.current;
+    const parent = view?.parentElement;
+    if (view == null || parent == null) return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(parent);
+    observer.observe(view);
+    return () => observer.disconnect();
+  }, [measure]);
+  return room;
 }
 
 /** Carries the column scope between `/columns` pages, and keeps the in-process
@@ -514,13 +587,29 @@ function ColumnAssistantPane({
   const { units } = columnInfo;
   const { selectedUnit, setSelectedUnitID } = useColumnSelection();
   const unitPopover = useUnitPopover();
+  // Without the sidebar the assistant follows the column, too far down for
+  // the selected unit, which rises from the bottom of the screen instead
+  const isNarrow = useIsBelow("tablet");
+  const showUnit = selectedUnit != null && !unitPopover;
+
+  let unitSheet = null;
+  if (showUnit && isNarrow) {
+    unitSheet = h(UnitDetailsSheet, {
+      units,
+      selectedUnit,
+      onSelectUnit: setSelectedUnitID,
+    });
+  }
 
   // Opened deliberately, so it takes the slot over a selected unit
   if (settingsOpen) {
-    return h(ViewSettingsPanel, { onClose: () => setSettingsOpen(false) });
+    return h([
+      h(ViewSettingsPanel, { onClose: () => setSettingsOpen(false) }),
+      unitSheet,
+    ]);
   }
 
-  if (selectedUnit != null && !unitPopover) {
+  if (showUnit && !isNarrow) {
     // The one piece of assistant content that reads as a card. The panel
     // resolves adjacent units' names through the column state scope, so it
     // gets its own provider here (the column's is in the content slot).
@@ -535,12 +624,33 @@ function ColumnAssistantPane({
       })
     );
   }
-  return h(ColumnInfoPanel, {
-    data: columnInfo,
-    project,
-    columnProjects,
-    onOpenSettings: () => setSettingsOpen(true),
-  });
+  return h([
+    h(ColumnInfoPanel, {
+      data: columnInfo,
+      project,
+      columnProjects,
+      onOpenSettings: () => setSettingsOpen(true),
+    }),
+    unitSheet,
+  ]);
+}
+
+/** The selected unit in a full-width sheet docked at the foot of the screen,
+ * like the main map's details on a phone */
+function UnitDetailsSheet({ units, selectedUnit, onSelectUnit }) {
+  return h(
+    HybridBottomSheet,
+    h(
+      MacrostratColumnStateProvider,
+      { units },
+      h(ModalUnitPanel, {
+        unitData: units,
+        className: "unit-details-sheet-panel",
+        selectedUnit,
+        onSelectUnit,
+      })
+    )
+  );
 }
 
 function ColumnInfoPanel({ data, project, columnProjects, onOpenSettings }) {

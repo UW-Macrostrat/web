@@ -32,7 +32,6 @@ import {
   buildCapabilities,
   capabilitiesAtom,
   contentScrollAtom,
-  hasMapPane,
   hasSidebar,
   mapPlacementCountAtom,
   sidebarWidthsAtom,
@@ -130,12 +129,8 @@ function HybridPageInner({
   // With a sidebar, the view menu and links sit at its foot instead
   const mode = useAtomValue(layoutModeAtom);
   const linksInSidebar = shell === "content" && hasSidebar(mode);
-  // Page-scrolling content without a map of its own offers one on request
-  const offerFloatingMap =
-    shell === "content" &&
-    contentScroll === "page" &&
-    map != null &&
-    !hasMapPane(mode);
+  // The bare content mode offers the map on request; `content-full` means none
+  const offerFloatingMap = mode === "content-only" && map != null;
   // …in the view menu, unless the page has placed the map itself
   const placements = useAtomValue(mapPlacementCountAtom);
   const controls = h(HeaderControls, {
@@ -168,6 +163,9 @@ function HybridPageInner({
       width: "constrained",
       actions: controls,
       collapseActions: "narrow",
+      // Icon-only actions (see `composer.module.sass`) fit down to a phone;
+      // only the narrowest bars fold them into a menu
+      collapseActionsBelow: 360,
       className: "shell-page-header",
     });
   } else if (titleAdornment == null) {

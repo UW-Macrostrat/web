@@ -21,6 +21,7 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
+import { belowBreakpointAtom } from "~/styles/breakpoints";
 
 export type LayoutMode =
   | "content-only"
@@ -167,9 +168,50 @@ export const capabilitiesAtom = atom<LayoutCapabilities>(defaultCapabilities);
 
 const layoutModeParam = atomWithSearchParam("layout");
 
+/** Too narrow for a sidebar beside the content (the CSS hides it here too) */
+export const narrowViewportAtom = belowBreakpointAtom("tablet");
+
+/** What a narrow viewport shows instead of a side-by-side mode: the sidebar
+ * mode as content-only (the sidebar's contents below the content), the split
+ * view as the map alone (its map is hidden when narrow). Only where the page
+ * offers the replacement. */
+const narrowReplacements: Partial<Record<LayoutMode, LayoutMode>> = {
+  "content-primary": "content-only",
+  "map-primary": "map-only",
+};
+
+const narrowReplacementsAtom = atom((get) => {
+  const replacements: Partial<Record<LayoutMode, LayoutMode>> = {};
+  if (!get(narrowViewportAtom)) return replacements;
+  const { modes } = get(capabilitiesAtom);
+  for (const [mode, replacement] of Object.entries(narrowReplacements)) {
+    if (modes.includes(replacement)) replacements[mode] = replacement;
+  }
+  return replacements;
+});
+
+/** The modes the view menu offers: without those replaced when narrow, since
+ * choosing one would change nothing. */
+export const availableModesAtom = atom((get): LayoutMode[] => {
+  const { modes } = get(capabilitiesAtom);
+  const replacements = get(narrowReplacementsAtom);
+  return modes.filter((m) => replacements[m] == null);
+});
+
 /** The one piece of layout state. Synced to `?layout=`, with the page's default
- * kept out of the URL (repo convention). */
+ * kept out of the URL (repo convention). Reads as the mode on screen, so a
+ * narrow viewport's replaced mode reads as its replacement, though the URL
+ * keeps the choice for a wider one. */
 export const layoutModeAtom = atom(
+  (get): LayoutMode => {
+    const mode = get(chosenLayoutModeAtom);
+    return get(narrowReplacementsAtom)[mode] ?? mode;
+  },
+  (get, set, mode: LayoutMode) => set(chosenLayoutModeAtom, mode)
+);
+
+/** The mode the reader (or the page's default) chose */
+const chosenLayoutModeAtom = atom(
   (get): LayoutMode => {
     const caps = get(capabilitiesAtom);
     const raw = get(layoutModeParam) as LayoutMode | null;
@@ -209,6 +251,9 @@ export const footerLinksOpenAtom = atom(false);
 /** The map floated beside the content, shown on request in the modes without
  * a map of their own. Ephemeral, so it stays out of the URL. */
 export const floatingMapOpenAtom = atom(false);
+
+/** The content shell's slot for a sheet docked below its scroll region */
+export const bottomSheetElementAtom = atom<HTMLElement | null>(null);
 
 /** How many map placements the page's content has mounted. With none, the
  * frame offers the map from the view menu and floats it at the top. */
