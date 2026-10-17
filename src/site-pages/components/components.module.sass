@@ -58,15 +58,10 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   .app-name
     margin: 0
 
-// Light integrations: the same card, smaller.
-.app-list.small
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))
+// Light integrations: the same card, smaller, in the same list.
+.app-list .app-card.small
   gap: var(--pz-space-2)
-  .archived &
-    margin-top: var(--pz-space-3)
-  .app-card
-    gap: var(--pz-space-2)
-    padding: var(--pz-space-2)
+  padding: var(--pz-space-2)
   .app-logo
     width: 32px
     height: 32px
@@ -116,9 +111,8 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   font-size: var(--pz-font-size-sm)
   font-weight: var(--pz-font-weight-semibold)
 
-.archived, .former
-  .app-card, .person-card
-    opacity: 0.8
+.app-card.archived, .person-card.former
+  opacity: 0.8
 
 .people-list
   display: grid

@@ -3,32 +3,19 @@ import { LinkCard } from "~/components/cards";
 
 export function AppGallery({ apps }) {
   const items: any[] = apps?.apps ?? [];
-  const active = items.filter((a) => a.status !== "archived");
-  const archived = items.filter((a) => a.status === "archived");
-  const light = active.filter(isLight);
+  const ordered = [...items].sort((a, b) => appRank(a) - appRank(b));
+  return h(
+    "ul.app-list",
+    ordered.map((a) => h("li", { key: a.id }, h(AppCard, { app: a })))
+  );
+}
 
-  let lightBlock = null;
-  if (light.length > 0) {
-    lightBlock = h("div.app-group", [
-      h("h3.tier-label", "Also using Macrostrat"),
-      h(AppCards, { apps: light, small: true }),
-    ]);
-  }
-
-  let archivedBlock = null;
-  if (archived.length > 0) {
-    archivedBlock = h("div.app-group.archived", [
-      h("h3.tier-label", "Earlier work"),
-      h(AppCards, { apps: archived.filter(isCore) }),
-      h(AppCards, { apps: archived.filter(isLight), small: true }),
-    ]);
-  }
-
-  return h("div.app-gallery", [
-    h(AppCards, { apps: active.filter(isCore) }),
-    lightBlock,
-    archivedBlock,
-  ]);
+// Core entries, then light ones, then archived; file order within each.
+function appRank(app) {
+  let rank = 0;
+  if (isLight(app)) rank += 1;
+  if (app.status === "archived") rank += 2;
+  return rank;
 }
 
 // Light entries show Macrostrat's map or link to it among other sources.
@@ -36,24 +23,9 @@ function isLight(app) {
   return app.integration === "light";
 }
 
-function isCore(app) {
-  return !isLight(app);
-}
-
-function AppCards({ apps, small = false }) {
-  if (apps.length === 0) return null;
-  let listTag = "ul.app-list";
-  if (small) {
-    listTag = "ul.app-list.small";
-  }
-  return h(
-    listTag,
-    apps.map((a) => h("li", { key: a.id }, h(AppCard, { app: a, small })))
-  );
-}
-
-function AppCard({ app, small }) {
-  const { name, url, by, logo, blurb, kind, uses } = app;
+function AppCard({ app }) {
+  const { name, url, by, logo, blurb, kind, uses, status } = app;
+  const small = isLight(app);
   // An empty box keeps cards without a logo aligned with the rest.
   let logoEl = h("span.app-logo");
   if (logo != null) {
@@ -68,7 +40,10 @@ function AppCard({ app, small }) {
   if (uses != null) {
     usesEl = h("p.app-uses", uses);
   }
-  return h(LinkCard, { href: url, density: "list", className: "app-card" }, [
+  let cardClass = "app-card";
+  if (small) cardClass += " small";
+  if (status === "archived") cardClass += " archived";
+  return h(LinkCard, { href: url, density: "list", className: cardClass }, [
     logoEl,
     h("div.app-body", [
       h("h3.app-name", name),
