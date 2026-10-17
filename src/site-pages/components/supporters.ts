@@ -28,18 +28,20 @@ export function SupportersGrid({ supporters }) {
   );
 }
 
-// A card leads with what was given (a grant's title, or a contribution); the
-// organization that gave it follows, secondary.
+// A grant leads with its title, the agency secondary; other support leads with
+// the organization. Program or contribution, award and years share one line.
 function SupporterCard({ supporter }) {
   const { name, title, program, contribution, award, pi, url, logo, blurb, period } =
     supporter;
   let heading = title;
-  let programText = program;
+  let funderEl = h("span.supporter-funder", name);
   if (title == null) {
-    heading = program ?? contribution ?? name;
-    programText = null;
+    heading = name;
+    funderEl = null;
   }
-  const details = [programText, award, formatPeriod(period)].filter(Boolean).join(" · ");
+  const details = [program ?? contribution, award, formatPeriod(period)]
+    .filter(Boolean)
+    .join(" · ");
   let detailsEl = null;
   if (details !== "") {
     detailsEl = h("span.supporter-details", details);
@@ -56,7 +58,7 @@ function SupporterCard({ supporter }) {
     h("h3.supporter-title", heading),
     h("div.supporter-source", [
       logoEl,
-      h("div.supporter-source-text", [detailsEl, h("span.supporter-funder", name)]),
+      h("div.supporter-source-text", [detailsEl, funderEl]),
     ]),
     piEl,
     h("p.supporter-blurb", blurb),
