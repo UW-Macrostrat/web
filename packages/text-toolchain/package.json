@@ -8,7 +8,7 @@
     "@mdx-js/mdx": "^2.3.0",
     "@mdx-js/rollup": "^2.3.0",
     "@sindresorhus/slugify": "^2.2.0",
-    "@vitejs/plugin-react": "^5.1.2",
+    "@vitejs/plugin-react": "^6.1.2",
     "glob": "^10.2.2",
     "gray-matter": "^4.0.3",
     "rehype-raw": "^6.1.1",
