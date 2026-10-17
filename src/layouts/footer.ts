@@ -45,10 +45,10 @@ export const platformNavItems: NavLinkItem[] = [
     href: "/community",
     text: "Community",
     icon: "people",
-    description: "Apps, integrations and data providers.",
+    description: "Publications, apps, integrations and data providers.",
   },
   {
-    href: "/publications",
+    href: "/community/publications",
     text: "Publications",
     icon: "book",
     description: "Macrostrat's scientific impact.",

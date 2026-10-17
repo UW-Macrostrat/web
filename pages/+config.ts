@@ -37,6 +37,7 @@ export default {
     "/people": "/about/people",
     "/community/contributors": "/about/people",
     "/support": "/about/support",
+    "/publications": "/community/publications",
     // The matching tools, moved under the lexicon's own tools section.
     "/lex/lith-match": "/lex/match/lithologies",
     "/dev/match-api": "/lex/match/strat-names",

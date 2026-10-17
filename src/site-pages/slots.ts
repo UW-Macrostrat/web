@@ -52,7 +52,7 @@ export const siteSlots: Record<string, SlotSpec[]> = {
   "/contact": [
     { at: "contact", mode: "after", component: "ContactBlock", marker: "Contact", data: ["contact"] },
   ],
-  "/publications": [
+  "/community/publications": [
     { at: "publications-using-macrostrat", mode: "aside", component: "BibliographySummary", data: ["publications"] },
     { at: "publications-using-macrostrat", mode: "after", component: "Bibliography", data: ["publications"] },
   ],

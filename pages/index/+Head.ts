@@ -8,7 +8,7 @@ const legacyAnchors = {
   api: "/docs/data-services",
   people: "/about/people",
   donate: "/about/support",
-  publications: "/publications",
+  publications: "/community/publications",
 };
 
 /** Redirects v1 `/#people`-style links before the client bundle loads. */
