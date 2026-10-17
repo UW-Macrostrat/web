@@ -6,7 +6,7 @@
   @include type.label
   margin: var(--pz-space-4) 0 var(--pz-space-2)
 
-ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-list, ul.contact-list
+ul.supporter-list, ul.app-list, ul.app-rows, ul.people-list, ul.integration-list, ul.repo-list, ul.contact-list
   list-style: none
   padding: 0
   margin: 0
@@ -44,8 +44,43 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
 .supporter-program, .app-meta, .supporter-period, .person-title, .person-affiliation
   @include type.supporting
 
+.app-uses
+  @include type.supporting
+
+// Light integrations: a compact list below the cards.
+.app-rows
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))
+  column-gap: var(--pz-space-4)
+  .archived &
+    margin-top: var(--pz-space-3)
+
+.app-row
+  display: flex
+  gap: var(--pz-space-2)
+  align-items: flex-start
+  padding: var(--pz-space-2) 0
+  border-bottom: 1px solid var(--pz-panel-rule-color)
+
+.app-row-logo
+  width: 32px
+  height: 32px
+  object-fit: contain
+  flex: none
+
+.app-row-body
+  min-width: 0
+  p
+    margin: 0.1em 0 0
+
+.app-row-head
+  display: flex
+  flex-wrap: wrap
+  gap: 0 0.6em
+  align-items: baseline
+
 .archived, .former
-  .app-card, .person-card
+  .app-card, .app-row, .person-card
     opacity: 0.8
 
 .people-list
