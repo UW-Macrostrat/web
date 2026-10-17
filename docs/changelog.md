@@ -9,6 +9,40 @@ a single interface are recorded in that interface's own changelog, such as the
 [map interface changelog](map/changelog.md); the map's 4.x releases predate this
 file and are recorded only there.
 
+## 5.4.0
+
+_October 2026_
+
+### Site
+
+- Community pages at `/community/apps`, `/community/integrations` and
+  `/community/providers`, and a contact page at `/contact`.
+- Apps, people and supporters each appear in one list, ordered by tier; grants
+  show as cards with title, program and PI, newest first.
+- Site pages use the collapsing page header.
+- Layouts for small screens on the map, column and map pages.
+- Reworked homepage hero.
+
+### Lexicon
+
+- Sift is retired: its links (`/sift/#/strat_name/1`, `/sift/unit/1`, …)
+  redirect to the matching lexicon, column or project page.
+- The lexicon index links the legacy Sift app at `v1.macrostrat.org/sift/` and
+  no longer shows an Updates dialog.
+
+### Access
+
+- Creating a column (`/columns/new`) requires an authorized account.
+- Integration pages and the globe preview appear only outside production, as
+  set by `MACROSTRAT_ENV`.
+
+### Operations
+
+- Built on Vite 8, with the server defined in Vike's `+server.ts`; vike-photon
+  is removed.
+- Redirects behind the HTTPS proxy point at `https://` addresses instead of
+  `http://`.
+
 ## 5.3.0
 
 _October 2026_
