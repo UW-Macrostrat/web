@@ -21,7 +21,17 @@ export const apiDomain = getRuntimeConfig("MACROSTRAT_API_DOMAIN");
 
 export const tileserverDomain = burwellTileDomain;
 // For now,
-export const isDev = true; // getRuntimeConfig("MACROSTRAT_INSTANCE") === "Development";
+
+function looseCompare(a: string, b: string) {
+  if (a == null) return b == null;
+  if (b == null) return a == null;
+  return a.toLowerCase() === b.toLowerCase();
+}
+
+export const isDev = !looseCompare(
+  getRuntimeConfig("MACROSTRAT_INSTANCE"),
+  "Production"
+);
 
 export const gddDomain = "https://xdd.wisc.edu";
 export const pbdbDomain = "https://paleobiodb.org";

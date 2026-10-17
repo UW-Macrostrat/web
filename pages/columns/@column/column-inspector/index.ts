@@ -21,7 +21,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useAtom } from "jotai";
 import { AnchorButton } from "@blueprintjs/core";
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { apiV2Prefix, isDev } from "@macrostrat-web/settings";
 import { NavigationLinkProvider, PatternProvider } from "~/_providers";
 import { navigate } from "vike/client/router";
 import {
@@ -368,7 +368,11 @@ function ColumnUnitLinks({ columnInfo, children }) {
     [col_id, units, setSelectedUnitID]
   );
 
-  return h(MacrostratInteractionProvider, { interactionPropsForItem }, children);
+  return h(
+    MacrostratInteractionProvider,
+    { interactionPropsForItem },
+    children
+  );
 }
 
 /* ----------------------------------------------------------------- the map */
@@ -429,25 +433,22 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   // building a new GL context. `visibleColumnIDs: null` means every column in
   // scope; the list is the only page that narrows it.
   return h("div.column-map-pane", [
-    h(
-      ColumnMapSlot,
-      {
-        className: "column-map",
-        targetKey: `column:${columnInfo.col_id}`,
-        projectID: mapProject,
-        inProcess: showInProcess,
-        visibleColumnIDs: null,
-        selectedColumnIDs: EMPTY_SELECTION,
-        selectedColumn: columnInfo.col_id,
-        onSelectColumn,
-        // The project filter scopes only the map, so it lives with the map
-        settings: h(
-          MapSettingsSection,
-          { title: "Projects" },
-          h(ProjectFilterMenu, { inline: true })
-        ),
-      }
-    ),
+    h(ColumnMapSlot, {
+      className: "column-map",
+      targetKey: `column:${columnInfo.col_id}`,
+      projectID: mapProject,
+      inProcess: showInProcess,
+      visibleColumnIDs: null,
+      selectedColumnIDs: EMPTY_SELECTION,
+      selectedColumn: columnInfo.col_id,
+      onSelectColumn,
+      // The project filter scopes only the map, so it lives with the map
+      settings: h(
+        MapSettingsSection,
+        { title: "Projects" },
+        h(ProjectFilterMenu, { inline: true })
+      ),
+    }),
   ]);
 }
 
@@ -535,7 +536,7 @@ function ColumnInfoPanel({ data, project, columnProjects, onOpenSettings }) {
         minimal: true,
         small: true,
         icon: "comparison",
-        text: "Correlate with other columns",
+        text: "Correlate columns",
         href: correlationHref([data.col_id]),
       }),
       // The same column as tables — its units, its ingestion-format sheet
@@ -547,7 +548,7 @@ function ColumnInfoPanel({ data, project, columnProjects, onOpenSettings }) {
         text: "View as table",
         href: `/columns/${data.col_id}/table`,
       }),
-      h(AnchorButton, {
+      h.if(isDev)(AnchorButton, {
         minimal: true,
         small: true,
         icon: "edit",

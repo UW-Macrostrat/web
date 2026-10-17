@@ -159,7 +159,7 @@ const entryPoints: EntryPoint[] = [
 function SiteLead() {
   return h("div.site-lead-container", [
     h("p.site-lead", [
-      "An geologic model of the Earth's crust through time.",
+      "A geologic model of the Earth's crust through time.",
       //"Macrostrat is a data system to describe the Earth's crust through time.",
       // "Geologic maps and stratigraphic columns, integrated into one model of ",
       // "the Earth's crust through time.",

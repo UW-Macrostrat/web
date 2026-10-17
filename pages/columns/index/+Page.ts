@@ -107,6 +107,7 @@ import {
 
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
+import { isDev } from "@macrostrat-web/settings";
 
 const h = hyper.styled(styles);
 
@@ -251,13 +252,16 @@ const columnListLinks: HybridLink[] = [
     icon: "comparison",
     tag: "Beta",
   },
-  {
+];
+
+if (isDev) {
+  columnListLinks.push({
     label: "New column",
     href: "/columns/new",
     icon: "add",
     tag: "Alpha",
-  },
-];
+  });
+}
 
 export function Page({ linkPrefix = "/" }) {
   const data = useData();
