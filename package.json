@@ -73,7 +73,6 @@
     "@macrostrat-web/section-editor-demo": "workspace:*",
     "@macrostrat-web/security": "workspace:*",
     "@macrostrat-web/settings": "workspace:*",
-    "@macrostrat-web/sift": "workspace:*",
     "@macrostrat-web/text-toolchain": "workspace:*",
     "@macrostrat-web/utility-functions": "workspace:*",
     "@macrostrat/api-types": "^1.4.0",
