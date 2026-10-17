@@ -14,7 +14,7 @@
  */
 import h from "./hero.module.sass";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { Card, Icon } from "@blueprintjs/core";
+import { Card } from "@blueprintjs/core";
 import { clientOnly } from "~/components/lex/client-only";
 import type { MapSnapshotImage } from "~/map-snapshots/spec";
 import {
@@ -154,10 +154,6 @@ function HeroStill({
         },
         [
           picture,
-          h("div.hero-engage-hint", [
-            h(Icon, { icon: "hand-up", size: 12 }),
-            "Interactive map",
-          ]),
           h(
             "div.hero-overlay",
             h("div.hero-caption", h("h3.hero-title", area.title))

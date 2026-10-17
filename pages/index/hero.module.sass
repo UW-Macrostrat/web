@@ -53,6 +53,18 @@
   // to the right-hand corner and kept above the caption's scrim.
   :global(.mapboxgl-ctrl-bottom-right)
     z-index: 11
+    // The wordmark and the ⓘ side by side, ⓘ in the corner. Reversed because
+    // Mapbox inserts later corner controls first.
+    display: flex
+    flex-direction: row-reverse
+    align-items: center
+    gap: 4px
+    padding: 0 6px 6px 0
+
+    :global(.mapboxgl-ctrl)
+      float: none
+      clear: none
+      margin: 0
 
 .hero-column-slot
   display: flex
@@ -265,41 +277,20 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
 // ------------------------------------------------------------- map chrome
 
-// While a new column is being loaded.
+// While a new column is being loaded: small, in a corner, and only for loads
+// long enough to notice.
 .hero-loading
   position: absolute
   top: 0.75em
-  left: 50%
-  transform: translateX(-50%)
+  right: 0.75em
   z-index: 20
-  padding: 0.3em
-  border-radius: 50%
-  background: var(--pz-panel-background-color)
+  pointer-events: none
+  opacity: 0
+  animation: hero-loading-in 0.2s ease 0.4s forwards
 
-// ------------------------------------------------------------- credits
-
-.hero-credits
-  display: flex
-  flex-wrap: wrap
-  gap: 0.15em 1.5em
-  margin-top: 0.5em
-  justify-content: flex-end
-
-  .hero-credit
-    margin: 0
-    font-size: var(--pz-font-size-xs)
-    line-height: var(--pz-line-height-snug)
-    color: var(--pz-text-subtle-color)
-
-  .credit-label
-    text-transform: uppercase
-    letter-spacing: 0.05em
-    margin-right: 0.5em
-    font-weight: var(--pz-font-weight-semibold)
-    color: var(--pz-accent-text-color)
-
-  .credit-detail
-    color: var(--pz-text-subtle-color)
+@keyframes hero-loading-in
+  to
+    opacity: 0.7
 
 // ------------------------------------------------------- the still
 
@@ -340,21 +331,6 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
   &.is-revealed
     opacity: 0
-
-.hero-engage-hint
-  position: absolute
-  top: 0.8em
-  right: 0.8em
-  z-index: 10
-  display: flex
-  align-items: center
-  gap: 0.35em
-  padding: 0.2em 0.6em
-  border-radius: var(--pz-radius-lg)
-  font-size: 0.8em
-  color: $over-imagery-text
-  background: rgba(0, 0, 0, 0.45)
-  pointer-events: none
 
 .hero-still-attribution
   position: absolute

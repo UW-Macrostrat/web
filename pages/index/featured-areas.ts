@@ -36,10 +36,10 @@ export interface FeaturedArea {
   view: MapCamera;
   /** Pin this column rather than taking whatever the map's centre is over. */
   columnID?: number;
-  /** Open with the age filter already set: an interval by name, resolved
-   * against the international timescale, or explicit bounds in Ma, oldest
-   * first. */
-  ageRange?: string | [number, number];
+  /** Open with the age filter already set: an interval by name, or two (oldest
+   * first) for the span between them, resolved against the international
+   * timescale. */
+  ageRange?: string | [string, string];
 }
 
 /** The hero's default camera angle — an oblique, terrain-lit view.
@@ -76,7 +76,7 @@ export const featuredAreas: FeaturedArea[] = [
       "A kilometre of Paleozoic strata, layer by layer, over Proterozoic basement — the section that taught North America to read its own rock record.",
     view: camera(36.1, -112.1, 10.2),
     columnID: 491,
-    ageRange: "Paleozoic",
+    ageRange: "Proterozoic",
   },
   {
     id: "paradox-basin",
@@ -102,6 +102,7 @@ export const featuredAreas: FeaturedArea[] = [
       "A Laramide dome that lifts Precambrian basement through its Paleozoic and Mesozoic cover — a bullseye best read from straight above.",
     view: camera(44.0, -103.6, 8.6, { pitch: 0, bearing: 0 }),
     columnID: 512,
+    ageRange: ["Pennsylvanian", "Permian"],
   },
 ];
 

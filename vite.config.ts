@@ -1,7 +1,7 @@
 import revisionInfo from "@macrostrat/revision-info-webpack";
 import react from "@vitejs/plugin-react";
 import vike from "vike/plugin";
-import { defineConfig, loadEnv, type ProxyOptions } from "vite";
+import { defineConfig, loadEnv, type Plugin, type ProxyOptions } from "vite";
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { cp } from "node:fs/promises";
@@ -37,6 +37,7 @@ export default defineConfig({
     vike(),
     react(),
     hyperStyles(),
+    refreshSsrLoadModule(),
     // patchCssModules(),
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
@@ -90,6 +91,36 @@ export default defineConfig({
     },
   },
 });
+
+/** Photon runs `server/entry.ts` in the SSR environment's module runner, but
+ * Vike renders pages through `ssrLoadModule`, a second runner over the same
+ * module graph. When a file both import changes, Photon's runner refetches it
+ * first, which marks it fresh in the graph, so Vike's runner keeps its old copy
+ * until a restart. Drop the edited file and its importers from Vike's runner. */
+function refreshSsrLoadModule(): Plugin {
+  return {
+    name: "refresh-ssr-load-module",
+    apply: "serve",
+    hotUpdate({ file, server }) {
+      if (this.environment.name !== "ssr") return;
+      // Private: the runner behind `ssrLoadModule` (vite/src/node/ssr/ssrModuleLoader.ts)
+      const evaluated = (server as any)._ssrCompatModuleRunner?.evaluatedModules;
+      if (evaluated == null) return;
+      const stale = [...(evaluated.getModulesByFile(file) ?? [])];
+      const seen = new Set();
+      while (stale.length > 0) {
+        const node = stale.pop();
+        if (seen.has(node)) continue;
+        seen.add(node);
+        evaluated.invalidateModule(node);
+        for (const id of node.importers) {
+          const importer = evaluated.getModuleById(id);
+          if (importer != null) stale.push(importer);
+        }
+      }
+    },
+  };
+}
 
 /** `vite-plugin-cesium` copies Cesium's runtime assets to `build.outDir` as it was
  * defined when its `config` hook ran, which is the default `dist` – Vike only sets

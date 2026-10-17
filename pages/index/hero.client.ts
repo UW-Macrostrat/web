@@ -24,14 +24,21 @@
  */
 import h from "./hero.module.sass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MapView } from "@macrostrat/map-interface";
+import { MapMovedReporter, MapView } from "@macrostrat/map-interface";
+import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import mapboxgl from "mapbox-gl";
-import { setGeoJSON, setMapPosition } from "@macrostrat/mapbox-utils";
+import {
+  buildGeoJSONSource,
+  getFocusState,
+  setGeoJSON,
+} from "@macrostrat/mapbox-utils";
 import {
   LocationFocusButton,
   MapboxMapProvider,
+  getTerrainLayerForStyle,
   isCentered,
   useFocusState,
+  useMapClickHandler,
   useMapInitialized,
   useMapRef,
   useMapStyleOperator,
@@ -41,7 +48,7 @@ import {
   MacrostratDataProvider,
   useMacrostratDefs,
 } from "@macrostrat/data-provider";
-import { IntervalAgeRange, IntervalField } from "@macrostrat/data-components";
+import { IntervalAgeRange } from "@macrostrat/data-components";
 import { ErrorBoundary, useInDarkMode } from "@macrostrat/ui-components";
 import { Button, Spinner } from "@blueprintjs/core";
 import type { UnitLong } from "@macrostrat/api-types";
@@ -50,20 +57,16 @@ import {
   apiV2Prefix,
   tileserverDomain,
 } from "@macrostrat-web/settings";
-import { Link } from "~/components";
 import { PatternProvider } from "~/_providers";
 import {
   fetchColumnAtPoint,
   fetchColumnByID,
   fetchIntervalsByID,
-  fetchMapSource,
   fetchMapUnitAtPoint,
   roundCoordinate,
   type AgedFeature,
   type HeroColumn,
   type HeroPoint,
-  type MapSourceRef,
-  type MapUnitMatch,
   fetchProjectColumns,
   isStandardProject,
 } from "./hero-data";
@@ -106,9 +109,15 @@ const GEOLOGY_STROKE_OPACITY = 0.18;
 const HIGHLIGHT_FILL_OPACITY = 0.6;
 const DIMMED_FILL_OPACITY = 0.2;
 
+/** The main map's fault layer. The `lines` layer also carries every contact,
+ * which would outline each polygon in grey. */
+const faultsLayer = buildMacrostratStyleLayers({ lineOpacity: 0.7 }).find(
+  (layer) => layer.id === "faults"
+);
+
 /** The geology, as little of it as the hero needs: one vector source on the
  * carto tiles, the unit polygons filled and outlined in their own color, and
- * the structural lines over them. The library's full style brings twenty-odd
+ * the faults over them. The library's full style brings twenty-odd
  * layers across several sources the hero never draws; this is what it shows. */
 const geologyStyle = {
   version: 8,
@@ -142,64 +151,23 @@ const geologyStyle = {
         "line-opacity": GEOLOGY_STROKE_OPACITY,
       },
     },
-    {
-      id: "burwell_lines",
-      type: "line",
-      source: "burwell",
-      "source-layer": "lines",
-      paint: {
-        "line-color": "#333333",
-        "line-width": 0.8,
-        "line-opacity": 0.7,
-      },
-    },
+    faultsLayer,
   ],
 };
 
-/** The elevation source terrain is drawn from, and a sky to put over it.
- *
- * This has to come from here because `setup3DTerrain` in
- * `@macrostrat/mapbox-react` never adds one: it computes
- * `demSourceID = sourceID ?? currentTerrainSourceID ?? "mapbox-dem"`, then does
- * `nextTerrainSourceID ??= addDefault3DStyles(…)` on a value that is already
- * non-null, so the fallback branch is dead. With Macrostrat's own map styles
- * that goes unnoticed — they ship a `raster-dem` source, so
- * `getTerrainSourceID` finds one — but plain `satellite-v9` has none, and
- * `map.setTerrain({source: "mapbox-dem"})` then names a source that isn't
- * there. Declaring it here gives `getTerrainSourceID` something to find.
- *
- * Deliberately no `terrain` key: whether terrain is *on* stays with
- * `MapTerrainManager`, which is what lets an overhead area be flat. */
-const terrainStyle = {
+/** The elevation source and sky, always in the style. `setup3DTerrain` never
+ * adds a missing DEM source, and plain `satellite-v9` has none. The `terrain`
+ * key is dropped so `MapTerrainManager` decides, which keeps overhead areas
+ * flat. */
+const { terrain: _terrain, ...terrainStyle } = getTerrainLayerForStyle({
   version: 8,
-  sources: {
-    "mapbox-dem": {
-      type: "raster-dem",
-      url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-      tileSize: 512,
-      maxzoom: 14,
-    },
-  },
-  layers: [
-    {
-      id: "sky",
-      type: "sky",
-      paint: {
-        "sky-type": "atmosphere",
-        "sky-atmosphere-sun": [0, 0],
-        "sky-atmosphere-sun-intensity": 15,
-      },
-    },
-  ],
-};
+  sources: {},
+  layers: [],
+});
 
 /** Stable across renders: `MapView` rebuilds its style whenever this array's
  * identity changes. */
 const overlayStyles = [terrainStyle, geologyStyle];
-
-/** How long the map has to sit still before its centre is taken as a new
- * question to ask the API. */
-const CENTER_SETTLE_MS = 400;
 
 /* --------------------------------------------------------------- the hero */
 
@@ -251,7 +219,7 @@ function HeroPanel({ hero, still }: HeroLiveProps) {
 
   let spinner = null;
   if (state.loading) {
-    spinner = h("div.hero-loading", h(Spinner, { size: 20 }));
+    spinner = h("div.hero-loading", h(Spinner, { size: 14 }));
   }
 
   // The provider `MapAreaContainer` used to bring: `MapView` and everything
@@ -270,7 +238,12 @@ function HeroPanel({ hero, still }: HeroLiveProps) {
             onCenterChanged: state.setCenter,
             onProbe: state.probeAt,
           }),
-          h(StillCover, { key: "still", image: still }),
+          h(StillCover, {
+            key: "still",
+            image: still,
+            // The still shows the area's range; keep it up until the map does.
+            ready: carousel.area.ageRange == null || timeRange != null,
+          }),
           h(HeroChrome, {
             key: "chrome",
             area: carousel.area,
@@ -390,8 +363,6 @@ interface HeroState {
   projectColumns: GeoJSON.FeatureCollection | null;
   loading: boolean;
   timeRange: TimeRange | null;
-  mapUnit: MapUnitMatch | null;
-  mapSource: MapSourceRef | null;
   display: ColumnDisplay;
   setCenter(lat: number, lng: number, userInitiated: boolean): void;
   /** A click on the map: ask what is there, and filter by it. */
@@ -416,8 +387,6 @@ function useHeroState(
     return hero.column;
   });
   const [loading, setLoading] = useState(false);
-  const [mapUnit, setMapUnit] = useState<MapUnitMatch | null>(null);
-  const [mapSource, setMapSource] = useState<MapSourceRef | null>(null);
 
   // The filter is stored as what was *chosen*, not as a resolved range: a
   // clicked feature, or the area's own spec. The range is derived, so an
@@ -443,52 +412,25 @@ function useHeroState(
     area.columnID ?? null
   );
 
-  // Where to ask what the geology is, and whether the answer should set the
-  // filter. The centre asks for the credit line only; a click asks to filter.
-  const [probe, setProbe] = useState<HeroPoint & { filter: boolean }>({
-    lat: area.view.lat,
-    lng: area.view.lng,
-    filter: false,
-  });
-
   const setCenter = useCallback(
     (lat: number, lng: number, userInitiated: boolean) => {
-      const next = { lat: roundCoordinate(lat), lng: roundCoordinate(lng) };
-      setCenterState(next);
-      setProbe({ ...next, filter: false });
+      setCenterState({ lat: roundCoordinate(lat), lng: roundCoordinate(lng) });
       // Panning is how you leave a featured area's column behind.
       if (userInitiated) setPinnedColumn(null);
     },
     []
   );
 
-  const probeAt = useCallback((lat: number, lng: number) => {
-    setProbe({
-      lat: roundCoordinate(lat),
-      lng: roundCoordinate(lng),
-      filter: true,
-    });
-  }, []);
-
-  const onMapUnitResolved = useCallback(
-    (match: MapUnitMatch | null, shouldFilter: boolean) => {
-      setMapUnit(match);
-      if (!shouldFilter || match == null) return;
-      setSelection(match);
-    },
-    []
-  );
+  const probeAt = useMapUnitFilter(setSelection);
 
   useAreaSelection(area, {
     setPinnedColumn,
     setSelection,
     setAreaSpec,
     setCenterState,
-    setProbe,
   });
   useHeroColumn(area, pinnedColumn, center, hero, setColumn, setLoading);
   const projectColumns = useProjectColumns(column);
-  useMapUnitAtPoint(probe, onMapUnitResolved, setMapSource);
 
   const selectUnit = useCallback(
     (_unitID: number | null, unit: UnitLong | null) => {
@@ -522,8 +464,6 @@ function useHeroState(
     projectColumns,
     loading,
     timeRange,
-    mapUnit,
-    mapSource,
     display,
     setCenter,
     probeAt,
@@ -537,20 +477,14 @@ interface AreaSetters {
   setSelection(f: AgedFeature | null): void;
   setAreaSpec(spec: FeaturedArea["ageRange"] | null): void;
   setCenterState(p: HeroPoint): void;
-  setProbe(p: HeroPoint & { filter: boolean }): void;
 }
 
 /** What choosing an area sets: its pinned column, its age range, and — when it
  * pins no column — the centre, so the column is looked up where the area is
  * about to land rather than where the map still is. */
 function useAreaSelection(area: FeaturedArea, setters: AreaSetters) {
-  const {
-    setPinnedColumn,
-    setSelection,
-    setAreaSpec,
-    setCenterState,
-    setProbe,
-  } = setters;
+  const { setPinnedColumn, setSelection, setAreaSpec, setCenterState } =
+    setters;
 
   useEffect(() => {
     setPinnedColumn(area.columnID ?? null);
@@ -558,12 +492,10 @@ function useAreaSelection(area: FeaturedArea, setters: AreaSetters) {
     setSelection(null);
     setAreaSpec(area.ageRange ?? null);
     if (area.columnID != null) return;
-    const next = {
+    setCenterState({
       lat: roundCoordinate(area.view.lat),
       lng: roundCoordinate(area.view.lng),
-    };
-    setCenterState(next);
-    setProbe({ ...next, filter: false });
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the area
   }, [area.id]);
 }
@@ -642,33 +574,22 @@ function useProjectColumns(
   return byProject[projectID] ?? null;
 }
 
-/** Asks what geologic map unit is at the probe point, and who published the map
- * it came from. Runs for the opening centre too, so the credit line is there
- * before anything is clicked. */
-function useMapUnitAtPoint(
-  probe: HeroPoint & { filter: boolean },
-  onResolved: (m: MapUnitMatch | null, shouldFilter: boolean) => void,
-  setMapSource: (s: MapSourceRef | null) => void
-) {
-  useEffect(() => {
-    let cancelled = false;
-    const shouldFilter = probe.filter;
-    fetchMapUnitAtPoint(probe.lat, probe.lng).then(async (match) => {
-      if (cancelled) return;
-      onResolved(match, shouldFilter);
-      if (match == null) {
-        setMapSource(null);
-        return;
-      }
-      const source = await fetchMapSource(match.source_id);
-      if (cancelled) return;
-      setMapSource(source);
-    });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the probe
-  }, [probe]);
+/** A click on the map filters by the geologic map unit under it. A later click
+ * supersedes an earlier one still in flight. */
+function useMapUnitFilter(setSelection: (f: AgedFeature) => void) {
+  const latest = useRef(0);
+  return useCallback(
+    (lat: number, lng: number) => {
+      const id = ++latest.current;
+      fetchMapUnitAtPoint(roundCoordinate(lat), roundCoordinate(lng)).then(
+        (match) => {
+          if (match == null || id !== latest.current) return;
+          setSelection(match);
+        }
+      );
+    },
+    [setSelection]
+  );
 }
 
 /* ----------------------------------------------------------------- the map */
@@ -687,11 +608,6 @@ interface HeroMapProps {
   snapshot?: boolean;
 }
 
-/** Marks a camera move as the hero's own, so the centre reporter can tell a
- * carousel flight from the reader dragging the map. Mapbox passes this through
- * to the events the move raises. */
-const HERO_MOVE = { heroTransition: true };
-
 export function HeroMap({
   area,
   footprint,
@@ -702,16 +618,10 @@ export function HeroMap({
   snapshot = false,
 }: HeroMapProps) {
   // The opening camera, read once: `AreaFlight` drives every later change.
-  const initialView = useRef(area.view);
+  const [initialView] = useState(area.view);
   const onMapLoaded = useCallback((map) => {
-    const view = initialView.current;
-    setMapPosition(map, { lat: view.lat, lng: view.lng, zoom: view.zoom });
-    map.setPitch(view.pitch ?? HERO_PITCH);
-    map.setBearing(view.bearing ?? HERO_BEARING);
     if (snapshot) return;
-    // Attribution as the compact ⓘ rather than a line of credits across the
-    // corner. Mapbox's constructor has no option for it, so the default one is
-    // switched off below and the compact one added here.
+    // The compact ⓘ; Mapbox's constructor has no option for it.
     map.addControl(
       new mapboxgl.AttributionControl({ compact: true }),
       "bottom-right"
@@ -724,7 +634,7 @@ export function HeroMap({
     h(ProjectColumnsLayer, { key: "project", columns: projectColumns }),
     h(ColumnFootprintLayer, { key: "footprint", footprint }),
     h(TimeRangeHighlight, { key: "highlight", timeRange }),
-    h(CenterReporter, { key: "centre", onChange: onCenterChanged }),
+    h(CenterReporter, { key: "centre", area, onChange: onCenterChanged }),
     h(MapProbeHandler, { key: "probe", onProbe }),
     h(ScrollZoomGate, { key: "scroll-zoom" }),
   ];
@@ -761,8 +671,10 @@ export function HeroMap({
       // An overhead area has nothing to gain from terrain, and Mapbox only
       // turns it on below ~200 km of camera altitude anyway.
       enableTerrain: (area.view.pitch ?? HERO_PITCH) > 0,
-      pitch: area.view.pitch ?? HERO_PITCH,
-      bearing: area.view.bearing ?? HERO_BEARING,
+      center: [initialView.lng, initialView.lat],
+      zoom: initialView.zoom,
+      pitch: initialView.pitch ?? HERO_PITCH,
+      bearing: initialView.bearing ?? HERO_BEARING,
       onMapLoaded,
       ...snapshotOptions,
     },
@@ -774,20 +686,29 @@ export function HeroMap({
  * map is first idle — style, imagery and terrain all drawn — and then faded
  * out. The two are registered: the snapshot is drawn from the same camera at
  * the same scale, and shown unscaled from its centre. */
-function StillCover({ image }: { image: MapSnapshotImage | null | undefined }) {
+function StillCover({
+  image,
+  ready,
+}: {
+  image: MapSnapshotImage | null | undefined;
+  /** The map is showing what the still shows. */
+  ready: boolean;
+}) {
   const mapRef = useMapRef();
   const initialized = useMapInitialized();
   const [drawn, setDrawn] = useState(false);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (map == null || image == null) return;
+    if (map == null || image == null || !ready) return;
     const reveal = () => setDrawn(true);
     map.once("idle", reveal);
+    // An already-idle map would otherwise never fire again.
+    map.triggerRepaint();
     return () => {
       map.off("idle", reveal);
     };
-  }, [initialized, image]);
+  }, [initialized, image, ready]);
 
   if (image == null) return null;
   let tag = "img.hero-still-cover";
@@ -800,7 +721,7 @@ function StillCover({ image }: { image: MapSnapshotImage | null | undefined }) {
   });
 }
 
-/** Scroll-zoom stays off until the map has been clicked once.
+/** Scroll-zoom stays off until the map has been pressed once.
  *
  * A live map across a landing page otherwise swallows the scroll that was meant
  * for the page: the reader flicks the wheel to read on, and zooms instead. One
@@ -816,9 +737,11 @@ function ScrollZoomGate() {
     if (map == null) return;
     map.scrollZoom.disable();
     const enable = () => map.scrollZoom.enable();
-    map.on("click", enable);
+    map.on("mousedown", enable);
+    map.on("touchstart", enable);
     return () => {
-      map.off("click", enable);
+      map.off("mousedown", enable);
+      map.off("touchstart", enable);
     };
   }, [initialized]);
 
@@ -838,83 +761,53 @@ function AreaFlight({ area }: { area: FeaturedArea }) {
     if (lastArea.current === area.id) return;
     lastArea.current = area.id;
     const { lat, lng, zoom, pitch, bearing } = area.view;
-    map.flyTo(
-      {
-        center: [lng, lat],
-        zoom,
-        pitch: pitch ?? HERO_PITCH,
-        bearing: bearing ?? HERO_BEARING,
-        duration: 2600,
-        essential: true,
-      },
-      HERO_MOVE
-    );
+    map.flyTo({
+      center: [lng, lat],
+      zoom,
+      pitch: pitch ?? HERO_PITCH,
+      bearing: bearing ?? HERO_BEARING,
+      duration: 2600,
+      essential: true,
+    });
   }, [area.id, initialized]);
 
   return null;
 }
 
 /** A click anywhere on the map asks what is beneath it. There is no marker: the
- * answer shows up as the filter, not as a pin.
- *
- * Bound directly rather than through `useMapClickHandler`, which registers the
- * listener inside `useMapStyleOperator` — and that hook discards the cleanup
- * its operator returns, so the handler is added again on every style reload and
- * one click ends up firing several lookups. */
+ * answer shows up as the filter, not as a pin. */
 function MapProbeHandler({
   onProbe,
 }: {
   onProbe(lat: number, lng: number): void;
 }) {
-  const mapRef = useMapRef();
-  const initialized = useMapInitialized();
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    const handle = (event) => {
-      onProbe(event.lngLat.lat, event.lngLat.lng);
-    };
-    map.on("click", handle);
-    return () => {
-      map.off("click", handle);
-    };
-  }, [initialized, onProbe]);
-
+  useMapClickHandler(
+    (event) => onProbe(event.lngLat.lat, event.lngLat.lng),
+    [onProbe]
+  );
   return null;
 }
 
-/** Publishes the map's centre once it settles, which is what picks the column
- * outside a featured area — and says whether the reader moved it, which is what
- * releases a featured area's pinned column. */
+/** Publishes the map's centre once it settles, which picks the column outside
+ * a featured area. Leaving the area's centre is what releases its pinned
+ * column, so a carousel flight, which lands on it, never does. */
 function CenterReporter({
+  area,
   onChange,
 }: {
+  area: FeaturedArea;
   onChange(lat: number, lng: number, userInitiated: boolean): void;
 }) {
-  const mapRef = useMapRef();
-  const initialized = useMapInitialized();
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const report = (event: any) => {
-      const userInitiated = event?.heroTransition !== true;
-      if (timer != null) clearTimeout(timer);
-      timer = setTimeout(() => {
-        const c = map.getCenter();
-        onChange(c.lat, c.lng, userInitiated);
-      }, CENTER_SETTLE_MS);
-    };
-    map.on("moveend", report);
-    return () => {
-      if (timer != null) clearTimeout(timer);
-      map.off("moveend", report);
-    };
-  }, [initialized, onChange]);
-
-  return null;
+  const { lat, lng } = area.view;
+  const onMapMoved = useCallback(
+    (position, map) => {
+      const { target } = position;
+      const onArea = isCentered(getFocusState(map, [lng, lat]));
+      onChange(target.lat, target.lng, !onArea);
+    },
+    [lat, lng, onChange]
+  );
+  return h(MapMovedReporter, { onMapMoved });
 }
 
 /** The current column's own outline — the one footprint worth drawing now that
@@ -978,10 +871,7 @@ const PROJECT_LINE_COLOR = "rgba(255, 255, 255, 0.5)";
 const projectColumnsStyle = {
   version: 8,
   sources: {
-    "hero-project-columns": {
-      type: "geojson",
-      data: { type: "FeatureCollection", features: [] },
-    },
+    "hero-project-columns": buildGeoJSONSource(),
   },
   layers: [
     {
@@ -999,10 +889,7 @@ const projectColumnsStyle = {
 const columnFootprintStyle = {
   version: 8,
   sources: {
-    "hero-column": {
-      type: "geojson",
-      data: { type: "FeatureCollection", features: [] },
-    },
+    "hero-column": buildGeoJSONSource(),
   },
   layers: [
     {
@@ -1069,55 +956,20 @@ function ageOverlapExpression(range: TimeRange) {
 /* ------------------------------------------------------------- the column */
 
 /** The library's own focus control: it knows whether the target is already on
- * screen, and fits the map to it when it isn't. Nothing for a column with no
+ * screen, and eases to it when it isn't. Nothing for a column with no
  * footprint. */
 function ColumnFocusButton({ column }: { column: HeroColumn }) {
-  const bounds = useMemo(
-    () => boundsForGeometry(column.footprint?.geometry),
-    [column.footprint]
-  );
-  if (bounds == null) return null;
+  const geometry = column.footprint?.geometry;
+  if (geometry == null) return null;
   return h(LocationFocusButton, {
     className: "column-focus-button",
-    bounds,
+    location: geometry,
     small: true,
     title: `Zoom to ${column.info.col_name}`,
   });
 }
 
-/** The bounding box of a footprint, as `LocationFocusButton` wants it. */
-function boundsForGeometry(
-  geometry: any
-): [number, number, number, number] | null {
-  if (geometry == null) return null;
-  let minLng = Infinity;
-  let minLat = Infinity;
-  let maxLng = -Infinity;
-  let maxLat = -Infinity;
-
-  const visit = (coords: any) => {
-    if (typeof coords[0] === "number") {
-      const [lng, lat] = coords;
-      if (lng < minLng) minLng = lng;
-      if (lat < minLat) minLat = lat;
-      if (lng > maxLng) maxLng = lng;
-      if (lat > maxLat) maxLat = lat;
-      return;
-    }
-    for (const part of coords) visit(part);
-  };
-  visit(geometry.coordinates);
-
-  if (!Number.isFinite(minLng)) return null;
-  // A point footprint — a drill site — has no extent to fit; give it one.
-  if (minLng === maxLng && minLat === maxLat) {
-    const pad = 0.25;
-    return [minLng - pad, minLat - pad, maxLng + pad, maxLat + pad];
-  }
-  return [minLng, minLat, maxLng, maxLat];
-}
-
-/* ------------------------------------------------- filter and credits */
+/* ----------------------------------------------------------- the filter */
 
 function TimeRangeFilter({
   timeRange,
@@ -1154,58 +1006,4 @@ function TimeRangeFilter({
       onClick: onClear,
     }),
   ]);
-}
-
-/** Who made what the hero is showing. Stays below the frame: it is a credit
- * line, not a control, and the panels inside the map are for controls. */
-function HeroCredits({
-  column,
-  mapSource,
-}: {
-  column: HeroColumn | null;
-  mapSource: MapSourceRef | null;
-}) {
-  let columnCredit = null;
-  if (column != null) {
-    columnCredit = h("p.hero-credit", [
-      h("span.credit-label", "Column"),
-      h(Link, { href: `/columns/${column.info.col_id}` }, column.info.col_name),
-      h.if(column.info.col_group != null)("span.credit-detail", [
-        ` · ${column.info.col_group}`,
-      ]),
-    ]);
-  }
-
-  let mapCredit = null;
-  if (mapSource != null) {
-    mapCredit = h("p.hero-credit", [
-      h("span.credit-label", "Geologic map"),
-      h(MapSourceCitation, { source: mapSource }),
-    ]);
-  }
-
-  if (columnCredit == null && mapCredit == null) return null;
-
-  return h("div.hero-credits", [columnCredit, mapCredit]);
-}
-
-function MapSourceCitation({ source }: { source: MapSourceRef }) {
-  const title = source.ref_title ?? source.name;
-  let label: any = title;
-  if (source.url != null) {
-    label = h(
-      "a",
-      { href: source.url, target: "_blank", rel: "noreferrer" },
-      title
-    );
-  }
-
-  let attribution = null;
-  if (source.authors != null) {
-    let year = "";
-    if (source.ref_year != null) year = `, ${source.ref_year}`;
-    attribution = h("span.credit-detail", ` · ${source.authors}${year}`);
-  }
-
-  return h("span", [label, attribution]);
 }
