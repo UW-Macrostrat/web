@@ -92,11 +92,11 @@ export default defineConfig({
   },
 });
 
-/** Photon runs `server/entry.ts` in the SSR environment's module runner, but
+/** In dev, `+server.ts` runs in the SSR environment's module runner, but
  * Vike renders pages through `ssrLoadModule`, a second runner over the same
- * module graph. When a file both import changes, Photon's runner refetches it
- * first, which marks it fresh in the graph, so Vike's runner keeps its old copy
- * until a restart. Drop the edited file and its importers from Vike's runner. */
+ * module graph. When a file both import changes, the server's runner refetches
+ * it first, which marks it fresh in the graph, so Vike's runner keeps its old
+ * copy until a restart. Drop the edited file and its importers from Vike's runner. */
 function refreshSsrLoadModule(): Plugin {
   return {
     name: "refresh-ssr-load-module",

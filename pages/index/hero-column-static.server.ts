@@ -10,7 +10,7 @@
  * They differ only in their fills, which gzip mostly absorbs.
  *
  * The opening area's column travels with the page; the others come from
- * `/_hero/still-column/<area>` (server/entry.ts) when the still's carousel
+ * `/_hero/still-column/<area>` (+server.ts) when the still's carousel
  * reaches them.
  *
  * Columns, the timescale and the markup are cached in the server's memory:
