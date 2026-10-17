@@ -29,6 +29,6 @@
     "packages/*/src/**/*",
     "src/**/*",
     "pages/**/*",
-    "server/**/*"
+    "+server.ts"
   ]
 }

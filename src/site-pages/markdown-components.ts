@@ -177,15 +177,28 @@ function MarkdownCard({ nodes, density }: { nodes: ReactNode[]; density?: "list"
   if (card.description.length > 0) {
     description = h("p.card-description", card.description);
   }
+  let label: string | undefined = undefined;
+  if (typeof card.title === "string") {
+    label = card.title;
+  }
   return h(
     LinkCard,
     {
       href: card.href,
       density,
       title: h("span.card-title", [card.title, card.tags.map((t) => h(CardTag, { key: t, tag: t }))]),
+      // Anchors can't nest, so a description with links needs the overlay link.
+      nestedLinks: card.description.some(containsLink),
+      label,
     },
     description
   );
+}
+
+function containsLink(node: ReactNode): boolean {
+  if (!isElement(node)) return false;
+  if (node.props.href != null) return true;
+  return Children.toArray(node.props.children).some(containsLink);
 }
 
 function CardTag({ tag }: { tag: string }) {

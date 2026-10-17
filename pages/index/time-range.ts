@@ -144,54 +144,38 @@ export function colorForAgeRange(
   return null;
 }
 
-/** The filter a featured area opens with. An interval name is resolved against
- * the timescale, so the area says "Mesozoic" and the exact bounds — and the
- * chip's color — come from the same place every other age in the hero does.
+/** The filter a featured area opens with: one interval, or the span from the
+ * oldest of two to the youngest. Names resolve against the timescale, so the
+ * bounds and the chip's color come from where every other age in the hero does.
  *
  * Returns null until the timescale has arrived; the caller re-runs then. */
 export function timeRangeForSpec(
-  spec: string | [number, number] | null | undefined,
+  spec: string | [string, string] | null | undefined,
   intervals: Map<number, any> | null
 ): TimeRange | null {
-  if (spec == null) return null;
-  if (intervals == null) return null;
-
-  if (typeof spec === "string") {
-    const wanted = spec.toLowerCase();
-    for (const record of intervals.values()) {
-      if (String(record.name).toLowerCase() !== wanted) continue;
-      const interval = toIntervalShort(record);
-      return {
-        t_age: interval.t_age,
-        b_age: interval.b_age,
-        intervals: [interval],
-      };
-    }
-    return null;
-  }
-
-  const [b_age, t_age] = spec;
-  const containing = colorForAgeRangeInterval(t_age, b_age, intervals);
-  const named = containing == null ? [] : [containing];
-  return { t_age, b_age, intervals: named };
+  if (spec == null || intervals == null) return null;
+  let names = spec;
+  if (typeof spec === "string") names = [spec];
+  const found = names.map((name) => findInterval(name, intervals));
+  if (found.some((d) => d == null)) return null;
+  const oldest = found[0];
+  const youngest = found[found.length - 1];
+  return {
+    t_age: youngest.t_age,
+    b_age: oldest.b_age,
+    intervals: found.filter((d, i) => i === 0 || d.id !== oldest.id),
+  };
 }
 
-/** The tightest interval containing a span, as a record rather than a color —
- * what labels an explicit numeric range. */
-function colorForAgeRangeInterval(
-  t_age: number,
-  b_age: number,
+function findInterval(
+  name: string,
   intervals: Map<number, any>
 ): IntervalShort | null {
-  let best: any = null;
+  const wanted = name.toLowerCase();
   for (const record of intervals.values()) {
-    if (record.t_age == null || record.b_age == null) continue;
-    if (record.t_age > t_age + AGE_TOLERANCE) continue;
-    if (record.b_age < b_age - AGE_TOLERANCE) continue;
-    if (best == null || record.b_age - record.t_age < best.b_age - best.t_age) {
-      best = record;
+    if (String(record.name).toLowerCase() === wanted) {
+      return toIntervalShort(record);
     }
   }
-  if (best == null) return null;
-  return toIntervalShort(best);
+  return null;
 }

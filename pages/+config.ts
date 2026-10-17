@@ -1,6 +1,5 @@
 // For full vike-react integration, we need to remove +onRenderClient.ts and +onRenderHTML.ts
 import vikeReact from "vike-react/config";
-import vikePhoton from "vike-photon/config";
 import type { Config } from "vike/types";
 
 // Default config (can be overridden by pages)
@@ -9,11 +8,7 @@ export default {
   pageStyle: "index",
   description:
     "A platform for geological data exploration, integration, and analysis.",
-  extends: [vikeReact, vikePhoton],
-  // https://vike.dev/vike-photon
-  photon: {
-    server: "../server/entry.ts",
-  },
+  extends: [vikeReact],
   pageInfo: {
     name: null,
   },
@@ -41,9 +36,8 @@ export default {
     // The v1 addresses of pages now under /about and /community.
     "/people": "/about/people",
     "/community/contributors": "/about/people",
-    "/community/apps": "/about/apps",
-    "/community/integrations": "/community/collaborators",
     "/support": "/about/support",
+    "/publications": "/community/publications",
     // The matching tools, moved under the lexicon's own tools section.
     "/lex/lith-match": "/lex/match/lithologies",
     "/dev/match-api": "/lex/match/strat-names",

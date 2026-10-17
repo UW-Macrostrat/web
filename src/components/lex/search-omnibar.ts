@@ -292,6 +292,7 @@ export function LexSearchButton({
       small: !large,
       icon: "search",
       onClick: openSearch,
+      "aria-label": text,
     },
     [h("span.label", text)]
   );
@@ -340,6 +341,7 @@ export function SiteSearchPrompt({
       minimal: true,
       icon: "search",
       onClick: openSearch,
+      "aria-label": text,
       endIcon: h("span.site-search-hotkey", hotkeyLabel),
     },
     text

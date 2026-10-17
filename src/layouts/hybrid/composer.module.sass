@@ -92,6 +92,15 @@
   // list does. This token is `data-sheet`'s documented styling seam.
   --data-panel-content-width: var(--hybrid-content-width)
 
+// The map on request, leading the list and scrolling away with it
+.content-panel-holder > .floating-map-band
+  flex: 0 0 auto
+  float: none
+  width: 100%
+  height: clamp(12rem, 40vh, 24rem)
+  aspect-ratio: auto
+  margin: 0 0 1em
+
 // `content-only` is the bare list page: no sidebar, panel spans the shell.
 .content-shell:not(.has-sidebar)
   .content-panel-holder
@@ -185,6 +194,22 @@
   display: flex
   flex-direction: column
 
+// Docked beneath the scroll region (see `HybridBottomSheet`), which gives up
+// the height it takes
+.bottom-sheet-slot
+  flex: 0 1 auto
+  align-self: stretch
+  max-height: 60%
+  min-height: 0
+  display: flex
+  flex-direction: column
+  border-top: 1px solid var(--pz-border-color, var(--panel-rule-color))
+  background-color: var(--pz-panel-background-color, var(--panel-background-color))
+  box-shadow: var(--pz-shadow-md, 0 -1px 3px 0 rgba(0, 0, 0, 0.3))
+
+  &:empty
+    display: none
+
 /* ------------------------------------------------ panel-scrolling variant */
 
 // Everything below the header scrolls as one region, with its scrollbar at the
@@ -237,17 +262,20 @@
   height: auto
   --windowed-sticky-top: var(--data-panel-top-margin)
 
+  // The shell's gutter already pads the panel; its own would double it
   [class*="data-panel-top-area"]
     position: sticky
     z-index: 5
     box-sizing: border-box
     height: var(--data-panel-top-margin)
+    padding-left: 0
+    padding-right: 0
     background-color: var(--pz-background-color, var(--background-color))
 
   [class*="data-panel-body"]
     flex: 1 0 auto
     overflow: visible
-    padding-top: 0
+    padding: 0
     mask-image: none
 
 // A narrow list (the split shell's panel) keeps the toolbar on one row: any
@@ -304,6 +332,14 @@
   header:global(.shell-page-header)
     --page-header-padding-x: 1em
     --page-header-content-width: calc(var(--hybrid-shell-width) - 2em)
+
+  // Action labels drop well before the library's 40rem, so a narrow bar shows
+  // icon buttons rather than folding them into a menu
+  @container page-header-bar (max-width: 48rem)
+    header:global(.shell-page-header)
+      [data-toolbar-label],
+      :global(.bp6-button-text):has(> [data-toolbar-label])
+        display: none
 
   // Fills the window below the header, so a short page's footer sits at the
   // bottom of it

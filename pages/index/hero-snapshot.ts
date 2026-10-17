@@ -23,7 +23,7 @@ import {
  * base style, the geology's opacities, the footprint's line. Every hero key
  * changes with it, so the page falls back to the cover photo rather than show
  * last week's styling until the renderer runs again. */
-export const HERO_SNAPSHOT_VERSION = 2;
+export const HERO_SNAPSHOT_VERSION = 3;
 
 /** The largest the map cell gets: the full content width (no column beside
  * it) by the top of `--hero-height`'s clamp. The page shows the image

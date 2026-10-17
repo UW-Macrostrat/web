@@ -8,7 +8,15 @@
 import { Button } from "@blueprintjs/core";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import classNames from "classnames";
-import { createContext, useContext, useEffect, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  type ReactNode,
+  type RefObject,
+} from "react";
+import { flushSync } from "react-dom";
 
 import h from "./map-placement.module.sass";
 import {
@@ -71,7 +79,9 @@ export function FloatingMapPanel({
   children: ReactNode;
 }) {
   const setOpen = useSetAtom(floatingMapOpenAtom);
-  return h("div.map-placement.open", { className: classNames(className) }, [
+  const ref = useRef<HTMLDivElement>(null);
+  useCloseWhenScrolledPast(ref);
+  return h("div.map-placement.open", { className: classNames(className), ref }, [
     children,
     h(Button, {
       className: "map-placement-close",
@@ -81,6 +91,46 @@ export function FloatingMapPanel({
       onClick: () => setOpen(false),
     }),
   ]);
+}
+
+/** Brings the map into view as it opens (from a header button, the reader
+ * may be far down the page), and puts it away once it has scrolled off the
+ * top. The content below holds still as the map's space closes up — by hand,
+ * since not every browser anchors scrolling (Safari doesn't). */
+function useCloseWhenScrolledPast(ref: RefObject<HTMLDivElement>) {
+  const setOpen = useSetAtom(floatingMapOpenAtom);
+  useEffect(() => {
+    const element = ref.current;
+    if (element == null) return;
+    element.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    // Not before it has been seen, or the scroll to it would close it
+    let seen = false;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) seen = true;
+      // Gone above the viewport, not merely below it
+      if (!seen || entry.isIntersecting) return;
+      if (entry.boundingClientRect.bottom > 0) return;
+      const anchor = element.nextElementSibling;
+      const scroller = scrollParent(element);
+      const before = anchor?.getBoundingClientRect().top;
+      flushSync(() => setOpen(false));
+      const after = anchor?.getBoundingClientRect().top;
+      if (scroller == null || before == null || after == null) return;
+      scroller.scrollTop += after - before;
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [setOpen]);
+}
+
+function scrollParent(element: HTMLElement): HTMLElement | null {
+  let node = element.parentElement;
+  while (node != null) {
+    const { overflowY } = getComputedStyle(node);
+    if (overflowY == "auto" || overflowY == "scroll") return node;
+    node = node.parentElement;
+  }
+  return document.scrollingElement as HTMLElement | null;
 }
 
 function useRegisterPlacement() {

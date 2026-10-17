@@ -71,7 +71,6 @@ import {
 } from "./filters";
 import { initialViewStateFromURL } from "~/components";
 import { columnPageLinks, rowsAfterColumn } from "./page-links";
-import { HybridPersona } from "../persona";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   addFilterAtom,
@@ -107,6 +106,7 @@ import {
 
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
+import { isDev } from "@macrostrat-web/settings";
 
 const h = hyper.styled(styles);
 
@@ -251,13 +251,16 @@ const columnListLinks: HybridLink[] = [
     icon: "comparison",
     tag: "Beta",
   },
-  {
+];
+
+if (isDev) {
+  columnListLinks.push({
     label: "New column",
     href: "/columns/new",
     icon: "add",
     tag: "Alpha",
-  },
-];
+  });
+}
 
 export function Page({ linkPrefix = "/" }) {
   const data = useData();
@@ -287,7 +290,6 @@ export function Page({ linkPrefix = "/" }) {
         ],
         // Inside the frame's jotai scope, so it sees the live filters.
         wrap: (node) => h(ColumnScopeSync, { adopted: scope.adopted }, node),
-        actions: h(HybridPersona),
         links: columnListLinks,
         content: h(ColumnList),
         map: h(ColumnListMapSlot),

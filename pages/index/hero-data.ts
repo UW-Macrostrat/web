@@ -86,17 +86,6 @@ export interface MapUnitMatch extends AgedFeature {
   macro_units: number[];
 }
 
-/** A map source, for the credit line below the hero. */
-export interface MapSourceRef {
-  source_id: number;
-  name: string;
-  ref_title: string | null;
-  authors: string | null;
-  ref_year: string | null;
-  url: string | null;
-  scale: string | null;
-}
-
 /** Map coordinates carry full float precision, far past the resolution of
  * anything Macrostrat holds; rounding also keeps the request URLs stable, which
  * matters when the map's centre drives them. */
@@ -251,29 +240,5 @@ export async function fetchIntervalsByID(ids: number[]): Promise<any[]> {
   } catch (err) {
     console.warn("[homepage] interval lookup failed:", err?.message ?? err);
     return [];
-  }
-}
-
-export async function fetchMapSource(
-  sourceID: number
-): Promise<MapSourceRef | null> {
-  try {
-    const sources = await fetchAPIData("/defs/sources", {
-      source_id: sourceID,
-    });
-    const source = sources?.[0];
-    if (source == null) return null;
-    return {
-      source_id: source.source_id,
-      name: source.name,
-      ref_title: source.ref_title ?? null,
-      authors: source.authors ?? null,
-      ref_year: source.ref_year ?? null,
-      url: source.url ?? null,
-      scale: source.scale ?? null,
-    };
-  } catch (err) {
-    console.warn("[homepage] map source lookup failed:", err?.message ?? err);
-    return null;
   }
 }

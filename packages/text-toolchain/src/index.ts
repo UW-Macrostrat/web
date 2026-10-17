@@ -5,13 +5,14 @@ import gfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeRaw from "rehype-raw";
 import { nodeTypes } from "@mdx-js/mdx";
-import callouts from "./remark-callouts";
-import relativeLinks from "./remark-relative-links";
-import mediaSources, { WEB_ASSETS_STORE } from "./rehype-media-sources";
+import callouts from "./remark-callouts.ts";
+import relativeLinks from "./remark-relative-links.ts";
+import slotMarkers from "./remark-slot-markers.ts";
+import mediaSources, { WEB_ASSETS_STORE } from "./rehype-media-sources.ts";
 import slugify from "@sindresorhus/slugify";
 import { join } from "path";
 
-import { buildPageIndex } from "./utils";
+import { buildPageIndex } from "./utils.ts";
 
 export { buildPageIndex, WEB_ASSETS_STORE };
 
@@ -58,6 +59,8 @@ export default function viteTextToolchain({
       [frontmatter, { type: "yaml", marker: "-" }],
       gfm,
       callouts,
+      // `<!-- slot: Name -->` -> an empty marker the site pages place components at.
+      slotMarkers,
       // `[Changelog](changelog.md)` between pages of the tree -> permalinks.
       [
         relativeLinks,

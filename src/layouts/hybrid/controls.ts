@@ -23,10 +23,12 @@ import {
   Tag,
 } from "@blueprintjs/core";
 import { useAtom, useAtomValue } from "jotai";
+import { PageHeaderButton } from "@macrostrat/ui-components";
 import type { ReactNode } from "react";
 
 import h from "./controls.module.sass";
 import {
+  availableModesAtom,
   capabilitiesAtom,
   floatingMapOpenAtom,
   layoutModeAtom,
@@ -70,10 +72,15 @@ export function LayoutModeControl({
   links = [],
   mapItem = false,
 }: LayoutModeControlProps) {
-  const { modes, itemName } = useAtomValue(capabilitiesAtom);
+  const { itemName } = useAtomValue(capabilitiesAtom);
+  const modes = useAtomValue(availableModesAtom);
   const [mode, setMode] = useAtom(layoutModeAtom);
   const [mapOpen, setMapOpen] = useAtom(floatingMapOpenAtom);
 
+  // No modes to choose between (a narrow viewport, say), but still the map
+  if (modes.length < 2 && mapItem) {
+    return h(MapToggleButton, { className });
+  }
   if (modes.length < 2) return null;
 
   const currentLabel = layoutModeLabel(mode, itemName);
@@ -144,6 +151,22 @@ export function LayoutModeControl({
         },
         label
       ),
+  });
+}
+
+/** Shows and hides the map floated at the top of the content. Its label drops
+ * in a crowded header but stays in the header's folded actions menu. */
+function MapToggleButton({ className }) {
+  const [mapOpen, setMapOpen] = useAtom(floatingMapOpenAtom);
+  let text = "Show map";
+  if (mapOpen) text = "Hide map";
+  return h(PageHeaderButton, {
+    className,
+    minimal: true,
+    active: mapOpen,
+    icon: "map",
+    text,
+    onClick: () => setMapOpen(!mapOpen),
   });
 }
 

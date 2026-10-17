@@ -21,6 +21,7 @@ import { Button } from "@blueprintjs/core";
 import { onDemand } from "~/_utils";
 
 import h from "./composer.module.sass";
+import { BottomSheetSlot } from "./bottom-sheet";
 import { FloatingMapPanel } from "./map-placement";
 import { ResizeHandle } from "./resize-handle";
 import {
@@ -152,16 +153,13 @@ function ContentShell({
   const floatingMapOpen = useAtomValue(floatingMapOpenAtom);
   const placements = useAtomValue(mapPlacementCountAtom);
   let floatingMap = null;
-  if (
-    contentScroll == "page" &&
-    !sidebar &&
-    !inset &&
-    floatingMapOpen &&
-    placements == 0
-  ) {
-    floatingMap = h(FloatingMapPanel, { key: "floating-map" }, map);
+  if (!sidebar && !inset && floatingMapOpen && placements == 0) {
+    // A list has no text to wrap beside the map, so it leads as a band
+    let className: string | undefined = undefined;
+    if (contentScroll == "panel") className = h["floating-map-band"];
+    floatingMap = h(FloatingMapPanel, { key: "floating-map", className }, map);
   }
-  let holder = h("div.content-panel-holder", content);
+  let holder = h("div.content-panel-holder", [floatingMap, content]);
 
   const className = classNames(`mode-${mode}`, `scroll-${contentScroll}`, {
     "has-sidebar": sidebar,
@@ -187,16 +185,19 @@ function ContentShell({
       afterContent,
       h.if(footer != null)("div.content-page-footer", footer),
     ]);
-    return h(
-      "div.content-shell",
-      { className },
-      h(PageScrollBody, { headerRegion, holder, sidebarRegion, insetRegion })
-    );
+    return h("div.content-shell", { className }, [
+      h(PageScrollBody, { headerRegion, holder, sidebarRegion, insetRegion }),
+      h(BottomSheetSlot),
+    ]);
   }
 
   const body = h(ScrollBody, { holder, sidebar, sidebarRegion, insetRegion });
 
-  return h("div.content-shell", { className }, [headerRegion, body]);
+  return h("div.content-shell", { className }, [
+    headerRegion,
+    body,
+    h(BottomSheetSlot),
+  ]);
 }
 
 /** One tall item: the header and the content's row scroll together, so the

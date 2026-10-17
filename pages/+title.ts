@@ -8,7 +8,6 @@ export default function title(pageContext) {
 
 function getPageName(pageContext): string | null {
   const { pageInfo } = pageContext.config;
-  console.log("pageInfo", pageInfo);
   const firstPageInfoEntry = pageInfo;
   if (firstPageInfoEntry == null) return null;
   if (typeof firstPageInfoEntry === "string") return firstPageInfoEntry;

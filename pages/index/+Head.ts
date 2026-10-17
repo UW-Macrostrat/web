@@ -4,11 +4,11 @@ import h from "@macrostrat/hyper";
  * pairs are in the served HTML; change the two together. */
 const legacyAnchors = {
   about: "/about",
-  apps: "/about/apps",
+  apps: "/community/apps",
   api: "/docs/data-services",
   people: "/about/people",
   donate: "/about/support",
-  publications: "/publications",
+  publications: "/community/publications",
 };
 
 /** Redirects v1 `/#people`-style links before the client bundle loads. */

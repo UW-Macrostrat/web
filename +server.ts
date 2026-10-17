@@ -1,13 +1,14 @@
 import express from "express";
-import { apply, serve } from "@photonjs/express";
+import vike, { toFetchHandler } from "@vikejs/express";
+import type { Server } from "vike/types";
 import sirv from "sirv";
-import { mintTileToken } from "../src/_utils/tile-token.server.ts";
+import { mintTileToken } from "./src/_utils/tile-token.server.ts";
 import {
   mapSnapshotConfig,
   mapSnapshotDir,
-} from "../src/map-snapshots/store.server.ts";
-import { MAP_SNAPSHOT_URL_PREFIX } from "../src/map-snapshots/spec.ts";
-import { stillColumnFor } from "../pages/index/hero-column-static.server.ts";
+} from "./src/map-snapshots/store.server.ts";
+import { MAP_SNAPSHOT_URL_PREFIX } from "./src/map-snapshots/spec.ts";
+import { stillColumnFor } from "./pages/index/hero-column-static.server.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,8 +17,12 @@ const fgdcPatterns = join(
   "assets"
 );
 
-function startServer() {
+function createApp() {
   const app = express();
+  // TLS ends at the proxy; redirects need its X-Forwarded-Proto, not plain http
+  app.set("trust proxy", 1);
+  // Before any route: vike(app) refuses to install after one
+  vike(app);
   app.use("/assets/geologic-patterns", sirv(fgdcPatterns));
   // A fresh tile token, for a page that has outlived the one it arrived with.
   // Never cached: every response is a different credential.
@@ -40,8 +45,11 @@ function startServer() {
       immutable: true,
       maxAge: "365d",
       index: false,
-      fallthrough: false,
-    })
+    }),
+    // Not `fallthrough: false`: an Express error reaches srvx as a 500
+    (_req, res) => {
+      res.sendStatus(404);
+    }
   );
   // The homepage hero's column as static markup, for an area the still's
   // carousel moves to (the opening one comes with the page).
@@ -63,9 +71,8 @@ function startServer() {
     res.set("Cache-Control", "no-store");
     res.json({ status: "ok" });
   });
-  apply(app);
   warmMapSnapshots();
-  return serve(app);
+  return app;
 }
 
 /** The build this process runs, from the variables CI sets in the image. */
@@ -94,4 +101,6 @@ function warmMapSnapshots() {
   }, 15_000).unref();
 }
 
-export default startServer();
+export default {
+  fetch: toFetchHandler(createApp()),
+} satisfies Server;

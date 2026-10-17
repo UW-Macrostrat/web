@@ -19,5 +19,9 @@ function synthesizeConfigFromEnvironment() {
       env[newKey] = process.env[key];
     }
   }
+  // Unprefixed because the cluster sets it for every service; `isDev` reads it.
+  if (process.env.MACROSTRAT_ENV != null) {
+    env["MACROSTRAT_ENV"] = process.env.MACROSTRAT_ENV;
+  }
   return env;
 }

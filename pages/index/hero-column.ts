@@ -81,7 +81,7 @@ export function ColumnPanel({
   const { info, units } = column;
   const stats = useMemo(() => summarizeUnits(units), [units]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  useScrollToRange(scrollRef);
+  useScrollToRange(scrollRef, units);
 
   return h(Card, { className: h["hero-column-panel"] }, [
     h("div.column-inset-header", [
@@ -125,33 +125,44 @@ export function ColumnPanel({
   ]);
 }
 
-/** A new age filter brings the units inside it into view: centred when they
- * fit the panel, their top edge otherwise. They are found by the class
- * `HeroUnit` marks them with, so this never has to know how the column orders
- * or groups them. */
-function useScrollToRange(scrollRef: React.RefObject<HTMLDivElement>) {
+/** A new age filter, or a new column under one, brings the units inside it into
+ * view: centred when they fit the panel, their top edge otherwise. They are
+ * found by the class `HeroUnit` marks them with, so this never has to know how
+ * the column orders or groups them. */
+function useScrollToRange(
+  scrollRef: React.RefObject<HTMLDivElement>,
+  units: UnitLong[]
+) {
   const { timeRange } = useContext(ColumnDisplayContext);
   useEffect(() => {
-    const scroller = scrollRef.current;
-    if (timeRange == null || scroller == null) return;
-    const marked = scroller.querySelectorAll("g.hero-unit.in-range");
-    if (marked.length === 0) return;
-    const box = scroller.getBoundingClientRect();
-    let top = Infinity;
-    let bottom = -Infinity;
-    marked.forEach((el) => {
-      const rect = el.getBoundingClientRect();
-      top = Math.min(top, rect.top);
-      bottom = Math.max(bottom, rect.bottom);
-    });
-    top += scroller.scrollTop - box.top;
-    bottom += scroller.scrollTop - box.top;
-    let target = top - 8;
-    if (bottom - top < box.height) {
-      target = top - (box.height - (bottom - top)) / 2;
-    }
-    scroller.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
-  }, [timeRange, scrollRef]);
+    if (timeRange == null) return;
+    // After layout, and after column-views scrolls a clicked unit into view.
+    const frame = requestAnimationFrame(() =>
+      scrollToMarked(scrollRef.current)
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [timeRange, units, scrollRef]);
+}
+
+function scrollToMarked(scroller: HTMLDivElement | null) {
+  if (scroller == null) return;
+  const marked = scroller.querySelectorAll("g.hero-unit.in-range");
+  if (marked.length === 0) return;
+  const box = scroller.getBoundingClientRect();
+  let top = Infinity;
+  let bottom = -Infinity;
+  marked.forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    top = Math.min(top, rect.top);
+    bottom = Math.max(bottom, rect.bottom);
+  });
+  top += scroller.scrollTop - box.top;
+  bottom += scroller.scrollTop - box.top;
+  let target = top - 8;
+  if (bottom - top < box.height) {
+    target = top - (box.height - (bottom - top)) / 2;
+  }
+  scroller.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
 }
 
 /** Replaces the composite age axis: the inset has no room for one, and the

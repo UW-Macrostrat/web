@@ -39,7 +39,7 @@ const defaultState: CoreState = {
   pbdbData: [],
   mapIsLoading: false,
   isShowingColumnPage: false,
-  showSelectedColumnFootprint: true,
+  showSelectedColumnFootprint: false,
   mapCenter: {
     type: null,
   },

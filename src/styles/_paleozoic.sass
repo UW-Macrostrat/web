@@ -18,9 +18,12 @@
 :root
   // --- Type ----------------------------------------------------------------
 
-  // Body text is 14px, the size the map interface was designed at. Everything
-  // sized in the scale below follows it.
-  --pz-body-font-size: 14px
+  // Interface text is 14px, the size the map interface and Blueprint are set
+  // at; running text (the `prose` mixin) reads at 16px. In rem, so a reader's
+  // browser text size still applies. The scale below follows whichever is
+  // in effect.
+  --pz-body-font-size: 0.875rem
+  --pz-prose-font-size: 1rem
 
   // The size scale, in em rather than the library's rem: steps are relative to
   // the text around them, so changing `--pz-body-font-size` moves every size on
@@ -39,6 +42,7 @@
   --serif-font: var(--pz-font-serif)
   --sans-serif-font: var(--pz-font-sans)
   --monospace-font: var(--pz-font-mono)
+  --pz-body-font: var(--pz-font-sans)
 
   // --- Layout --------------------------------------------------------------
 

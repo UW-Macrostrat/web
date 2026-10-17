@@ -1,11 +1,11 @@
 import revisionInfo from "@macrostrat/revision-info-webpack";
 import react from "@vitejs/plugin-react";
 import vike from "vike/plugin";
-import { defineConfig, loadEnv, type ProxyOptions } from "vite";
+import { defineConfig, loadEnv, type Plugin, type ProxyOptions } from "vite";
 import path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { cp } from "node:fs/promises";
-import textToolchain from "./packages/text-toolchain/src";
+import textToolchain from "./packages/text-toolchain/src/index.ts";
 import { cjsInterop } from "vite-plugin-cjs-interop";
 import hyperStyles from "@macrostrat/vite-plugin-hyperstyles";
 import cesium from "vite-plugin-cesium";
@@ -37,6 +37,7 @@ export default defineConfig({
     vike(),
     react(),
     hyperStyles(),
+    refreshSsrLoadModule(),
     // patchCssModules(),
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
@@ -45,7 +46,7 @@ export default defineConfig({
     }),
     // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
-      contentDir: requireDocsContent(path.resolve(__dirname, "content")),
+      contentDir: requireDocsContent(path.resolve(import.meta.dirname, "content")),
       wikiPrefix: "/docs",
     }),
     cesiumPlugin({
@@ -91,6 +92,36 @@ export default defineConfig({
   },
 });
 
+/** In dev, `+server.ts` runs in the SSR environment's module runner, but
+ * Vike renders pages through `ssrLoadModule`, a second runner over the same
+ * module graph. When a file both import changes, the server's runner refetches
+ * it first, which marks it fresh in the graph, so Vike's runner keeps its old
+ * copy until a restart. Drop the edited file and its importers from Vike's runner. */
+function refreshSsrLoadModule(): Plugin {
+  return {
+    name: "refresh-ssr-load-module",
+    apply: "serve",
+    hotUpdate({ file, server }) {
+      if (this.environment.name !== "ssr") return;
+      // Private: the runner behind `ssrLoadModule` (vite/src/node/ssr/ssrModuleLoader.ts)
+      const evaluated = (server as any)._ssrCompatModuleRunner?.evaluatedModules;
+      if (evaluated == null) return;
+      const stale = [...(evaluated.getModulesByFile(file) ?? [])];
+      const seen = new Set();
+      while (stale.length > 0) {
+        const node = stale.pop();
+        if (seen.has(node)) continue;
+        seen.add(node);
+        evaluated.invalidateModule(node);
+        for (const id of node.importers) {
+          const importer = evaluated.getModuleById(id);
+          if (importer != null) stale.push(importer);
+        }
+      }
+    },
+  };
+}
+
 /** `vite-plugin-cesium` copies Cesium's runtime assets to `build.outDir` as it was
  * defined when its `config` hook ran, which is the default `dist` – Vike only sets
  * the per-environment output directories (`dist/client`, `dist/server`) later on.
@@ -102,13 +133,13 @@ function cesiumPlugin(options) {
   const plugin = cesium(options);
   const { cesiumBuildPath } = options;
 
-  let clientOutDir = path.resolve(__dirname, "dist/client");
+  let clientOutDir = path.resolve(import.meta.dirname, "dist/client");
 
   return {
     ...plugin,
     configResolved(config) {
       const env = config.environments?.client ?? config;
-      clientOutDir = path.resolve(config.root ?? __dirname, env.build.outDir);
+      clientOutDir = path.resolve(config.root ?? import.meta.dirname, env.build.outDir);
     },
     async closeBundle() {
       // Only the client build ships static assets
@@ -141,7 +172,7 @@ function requireDocsContent(contentDir: string): string {
 
 function getPackageJSONContents(packageJSONPath: string) {
   return JSON.parse(
-    readFileSync(path.resolve(__dirname, packageJSONPath), "utf-8")
+    readFileSync(path.resolve(import.meta.dirname, packageJSONPath), "utf-8")
   );
 }
 

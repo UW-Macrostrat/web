@@ -15,18 +15,65 @@ export function SitePage() {
   const data: Record<string, unknown> = ctx.siteData ?? {};
   const slots = siteSlots[route] ?? [];
 
+  // Slots the prose places with a comment; the rest fall back to their heading.
+  const marked = new Set(
+    sections.flatMap((s) => markerNames(s.html)).map((name) => slotForMarker(slots, name))
+  );
+  const headingSlots = slots.filter((slot) => !marked.has(slot));
   const ids = new Set(sections.map((s) => s.id).filter((id) => id != null));
-  const orphanSlots = slots.filter((slot) => !ids.has(slot.at));
+  const orphanSlots = headingSlots.filter((slot) => !ids.has(slot.at));
 
   return h("article.site-page.docs-content", [
     sections.map((section, i) =>
-      h(Section, { key: section.id ?? `lead-${i}`, section, slots, data })
+      h(Section, {
+        key: section.id ?? `lead-${i}`,
+        section,
+        slots: headingSlots,
+        markerSlots: slots,
+        data,
+      })
     ),
     orphanSlots.map((slot) => h(SlotComponent, { key: slot.component, slot, data })),
   ]);
 }
 
-function Section({ section, slots, data }) {
+// Left where the vault page had a `<!-- slot: Name -->` comment (see the text toolchain).
+const MARKER = /<div data-slot-marker="([^"]+)"><\/div>/g;
+
+function markerNames(html: string): string[] {
+  return [...html.matchAll(MARKER)].map((m) => m[1]);
+}
+
+/** Asides belong to a heading's line, so a comment never places them. */
+function slotForMarker(slots: SlotSpec[], name: string): SlotSpec | undefined {
+  return slots.find(
+    (slot) => slot.mode !== "aside" && (slot.component === name || slot.marker === name)
+  );
+}
+
+/** A section's prose, with the slots its comments name rendered in place. */
+function ProseWithSlots({ html, slots, data }) {
+  // Split with a capture group: prose, marker name, prose, marker name, …
+  const parts = html.split(MARKER);
+  const children = [];
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) {
+      const slot = slotForMarker(slots, parts[i]);
+      if (slot != null) {
+        children.push(h(SlotComponent, { key: `slot-${i}`, slot, data }));
+      }
+      continue;
+    }
+    if (parts[i].trim() !== "") {
+      children.push(
+        h("div.section-prose", { key: `prose-${i}`, dangerouslySetInnerHTML: { __html: parts[i] } })
+      );
+    }
+  }
+  return h(children);
+}
+
+function Section({ section, slots, markerSlots, data }) {
   const own = slots.filter((slot) => slot.at === section.id);
   const replacing = own.find((slot) => slot.mode === "replace");
   const after = own.filter((slot) => slot.mode === "after");
@@ -50,9 +97,7 @@ function Section({ section, slots, data }) {
   if (replacing != null) {
     body = h(SlotComponent, { slot: replacing, data });
   } else {
-    body = h("div.section-prose", {
-      dangerouslySetInnerHTML: { __html: section.html },
-    });
+    body = h(ProseWithSlots, { html: section.html, slots: markerSlots, data });
   }
 
   return h("section.site-section", [

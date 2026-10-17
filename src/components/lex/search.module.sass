@@ -2,6 +2,7 @@
 // homepage search prompt.
 
 @use "~/styles/type"
+@use "~/styles/breakpoints"
 
 .lex-search-results
   max-height: 60vh
@@ -39,6 +40,14 @@
 .lex-search-control
   display: flex
   justify-content: flex-end
+
+// Header search buttons go icon-only on a phone, where the header is crowded.
+.lex-search-control,
+.site-search-prompt
+  @include breakpoints.phone
+    :global(.bp6-button-text),
+    .site-search-hotkey
+      display: none
 
 // The homepage's central call to action.
 .lex-search-prompt
