@@ -1,4 +1,5 @@
 import h from "./components.module.sass";
+import { LinkCard } from "~/components/cards";
 
 export function AppGallery({ apps }) {
   const items: any[] = apps?.apps ?? [];
@@ -10,7 +11,7 @@ export function AppGallery({ apps }) {
   if (light.length > 0) {
     lightBlock = h("div.app-group", [
       h("h3.tier-label", "Also using Macrostrat"),
-      h(AppRows, { apps: light }),
+      h(AppCards, { apps: light, small: true }),
     ]);
   }
 
@@ -19,7 +20,7 @@ export function AppGallery({ apps }) {
     archivedBlock = h("div.app-group.archived", [
       h("h3.tier-label", "Earlier work"),
       h(AppCards, { apps: archived.filter(isCore) }),
-      h(AppRows, { apps: archived.filter(isLight) }),
+      h(AppCards, { apps: archived.filter(isLight), small: true }),
     ]);
   }
 
@@ -39,52 +40,41 @@ function isCore(app) {
   return !isLight(app);
 }
 
-function AppCards({ apps }) {
+function AppCards({ apps, small = false }) {
   if (apps.length === 0) return null;
-  return h("ul.app-list", apps.map((a) => h(AppCard, { key: a.id, app: a })));
+  let listTag = "ul.app-list";
+  if (small) {
+    listTag = "ul.app-list.small";
+  }
+  return h(
+    listTag,
+    apps.map((a) => h("li", { key: a.id }, h(AppCard, { app: a, small })))
+  );
 }
 
-function AppRows({ apps }) {
-  if (apps.length === 0) return null;
-  return h("ul.app-rows", apps.map((a) => h(AppRow, { key: a.id, app: a })));
-}
-
-function AppCard({ app }) {
+function AppCard({ app, small }) {
   const { name, url, by, logo, blurb, kind, uses } = app;
-  let logoEl = null;
+  // An empty box keeps cards without a logo aligned with the rest.
+  let logoEl = h("span.app-logo");
   if (logo != null) {
     logoEl = h("img.app-logo", { src: logo, alt: "" });
+  }
+  // Small cards say only what the app does with Macrostrat.
+  let blurbEl = null;
+  if (!small) {
+    blurbEl = h("p.app-blurb", blurb);
   }
   let usesEl = null;
   if (uses != null) {
     usesEl = h("p.app-uses", uses);
   }
-  return h("li.app-card", [
+  return h(LinkCard, { href: url, density: "list", className: "app-card" }, [
     logoEl,
     h("div.app-body", [
-      h("a.app-name", { href: url }, name),
+      h("h3.app-name", name),
       h("span.app-meta", [kind, " · by ", by]),
-      h("p.app-blurb", blurb),
+      blurbEl,
       usesEl,
-    ]),
-  ]);
-}
-
-function AppRow({ app }) {
-  const { name, url, by, logo, kind, uses } = app;
-  // An empty box keeps rows without a logo aligned with the rest.
-  let logoEl = h("span.app-row-logo");
-  if (logo != null) {
-    logoEl = h("img.app-row-logo", { src: logo, alt: "" });
-  }
-  return h("li.app-row", [
-    logoEl,
-    h("div.app-row-body", [
-      h("div.app-row-head", [
-        h("a.app-name", { href: url }, name),
-        h("span.app-meta", [kind, " · by ", by]),
-      ]),
-      h("p.app-uses", uses),
     ]),
   ]);
 }
