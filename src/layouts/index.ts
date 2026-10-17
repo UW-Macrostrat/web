@@ -139,15 +139,14 @@ export function HybridFramePage({ children, className, ...rest }) {
 }
 
 /** The site ("meta") pages — About, Community, Publications and the rest of
- * `pages/(site)`. Same shape as `IndexPage`, except that the header stays with
- * the reader: these pages are long prose, and the trail back out of them
- * shouldn't scroll away. */
+ * `pages/(site)`. The content pages' header: a large title that collapses
+ * into a bar which stays with the reader through long prose. */
 export function SitePage({ children, className, ...rest }) {
   return h(
     BaseContentPage,
     {
       className,
-      header: h(ContentPageHeader, { variant: "compact", sticky: true }),
+      header: h(ContentPageHeader, { variant: "hybrid" }),
       ...rest,
     },
     [h("div.main", [children]), h(Footer)]
