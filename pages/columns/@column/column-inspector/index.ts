@@ -325,18 +325,18 @@ function ColumnContentPane({ columnInfo }) {
   ]);
 }
 
-/** A phone has no room for the label column; a facet keeps the space beside
- * the column it draws into. */
+/** A phone gets a narrower column and label column; the smallest phones have
+ * no room for labels, though a facet keeps the space it draws into. */
 function useColumnSize(hasFacet: boolean) {
   const isPhone = useIsBelow("phone");
+  const isSmallPhone = useIsBelow("smallPhone");
   if (!isPhone) {
     return { columnWidth: 300, width: 450 };
   }
-  let width = 180;
-  if (hasFacet) {
-    width = 300;
+  if (!isSmallPhone || hasFacet) {
+    return { columnWidth: 180, width: 300 };
   }
-  return { columnWidth: 180, width };
+  return { columnWidth: 180, width: 180 };
 }
 
 /** Carries the column scope between `/columns` pages, and keeps the in-process

@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 export const breakpoints = {
+  smallPhone: 440,
   phone: 640,
   mapNarrow: 768,
   tablet: 1000,
