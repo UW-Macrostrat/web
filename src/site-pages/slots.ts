@@ -1,11 +1,13 @@
 /** Where the website inserts components into each site page.
  *
  * A site page is prose from the documentation vault (`Site/` in Macrostrat/docs),
- * split at its H2 headings. A slot names a heading by its id and a component to
- * render `after` that section's prose, to `replace` it, or as an `aside` at the
- * end of the heading's line. A slot whose heading
- * is missing is appended at the end of the page, so a renamed heading in the
- * vault reorders the page rather than breaking it.
+ * split at its H2 headings. An `after` or `replace` slot renders where the prose
+ * has a `<!-- slot: Name -->` comment naming its component (or its `marker`).
+ * Without one, the slot falls back to its heading: it names a heading by id and
+ * renders `after` that section's prose, `replace`s it, or sits as an `aside` at
+ * the end of the heading's line. A slot whose heading is missing too is appended
+ * at the end of the page, so a renamed heading reorders the page rather than
+ * breaking it.
  *
  * `component` is a name in `./components` (the page context is serialized, so
  * slots cannot carry the component itself); `data` names files in
@@ -18,16 +20,18 @@ export interface SlotSpec {
   at: string;
   mode: SlotMode;
   component: string;
+  /** The name a slot comment uses, where it differs from `component`. */
+  marker?: string;
   data?: string[];
 }
 
 export const siteSlots: Record<string, SlotSpec[]> = {
   "/about": [
-    { at: "get-involved", mode: "after", component: "ContactBlock", data: ["contact"] },
+    { at: "get-involved", mode: "after", component: "ContactBlock", marker: "Contact", data: ["contact"] },
   ],
   "/about/support": [
     { at: "supporters", mode: "after", component: "SupportersGrid", data: ["supporters"] },
-    { at: "how-to-give", mode: "after", component: "ContactBlock", data: ["contact"] },
+    { at: "donate", mode: "after", component: "ContactBlock", marker: "Contact", data: ["contact"] },
   ],
   "/about/brand": [],
   "/about/version-2": [],
@@ -39,7 +43,7 @@ export const siteSlots: Record<string, SlotSpec[]> = {
     { at: "directory", mode: "after", component: "ContributorDirectory", data: ["people"] },
   ],
   "/community": [
-    { at: "contact", mode: "after", component: "ContactBlock", data: ["contact"] },
+    { at: "contact", mode: "after", component: "ContactBlock", marker: "Contact", data: ["contact"] },
   ],
   "/community/contributing": [],
   "/community/collaborators": [
