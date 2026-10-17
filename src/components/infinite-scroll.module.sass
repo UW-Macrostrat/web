@@ -7,7 +7,7 @@
 
 .page-header
   margin: 1.5em auto 0.75em
-  width: var(--qz-main-content-width)
+  width: min(var(--qz-main-content-width), calc(100% - 2em))
 
 .footer-panel, .load-progress
   display: flex
@@ -36,4 +36,4 @@
   width: 100%
 
 .ingestion-panel
-  --data-panel-content-width: var(--qz-main-content-width) !important
+  --data-panel-content-width: min(var(--qz-main-content-width), calc(100vw - 2em)) !important

@@ -41,6 +41,7 @@ import {
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
 import { HybridPage, type LayoutCapabilities } from "~/layouts/hybrid";
+import { useIsBelow } from "~/styles/breakpoints";
 import {
   columnHashStateAtom,
   columnInfoAtom,
@@ -253,6 +254,8 @@ function ColumnContentPane({ columnInfo }) {
     facet = h("div.facet-container", [facetElement]);
   }
 
+  const { columnWidth, width } = useColumnSize(facet != null);
+
   // As a child rather than `showUnitPopover`, which re-enables selection on a
   // provider the page already owns (and warns about it).
   const showUnitPopover = useUnitPopover();
@@ -294,8 +297,8 @@ function ColumnContentPane({ columnInfo }) {
               // `auto` grain size follows the column type, not the axis
               columnType: columnTypeFromColType(columnInfo.col_type),
               grainsize,
-              columnWidth: 300,
-              width: 450,
+              columnWidth,
+              width,
               maxInternalColumns,
               showLabelColumn,
               hybridScale,
@@ -320,6 +323,20 @@ function ColumnContentPane({ columnInfo }) {
       )
     ),
   ]);
+}
+
+/** A phone has no room for the label column; a facet keeps the space beside
+ * the column it draws into. */
+function useColumnSize(hasFacet: boolean) {
+  const isPhone = useIsBelow("phone");
+  if (!isPhone) {
+    return { columnWidth: 300, width: 450 };
+  }
+  let width = 180;
+  if (hasFacet) {
+    width = 300;
+  }
+  return { columnWidth: 180, width };
 }
 
 /** Carries the column scope between `/columns` pages, and keeps the in-process
