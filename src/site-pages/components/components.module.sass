@@ -24,13 +24,13 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   border-radius: var(--pz-radius-md)
   background: var(--pz-panel-background-color)
 
-.supporter-logo, .app-logo
+.app-logo
   width: 56px
   height: 56px
   object-fit: contain
   flex: none
 
-.supporter-body, .app-body, .person-body
+.app-body, .person-body
   display: flex
   flex-direction: column
   gap: 0.2em
@@ -38,10 +38,10 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   p
     margin: 0.2em 0 0
 
-.supporter-name, .app-name, .person-name
+.app-name, .person-name
   @include type.item-title
 
-.app-meta, .supporter-period, .person-title, .person-affiliation
+.app-meta, .person-title, .person-affiliation
   @include type.supporting
 
 .app-uses
@@ -75,51 +75,46 @@ ul.supporter-list, ul.app-list, ul.people-list, ul.integration-list, ul.repo-lis
   .app-meta, .app-uses
     font-size: var(--pz-font-size-xs)
 
-// Each supporter is a shared LinkCard; these rules lay out its contents.
+// Each supporter is a shared LinkCard: grants lead with title and program,
+// and the funder follows beneath them.
 .supporter-list
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))
   li
     display: flex
   .supporter-card
     display: flex
-    flex: 1
-    gap: var(--pz-space-3)
-  .supporter-name
-    margin: 0
-
-// Grants lead with title, program and PI; the agency sits small at the foot.
-.supporter-list.grants
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))
-  .grant-card
     flex-direction: column
+    flex: 1
     gap: 0.3em
     p
       margin: 0.2em 0 0
 
-.grant-title
+.supporter-title
   @include type.item-title
   margin: 0
 
-.grant-details
-  @include type.supporting
-
-.grant-pi
-  font-size: var(--pz-font-size-sm)
-  font-weight: var(--pz-font-weight-semibold)
-
-.grant-agency
+// The funder's logo sits beside both the program line and the funder's name.
+.supporter-source
   @include type.supporting
   display: flex
   align-items: center
-  gap: 0.5em
-  margin-top: auto
-  padding-top: var(--pz-space-2)
-  font-size: var(--pz-font-size-xs)
+  gap: 0.6em
 
-.grant-agency-logo
-  height: 20px
+.supporter-source-text
+  display: flex
+  flex-direction: column
+  min-width: 0
+
+.supporter-logo
+  height: 40px
   width: auto
-  max-width: 64px
+  max-width: 96px
   object-fit: contain
+  flex: none
+
+.supporter-pi
+  font-size: var(--pz-font-size-sm)
+  font-weight: var(--pz-font-weight-semibold)
 
 .archived, .former
   .app-card, .person-card
