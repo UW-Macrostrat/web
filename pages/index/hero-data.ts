@@ -138,16 +138,45 @@ function columnInfoFromProperties(props: any): HeroColumnInfo {
  * failure, which the hero reads as "no column here". */
 export async function fetchColumnUnits(colID: number): Promise<UnitLong[]> {
   try {
-    return await fetchAPIData("/units", {
+    const units = await fetchAPIData("/units", {
       col_id: colID,
       response: "long",
       show_position: true,
       status_code: "active",
     });
+    return units?.map(heroUnitFields);
   } catch (err) {
     console.warn("[homepage] units unavailable:", err?.message ?? err);
     return null;
   }
+}
+
+/** Only what the column and age filter read; `measure` alone can reach megabytes. */
+const HERO_UNIT_FIELDS = [
+  "unit_id",
+  "section_id",
+  "col_id",
+  "unit_name",
+  "strat_name_id",
+  "t_age",
+  "b_age",
+  "t_pos",
+  "b_pos",
+  "max_thick",
+  "min_thick",
+  "color",
+  "t_int_id",
+  "t_int_name",
+  "t_int_age",
+  "b_int_id",
+  "b_int_name",
+  "b_int_age",
+] as const;
+
+function heroUnitFields(unit: UnitLong): UnitLong {
+  const picked: Partial<UnitLong> = {};
+  for (const key of HERO_UNIT_FIELDS) picked[key] = unit[key];
+  return picked as UnitLong;
 }
 
 /** The column containing a point, with its units and outline. Null when the

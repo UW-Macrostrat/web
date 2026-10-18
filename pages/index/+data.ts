@@ -160,12 +160,12 @@ export async function data(pageContext) {
 
   let columns = 0;
   let units = 0;
-  let polygons = 0;
+  // Every project row carries the same global polygon total, so take it once.
+  const polygons = statsData[0]?.t_polys ?? 0;
 
   statsData.forEach((project) => {
     columns += project.columns;
     units += project.units;
-    polygons += project.t_polys;
   });
 
   const stats: PageStats = {
