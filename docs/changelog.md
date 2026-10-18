@@ -9,6 +9,17 @@ a single interface are recorded in that interface's own changelog, such as the
 [map interface changelog](map/changelog.md); the map's 4.x releases predate this
 file and are recorded only there.
 
+## 5.4.1
+
+_October 2026_
+
+### Site
+
+- The homepage's map-polygon count no longer multiplies the total by the number
+  of projects.
+- Client-side navigation to the homepage no longer loads megabytes of unused
+  column data.
+
 ## 5.4.0
 
 _October 2026_
