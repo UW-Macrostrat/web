@@ -165,6 +165,8 @@ const HERO_UNIT_FIELDS = [
   "max_thick",
   "min_thick",
   "color",
+  // The unit's fill pattern comes from its dominant lithology
+  "lith",
   "t_int_id",
   "t_int_name",
   "t_int_age",
