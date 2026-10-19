@@ -20,8 +20,17 @@ export const burwellTileDomain = getRuntimeConfig(
 export const apiDomain = getRuntimeConfig("MACROSTRAT_API_DOMAIN");
 
 export const tileserverDomain = burwellTileDomain;
-// For now,
-export const isDev = true; // getRuntimeConfig("MACROSTRAT_INSTANCE") === "Development";
+
+/** The deployment tier (`MACROSTRAT_ENV`: development, staging, production).
+ * Set unprefixed on the server; `onCreateGlobalContext` forwards it to the
+ * browser. */
+function macrostratEnv(): string | null {
+  if (typeof window === "undefined") return process.env.MACROSTRAT_ENV ?? null;
+  return getRuntimeConfig("MACROSTRAT_ENV", null);
+}
+
+/** Every tier but production, including a local stack that sets none. */
+export const isDev = macrostratEnv()?.toLowerCase() !== "production";
 
 export const gddDomain = "https://xdd.wisc.edu";
 export const pbdbDomain = "https://paleobiodb.org";
@@ -114,7 +123,7 @@ export const knowledgeGraphAPIURL = getRuntimeConfig(
   apiV3Prefix + "/knowledge-graph"
 );
 
-export const macrostratInstance = getRuntimeConfig("MACROSTRAT_INSTANCE");
+export const macrostratInstance = macrostratEnv();
 
 export const elevationLayerURL = getRuntimeConfig("ELEVATION_LAYER_URL");
 

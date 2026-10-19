@@ -20,12 +20,21 @@ export async function fetchKGRows<T = any>(
   view: string,
   params: Record<string, string | number | null | undefined> = {}
 ): Promise<T[]> {
-  const url = new URL(`${postgrestPrefix}/${view}`);
+  let baseURL: string | undefined;
+  if (typeof window !== "undefined") baseURL = window.location.origin;
+  const url = new URL(`${postgrestPrefix}/${view}`, baseURL);
   for (const [key, value] of Object.entries(params)) {
     if (value == null) continue;
     url.searchParams.set(key, String(value));
   }
-  const res = await fetch(url.toString());
+  const res = await fetch(url.toString(), {
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Cache-Control": "no-cache, no-store, max-age=0",
+      Pragma: "no-cache",
+    },
+  });
   const text = await res.text();
   let body: any = null;
   try {

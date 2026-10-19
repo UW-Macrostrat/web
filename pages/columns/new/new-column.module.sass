@@ -1,5 +1,36 @@
 // The new-column form: a narrow column of fields, centered in the content.
 
+@use "~/styles/type"
+
+// The form, the upload and the tools, in the content column.
+.new-column-body
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-4)
+  padding-top: var(--pz-space-4)
+
+// Before signing in: the prompt, and the tools anyone may use meanwhile.
+.sign-in-first
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-6)
+  padding-top: var(--pz-space-5)
+
+// The matching tools, under whatever the page is showing.
+.tools-section
+  margin-top: var(--pz-space-6)
+  padding-top: var(--pz-space-4)
+  border-top: 1px solid var(--pz-panel-rule-color)
+  max-width: 48em
+
+  h2
+    @include type.section-heading
+
+  .tools-grid
+    display: grid
+    grid-template-columns: repeat(auto-fill, minmax(16em, 1fr))
+    gap: var(--pz-space-3)
+
 // Separate the source tabs from the upload/form area below them.
 .form-type-picker
   margin-bottom: 1em
@@ -38,6 +69,12 @@
   display: flex
   flex-direction: column
   gap: 0.5em
+
+// Project and group, side by side where there is room.
+.placement-fields
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(14em, 1fr))
+  gap: 0 var(--pz-space-4)
 
 .example-section
   margin-top: 0.5em

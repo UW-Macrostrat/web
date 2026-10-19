@@ -1,5 +1,6 @@
 export { HybridPage, type HybridPageProps } from "./page";
 export { HybridMapPlacement } from "./map-placement";
+export { HybridBottomSheet } from "./bottom-sheet";
 export {
   ActionsPanel,
   LayoutModeControl,

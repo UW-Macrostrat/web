@@ -45,19 +45,25 @@ export const platformNavItems: NavLinkItem[] = [
     href: "/community",
     text: "Community",
     icon: "people",
-    description: "Collaborators, supporters, and ways to contribute.",
+    description: "Publications, apps, integrations and data providers.",
   },
   {
-    href: "/publications",
+    href: "/community/publications",
     text: "Publications",
     icon: "book",
-    description: "Papers built on Macrostrat, and how to cite it.",
+    description: "Macrostrat's scientific impact.",
   },
   {
     href: "/about/support",
-    text: "Support us",
+    text: "Support",
     icon: "heart",
     description: "Funders, and what keeps the system running.",
+  },
+  {
+    href: "/contact",
+    text: "Contact",
+    icon: "envelope",
+    description: "Ways to reach the Macrostrat team.",
   },
   {
     href: "/heatmap",
@@ -103,16 +109,21 @@ export function Footer({ className }) {
     },
   ];
 
-  return h("div.footer", { className }, [
-    h("a.homepage-link", { href: "/" }, [
-      h("h3", "Macrostrat"),
-      h(MacrostratIcon, { className: "footer-logo" }),
-    ]),
-    h(NavLinkList, { items: navItems, title: "Data" }),
-    h(NavLinkList, { items: metaItems, title: "Platform" }),
-    h(NavLinkList, { items: externalLinks, title: "Links" }),
-    h(NavLinkList, { items: actions, title: "Actions" }),
-  ]);
+  // The inner box lays out against the footer's width (a container query)
+  return h(
+    "div.footer",
+    { className },
+    h("div.footer-inner", [
+      h("a.homepage-link", { href: "/" }, [
+        h("h3", "Macrostrat"),
+        h(MacrostratIcon, { className: "footer-logo" }),
+      ]),
+      h(NavLinkList, { items: navItems, title: "Data" }),
+      h(NavLinkList, { items: metaItems, title: "Platform" }),
+      h(NavLinkList, { items: externalLinks, title: "Links" }),
+      h(NavLinkList, { items: actions, title: "Actions" }),
+    ])
+  );
 }
 
 function NavLinkList({ items, title }) {

@@ -16,7 +16,12 @@ import h from "./site-header.module.sass";
 export type SitePageHeaderProps = Omit<
   PageHeaderProps,
   "logo" | "breadcrumbs" | "title" | "shortTitle" | "identifier"
->;
+> & {
+  /** Shown right after the title: a status tag that belongs to the page's
+   * identity rather than to its controls. The hybrid frame's slot of the same
+   * name, for pages on the plain content layout. */
+  titleAdornment?: ReactNode;
+};
 
 /**
  * The site's page header: `PageHeader` (`@macrostrat/ui-components`) filled
@@ -30,15 +35,21 @@ export type SitePageHeaderProps = Omit<
  * boundary, so render it as a direct child of the page or scroll container.
  */
 export function SitePageHeader(props: SitePageHeaderProps) {
-  const { className, actions, ...rest } = props;
+  const { className, actions, titleAdornment, ...rest } = props;
   const items = usePageBreadcrumbs();
   const PageActions = usePageContext().config.headerActions;
   let headerActions: ReactNode = actions;
   if (PageActions != null) {
     headerActions = h([h(PageActions, { key: "page" }), actions]);
   }
+  const content = headerContent(items);
+  let title = content.title;
+  if (titleAdornment != null) {
+    title = h("span.title-with-adornment", [content.title, titleAdornment]);
+  }
   return h(PageHeader, {
-    ...headerContent(items),
+    ...content,
+    title,
     logo: h(SiteLogo),
     titleAlignment: "left",
     actions: headerActions,

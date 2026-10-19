@@ -14,8 +14,9 @@ import {
   LexSearchHost,
   SiteSearchPrompt,
 } from "~/components/lex/search-omnibar";
-import type { HeroData } from "./+data";
+import type { HeroData, PageStats } from "./+data";
 import { HeroStage } from "./hero-stage";
+import type { ReactNode } from "react";
 import classNames from "classnames";
 
 /** The homepage: what Macrostrat is in a line, the data itself, a few entry
@@ -68,15 +69,14 @@ function DissolvingLogo() {
 }
 
 /** That this is v2 and a beta is worth one tag beside the wordmark, not a
- * banner across the top of the page. It leads to `/community`, which is where
- * the feedback the banner used to ask for actually goes. */
+ * banner across the top of the page. It leads to the account of what v2 is. */
 function V2BetaTag() {
   return h(
     Link,
     {
-      href: "/community",
+      href: "/about/version-2",
       className: h["v2-beta-tag"],
-      title: "Macrostrat v2 is in beta — tell us what you find",
+      title: "Macrostrat v2 is in public beta!",
     },
     "v2 beta 🎉"
   );
@@ -107,29 +107,44 @@ function HeroStatic() {
   });
 }
 
-const entryPoints = [
+type StatKey = keyof PageStats;
+
+interface EntryPoint {
+  title: string;
+  href: string;
+  text: string;
+  image?: string;
+  /** The two the page is about come first and larger, each carrying the
+   * numbers behind it, smallest first. */
+  stats?: StatKey[];
+  /** The main thing to do here. One card, set apart by a wash of the accent
+   * color rather than by a button. */
+  primary?: boolean;
+}
+
+const entryPoints: EntryPoint[] = [
   {
     title: "Map",
     href: "/map",
-    text: "The world's geologic maps, harmonized into one.",
-    className: "major",
+    text: "A unified view of the world's geologic maps.",
+    stats: ["maps", "legendItems", "polygons"],
+    primary: true,
   },
   {
     title: "Columns",
     href: "/columns",
-    text: "The rock record through time, region by region.",
-    className: "major",
+    text: "The rock record through time.",
+    stats: ["projects", "columns", "units"],
   },
   {
     title: "Lexicon",
     href: "/lex",
     text: "Stratigraphic names, lithologies, intervals and environments.",
-    className: "major",
   },
   {
     title: "Projects",
     href: "/projects",
-    text: "Targeting specific regions and geological problems.",
+    text: "Specific regions and geological problems.",
   },
   {
     title: "Rockd",
@@ -144,44 +159,47 @@ const entryPoints = [
 function SiteLead() {
   return h("div.site-lead-container", [
     h("p.site-lead", [
-      "An geologic model of the Earth's crust through time.",
+      "A geologic model of the Earth's crust through time.",
       //"Macrostrat is a data system to describe the Earth's crust through time.",
       // "Geologic maps and stratigraphic columns, integrated into one model of ",
       // "the Earth's crust through time.",
     ]),
-    h(MacrostratStats),
   ]);
 }
 
 function EntryPoints() {
   return h(
     "nav.entry-points",
-    entryPoints.map((item) => {
-      let icon = null;
-      if (item.image != null) {
-        icon = h(Image, {
-          className: "entry-icon",
-          src: item.image,
-          width: "22px",
-          height: "22px",
-        });
-      }
-
-      let title = item.title;
-      if (icon != null) title = h("span.entry-title", [icon, title]);
-
-      return h(
-        LinkCard,
-        {
-          key: item.href,
-          title,
-          href: item.href,
-          className: classNames("entry-card", item.className),
-        },
-        [h("p", item.text)]
-      );
-    })
+    entryPoints.map((item) => h(EntryCard, { key: item.href, item }))
   );
+}
+
+function EntryCard({ item }: { item: EntryPoint }) {
+  let icon = null;
+  if (item.image != null) {
+    icon = h(Image, {
+      className: "entry-icon",
+      src: item.image,
+      width: "22px",
+      height: "22px",
+    });
+  }
+
+  let title: ReactNode = item.title;
+  if (icon != null) title = h("span.entry-title", [icon, title]);
+
+  let stats: ReactNode = null;
+  if (item.stats != null) stats = h(EntryStats, { keys: item.stats });
+
+  const className = classNames("entry-card", {
+    major: item.stats != null,
+    primary: item.primary,
+  });
+
+  return h(LinkCard, { title, href: item.href, className }, [
+    h("p", item.text),
+    stats,
+  ]);
 }
 
 function WhatsNew() {
@@ -206,12 +224,12 @@ function WhatsNew() {
 
 /** The pages about the project, below the data rather than in a header. Same
  * list the footer uses, so the two never disagree — and the same card as the
- * entry points above, quieter, so the page reads as one set of boxes rather
- * than as content followed by a row of buttons. */
+ * minor entry points above, so the page reads as one set of boxes rather than
+ * as content followed by a row of buttons. */
 function PlatformLinks() {
   const items = platformNavItems.filter((item) => item.href !== "/heatmap");
   return h("nav.platform-links", [
-    h("h2", "About the project"),
+    h("h2", "Platform"),
     h(
       "div.platform-cards",
       items.map((item) =>
@@ -221,7 +239,7 @@ function PlatformLinks() {
             key: item.href,
             title: item.text,
             href: item.href,
-            className: "platform-card",
+            className: "entry-card",
           },
           [h("p", item.description)]
         )
@@ -230,30 +248,33 @@ function PlatformLinks() {
   ]);
 }
 
-function formatNumber(num) {
+function formatNumber(num: number) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function MacrostratStats() {
-  const { stats } = useData() as any;
-  const { columns, units, polygons, projects } = stats;
+const statLabels: Record<StatKey, string> = {
+  maps: "maps",
+  legendItems: "legend items",
+  polygons: "map polygons",
+  columns: "columns",
+  units: "rock units",
+  projects: "projects",
+};
 
-  return h("div.stats", {}, [
-    h("div.stat", {}, [
-      h("span.top-stat#n_names", {}, formatNumber(projects)),
-      h("span.top-stat-label", {}, "projects"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_columns", {}, formatNumber(columns)),
-      h("span.top-stat-label", {}, "columns"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_units", {}, formatNumber(units)),
-      h("span.top-stat-label", {}, "rock units"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_polys", {}, formatNumber(polygons)),
-      h("span.top-stat-label", {}, "map polygons"),
-    ]),
-  ]);
+/** The numbers behind one entry point. A stat the server couldn't get is left
+ * out rather than shown as zero. */
+function EntryStats({ keys }: { keys: StatKey[] }) {
+  const { stats } = useData() as { stats: PageStats };
+  const items: ReactNode[] = [];
+  for (const key of keys) {
+    const value = stats[key];
+    if (value == null) continue;
+    items.push(
+      h("div.stat", { key }, [
+        h("span.top-stat", formatNumber(value)),
+        h("span.top-stat-label", statLabels[key]),
+      ])
+    );
+  }
+  return h("div.stats", items);
 }

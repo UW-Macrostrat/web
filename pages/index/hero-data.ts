@@ -34,6 +34,35 @@ export interface HeroPoint {
   lng: number;
 }
 
+/** North America: the project the API answers for when none is named, and the
+ * one whose columns the hero takes as given. A column from any other project
+ * — New Zealand, the deep sea — is a window onto that project, so the hero
+ * draws the rest of it too. */
+export const STANDARD_PROJECT_ID = 1;
+
+export function isStandardProject(projectID: number | null | undefined) {
+  return projectID == null || projectID === STANDARD_PROJECT_ID;
+}
+
+/** Every active column in a project, as footprints to draw on the map. Null
+ * when the request fails; the map is no worse off without them. */
+export async function fetchProjectColumns(
+  projectID: number
+): Promise<GeoJSON.FeatureCollection | null> {
+  try {
+    const collection = await fetchAPIData("/columns", {
+      project_id: projectID,
+      status_code: "active",
+      format: "geojson",
+    });
+    if (collection?.type !== "FeatureCollection") return null;
+    return collection;
+  } catch (error) {
+    console.error(`Could not fetch columns for project ${projectID}:`, error);
+    return null;
+  }
+}
+
 /** Anything with an age range and the intervals that range sits in: a column
  * unit and a matched geologic map unit both answer this shape, which is what
  * lets a click on either one drive the same filter. */
@@ -55,17 +84,6 @@ export interface MapUnitMatch extends AgedFeature {
   color: string | null;
   /** Macrostrat column unit ids this map unit matches, when any. */
   macro_units: number[];
-}
-
-/** A map source, for the credit line below the hero. */
-export interface MapSourceRef {
-  source_id: number;
-  name: string;
-  ref_title: string | null;
-  authors: string | null;
-  ref_year: string | null;
-  url: string | null;
-  scale: string | null;
 }
 
 /** Map coordinates carry full float precision, far past the resolution of
@@ -120,16 +138,47 @@ function columnInfoFromProperties(props: any): HeroColumnInfo {
  * failure, which the hero reads as "no column here". */
 export async function fetchColumnUnits(colID: number): Promise<UnitLong[]> {
   try {
-    return await fetchAPIData("/units", {
+    const units = await fetchAPIData("/units", {
       col_id: colID,
       response: "long",
       show_position: true,
       status_code: "active",
     });
+    return units?.map(heroUnitFields);
   } catch (err) {
     console.warn("[homepage] units unavailable:", err?.message ?? err);
     return null;
   }
+}
+
+/** Only what the column and age filter read; `measure` alone can reach megabytes. */
+const HERO_UNIT_FIELDS = [
+  "unit_id",
+  "section_id",
+  "col_id",
+  "unit_name",
+  "strat_name_id",
+  "t_age",
+  "b_age",
+  "t_pos",
+  "b_pos",
+  "max_thick",
+  "min_thick",
+  "color",
+  // The unit's fill pattern comes from its dominant lithology
+  "lith",
+  "t_int_id",
+  "t_int_name",
+  "t_int_age",
+  "b_int_id",
+  "b_int_name",
+  "b_int_age",
+] as const;
+
+function heroUnitFields(unit: UnitLong): UnitLong {
+  const picked: Partial<UnitLong> = {};
+  for (const key of HERO_UNIT_FIELDS) picked[key] = unit[key];
+  return picked as UnitLong;
 }
 
 /** The column containing a point, with its units and outline. Null when the
@@ -222,29 +271,5 @@ export async function fetchIntervalsByID(ids: number[]): Promise<any[]> {
   } catch (err) {
     console.warn("[homepage] interval lookup failed:", err?.message ?? err);
     return [];
-  }
-}
-
-export async function fetchMapSource(
-  sourceID: number
-): Promise<MapSourceRef | null> {
-  try {
-    const sources = await fetchAPIData("/defs/sources", {
-      source_id: sourceID,
-    });
-    const source = sources?.[0];
-    if (source == null) return null;
-    return {
-      source_id: source.source_id,
-      name: source.name,
-      ref_title: source.ref_title ?? null,
-      authors: source.authors ?? null,
-      ref_year: source.ref_year ?? null,
-      url: source.url ?? null,
-      scale: source.scale ?? null,
-    };
-  } catch (err) {
-    console.warn("[homepage] map source lookup failed:", err?.message ?? err);
-    return null;
   }
 }

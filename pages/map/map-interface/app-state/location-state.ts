@@ -1,6 +1,6 @@
 import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import { type Location } from "history";
-import partRegex from "part-regex";
+import { partRegex } from "part-regex";
 import { AppState, MenuPage } from "./types";
 import { getInitialStateFromHash } from "./hash-string";
 import { browserHistory } from "./browser-history";

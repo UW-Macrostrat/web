@@ -50,6 +50,7 @@ export function useColumnState(columnInfo) {
   const validateSelectedUnitID = useSetAtom(validateSelectedUnitIDAtom);
 
   const pixelScale = useAtomValue(pixelScaleAtom);
+  const grainsize = useAtomValue(grainsizeAtom) ?? "auto";
 
   useEffect(() => {
     validateSelectedUnitID();
@@ -113,6 +114,7 @@ export function useColumnState(columnInfo) {
     t_pos,
     b_pos,
     pixelScale,
+    grainsize,
   };
 }
 
@@ -145,6 +147,10 @@ interface ColumnHashState {
   scale?: number;
   /** Where a selected unit's details show; the sidebar when unset */
   unit_details?: "popover";
+  /** The age-model facet draws every surface, not just the tie points */
+  surfaces?: "all";
+  /** Grain-size widths forced on or off; unset follows the column type */
+  grainsize?: "on" | "off";
 }
 
 function validateInt(value: string | null): number | undefined {
@@ -184,6 +190,7 @@ const facets = [
   { label: "Fossils (taxa)", value: "fossil-taxa" },
   { label: "Fossils (collections)", value: "fossil-collections" },
   { label: "Detrital zircons", value: "detrital-zircons" },
+  { label: "Age model", value: "age-model" },
 ];
 
 const validFacets = facets.map((d) => d.value).filter((d) => d != "none");
@@ -200,6 +207,11 @@ function getStateFromHash(): ColumnHashState {
   state.axis = validateAxis(params.get("axis"));
   state.unit_details = validateValues<"popover">(params.get("unit_details"), [
     "popover",
+  ]);
+  state.surfaces = validateValues<"all">(params.get("surfaces"), ["all"]);
+  state.grainsize = validateValues<"on" | "off">(params.get("grainsize"), [
+    "on",
+    "off",
   ]);
   state.unit = validateInt(params.get("unit"));
   for (const key of ["int_id", "t_int_id", "b_int_id"]) {
@@ -294,6 +306,7 @@ const validateSelectedUnitIDAtom = atom(null, (get, set) => {
 
 const axisTypeAtom = atomWithHashParam<ColumnAxisType>("axis");
 const facetAtom = atomWithHashParam<string | null>("facet");
+const grainsizeAtom = atomWithHashParam<"on" | "off" | null>("grainsize");
 
 /** Setter for the facet shown beside the column (e.g. from a fossils link). */
 export function useSetFacet() {
@@ -359,6 +372,25 @@ const unitDetailsAtom = atomWithHashParam<"popover" | null>("unit_details");
  * rather than in the sidebar. */
 export function useUnitPopover(): boolean {
   return useAtomValue(unitDetailsAtom) === "popover";
+}
+
+const surfacesAtom = atomWithHashParam<"all" | null>("surfaces");
+
+export function useShowAllSurfaces(): boolean {
+  return useAtomValue(surfacesAtom) === "all";
+}
+
+function AllSurfacesSwitch() {
+  const [value, setValue] = useAtom(surfacesAtom);
+  return h(Switch, {
+    label: "Show all surfaces",
+    checked: value === "all",
+    onChange: (evt) => {
+      let next = null;
+      if ((evt.target as HTMLInputElement).checked) next = "all";
+      setValue(next);
+    },
+  });
 }
 
 function UnitPopoverSwitch() {
@@ -470,6 +502,7 @@ export function ColumnSettingsPanel() {
     h(AxisTypeControl),
     h(FacetControl),
     h(UnitPopoverSwitch),
+    h(GrainsizeControl),
     // What the navigation map shows, rather than how the column is drawn — but
     // it belongs with the other view controls rather than floating over the map
     // itself, where it read as part of the map.
@@ -650,6 +683,33 @@ function AxisTypeControl() {
   );
 }
 
+const grainsizeOptions = [
+  { label: "Auto", value: "auto" },
+  { label: "On", value: "on" },
+  { label: "Off", value: "off" },
+];
+
+/** Finer-grained units drawn narrower; `auto` (unset) is on for a measured column. */
+function GrainsizeControl() {
+  const [value, setValue] = useAtom(grainsizeAtom);
+  return h(
+    FormGroup,
+    { label: "Grain size", inline: true },
+    h(ControlGroup, { fill: true }, [
+      h(HTMLSelect, {
+        options: grainsizeOptions,
+        value: value ?? "auto",
+        onChange: (evt) => {
+          let next = evt.target.value;
+          if (next === "auto") next = null;
+          setValue(next);
+        },
+      }),
+      h(ClearButton, { value, setValue }),
+    ])
+  );
+}
+
 function FacetControl() {
   const [facet, setFacet] = useAtom(facetAtom);
   return h("div.facet-control", [
@@ -675,5 +735,6 @@ function FacetControl() {
         h(ClearButton, { value: facet, setValue: setFacet }),
       ])
     ),
+    h.if(facet === "age-model")(AllSurfacesSwitch),
   ]);
 }

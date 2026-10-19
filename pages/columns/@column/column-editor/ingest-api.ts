@@ -28,6 +28,8 @@ export interface IngestNotice {
 export interface IngestSummary {
   project: { id: number; slug: string; name: string };
   col_group_id: number;
+  /** The group's name, as written. */
+  col_group?: string;
   /** Written columns by id — or, from an older backend, parsed previews
    * (`{columnInfo, units}`) for the editor to open as drafts. */
   columns: any[];
@@ -56,7 +58,12 @@ export interface FaciesDef {
   color?: string | null;
   lithology?: string | null;
   environment?: string | null;
-  lith: { lith_id: number; name: string; prop: number | null; atts: string[] }[];
+  lith: {
+    lith_id: number;
+    name: string;
+    prop: number | null;
+    atts: string[];
+  }[];
   environ: { environ_id: number; name: string }[];
 }
 
@@ -78,6 +85,25 @@ export interface ColumnSubmission {
   units: Record<string, any>[];
   refs?: Record<string, any>[];
   facies?: Record<string, any>[];
+}
+
+/** Where ingested columns go, overriding the file's own metadata: a project,
+ * and a group by id or — to create one — by name. With a project and no group,
+ * the pipeline uses the file's project as the group's name. */
+export interface ColumnPlacement {
+  project_id?: number | null;
+  col_group_id?: number | null;
+  col_group?: string | null;
+}
+
+/** Only the parts of a placement that say something. */
+function placementFields(placement: ColumnPlacement | null | undefined) {
+  const fields: Record<string, string | number> = {};
+  if (placement?.project_id != null) fields.project_id = placement.project_id;
+  if (placement?.col_group_id != null)
+    fields.col_group_id = placement.col_group_id;
+  if (placement?.col_group) fields.col_group = placement.col_group;
+  return fields;
 }
 
 const POLL_INTERVAL_MS = 1500;
@@ -114,7 +140,13 @@ export async function pollIngestTask(taskId: string): Promise<IngestResult> {
 function unwrapTaskResult(result: any): IngestResult {
   let inner = result?.result ?? result ?? {};
   if (inner.summary === undefined && inner.n_units !== undefined) {
-    inner = { summary: inner, ok: true, notices: [], data: null, dry_run: inner.dry_run };
+    inner = {
+      summary: inner,
+      ok: true,
+      notices: [],
+      data: null,
+      dry_run: inner.dry_run,
+    };
   }
   return {
     dry_run: inner.dry_run ?? result?.dry_run ?? true,
@@ -129,11 +161,15 @@ function unwrapTaskResult(result: any): IngestResult {
 /** Upload a workbook and wait for its result. */
 export async function ingestColumnFile(
   file: File,
-  dryRun: boolean
+  dryRun: boolean,
+  placement: ColumnPlacement | null = null
 ): Promise<IngestResult> {
   const data = new FormData();
   data.append("file", file, file.name);
   data.append("dry_run", String(dryRun));
+  for (const [key, value] of Object.entries(placementFields(placement))) {
+    data.append(key, String(value));
+  }
   // No Content-Type header — the browser sets the multipart boundary itself.
   const res = await fetch(`${apiV3Prefix}/columns/ingest`, {
     method: "POST",
@@ -148,21 +184,53 @@ export async function ingestColumnFile(
 /** Submit the format's tables as JSON and wait for the result. */
 export async function submitColumnData(
   submission: ColumnSubmission,
-  dryRun: boolean
+  dryRun: boolean,
+  placement: ColumnPlacement | null = null
 ): Promise<IngestResult> {
   const res = await fetch(`${apiV3Prefix}/columns/submit`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: submission, dry_run: dryRun }),
+    body: JSON.stringify({
+      data: submission,
+      dry_run: dryRun,
+      ...placementFields(placement),
+    }),
   });
   if (!res.ok) throw await readError(res, "Submission");
   const { task_id } = await res.json();
   return pollIngestTask(task_id);
 }
 
+/** What a column's placement is after a change. */
+export interface PlacementResult {
+  col_id: number;
+  project_id: number;
+  project: string | null;
+  col_group_id: number;
+  col_group: string | null;
+}
+
+/** Move an existing column to a project and group (administrators). A group
+ * given by name is created in the project if it is new. */
+export async function updateColumnPlacement(
+  colID: number,
+  placement: ColumnPlacement
+): Promise<PlacementResult> {
+  const res = await fetch(`${apiV3Prefix}/columns/${colID}/placement`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(placementFields(placement)),
+  });
+  if (!res.ok) throw await readError(res, "Changing the column's placement");
+  return res.json();
+}
+
 export function exampleDownloadUrl(key: string): string {
-  return `${apiV3Prefix}/columns/examples/download?key=${encodeURIComponent(key)}`;
+  return `${apiV3Prefix}/columns/examples/download?key=${encodeURIComponent(
+    key
+  )}`;
 }
 
 export async function listExamples(): Promise<

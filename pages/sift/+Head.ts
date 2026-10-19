@@ -1,11 +1,12 @@
 import h from "@macrostrat/hyper";
 
-/** Redirects legacy `/sift/#/…` fragment links before the client bundle loads.
- * `macrostrat check` asserts this script is in the served HTML. */
+/** Sift's links were fragments (`/sift/#/strat_name/1`): hand the fragment to
+ * the server as a path, which redirects it to the lexicon. */
 function redirectLegacyHash() {
-  const { pathname, hash } = window.location;
-  if (!/^\/sift\/?$/.test(pathname) || !hash.startsWith("#/")) return;
-  window.location.replace("/sift" + hash.slice(1));
+  const { hash } = window.location;
+  let target = "/lex";
+  if (hash.startsWith("#/")) target = "/sift" + hash.slice(1);
+  window.location.replace(target);
 }
 
 export default function Head() {

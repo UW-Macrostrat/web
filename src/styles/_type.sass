@@ -14,10 +14,10 @@
 // same names: the package's `exports` map doesn't expose its `paleozoic/`
 // partials, so web can't `@use` them. Drop these once it does.
 
-// Running text: the prose font at body size and line height.
+// Running text: the prose font at prose size and body line height.
 @mixin prose
   font-family: var(--pz-prose-font)
-  font-size: var(--pz-body-font-size)
+  font-size: var(--pz-prose-font-size)
   line-height: var(--pz-body-line-height)
   color: var(--pz-text-color)
 
@@ -41,21 +41,21 @@
 // font.
 @mixin section-heading
   font-family: var(--pz-heading-font)
-  font-weight: var(--pz-font-weight-normal)
-  font-size: var(--pz-font-size-lg)
-  line-height: var(--pz-line-height-tight)
+  //font-weight: var(--pz-font-weight-normal)
+  //font-size: var(--pz-font-size-lg)
+  //line-height: var(--pz-line-height-tight)
   color: var(--pz-heading-color)
-  margin: 0 0 var(--pz-heading-spacing)
+  //margin: 0 0 var(--pz-heading-spacing)
 
 // A part of a section: a docs `h3`, a column group under its project. The
 // heading font in the text color, so it sits below the pink section heading.
 @mixin subsection-heading
   font-family: var(--pz-heading-font)
-  font-weight: var(--pz-font-weight-normal)
-  font-size: var(--pz-font-size-lg)
-  line-height: var(--pz-line-height-tight)
+  //font-weight: var(--pz-font-weight-normal)
+  //font-size: var(--pz-font-size-lg)
+  //line-height: var(--pz-line-height-tight)
   color: var(--pz-text-emphasized-color)
-  margin: 0 0 var(--pz-heading-spacing)
+  //margin: 0 0 var(--pz-heading-spacing)
 
 // A small label: what a card links to, the name under a figure, a
 // sidebar block's heading. A hint, not a heading.

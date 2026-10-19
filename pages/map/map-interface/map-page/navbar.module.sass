@@ -1,3 +1,5 @@
+@use "~/styles/breakpoints"
+
 .navbar
   display: flex
   flex-direction: row
@@ -23,6 +25,19 @@
 
 .navbar-link-container
   z-index: 20
+
+// Narrow: the bar meets the screen's top and right edges, so the logo sits
+// inside it rather than overhanging, and the bar no longer runs past the right.
+@include breakpoints.map-narrow
+  .navbar
+    --navbar-padding: 3px 3px 3px 19px
+
+    :global(.bp6-navbar)
+      margin-right: 0
+
+  .navbar-logo
+    --macrostrat-logo-size: 40px
+    margin: 3px -24px 0 4px
 
 .search-results-card:global(.bp6-card)
   padding: 0

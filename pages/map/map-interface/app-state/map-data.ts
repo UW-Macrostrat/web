@@ -2,7 +2,7 @@ import { atom } from "jotai";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { appStateAtom, mapInstanceAtom } from "./store.ts";
 import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
-import { compilationOrDefault } from "./compilation";
+import { mapQuerySource } from "./compilation";
 import {} from "@macrostrat/mapbox-react";
 import { loadable, selectAtom } from "jotai/utils";
 import mapboxgl from "mapbox-gl";
@@ -38,14 +38,17 @@ const mapInfoDataAtom = atom<Promise<KeyedMapQueryData | null>>(
 
     // The compilation the tiles are drawn from answers the click, so what the
     // panel describes is what is on the map.
-    const params = {
+    const params: Record<string, string> = {
       lng: formatCoordForZoomLevel(lng, zoom),
       lat: formatCoordForZoomLevel(lat, zoom),
       z: zoom.toFixed(0),
-      source: compilationOrDefault(compilation),
-      // The earlier name of `source`, for an API v2 that predates it.
-      compilation: compilationOrDefault(compilation),
     };
+    const source = mapQuerySource(compilation);
+    if (source != null) {
+      params.source = source;
+      // The earlier name of `source`, for an API v2 that predates it.
+      params.compilation = source;
+    }
 
     const queryParams = new URLSearchParams(params).toString();
 

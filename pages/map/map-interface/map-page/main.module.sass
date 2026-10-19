@@ -1,5 +1,7 @@
 // This stylesheet the overall application page layout.
 
+@use "~/styles/breakpoints"
+
 .panel-card
   padding: 10px
 
@@ -143,6 +145,11 @@
   bottom: 0
   pointer-events: none
   z-index: 1
+
+// Narrow: panels run edge to edge, so cards drop the rounding set above
+@include breakpoints.map-narrow
+  .macrostrat-map-container :global(.bp6-card)
+    border-radius: 0
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */

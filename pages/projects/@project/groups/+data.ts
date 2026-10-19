@@ -1,34 +1,20 @@
-import { fetchAPIData, fetchProjectData } from "~/_utils/fetch-helpers.ts";
+import { render } from "vike/abort";
+import { fetchAllProjects, fetchAPIData } from "~/_utils/fetch-helpers";
+import { findProject } from "~/components/project-filter/model";
 
+/** The project's column groups. The route takes a slug or a numeric id, as
+ * the project overview does; the groups API wants the id. */
 export async function data(pageContext) {
-  const { project } = pageContext.routeParams;
+  const key = String(pageContext.routeParams.project ?? "");
+  const projects = await fetchAllProjects();
+  const project = findProject(projects, key);
+  if (project == null) {
+    throw render(404, `Project "${key}" not found.`);
+  }
 
-  const res = await fetchAPIData("/defs/groups", { project_id: project });
+  const columnGroups = await fetchAPIData("/defs/groups", {
+    project_id: project.project_id,
+  });
 
-  const projectData = await fetchProjectData(project);
-
-  //const res = await fetchAPIData(`/columns`, { all: true });
-
-  // const grouped = {};
-  //
-  // for (const item of res) {
-  //   const key = item.col_group_id;
-  //
-  //   if (!grouped[key]) {
-  //     grouped[key] = {
-  //       name: item.col_group,
-  //       id: item.col_group_id,
-  //       columns: [],
-  //     };
-  //   }
-  //
-  //   grouped[key].columns.push(item);
-  // }
-  //
-  // const columnGroups = Object.values(grouped);
-
-  return {
-    project: projectData,
-    columnGroups: res,
-  };
+  return { project, columnGroups };
 }

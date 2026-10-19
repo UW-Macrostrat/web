@@ -1,3 +1,5 @@
+@use "~/styles/breakpoints"
+
 // Floated at the top right of its container, so the content wraps beside and
 // below it; the content after it decides whether to clear it.
 .map-placement
@@ -7,13 +9,11 @@
   margin: 0 0 1em 1.5em
   border-radius: var(--pz-radius-lg)
 
-// A placeholder where the map will go: the size of the map's width, but short
+// Where the map will go: just the button that opens it
 .map-placement.closed
   display: flex
   align-items: center
   justify-content: center
-  min-height: 6em
-  border: 1px dashed var(--pz-border-muted-color)
 
   &.unavailable
     opacity: 0.6
@@ -21,6 +21,8 @@
 .map-placement.open
   aspect-ratio: 4 / 3
   overflow: hidden
+  // Clear of the sticky bar when scrolled to on opening
+  scroll-margin-top: calc(var(--hybrid-bar-height, 0px) + 1em)
 
   // The map's GL canvas is composited apart, so overflow alone leaves its
   // corners square; clipped inside the panel so the panel keeps its shadow.
@@ -35,3 +37,10 @@
   top: 0.4em
   right: 0.4em
   z-index: 11
+
+// A phone has no room to wrap text beside the map, so it spans the content
+@include breakpoints.phone
+  .map-placement
+    float: none
+    width: 100%
+    margin: 0 0 1em

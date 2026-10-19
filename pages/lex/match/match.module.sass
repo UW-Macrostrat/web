@@ -1,0 +1,253 @@
+// The lexicon's matching tools. One console shape for both: a query panel on
+// the left, results on the right, presets above. Tokens from the Paleozoic
+// system (--pz-*), text styles from `~/styles/type`, controls from Blueprint.
+
+@use "~/styles/type"
+
+.match-page
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-5)
+
+.lead
+  margin: 0
+  font-size: var(--pz-font-size-lg)
+  line-height: var(--pz-line-height-normal)
+  color: var(--pz-text-color)
+  max-width: 44em
+
+// Worked examples to start from, as a row of chips.
+.presets
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: var(--pz-space-2)
+
+  .presets-label
+    @include type.label
+
+// The console: the query beside its results, stacked once there is no room.
+.console
+  display: grid
+  grid-template-columns: minmax(20em, 26em) minmax(0, 1fr)
+  gap: var(--pz-space-5)
+  align-items: start
+
+  @media (max-width: 860px)
+    grid-template-columns: minmax(0, 1fr)
+
+.panel
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-3)
+  padding: var(--pz-space-4)
+  border: 1px solid var(--pz-border-muted-color)
+  border-radius: var(--pz-radius-lg)
+  background: var(--pz-panel-background-color)
+  min-width: 0
+
+  h3
+    @include type.item-title
+
+  // Blueprint's form groups carry a bottom margin for a stacked form; the
+  // panel's gap does that here.
+  :global(.bp6-form-group)
+    margin: 0
+
+.panel-head
+  display: flex
+  align-items: baseline
+  justify-content: space-between
+  gap: var(--pz-space-3)
+
+  .count
+    @include type.supporting
+
+.hint
+  @include type.supporting
+  margin: 0
+
+  code, kbd
+    @include type.code
+
+.actions
+  display: flex
+  flex-wrap: wrap
+  gap: var(--pz-space-2)
+  padding-top: var(--pz-space-1)
+
+.muted
+  @include type.supporting
+  margin: 0
+
+.results-body
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-3)
+
+.notices
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-2)
+
+  .notice-code
+    @include type.identifier
+    margin-left: 0.5em
+
+// Two inputs side by side: latitude and longitude, the two ages.
+.field-row
+  display: grid
+  grid-template-columns: 1fr 1fr
+  gap: var(--pz-space-3)
+
+// Where to match, as a map: click to set the coordinates.
+.point-map
+  position: relative
+  height: 14em
+  border: 1px solid var(--pz-border-muted-color)
+  border-radius: var(--pz-radius-md)
+  overflow: hidden
+  background: var(--pz-panel-secondary-background-color)
+
+  :global(.map-view-container),
+  :global(.mapbox-map)
+    border-radius: inherit
+
+  .map-hint
+    position: absolute
+    left: 0.5em
+    bottom: 0.4em
+    z-index: 5
+    padding: 0.15em 0.5em
+    border-radius: var(--pz-radius-md)
+    font-size: var(--pz-font-size-xs)
+    color: var(--pz-text-subtle-color)
+    background: color-mix(in srgb, var(--pz-panel-background-color) 85%, transparent)
+    pointer-events: none
+
+// Optional parameters fold away under a text control.
+.optional
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-3)
+  padding-top: var(--pz-space-3)
+  border-top: 1px solid var(--pz-panel-rule-color)
+
+.optional-toggle
+  @include type.text-control
+  align-self: flex-start
+
+// The request as sent, for anyone taking the tool's answer to the API.
+.request-url
+  @include type.identifier
+  display: block
+  padding: var(--pz-space-2) var(--pz-space-3)
+  border-radius: var(--pz-radius-md)
+  background: var(--pz-code-background-color)
+  overflow-x: auto
+  white-space: nowrap
+
+.name-bases
+  display: flex
+  flex-wrap: wrap
+  gap: var(--pz-space-1)
+
+// ------------------------------------------------------ strat-name matches
+
+.match-list
+  list-style: none
+  margin: 0
+  padding: 0
+  display: flex
+  flex-direction: column
+  gap: var(--pz-space-2)
+
+.match-row
+  display: flex
+  gap: var(--pz-space-3)
+  padding: var(--pz-space-3)
+  border: 1px solid var(--pz-border-muted-color)
+  border-radius: var(--pz-radius-md)
+
+  .match-rank
+    flex: 0 0 auto
+    width: 2em
+    height: 2em
+    display: flex
+    align-items: center
+    justify-content: center
+    border-radius: 50%
+    background: var(--pz-code-background-color)
+    font-size: var(--pz-font-size-sm)
+    font-weight: var(--pz-font-weight-semibold)
+    font-variant-numeric: tabular-nums
+    color: var(--pz-accent-text-color)
+
+  .match-main
+    flex: 1 1 auto
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: var(--pz-space-1)
+
+  .match-title
+    display: flex
+    align-items: baseline
+    flex-wrap: wrap
+    gap: var(--pz-space-2)
+
+  .match-name
+    font-size: var(--pz-font-size-md)
+    font-weight: var(--pz-font-weight-semibold)
+
+  .match-tags
+    display: flex
+    flex-wrap: wrap
+    gap: var(--pz-space-1)
+
+  // The ids a match resolves to, each linked where there is a page for it.
+  .match-ids
+    display: flex
+    flex-wrap: wrap
+    gap: var(--pz-space-1) var(--pz-space-4)
+    @include type.identifier
+
+    strong
+      font-weight: var(--pz-font-weight-semibold)
+      color: var(--pz-text-subtle-color)
+      margin-right: 0.35em
+
+// The matched name, word by word: the reader's words marked, the lexicon's
+// additions underlined.
+.tok-match
+  background: color-mix(in srgb, var(--pz-accent-color) 18%, transparent)
+  border-radius: var(--pz-radius-sm)
+  padding: 0 0.1em
+
+.tok-added
+  text-decoration: underline dotted
+  text-underline-offset: 0.15em
+  color: var(--pz-text-subtle-color)
+
+.raw-json
+  @include type.code
+  display: block
+  max-height: 24em
+  overflow: auto
+  padding: var(--pz-space-3)
+  margin: 0
+  font-size: var(--pz-font-size-xs)
+
+.meta
+  @include type.supporting
+
+// ------------------------------------------------------ the tools index
+
+.tools-grid
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr))
+  gap: var(--pz-space-4)
+
+  :global(.tool-card)
+    margin: 0
+    height: 100%

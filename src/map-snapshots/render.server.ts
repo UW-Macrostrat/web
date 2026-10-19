@@ -10,10 +10,7 @@
  * (`yarn snapshots:install-browser`) or an installed Google Chrome.
  */
 import { chromium, type Browser } from "playwright-core";
-import {
-  MAP_SNAPSHOT_FORMAT,
-  type MapSnapshotIndexEntry,
-} from "./spec";
+import { MAP_SNAPSHOT_FORMAT, type MapSnapshotIndexEntry } from "./spec";
 
 /** Software WebGL: headless Chromium has no GPU, and refuses SwiftShader for
  * WebGL unless told it may. */
@@ -30,7 +27,10 @@ export async function launchSnapshotBrowser(
   chromiumPath?: string
 ): Promise<Browser | null> {
   if (chromiumPath) {
-    return chromium.launch({ executablePath: chromiumPath, args: CHROMIUM_ARGS });
+    return chromium.launch({
+      executablePath: chromiumPath,
+      args: CHROMIUM_ARGS,
+    });
   }
   try {
     return await chromium.launch({ args: CHROMIUM_ARGS });
@@ -79,14 +79,27 @@ export async function captureMapSnapshot(
         const handle = (window as any).__macrostratMapSnapshot;
         if (handle == null) return null;
         let dataURL: string | null = null;
-        if (handle.status === "ready") dataURL = handle.capture(mimeType, quality);
-        return { key: handle.key, status: handle.status, dataURL };
+        if (handle.status === "ready")
+          dataURL = handle.capture(mimeType, quality);
+        return {
+          key: handle.key,
+          status: handle.status,
+          reason: handle.reason,
+          dataURL,
+        };
       },
-      { mimeType: MAP_SNAPSHOT_FORMAT.mimeType, quality: MAP_SNAPSHOT_FORMAT.quality }
+      {
+        mimeType: MAP_SNAPSHOT_FORMAT.mimeType,
+        quality: MAP_SNAPSHOT_FORMAT.quality,
+      }
     );
 
-    if (result == null) throw new Error("the page published no snapshot handle");
-    if (result.status !== "ready") throw new Error(`map did not settle (${result.status})`);
+    if (result == null)
+      throw new Error("the page published no snapshot handle");
+    if (result.status !== "ready") {
+      const why = result.reason ? `: ${result.reason}` : "";
+      throw new Error(`map did not settle (${result.status}${why})`);
+    }
     if (result.key !== entry.key) {
       throw new Error(`page reports key ${result.key}, expected ${entry.key}`);
     }

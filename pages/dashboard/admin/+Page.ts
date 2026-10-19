@@ -1,6 +1,6 @@
 /** Administrator tools: see what the system makes of a session, browse the
- * site with a reduced role, see which build each service runs, and manage
- * users and API tokens.
+ * site with a reduced role, see which build each service runs, reach the cache
+ * tools, and manage users and API tokens.
  *
  * Everything that changes state goes through api_v3's admin-gated `/security`
  * routes; this page is a window onto them, not an authority of its own. A
@@ -9,12 +9,7 @@
  * would refuse them anyway.
  */
 import hyper from "@macrostrat/hyper";
-import {
-  AnchorButton,
-  Callout,
-  HotkeysProvider,
-  Intent,
-} from "@blueprintjs/core";
+import { Callout, HotkeysProvider, Intent } from "@blueprintjs/core";
 import { useAuth } from "@macrostrat/form-components";
 import type { ReactNode } from "react";
 import { isDegraded } from "~/components/auth";
@@ -52,17 +47,9 @@ export function Page() {
     h(
       Section,
       {
-        title: "Management tasks",
-        description:
-          "Topology updates and other maintenance, run on the worker with live output.",
+        title: "Tools",
       },
-      [
-        h(
-          AnchorButton,
-          { href: "/dashboard/admin/tasks", icon: "console" },
-          "Open the task runner"
-        ),
-      ]
+      [h(AdminTools)]
     ),
     h(
       Section,
@@ -100,6 +87,43 @@ export function Page() {
       ]
     ),
   ]);
+}
+
+const adminTools = [
+  {
+    href: "/dashboard/admin/tasks",
+    text: "Task runner",
+    description:
+      "topology updates and other maintenance on the worker, with live output",
+  },
+  {
+    href: "/dashboard/admin/cache",
+    text: "Cache management",
+    description: "flush the tile cache",
+  },
+  {
+    href: "/dashboard/admin/map-cache",
+    text: "Map cache management",
+    description: "expire tiles by region or source map",
+  },
+  {
+    href: "/dashboard/admin/security",
+    text: "Sign-in test",
+    description: "check the sign-in flow and admin guard",
+  },
+];
+
+function AdminTools() {
+  return h(
+    "ul.admin-tools",
+    adminTools.map((tool) =>
+      h("li", { key: tool.href }, [
+        h("a", { href: tool.href }, tool.text),
+        " — ",
+        tool.description,
+      ])
+    )
+  );
 }
 
 function Section({

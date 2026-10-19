@@ -1,10 +1,7 @@
 import h from "./components.module.sass";
+import { LinkCard } from "~/components/cards";
 
-const tierLabels: Record<string, string> = {
-  funder: "Funding",
-  institutional: "Institutional support",
-  "in-kind": "In-kind contributions",
-};
+const tierOrder = ["funder", "institutional", "in-kind"];
 
 function formatPeriod(period) {
   if (period == null) return null;
@@ -14,51 +11,54 @@ function formatPeriod(period) {
   return null;
 }
 
+// Grants first, then institutional and in-kind support; newest first within each.
+function byTierThenNewest(a, b) {
+  const tier = tierOrder.indexOf(a.tier) - tierOrder.indexOf(b.tier);
+  if (tier !== 0) return tier;
+  return (b.period?.from ?? 0) - (a.period?.from ?? 0);
+}
+
 export function SupportersGrid({ supporters }) {
-  const items: any[] = (supporters?.supporters ?? []).filter((s) =>
-    (s.projects ?? ["macrostrat"]).includes("macrostrat")
-  );
-  const tiers = ["funder", "institutional", "in-kind"].filter((tier) =>
-    items.some((s) => s.tier === tier)
-  );
+  const items: any[] = (supporters?.supporters ?? [])
+    .filter((s) => (s.projects ?? ["macrostrat"]).includes("macrostrat"))
+    .sort(byTierThenNewest);
   return h(
-    "div.supporters",
-    tiers.map((tier) =>
-      h("div.supporter-tier", { key: tier }, [
-        h("h3.tier-label", tierLabels[tier] ?? tier),
-        h(
-          "ul.supporter-list",
-          items
-            .filter((s) => s.tier === tier)
-            .map((s) => h(SupporterCard, { key: s.id, supporter: s }))
-        ),
-      ])
-    )
+    "ul.supporter-list",
+    items.map((s) => h("li", { key: s.id }, h(SupporterCard, { supporter: s })))
   );
 }
 
+// A grant leads with its title; other support has none. Beside the logo, the
+// program (or contribution), award and years, then the organization giving it.
 function SupporterCard({ supporter }) {
-  const { name, program, url, logo, blurb, period } = supporter;
+  const { name, title, program, contribution, award, pi, url, logo, blurb, period } =
+    supporter;
+  let titleEl = null;
+  if (title != null) {
+    titleEl = h("h3.supporter-title", title);
+  }
+  const details = [program ?? contribution, award, formatPeriod(period)]
+    .filter(Boolean)
+    .join(" · ");
+  let detailsEl = null;
+  if (details !== "") {
+    detailsEl = h("span.supporter-details", details);
+  }
   let logoEl = null;
   if (logo != null) {
     logoEl = h("img.supporter-logo", { src: logo, alt: "" });
   }
-  let programEl = null;
-  if (program != null) {
-    programEl = h("span.supporter-program", program);
+  let piEl = null;
+  if (pi != null) {
+    piEl = h("span.supporter-pi", ["Lead PI: ", pi]);
   }
-  const periodText = formatPeriod(period);
-  let periodEl = null;
-  if (periodText != null) {
-    periodEl = h("span.supporter-period", periodText);
-  }
-  return h("li.supporter-card", [
-    logoEl,
-    h("div.supporter-body", [
-      h("a.supporter-name", { href: url, target: "_blank", rel: "noopener" }, name),
-      programEl,
-      h("p.supporter-blurb", blurb),
-      periodEl,
+  return h(LinkCard, { href: url, density: "list", className: "supporter-card" }, [
+    titleEl,
+    h("div.supporter-source", [
+      logoEl,
+      h("div.supporter-source-text", [detailsEl, h("span.supporter-funder", name)]),
     ]),
+    piEl,
+    h("p.supporter-blurb", blurb),
   ]);
 }

@@ -1,9 +1,8 @@
-import { LinkCard, StickyHeader } from "~/components";
+import { LinkCard } from "~/components";
 import h from "./+Page.module.sass";
 import { useData } from "vike-react/useData";
-import { useState } from "react";
-import { Tag, Dialog, Icon } from "@blueprintjs/core";
 import { LexSearchPrompt } from "~/components/lex/search-omnibar";
+import { matchingTools } from "../match/tools";
 
 export function Page() {
   const { res } = useData();
@@ -51,33 +50,19 @@ export function Page() {
       h(Stat, { value: measurements, label: "measurements" }),
     ]),
     h("div.lex-search", h(LexSearchPrompt)),
-    h("section.dictionaries", [
-      h("h2", "Dictionaries"),
-      h(
-        "div.dictionary-grid",
-        dictionaries.map((item) =>
-          h(
-            LinkCard,
-            {
-              key: item.href,
-              href: item.href,
-              title: item.title,
-              // Global (matched with `:global()` in the stylesheet): the card's
-              // own class is hashed by the cards module, so the grid can only
-              // reach it through a name it passes in itself.
-              className: "dictionary-card",
-            },
-            item.text
-          )
-        )
-      ),
-    ]),
+    h(CardSection, { title: "Dictionaries", items: dictionaries }),
+    // What the dictionaries are *for*, in part: the importers read free text
+    // against them, and these show how.
+    h(CardSection, { title: "Tools", items: matchingTools }),
     h("p.lex-footnote", [
-      h("a", { href: "https://macrostrat.org/sift/#", target: "_blank" }, "Sift"),
+      h(
+        "a",
+        { href: "https://v1.macrostrat.org/sift/", target: "_blank" },
+        "Sift"
+      ),
       ", Macrostrat's legacy lexicon app, is still available while it is ",
       "gradually brought into this framework.",
     ]),
-    h(UpdatesExpandableDialog),
   ]);
 }
 
@@ -119,11 +104,6 @@ const dictionaries = [
     title: "Economics",
     text: "Economic uses of geologic materials.",
   },
-   {
-    href: "/lex/lith-match",
-    title: "Lithology matcher",
-    text: "Preview how the column-ingestion importer matches free lithology text to Macrostrat's lithology vocabulary.",
-  },
   {
     href: "/lex/minerals",
     title: "Minerals",
@@ -134,8 +114,32 @@ const dictionaries = [
     title: "Structures",
     text: "Names and descriptions of geologic structures.",
   },
-
 ];
+
+/** A titled grid of link cards: the dictionaries, the tools. */
+function CardSection({ title, items }) {
+  return h("section.dictionaries", [
+    h("h2", title),
+    h(
+      "div.dictionary-grid",
+      items.map((item) =>
+        h(
+          LinkCard,
+          {
+            key: item.href,
+            href: item.href,
+            title: item.title,
+            // Global (matched with `:global()` in the stylesheet): the card's
+            // own class is hashed by the cards module, so the grid can only
+            // reach it through a name it passes in itself.
+            className: "dictionary-card",
+          },
+          item.text
+        )
+      )
+    ),
+  ]);
+}
 
 /** One figure in the row above the dictionaries. Linked when there is
  * somewhere to go. */
@@ -152,67 +156,4 @@ function Stat({ value, label, href = null }) {
 
 function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-function UpdatesExpandableDialog() {
-  const [updateOpen, setUpdateOpen] = useState(false);
-
-  return h("div.header", [
-    h(
-      Tag,
-      {
-        intent: "PRIMARY",
-        active: updateOpen,
-        onClick: () => setUpdateOpen(true),
-      },
-      "Updates"
-    ),
-    h(
-      Dialog,
-      {
-        isOpen: updateOpen,
-      },
-      h(Updates, { setUpdateOpen })
-    ),
-  ]);
-}
-
-function Updates({ setUpdateOpen }) {
-  const updates = [
-    {
-      title: "Added dictionaries",
-      description:
-        "Added new lexicon dictionaries for lithology attributes, environments, economic uses, minerals, and structures.",
-      slug: "version-4.1.0/save-location",
-      version: "2.0.0",
-    },
-  ];
-
-  return h("div.update-container", [
-    h(
-      StickyHeader,
-      h("div.update-title", [
-        h("h2", "Recent Updates"),
-        h(Icon, {
-          className: "close-btn",
-          icon: "cross",
-          onClick: () => setUpdateOpen(false),
-        }),
-      ])
-    ),
-    h("div.update-list", [
-      updates.map((update) =>
-        h("div.update", [
-          h("div.update-title", [
-            h("h3.title", update.title),
-            h(Tag, { intent: "success" }, `v${update.version}`),
-          ]),
-          // h("div.description", [
-          //   h(DocsVideo, { slug: update.slug }),
-          //   h("p", update.description),
-          // ]),
-        ])
-      ),
-    ]),
-  ]);
 }

@@ -14,7 +14,7 @@ import { HTMLSelect, Tag } from "@blueprintjs/core";
 import { useAtomValue } from "jotai";
 import { useAppActions, useAppState } from "../app-state";
 import {
-  DEFAULT_COMPILATION,
+  MAP_DEFAULT_COMPILATION,
   compilationLabel,
   compilationOrDefault,
   compilationsAtom,
@@ -55,14 +55,14 @@ export function CompilationSelect() {
       options,
       onChange(evt) {
         let compilation: string | null = evt.currentTarget.value;
-        if (compilation == DEFAULT_COMPILATION) compilation = null;
+        if (compilation == MAP_DEFAULT_COMPILATION) compilation = null;
         runAction({ type: "set-compilation", compilation });
       },
     }),
     h(CompilationZoomWarning, { compilation: selected, zoom }),
     h(
       "p.info",
-      "The compilation the map is drawn from and described by. Carto is the map served by default."
+      "The compilation the map is drawn from and described by."
     ),
   ]);
 }

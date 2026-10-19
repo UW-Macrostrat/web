@@ -14,13 +14,7 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./search.module.sass";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Button,
-  Icon,
-  Menu,
-  MenuDivider,
-  MenuItem,
-} from "@blueprintjs/core";
+import { Button, Menu, MenuDivider, MenuItem } from "@blueprintjs/core";
 import { Omnibar } from "@blueprintjs/select";
 import { navigate } from "vike/client/router";
 import { atom, useAtom, useSetAtom } from "jotai";
@@ -164,6 +158,9 @@ function renderResultList(
     children.push(renderItem(item, index));
   });
   if (children.length === 0) {
+    if (emptyState == null) {
+      return null;
+    }
     children.push(emptyState);
   }
   return h(
@@ -181,28 +178,35 @@ function LexSearchOmnibar({
 }) {
   const [query, setQuery] = useState("");
   const { results, loading } = useLexSearch(query, isOpen);
+
+  // However it closes (Escape, the backdrop, ⌘K), it reopens empty.
+  useEffect(() => {
+    if (!isOpen) setQuery("");
+  }, [isOpen]);
   const items = useCategorizedResults(results);
 
   const onItemSelect = useCallback(
     (item: LexSearchItem) => {
       onClose();
-      setQuery("");
       navigate(item.href);
     },
     [onClose]
   );
 
-  let emptyMessage = "Search Macrostrat…";
+  let emptyMessage = null;
+  let emptyState = null;
   if (loading) {
     emptyMessage = "Searching…";
   } else if (query.trim().length >= MIN_QUERY_LENGTH) {
     emptyMessage = "No matches";
   }
-  const emptyState = h(MenuItem, {
-    disabled: true,
-    text: emptyMessage,
-    key: "empty",
-  });
+  if (emptyMessage != null) {
+    emptyState = h(MenuItem, {
+      disabled: true,
+      text: emptyMessage,
+      key: "empty",
+    });
+  }
 
   return h(Omnibar<LexSearchItem>, {
     isOpen,
@@ -216,8 +220,10 @@ function LexSearchOmnibar({
     itemListRenderer: (props) => renderResultList(props, emptyState),
     onItemSelect,
     resetOnSelect: true,
+    overlayProps: { portalClassName: styles["lex-search-portal"] },
     inputProps: {
-      placeholder: "Search Macrostrat: names, lithologies, intervals, minerals…",
+      placeholder:
+        "Search Macrostrat: names, lithologies, intervals, minerals…",
     },
   });
 }
@@ -286,6 +292,7 @@ export function LexSearchButton({
       small: !large,
       icon: "search",
       onClick: openSearch,
+      "aria-label": text,
     },
     [h("span.label", text)]
   );
@@ -311,31 +318,33 @@ export function LexSearchPrompt() {
 }
 
 /**
- * The site's search box: a field-shaped control that opens the omnibar, worded
- * for the whole site rather than for the lexicon. It is the only search surface
- * Macrostrat has, and on a page that isn't `/lex` a button labelled "Search the
- * lexicon" reads as a link into one section rather than as *the* search.
+ * The site's search control: a minimal button that opens the omnibar, worded
+ * for the whole site rather than for the lexicon. A field-shaped control would
+ * promise typing in place; the typing happens in the omnibar.
  *
  * What it searches is still the lexicon's autocomplete (`./search`); widening
  * the index to columns, map sources and projects is the other half of this and
  * happens behind the same control.
  */
 export function SiteSearchPrompt({
-  placeholder = "Search Macrostrat",
+  text = "Search Macrostrat",
 }: {
-  placeholder?: string;
+  text?: string;
 }) {
   const openSearch = useOpenLexSearch();
   const hotkeyLabel = useHotkeyLabel();
 
   return h(
-    "button.site-search-prompt",
-    { type: "button", onClick: openSearch, "aria-label": placeholder },
-    [
-      h(Icon, { icon: "search" }),
-      h("span.site-search-label", placeholder),
-      h("span.site-search-hotkey", hotkeyLabel),
-    ]
+    Button,
+    {
+      className: styles["site-search-prompt"],
+      minimal: true,
+      icon: "search",
+      onClick: openSearch,
+      "aria-label": text,
+      endIcon: h("span.site-search-hotkey", hotkeyLabel),
+    },
+    text
   );
 }
 

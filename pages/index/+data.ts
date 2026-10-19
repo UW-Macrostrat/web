@@ -1,7 +1,9 @@
 import { fetchAPIData } from "~/_utils";
+import { postgrestPrefix } from "@macrostrat-web/settings";
+import fetch from "cross-fetch";
 import { parse as parseYaml } from "yaml";
 import {
-  featuredAreaForToday,
+  randomFeaturedArea,
   featuredAreas,
   type FeaturedArea,
 } from "./featured-areas";
@@ -15,7 +17,11 @@ import {
 } from "./hero-column-static.server";
 import type { StaticHeroColumn } from "./hero-column";
 
-interface PageStats {
+export interface PageStats {
+  /** Finalized map sources. Null when the count couldn't be had. */
+  maps: number | null;
+  /** Legend items across those maps, as `/legend` lists them. */
+  legendItems: number | null;
   columns: number;
   units: number;
   polygons: number;
@@ -85,7 +91,7 @@ function latestNews(limit = 3): NewsItem[] {
  * that column as the still draws it, and every area's still map. None of it
  * failing takes the page down; the map renders on its own. */
 async function heroData(): Promise<HeroData> {
-  const area = featuredAreaForToday();
+  const area = randomFeaturedArea();
   const [column, stillColumn, snapshots] = await Promise.all([
     featuredAreaColumn(area),
     stillColumnFor(area.id),
@@ -97,10 +103,15 @@ async function heroData(): Promise<HeroData> {
 /** Every featured area's still, so the carousel can move through them without
  * the live map. Any the server hasn't drawn yet are queued, and show the cover
  * photo until they exist. */
-async function heroSnapshots(): Promise<Record<string, MapSnapshotImage | null>> {
-  const images = await resolveMapSnapshots(featuredAreas.map(heroSnapshotSpec), {
-    complete: true,
-  });
+async function heroSnapshots(): Promise<
+  Record<string, MapSnapshotImage | null>
+> {
+  const images = await resolveMapSnapshots(
+    featuredAreas.map(heroSnapshotSpec),
+    {
+      complete: true,
+    }
+  );
   const snapshots: Record<string, MapSnapshotImage | null> = {};
   featuredAreas.forEach((area, i) => {
     snapshots[area.id] = images[i];
@@ -108,23 +119,58 @@ async function heroSnapshots(): Promise<Record<string, MapSnapshotImage | null>>
   return snapshots;
 }
 
+/** How many rows a PostgREST route has, from the `Content-Range` an exact
+ * count request carries — one row of payload, whatever the table's size. */
+async function fetchPGCount(route: string, key: string): Promise<number> {
+  const url = `${postgrestPrefix}${route}?select=${key}&limit=1`;
+  const res = await fetch(url, { headers: { Prefer: "count=exact" } });
+  const range = res.headers.get("content-range") ?? "";
+  const match = /\/(\d+)$/.exec(range);
+  if (match == null) throw new Error(`No count in Content-Range "${range}"`);
+  return parseInt(match[1], 10);
+}
+
+const COUNT_TTL_MS = 60 * 60 * 1000;
+const countCache = new Map<string, { value: number; expires: number }>();
+
+/** A route's count, held for an hour: the legend count takes the database
+ * over a second, and a landing page can't pay that on every render. Null when
+ * it can't be had, so the stat is left out rather than shown as zero. */
+async function cachedCount(route: string, key: string): Promise<number | null> {
+  const cached = countCache.get(route);
+  if (cached != null && cached.expires > Date.now()) return cached.value;
+  try {
+    const value = await fetchPGCount(route, key);
+    countCache.set(route, { value, expires: Date.now() + COUNT_TTL_MS });
+    return value;
+  } catch (error) {
+    console.error(`Could not count ${route}:`, error);
+    return cached?.value ?? null;
+  }
+}
+
 export async function data(pageContext) {
-  const [statsData, hero] = await Promise.all([
+  const [statsData, maps, legendItems, hero] = await Promise.all([
     fetchAPIData("/stats", { all: true }),
+    // The same finalized set `/maps` lists, so the two figures agree.
+    cachedCount("/maps", "source_id"),
+    cachedCount("/legend", "legend_id"),
     heroData(),
   ]);
 
   let columns = 0;
   let units = 0;
-  let polygons = 0;
+  // Every project row carries the same global polygon total, so take it once.
+  const polygons = statsData[0]?.t_polys ?? 0;
 
   statsData.forEach((project) => {
     columns += project.columns;
     units += project.units;
-    polygons += project.t_polys;
   });
 
   const stats: PageStats = {
+    maps,
+    legendItems,
     columns,
     units,
     polygons,

@@ -20,13 +20,21 @@ import {
   HTMLSelect,
   Tag,
 } from "@blueprintjs/core";
-import { usePageContext } from "vike-react/usePageContext";
+import { useAuth } from "@macrostrat/form-components";
+import { isAdminSession } from "~/components/auth";
 import {
   exampleDownloadUrl,
   ingestColumnFile,
   listExamples,
+  type ColumnPlacement,
   type IngestResult,
 } from "../@column/column-editor/ingest-api";
+import {
+  GroupSelect,
+  ProjectSelect,
+  type GroupDef,
+} from "../@column/column-editor/project-fields";
+import { FormGroup } from "@blueprintjs/core";
 import {
   columnsFromIngestResult,
   type ColumnEditorData,
@@ -73,11 +81,22 @@ export interface ColumnUploadProps {
 }
 
 export function ColumnUpload({ onOpenColumn }: ColumnUploadProps) {
-  const pageContext = usePageContext();
-  const isAdmin = (pageContext as any).user?.role === "web_admin";
+  // The live session, degraded role included: an admin browsing as a
+  // `web_user` may only dry-run, as the API will insist anyway.
+  const { user } = useAuth();
+  const isAdmin = isAdminSession(user);
 
   const [file, setFile] = useState<File | null>(null);
   const [dryRun, setDryRun] = useState(true);
+  // Where the columns go. Nothing chosen means the spreadsheet decides; a
+  // project alone demotes the spreadsheet's project to the group.
+  const [projectID, setProjectID] = useState<number | null>(null);
+  const [group, setGroup] = useState<GroupDef | null>(null);
+  const placement: ColumnPlacement = {
+    project_id: projectID,
+    col_group_id: group?.col_group_id ?? null,
+    col_group: group?.isNew ? group.name : null,
+  };
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<IngestResult | null>(null);
@@ -108,19 +127,22 @@ export function ColumnUpload({ onOpenColumn }: ColumnUploadProps) {
   }, []);
 
   // Core upload + poll, shared by the file submit and the example dry run.
-  const runIngest = useCallback(async (toSend: File, dryRunValue: boolean) => {
-    setPhase("working");
-    setError(null);
-    setResult(null);
-    try {
-      const res = await ingestColumnFile(toSend, dryRunValue);
-      setResult(res);
-      setPhase("done");
-    } catch (e: any) {
-      setPhase("error");
-      setError(e?.message ?? String(e));
-    }
-  }, []);
+  const runIngest = useCallback(
+    async (toSend: File, dryRunValue: boolean) => {
+      setPhase("working");
+      setError(null);
+      setResult(null);
+      try {
+        const res = await ingestColumnFile(toSend, dryRunValue, placement);
+        setResult(res);
+        setPhase("done");
+      } catch (e: any) {
+        setPhase("error");
+        setError(e?.message ?? String(e));
+      }
+    },
+    [placement.project_id, placement.col_group_id, placement.col_group]
+  );
 
   const submit = useCallback(() => {
     if (file == null) return;
@@ -164,6 +186,12 @@ export function ColumnUpload({ onOpenColumn }: ColumnUploadProps) {
 
   const busy = phase === "working";
 
+  let groupHelp =
+    "Leave the group empty to use the spreadsheet's own project as the group.";
+  if (projectID == null) {
+    groupHelp = "With no project chosen, the spreadsheet's metadata decides.";
+  }
+
   let checkboxLabel = "Dry run — validate only, don't save";
   if (!isAdmin) checkboxLabel = "Dry run — required (only admins can save)";
   const submitLabel = effectiveDryRun ? "Submit (dry run)" : "Submit";
@@ -185,6 +213,34 @@ export function ColumnUpload({ onOpenColumn }: ColumnUploadProps) {
   }
 
   return h("div.column-upload", [
+    h("div.placement-fields", [
+      h(
+        FormGroup,
+        {
+          label: "Project",
+          helperText:
+            "Where the columns go. A spreadsheet's project usually becomes a group here.",
+        },
+        h(ProjectSelect, {
+          value: projectID,
+          onChange: (id) => {
+            setProjectID(id);
+            setGroup(null);
+          },
+        })
+      ),
+      h(
+        FormGroup,
+        { label: "Group", helperText: groupHelp },
+        h(GroupSelect, {
+          project_id: projectID,
+          value: group?.col_group_id ?? null,
+          label: group?.name,
+          allowCreate: true,
+          onChange: setGroup,
+        })
+      ),
+    ]),
     h("div.upload-controls", [
       h(FileInput, {
         text: file?.name ?? "Choose a column spreadsheet (.xlsx)…",
@@ -286,7 +342,8 @@ function IngestOutcome({
       "ul.result-columns",
       columns.map((column, index) =>
         h(ResultColumn, {
-          key: column.columnInfo.local_id ?? column.columnInfo.col_name ?? index,
+          key:
+            column.columnInfo.local_id ?? column.columnInfo.col_name ?? index,
           column,
           index,
           columns,
@@ -321,7 +378,9 @@ function ResultColumn({
   onOpenColumn?: (column: ColumnEditorData) => void;
 }) {
   const info = column.columnInfo;
-  const errors = (column.notices ?? []).filter((n) => n.level === "error").length;
+  const errors = (column.notices ?? []).filter(
+    (n) => n.level === "error"
+  ).length;
 
   let errorTag = null;
   if (errors > 0) {
@@ -365,7 +424,10 @@ function ResultColumn({
 
   return h("li.result-column", [
     h("span.column-name", info.col_name),
-    h("span.column-meta", `${column.units.length} units · ${info.col_type ?? "column"}`),
+    h(
+      "span.column-meta",
+      `${column.units.length} units · ${info.col_type ?? "column"}`
+    ),
     errorTag,
     h("span.spacer"),
     action,

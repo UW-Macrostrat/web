@@ -11,7 +11,8 @@ import hyper from "@macrostrat/hyper";
 import { useCallback } from "react";
 import { Button, ButtonGroup } from "@blueprintjs/core";
 import { useAtomValue, useSetAtom } from "./state/ctx";
-import { usePageContext } from "vike-react/usePageContext";
+import { useAuth } from "@macrostrat/form-components";
+import { isAdminSession } from "~/components/auth";
 import { submitColumnData } from "./ingest-api";
 import { buildSubmission } from "./submission";
 import {
@@ -45,8 +46,20 @@ function useSubmitColumn() {
       setPhase("working");
       setError(null);
       try {
-        const submission = buildSubmission(columnInfo, units, facies, footprint);
-        const result = await submitColumnData(submission, dryRun);
+        const submission = buildSubmission(
+          columnInfo,
+          units,
+          facies,
+          footprint
+        );
+        // The pickers' choice travels beside the sheets: a group chosen by id,
+        // or one named here that the write creates.
+        const result = await submitColumnData(submission, dryRun, {
+          project_id: columnInfo?.project_id ?? null,
+          col_group_id: columnInfo?.col_group_id ?? null,
+          col_group:
+            columnInfo?.col_group_id == null ? columnInfo?.col_group : null,
+        });
         setNotices(result.notices);
         setResult(result);
         setPhase("done");
@@ -55,7 +68,16 @@ function useSubmitColumn() {
         setPhase("error");
       }
     },
-    [columnInfo, footprint, units, facies, setNotices, setResult, setPhase, setError]
+    [
+      columnInfo,
+      footprint,
+      units,
+      facies,
+      setNotices,
+      setResult,
+      setPhase,
+      setError,
+    ]
   );
 }
 
@@ -75,8 +97,8 @@ function statusText(
 }
 
 export function IngestActions() {
-  const pageContext = usePageContext();
-  const isAdmin = (pageContext as any).user?.role === "web_admin";
+  const { user } = useAuth();
+  const isAdmin = isAdminSession(user);
   const snapshot = useAtomValue(snapshotAtom);
   const phase = useAtomValue(submissionPhaseAtom);
   const error = useAtomValue(submissionErrorAtom);
@@ -87,7 +109,8 @@ export function IngestActions() {
   // A column already in the database would be created again, not updated:
   // the importer has no update-by-id path yet
   const existing = (snapshot?.col_id ?? 0) > 0;
-  let writeTitle = "Write the column to the database through the ingestion pipeline";
+  let writeTitle =
+    "Write the column to the database through the ingestion pipeline";
   if (!isAdmin) {
     writeTitle = "Only admins can write";
   } else if (existing) {

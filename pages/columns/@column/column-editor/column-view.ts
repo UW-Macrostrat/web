@@ -12,6 +12,7 @@ import {
   ColoredUnitComponent,
   Column,
   ColumnSurfaces,
+  columnTypeFromColType,
   UnitComponent,
   type ColumnSurface,
 } from "@macrostrat/column-views";
@@ -46,6 +47,8 @@ import {
   surfacesAtom,
   targetUnitHeightAtom,
   unconformityCollapseAtom,
+  grainsizeAtom,
+  editedColumnInfoAtom,
 } from "./state";
 
 /** Width of the surfaces' label column, connector included. It is an ordinary
@@ -100,6 +103,11 @@ export function EditorColumn() {
   const showTimescale = useAtomValue(showTimescaleAtom);
   const showSurfaceLines = useAtomValue(showSurfaceLinesAtom);
   const unconformityCollapse = useAtomValue(unconformityCollapseAtom);
+  const grainsize = useAtomValue(grainsizeAtom);
+  // `auto` grain size follows the column type, not the axis it is drawn on
+  const columnType = columnTypeFromColType(
+    useAtomValue(editedColumnInfoAtom)?.col_type
+  );
   const zoom = useColumnFocus();
   const timescales = useColumnTimescales(mode, zoom?.timescaleLevels);
 
@@ -221,6 +229,8 @@ export function EditorColumn() {
       showLabelColumn,
       unconformityLabels: "minimal",
       collapseSmallUnconformities: collapseUnconformities(unconformityCollapse),
+      grainsize,
+      columnType,
       showTimescale: timescale,
       // A column placed by surface order alone has no measure to label
       showAgeAxis: !speculative,

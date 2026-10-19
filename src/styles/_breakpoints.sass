@@ -1,0 +1,31 @@
+// The website's width breakpoints, as variables and mixins: a media query
+// can't read a CSS variable, so these can't be `--pz-` tokens.
+//
+//   @use "~/styles/breakpoints"
+//   .toolbar
+//     @include breakpoints.phone
+//       gap: 0
+//
+// Mixins only: this file emits no CSS of its own. `breakpoints.ts` mirrors the
+// values for components that take a width as a prop.
+
+// A phone held upright, and anything as cramped.
+$phone: 640px
+
+// Where `@macrostrat/map-interface` stacks its panels edge to edge.
+$map-narrow: 768px
+
+// Below this, a page has no room for a sidebar beside its content.
+$tablet: 1000px
+
+@mixin phone
+  @media screen and (max-width: $phone)
+    @content
+
+@mixin map-narrow
+  @media screen and (max-width: $map-narrow)
+    @content
+
+@mixin tablet
+  @media screen and (max-width: $tablet)
+    @content

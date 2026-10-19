@@ -1,9 +1,9 @@
 // The live hero. A two-cell grid — the map, then the stratigraphic column
-// beside it — with the area carousel underneath. Over the map: the "Explore"
-// masthead in one corner and the caption (the area's name, the age range) in
-// the other, both over a scrim because satellite imagery is neither light nor
-// dark. It was a `MapAreaContainer` with the column floating over the map;
-// taking the column out of the frame is what left room for the caption in it.
+// beside it — with the area carousel underneath. Over the map: the caption
+// (the area's name, the age range) in one corner, over a scrim because
+// satellite imagery is neither light nor dark. It was a `MapAreaContainer`
+// with the column floating over the map; taking the column out of the frame
+// is what left room for the caption in it.
 
 .hero-frame
   // Wide enough for the column the library draws at `COLUMN_WIDTH`
@@ -35,6 +35,10 @@
   // past. `isolation` keeps the overlay's stacking to this box as well.
   overflow: hidden
   isolation: isolate
+  // Safari won't clip a composited layer — the WebGL canvas — to a rounded
+  // box unless the box is composited itself; the map otherwise squares off
+  // the corners once it goes live.
+  transform: translateZ(0)
   border-radius: var(--pz-radius-lg)
   border: 1px solid color-mix(in srgb, var(--pz-accent-color) 30%, transparent)
   background: var(--pz-panel-background-color)
@@ -49,6 +53,18 @@
   // to the right-hand corner and kept above the caption's scrim.
   :global(.mapboxgl-ctrl-bottom-right)
     z-index: 11
+    // The wordmark and the ⓘ side by side, ⓘ in the corner. Reversed because
+    // Mapbox inserts later corner controls first.
+    display: flex
+    flex-direction: row-reverse
+    align-items: center
+    gap: 4px
+    padding: 0 6px 6px 0
+
+    :global(.mapboxgl-ctrl)
+      float: none
+      clear: none
+      margin: 0
 
 .hero-column-slot
   display: flex
@@ -62,54 +78,45 @@
 $over-imagery-text: #fff
 $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
-// The way into the full map. A proper button, in the corner the reader starts
-// from: the hero is an invitation, and a button is what says so.
-.hero-explore
-  position: absolute
-  top: 0.7em
-  left: 0.7em
-  z-index: 10
-  font-size: 1.05em
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4) !important
-
-  @media (max-width: 620px)
-    font-size: 1em
-
-// What is on screen, bottom-left. Transparent to the pointer except where
-// there is something to click, so the map underneath stays draggable.
+// What is on screen, bottom-left: the area's name and the age range showing,
+// on one line in a rounded panel — the same treatment as the hint badge in
+// the opposite corner. Only the panel takes the pointer, so the map
+// underneath stays draggable.
 .hero-overlay
   position: absolute
-  left: 0
-  right: 0
-  bottom: 0
+  left: 0.85em
+  bottom: 0.6em
+  max-width: calc(100% - 1.7em)
   z-index: 10
-  display: flex
-  flex-direction: column
-  align-items: flex-start
-  gap: 0.25em
-  padding: 2.5em 0.85em 0.6em
   pointer-events: none
-  // Weighted into the corner the caption is in, so it reaches the text without
-  // washing over the whole bottom edge of the map.
-  background: linear-gradient(to top right, rgba(0, 0, 0, 0.65), transparent 65%)
 
-  > *
-    pointer-events: auto
+.hero-caption
+  display: flex
+  align-items: center
+  flex-wrap: wrap
+  gap: 0.3em 0
+  padding: 0.35em 0.75em
+  border-radius: var(--pz-radius-lg)
+  background: rgba(0, 0, 0, 0.6)
+  pointer-events: auto
 
 .hero-title
-  margin: 0
+  margin: 0 0.75em 0 0
+  max-width: 30em
   font-family: var(--pz-heading-font)
   font-size: var(--pz-font-size-xl)
   line-height: var(--pz-line-height-tight)
   color: $over-imagery-text
-  text-shadow: $over-imagery-shadow
-  transition: opacity 0.45s ease, transform 0.45s ease
+  white-space: nowrap
+  overflow: hidden
+  transition: opacity 0.45s ease, max-width 0.45s ease, margin-right 0.45s ease
 
   // Panned away from the area: the name stops describing what is on screen, so
-  // it leaves rather than being replaced by a sentence saying it has.
+  // it leaves — fading and closing up, so the filter beside it slides over.
   &.is-hidden
     opacity: 0
-    transform: translateY(0.4em)
+    max-width: 0
+    margin-right: 0
     pointer-events: none
 
 // ------------------------------------------------------- under the map
@@ -166,7 +173,6 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
       text-transform: uppercase
       letter-spacing: 0.04em
       color: $over-imagery-text
-      text-shadow: $over-imagery-shadow
 
   // The clear button, over imagery rather than over a panel.
   :global(.bp6-button)
@@ -271,41 +277,20 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
 // ------------------------------------------------------------- map chrome
 
-// While a new column is being loaded.
+// While a new column is being loaded: small, in a corner, and only for loads
+// long enough to notice.
 .hero-loading
   position: absolute
   top: 0.75em
-  left: 50%
-  transform: translateX(-50%)
+  right: 0.75em
   z-index: 20
-  padding: 0.3em
-  border-radius: 50%
-  background: var(--pz-panel-background-color)
+  pointer-events: none
+  opacity: 0
+  animation: hero-loading-in 0.2s ease 0.4s forwards
 
-// ------------------------------------------------------------- credits
-
-.hero-credits
-  display: flex
-  flex-wrap: wrap
-  gap: 0.15em 1.5em
-  margin-top: 0.5em
-  justify-content: flex-end
-
-  .hero-credit
-    margin: 0
-    font-size: var(--pz-font-size-xs)
-    line-height: var(--pz-line-height-snug)
-    color: var(--pz-text-subtle-color)
-
-  .credit-label
-    text-transform: uppercase
-    letter-spacing: 0.05em
-    margin-right: 0.5em
-    font-weight: var(--pz-font-weight-semibold)
-    color: var(--pz-accent-text-color)
-
-  .credit-detail
-    color: var(--pz-text-subtle-color)
+@keyframes hero-loading-in
+  to
+    opacity: 0.7
 
 // ------------------------------------------------------- the still
 
@@ -346,21 +331,6 @@ $over-imagery-shadow: 0 1px 6px rgba(0, 0, 0, 0.7)
 
   &.is-revealed
     opacity: 0
-
-.hero-engage-hint
-  position: absolute
-  top: 0.8em
-  right: 0.8em
-  z-index: 10
-  display: flex
-  align-items: center
-  gap: 0.35em
-  padding: 0.2em 0.6em
-  border-radius: var(--pz-radius-lg)
-  font-size: 0.8em
-  color: $over-imagery-text
-  background: rgba(0, 0, 0, 0.45)
-  pointer-events: none
 
 .hero-still-attribution
   position: absolute

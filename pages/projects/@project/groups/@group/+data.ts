@@ -1,15 +1,20 @@
-import { fetchAPIData, fetchAPIRefs, fetchProjectData } from "~/_utils";
+import { render } from "vike/abort";
+import { fetchAllProjects, fetchAPIData, fetchAPIRefs } from "~/_utils";
+import { findProject } from "~/components/project-filter/model";
 import { getPrevalentTaxa } from "~/components/lex/data-helper.ts";
 
+/** One column group: its definition, its columns, their fossils and
+ * references. The project segment may be a slug or an id. */
 export async function data(pageContext) {
-  console.log(pageContext.routeParams);
-  const project_id = parseInt(pageContext.routeParams.project);
+  const key = String(pageContext.routeParams.project ?? "");
   const col_group_id = parseInt(pageContext.routeParams.group);
+  if (Number.isNaN(col_group_id)) {
+    throw render(404, "Column group ids are numbers.");
+  }
 
-  // Await all API calls
-  const [project, resData, colData, fossilsData, refs1, refs2] =
+  const [projects, resData, colData, fossilsData, refs1, refs2] =
     await Promise.all([
-      fetchProjectData(project_id),
+      fetchAllProjects(),
       fetchAPIData("/defs/groups", { col_group_id }),
       fetchAPIData("/columns", {
         col_group_id,
@@ -21,11 +26,17 @@ export async function data(pageContext) {
       fetchAPIRefs("/columns", { col_group_id }),
     ]);
 
-  const refValues1 = Object.values(refs1);
-  const refValues2 = Object.values(refs2);
-  const refs = [...refValues1, ...refValues2];
+  const project = findProject(projects, key);
+  if (project == null) {
+    throw render(404, `Project "${key}" not found.`);
+  }
+  const group = resData?.[0] ?? null;
+  if (group == null) {
+    throw render(404, `Column group ${col_group_id} not found.`);
+  }
 
+  const refs = [...Object.values(refs1), ...Object.values(refs2)];
   const taxaData = await getPrevalentTaxa(fossilsData);
 
-  return { project, resData: resData[0], colData, taxaData, refs };
+  return { project, resData: group, colData, taxaData, refs };
 }

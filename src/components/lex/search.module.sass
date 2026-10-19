@@ -2,6 +2,7 @@
 // homepage search prompt.
 
 @use "~/styles/type"
+@use "~/styles/breakpoints"
 
 .lex-search-results
   max-height: 60vh
@@ -40,6 +41,14 @@
   display: flex
   justify-content: flex-end
 
+// Header search buttons go icon-only on a phone, where the header is crowded.
+.lex-search-control,
+.site-search-prompt
+  @include breakpoints.phone
+    :global(.bp6-button-text),
+    .site-search-hotkey
+      display: none
+
 // The homepage's central call to action.
 .lex-search-prompt
   display: flex
@@ -54,44 +63,16 @@
     max-width: 34em
     text-align: center
 
-// The site search box. Shaped like a text field rather than like a button: it
-// is the page's search, not one action among several, and a field is what a
-// reader looks for. Opening it hands the real input to the omnibar.
+// The site search button. Minimal, since the typing happens in the omnibar.
 .site-search-prompt
-  display: flex
-  align-items: center
-  gap: 0.5em
-  min-width: 15em
-  max-width: 22em
-  padding: 0.4em 0.75em
-  cursor: pointer
-  font: inherit
-  text-align: left
   color: var(--pz-text-subtle-color)
-  background: var(--pz-panel-background-color)
-  border: 1px solid var(--pz-border-color)
-  border-radius: var(--pz-radius-full)
-  transition: border-color 0.15s ease, color 0.15s ease
-  @include type.focus-ring
-
-  &:hover
-    color: var(--pz-text-color)
-    border-color: var(--pz-accent-color)
-
-  // Blueprint's icon, which takes no class of ours: `className` on a component
-  // is a prop, and this module scopes only the classes written in a tag.
-  :global(.bp6-icon)
-    flex: 0 0 auto
-    color: var(--pz-accent-text-color)
-
-  .site-search-label
-    flex: 1 1 auto
-    white-space: nowrap
-    overflow: hidden
-    text-overflow: ellipsis
 
   .site-search-hotkey
-    flex: 0 0 auto
     font-family: var(--pz-font-mono)
     font-size: var(--pz-font-size-sm)
     color: var(--pz-text-subtle-color)
+
+// The omnibar's portal: a stacking context above the sticky headers (100).
+.lex-search-portal
+  position: relative
+  z-index: 200

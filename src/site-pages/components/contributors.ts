@@ -21,16 +21,11 @@ export function ContributorDirectory({ people }) {
     });
   }, [entries, query, role, labOnly]);
 
-  const current = filtered.filter((p) => !isFormer(p));
-  const former = filtered.filter((p) => isFormer(p));
-
-  let formerBlock = null;
-  if (former.length > 0) {
-    formerBlock = h("div.people-group.former", [
-      h("h3.tier-label", "Former members and collaborators"),
-      h("ul.people-list", former.map((p) => h(PersonCard, { key: p.id, person: p }))),
-    ]);
-  }
+  // Current people first, then former members and collaborators.
+  const ordered = [
+    ...filtered.filter((p) => !isFormer(p)),
+    ...filtered.filter((p) => isFormer(p)),
+  ];
 
   return h("div.contributor-directory", [
     h("div.directory-controls", [
@@ -62,8 +57,7 @@ export function ContributorDirectory({ people }) {
         ),
       ]),
     ]),
-    h("ul.people-list", current.map((p) => h(PersonCard, { key: p.id, person: p }))),
-    formerBlock,
+    h("ul.people-list", ordered.map((p) => h(PersonCard, { key: p.id, person: p }))),
   ]);
 }
 
@@ -185,7 +179,9 @@ function PersonCard({ person }) {
     );
   }
 
-  return h("li.person-card", [
+  let cardTag = "li.person-card";
+  if (isFormer(person)) cardTag = "li.person-card.former";
+  return h(cardTag, [
     photo,
     h("div.person-body", [
       nameEl,

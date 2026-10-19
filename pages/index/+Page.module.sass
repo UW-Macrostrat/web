@@ -8,6 +8,9 @@
   flex-direction: column
   gap: var(--pz-section-gap)
 
+  h2
+    @include type.section-heading
+
 // The header. It is the wordmark, the tagline, the beta tag and the search —
 // everything else that used to live here pushed the hero below the fold. Once
 // it sticks, the title shrinks; `.is-stuck` comes from the shared
@@ -38,10 +41,10 @@
 
 .site-lead-container
   display: flex
-  flex-flow: row wrap
-  gap: var(--pz-space-4)
+  flex-flow: column
+  gap: var(--pz-space-6)
   justify-content: space-between
-  align-items: baseline
+  align-items: center
 
 .site-header-inner
   display: flex
@@ -118,7 +121,8 @@
   :global(.search-hint)
     display: none
 
-// The page's thesis, now beneath the hero rather than above it.
+// The page's thesis, beneath the hero; the numbers that used to follow it
+// now sit in the Map and Columns panels, each beside what it counts.
 .site-lead
   margin: 0
   text-align: center
@@ -142,17 +146,78 @@
   background-size: cover
   background-position: center
 
+// ---------------------------------------------------------- entry points
+
+.entry-card
+  // The card every link on this page is: the entry points and the project pages
+  // below them alike. No border — the shadow and the gap between them are
+  // enough to make them boxes.
+
+  // The title runs in: inline, with the description following on the same
+  // baseline, so every card's text starts on its first line.
+  h3
+    display: inline
+    margin: 0 0.8em 0 0
+    font-size: var(--pz-font-size-lg)
+  p
+    display: inline
+    margin: 0
+    font-size: var(--pz-font-size-md)
+    color: var(--pz-text-subtle-color)
+
+.entry-icon
+  vertical-align: text-bottom
+  margin-right: 0.4em
+
+// Six tracks: the two major panels take three each on the first row, the
+// three minor cards two each on the second. One column once a phone can't
+// hold the pair side by side.
+.entry-points
+  display: grid
+  grid-template-columns: repeat(6, minmax(0, 1fr))
+  gap: var(--pz-space-5)
+
+  .entry-card
+    grid-column: span 2
+    margin: 0px
+    border: none
+
+  // The two the page is about: wider, a larger title, and the figures
+  // behind them beneath the text.
+  .entry-card.major
+    grid-column: span 3
+    padding: var(--pz-space-5)
+
+    h3
+      font-size: var(--pz-font-size-xl)
+
+    p
+      font-size: var(--pz-font-size-lg)
+
+  // The main thing to do here, said with a slight outline in the accent color,
+  // not with a button.
+  .entry-card.primary
+    border: 1px solid color-mix(in srgb, var(--pz-accent-color) 40%, transparent)
+
+    &:hover
+      border-color: var(--pz-accent-color)
+
+  @media (max-width: 620px)
+    .entry-card,
+    .entry-card.major
+      grid-column: span 6
+
+
 .stats
   display: flex
-  gap: 1.5em 2.5em
+  gap: var(--pz-space-3) var(--pz-space-6)
   flex-wrap: wrap
   justify-content: center
-  margin-top: calc(-1 * var(--pz-space-3))
+  padding-top: var(--pz-space-4)
 
   .stat
     display: flex
     flex-direction: column
-    align-items: center
 
   .top-stat
     @include type.figure
@@ -160,30 +225,10 @@
   .top-stat-label
     @include type.label
 
-// ---------------------------------------------------------- entry points
-
-.entry-points
-  display: grid
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr))
-  gap: var(--pz-space-3)
-
-  :global(.entry-card)
-    margin: 0
-    h3
-      margin-top: 0
-    p
-      @include type.supporting
-      margin: 0
-
-  .entry-icon
-    vertical-align: text-bottom
-    margin-right: 0.4em
 
 // -------------------------------------------------------------- news
 
 .whats-new
-  h2
-    @include type.section-heading
 
   .news-list
     list-style: none
@@ -213,23 +258,17 @@
 
 .platform-links
   padding-top: var(--pz-space-4)
-  border-top: 2px solid var(--pz-accent-rule-color)
 
-  h2
-    @include type.section-heading
-
-  // The same boxes as the entry points above, on a narrower grid: these are
-  // the quieter half of the page, but they are still the same kind of thing.
+  // The same cards as the minor entry points above, three to a row as they
+  // are, and one column at the same width they drop to.
   .platform-cards
     display: grid
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr))
-    gap: var(--pz-space-3)
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    gap: var(--pz-space-5)
 
-  :global(.platform-card)
-    margin: 0
-    h3
-      margin-top: 0
-      font-size: var(--pz-font-size-md)
-    p
-      @include type.supporting
-      margin: 0
+    .entry-card
+      margin: 0px
+      border: none
+
+    @media (max-width: 620px)
+      grid-template-columns: minmax(0, 1fr)
