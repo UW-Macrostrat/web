@@ -13,10 +13,12 @@ import {
   Identifier,
   MacrostratColumnStateProvider,
   PBDBFossilsColumn,
-  ReferencesField,
   UnitSelectionPopover,
   UnitSelectionStyle,
   columnTypeFromColType,
+  scope as columnScope,
+  selectedUnitElementAtom,
+  useUnitSelection,
 } from "@macrostrat/column-views";
 import {
   useCallback,
@@ -44,8 +46,11 @@ import { ErrorBoundary } from "@macrostrat/ui-components";
 import {
   DataField,
   MacrostratInteractionProvider,
+  Tag,
+  TagSize,
   type MacrostratItemIdentifier,
 } from "@macrostrat/data-components";
+import { ReferenceList } from "~/components/lex/references";
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
 import {
@@ -79,6 +84,7 @@ import {
   useProjectIDs,
 } from "~/components/project-filter";
 import {
+  IN_PROCESS_STATUS,
   InProcessFilterProvider,
   InProcessFilterTag,
   useRevealInProcess,
@@ -114,6 +120,8 @@ const columnPageCapabilities: Partial<LayoutCapabilities> = {
   hasAssistant: true,
   itemName: "Column",
   contentScroll: "page",
+  // The column's details scroll within the sidebar, which keeps to the window
+  fitSidebar: true,
 };
 
 /** A selected unit keeps its color while the rest of the column goes plain */
@@ -148,6 +156,7 @@ export function ColumnPage(props) {
 
 function ColumnPageFrame({
   columnInfo,
+  columnRefs,
   linkPrefix = "/",
   projectID,
   project,
@@ -185,13 +194,12 @@ function ColumnPageFrame({
     wrap: (node) =>
       h(
         ColumnScopeBridge,
-        { status: columnInfo.status },
+        { status: columnInfo.status_code },
         h(ColumnUnitLinks, { columnInfo }, node)
       ),
-    // Active filters sit in a second header row above the column
+    // Filters on the column sit in a second header row above it; those that
+    // only scope the navigation map ride on the map (`ColumnMapFilters`)
     filterBar: h([
-      h(ProjectFilterTag),
-      h(InProcessFilterTag),
       h(TimeFilterTag),
       h(TimeFilterEmptyNotice, { units: columnInfo.units }),
     ]),
@@ -199,6 +207,7 @@ function ColumnPageFrame({
     map: h(ColumnMapPane, { columnInfo, linkPrefix, projectID }),
     assistant: h(ColumnAssistantPane, {
       columnInfo,
+      columnRefs,
       project,
       columnProjects,
       settingsOpen,
@@ -300,44 +309,72 @@ function ColumnContentPane({ columnInfo }) {
           "div.column-view",
           { ref: viewRef, className: viewClassName },
           h(
-            Column,
-            {
-              units,
-              unitComponent: ColoredUnitComponent,
-              unitComponentProps: selectedUnitProps,
-              unconformityLabels: "minimal",
-              collapseSmallUnconformities: true,
-              showTimescale,
-              axisType,
-              // `auto` grain size follows the column type, not the axis
-              columnType: columnTypeFromColType(columnInfo.col_type),
-              grainsize,
-              columnWidth,
-              width,
-              maxInternalColumns,
-              showLabelColumn,
-              hybridScale,
-              pixelScale,
-              targetUnitHeight,
-              t_age: timeWindow.window?.t_age,
-              b_age: timeWindow.window?.b_age,
-              // A margin past an interval selection; none for explicit ages
-              windowPadding: timeWindow.windowPadding,
-              isTransitioning: timeWindow.isAnimating,
-              // Labels re-lay-out every frame otherwise, which is the jank.
-              hideLabelsWhileTransitioning: true,
-              onClickTimescaleInterval: timeWindow.onClickTimescaleInterval,
-              timescaleIntervalStyle: timeWindow.timescaleIntervalStyle,
-              timescaleLevels: timeWindow.timescaleLevels,
-              t_pos,
-              b_pos,
-            },
-            [facet, unitPopover]
+            SelectedUnitToggle,
+            h(
+              Column,
+              {
+                units,
+                unitComponent: ColoredUnitComponent,
+                unitComponentProps: selectedUnitProps,
+                unconformityLabels: "minimal",
+                collapseSmallUnconformities: true,
+                showTimescale,
+                axisType,
+                // `auto` grain size follows the column type, not the axis
+                columnType: columnTypeFromColType(columnInfo.col_type),
+                grainsize,
+                columnWidth,
+                width,
+                maxInternalColumns,
+                showLabelColumn,
+                hybridScale,
+                pixelScale,
+                targetUnitHeight,
+                t_age: timeWindow.window?.t_age,
+                b_age: timeWindow.window?.b_age,
+                // A margin past an interval selection; none for explicit ages
+                windowPadding: timeWindow.windowPadding,
+                isTransitioning: timeWindow.isAnimating,
+                // Labels re-lay-out every frame otherwise, which is the jank.
+                hideLabelsWhileTransitioning: true,
+                onClickTimescaleInterval: timeWindow.onClickTimescaleInterval,
+                timescaleIntervalStyle: timeWindow.timescaleIntervalStyle,
+                timescaleLevels: timeWindow.timescaleLevels,
+                t_pos,
+                b_pos,
+              },
+              [facet, unitPopover]
+            )
           )
         )
       )
     ),
   ]);
+}
+
+/** A second click on the selected unit deselects it. The library reselects
+ * the same unit (a no-op), so the click is caught on its way down when it
+ * lands in the selected unit's group — its fill, pattern and outline — and
+ * never reaches the unit. Modifier clicks pass through untouched. */
+function SelectedUnitToggle({ children }) {
+  const onClickCapture = useDeselectOnRepeatClick();
+  return h("div.selected-unit-toggle", { onClickCapture }, children);
+}
+
+function useDeselectOnRepeatClick() {
+  const [selectedUnit, selectUnit] = useUnitSelection();
+  const element = columnScope.useAtomValue(selectedUnitElementAtom);
+  return useCallback(
+    (evt) => {
+      if (selectedUnit == null || element == null) return;
+      if (evt.metaKey || evt.ctrlKey || evt.shiftKey) return;
+      const group = element.parentElement;
+      if (group == null || !group.contains(evt.target)) return;
+      evt.stopPropagation();
+      selectUnit(null, null);
+    },
+    [selectedUnit, element, selectUnit]
+  );
 }
 
 const UNIT_COLUMN_WIDTH = 300;
@@ -484,7 +521,9 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   const filterProjectIDs = useProjectIDs();
   let mapProject = projectID;
   if (filterProjectIDs !== undefined) {
-    mapProject = projectIDParam(filterProjectIDs) ?? projectID;
+    // Never without the column's own project, which its tag can't remove
+    const scoped = withProject(filterProjectIDs, columnInfo.project_id);
+    mapProject = projectIDParam(scoped) ?? projectID;
   }
   // With neither a route project nor a filter, keep the scope the *list* has:
   // its default is the core-projects composite, and narrowing to this column's
@@ -538,8 +577,31 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
         { title: "Projects" },
         h(ProjectFilterMenu, { inline: true })
       ),
+      filters: h(ColumnMapFilters, { columnInfo }),
     }),
   ]);
+}
+
+/** The filters that decide only which columns the map shows, over the map's
+ * top edge. The column's own project is always in scope, so its tag has no
+ * ×; nor does in-process for a column that is itself in process, which would
+ * turn straight back on (`useRevealInProcess`). */
+function ColumnMapFilters({ columnInfo }) {
+  const inProcess = columnInfo.status_code === IN_PROCESS_STATUS;
+  return h("div.map-filters", [
+    h(ProjectFilterTag, { lockedProjectID: columnInfo.project_id }),
+    h(InProcessFilterTag, { clearable: !inProcess }),
+  ]);
+}
+
+/** A project filter's ids with one more project, unless it's already there.
+ * `null` (the default scope) stays as it is. */
+function withProject(
+  ids: number[] | null,
+  projectID: number | null | undefined
+): number[] | null {
+  if (ids == null || projectID == null || ids.includes(projectID)) return ids;
+  return [...ids, projectID];
 }
 
 /** Whether the pointer press behind the current click carried a modifier key.
@@ -579,6 +641,7 @@ function openCorrelation(colIDs: number[]) {
 
 function ColumnAssistantPane({
   columnInfo,
+  columnRefs,
   project,
   columnProjects,
   settingsOpen,
@@ -627,6 +690,7 @@ function ColumnAssistantPane({
   return h([
     h(ColumnInfoPanel, {
       data: columnInfo,
+      refs: columnRefs,
       project,
       columnProjects,
       onOpenSettings: () => setSettingsOpen(true),
@@ -653,11 +717,21 @@ function UnitDetailsSheet({ units, selectedUnit, onSelectUnit }) {
   );
 }
 
-function ColumnInfoPanel({ data, project, columnProjects, onOpenSettings }) {
+/** The column's details, scrolling on their own beneath the map when the
+ * sidebar runs out of room, over its actions, which stay in view. */
+function ColumnInfoPanel({
+  data,
+  refs,
+  project,
+  columnProjects,
+  onOpenSettings,
+}) {
   const setFacet = useSetFacet();
   return h("div.column-assistant", [
-    h(ColumnBasicInfo, { data, project, columnProjects }),
-    h(ColumnExtData, { columnInfo: data, onSelectFacet: setFacet }),
+    h("div.column-assistant-body", [
+      h(ColumnBasicInfo, { data, refs, project, columnProjects }),
+      h(ColumnExtData, { columnInfo: data, onSelectFacet: setFacet }),
+    ]),
     h("div.column-actions", [
       h(AnchorButton, {
         minimal: true,
@@ -689,6 +763,7 @@ function ColumnInfoPanel({ data, project, columnProjects, onOpenSettings }) {
 
 function ColumnBasicInfo({
   data,
+  refs,
   project,
   columnProjects,
   showTitleRow = false,
@@ -748,13 +823,34 @@ function ColumnBasicInfo({
       },
       [h(Identifier, { id: data.col_group_id })]
     ),
-    h(ReferencesField, {
-      refs: data.refs,
-      inline: false,
-      row: true,
-      className: "column-refs",
-    }),
+    h(ColumnStatusField, { status: data.status_code }),
+    h(ColumnReferencesField, { refs }),
   ]);
+}
+
+/** Whether the column is published ("active") or still being compiled */
+function ColumnStatusField({ status }: { status: string | null | undefined }) {
+  if (status == null) return null;
+  // Colored as on the column list
+  let color: string | undefined = undefined;
+  if (status === IN_PROCESS_STATUS) color = "lightgreen";
+  return h(DataField, {
+    row: true,
+    label: "Status",
+    value: h(Tag, { size: TagSize.Small, name: status, color }),
+  });
+}
+
+/** Compacted the way the lexicon lists them: shortened author lists, titles
+ * that link out in place of printed DOIs and URLs, and parts of one volume
+ * gathered under it. */
+function ColumnReferencesField({ refs }) {
+  if (refs == null || refs.length === 0) return null;
+  return h(
+    DataField,
+    { label: "References", className: "column-refs" },
+    h(ReferenceList, { refs })
+  );
 }
 
 function facetElements(facet: string | null, columnID: number) {

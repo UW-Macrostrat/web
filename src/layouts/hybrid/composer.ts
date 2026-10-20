@@ -15,7 +15,14 @@
 
 import { atom, useAtomValue, useSetAtom, type Atom } from "jotai";
 import classNames from "classnames";
-import type { ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { Button } from "@blueprintjs/core";
 
 import { onDemand } from "~/_utils";
@@ -119,6 +126,8 @@ function ContentShell({
   const fullWidth = isFullWidth(mode as LayoutMode);
   // `panel`: the content fills the scroll region; `page`: it grows with itself.
   const contentScroll = useAtomValue(contentScrollAtom);
+  const { fitSidebar = false } = useAtomValue(capabilitiesAtom);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   let sidebarRegion = null;
   if (sidebar) {
@@ -126,7 +135,7 @@ function ContentShell({
     if (showAssistant) {
       assistantRegion = h("div.sidebar-assistant", assistant);
     }
-    sidebarRegion = h("div.content-sidebar", [
+    sidebarRegion = h("div.content-sidebar", { ref: sidebarRef }, [
       h("div.sidebar-map", [
         map,
         // Shrink to the inset, when the page offers that mode
@@ -165,6 +174,7 @@ function ContentShell({
     "has-sidebar": sidebar,
     "has-inset": inset,
     "full-width": fullWidth,
+    "fit-sidebar": fitSidebar,
   });
 
   const headerRegion = h("header.content-header", [
@@ -186,7 +196,14 @@ function ContentShell({
       h.if(footer != null)("div.content-page-footer", footer),
     ]);
     return h("div.content-shell", { className }, [
-      h(PageScrollBody, { headerRegion, holder, sidebarRegion, insetRegion }),
+      h(PageScrollBody, {
+        headerRegion,
+        holder,
+        sidebarRegion,
+        insetRegion,
+        sidebarRef,
+        fitSidebar: fitSidebar && sidebar,
+      }),
       h(BottomSheetSlot),
     ]);
   }
@@ -203,17 +220,80 @@ function ContentShell({
 /** One tall item: the header and the content's row scroll together, so the
  * header can collapse to its bar as the page title passes under it. The
  * sidebar is a sticky column in the row rather than an overlay. */
-function PageScrollBody({ headerRegion, holder, sidebarRegion, insetRegion }) {
+function PageScrollBody({
+  headerRegion,
+  holder,
+  sidebarRegion,
+  insetRegion,
+  sidebarRef,
+  fitSidebar = false,
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useFitSidebar(scrollRef, sidebarRef, fitSidebar);
+
   let resizeHandle = null;
   if (sidebarRegion != null) {
     resizeHandle = h(ResizeHandle, { edge: "sidebar" });
   }
   return h("div.content-body", [
-    h("div.content-scroll", [
+    h("div.content-scroll", { ref: scrollRef }, [
       headerRegion,
       h("div.content-main", [holder, resizeHandle, sidebarRegion, insetRegion]),
     ]),
   ]);
+}
+
+/** Least height a fitted sidebar keeps, in a window too short for its map */
+const MIN_FITTED_SIDEBAR = 160;
+
+/** `fitSidebar`: the sticky sidebar takes the room from its top edge to the
+ * scroller's foot. That edge rises as the page header collapses into its bar,
+ * so the room is measured on scroll as well as on resize — a height fixed in
+ * CSS could only suit the stuck position, and would cut off the sidebar's
+ * foot at the top of the page. */
+function useFitSidebar(
+  scrollRef: RefObject<HTMLDivElement>,
+  sidebarRef: RefObject<HTMLDivElement>,
+  enabled: boolean
+) {
+  const fit = useCallback(() => {
+    const scroller = scrollRef.current;
+    const sidebar = sidebarRef.current;
+    if (scroller == null || sidebar == null) return;
+    const top =
+      sidebar.getBoundingClientRect().top -
+      scroller.getBoundingClientRect().top;
+    const room = scroller.clientHeight - Math.max(top, 0);
+    sidebar.style.maxHeight = `${Math.max(room, MIN_FITTED_SIDEBAR)}px`;
+  }, []);
+
+  // After every render too: a filter row appearing moves the sidebar down
+  useLayoutEffect(() => {
+    if (enabled) fit();
+  });
+
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const sidebar = sidebarRef.current;
+    if (!enabled || scroller == null || sidebar == null) return;
+    let frame: number | null = null;
+    const schedule = () => {
+      if (frame != null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        fit();
+      });
+    };
+    scroller.addEventListener("scroll", schedule, { passive: true });
+    const observer = new ResizeObserver(schedule);
+    observer.observe(scroller);
+    return () => {
+      scroller.removeEventListener("scroll", schedule);
+      observer.disconnect();
+      if (frame != null) cancelAnimationFrame(frame);
+      sidebar.style.maxHeight = "";
+    };
+  }, [enabled, fit]);
 }
 
 /** Everything below the header scrolls as one, with the scrollbar at the

@@ -5,7 +5,7 @@ import {
   assembleColumnSummary,
   ColumnSummary,
 } from "#/map/map-interface/app-state/columns/utils";
-import { fetchAllProjects, fetchProjectData, getAndUnwrap } from "~/_utils";
+import { fetchAllProjects, fetchProjectData, getAPISuccess } from "~/_utils";
 import { render } from "vike/abort";
 
 export async function data(pageContext) {
@@ -37,6 +37,7 @@ export async function data(pageContext) {
     getData(
       "columns",
       { col_id, project_id: projectID, format: "json", response: "long" },
+      // Whole, for the formatted references beside the data
       (res) => res
     ),
     getData(
@@ -47,17 +48,20 @@ export async function data(pageContext) {
         show_position: true,
         response: "long",
       },
-      (res) => res
+      (res) => res?.data ?? []
     ),
   ]);
 
-  const [project, allProjects, columns, units]: [any, any, any, any] =
+  const [project, allProjects, columnsResponse, units]: [any, any, any, any] =
     responses;
 
+  const columns = columnsResponse?.data ?? [];
   const columnInfo: ColumnSummary = assembleColumnSummary(columns[0], units);
   return {
     project,
     columnInfo,
+    // Formatted citations, which the sidebar compacts the way the lexicon does
+    columnRefs: columnReferences(columns[0]?.refs, columnsResponse?.refs),
     // The column's own project plus any composite project that includes it
     columnProjects: projectsForColumn(allProjects, columnInfo.project_id),
     // The full list, so the shared project filter can resolve its slugs to
@@ -100,10 +104,23 @@ function projectsForColumn(
   return out;
 }
 
+/** The column's references as `{ id, text }`, in the column's own order. The
+ * columns route returns their formatted text beside its data, keyed by id. */
+function columnReferences(
+  refIDs: number[] | null | undefined,
+  refs: Record<string, string> | null | undefined
+) {
+  if (refs == null) return [];
+  const ids = refIDs ?? Object.keys(refs).map(Number);
+  return ids
+    .filter((id) => refs[id] != null)
+    .map((id) => ({ id, text: refs[id] }));
+}
+
 async function getData(
   entity: string,
   args: { col_id: number; project_id: number },
-  unwrapResponse: (res: any) => any[]
+  unwrapResponse: (res: any) => any
 ) {
   /** Fetch column data without knowing if it is an 'in process' column, a priori. This
    * gets around the current limitation that there's no way to request any column data
@@ -114,7 +131,7 @@ async function getData(
     status_code: "active,in process",
   });
 
-  const res = await getAndUnwrap(url);
+  const res = await getAPISuccess(url);
   return unwrapResponse(res);
 }
 

@@ -49,12 +49,18 @@
     margin-bottom: 0.25em
 
 // Floats over the map's top-left corner, clear of the frame's grow/shrink
-// button on the right.
+// button on the right. Anything after the button (active filters) wraps along
+// the top edge beside it.
 .map-settings-overlay
   position: absolute
   top: 0.4em
   left: 0.4em
+  right: 2.8em
   z-index: 2
+  display: flex
+  flex-direction: row
+  align-items: flex-start
+  gap: 0.35em
   pointer-events: none
   font-size: 0.85em
 

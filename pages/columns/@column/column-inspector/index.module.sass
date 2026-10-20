@@ -6,8 +6,9 @@
 .column-page
   --column-background-color: var(--background-color)
   --column-stroke-color: var(--text-color)
-  // Selected units take the link color
-  --selection-overlay-color: var(--pz-link-color)
+  // Selected units take the accent, as the selected column does on the map
+  // (`--column-map-selection-color`, set by the hybrid frame)
+  --selection-overlay-color: var(--pz-accent-color)
 
 // The content slot, in the frame's page-scrolling mode; the frame adds the
 // footer after it.
@@ -27,6 +28,10 @@
   &.unmeasured
     @include breakpoints.phone
       visibility: hidden
+
+// Only listens for clicks; the column lays out as if it weren't there
+.selected-unit-toggle
+  display: contents
 
 /* --------------------------------------------------------------- settings */
 
@@ -104,11 +109,32 @@
   .land
     background-color: rgb(233, 252, 234)
 
+// The map's own filters, beside its settings button (see `ColumnMapFilters`),
+// each group on the overlay background so it reads over the basemap
+.map-filters
+  display: flex
+  flex-wrap: wrap
+  gap: 0.35em
+  min-width: 0
+
+  > *
+    pointer-events: auto
+    padding: 0.1em 0.3em
+    border-radius: var(--pz-radius-md, 4px)
+    background-color: var(--pz-overlay-background-color, var(--translucent-panel-background-color))
+    box-shadow: var(--pz-shadow-md)
+
 
 /* -------------------------------------------------------------- assistant */
 
-// Plain metadata: not a card.
+// Plain metadata: not a card. Its details scroll when the sidebar runs out of
+// room (the frame's `fitSidebar`), over actions that stay in view.
 .column-assistant
+  flex: 0 1 auto
+  min-height: 0
+  display: flex
+  flex-direction: column
+
   h3
     color: var(--secondary-color)
 
@@ -133,8 +159,14 @@
     align-items: baseline
     gap: 0.5em
 
+.column-assistant-body
+  flex: 0 1 auto
+  min-height: 0
+  overflow-y: auto
+
 // One action per row, left-aligned
 .column-actions
+  flex: 0 0 auto
   margin-top: 1em
   display: flex
   flex-direction: column

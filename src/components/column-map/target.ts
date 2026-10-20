@@ -135,6 +135,8 @@ interface ColumnMapSlotProps extends Omit<ColumnMapTarget, "key"> {
   className?: string;
   /** Extra sections for the map settings popover */
   settings?: any;
+  /** Active filters on what the map shows, along its top edge */
+  filters?: any;
 }
 
 /**
@@ -153,6 +155,7 @@ export function ColumnMapSlot(props: ColumnMapSlotProps) {
     onSelectColumn,
     className,
     settings,
+    filters,
   } = props;
   const setTarget = useSetAtom(columnMapTargetAtom, { store: columnMapStore });
   const ref = useRef<HTMLDivElement | null>(null);
@@ -198,6 +201,6 @@ export function ColumnMapSlot(props: ColumnMapSlotProps) {
     // Kept free of React children: the shared map node is appended here
     // imperatively, so React must not manage siblings inside it.
     h("div.map-mount", { ref }),
-    h(MapSettingsOverlay, { sections: settings }),
+    h(MapSettingsOverlay, { sections: settings }, filters),
   ]);
 }

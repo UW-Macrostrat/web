@@ -123,7 +123,13 @@ export async function fetchProjectData(project: string | number) {
 }
 
 export async function getAndUnwrap<T>(url: string): Promise<T> {
+  const res = await getAPISuccess(url);
+  return res?.data ?? null;
+}
+
+/** The whole `success` body, for what rides beside `data` (e.g. `refs`) */
+export async function getAPISuccess(url: string): Promise<any> {
   const res = await fetchWrapper(url);
   const res1 = await res.json();
-  return res1.success?.data ?? null;
+  return res1.success ?? null;
 }

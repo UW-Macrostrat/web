@@ -362,6 +362,12 @@
   &:has(.header-filters:not(:empty)) .content-sidebar
     top: calc(var(--hybrid-bar-height) + var(--hybrid-filter-bar-height) + 1em)
 
+  // `fitSidebar`: held to the room below it (measured, see `useFitSidebar`),
+  // its padding inside that height. The assistant shrinks to what the map and
+  // links leave, and scrolls — or lets a card in it scroll its own body.
+  &.fit-sidebar .content-sidebar
+    box-sizing: border-box
+
   // The content, then (in content-only) the assistant, then the footer
   .content-panel-holder
     display: flex

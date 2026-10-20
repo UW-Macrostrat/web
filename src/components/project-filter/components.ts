@@ -28,24 +28,43 @@ export interface ProjectFilterTagProps {
   className?: string;
   size?: TagSize;
   clearable?: boolean;
+  /** A project that is always in scope (a column page's own project): its tag
+   * has no ×, and leads the others when the selection leaves it out. */
+  lockedProjectID?: number | null;
 }
 
 /** The selected projects as tags; nothing when the default (core columns)
  * applies. Each tag's × removes just that project. */
 export function ProjectFilterTag(props: ProjectFilterTagProps) {
-  const { className, size = TagSize.Small, clearable = true } = props;
+  const {
+    className,
+    size = TagSize.Small,
+    clearable = true,
+    lockedProjectID,
+  } = props;
   const { projects, removeProject } = useProjectFilter();
   const defs = useProjectDefs();
   if (projects.length === 0) return null;
 
+  const isLocked = (slug: string) =>
+    lockedProjectID != null && projectIDOf(defs, slug) === lockedProjectID;
+  let shown = projects;
+  if (lockedProjectID != null && !projects.some(isLocked)) {
+    const locked = projectSlug(findProject(defs, lockedProjectID));
+    shown = [locked ?? lockedProjectID.toString(), ...projects];
+  }
+
   return h(
     "span.project-filter-tags",
     { className },
-    projects.map((slug) => {
+    shown.map((slug) => {
       const def = findProject(defs, slug);
-      return h("span.project-filter-tag", { key: slug }, [
+      const locked = isLocked(slug);
+      let title: string | undefined = undefined;
+      if (locked) title = "Always in scope here";
+      return h("span.project-filter-tag", { key: slug, title }, [
         h(Tag, { size, name: def?.project ?? slug, details: "project" }),
-        h.if(clearable)(Button, {
+        h.if(clearable && !locked)(Button, {
           className: "clear-button",
           icon: "cross",
           minimal: true,
@@ -56,6 +75,15 @@ export function ProjectFilterTag(props: ProjectFilterTagProps) {
       ]);
     })
   );
+}
+
+/** A filter entry's project id, from its definition or the entry itself */
+function projectIDOf(defs: ProjectDef[] | null, slug: string): number | null {
+  const def = findProject(defs, slug);
+  if (def != null) return def.project_id;
+  const num = parseInt(slug, 10);
+  if (Number.isFinite(num) && String(num) === slug) return num;
+  return null;
 }
 
 /** Every project as a checkable menu; pick one or several. The first entry
