@@ -16,9 +16,6 @@ import {
   UnitSelectionPopover,
   UnitSelectionStyle,
   columnTypeFromColType,
-  scope as columnScope,
-  selectedUnitElementAtom,
-  useUnitSelection,
 } from "@macrostrat/column-views";
 import {
   useCallback,
@@ -46,11 +43,11 @@ import { ErrorBoundary } from "@macrostrat/ui-components";
 import {
   DataField,
   MacrostratInteractionProvider,
+  ReferenceList,
   Tag,
   TagSize,
   type MacrostratItemIdentifier,
 } from "@macrostrat/data-components";
-import { ReferenceList } from "~/components/lex/references";
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
 import {
@@ -309,72 +306,44 @@ function ColumnContentPane({ columnInfo }) {
           "div.column-view",
           { ref: viewRef, className: viewClassName },
           h(
-            SelectedUnitToggle,
-            h(
-              Column,
-              {
-                units,
-                unitComponent: ColoredUnitComponent,
-                unitComponentProps: selectedUnitProps,
-                unconformityLabels: "minimal",
-                collapseSmallUnconformities: true,
-                showTimescale,
-                axisType,
-                // `auto` grain size follows the column type, not the axis
-                columnType: columnTypeFromColType(columnInfo.col_type),
-                grainsize,
-                columnWidth,
-                width,
-                maxInternalColumns,
-                showLabelColumn,
-                hybridScale,
-                pixelScale,
-                targetUnitHeight,
-                t_age: timeWindow.window?.t_age,
-                b_age: timeWindow.window?.b_age,
-                // A margin past an interval selection; none for explicit ages
-                windowPadding: timeWindow.windowPadding,
-                isTransitioning: timeWindow.isAnimating,
-                // Labels re-lay-out every frame otherwise, which is the jank.
-                hideLabelsWhileTransitioning: true,
-                onClickTimescaleInterval: timeWindow.onClickTimescaleInterval,
-                timescaleIntervalStyle: timeWindow.timescaleIntervalStyle,
-                timescaleLevels: timeWindow.timescaleLevels,
-                t_pos,
-                b_pos,
-              },
-              [facet, unitPopover]
-            )
+            Column,
+            {
+              units,
+              unitComponent: ColoredUnitComponent,
+              unitComponentProps: selectedUnitProps,
+              unconformityLabels: "minimal",
+              collapseSmallUnconformities: true,
+              showTimescale,
+              axisType,
+              // `auto` grain size follows the column type, not the axis
+              columnType: columnTypeFromColType(columnInfo.col_type),
+              grainsize,
+              columnWidth,
+              width,
+              maxInternalColumns,
+              showLabelColumn,
+              hybridScale,
+              pixelScale,
+              targetUnitHeight,
+              t_age: timeWindow.window?.t_age,
+              b_age: timeWindow.window?.b_age,
+              // A margin past an interval selection; none for explicit ages
+              windowPadding: timeWindow.windowPadding,
+              isTransitioning: timeWindow.isAnimating,
+              // Labels re-lay-out every frame otherwise, which is the jank.
+              hideLabelsWhileTransitioning: true,
+              onClickTimescaleInterval: timeWindow.onClickTimescaleInterval,
+              timescaleIntervalStyle: timeWindow.timescaleIntervalStyle,
+              timescaleLevels: timeWindow.timescaleLevels,
+              t_pos,
+              b_pos,
+            },
+            [facet, unitPopover]
           )
         )
       )
     ),
   ]);
-}
-
-/** A second click on the selected unit deselects it. The library reselects
- * the same unit (a no-op), so the click is caught on its way down when it
- * lands in the selected unit's group — its fill, pattern and outline — and
- * never reaches the unit. Modifier clicks pass through untouched. */
-function SelectedUnitToggle({ children }) {
-  const onClickCapture = useDeselectOnRepeatClick();
-  return h("div.selected-unit-toggle", { onClickCapture }, children);
-}
-
-function useDeselectOnRepeatClick() {
-  const [selectedUnit, selectUnit] = useUnitSelection();
-  const element = columnScope.useAtomValue(selectedUnitElementAtom);
-  return useCallback(
-    (evt) => {
-      if (selectedUnit == null || element == null) return;
-      if (evt.metaKey || evt.ctrlKey || evt.shiftKey) return;
-      const group = element.parentElement;
-      if (group == null || !group.contains(evt.target)) return;
-      evt.stopPropagation();
-      selectUnit(null, null);
-    },
-    [selectedUnit, element, selectUnit]
-  );
 }
 
 const UNIT_COLUMN_WIDTH = 300;
