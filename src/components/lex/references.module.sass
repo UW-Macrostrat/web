@@ -1,0 +1,29 @@
+// An item's references (see `./references.ts`)
+
+@use "~/styles/type"
+
+// The heading with a quiet count beside it, and the list from the API at right
+.references-header
+  display: flex
+  align-items: baseline
+  gap: 0.6em
+
+  h3
+    @include type.section-heading
+
+  .spacer
+    flex-grow: 1
+
+.reference-count
+  font-size: var(--pz-font-size-sm)
+  font-family: var(--pz-font-sans)
+  color: var(--pz-secondary-color)
+
+.reference-downloads
+  display: flex
+  gap: 0.8em
+  font-size: var(--pz-font-size-sm)
+
+// The list (`ReferenceList`, styled by the library) below the rule
+.reference-list
+  margin-top: 1em

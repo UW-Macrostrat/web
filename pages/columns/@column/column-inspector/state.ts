@@ -393,17 +393,32 @@ function AllSurfacesSwitch() {
   });
 }
 
-function UnitPopoverSwitch() {
+const unitDetailsOptions = [
+  { label: "Sidebar", value: "sidebar" },
+  { label: "Popover", value: "popover" },
+];
+
+/** Where a selected unit's details show: the sidebar panel beneath the map
+ * (the default, kept out of the URL) or a popover beside the unit, as in the
+ * column-views stories' column page and unit-selection popover. */
+function UnitDetailsControl() {
   const [value, setValue] = useAtom(unitDetailsAtom);
-  return h(Switch, {
-    label: "Unit details in a popover",
-    checked: value === "popover",
-    onChange: (evt) => {
-      let next = null;
-      if ((evt.target as HTMLInputElement).checked) next = "popover";
-      setValue(next);
-    },
-  });
+  return h(
+    FormGroup,
+    { label: "Unit details", inline: true },
+    h(ControlGroup, { fill: true }, [
+      h(HTMLSelect, {
+        options: unitDetailsOptions,
+        value: value ?? "sidebar",
+        onChange: (evt) => {
+          let next = evt.target.value;
+          if (next === "sidebar") next = null;
+          setValue(next);
+        },
+      }),
+      h(ClearButton, { value, setValue }),
+    ])
+  );
 }
 
 const h = hyperStyled(styles);
@@ -501,7 +516,7 @@ export function ColumnSettingsPanel() {
   return h("div.column-settings-panel", [
     h(AxisTypeControl),
     h(FacetControl),
-    h(UnitPopoverSwitch),
+    h(UnitDetailsControl),
     h(GrainsizeControl),
     // What the navigation map shows, rather than how the column is drawn — but
     // it belongs with the other view controls rather than floating over the map

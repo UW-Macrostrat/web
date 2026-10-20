@@ -133,6 +133,10 @@ export interface LayoutCapabilities {
   itemName: string;
   /** Scrolling model of the content shell (see `ContentScrollMode`). */
   contentScroll: ContentScrollMode;
+  /** With `page` scrolling, hold the sticky sidebar to the window's height, so
+   * a long assistant scrolls within it (the page's own cards scroll their
+   * bodies) rather than with the page, and its foot is always in reach. */
+  fitSidebar?: boolean;
   /** CSS widths of the content measure and the sidebar beside it, when a page
    * wants a different split from the frame's default. */
   contentWidth?: string;

@@ -13,7 +13,6 @@ import {
   Identifier,
   MacrostratColumnStateProvider,
   PBDBFossilsColumn,
-  ReferencesField,
   UnitSelectionPopover,
   UnitSelectionStyle,
   columnTypeFromColType,
@@ -44,6 +43,9 @@ import { ErrorBoundary } from "@macrostrat/ui-components";
 import {
   DataField,
   MacrostratInteractionProvider,
+  ReferenceList,
+  Tag,
+  TagSize,
   type MacrostratItemIdentifier,
 } from "@macrostrat/data-components";
 import { SGPMeasurementsColumn } from "./sgp-facet";
@@ -79,6 +81,7 @@ import {
   useProjectIDs,
 } from "~/components/project-filter";
 import {
+  IN_PROCESS_STATUS,
   InProcessFilterProvider,
   InProcessFilterTag,
   useRevealInProcess,
@@ -114,6 +117,8 @@ const columnPageCapabilities: Partial<LayoutCapabilities> = {
   hasAssistant: true,
   itemName: "Column",
   contentScroll: "page",
+  // The column's details scroll within the sidebar, which keeps to the window
+  fitSidebar: true,
 };
 
 /** A selected unit keeps its color while the rest of the column goes plain */
@@ -148,6 +153,7 @@ export function ColumnPage(props) {
 
 function ColumnPageFrame({
   columnInfo,
+  columnRefs,
   linkPrefix = "/",
   projectID,
   project,
@@ -185,13 +191,12 @@ function ColumnPageFrame({
     wrap: (node) =>
       h(
         ColumnScopeBridge,
-        { status: columnInfo.status },
+        { status: columnInfo.status_code },
         h(ColumnUnitLinks, { columnInfo }, node)
       ),
-    // Active filters sit in a second header row above the column
+    // Filters on the column sit in a second header row above it; those that
+    // only scope the navigation map ride on the map (`ColumnMapFilters`)
     filterBar: h([
-      h(ProjectFilterTag),
-      h(InProcessFilterTag),
       h(TimeFilterTag),
       h(TimeFilterEmptyNotice, { units: columnInfo.units }),
     ]),
@@ -199,6 +204,7 @@ function ColumnPageFrame({
     map: h(ColumnMapPane, { columnInfo, linkPrefix, projectID }),
     assistant: h(ColumnAssistantPane, {
       columnInfo,
+      columnRefs,
       project,
       columnProjects,
       settingsOpen,
@@ -484,7 +490,9 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
   const filterProjectIDs = useProjectIDs();
   let mapProject = projectID;
   if (filterProjectIDs !== undefined) {
-    mapProject = projectIDParam(filterProjectIDs) ?? projectID;
+    // Never without the column's own project, which its tag can't remove
+    const scoped = withProject(filterProjectIDs, columnInfo.project_id);
+    mapProject = projectIDParam(scoped) ?? projectID;
   }
   // With neither a route project nor a filter, keep the scope the *list* has:
   // its default is the core-projects composite, and narrowing to this column's
@@ -538,8 +546,31 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
         { title: "Projects" },
         h(ProjectFilterMenu, { inline: true })
       ),
+      filters: h(ColumnMapFilters, { columnInfo }),
     }),
   ]);
+}
+
+/** The filters that decide only which columns the map shows, over the map's
+ * top edge. The column's own project is always in scope, so its tag has no
+ * ×; nor does in-process for a column that is itself in process, which would
+ * turn straight back on (`useRevealInProcess`). */
+function ColumnMapFilters({ columnInfo }) {
+  const inProcess = columnInfo.status_code === IN_PROCESS_STATUS;
+  return h("div.map-filters", [
+    h(ProjectFilterTag, { lockedProjectID: columnInfo.project_id }),
+    h(InProcessFilterTag, { clearable: !inProcess }),
+  ]);
+}
+
+/** A project filter's ids with one more project, unless it's already there.
+ * `null` (the default scope) stays as it is. */
+function withProject(
+  ids: number[] | null,
+  projectID: number | null | undefined
+): number[] | null {
+  if (ids == null || projectID == null || ids.includes(projectID)) return ids;
+  return [...ids, projectID];
 }
 
 /** Whether the pointer press behind the current click carried a modifier key.
@@ -579,6 +610,7 @@ function openCorrelation(colIDs: number[]) {
 
 function ColumnAssistantPane({
   columnInfo,
+  columnRefs,
   project,
   columnProjects,
   settingsOpen,
@@ -627,6 +659,7 @@ function ColumnAssistantPane({
   return h([
     h(ColumnInfoPanel, {
       data: columnInfo,
+      refs: columnRefs,
       project,
       columnProjects,
       onOpenSettings: () => setSettingsOpen(true),
@@ -653,11 +686,21 @@ function UnitDetailsSheet({ units, selectedUnit, onSelectUnit }) {
   );
 }
 
-function ColumnInfoPanel({ data, project, columnProjects, onOpenSettings }) {
+/** The column's details, scrolling on their own beneath the map when the
+ * sidebar runs out of room, over its actions, which stay in view. */
+function ColumnInfoPanel({
+  data,
+  refs,
+  project,
+  columnProjects,
+  onOpenSettings,
+}) {
   const setFacet = useSetFacet();
   return h("div.column-assistant", [
-    h(ColumnBasicInfo, { data, project, columnProjects }),
-    h(ColumnExtData, { columnInfo: data, onSelectFacet: setFacet }),
+    h("div.column-assistant-body", [
+      h(ColumnBasicInfo, { data, refs, project, columnProjects }),
+      h(ColumnExtData, { columnInfo: data, onSelectFacet: setFacet }),
+    ]),
     h("div.column-actions", [
       h(AnchorButton, {
         minimal: true,
@@ -689,6 +732,7 @@ function ColumnInfoPanel({ data, project, columnProjects, onOpenSettings }) {
 
 function ColumnBasicInfo({
   data,
+  refs,
   project,
   columnProjects,
   showTitleRow = false,
@@ -748,13 +792,34 @@ function ColumnBasicInfo({
       },
       [h(Identifier, { id: data.col_group_id })]
     ),
-    h(ReferencesField, {
-      refs: data.refs,
-      inline: false,
-      row: true,
-      className: "column-refs",
-    }),
+    h(ColumnStatusField, { status: data.status_code }),
+    h(ColumnReferencesField, { refs }),
   ]);
+}
+
+/** Whether the column is published ("active") or still being compiled */
+function ColumnStatusField({ status }: { status: string | null | undefined }) {
+  if (status == null) return null;
+  // Colored as on the column list
+  let color: string | undefined = undefined;
+  if (status === IN_PROCESS_STATUS) color = "lightgreen";
+  return h(DataField, {
+    row: true,
+    label: "Status",
+    value: h(Tag, { size: TagSize.Small, name: status, color }),
+  });
+}
+
+/** Compacted the way the lexicon lists them: shortened author lists, titles
+ * that link out in place of printed DOIs and URLs, and parts of one volume
+ * gathered under it. */
+function ColumnReferencesField({ refs }) {
+  if (refs == null || refs.length === 0) return null;
+  return h(
+    DataField,
+    { label: "References", className: "column-refs" },
+    h(ReferenceList, { refs })
+  );
 }
 
 function facetElements(facet: string | null, columnID: number) {

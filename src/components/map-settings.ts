@@ -163,16 +163,19 @@ export function MapSettingsSection({
 }
 
 /** The settings button, floating over an inset map's top edge rather than
- * taking a strip beneath it. */
+ * taking a strip beneath it. Children (active filters on what the map shows)
+ * follow it along that edge. */
 export function MapSettingsOverlay({
   settings,
   sections,
+  children,
 }: {
   settings?: ReactNode;
   sections?: ReactNode;
+  children?: ReactNode;
 }) {
-  return h(
-    "div.map-settings-overlay",
-    h(MapSettingsButton, { sections, iconOnly: true }, settings)
-  );
+  return h("div.map-settings-overlay", [
+    h(MapSettingsButton, { sections, iconOnly: true }, settings),
+    children,
+  ]);
 }
