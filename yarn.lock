@@ -3134,6 +3134,7 @@ __metadata:
     "@visx/scale": "npm:^2.2.2"
     "@visx/shape": "npm:^3.12.0"
     "@vitejs/plugin-react": "npm:^6.1.2"
+    "@xterm/xterm": "npm:^5.5.0"
     "@yarnpkg/sdks": "npm:^3.1.0"
     allotment: "npm:^1.20.2"
     axios: "npm:^1.14.0"
@@ -7515,6 +7516,13 @@ __metadata:
     oxc-transform-react:
       optional: true
   checksum: 10c0/5c49e9098455e40662c60e7e3daf81088f8f3dc94dbd55746c310fc08a47962321c432dab202d5c240c91bf951c6a62ea64784b183e7ed47e6f9378d6e00e565
+  languageName: node
+  linkType: hard
+
+"@xterm/xterm@npm:^5.5.0":
+  version: 5.5.0
+  resolution: "@xterm/xterm@npm:5.5.0"
+  checksum: 10c0/358801feece58617d777b2783bec68dac1f52f736da3b0317f71a34f4e25431fb0b1920244f678b8d673f797145b4858c2a5ccb463a4a6df7c10c9093f1c9267
   languageName: node
   linkType: hard
 

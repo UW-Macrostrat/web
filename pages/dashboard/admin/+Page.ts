@@ -91,6 +91,12 @@ export function Page() {
 
 const adminTools = [
   {
+    href: "/dashboard/admin/tasks",
+    text: "Task runner",
+    description:
+      "topology updates and other maintenance on the worker, with live output",
+  },
+  {
     href: "/dashboard/admin/cache",
     text: "Cache management",
     description: "flush the tile cache",

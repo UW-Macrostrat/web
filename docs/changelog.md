@@ -9,6 +9,12 @@ a single interface are recorded in that interface's own changelog, such as the
 [map interface changelog](map/changelog.md); the map's 4.x releases predate this
 file and are recorded only there.
 
+## Unreleased
+
+- `/dashboard/admin/tasks` runs management tasks (topology updates first) on the
+  worker, unattended, with their terminal output streamed live and a cancel that
+  ends a run like Ctrl-C. Admin only; needs an api_v3 with `/tasks`.
+
 ## 5.4.1
 
 _October 2026_
@@ -44,8 +50,8 @@ _October 2026_
 ### Access
 
 - Creating a column (`/columns/new`) requires an authorized account.
-- Integration pages and the globe preview appear only outside production, as
-  set by `MACROSTRAT_ENV`.
+- Integration pages and the globe preview appear only outside production, as set
+  by `MACROSTRAT_ENV`.
 
 ### Operations
 
@@ -98,7 +104,8 @@ _October 2026_
 - A time filter on column and correlation pages.
 - Column editor at `/columns/<id>/edit` and `/columns/new`: metadata, location,
   units, facies and grain size.
-- Upload a column file from `/columns/new`, with a dry-run preview in the editor.
+- Upload a column file from `/columns/new`, with a dry-run preview in the
+  editor.
 
 ### Lexicon
 
