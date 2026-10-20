@@ -80,6 +80,19 @@ function describeDetail(detail: any): string {
   return JSON.stringify(detail);
 }
 
+let catalog: Promise<TaskInfo[]> | null = null;
+
+/** The catalog changes only with a deploy, so pages share one fetch of it. */
+export function fetchCatalog(): Promise<TaskInfo[]> {
+  if (catalog == null) {
+    catalog = fetchTasks();
+    catalog.catch(() => {
+      catalog = null;
+    });
+  }
+  return catalog;
+}
+
 export async function fetchTasks(): Promise<TaskInfo[]> {
   const response = await fetch(tasksPrefix, { credentials: "include" });
   if (response.status === 404) throw new TaskServiceUnavailable();
@@ -120,6 +133,12 @@ export function runOutputURL(id: string): string {
   return `${tasksPrefix}/runs/${id}/output`;
 }
 
-export function runURL(id: string): string {
-  return `/dashboard/admin/tasks/${id}`;
+export const tasksURL = "/dashboard/admin/tasks";
+
+export function taskURL(name: string): string {
+  return `${tasksURL}/${name}`;
+}
+
+export function runURL(run: Pick<Run, "task" | "id">): string {
+  return `${taskURL(run.task)}/${run.id}`;
 }

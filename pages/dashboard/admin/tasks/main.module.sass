@@ -24,19 +24,11 @@
     grid-template-columns: repeat(auto-fit, minmax(20em, 1fr))
     gap: 1em
 
-  .task-card
-    display: flex
-    flex-direction: column
-    gap: 0.5em
-    h3
-      margin: 0
-      font-size: 1.05em
-    p
-      margin: 0
-      flex: 1
-    .task-name
-      font-family: var(--pz-monospace-font, monospace)
-      font-size: 0.85em
+  .task-description
+    margin: 0 0 0.5em
+  .task-name
+    font-family: var(--pz-monospace-font, monospace)
+    font-size: 0.85em
 
   .runs-table
     width: 100%
@@ -46,21 +38,38 @@
       white-space: nowrap
       text-align: right
 
-  .run-header
+  .task-panel
+    margin-bottom: 1em
+    .schema-form
+      max-width: 40em
+
+  .panel-footer
     display: flex
     gap: 0.75em
     align-items: center
     flex-wrap: wrap
-    margin-bottom: 0.5em
-    h2
-      margin: 0
+    margin-top: 0.75em
+
+  .run-status
+    display: flex
+    gap: 0.75em
+    align-items: center
+    flex: 1
+    flex-wrap: wrap
+    .run-details
+      font-variant-numeric: tabular-nums
     .run-actions
       margin-left: auto
       display: flex
       gap: 0.5em
 
-  .run-fields
-    margin-bottom: 1em
+  .output-placeholder
+    border: 1px dashed var(--pz-border-color)
+    border-radius: 4px
+    padding: 2em 1em
+    text-align: center
+    p
+      margin: 0.25em 0
 
   .run-json
     margin: 0 0 1em

@@ -17,6 +17,7 @@ import {
   type Run,
   type RunState,
   runURL,
+  taskURL,
 } from "./api";
 import styles from "./main.module.sass";
 
@@ -141,7 +142,7 @@ function RunRow({
     cancel = h(CancelButton, { run, onDone: onChange, minimal: true });
   }
   return h("tr", [
-    h("td", h("a", { href: runURL(run.id) }, run.task)),
+    h("td", h("a", { href: taskURL(run.task) }, run.task)),
     h("td", h(StateTag, { state: run.state })),
     h("td", run.requested_by_name ?? ""),
     h("td", formatDateTime(run.started_on ?? run.created_on)),
@@ -149,7 +150,7 @@ function RunRow({
     h("td.actions", [
       h(
         AnchorButton,
-        { href: runURL(run.id), icon: "console", minimal: true, small: true },
+        { href: runURL(run), icon: "console", minimal: true, small: true },
         "Output"
       ),
       cancel,

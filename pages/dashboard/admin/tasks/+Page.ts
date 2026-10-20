@@ -1,30 +1,20 @@
 /** Management tasks: run `topo update` and its relatives on the worker,
  * unattended, with live output — never a shell. The catalog and the runs
- * come from api_v3's admin-gated `/tasks`; a run opens its own page.
+ * come from api_v3's admin-gated `/tasks`; each task opens its own page.
  */
 import hyper from "@macrostrat/hyper";
-import {
-  Button,
-  Callout,
-  Card,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Intent,
-} from "@blueprintjs/core";
+import { Callout, Intent } from "@blueprintjs/core";
 import { useAuth } from "@macrostrat/form-components";
 import { type ReactNode, useEffect, useState } from "react";
-import { navigate } from "vike/client/router";
+import { LinkCard } from "~/components";
 import { isDegraded } from "~/components/auth";
 import {
-  fetchTasks,
+  fetchCatalog,
   isLive,
-  runURL,
-  startRun,
   type TaskInfo,
+  taskURL,
   TaskServiceUnavailable,
 } from "./api";
-import { defaultValues, SchemaForm } from "./schema-form";
 import { RunsTable, useNow, useRuns } from "./runs";
 import styles from "./main.module.sass";
 
@@ -48,15 +38,7 @@ export function Page() {
   }
 
   return h("div.tasks-page", [
-    h(
-      Section,
-      {
-        title: "Tasks",
-        description:
-          "Each task runs on the worker with its terminal output streamed here. One run of a task at a time.",
-      },
-      [h(Catalog, { catalog, onStarted: refresh })]
-    ),
+    h(Catalog, { catalog }),
     h(Section, { title: "Runs" }, [
       h.if(runsError != null)("p.error", runsError),
       h(RunsTable, { runs, now, onChange: refresh }),
@@ -77,7 +59,7 @@ function useCatalog(): CatalogState {
     unavailable: false,
   });
   useEffect(() => {
-    fetchTasks()
+    fetchCatalog()
       .then((tasks) => setState({ tasks, error: null, unavailable: false }))
       .catch((e) => {
         const unavailable = e instanceof TaskServiceUnavailable;
@@ -87,13 +69,7 @@ function useCatalog(): CatalogState {
   return state;
 }
 
-function Catalog({
-  catalog,
-  onStarted,
-}: {
-  catalog: CatalogState;
-  onStarted(): void;
-}) {
+function Catalog({ catalog }: { catalog: CatalogState }) {
   if (catalog.unavailable) {
     return h(
       Callout,
@@ -105,93 +81,19 @@ function Catalog({
   if (catalog.tasks == null) return h("p.muted", "Loading…");
   return h(
     "div.task-cards",
-    catalog.tasks.map((task) =>
-      h(TaskCard, { key: task.name, task, onStarted })
-    )
+    catalog.tasks.map((task) => h(TaskCard, { key: task.name, task }))
   );
 }
 
-function TaskCard({ task, onStarted }: { task: TaskInfo; onStarted(): void }) {
-  const [isOpen, setOpen] = useState(false);
-  return h(Card, { className: "task-card" }, [
-    h("h3", task.title),
-    h("span.task-name.muted", task.name),
-    h("p", task.description),
-    h(
-      Button,
-      { icon: "play", intent: Intent.PRIMARY, onClick: () => setOpen(true) },
-      "Run…"
-    ),
-    h(RunDialog, {
-      task,
-      isOpen,
-      onClose: () => setOpen(false),
-      onStarted,
-    }),
-  ]);
-}
-
-function RunDialog({
-  task,
-  isOpen,
-  onClose,
-  onStarted,
-}: {
-  task: TaskInfo;
-  isOpen: boolean;
-  onClose(): void;
-  onStarted(): void;
-}) {
-  const [values, setValues] = useState(() => defaultValues(task.params_schema));
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function submit() {
-    setBusy(true);
-    setError(null);
-    try {
-      const run = await startRun(task.name, values);
-      onStarted();
-      onClose();
-      navigate(runURL(run.id));
-    } catch (e: any) {
-      setError(e?.message ?? "Could not start the run");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  let errorNode: ReactNode = null;
-  if (error != null) {
-    errorNode = h(Callout, { intent: Intent.DANGER }, error);
-  }
-
-  return h(Dialog, { isOpen, onClose, title: task.title, icon: "play" }, [
-    h(DialogBody, [
-      h("p.muted", task.description),
-      h(SchemaForm, {
-        schema: task.params_schema,
-        values,
-        onChange: setValues,
-      }),
-      errorNode,
-    ]),
-    h(DialogFooter, {
-      actions: h([
-        h(Button, { onClick: onClose }, "Cancel"),
-        h(
-          Button,
-          {
-            intent: Intent.PRIMARY,
-            icon: "play",
-            loading: busy,
-            onClick: submit,
-          },
-          "Start"
-        ),
-      ]),
-    }),
-  ]);
+function TaskCard({ task }: { task: TaskInfo }) {
+  return h(
+    LinkCard,
+    { href: taskURL(task.name), title: task.title, density: "list" },
+    [
+      h("p.task-description", task.description),
+      h("span.task-name.muted", task.name),
+    ]
+  );
 }
 
 function Section({
