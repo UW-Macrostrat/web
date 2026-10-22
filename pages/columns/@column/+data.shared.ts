@@ -7,6 +7,7 @@ import {
 } from "#/map/map-interface/app-state/columns/utils";
 import { fetchAllProjects, fetchProjectData, getAPISuccess } from "~/_utils";
 import { render } from "vike/abort";
+import { assembleColumnReferences } from "./references";
 
 export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
@@ -60,8 +61,13 @@ export async function data(pageContext) {
   return {
     project,
     columnInfo,
-    // Formatted citations, which the sidebar compacts the way the lexicon does
-    columnRefs: columnReferences(columns[0]?.refs, columnsResponse?.refs),
+    // Formatted citations, which the sidebar compacts the way the lexicon does,
+    // and those cited with a verb or at locators
+    columnRefs: assembleColumnReferences(
+      columns[0]?.refs,
+      columnsResponse?.refs,
+      columns[0]?.refs_expanded
+    ),
     // The column's own project plus any composite project that includes it
     columnProjects: projectsForColumn(allProjects, columnInfo.project_id),
     // The full list, so the shared project filter can resolve its slugs to
@@ -102,19 +108,6 @@ function projectsForColumn(
     }
   }
   return out;
-}
-
-/** The column's references as `{ id, text }`, in the column's own order. The
- * columns route returns their formatted text beside its data, keyed by id. */
-function columnReferences(
-  refIDs: number[] | null | undefined,
-  refs: Record<string, string> | null | undefined
-) {
-  if (refs == null) return [];
-  const ids = refIDs ?? Object.keys(refs).map(Number);
-  return ids
-    .filter((id) => refs[id] != null)
-    .map((id) => ({ id, text: refs[id] }));
 }
 
 async function getData(

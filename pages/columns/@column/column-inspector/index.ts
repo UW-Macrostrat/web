@@ -102,6 +102,12 @@ import {
   useTimeFilterWindow,
 } from "~/components/time-filter";
 
+import type {
+  ColumnReferences,
+  LocatedReference,
+  Locator,
+} from "../references";
+
 import h from "./index.module.sass";
 
 /** The column page never draws a selection of its own, only the current
@@ -812,14 +818,49 @@ function ColumnStatusField({ status }: { status: string | null | undefined }) {
 
 /** Compacted the way the lexicon lists them: shortened author lists, titles
  * that link out in place of printed DOIs and URLs, and parts of one volume
- * gathered under it. */
-function ColumnReferencesField({ refs }) {
-  if (refs == null || refs.length === 0) return null;
-  return h(
-    DataField,
-    { label: "References", className: "column-refs" },
-    h(ReferenceList, { refs })
-  );
+ * gathered under it. References cited with a verb or at locators follow. */
+function ColumnReferencesField({ refs }: { refs: ColumnReferences | null }) {
+  const cited = refs?.cited ?? [];
+  const located = refs?.located ?? [];
+  if (cited.length + located.length == 0) return null;
+
+  let citedList = null;
+  if (cited.length > 0) {
+    citedList = h(ReferenceList, { refs: cited });
+  }
+  return h(DataField, { label: "References", className: "column-refs" }, [
+    citedList,
+    ...located.map((entry) =>
+      h(LocatedReferenceEntry, { key: `${entry.ref.id}:${entry.label}`, entry })
+    ),
+  ]);
+}
+
+/** "Compiled in" the citation, then where in it: "Cenoz11, Cret17a". */
+function LocatedReferenceEntry({ entry }: { entry: LocatedReference }) {
+  const { label, ref, locators } = entry;
+  let prefix = null;
+  if (label != "") {
+    prefix = h("em.ref-prefix", label);
+  }
+  return h("div.located-reference", [
+    prefix,
+    h(ReferenceList, { refs: [ref] }),
+    h(LocatorList, { locators }),
+  ]);
+}
+
+function LocatorList({ locators }: { locators: Locator[] }) {
+  if (locators.length == 0) return null;
+  const items = locators.flatMap((locator, i) => {
+    let item = h("span", locator.text);
+    if (locator.url != null) {
+      item = h("a", { href: locator.url, target: "_blank" }, locator.text);
+    }
+    if (i == 0) return [item];
+    return [", ", item];
+  });
+  return h("p.locators", items);
 }
 
 function facetElements(facet: string | null, columnID: number) {
