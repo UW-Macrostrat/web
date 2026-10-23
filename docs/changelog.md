@@ -11,9 +11,28 @@ file and are recorded only there.
 
 ## Unreleased
 
+## 5.5.0
+
+_October 2026_
+
+### Site
+
 - `/dashboard/admin/tasks` runs management tasks (topology updates first) on the
   worker, unattended, with their terminal output streamed live and a cancel that
-  ends a run like Ctrl-C. Admin only; needs an api_v3 with `/tasks`.
+  ends a run like Ctrl-C. Each task has its own page at
+  `/dashboard/admin/tasks/<task>`, with its runs beneath it. Admin only; needs an
+  api_v3 with `/tasks`.
+- On column pages, the selected unit takes the accent color, matching the
+  navigation map, and a second click deselects it.
+- On column pages, the "Unit details" setting chooses between the sidebar panel
+  and a popover beside the unit.
+- On column pages, the column's status shows in the sidebar, and the project and
+  in-process filters sit on the navigation map.
+- Column references use the lexicon's compact format, with verbs and locators
+  ("Compiled in …: Cenoz11").
+- The map ingestion list no longer re-requests endlessly after a load error, and
+  offers "Try again".
+- A map camera move mid-drag no longer ends the drag as a click.
 
 ## 5.4.1
 
