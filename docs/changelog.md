@@ -11,6 +11,12 @@ file and are recorded only there.
 
 ## Unreleased
 
+### Site
+
+- The admin page's Services table lists each Celery worker's build, from api-v3's
+  `/workers/version`, and links API v2 to its tags and changelog in the
+  `macrostrat` repository.
+
 ## 5.5.0
 
 _October 2026_

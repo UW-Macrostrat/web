@@ -1,4 +1,4 @@
-/** The build each main service is running, from its `version` route. */
+/** The build each main service and worker is running, from its `version` route. */
 import hyper from "@macrostrat/hyper";
 import { HTMLTable, Spinner, Tag } from "@blueprintjs/core";
 import {
@@ -27,6 +27,9 @@ interface BuildInfo {
   commit: string | null;
   build_date: string | null;
   repository: string | null;
+  // Workers only; an `error` alone means a build predating version reporting.
+  queues?: string[];
+  error?: string;
 }
 
 const services: ServiceSpec[] = [
@@ -40,9 +43,9 @@ const services: ServiceSpec[] = [
   {
     name: "API v2",
     url: `${apiV2Prefix}/version`,
-    repository: "UW-Macrostrat/macrostrat-api",
-    changelog: "CHANGELOG.md",
-    tagPrefix: "v",
+    repository: "UW-Macrostrat/macrostrat",
+    changelog: "services/api-v2/CHANGELOG.md",
+    tagPrefix: "api-v2-v",
   },
   {
     name: "API v3",
@@ -67,6 +70,15 @@ const services: ServiceSpec[] = [
   },
 ];
 
+// Workers have no HTTP server; api-v3 asks them over the Celery broker.
+const workers: ServiceSpec = {
+  name: "Worker",
+  url: `${apiV3Prefix}/workers/version`,
+  repository: "UW-Macrostrat/macrostrat",
+  changelog: "services/worker/CHANGELOG.md",
+  tagPrefix: "worker-v",
+};
+
 export function ServicesPanel() {
   return h(HTMLTable, { className: "services-table", compact: true }, [
     h("thead", [
@@ -78,26 +90,51 @@ export function ServicesPanel() {
         h("th", "Changelog"),
       ]),
     ]),
-    h(
-      "tbody",
-      services.map((spec) => h(ServiceRow, { key: spec.name, spec }))
-    ),
+    h("tbody", [
+      ...services.map((spec) => h(ServiceRow, { key: spec.name, spec })),
+      h(WorkerRows, { key: "workers", spec: workers }),
+    ]),
   ]);
 }
 
 function ServiceRow({ spec }: { spec: ServiceSpec }) {
-  const { info, loading, error } = useBuildInfo(spec.url);
+  const { info, loading, error } = useBuildInfo<BuildInfo>(spec.url);
+  const { name } = spec;
+  if (loading) return h(MessageRow, { name }, h(Spinner, { size: 16 }));
+  if (error != null) return h(MessageRow, { name }, `Not reporting (${error})`);
+  return h(BuildRow, { name, spec, info });
+}
 
-  let cells: ReactNode;
-  if (loading) {
-    cells = h("td", { colSpan: 4 }, h(Spinner, { size: 16 }));
-  } else if (error != null) {
-    cells = h("td.muted", { colSpan: 4 }, `Not reporting (${error})`);
-  } else {
-    cells = h(BuildCells, { spec, info });
+/** A row per worker process, so a stale pod shows beside its replacement. */
+function WorkerRows({ spec }: { spec: ServiceSpec }) {
+  const { info, loading, error } = useBuildInfo<BuildInfo[]>(spec.url);
+  const { name } = spec;
+  if (loading) return h(MessageRow, { name }, h(Spinner, { size: 16 }));
+  if (error != null) return h(MessageRow, { name }, `Not reporting (${error})`);
+  if (info.length == 0) return h(MessageRow, { name }, "No workers reporting");
+  return h(
+    info.map((worker, i) => h(WorkerRow, { key: i, spec, info: worker }))
+  );
+}
+
+function WorkerRow({ spec, info }: { spec: ServiceSpec; info: BuildInfo }) {
+  if (info.error != null) {
+    return h(
+      MessageRow,
+      { name: spec.name },
+      "Running a build without version reporting"
+    );
   }
+  const name = `${spec.name} (${info.queues.join(", ")})`;
+  return h(BuildRow, { name, spec, info });
+}
 
-  return h("tr", [h("td", spec.name), cells]);
+function MessageRow({ name, children }) {
+  return h("tr", [h("td", name), h("td.muted", { colSpan: 4 }, children)]);
+}
+
+function BuildRow({ name, spec, info }) {
+  return h("tr", [h("td", name), h(BuildCells, { spec, info })]);
 }
 
 function BuildCells({ spec, info }: { spec: ServiceSpec; info: BuildInfo }) {
@@ -118,7 +155,10 @@ function BuildCells({ spec, info }: { spec: ServiceSpec; info: BuildInfo }) {
     h("td", h(VersionLabel, { spec, info, github })),
     h("td", formatDateTime(info.build_date)),
     h("td", commit),
-    h("td", h("a", { href: `${github}/blob/${ref}/${spec.changelog}` }, "View")),
+    h(
+      "td",
+      h("a", { href: `${github}/blob/${ref}/${spec.changelog}` }, "View")
+    ),
   ]);
 }
 
@@ -134,8 +174,8 @@ function VersionLabel({ spec, info, github }) {
   return h("a", { href: `${github}/tree/${tag}` }, info.version);
 }
 
-function useBuildInfo(url: string) {
-  const [info, setInfo] = useState<BuildInfo | null>(null);
+function useBuildInfo<T>(url: string) {
+  const [info, setInfo] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
