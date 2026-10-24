@@ -33,6 +33,7 @@ import {
   showDataAtom,
   tileVersionAtom,
 } from "./state";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 
 const ADD_COLOR = "#2b8a3e";
 const SUBTRACT_COLOR = "#c92a2a";
@@ -72,6 +73,7 @@ function BoundaryMapInner({ shell }) {
       style,
       accessToken: mapboxAccessToken,
       overlayStyles,
+      transformStyle: withSeparateTerrainSource,
       transformRequest: tileRequestTransform,
       onMapLoaded,
       // `MapAreaContainer` lays out a non-standalone map full-bleed

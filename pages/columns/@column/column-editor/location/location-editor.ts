@@ -80,6 +80,7 @@ import {
   useSetAtom,
 } from "../state";
 import styles from "./main.module.sass";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 
 const h = hyper.styled(styles);
 
@@ -770,6 +771,7 @@ function LocationMap() {
         style: mapStyle,
         accessToken: mapboxAccessToken,
         standalone: shell !== "map",
+        transformStyle: withSeparateTerrainSource,
         height: "100%",
         onMapLoaded,
       },

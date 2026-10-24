@@ -57,7 +57,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   basemapAtom,
   showLabelsAtom,
-  useLabelTransform,
+  useBasemapTransform,
 } from "~/_utils/basemap";
 import { atomWithSearchParam, locationAtom } from "~/_utils/url-atoms";
 import {
@@ -314,7 +314,7 @@ export function Page() {
   const dark = useDarkMode();
   const basemap = useAtomValue(basemapAtom);
   const baseStyle = basemapStyle(basemap, dark?.isEnabled);
-  const transformStyle = useLabelTransform();
+  const transformStyle = useBasemapTransform();
 
   const leftSource = useAtomValue(leftSourceAtom);
   const rightSource = useAtomValue(rightSourceAtom);

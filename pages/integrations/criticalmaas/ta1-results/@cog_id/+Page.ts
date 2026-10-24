@@ -25,6 +25,7 @@ import {
   OpacitySlider,
 } from "~/components";
 import { buildRasterStyle } from "../utils";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 
 interface StyleOpts {
   style: string;
@@ -79,7 +80,7 @@ export default function MapInterface() {
     const styleURL = basemapStyle(layer, dark);
     getMapboxStyle(styleURL, {
       access_token: SETTINGS.mapboxAccessToken,
-    }).then(setStyle);
+    }).then((s) => setStyle(withSeparateTerrainSource(s)));
   }, [layer, dark]);
 
   const [selectedLocation, setSelectedLocation] = useState(null);

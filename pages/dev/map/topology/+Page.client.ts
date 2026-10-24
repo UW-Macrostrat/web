@@ -47,7 +47,7 @@ import { loadable } from "jotai/utils";
 import {
   basemapAtom,
   showLabelsAtom,
-  useLabelTransform,
+  useBasemapTransform,
 } from "~/_utils/basemap";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { macrostratCartoStyle } from "~/_utils/map-layers";
@@ -261,7 +261,7 @@ export function Page() {
     errors,
   ]);
 
-  const transformStyle = useLabelTransform();
+  const transformStyle = useBasemapTransform();
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);

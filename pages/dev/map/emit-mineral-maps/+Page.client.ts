@@ -61,7 +61,7 @@ import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import {
   basemapAtom,
   showLabelsAtom,
-  useLabelTransform,
+  useBasemapTransform,
 } from "~/_utils/basemap";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { BaseLayerForm, basemapStyle, ExpandablePanel } from "~/components";
@@ -144,7 +144,7 @@ export function Page() {
     return styles;
   }, [rasterOverlayStyle, showGeology, showFootprints]);
 
-  const transformStyle = useLabelTransform();
+  const transformStyle = useBasemapTransform();
 
   // Mapbox fetches the raster tiles and the footprints MVT itself, so the
   // delegated token has to be attached here rather than at a call site. Scoped

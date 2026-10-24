@@ -52,6 +52,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useData } from "vike-react/useData";
 
 import { tileRequestTransform } from "~/_utils/compilations";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 import {
   BaseLayerForm,
   Basemap,
@@ -133,7 +134,7 @@ export function Page() {
 
   const basemap = useAtomValue(basemapAtom);
   const baseStyle = basemapStyle(basemap, dark);
-  const transformStyle = useLabelTransform();
+  const transformStyle = useBasemapTransform();
   const facesAboveRange = useAtomValue(facesAboveRangeAtom);
 
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -267,12 +268,13 @@ function facesStyle(tileJSON: MapData["tileJSON"], aboveRange: boolean, dark) {
   };
 }
 
-function useLabelTransform() {
+function useBasemapTransform() {
   const showLabels = useAtomValue(showLabelsAtom);
   return useCallback(
     (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
+      const next = withSeparateTerrainSource(style);
+      if (showLabels) return next;
+      return removeMapLabels(next, true);
     },
     [showLabels]
   );

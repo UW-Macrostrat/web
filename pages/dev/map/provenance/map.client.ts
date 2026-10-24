@@ -29,6 +29,7 @@ import {
   selectedNodeAtom,
   supersededByIdAtom,
 } from "./state";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 
 const colors = {
   selected: "#f5a623",
@@ -59,6 +60,7 @@ function ProvenanceMapInner({ shell }) {
     {
       style: basemapStyle(Basemap.Basic, inDarkMode),
       mapPosition,
+      transformStyle: withSeparateTerrainSource,
       onMapMoved: setMapPosition,
       mapboxToken: mapboxAccessToken,
       accessToken: mapboxAccessToken,

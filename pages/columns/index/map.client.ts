@@ -49,6 +49,7 @@ import {
   useColumnHref,
   visibleRowsAtom,
 } from "./state";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 
 export function ColumnListMap({ projectID }) {
   const shell = useAtomValue(layoutShellAtom);
@@ -135,6 +136,7 @@ function FullMap({ projectID, standalone }) {
       style: mapStyle,
       accessToken: mapboxAccessToken,
       standalone,
+      transformStyle: withSeparateTerrainSource,
       height: "100%",
     },
     [

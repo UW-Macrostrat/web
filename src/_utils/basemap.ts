@@ -8,6 +8,7 @@ import { atom, useAtomValue } from "jotai";
 import { useCallback } from "react";
 
 import { Basemap } from "~/components/map-controls";
+import { withSeparateTerrainSource } from "./terrain-source";
 import { atomWithSearchParam } from "./url-atoms";
 
 const basemapParamAtom = atomWithSearchParam("basemap");
@@ -38,15 +39,16 @@ export const showLabelsAtom = atom(
   }
 );
 
-/** A `MapView` `transformStyle` that strips the label layers when labels are
- * off. */
-export function useLabelTransform() {
+/** A `MapView` `transformStyle` that gives terrain its own source, as on
+ * `/map`, and strips the label layers when labels are off. */
+export function useBasemapTransform() {
   const showLabels = useAtomValue(showLabelsAtom);
 
   return useCallback(
     (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
+      const next = withSeparateTerrainSource(style);
+      if (showLabels) return next;
+      return removeMapLabels(next, true);
     },
     [showLabels]
   );

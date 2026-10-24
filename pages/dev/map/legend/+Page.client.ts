@@ -44,7 +44,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   basemapAtom,
   showLabelsAtom,
-  useLabelTransform,
+  useBasemapTransform,
 } from "~/_utils/basemap";
 import { locationAtom } from "~/_utils/url-atoms";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
@@ -163,7 +163,7 @@ export function Page() {
   const dark = useDarkMode();
   const basemap = useAtomValue(basemapAtom);
   const baseStyle = basemapStyle(basemap, dark?.isEnabled);
-  const transformStyle = useLabelTransform();
+  const transformStyle = useBasemapTransform();
 
   const mapPosition = useInitialMapPosition();
   const onMapMoved = useMapMovedHandler();

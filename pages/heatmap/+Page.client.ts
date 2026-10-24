@@ -44,7 +44,7 @@ import styles from "./main.module.scss";
 import {
   basemapAtom,
   showLabelsAtom,
-  useLabelTransform,
+  useBasemapTransform,
 } from "~/_utils/basemap";
 
 const h = hyper.styled(styles);
@@ -123,7 +123,7 @@ export function Page() {
     return overlays;
   }, [showRequests, showAccessAll, showAccessToday]);
 
-  const transformStyle = useLabelTransform();
+  const transformStyle = useBasemapTransform();
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);

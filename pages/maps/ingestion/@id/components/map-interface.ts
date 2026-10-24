@@ -27,6 +27,7 @@ import { MapboxMapProvider } from "@macrostrat/mapbox-react";
 import { baseElements, buildBasicStyle } from "../utils";
 import h from "./main.module.sass";
 import { compose } from "@macrostrat/hyper";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 
 function rasterURL(source_id) {
   // Placeholder for figuring out a better version of this.
@@ -249,6 +250,7 @@ function _MapInterface({
         style,
         mapboxToken: SETTINGS.mapboxAccessToken,
         overlayStyles,
+        transformStyle: withSeparateTerrainSource,
         bounds,
         mapPosition: null,
         fitBoundsOptions: { padding: 50 },

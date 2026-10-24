@@ -26,6 +26,7 @@ import {
   visibleMapsAtom,
   type Point,
 } from "./state";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 
 const SOURCE = "map-bounds";
 
@@ -51,8 +52,9 @@ function MapListMapInner({ standalone }) {
 
   const transformStyle = useCallback(
     (style) => {
-      if (showLabels) return style;
-      return removeMapLabels(style, true);
+      const next = withSeparateTerrainSource(style);
+      if (showLabels) return next;
+      return removeMapLabels(next, true);
     },
     [showLabels]
   );

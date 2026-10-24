@@ -4,6 +4,7 @@ import { mapboxAccessToken } from "@macrostrat-web/settings";
 import h from "./main.module.sass";
 import mapboxgl from "mapbox-gl";
 import { navigate } from "vike/client/router";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 
 export function ColumnsMap({ columns, project = null }) {
   const [mapInstance, setMapInstance] = useState(null);
@@ -135,6 +136,7 @@ export function ColumnsMap({ columns, project = null }) {
       style:
         "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true",
       mapboxToken: mapboxAccessToken,
+      transformStyle: withSeparateTerrainSource,
       mapPosition,
       onMapLoaded: handleMapLoaded,
     })

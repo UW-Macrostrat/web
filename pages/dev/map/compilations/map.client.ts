@@ -26,7 +26,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useMemo } from "react";
 
 import { basemapStyle, Basemap } from "~/components";
-import { basemapAtom, useLabelTransform } from "~/_utils/basemap";
+import { basemapAtom, useBasemapTransform } from "~/_utils/basemap";
 import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
 import { MapMarker } from "@macrostrat/map-interface";
@@ -72,7 +72,7 @@ function CompilationMapInner({ shell }) {
 
   const overlayStyles = useOverlayStyles();
 
-  const transformStyle = useLabelTransform();
+  const transformStyle = useBasemapTransform();
 
   const setPosition = useCallback(
     (position: Point | null) => setPoint(position),

@@ -10,6 +10,7 @@ import { MapboxMapProvider } from "@macrostrat/mapbox-react";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { useInsetMapStyleProps } from "~/components/map-settings";
 import styles from "../match.module.sass";
+import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 
 const h = hyper.styled(styles);
 
@@ -124,6 +125,7 @@ export function PointMap({
         style: mapStyle,
         accessToken: mapboxAccessToken,
         standalone: true,
+        transformStyle: withSeparateTerrainSource,
         height: "100%",
         onMapLoaded,
       })

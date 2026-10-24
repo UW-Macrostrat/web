@@ -27,7 +27,7 @@ import { atom, useAtom, useAtomValue } from "jotai";
 import {
   basemapAtom,
   showLabelsAtom,
-  useLabelTransform,
+  useBasemapTransform,
 } from "~/_utils/basemap";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
@@ -161,7 +161,7 @@ export function Page() {
     [afterVersion]
   );
 
-  const transformStyle = useLabelTransform();
+  const transformStyle = useBasemapTransform();
 
   // Mirror the navbar width, as the other map dev pages do.
   const contextPanel = h(

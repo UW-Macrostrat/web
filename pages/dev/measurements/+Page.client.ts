@@ -15,7 +15,7 @@ import { fetchAPIV2Result, fetchPGData } from "~/_utils";
 import {
   basemapAtom,
   showLabelsAtom,
-  useLabelTransform,
+  useBasemapTransform,
 } from "~/_utils/basemap";
 import { macrostratCartoStyle } from "~/_utils/map-layers";
 import { atomWithSearchParam } from "~/_utils/url-atoms";
@@ -81,7 +81,7 @@ function Map({ types }) {
     showCarto,
   });
 
-  const transformStyle = useLabelTransform();
+  const transformStyle = useBasemapTransform();
 
   const mapPosition = {
     camera: {

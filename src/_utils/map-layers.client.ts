@@ -9,6 +9,7 @@ import {
 } from "@macrostrat/mapbox-utils";
 import mapboxgl from "mapbox-gl";
 import { MacrostratVectorTileset, MacrostratRasterTileset } from "./map-layers";
+import { withSeparateTerrainSource } from "./terrain-source";
 
 export * from "./map-layers";
 
@@ -69,7 +70,9 @@ export async function buildMapStyle(
   //const { inDarkMode, xRay = false, tileset } = styleOptions;
   //const overlayStyles: any = xRay ? buildXRayStyle({ inDarkMode }) : mapStyle;
 
-  return removeMapLabels(mergeStyles(style, overlayStyle));
+  return removeMapLabels(
+    mergeStyles(withSeparateTerrainSource(style), overlayStyle)
+  );
 }
 
 export function LineSymbolManager({ showLineSymbols }) {
