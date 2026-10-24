@@ -9,8 +9,6 @@ a single interface are recorded in that interface's own changelog, such as the
 [map interface changelog](map/changelog.md); the map's 4.x releases predate this
 file and are recorded only there.
 
-## Unreleased
-
 ### Site
 
 - The admin page's Services table lists each Celery worker's build, from api-v3's
