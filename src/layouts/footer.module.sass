@@ -50,6 +50,12 @@
         img
           filter: unset
           opacity: 1
+
+    // A `<button>` (the theme toggle) doesn't inherit line height as the link
+    // `<a>`s do, which left its row shorter than the rest. Small buttons (the
+    // toggle's "auto") keep their own.
+    :global(.bp6-button.bp6-minimal:not(.bp6-small))
+      line-height: inherit
     margin: 0.2em 0 1em
 
   .footer-nav > *
@@ -115,15 +121,20 @@
   padding-left: 0
   list-style: none
 
+// Columns are left-aligned, the heading inset by the link buttons' own
+// padding so it lines up with the icons beneath it
 .link-list-container
   display: flex
   flex-direction: column
-  align-items: center
+  align-items: flex-start
   justify-content: space-between
   flex-grow: 1
 
+  .link-list-title
+    padding-left: 8px
+
 // Narrow footers: the logo and name span a row of their own, the lists sit
-// two to a row beneath, centred, and the type is set smaller and closer
+// two to a row beneath, and the type is set smaller and closer
 @container (max-width: 48rem)
   .footer .footer-inner
     display: grid
