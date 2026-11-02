@@ -1,12 +1,9 @@
 export { HybridPage, type HybridPageProps } from "./page";
 export { HybridMapPlacement } from "./map-placement";
 export { HybridBottomSheet } from "./bottom-sheet";
-export {
-  ActionsPanel,
-  LayoutModeControl,
-  type HybridLink,
-} from "./controls";
+export { ActionsPanel, LayoutModeControl, type HybridLink } from "./controls";
 export { FooterLinksButton } from "./chrome";
+export { HybridPersona } from "./persona";
 export { HybridContentFooter } from "./content-footer";
 export {
   allLayoutModes,

@@ -79,6 +79,7 @@ export const focusSlugAtom = searchParamAtom("focus");
 export const treeAtoms = compilationTreeAtoms({
   graph: activeGraphAtom,
   focusSlug: focusSlugAtom,
+  focusAsRoot: true,
 });
 
 export const focusNodeAtom = treeAtoms.focusNode;

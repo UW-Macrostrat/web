@@ -25,7 +25,7 @@ export {
   type CompilationTreeAtoms,
   type CompilationTreeSource,
 } from "./state";
-export { CompilationTree, ScaleFilter } from "./tree";
+export { CompilationTree, ScaleFilter, TreeSearch } from "./tree";
 export {
   CompilationPath,
   CompilationSelector,

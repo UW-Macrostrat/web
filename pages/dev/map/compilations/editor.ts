@@ -21,7 +21,7 @@ import {
   Switch,
   Tag,
 } from "@blueprintjs/core";
-import { Suggest, type ItemPredicate } from "@blueprintjs/select";
+import { Select, type ItemPredicate } from "@blueprintjs/select";
 import hyper from "@macrostrat/hyper";
 import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import { useMemo, useState } from "react";
@@ -32,7 +32,6 @@ import {
   nodeName,
   saveDraft,
   SaveRefused,
-  ScaleFilter,
   type Change,
   type GraphNode,
   type SaveProblem,
@@ -51,40 +50,21 @@ const h = hyper.styled(styles);
 
 /* ---------------------------------------------------------------- toolbar */
 
-/** Beneath the search box: the scale filter, the served-at-top switch, and —
- * for an admin — the edit controls. */
-export function CompilationToolbar() {
-  const isAdmin = useIsAdmin();
-  const [servedAtTop, setServedAtTop] = useAtom(treeAtoms.servedAtTop);
-
-  let editControls = null;
-  if (isAdmin) editControls = h(EditControls);
-
-  return h("div.compilation-toolbar", [
-    h(ScaleFilter, { atoms: treeAtoms }),
-    h(Switch, {
-      className: "served-switch",
-      label: "Served compilations at top level",
-      checked: servedAtTop,
-      onChange: () => setServedAtTop(!servedAtTop),
-    }),
-    editControls,
-    h(TopoUpdateBanner),
-  ]);
-}
-
-function EditControls() {
+/** For the toolbar: an icon to start editing, then the draft's controls. */
+export function EditControls() {
   const [editing, setEditing] = useAtom(editAtoms.editing);
   const changes = useAtomValue(editAtoms.changes);
   const discard = useSetAtom(editAtoms.discard);
   const [reviewing, setReviewing] = useState(false);
 
   if (!editing) {
-    return h(
-      Button,
-      { small: true, icon: "edit", onClick: () => setEditing(true) },
-      "Edit compilations"
-    );
+    return h(Button, {
+      size: "large",
+      intent: "primary",
+      icon: "edit",
+      title: "Edit compilations",
+      onClick: () => setEditing(true),
+    });
   }
 
   const n = changes.length;
@@ -99,45 +79,58 @@ function EditControls() {
     countIntent = "warning";
   }
 
-  return h("div.edit-controls", [
-    h("div.edit-bar", [
-      h(Tag, { minimal: true, intent: countIntent }, countLabel),
-      h(ButtonGroup, [
-        h(
-          Button,
-          {
-            small: true,
-            intent: "primary",
-            icon: "floppy-disk",
-            disabled: n === 0,
-            onClick: () => setReviewing(true),
-          },
-          "Review…"
-        ),
-        h(
-          Button,
-          { small: true, disabled: n === 0, onClick: discard },
-          "Discard"
-        ),
-        h(
-          Button,
-          {
-            small: true,
-            disabled: n > 0,
-            title: doneTitle,
-            onClick: () => setEditing(false),
-          },
-          "Done"
-        ),
-      ]),
+  return h("div.edit-bar", [
+    h(Tag, { minimal: true, intent: countIntent }, countLabel),
+    h(ButtonGroup, [
+      h(
+        Button,
+        {
+          small: true,
+          intent: "primary",
+          icon: "floppy-disk",
+          disabled: n === 0,
+          onClick: () => setReviewing(true),
+        },
+        "Review…"
+      ),
+      h(
+        Button,
+        { small: true, disabled: n === 0, onClick: discard },
+        "Discard"
+      ),
+      h(
+        Button,
+        {
+          small: true,
+          disabled: n > 0,
+          title: doneTitle,
+          onClick: () => setEditing(false),
+        },
+        "Done"
+      ),
     ]),
-    h(
+    h(SaveDialog, { isOpen: reviewing, onClose: () => setReviewing(false) }),
+  ]);
+}
+
+/** Above the tree: how editing works, refused drops, and the reminder to run
+ * the topology update after a save. */
+export function CompilationNotices() {
+  const editing = useAtomValue(editAtoms.editing);
+
+  let hint = null;
+  if (editing) {
+    hint = h(
       "p.edit-hint",
       "Drag a map onto a compilation to add it, or onto a map to join its tier. " +
         "Hold Alt to copy rather than move."
-    ),
+    );
+  }
+
+  return h("div.compilation-notices", [
+    hint,
     h(EditNotice),
-    h(SaveDialog, { isOpen: reviewing, onClose: () => setReviewing(false) }),
+    h(TopoUpdateBanner),
   ]);
 }
 
@@ -348,9 +341,7 @@ function NodeProperties({ node }: { node: GraphNode }) {
   const id = node.source_id;
 
   let modeField = null;
-  let addMember = null;
   if (node.is_compilation) {
-    addMember = h(AddMember, { node });
     // Read-only: fixed by how the compilation's contents were built, so
     // changing it is restructuring (`macrostrat compilations mode`), not an edit.
     modeField = h("p.assembly-mode", [
@@ -375,13 +366,18 @@ function NodeProperties({ node }: { node: GraphNode }) {
       onChange: () => setProperty(id, { is_served: !node.is_served }),
     }),
     modeField,
-    addMember,
   ]);
 }
 
-/** Add any map in the graph to the selected compilation, at the top. The same
- * as a drop onto its row, for a map the tree is not showing. */
-function AddMember({ node }: { node: GraphNode }) {
+/** Each compilation row's add button, while editing. */
+export function memberActions(node: GraphNode) {
+  if (!node.is_compilation) return null;
+  return h(AddMemberButton, { node });
+}
+
+/** Add any map in the graph to a compilation, at the top. The same as a drop
+ * onto its row, for a map the tree is not showing. */
+function AddMemberButton({ node }: { node: GraphNode }) {
   const graph = useAtomValue(graphAtom);
   const children = useAtomValue(treeAtoms.children);
   const addMember = useSetAtom(editAtoms.addMember);
@@ -398,28 +394,33 @@ function AddMember({ node }: { node: GraphNode }) {
   }, [graph, children, node.source_id]);
 
   return h(
-    FormGroup,
-    { label: "Add a member" },
-    h(Suggest<GraphNode>, {
+    Select<GraphNode>,
+    {
       items,
-      selectedItem: null,
       itemPredicate: matchNode,
       itemRenderer: renderNode,
-      inputValueRenderer: () => "",
       onItemSelect: (n) => addMember(node.source_id, n.source_id),
       noResults: h(MenuItem, {
         disabled: true,
         text: "No matching maps",
         roleStructure: "listoption",
       }),
+      initialContent: h(MenuItem, {
+        disabled: true,
+        text: "Type to search maps",
+        roleStructure: "listoption",
+      }),
       resetOnClose: true,
       resetOnSelect: true,
-      fill: true,
-      popoverProps: { minimal: true, matchTargetWidth: true },
-      inputProps: {
-        placeholder: "Search maps by slug or name…",
-        leftIcon: "add",
-      },
+      popoverProps: { hasBackdrop: true, placement: "bottom-end" },
+      inputProps: { placeholder: "Search maps by slug or name…" },
+    },
+    h(Button, {
+      minimal: true,
+      small: true,
+      icon: "add",
+      className: "add-member",
+      title: `Add a map to ${node.slug}`,
     })
   );
 }
