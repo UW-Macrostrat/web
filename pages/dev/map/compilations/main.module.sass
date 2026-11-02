@@ -5,60 +5,54 @@
   flex-direction: column
   gap: 0.6em
 
-.point-summary,
-.focus-summary
-  .point-header,
-  .focus-header
-    display: flex
-    align-items: center
-    justify-content: space-between
-    gap: 0.5em
-
-  .focus-name
-    font-weight: 600
-
-  .point-counts,
-  .focus-stats
-    margin: 0.3em 0 0
-    font-size: 0.85em
-    color: var(--secondary-color)
-
 .option-note
   margin: 0.2em 0 0.6em
   font-size: 0.8em
   color: var(--secondary-color)
-
-.legend
-  margin: 0
-  font-size: 0.85em
-
-  dt
-    font-weight: 600
-
-  dd
-    margin: 0 0 0.5em
-    color: var(--secondary-color)
 
 .choice-filter
   display: flex
   flex-direction: column
   padding: 0.2em 0.4em
 
-/* ---------------------------------------------------------------- editing */
+/* ---------------------------------------------------------------- toolbar */
 
 .compilation-toolbar
   display: flex
-  flex-direction: column
-  gap: 0.4em
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.5em
+  width: 100%
+  padding: 0.4em 0
+
+.toolbar-search
+  width: 16em
+  max-width: 100%
 
 .served-switch
   margin: 0
   font-size: 0.85em
 
-.edit-controls
+.toolbar-spacer
+  flex: 1
+
+/* ---------------------------------------------------------------- editing */
+
+.compilation-notices
   display: flex
   flex-direction: column
-  gap: 0.3em
+  gap: 0.4em
+  padding: 0 0.5em
+
+  &:empty
+    display: none
+
+.add-member
+  flex-shrink: 0
+  opacity: 0.6
+
+  &:hover
+    opacity: 1
 
 .edit-bar
   display: flex

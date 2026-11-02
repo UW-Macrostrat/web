@@ -9,6 +9,18 @@ a single interface are recorded in that interface's own changelog, such as the
 [map interface changelog](map/changelog.md); the map's 4.x releases predate this
 file and are recorded only there.
 
+## 5.5.2
+
+_November 2026_
+
+### Site
+
+- The footer's link columns align left, each heading over its icons, and the
+  theme toggle's row matches the others' height.
+- `/dev/map/compilations` puts search, filters, the selected compilation and the
+  inspected point in a toolbar; selecting a compilation shows only its tree, and
+  while editing each compilation row has its own add button.
+
 ## 5.5.1
 
 Added to worker display to admin interface.

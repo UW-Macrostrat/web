@@ -1,40 +1,27 @@
-/** The assistant panel: what the map settings are, and what is defined at the
- * inspected point.
- *
- * The point view reuses the list's own row set — the point-scoped graph goes
- * through exactly the same flattening — so "what maps are here" is answered in
- * the same vocabulary as the catalog rather than a parallel one.
- */
+/** The assistant panel: the focused source's properties while editing, and
+ * the map settings. The focus and the inspected point are tags in the
+ * toolbar. */
 
-import { Button, Callout, Spinner, Switch, Tag } from "@blueprintjs/core";
+import { Switch } from "@blueprintjs/core";
 import { ExpansionPanel } from "@macrostrat/data-components";
 import { ErrorCallout } from "@macrostrat/ui-components";
 import hyper from "@macrostrat/hyper";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 
-import { BaseLayerForm, Link } from "~/components";
-import {
-  fetchCompilationGraph,
-  formatArea,
-  mapPageHref,
-  NodeTags,
-  kindTags,
-} from "~/components/compilation-tree";
+import { BaseLayerForm } from "~/components";
+import { fetchCompilationGraph } from "~/components/compilation-tree";
 
 import { FocusEditor } from "./editor";
 import { basemapAtom, showLabelsAtom } from "~/_utils/basemap";
 import {
   graphVersionAtom,
   expandMembersAtom,
-  focusNodeAtom,
-  focusSlugAtom,
   pointAtom,
   pointGraphAtom,
   showCartoAtom,
   showFacesAtom,
   showFootprintsAtom,
-  type Point,
 } from "./state";
 import styles from "./main.module.sass";
 
@@ -43,11 +30,8 @@ const h = hyper.styled(styles);
 export function CompilationAssistant() {
   return h("div.compilation-assistant", [
     h(PointLoader),
-    h(FocusSummary),
     h(FocusEditor),
-    h(PointSummary),
     h(MapOptions),
-    h(Legend),
   ]);
 }
 
@@ -94,108 +78,6 @@ function PointLoader() {
   return h(ErrorCallout, { error });
 }
 
-function PointSummary() {
-  const [point, setPoint] = useAtom(pointAtom);
-  const graph = useAtomValue(pointGraphAtom);
-
-  if (point == null) {
-    return h(
-      Callout,
-      { className: "point-summary", icon: "map-marker" },
-      "Click the map to narrow the list to the maps covering a point."
-    );
-  }
-
-  let body = null;
-  if (graph == null) {
-    body = h(Spinner, { size: 16 });
-  } else {
-    const compilations = graph.nodes.filter((n) => n.is_compilation).length;
-    const maps = graph.nodes.length - compilations;
-    body = h(
-      "p.point-counts",
-      `${maps} maps in ${compilations} compilations cover this point.`
-    );
-  }
-
-  return h(Callout, { className: "point-summary", icon: "map-marker" }, [
-    h("div.point-header", [
-      h("code", formatCoordinates(point)),
-      h(Button, {
-        minimal: true,
-        small: true,
-        icon: "cross",
-        title: "Show the whole catalog",
-        onClick: () => setPoint(null),
-      }),
-    ]),
-    body,
-  ]);
-}
-
-function formatCoordinates({ lng, lat }: Point) {
-  const ns = lat >= 0 ? "N" : "S";
-  const ew = lng >= 0 ? "E" : "W";
-  return `${Math.abs(lat).toFixed(3)}°${ns}, ${Math.abs(lng).toFixed(3)}°${ew}`;
-}
-
-/* -------------------------------------------------------------- the focus */
-
-/** What the map is drawing. Any compilation is addressable by the tile routes,
- * so this is a real choice rather than a fixed layer. */
-function FocusSummary() {
-  const node = useAtomValue(focusNodeAtom);
-  const setFocus = useSetAtom(focusSlugAtom);
-
-  if (node == null) {
-    return h(
-      Callout,
-      { className: "focus-summary", icon: "layers" },
-      "The map is drawing carto, at the band for the zoom. Pick a compilation in the list to draw it instead."
-    );
-  }
-
-  // As in the tree, only a served source links to its map page.
-  const label = node.name ?? node.slug;
-  let name = h("span.focus-name", label);
-  if (node.is_served) {
-    name = h(Link, { href: mapPageHref(node), className: "focus-name" }, label);
-  }
-
-  return h(Callout, { className: "focus-summary", icon: "layers" }, [
-    h("div.focus-header", [
-      name,
-      h(Button, {
-        minimal: true,
-        small: true,
-        icon: "cross",
-        title: "Back to carto",
-        onClick: () => setFocus(null),
-      }),
-    ]),
-    h(NodeTags, { node }),
-    h("p.focus-stats", focusStats(node)),
-  ]);
-}
-
-/** A leaf map has no members, so saying "0 members" is noise rather than
- * information; only a compilation gets a membership line. */
-function focusStats(node) {
-  const parts: string[] = [`${node.slug} #${node.source_id}`];
-  if (node.is_compilation) {
-    parts.push(`${node.n_members} members`);
-    if (node.n_sources !== node.n_members) {
-      parts.push(`${node.n_sources} maps`);
-    }
-  }
-  if (node.is_standalone) {
-    parts.push("in no compilation");
-  }
-  const area = formatArea(node.area_km);
-  if (area != null) parts.push(area);
-  return parts.join(" · ");
-}
-
 /* ------------------------------------------------------------ map options */
 
 function MapOptions() {
@@ -235,19 +117,5 @@ function MapOptions() {
       }),
       h(BaseLayerForm, { basemap, setBasemap, showLabels, setShowLabels }),
     ]
-  );
-}
-
-function Legend() {
-  return h(
-    ExpansionPanel,
-    { title: "Legend", className: "legend-panel", expanded: false },
-    h(
-      "dl.legend",
-      kindTags.flatMap((tag) => [
-        h("dt", { key: `${tag.label}-t` }, tag.label),
-        h("dd", { key: `${tag.label}-d` }, tag.title),
-      ])
-    )
   );
 }

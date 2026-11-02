@@ -2,10 +2,6 @@
   display: flex
   flex-direction: column
   gap: 0.5em
-  // The panel is a flex child of a viewport-capped column; without this it
-  // refuses to shrink below its content and clips instead of scrolling.
-  min-height: 0
-  height: 100%
   padding: 0.5em
 
 .tree-toolbar
@@ -27,14 +23,11 @@
   list-style: none
   padding: 0
   margin: 0
-  min-height: 0
-  overflow-y: auto
 
   .tree
     margin-left: 0.5em
     padding-left: 0.7em
     border-left: 1px solid var(--panel-rule-color, rgba(128, 128, 128, 0.3))
-    overflow-y: visible
 
 // The blue of the faces overlay (`map.client.ts`), which draws what these hold.
 $content-color: #2b6cb0
@@ -173,7 +166,10 @@ $content-color-dark: #7bb5ff
   .compilation-tree
     flex: 1
     min-height: 0
-    height: auto
+
+    > .tree
+      min-height: 0
+      overflow-y: auto
 
 .compilation-path
   display: flex
