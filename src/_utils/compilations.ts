@@ -2,18 +2,21 @@
  *
  * A compilation is any source the tileserver serves by slug at
  * `/map/{slug}/{z}/{x}/{y}`, that API v2's `map_query_v2` answers a point for
- * with `?source=`. `carto` is Macrostrat's served map:
- * public, cached, and the default. `sys:carto-legacy` is the materialized
+ * with `?source=`. `carto` is Macrostrat's served map,
+ * public and cached. `sys:carto-legacy` is the materialized
  * build it replaces, addressed the same way so the two can be compared with
  * nothing but the name changing; it is not a `maps.sources` row, so it is
  * listed here rather than by the API. Every other compilation is drawn per
  * request and needs the delegated token below.
+ *
+ * With no compilation chosen, `/map` names none: it draws `/carto-slim` and asks
+ * `map_query_v2` without a `source`, and each environment's servers decide
+ * which build answers both.
  */
 import { getTileToken } from "./tile-token";
 import {
   apiV3Prefix,
   burwellTileDomain,
-  isDev,
   mapTilesToken,
 } from "@macrostrat-web/settings";
 import { atom } from "jotai";
@@ -22,14 +25,6 @@ import type mapboxgl from "mapbox-gl";
 
 export const DEFAULT_COMPILATION = "carto";
 export const LEGACY_COMPILATION = "sys:carto-legacy";
-
-/** What `/map` shows with no compilation chosen. Production keeps the v1 tiles
- * (`/carto-slim`) and the legacy point query until compilations are switched
- * on there; that is the legacy build, so the selector names it. */
-const mapDefaultIsV1 = !isDev;
-let mapDefault = DEFAULT_COMPILATION;
-if (mapDefaultIsV1) mapDefault = LEGACY_COMPILATION;
-export const MAP_DEFAULT_COMPILATION = mapDefault;
 
 /** The fields of API v3's `/compilations` summary the map pages read. */
 export interface CompilationSummary {
@@ -95,16 +90,17 @@ function isUnset(slug: string | null | undefined): boolean {
   return slug == null || slug == "";
 }
 
+/** A slug for pages that must name one, such as the inspector and diff pages. */
 export function compilationOrDefault(slug: string | null | undefined): string {
-  if (isUnset(slug)) return MAP_DEFAULT_COMPILATION;
+  if (isUnset(slug)) return DEFAULT_COMPILATION;
   return slug;
 }
 
-/** The `source` for `map_query_v2`: null for the v1 default, which the API
- * answers with its legacy carto query. */
+/** The `source` for `map_query_v2`: none when unset, so the API's default
+ * answers. */
 export function mapQuerySource(slug: string | null | undefined): string | null {
-  if (isUnset(slug) && mapDefaultIsV1) return null;
-  return compilationOrDefault(slug);
+  if (isUnset(slug)) return null;
+  return slug;
 }
 
 export function compilationLabel(c: CompilationSummary): string {
@@ -124,8 +120,8 @@ export function applyCompilationTiles(
   style: mapboxgl.Style,
   slug: string | null
 ): mapboxgl.Style {
-  // The style's own `/carto-slim` source is the v1 default.
-  if (isUnset(slug) && mapDefaultIsV1) return style;
+  // The style's own `/carto-slim` is the tileserver's default build.
+  if (isUnset(slug)) return style;
   const source = style.sources?.["burwell"] as
     | mapboxgl.VectorSource
     | undefined;

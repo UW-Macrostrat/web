@@ -28,7 +28,7 @@ export function useAdmoinshments(): React.ReactNode[] {
   return admonishments;
 }
 
-/** The map is drawn from a compilation other than the default, `carto`. */
+/** The map is drawn from a chosen compilation rather than the default. */
 function CompilationAdmonishment({ compilation }: { compilation: string }) {
   const runAction = useAppActions();
   const compilations = useAtomValue(compilationsAtom);
