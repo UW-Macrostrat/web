@@ -9,6 +9,12 @@ a single interface are recorded in that interface's own changelog, such as the
 [map interface changelog](map/changelog.md); the map's 4.x releases predate this
 file and are recorded only there.
 
+## 5.5.3
+
+_November 2026_
+
+Don't assume a specific compilation
+
 ## 5.5.2
 
 _November 2026_
