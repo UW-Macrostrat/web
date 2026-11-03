@@ -58,11 +58,18 @@ export interface CompilationTreeProps {
   /** Edit state. Given, the tree offers drag, drop and removal while
    * `editor.editing` is on; absent, it is read-only. */
   editor?: CompilationEditAtoms | null;
+  /** Off when the page puts `TreeSearch` in a toolbar of its own. */
+  showSearch?: boolean;
+  /** Page-specific controls on each row while editing. */
+  editActions?: ((node: GraphNode) => ReactNode) | null;
 }
 
 /** The edit atoms, for rows at any depth — context rather than a prop threaded
  * through every level of the recursion. */
 const EditorContext = createContext<CompilationEditAtoms | null>(null);
+const EditActionsContext = createContext<
+  ((node: GraphNode) => ReactNode) | null
+>(null);
 
 export function CompilationTree({
   atoms,
@@ -70,20 +77,37 @@ export function CompilationTree({
   showStandalone = true,
   onSelect = null,
   editor = null,
+  showSearch = true,
+  editActions = null,
 }: CompilationTreeProps) {
+  let treeToolbar = null;
+  if (showSearch || toolbar != null) {
+    treeToolbar = h(TreeToolbar, { atoms, toolbar, showSearch });
+  }
+
   return h(
     EditorContext.Provider,
     { value: editor },
-    h("div.compilation-tree", [
-      h(TreeToolbar, { atoms, toolbar }),
-      h(TreeBody, { atoms, showStandalone, onSelect }),
-    ])
+    h(
+      EditActionsContext.Provider,
+      { value: editActions },
+      h("div.compilation-tree", [
+        treeToolbar,
+        h(TreeBody, { atoms, showStandalone, onSelect }),
+      ])
+    )
   );
 }
 
 /* ------------------------------------------------------------------ toolbar */
 
-function TreeToolbar({ atoms, toolbar }) {
+function TreeToolbar({ atoms, toolbar, showSearch }) {
+  let search = null;
+  if (showSearch) search = h(TreeSearch, { atoms });
+  return h("div.tree-toolbar", [search, toolbar]);
+}
+
+export function TreeSearch({ atoms }: { atoms: CompilationTreeAtoms }) {
   const [text, setText] = useAtom(atoms.searchText);
 
   let clearButton = undefined;
@@ -95,17 +119,14 @@ function TreeToolbar({ atoms, toolbar }) {
     });
   }
 
-  return h("div.tree-toolbar", [
-    h(InputGroup, {
-      className: "tree-search",
-      leftIcon: "search",
-      placeholder: "Search maps and compilations…",
-      value: text,
-      onChange: (evt) => setText(evt.currentTarget.value),
-      rightElement: clearButton,
-    }),
-    toolbar,
-  ]);
+  return h(InputGroup, {
+    className: "tree-search",
+    leftIcon: "search",
+    placeholder: "Search maps and compilations…",
+    value: text,
+    onChange: (evt) => setText(evt.currentTarget.value),
+    rightElement: clearButton,
+  });
 }
 
 /** Scale bands, coarse to fine — the order they mean something in, which is not
@@ -316,7 +337,8 @@ function TreeNode({
 
   // The rows the selection is drawn from: where its resolution stops.
   const classNames = [];
-  if (isSelected) classNames.push("selected");
+  // Scoped to the selection, the root is the selection; marking it says nothing.
+  if (isSelected && !atoms.focusAsRoot) classNames.push("selected");
   if (focusResolved.has(node.source_id)) classNames.push("resolved");
 
   let selectTitle = "Show this compilation";
@@ -364,6 +386,7 @@ function TreeNode({
         ]),
         h(NodeStats, { node, priority }),
       ]),
+      h(RowEditActions, { node }),
       h(RemoveButton, { node, edge }),
     ]),
     members,
@@ -520,6 +543,13 @@ function NodeRow({ node, edge, children }) {
       ...children,
     ]
   );
+}
+
+function RowEditActions({ node }: { node: GraphNode }) {
+  const editing = useEditing();
+  const editActions = useContext(EditActionsContext);
+  if (!editing || editActions == null) return null;
+  return editActions(node);
 }
 
 function RemoveButton({ node, edge }) {

@@ -22,6 +22,8 @@ import {
 export interface CompilationTreeSource {
   graph: Atom<CompilationGraph>;
   focusSlug: WritableAtom<string | null, [string | null], unknown>;
+  /** Show only the selection's own tree, without its parents or siblings. */
+  focusAsRoot?: boolean;
 }
 
 export interface CompilationTreeAtoms extends CompilationTreeSource {
@@ -86,7 +88,7 @@ function bySize(a: GraphNode | undefined, b: GraphNode | undefined): number {
 export function compilationTreeAtoms(
   source: CompilationTreeSource
 ): CompilationTreeAtoms {
-  const { graph, focusSlug } = source;
+  const { graph, focusSlug, focusAsRoot = false } = source;
 
   const searchText = atom("");
   const scaleFilter = atom<string[]>([]);
@@ -117,11 +119,25 @@ export function compilationTreeAtoms(
     return byParent;
   });
 
+  const focusNode = atom<GraphNode | null>((get) => {
+    const slug = get(focusSlug);
+    if (slug == null) return null;
+    return get(graph).nodes.find((n) => n.slug === slug) ?? null;
+  });
+
+  /** The selection alone, when the tree is scoped to it. */
+  const scopedRoot = atom<GraphNode | null>((get) => {
+    if (!focusAsRoot) return null;
+    return get(focusNode);
+  });
+
   /** Compilations nothing contains, largest first, which puts `carto` at the
    * top. With `servedAtTop`, every served compilation is a
    * root too, wherever else it sits: the compilations a client can ask for by
    * name, rather than the shape of the hierarchy. */
   const roots = atom<GraphNode[]>((get) => {
+    const scoped = get(scopedRoot);
+    if (scoped != null) return [scoped];
     const claimed = new Set(get(graph).edges.map((e) => e.member_id));
     const showServed = get(servedAtTop);
     return get(graph)
@@ -170,6 +186,7 @@ export function compilationTreeAtoms(
     }
 
     for (const root of get(roots)) visit(root.source_id);
+    if (get(scopedRoot) != null) return keep;
 
     // The walk starts at the compilation roots, so it never reaches a standalone
     // map. They have no ancestors to widen to, so a direct match is the whole
@@ -188,6 +205,7 @@ export function compilationTreeAtoms(
    * one worth seeing. The NGS quadrangles sit here until something wraps them,
    * and a superseded map often lands here permanently. */
   const standaloneNodes = atom<GraphNode[]>((get) => {
+    if (get(scopedRoot) != null) return [];
     const keep = get(matchingIds);
     return get(graph)
       .nodes.filter((n) => n.is_standalone)
@@ -201,12 +219,6 @@ export function compilationTreeAtoms(
     return get(graph)
       .nodes.filter((n) => keep.has(n.source_id))
       .map((n) => n.slug);
-  });
-
-  const focusNode = atom<GraphNode | null>((get) => {
-    const slug = get(focusSlug);
-    if (slug == null) return null;
-    return get(graph).nodes.find((n) => n.slug === slug) ?? null;
   });
 
   /** The graph is a DAG, so there can be several routes to a node; the first
@@ -280,6 +292,7 @@ export function compilationTreeAtoms(
   return {
     graph,
     focusSlug,
+    focusAsRoot,
     searchText,
     scaleFilter,
     servedAtTop,

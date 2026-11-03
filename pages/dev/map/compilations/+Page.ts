@@ -15,12 +15,13 @@
 import h from "@macrostrat/hyper";
 import { useData } from "vike-react/useData";
 
-import { HybridPage } from "~/layouts/hybrid";
+import { HybridPage, HybridPersona } from "~/layouts/hybrid";
 
 import { CompilationTree, emptyGraph } from "~/components/compilation-tree";
 
 import { CompilationAssistant } from "./assistant";
-import { CompilationToolbar } from "./editor";
+import { CompilationNotices, memberActions } from "./editor";
+import { CompilationToolbar } from "./toolbar";
 import { editAtoms, graphAtom, treeAtoms } from "./state";
 import { onDemand } from "~/_utils";
 
@@ -37,15 +38,22 @@ export function Page() {
     capabilities: {
       defaultMode: "content-primary",
       itemName: "Compilations",
+      contentScroll: "page",
     },
     // `HybridPage` creates its own jotai scope, so page state has to be seeded
     // here rather than in an outer provider.
     initialAtoms: [[graphAtom, graph]],
-    content: h(CompilationTree, {
-      atoms: treeAtoms,
-      toolbar: h(CompilationToolbar),
-      editor: editAtoms,
-    }),
+    actions: h(HybridPersona),
+    filterBar: h(CompilationToolbar),
+    content: h([
+      h(CompilationNotices),
+      h(CompilationTree, {
+        atoms: treeAtoms,
+        editor: editAtoms,
+        showSearch: false,
+        editActions: memberActions,
+      }),
+    ]),
     map: h(CompilationMap),
     assistant: h(CompilationAssistant),
   });
