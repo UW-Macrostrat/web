@@ -9,6 +9,16 @@ a single interface are recorded in that interface's own changelog, such as the
 [map interface changelog](map/changelog.md); the map's 4.x releases predate this
 file and are recorded only there.
 
+## 5.5.4
+
+_November 2026_
+
+### Lexicon
+
+- "View in Sift" on lexicon item pages opens the legacy Sift app at
+  `v1.macrostrat.org/sift/`, since `/sift` links on the main site now redirect
+  into the lexicon.
+
 ## 5.5.3
 
 _November 2026_
