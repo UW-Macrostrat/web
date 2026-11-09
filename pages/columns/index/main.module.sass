@@ -6,6 +6,7 @@
 // scroll body lays bands out by arithmetic, so it can't measure them.
 // `$row-height` is a *band* (one line of the three-column grid); `$row-gap` is
 // the vertical breathing room inside it, so the card itself takes the rest.
+// `$row-gap` is `--pz-card-grid-gap` in px, which the band arithmetic needs.
 $row-height: 48px
 $row-gap: 12px
 $group-height: 34px
@@ -29,10 +30,10 @@ $group-height: 34px
     max-width: none
 
   // Cards have a fixed height, so a band needn't clip: letting it overflow
-  // shows the card's hover lift and shadow. The gap matches `$row-gap`.
+  // shows the card's hover lift and shadow.
   [class*="windowed-row"]
     overflow: visible
-    gap: $row-gap
+    gap: var(--pz-card-grid-gap)
 
 
 .list-loading
@@ -42,17 +43,17 @@ $group-height: 34px
 
 /* ------------------------------------------------------------------- rows */
 
-// A column is the shared `LinkCard`, re-geometried for a dense windowed grid:
-// the card's padding and margin are far too generous at this density. Its
-// surface, border, shadow, hover lift and focus ring stay the card's.
-// Must outrank the card's `a.link-card` and `.bp6-dark .link-card` geometry.
+// A column is a list-density `LinkCard` at a fixed height, so the windowed
+// body can lay bands out by arithmetic. The text is centered in that height
+// rather than padded, and the margin splits the band's gap above and below.
+// Must outrank the card's `.link-card.list` geometry.
 .column-panel a.column-row
   display: flex
   flex-direction: column
   justify-content: center
   height: $row-height - $row-gap
   margin: math.div($row-gap, 2) 0
-  padding: 0 var(--pz-space-2)
+  padding-block: 0
   cursor: pointer
   user-select: none
 

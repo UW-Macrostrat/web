@@ -20,6 +20,10 @@ interface CorrelationHashParams {
    * alternative to a line of section, and how a column page hands off to this
    * one. Mutually exclusive with `section`. */
   columns?: number[] | null;
+  /** A column group to start from (`group=17`): its columns, in id order.
+   * Read only when there is no `section` or `columns`; once the selection is
+   * written to the hash as `columns`, it takes over. */
+  group?: number | null;
   unit?: number;
   /** Shared time filter (`int_id`, `t_age`, `b_age`), see `~/components/time-filter` */
   time?: TimeFilterParams | null;
@@ -44,16 +48,27 @@ export function getCorrelationHashParams(): CorrelationHashParams {
   }
 
   const columns = parseColumnIDs(hash.get("columns"));
+  let group: number | null = null;
+  if (section == null && columns == null) {
+    group = parseGroupID(hash.get("group"));
+  }
   const time = parseTimeFilterParams(hash);
   const project_id = parseProjectFilter(hash.get(PROJECT_FILTER_KEY));
 
   return {
     section,
     columns,
+    group,
     unit,
     time,
     project_id,
   };
+}
+
+function parseGroupID(value: string | null): number | null {
+  const groupID = parseInt(value ?? "", 10);
+  if (!Number.isFinite(groupID)) return null;
+  return groupID;
 }
 
 function parseColumnIDs(value: string | null): number[] | null {

@@ -20,7 +20,7 @@ import {
   SegmentedControl,
   Switch,
 } from "@blueprintjs/core";
-import { ReactNode, useEffect, useMemo } from "react";
+import { Fragment, ReactNode, useEffect, useMemo, useRef } from "react";
 import { DisplayDensity, useCorrelationDiagramStore } from "./state";
 import { PatternProvider } from "~/_providers";
 import {
@@ -30,7 +30,6 @@ import {
 } from "@macrostrat/ui-components";
 import {
   MacrostratDataProvider,
-  fetchUnits,
   useMacrostratColumnInfo,
   useMacrostratStore,
 } from "@macrostrat/data-provider";
@@ -59,6 +58,7 @@ import {
   getCorrelationHashParams,
   setHashStringForCorrelation,
 } from "./hash-string";
+import { fetchColumnGroup, fetchCorrelationUnits } from "./fetch";
 import {
   HybridPage,
   layoutModeAtom,
@@ -75,10 +75,15 @@ import {
   type TimeFilterParams,
 } from "~/components/time-filter";
 import {
+  findProject,
   projectIDParam,
+  projectSlug,
+  resolveProjectIDs,
   ProjectFilterControl,
   ProjectFilterProvider,
   ProjectFilterTag,
+  useProjectDefs,
+  useProjectFilter,
   useProjectIDs,
   type ProjectFilterAtom,
   type ProjectFilterValue,
@@ -138,7 +143,11 @@ export function Page() {
     () => (children: ReactNode) =>
       h(
         CorrelationStoreProvider,
-        { section: hashData.section, columns: hashData.columns ?? null },
+        {
+          section: hashData.section,
+          columns: hashData.columns ?? null,
+          groupID: hashData.group ?? null,
+        },
         children
       ),
     []
@@ -175,7 +184,7 @@ export function Page() {
 /** The map store, seeded from the hash and scoped to the project filter. The
  * footprints re-fetch when the project changes (a prop the store's effects
  * track); the selection itself is the store's from then on. */
-function CorrelationStoreProvider({ section, columns, children }) {
+function CorrelationStoreProvider({ section, columns, groupID, children }) {
   // Slugs resolved to the ids the API takes; `undefined` while resolving
   const projectIDs = useProjectIDs();
   let projectID: any = undefined;
@@ -190,9 +199,49 @@ function CorrelationStoreProvider({ section, columns, children }) {
       // the map in manual selection mode: columns are toggled by clicking.
       selectedColumns: columns,
       projectID,
+      // Always on, so a link to any column or group resolves
+      inProcess: true,
     },
-    children
+    [
+      h(ColumnGroupSeeder, { key: "group", groupID }),
+      h(Fragment, { key: "children" }, children),
+    ]
   );
+}
+
+/** Seeds a manual selection from `group=`: the group's columns in id order.
+ * Its project joins the filter, since the map only loads footprints in scope. */
+function ColumnGroupSeeder({ groupID }: { groupID: number | null }) {
+  const group = useColumnGroup(groupID);
+  const defs = useProjectDefs();
+  const { projects, setProjects } = useProjectFilter();
+  const setSelectedColumns = useCorrelationMapStore(
+    (s) => s.setSelectedColumns
+  );
+  const seeded = useRef(false);
+
+  useEffect(() => {
+    if (seeded.current || group == null || defs == null) return;
+    seeded.current = true;
+    if (group.columnIDs.length === 0) return;
+    setSelectedColumns(group.columnIDs);
+
+    const { projectID } = group;
+    if (projectID == null) return;
+    if (resolveProjectIDs(defs, projects)?.includes(projectID)) return;
+    const slug = projectSlug(findProject(defs, projectID)) ?? String(projectID);
+    setProjects([...projects, slug]);
+  }, [group, defs]);
+
+  return null;
+}
+
+function useColumnGroup(groupID: number | null) {
+  const fetch = useMacrostratStore((state) => state.fetch);
+  return useAsyncMemo(async () => {
+    if (groupID == null) return null;
+    return await fetchColumnGroup(groupID, fetch);
+  }, [groupID]);
 }
 
 /* ------------------------------------------------------------------ the map */
@@ -287,7 +336,7 @@ function CorrelationDiagramWrapper() {
 
   const fetch = useMacrostratStore((state) => state.fetch);
   const columnUnits = useAsyncMemo(async () => {
-    return await fetchUnits(colIDs, fetch);
+    return await fetchCorrelationUnits(colIDs, fetch);
   }, [colIDs]);
 
   // Age window driven by the shared time filter (full extent when unfiltered)
@@ -394,7 +443,7 @@ function UnitDetailsCard({ unit }) {
   const fetch = useMacrostratStore((state) => state.fetch);
   const columnData = useAsyncMemo(async () => {
     if (unit?.col_id == null) return null;
-    return await fetchUnits([unit.col_id], fetch);
+    return await fetchCorrelationUnits([unit.col_id], fetch);
   }, [unit?.col_id]);
   const units = columnData?.[0]?.units ?? [];
 
