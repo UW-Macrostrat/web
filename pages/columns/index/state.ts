@@ -21,6 +21,12 @@ import {
   type ProjectFilterValue,
 } from "~/components/project-filter";
 
+import {
+  buildDataViewSelection,
+  getSelectedRowIndices,
+  rowIndicesToRegions,
+  type SelectModifiers,
+} from "@macrostrat/data-sheet";
 import { atom, useAtomValue } from "jotai";
 import { useCallback } from "react";
 import { unwrap } from "jotai/utils";
@@ -271,55 +277,66 @@ export const assistantIdleAtom = atom(
   (get) => get(selectedColumnsAtom).length === 0
 );
 
-/** Anchor for shift-range selection (the last plain or additive click). */
-const selectionAnchorAtom = atom<number | null>(null);
+export type { SelectModifiers };
 
-export interface SelectModifiers {
-  additive?: boolean;
-  range?: boolean;
-}
+/** The `col_id` that shift-range selections run from: the last item clicked
+ * without shift. A ref, as in the data panel; derived so each store gets one. */
+const selectionAnchorAtom = atom(() => ({ current: null as number | null }));
 
-/** The familiar list idiom, applied to `col_id`s over the visible order:
- * plain replaces, cmd/ctrl toggles one, shift extends from the anchor. */
+/** The data panel's selection rules (`buildDataViewSelection`), run over the
+ * visible order. Selection and anchor stay `col_id`s so they survive filtering;
+ * a cmd/ctrl change keeps selected columns the filter hides. */
 export const selectColumnAtom = atom(
   null,
   (get, set, colID: number | null, mods: SelectModifiers = {}) => {
+    const anchor = get(selectionAnchorAtom);
     if (colID == null) {
       set(selectedColumnsAtom, []);
-      set(selectionAnchorAtom, null);
+      anchor.current = null;
       return;
     }
 
     const order = get(visibleRowsAtom).map((row) => row.col_id);
-    const anchor = get(selectionAnchorAtom);
-
-    if (mods.range && anchor != null) {
-      const from = order.indexOf(anchor);
-      const to = order.indexOf(colID);
-      if (from >= 0 && to >= 0) {
-        const [lo, hi] = from <= to ? [from, to] : [to, from];
-        set(selectedColumnsAtom, order.slice(lo, hi + 1));
-        return;
-      }
-    }
-
-    const current = get(selectedColumnsAtom);
-    if (mods.additive) {
-      let next: number[];
-      if (current.includes(colID)) {
-        next = current.filter((id) => id !== colID);
-      } else {
-        next = [...current, colID];
-      }
-      set(selectedColumnsAtom, next);
-      set(selectionAnchorAtom, colID);
+    const index = order.indexOf(colID);
+    if (index < 0) {
+      set(toggleColumnAtom, colID);
       return;
     }
 
-    set(selectedColumnsAtom, [colID]);
-    set(selectionAnchorAtom, colID);
+    const current = get(selectedColumnsAtom);
+    const visibleSelected = new Set(
+      current.map((id) => order.indexOf(id)).filter((i) => i >= 0)
+    );
+    const indexRef = { current: positionOf(order, anchor.current) };
+    const regions = buildDataViewSelection(
+      index,
+      mods,
+      rowIndicesToRegions(visibleSelected),
+      indexRef,
+      true
+    );
+
+    const picked = getSelectedRowIndices(regions)
+      .sort((a, b) => a - b)
+      .map((i) => order[i]);
+    let hidden: number[] = [];
+    if (mods.additive) {
+      hidden = current.filter((id) => !order.includes(id));
+    }
+    set(selectedColumnsAtom, [...hidden, ...picked]);
+    anchor.current = null;
+    if (indexRef.current != null) {
+      anchor.current = order[indexRef.current];
+    }
   }
 );
+
+function positionOf(order: number[], colID: number | null): number | null {
+  if (colID == null) return null;
+  const index = order.indexOf(colID);
+  if (index < 0) return null;
+  return index;
+}
 
 /** Selection is *modal*, and the mode is shared with the map: while it's off a
  * click — in the list or on a footprint — navigates to the column; while it's on
@@ -327,9 +344,10 @@ export const selectColumnAtom = atom(
  * disagree about what a click means. */
 export const selectionModeAtom = atom(false);
 
-/** Toggle one column in or out of the selection. The map's click path, and the
- * list's when a modifier isn't held. */
+/** Toggle one column in or out of the selection: the map's click path, which
+ * has no order to range over, and a list click on a column outside it. */
 export const toggleColumnAtom = atom(null, (get, set, colID: number) => {
+  get(selectionAnchorAtom).current = colID;
   const current = get(selectedColumnsAtom);
   if (current.includes(colID)) {
     set(
@@ -339,12 +357,11 @@ export const toggleColumnAtom = atom(null, (get, set, colID: number) => {
     return;
   }
   set(selectedColumnsAtom, [...current, colID]);
-  set(selectionAnchorAtom, colID);
 });
 
-export const clearSelectionAtom = atom(null, (_get, set) => {
+export const clearSelectionAtom = atom(null, (get, set) => {
   set(selectedColumnsAtom, []);
-  set(selectionAnchorAtom, null);
+  get(selectionAnchorAtom).current = null;
 });
 
 export function withinBounds(row: ColumnRow, bounds: MapBounds): boolean {

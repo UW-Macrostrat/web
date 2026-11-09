@@ -29,7 +29,7 @@ import { MapView } from "@macrostrat/map-interface";
 import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { navigate } from "vike/client/router";
 
 import { hasContentPane, layoutModeAtom, layoutShellAtom } from "~/layouts/hybrid";
@@ -161,16 +161,18 @@ function FullMap({ projectID, standalone }) {
 /* ------------------------------------------------------- shared behavior */
 
 /** What a footprint click means depends on the shared selection mode: navigate
- * to the column, or toggle it in the selection. */
+ * to the column, or toggle it in the selection. A modifier-click selects in
+ * either mode, as in the list. */
 function useColumnClickHandler() {
   const selectionMode = useAtomValue(selectionModeAtom);
   const columnHref = useColumnHref();
   const toggleColumn = useSetAtom(toggleColumnAtom);
+  const modifierHeld = useClickModifierRef();
 
   return useCallback(
     (colID: number | null) => {
       if (colID == null) return;
-      if (selectionMode) {
+      if (selectionMode || modifierHeld.current) {
         toggleColumn(colID);
         return;
       }
@@ -178,4 +180,19 @@ function useColumnClickHandler() {
     },
     [selectionMode, columnHref, toggleColumn]
   );
+}
+
+/** Whether the latest click held shift, cmd or ctrl. The map layer reports
+ * only the column, so the keys are read from the click as it starts: a
+ * capture listener on `window` runs before Mapbox sees the event. */
+function useClickModifierRef() {
+  const ref = useRef(false);
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      ref.current = event.shiftKey || event.metaKey || event.ctrlKey;
+    };
+    window.addEventListener("click", onClick, { capture: true });
+    return () => window.removeEventListener("click", onClick, { capture: true });
+  }, []);
+  return ref;
 }
