@@ -5,6 +5,7 @@
   line-height: 2em
   color: var(--pz-secondary-color)
   --filter: grayscale(100%)
+  --footer-inner-padding: 8px
 
   h3, h4
     color: var(--pz-secondary-color)
@@ -27,9 +28,15 @@
   .footer-inner
     display: flex
     flex-direction: row
-    flex-wrap: wrap
-    align-items: baseline
+    align-items: start
     gap: 1.5rem 1rem
+    justify-content: space-between
+
+  .footer-nav
+    display: flex
+    flex-direction: row
+    gap: 1.5rem 1rem
+    flex-wrap: wrap
     justify-content: space-between
     &>*
       flex: 1 1 8rem
@@ -97,13 +104,14 @@
 
 .homepage-link
   display: flex
-  flex-direction: column
+  flex-flow: row wrap
   align-items: center
-  gap: 0.5em
-  flex: 0
+  gap: 1em
   h3
     margin: 0
+    font-size: 2em
     color: var(--pz-secondary-color)
+    font-family: "Maven Pro", sans-serif
 
   &:hover
     .footer-logo
@@ -111,7 +119,7 @@
       opacity: 1
 
   .footer-logo
-    width: clamp(48px, 12cqi, 100px)
+    width: clamp(36px, 8cqi, 50px)
     aspect-ratio: 1/1
     // Tint the logo to match the text color
     filter: var(--filter)
@@ -127,31 +135,34 @@
   display: flex
   flex-direction: column
   align-items: flex-start
-  justify-content: space-between
   flex-grow: 1
 
   .link-list-title
-    padding-left: 8px
+    padding-left: var(--footer-inner-padding)
 
 // Narrow footers: the logo and name span a row of their own, the lists sit
 // two to a row beneath, and the type is set smaller and closer
 @container (max-width: 48rem)
   .footer .footer-inner
-    display: grid
-    grid-template-columns: repeat(2, minmax(0, 1fr))
-    align-items: start
-    gap: 1rem
-    font-size: var(--pz-font-size-sm, 0.875rem)
+    //display: grid
+    //grid-template-columns: repeat(2, minmax(0, 1fr))
+    //align-items: start
+    //gap: 1rem
+    font-size: 0.9em
+    //font-size: var(--pz-font-size-sm, 0.875rem)
     line-height: 1.5em
 
   .homepage-link
     grid-column: 1 / -1
     flex-direction: row
-    justify-content: center
+    justify-content: start
+    &> h3
+      display: none
 
     .footer-logo
       order: -1
-      width: 40px
+      width: 32px
+      height: 32px
 
   // Qualified to outrank the footer's own list margin
   .footer .nav-link-list
