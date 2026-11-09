@@ -2530,9 +2530,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^3.18.0":
-  version: 3.18.0
-  resolution: "@macrostrat/column-views@npm:3.18.0"
+"@macrostrat/column-views@npm:^3.18.1":
+  version: 3.18.1
+  resolution: "@macrostrat/column-views@npm:3.18.1"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/api-types": "npm:^1.4.0"
@@ -2541,7 +2541,7 @@ __metadata:
     "@macrostrat/data-components": "npm:^1.10.0"
     "@macrostrat/data-provider": "npm:^1.4.1"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/map-views": "npm:^1.1.2"
+    "@macrostrat/map-views": "npm:^1.1.3"
     "@macrostrat/scoped-store": "npm:^1.1.0"
     "@macrostrat/stratigraphy-utils": "npm:^1.4.2"
     "@macrostrat/timescale": "npm:^3.3.1"
@@ -2560,7 +2560,7 @@ __metadata:
     jotai: "npm:^2.20.0"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/a827c44f3018c4a1307f9a9ad96ecdf0af247df9e062b2de8413b5ce776be2a7ef88313a844543291039e2d730cbd66fbd66378d742d1933bad3dd3aff25d36b
+  checksum: 10c0/b01ffd0d0589c9274ea9de5905f688d9cfc325827135bd95167e9e69e287226283bb0605319804f4a6db2f6709b502f732b3d94a9ac86cfddebbc720e644ef98
   languageName: node
   linkType: hard
 
@@ -2700,7 +2700,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-interface@npm:^2.5.1, @macrostrat/map-interface@npm:^2.6.0":
+"@macrostrat/map-interface@npm:^2.6.0":
   version: 2.6.0
   resolution: "@macrostrat/map-interface@npm:2.6.0"
   dependencies:
@@ -2747,19 +2747,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-views@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "@macrostrat/map-views@npm:1.1.2"
+"@macrostrat/map-views@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "@macrostrat/map-views@npm:1.1.3"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/api-types": "npm:^1.4.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/data-provider": "npm:^1.4.1"
     "@macrostrat/hyper": "npm:^3.1.1"
-    "@macrostrat/map-interface": "npm:^2.5.1"
+    "@macrostrat/map-interface": "npm:^2.6.0"
     "@macrostrat/map-styles": "npm:^2.2.10"
-    "@macrostrat/mapbox-react": "npm:^3.4.1"
-    "@macrostrat/mapbox-utils": "npm:^1.8.0"
+    "@macrostrat/mapbox-react": "npm:^3.5.1"
+    "@macrostrat/mapbox-utils": "npm:^1.9.0"
     "@macrostrat/scoped-store": "npm:^1.1.0"
     "@macrostrat/stratigraphy-utils": "npm:^1.4.2"
     "@macrostrat/svg-map-components": "npm:^2.0.3"
@@ -2785,11 +2785,11 @@ __metadata:
     zustand: "npm:^5.0.3"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/3d27b84b6f15eaa5cf4402b815a15aea3b95c48f7ef584ddd6527a47866c9098de98e45a2b613e325a6966571db0b9dbdc460590da2f8a40d7e6d65a07c16843
+  checksum: 10c0/259f59d87c7fb7ffc4f8af44b5ad11515a18894a6ecc14054f73fd8e124ed97be2b333ec80ebb399758f7fa5bb7d76c117d47c55b9cdc2f8b33c61a44f6ef73d
   languageName: node
   linkType: hard
 
-"@macrostrat/mapbox-react@npm:^3.4.1, @macrostrat/mapbox-react@npm:^3.5.0, @macrostrat/mapbox-react@npm:^3.5.1":
+"@macrostrat/mapbox-react@npm:^3.5.0, @macrostrat/mapbox-react@npm:^3.5.1":
   version: 3.5.1
   resolution: "@macrostrat/mapbox-react@npm:3.5.1"
   dependencies:
@@ -3055,7 +3055,7 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.4.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/column-components": "npm:^2.2.1"
-    "@macrostrat/column-views": "npm:^3.18.0"
+    "@macrostrat/column-views": "npm:^3.18.1"
     "@macrostrat/data-components": "npm:^1.10.0"
     "@macrostrat/data-provider": "npm:^1.4.1"
     "@macrostrat/data-sheet": "npm:^4.11.1"
@@ -3064,7 +3064,7 @@ __metadata:
     "@macrostrat/hyper": "npm:^3.1.1"
     "@macrostrat/map-interface": "npm:^2.6.0"
     "@macrostrat/map-styles": "npm:^2.2.10"
-    "@macrostrat/map-views": "npm:^1.1.2"
+    "@macrostrat/map-views": "npm:^1.1.3"
     "@macrostrat/mapbox-react": "npm:^3.5.1"
     "@macrostrat/mapbox-utils": "npm:^1.9.0"
     "@macrostrat/revision-info-webpack": "npm:^1.0.0"
