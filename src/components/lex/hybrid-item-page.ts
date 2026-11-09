@@ -10,6 +10,7 @@ import {
   type LayoutCapabilities,
 } from "~/layouts/hybrid";
 import { LexItemPage } from "./index";
+import { legacySiftURL } from "./sift-link";
 import { lexOnHybridFrameAtom, LexSidebarSlot } from "./item-slots";
 
 const lexItemCapabilities: Partial<LayoutCapabilities> = {
@@ -80,7 +81,7 @@ function itemLinks({ siftLink, id, mapUrl }): HybridLink[] {
   if (siftLink != null) {
     links.push({
       label: "View in Sift",
-      href: "https://macrostrat.org/sift/#/" + siftLink + "/" + id,
+      href: legacySiftURL(siftLink, id),
     });
   }
   return links;

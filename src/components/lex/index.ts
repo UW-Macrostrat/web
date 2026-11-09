@@ -2,6 +2,7 @@ export * from "./list-page";
 export * from "./item-body-loader";
 export * from "./references";
 import { References } from "./references";
+import { legacySiftURL } from "./sift-link";
 import h from "./main.module.sass";
 import { navigate } from "vike/client/router";
 import {
@@ -132,7 +133,7 @@ function SiftLink({ id, siftLink }) {
     h(
       "a",
       {
-        href: "https://macrostrat.org/sift/#/" + siftLink + "/" + id,
+        href: legacySiftURL(siftLink, id),
         target: "_blank",
       },
       "View in Sift"
