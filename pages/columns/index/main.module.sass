@@ -45,7 +45,8 @@ $group-height: 34px
 // A column is the shared `LinkCard`, re-geometried for a dense windowed grid:
 // the card's padding and margin are far too generous at this density. Its
 // surface, border, shadow, hover lift and focus ring stay the card's.
-.column-row
+// Must outrank the card's `a.link-card` and `.bp6-dark .link-card` geometry.
+.column-panel a.column-row
   display: flex
   flex-direction: column
   justify-content: center

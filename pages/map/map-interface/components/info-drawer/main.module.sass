@@ -10,6 +10,8 @@
 
 .info-drawer > header
   text-wrap: nowrap
+  // Its unwrapped width would otherwise widen the whole map UI on phones.
+  contain: inline-size
 
   // TODO: integrate this with the panel header styles
   :global(.elevation)

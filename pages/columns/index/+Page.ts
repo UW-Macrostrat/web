@@ -758,9 +758,9 @@ function ColumnRowCard({ data }) {
     href: columnHref(col_id),
     onClick,
     title: h("span.col-head", [
-      h("span.col-name", { key: "name" }, col_name),
-      h("span.col-tags", { key: "tags" }, [statusTag, packagesTag, unitsTag]),
-      h("span.col-identifier", { key: "id" }, h(Identifier, { id: col_id })),
+      h("span.col-name", col_name),
+      h("span.col-tags", [statusTag, packagesTag, unitsTag]),
+      h("span.col-identifier", h(Identifier, { id: col_id })),
     ]),
     label: col_name,
   });
