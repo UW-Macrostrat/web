@@ -228,7 +228,8 @@
 .range
   color: var(--pz-text-emphasized-color) !important
 
-.img-dark-mode
+// Keyed on the body theme class, which is set before hydration, so SSR markup matches
+:global(.bp6-dark) .img-dark-mode
   filter: invert(1)
 
 .concept-info

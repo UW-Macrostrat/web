@@ -29,6 +29,7 @@ export function ConceptRelationCard({ concept }: { concept: any }) {
   return h("div.relation-cards", [
     h(LinkCard, {
       className: "relation-card",
+      density: "list",
       href: `/lex/strat-concepts/${conceptId}`,
       kind: "Concept",
       title: concept.name,
@@ -80,6 +81,7 @@ function UsageCard({ usage }) {
     LinkCard,
     {
       className,
+      density: "list",
       href: `/lex/strat-names/${usage.strat_name_id}`,
       kind: "Name",
       title: usage.strat_name_long ?? usage.strat_name,

@@ -26,7 +26,7 @@ export interface NavLinkItem {
  * hybrid map/content page frame) can present the same links without forking
  * the list. Anything that shows navigation should draw from these. */
 export const dataNavItems: NavLinkItem[] = [
-  { href: "/map/#3/40.78/-94.13", text: "Map", icon: "globe" },
+  { href: "/map", text: "Map", icon: "globe" },
   { href: "/columns", text: "Columns", icon: "layers" },
   { href: "/maps", text: "Map sources", icon: "map" },
   { href: "/lex", text: "Lexicon", icon: "book" },
@@ -115,13 +115,15 @@ export function Footer({ className }) {
     { className },
     h("div.footer-inner", [
       h("a.homepage-link", { href: "/" }, [
-        h("h3", "Macrostrat"),
         h(MacrostratIcon, { className: "footer-logo" }),
+        h("h3", "Macrostrat"),
       ]),
-      h(NavLinkList, { items: navItems, title: "Data" }),
-      h(NavLinkList, { items: metaItems, title: "Platform" }),
-      h(NavLinkList, { items: externalLinks, title: "Links" }),
-      h(NavLinkList, { items: actions, title: "Actions" }),
+      h("div.footer-nav", [
+        h(NavLinkList, { items: navItems, title: "Data" }),
+        h(NavLinkList, { items: metaItems, title: "Platform" }),
+        h(NavLinkList, { items: externalLinks, title: "Links" }),
+        h(NavLinkList, { items: actions, title: "Actions" }),
+      ]),
     ])
   );
 }

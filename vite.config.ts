@@ -31,7 +31,14 @@ export default defineConfig({
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: ["react", "react-dom", ...macrostratPackages],
+    dedupe: [
+      "react",
+      "react-dom",
+      // One icon registry in the browser, so preloaded icons match the SSR markup
+      "@blueprintjs/core",
+      "@blueprintjs/icons",
+      ...macrostratPackages,
+    ],
   },
   plugins: [
     vike(),

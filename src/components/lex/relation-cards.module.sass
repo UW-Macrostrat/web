@@ -6,16 +6,10 @@
 .relation-cards
   display: grid
   grid-template-columns: repeat(auto-fill, minmax(18em, 1fr))
-  gap: 0.6em
+  gap: var(--pz-card-grid-gap)
   margin: 1em 0
 
-// The grid gap spaces the cards; must outrank the card's `.bp6-dark .link-card`.
-.relation-cards > :is(a, div).relation-card
-  margin: 0
-
 .relation-card
-  padding: 0.6em 0.8em
-
   h3
     @include type.item-title
     margin-bottom: 0.2em

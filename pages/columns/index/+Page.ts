@@ -755,6 +755,7 @@ function ColumnRowCard({ data }) {
 
   return h(LinkCard, {
     className: classNames("column-row", { selected }),
+    density: "list",
     href: columnHref(col_id),
     onClick,
     title: h("span.col-head", [

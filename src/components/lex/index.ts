@@ -265,7 +265,6 @@ export function FossilsCard({ colData, fossilsData, taxaData }) {
 
 function Taxa({ record }) {
   const imgUrl = pbdbDomain + "/data1.2/taxa/thumb.png?id=";
-  const isDarkMode = useDarkMode().isEnabled;
 
   return h(
     Link,
@@ -277,7 +276,7 @@ function Taxa({ record }) {
     [
       h(BlankImage, {
         src: imgUrl + record.img,
-        className: "taxa-image" + (isDarkMode ? " img-dark-mode" : ""),
+        className: "taxa-image img-dark-mode",
       }),
       h("p.name", record.nam),
     ]
