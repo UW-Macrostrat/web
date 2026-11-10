@@ -198,3 +198,29 @@
   flex-direction: column
   gap: 0.5em
   --data-panel-card-padding: 0
+
+.map-legend-links
+  display: grid
+  gap: 0.5em
+  margin: 1em 0
+
+  &:empty
+    display: none
+
+.map-legend-link
+  display: flex
+  flex-wrap: wrap
+  align-items: baseline
+  gap: 0.25em 0.5em
+  padding: 0.65em 0.85em
+  border-left: 3px solid var(--text-subtle-color)
+  background: var(--panel-background-color)
+  border-radius: 0 4px 4px 0
+
+  a
+    overflow-wrap: anywhere
+
+.map-legend-label
+  color: var(--text-subtle-color)
+  font-weight: 600
+  white-space: nowrap

@@ -5,6 +5,7 @@ import {
   fetchAdjacentInPaper,
   fetchAdjacentSourceTexts,
   fetchKGLookups,
+  fetchKGRows,
   fetchPublication,
   fetchRuns,
   fetchSourceText,
@@ -15,7 +16,15 @@ import {
   numericRouteSegment,
 } from "~/components/knowledge-graph";
 
+export interface KGMapLegend {
+  source_text_id: number;
+  map_id: number;
+  legend_id: number;
+  legend_name: string;
+}
+
 export interface SourceTextPageData {
+  mapLegends: KGMapLegend[];
   sourceText: KGSourceText;
   publication: KGPublication | null;
   /** Model runs a reviewer can correct. */
@@ -46,14 +55,27 @@ export async function data(pageContext): Promise<SourceTextPageData> {
     adjacentRequest = fetchAdjacentInPaper(id, sourceText.paper_id);
   }
 
-  const [modelRuns, humanRunCount, adjacent, lookups, publication] =
+  const [modelRuns, humanRunCount, adjacent, lookups, publication, mapLegends] =
     await Promise.all([
       fetchRuns({ sourceTextId: id, kind: "model", requireVersion: true }),
       countHumanRuns(id),
       adjacentRequest,
       fetchKGLookups(),
       publicationRequest,
+      fetchKGRows<KGMapLegend>("kg_legend", {
+        source_text_id: `eq.${id}`,
+        select: "source_text_id,map_id,legend_id,legend_name",
+        order: "map_id,legend_id",
+      }),
     ]);
 
-  return { sourceText, publication, modelRuns, humanRunCount, adjacent, lookups };
+  return {
+    mapLegends,
+    sourceText,
+    publication,
+    modelRuns,
+    humanRunCount,
+    adjacent,
+    lookups,
+  };
 }
