@@ -16,6 +16,7 @@
  */
 
 import {
+  Button,
   NonIdealState,
   SegmentedControl,
   Spinner,
@@ -25,6 +26,7 @@ import {
   mapboxAccessToken,
   apiV2Prefix,
   apiV3Prefix,
+  postgrestPrefix,
 } from "@macrostrat-web/settings";
 import {
   DetailPanelStyle,
@@ -51,6 +53,7 @@ import { LngLatBoundsLike } from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useData } from "vike-react/useData";
 
+import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { tileRequestTransform } from "~/_utils/compilations";
 import { withSeparateTerrainSource } from "~/_utils/terrain-source";
 import {
@@ -115,7 +118,21 @@ const unitScopeAtom = atom(UnitScope.Visible);
 /** Faces are always drawn below the units' range; this adds them above it. */
 const facesAboveRangeAtom = atom(false);
 
-const selectedLegendIDAtom = atom<number | null>(null);
+const legendIDParamAtom = atomWithSearchParam("legend_id");
+const selectedLegendIDAtom = atom(
+  (get) => {
+    const value = get(legendIDParamAtom);
+    if (value == null || !/^\d+$/.test(value)) return null;
+    const id = Number(value);
+    if (!Number.isSafeInteger(id) || id <= 0) return null;
+    return id;
+  },
+  (_get, set, id: number | null) => {
+    let value: string | null = null;
+    if (id != null) value = String(id);
+    set(legendIDParamAtom, value);
+  }
+);
 const viewAtom = atom<View | null>(null);
 
 enum MenuPage {
@@ -138,6 +155,13 @@ export function Page() {
   const facesAboveRange = useAtomValue(facesAboveRangeAtom);
 
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const selectedLegendID = useAtomValue(selectedLegendIDAtom);
+  const setActivePage = useSetAtom(activePageAtom);
+  useEffect(() => {
+    setSelectedLocation(null);
+    setActivePage(MenuPage.Legend);
+  }, [ident, selectedLegendID, setActivePage]);
+
   const [mapRef, setMapRef] = useState<mapboxgl.Map | null>(null);
 
   const bounds: LngLatBoundsLike = useMemo(
@@ -472,6 +496,26 @@ function LegendContent({ mapInfo, tileJSON }) {
 
   const legend = useLegend(ident, view, useBounds, !belowRange);
 
+  // Resolve a selected entry independently of camera bounds and tile zoom.
+  // A deep link must still open its detail when the unit is off screen.
+  if (selectedID != null) {
+    const selected = legend.data?.find(
+      (entry) => entry.legend_id === selectedID
+    );
+    if (selected != null) {
+      return h(LegendEntryDetailView, {
+        entry: selected,
+        onClose: () => setSelectedID(null),
+      });
+    }
+    return h(SelectedLegend, {
+      sourceID: mapInfo.source_id,
+      legendID: selectedID,
+      onClose: () => setSelectedID(null),
+      key: `${mapInfo.source_id}:${selectedID}`,
+    });
+  }
+
   if (belowRange) {
     let description = `Units are drawn from zoom ${minzoom}.`;
     if (tileJSON?.faces != null) {
@@ -494,14 +538,65 @@ function LegendContent({ mapInfo, tileJSON }) {
     });
   }
 
-  const selected = legend.data.find((d) => d.legend_id === selectedID);
-  if (selected != null) {
-    return h(LegendEntryDetailView, {
-      entry: selected,
-      onClose: () => setSelectedID(null),
+  return h(LegendEntries, { data: legend.data, onSelect: setSelectedID });
+}
+
+/** Fetch only the requested entry, constrained to the current map. */
+function SelectedLegend({ sourceID, legendID, onClose }) {
+  const [state, setState] = useState<{ entry: any; error: string | null }>({
+    entry: null,
+    error: null,
+  });
+  useEffect(() => {
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      source_id: `eq.${sourceID}`,
+      legend_id: `eq.${legendID}`,
+      limit: "1",
+    });
+    fetch(`${postgrestPrefix}/legend?${params}`, { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Legend request failed (${res.status})`);
+        return res.json();
+      })
+      .then((rows) => {
+        if (rows.length === 0)
+          throw new Error("This legend entry is not in this map.");
+        const row = rows[0];
+        // The shared legend UI uses the v3 field names and bare IDs.
+        const entry = {
+          ...row,
+          map_unit_name: row.name,
+          b_age: row.best_age_bottom,
+          t_age: row.best_age_top,
+          b_interval: row.b_interval?.id ?? null,
+          t_interval: row.t_interval?.id ?? null,
+          lith_id: row.lith_ids,
+        };
+        setState({ entry, error: null });
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        setState({ entry: null, error: String(error) });
+      });
+    return () => controller.abort();
+  }, [sourceID, legendID]);
+
+  if (state.error != null) {
+    return h(NonIdealState, {
+      icon: "error",
+      title: "Couldn't load the selected legend",
+      description: state.error,
+      action: h(Button, { onClick: onClose }, "Back to legend"),
     });
   }
-  return h(LegendEntries, { data: legend.data, onSelect: setSelectedID });
+  if (state.entry == null) {
+    return h(NonIdealState, {
+      icon: h(Spinner, { size: 24 }),
+      title: "Loading selected legend",
+    });
+  }
+  return h(LegendEntryDetailView, { entry: state.entry, onClose });
 }
 
 /** The source's legend at the view's zoom: every entry it draws, or only those

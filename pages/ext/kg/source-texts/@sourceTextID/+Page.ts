@@ -35,6 +35,25 @@ export function Page() {
       href: paperHref(sourceText.paper_id),
       headingLevel: 3,
     }),
+    h(
+      "div.map-legend-links",
+      data.mapLegends.map((legend) =>
+        h(
+          "div.map-legend-link",
+          { key: `${legend.map_id}:${legend.legend_id}` },
+          [
+            h("span.map-legend-label", "Map Legend:"),
+            h(
+              "a",
+              {
+                href: `/maps/${legend.map_id}?legend_id=${legend.legend_id}`,
+              },
+              legend.legend_name
+            ),
+          ]
+        )
+      )
+    ),
     h(Editor, { modelRuns, lookups, autoSelect }),
   ]);
 }
