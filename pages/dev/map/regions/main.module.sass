@@ -1,0 +1,154 @@
+// Region list page content. The frame itself lives in `~/layouts/hybrid`.
+
+// The hybrid shell scrolls the panel and sticks its toolbar (its `panel` mode).
+.region-panel
+  height: 100%
+  min-height: 0
+  min-width: 0
+
+  // `.data-panel-main` is a flex item; its min-content width would push the
+  // grid wider than the split shell's fixed panel. Scoped inside `data-sheet`.
+  > div
+    min-width: 0
+
+  [class*="data-panel-toolbar-content"]
+    max-width: none
+
+.region-grid
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr))
+  gap: var(--pz-space-2)
+  padding: var(--pz-space-1) 0
+  --data-panel-card-padding: 0
+
+/* ------------------------------------------------------------------ cards */
+
+.region-card
+  display: flex
+  flex-direction: column
+  justify-content: center
+  gap: 0.2em
+  height: 100%
+  min-width: 0
+  margin: 0
+  padding: var(--pz-space-2) var(--pz-space-3)
+
+  h3
+    margin: 0
+    font-size: 1em
+    font-weight: 500
+
+  &.selected
+    outline: 2px solid #f5a623
+
+.region-head
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  gap: var(--pz-inline-gap)
+  min-width: 0
+
+.region-name
+  flex: 1 1 auto
+  min-width: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+.region-meta
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  gap: var(--pz-inline-gap)
+  min-width: 0
+  color: var(--pz-secondary-color)
+  font-size: 0.85rem
+
+.region-subtitle
+  flex: 1 1 auto
+  min-width: 0
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+.region-identifier
+  flex: 0 0 auto
+  margin-left: auto
+  color: var(--pz-secondary-color)
+  font-family: var(--monospace-font)
+  font-size: 0.8rem
+
+// The map's class colors, as a tint
+.class-tag
+  flex: 0 0 auto
+  font-size: 0.75rem
+  --class-color: var(--pz-secondary-color)
+  // Blueprint's minimal tag outranks a single class
+  color: var(--class-color) !important
+  background-color: color-mix(in srgb, var(--class-color) 15%, transparent) !important
+
+.class-physiographic
+  --class-color: #2f9a85
+
+.class-basin
+  --class-color: #d0692e
+
+.class-glacial
+  --class-color: #2f7fc1
+
+.class-ecoregion
+  --class-color: #6a9a3a
+
+/* --------------------------------------------------------------- controls */
+
+.search-input
+  flex: 1 1 auto
+  min-width: 10rem
+
+  @container hybrid-list (max-width: 40rem)
+    min-width: 6rem
+
+.source-select
+  min-width: 16rem
+
+/* -------------------------------------------------------------- assistant */
+
+.assistant
+  padding: var(--pz-content-padding)
+
+  h2
+    font-size: 1rem
+    margin: 0
+
+  h3
+    font-size: 1rem
+    margin: 0
+
+.assistant-header
+  display: flex
+  flex-direction: row
+  align-items: center
+  justify-content: space-between
+  gap: var(--pz-inline-gap)
+
+.assistant-empty
+  color: var(--pz-secondary-color)
+  margin: 0
+
+.assistant-point
+  margin: 0.2em 0 var(--pz-paragraph-spacing)
+  color: var(--pz-secondary-color)
+  font-family: var(--monospace-font)
+  font-size: 0.8rem
+
+.region-detail
+  padding: var(--pz-space-2) 0
+  border-top: 1px solid var(--panel-rule-color, rgba(128, 128, 128, 0.2))
+
+.region-description
+  margin: var(--pz-space-2) 0
+
+.region-reference
+  margin: var(--pz-space-2) 0
+  color: var(--pz-secondary-color)
+  font-size: 0.85rem
