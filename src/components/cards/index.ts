@@ -41,6 +41,9 @@ interface LinkCardProps {
    * like any other link (middle-click, copy link, the client router).
    */
   onClick?: (event: React.MouseEvent) => void;
+  /** Pointer enter/leave on the whole card, e.g. to mark it on a linked map. */
+  onMouseEnter?: (event: React.MouseEvent) => void;
+  onMouseLeave?: (event: React.MouseEvent) => void;
   /**
    * `list` is the card for a flat list or grid of many: tighter padding and no
    * page-level margin, with the shadow and hover lift kept. `compact` is for a
@@ -61,8 +64,11 @@ export function LinkCard(props: LinkCardProps) {
     nestedLinks = false,
     label,
     onClick,
+    onMouseEnter,
+    onMouseLeave,
     density = "default",
   } = props;
+  const hoverProps = { onMouseEnter, onMouseLeave };
 
   // Built here rather than passed as a tag class, because a variant selected by
   // the caller's `className` would be scoped by the *caller's* style module —
@@ -84,15 +90,15 @@ export function LinkCard(props: LinkCardProps) {
   }
 
   if (href == null) {
-    return h("div", { className: classNames(cardClass, "no-link") }, [
-      kindNode,
-      titleNode,
-      children,
-    ]);
+    return h(
+      "div",
+      { className: classNames(cardClass, "no-link"), ...hoverProps },
+      [kindNode, titleNode, children]
+    );
   }
 
   if (!nestedLinks) {
-    return h(Link, { className: cardClass, href, onClick }, [
+    return h(Link, { className: cardClass, href, onClick, ...hoverProps }, [
       kindNode,
       titleNode,
       children,
@@ -104,7 +110,7 @@ export function LinkCard(props: LinkCardProps) {
     ariaLabel = title;
   }
 
-  return h("div.has-overlay", { className: cardClass }, [
+  return h("div.has-overlay", { className: cardClass, ...hoverProps }, [
     h(Link, {
       key: "overlay",
       className: "card-overlay-link",

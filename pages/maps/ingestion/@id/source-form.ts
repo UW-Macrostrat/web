@@ -20,9 +20,11 @@ const INPUT_FIELDS = {
   "Reference Year": "ref_year",
   "ISBN DOI": "isbn_doi",
   Scale: "scale",
+  "Scale Denominator": "scale_denominator",
   License: "license",
-  Area: "area",
 };
+
+const NUMERIC_FIELDS = new Set(["scale_denominator"]);
 
 const postSource = async (data: any) => {
   const response = await fetch(`${ingestPrefix}/sources`, {
@@ -95,6 +97,10 @@ const StringInput = ({
   name: string;
   value?: string;
 }) => {
+  let type = "text";
+  if (NUMERIC_FIELDS.has(name)) {
+    type = "number";
+  }
   return h(
     FormGroup,
     {
@@ -107,6 +113,7 @@ const StringInput = ({
         {
           id: name,
           name: name,
+          type,
           defaultValue: value,
         },
         []
@@ -239,10 +246,12 @@ const EditSourceForm = ({ sourceId }: { sourceId: number }) => {
 
       // Filter out data that is the same as the source
       const filteredData = Object.entries(data).filter(([key, value]) => {
-        // Pass if the value is different from source, but consider null and empty string as the same
-        return (
-          value !== source?.[key] && !(value == "" && source?.[key] == null)
-        );
+        // An empty number fails API validation, and PATCH can't null a field anyway
+        if (NUMERIC_FIELDS.has(key) && value == "") {
+          return false;
+        }
+        // Form values are strings; compare as strings so numbers and nulls match
+        return value !== String(source?.[key] ?? "");
       });
 
       // Convert array of key value pairs into an object

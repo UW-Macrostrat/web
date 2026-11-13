@@ -38,6 +38,8 @@ import {
   columnMapStore,
   columnMapTargetAtom,
   getColumnMapNode,
+  useHoveredColumn,
+  useSetHoveredColumn,
   type ColumnMapTarget,
   type MapBounds,
 } from "./target";
@@ -86,6 +88,7 @@ function ColumnNavigationMapView({ target }: { target: ColumnMapTarget }) {
 
   // Basemap and labels, from the settings bar beneath the page's slot.
   const styleProps = useInsetMapStyleProps();
+  const setHoveredColumn = useSetHoveredColumn();
 
   return h(
     ColumnNavigationMap,
@@ -97,8 +100,10 @@ function ColumnNavigationMapView({ target }: { target: ColumnMapTarget }) {
       projectID,
       selectedColumn,
       onSelectColumn: target.onSelectColumn,
+      onHoverColumn: (colID: number | null) => setHoveredColumn(colID ?? null),
     },
     [
+      h(HoveredColumnHighlight, { key: "hover", columns }),
       h(SelectedColumnsOverlay, {
         key: "selection",
         columns,
@@ -156,6 +161,29 @@ export function SelectedColumnsOverlay({ columns, selectedIDs }) {
       });
     },
     [features]
+  );
+
+  return null;
+}
+
+/** Marks the column hovered in the list with the column layer's `highlighted`
+ * feature-state, which the library draws the same as a map hover. Exported for
+ * the list page's map-dominant shell, like the selection overlay. */
+export function HoveredColumnHighlight({ columns }) {
+  const colID = useHoveredColumn();
+
+  useMapStyleOperator(
+    (map) => {
+      const feature = columns.find((col) => col.properties?.col_id === colID);
+      if (feature?.id == null || map.getSource("columns") == null) return;
+      const ref = { source: "columns", id: feature.id };
+      map.setFeatureState(ref, { highlighted: true });
+      return () => {
+        if (map.getSource("columns") == null) return;
+        map.setFeatureState(ref, { highlighted: false });
+      };
+    },
+    [colID, columns]
   );
 
   return null;

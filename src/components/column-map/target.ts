@@ -28,7 +28,7 @@
  */
 import hyper from "@macrostrat/hyper";
 import { atom, createStore, useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 
 import { MapSettingsOverlay } from "~/components/map-settings";
 import styles from "./map-slot.module.sass";
@@ -74,6 +74,28 @@ export const columnMapBoundsAtom = atom<MapBounds | null>(null);
 /** The shared map's viewport, from inside a page's own jotai scope. */
 export function useColumnMapBounds(): MapBounds | null {
   return useAtomValue(columnMapBoundsAtom, { store: columnMapStore });
+}
+
+/** The column under the pointer, in the list or on the map, so each view can
+ * mark it in the other. Kept apart from the target so a hover doesn't
+ * re-target the map. */
+export const hoveredColumnAtom = atom<number | null>(null);
+
+export function useSetHoveredColumn(): (colID: number | null) => void {
+  return useSetAtom(hoveredColumnAtom, { store: columnMapStore });
+}
+
+export function useHoveredColumn(): number | null {
+  return useAtomValue(hoveredColumnAtom, { store: columnMapStore });
+}
+
+/** Whether this one column is hovered; re-renders only when that changes. */
+export function useIsColumnHovered(colID: number): boolean {
+  const isHoveredAtom = useMemo(
+    () => atom((get) => get(hoveredColumnAtom) === colID),
+    [colID]
+  );
+  return useAtomValue(isHoveredAtom, { store: columnMapStore });
 }
 
 let mapNode: HTMLDivElement | null = null;
