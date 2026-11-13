@@ -64,6 +64,14 @@ $group-height: 34px
     font-size: 1em
     font-weight: 400
 
+  // Its footprint is hovered on the map: the card's hover look, without the lift.
+  &.hovered
+    border-color: var(--pz-accent-color)
+    box-shadow: var(--pz-shadow-lg)
+
+    h3
+      color: var(--pz-link-hover-color)
+
   // A translucent tint over the card's own surface, so it keeps its color.
   &.selected
     background-image: linear-gradient(var(--pz-selected-background-color), var(--pz-selected-background-color))

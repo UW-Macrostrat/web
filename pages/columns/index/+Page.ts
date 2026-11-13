@@ -54,7 +54,11 @@ import {
   InProcessSwitch,
 } from "~/components/in-process-filter";
 import { onDemand } from "~/_utils";
-import { useColumnMapBounds } from "~/components/column-map/target";
+import {
+  useColumnMapBounds,
+  useIsColumnHovered,
+  useSetHoveredColumn,
+} from "~/components/column-map/target";
 import {
   useCarriedScopeAtMount,
   usePublishColumnScope,
@@ -707,6 +711,8 @@ function ColumnRowCard({ data }) {
 
   const { col_id, col_name, t_units, t_sections, status_code } = data;
   const selected = selectedIDs.includes(col_id);
+  const hovered = useIsColumnHovered(col_id);
+  const setHoveredColumn = useSetHoveredColumn();
 
   // `t_units` / `t_sections` are only in the API's `response=long` payload,
   // which this list can't afford (4.7 MB and ~3 s for the 2,783 rows it holds
@@ -754,10 +760,12 @@ function ColumnRowCard({ data }) {
   };
 
   return h(LinkCard, {
-    className: classNames("column-row", { selected }),
+    className: classNames("column-row", { selected, hovered }),
     density: "list",
     href: columnHref(col_id),
     onClick,
+    onMouseEnter: () => setHoveredColumn(col_id),
+    onMouseLeave: () => setHoveredColumn(null),
     title: h("span.col-head", [
       h("span.col-name", col_name),
       h("span.col-tags", [statusTag, packagesTag, unitsTag]),

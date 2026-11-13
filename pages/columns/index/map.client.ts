@@ -32,11 +32,19 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { navigate } from "vike/client/router";
 
-import { hasContentPane, layoutModeAtom, layoutShellAtom } from "~/layouts/hybrid";
-import { ColumnMapSlot } from "~/components/column-map/target";
+import {
+  hasContentPane,
+  layoutModeAtom,
+  layoutShellAtom,
+} from "~/layouts/hybrid";
+import {
+  ColumnMapSlot,
+  useSetHoveredColumn,
+} from "~/components/column-map/target";
 import { useInsetMapStyleProps } from "~/components/map-settings";
 import {
   ColumnMapBoundsReporter,
+  HoveredColumnHighlight,
   SelectedColumnsOverlay,
 } from "~/components/column-map/persistent-map.client";
 
@@ -116,6 +124,7 @@ function FullMap({ projectID, standalone }) {
   const visibleColumnIDs = useVisibleColumnIDs();
   const selectedIDs = useAtomValue(selectedColumnsAtom);
   const onColumnClick = useColumnClickHandler();
+  const setHoveredColumn = useSetHoveredColumn();
   // Follows the same settings as the shared instance, so switching shells
   // keeps the basemap.
   const { mapStyle, columnColor } = useInsetMapStyleProps();
@@ -147,7 +156,10 @@ function FullMap({ projectID, standalone }) {
         projectID,
         selectedColumn: null,
         onSelectColumn: onColumnClick,
+        onHoverColumn: (colID: number | null) =>
+          setHoveredColumn(colID ?? null),
       }),
+      h(HoveredColumnHighlight, { key: "hover", columns }),
       h(SelectedColumnsOverlay, {
         key: "selection",
         columns,
@@ -192,7 +204,8 @@ function useClickModifierRef() {
       ref.current = event.shiftKey || event.metaKey || event.ctrlKey;
     };
     window.addEventListener("click", onClick, { capture: true });
-    return () => window.removeEventListener("click", onClick, { capture: true });
+    return () =>
+      window.removeEventListener("click", onClick, { capture: true });
   }, []);
   return ref;
 }
