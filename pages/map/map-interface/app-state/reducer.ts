@@ -1,5 +1,6 @@
 import { AppAction, CoreState, MapLayer } from "./types";
 import update, { Spec } from "immutability-helper";
+import { getMapPositionForHash } from "@macrostrat/map-interface";
 import { FilterData, filterAppliesToMap } from "./handlers/filters";
 import { updateStateFromLocation } from "./location-state";
 import { browserHistory } from "./browser-history";
@@ -55,13 +56,8 @@ const defaultState: CoreState = {
   plateModelId: 3,
   focusedMapSource: null,
   compilation: null,
-  mapPosition: {
-    camera: {
-      lng: 23,
-      lat: 16,
-      altitude: 300000,
-    },
-  },
+  // World view centred on Africa, built like a hash so the zoom applies directly.
+  mapPosition: getMapPositionForHash({ x: "16", y: "23", z: "1.5" }, null),
 };
 
 export function createInitialState() {
