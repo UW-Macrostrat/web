@@ -1,0 +1,107 @@
+/* ---------------------------------------------------------------- toolbar */
+
+.ref-toolbar
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.5em
+  width: 100%
+  padding: 0.4em 0
+
+.toolbar-search
+  width: 14em
+  max-width: 100%
+
+.toolbar-switch
+  margin: 0
+  font-size: 0.85em
+
+.toolbar-count
+  margin-left: auto
+  font-size: 0.8em
+  color: var(--secondary-color)
+
+/* ------------------------------------------------------------------- list */
+
+.ref-list
+  list-style: none
+  margin: 0
+  padding: 0
+
+.ref-row
+  display: flex
+  flex-direction: column
+  gap: 0.25em
+  padding: 0.5em 0.6em
+  border-bottom: 1px solid var(--pz-border-color, var(--panel-rule-color))
+  cursor: pointer
+
+  &:hover
+    background: var(--pz-hover-background, var(--panel-secondary-background-color))
+
+  &.selected
+    background: var(--pz-selected-background, var(--panel-secondary-background-color))
+    box-shadow: inset 3px 0 0 #f5a623
+
+.ref-heading
+  display: flex
+  gap: 0.5em
+  align-items: baseline
+
+.ref-id
+  font-variant-numeric: tabular-nums
+  color: var(--secondary-color)
+  font-size: 0.85em
+
+.ref-author
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
+
+.ref-tags
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.3em
+
+.ref-names
+  font-size: 0.8em
+  color: var(--secondary-color)
+
+/* -------------------------------------------------------------- assistant */
+
+.ref-assistant
+  display: flex
+  flex-direction: column
+  gap: 0.6em
+
+.hint
+  margin: 0.4em 0
+  font-size: 0.85em
+  color: var(--secondary-color)
+
+.citation
+  margin: 0 0 0.5em
+  font-size: 0.9em
+
+.problem
+  margin-bottom: 0.5em
+  font-size: 0.85em
+
+  code
+    font-size: 0.9em
+    word-break: break-all
+
+.facts
+  display: grid
+  grid-template-columns: auto 1fr
+  gap: 0.2em 0.8em
+  margin: 0
+  font-size: 0.85em
+
+  dt
+    color: var(--secondary-color)
+
+  dd
+    margin: 0
+    font-variant-numeric: tabular-nums
