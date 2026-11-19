@@ -237,6 +237,7 @@ function ColumnContentPane({ columnInfo }) {
     b_pos,
     pixelScale,
     grainsize,
+    collapseSmallUnconformities,
   } = useColumnState(columnInfo);
 
   // The rendered age window follows the shared time filter, animating between
@@ -319,7 +320,7 @@ function ColumnContentPane({ columnInfo }) {
               unitComponent: ColoredUnitComponent,
               unitComponentProps: selectedUnitProps,
               unconformityLabels: "minimal",
-              collapseSmallUnconformities: true,
+              collapseSmallUnconformities,
               showTimescale,
               axisType,
               // `auto` grain size follows the column type, not the axis

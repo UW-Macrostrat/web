@@ -1,0 +1,77 @@
+@use "~/styles/type"
+
+// How far the sticky headers reach past the list's sides, so the shadows of
+// cards scrolling beneath them don't show beside them. Within the panel's
+// padding.
+$header-bleed: 8px
+
+// `--list-sticky-top` is where the headers park: below a floating toolbar when
+// an ancestor scrolls (set by the hybrid shell), else the scrollport's edge.
+.grouped-root
+  --grouped-section-height: 0px
+  position: relative
+  width: 100%
+
+  &.has-sections
+    --grouped-section-height: 34px
+
+%sticky-header
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap)
+  margin: 0 (-$header-bleed)
+  padding: 0 calc(var(--pz-space-2) + #{$header-bleed})
+  overflow: hidden
+  position: sticky
+  background-color: var(--pz-background-color)
+
+// The list's section heading (an `h2`), in the page's own color so it reads as
+// the top edge of the content rather than a panel floating over it
+.grouped-section-header
+  @extend %sticky-header
+  @include type.section-heading
+  height: var(--grouped-section-height)
+  top: var(--list-sticky-top, 0px)
+  z-index: 4
+  border-bottom: 1px solid var(--pz-border-color)
+
+// Subsections (`h3`), sticking beneath their section's header
+.grouped-group-header
+  @extend %sticky-header
+  @include type.subsection-heading
+  font-size: var(--pz-font-size-md)
+  height: 30px
+  top: calc(var(--list-sticky-top, 0px) + var(--grouped-section-height))
+  z-index: 3
+  border-bottom: 1px solid var(--pz-panel-rule-color)
+
+// Room before the next group's header
+.grouped-group
+  padding-bottom: var(--pz-space-3)
+
+// A break within a group, below its header in rank and scrolling with the cards
+.grouped-divider
+  display: flex
+  flex-direction: row
+  align-items: center
+  gap: var(--pz-inline-gap)
+  margin-top: var(--pz-space-2)
+  padding: var(--pz-space-1) var(--pz-space-2)
+  border-bottom: 1px solid var(--pz-panel-rule-color)
+  color: var(--pz-text-color)
+  font-size: var(--pz-font-size-sm)
+  font-weight: 600
+
+// Cards at their own width, wrapping to fill the line
+.grouped-cards
+  display: flex
+  flex-flow: row wrap
+  gap: var(--pz-card-grid-gap)
+  padding-block: var(--pz-space-3)
+
+  // The panel wraps each card in its own container
+  > *
+    flex: 0 1 auto
+    min-width: 0
+    max-width: 100%

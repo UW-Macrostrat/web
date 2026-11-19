@@ -44,9 +44,9 @@ function useNearbyColumns(colID: number | null) {
   const [data, setData] = useState<NearbyColumnsResult | null>(null);
 
   useEffect(() => {
+    setData(null);
     if (colID == null) return;
     let cancelled = false;
-    setData(null);
     fetch(`${apiV3Prefix}/columns/${colID}/nearby`)
       .then(async (res) => {
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);

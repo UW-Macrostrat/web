@@ -75,6 +75,9 @@ export interface ColumnRow {
   t_sections: number;
   /** Resolved from the project definitions, for the list's section headers. */
   project_name: string;
+  /** Columns in this row's group and project, for their headers. */
+  group_columns: number;
+  project_columns: number;
   /** In-process columns in this row's group, for its divider. */
   group_in_process: number;
   /** Every column of the group is in process, so its header says so once. */
@@ -254,10 +257,13 @@ export const allRowsAtom = atom<ColumnRow[]>((get) => {
   const projectNames = get(projectNamesAtom);
 
   const activeProjects = new Set<number>();
+  const projectColumns = new Map<number, number>();
   for (const group of groups) {
     for (const col of group.columns) {
+      const project = col.project_id as number;
+      projectColumns.set(project, (projectColumns.get(project) ?? 0) + 1);
       if (col.status_code === IN_PROCESS_STATUS) continue;
-      activeProjects.add(col.project_id as number);
+      activeProjects.add(project);
     }
   }
 
@@ -271,6 +277,8 @@ export const allRowsAtom = atom<ColumnRow[]>((get) => {
       col_group_id: group.id,
       project_name:
         projectNames.get(col.project_id) ?? `Project ${col.project_id}`,
+      group_columns: group.columns.length,
+      project_columns: projectColumns.get(col.project_id as number) ?? 0,
       group_in_process: inProcess,
       group_all_in_process: inProcess === group.columns.length,
       project_all_in_process: !activeProjects.has(col.project_id as number),

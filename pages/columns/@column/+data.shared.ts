@@ -53,8 +53,18 @@ export async function data(pageContext) {
     ),
   ]);
 
-  const [project, allProjects, columnsResponse, units]: [any, any, any, any] =
+  const [project, allProjects, longResponse, units]: [any, any, any, any] =
     responses;
+
+  // API v2's long response leaves out a column without units
+  let columnsResponse = longResponse;
+  if ((longResponse?.data ?? []).length === 0) {
+    columnsResponse = await getData(
+      "columns",
+      { col_id, project_id: projectID, format: "json", response: "short" },
+      (res) => res
+    );
+  }
 
   const columns = columnsResponse?.data ?? [];
   const columnInfo: ColumnSummary = assembleColumnSummary(columns[0], units);

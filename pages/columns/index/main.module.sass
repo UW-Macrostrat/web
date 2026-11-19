@@ -1,15 +1,4 @@
-@use "sass:math"
-
 // Column list page content. The frame itself lives in `~/layouts/hybrid`.
-
-// Must match ROW_HEIGHT / GROUP_HEIGHT / GROUP_GAP in `+Page.ts` — the windowed
-// scroll body lays bands out by arithmetic, so it can't measure them.
-// `$row-height` is a *band* (one line of the three-column grid); `$row-gap` is
-// the vertical breathing room inside it, so the card itself takes the rest.
-// `$row-gap` is `--pz-card-grid-gap` in px, which the band arithmetic needs.
-$row-height: 48px
-$row-gap: 12px
-$group-height: 34px
 
 // The hybrid shell scrolls the panel and sticks its toolbar (its `panel` mode).
 .column-panel
@@ -29,12 +18,6 @@ $group-height: 34px
   [class*="data-panel-toolbar-content"]
     max-width: none
 
-  // Cards have a fixed height, so a band needn't clip: letting it overflow
-  // shows the card's hover lift and shadow.
-  [class*="windowed-row"]
-    overflow: visible
-    gap: var(--pz-card-grid-gap)
-
 
 .list-loading
   display: flex
@@ -43,26 +26,45 @@ $group-height: 34px
 
 /* ------------------------------------------------------------------- rows */
 
-// A column is a list-density `LinkCard` at a fixed height, so the windowed
-// body can lay bands out by arithmetic. The text is centered in that height
-// rather than padded, and the margin splits the band's gap above and below.
-// Must outrank the card's `.link-card.list` geometry.
+// A column is a list-density `LinkCard`, one line high and as wide as its
+// name. Must outrank the card's `.link-card.list` geometry.
 .column-panel a.column-row
   display: flex
   flex-direction: column
   justify-content: center
-  height: $row-height - $row-gap
-  margin: math.div($row-gap, 2) 0
+  height: 36px
+  // Long names truncate rather than take a line each
+  max-width: 500px
+  margin: 0
   padding-block: 0
   cursor: pointer
   user-select: none
 
-  // Geometry only: the card's heading *color* is the design system's role for a
-  // card title (`--pz-heading-color`), and a column card is a card.
+  // Plain text in the body face until hovered: thousands of link-colored names
+  // in the heading face would shout
   h3
     margin: 0
+    font-family: var(--pz-body-font)
     font-size: 1em
     font-weight: 400
+    color: var(--pz-text-color)
+
+  &:hover h3
+    color: var(--pz-link-hover-color)
+
+  // Placeholders and drafts, receding behind the active columns
+  &.in-process
+    background-color: color-mix(in srgb, var(--pz-panel-background-color) 50%, var(--pz-background-color))
+    box-shadow: var(--pz-shadow-sm)
+
+    h3
+      color: var(--pz-text-subtle-color)
+
+    &:hover
+      box-shadow: var(--pz-shadow-md)
+
+      h3
+        color: var(--pz-link-hover-color)
 
   // Its footprint is hovered on the map: the card's hover look, without the lift.
   &.hovered
@@ -95,6 +97,14 @@ $group-height: 34px
 
   &:empty
     display: none
+
+// How many columns a project, group or its in-process part holds: an aside
+.header-count,
+.divider-count
+  flex: 0 0 auto
+  color: var(--pz-secondary-color)
+  font-style: italic
+  font-weight: 400
 
 // Project and group ids sit at the right of their headers
 .header-identifier
