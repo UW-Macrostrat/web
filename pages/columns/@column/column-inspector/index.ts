@@ -50,6 +50,7 @@ import {
 } from "@macrostrat/data-components";
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
+import { NearbyColumns } from "./nearby-columns";
 import {
   HybridBottomSheet,
   HybridPage,
@@ -706,6 +707,7 @@ function ColumnInfoPanel({
     h("div.column-assistant-body", [
       h(ColumnBasicInfo, { data, refs, project, columnProjects }),
       h(ColumnExtData, { columnInfo: data, onSelectFacet: setFacet }),
+      h(NearbyColumns, { colID: data.col_id }),
     ]),
     h("div.column-actions", [
       h(AnchorButton, {

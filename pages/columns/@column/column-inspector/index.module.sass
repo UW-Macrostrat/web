@@ -212,3 +212,32 @@ div.section
   display: flex
   flex-direction: row
 
+
+// Columns of other projects at the same place, one collapsed row per project
+.nearby-columns
+  margin-top: 0.5em
+
+.nearby-project-toggle
+  width: 100%
+  .nearby-project-name
+    margin-right: 0.5em
+  .nearby-count
+    color: var(--secondary-color)
+
+.nearby-list
+  list-style: none
+  margin: 0.2em 0 0.5em 1.6em
+  padding: 0
+
+.nearby-column
+  display: flex
+  align-items: baseline
+  gap: 0.4em
+  .nearby-distance
+    margin-left: auto
+    white-space: nowrap
+    color: var(--secondary-color)
+
+.nearby-more
+  color: var(--secondary-color)
+  font-style: italic
