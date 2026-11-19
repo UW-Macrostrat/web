@@ -1,112 +1,83 @@
-/** Every account, searchable, with its role editable in place.
+/** Every account, searchable, with role, display name and email editable.
  *
- * A `DataSheet` over a provider that reads `GET /security/users` (the search
- * box becomes the `q` parameter) and writes role changes back one
- * `PATCH /security/users/{id}` at a time through `saveRows` — the sheet's own
- * Save action calls it with the edited rows and reloads. Only the role is
- * editable; the rest of a record is the user's own, from ORCID.
+ * Edits are held by the sheet until its Save action, which sends one
+ * `PATCH /security/users/{id}` per edited row; rows marked with Delete are
+ * removed by `DELETE /security/users/{id}` on the same Save.
  */
 import hyper from "@macrostrat/hyper";
-import {
-  Callout,
-  HTMLSelect,
-  InputGroup,
-  Intent,
-  Tag,
-} from "@blueprintjs/core";
+import { Callout, HTMLSelect, Intent, Tag } from "@blueprintjs/core";
 import {
   type CellDetailContext,
   type ColumnSpec,
   compareRowsBySorts,
   DataSheet,
   DataSheetDensity,
-  type FetchDataParams,
+  deleteRowsAction,
   type TableDataProvider,
-  type TableFilter,
 } from "@macrostrat/data-sheet";
 import { useEffect, useMemo, useState } from "react";
 import {
+  deleteUser,
   fetchRoles,
   fetchUsers,
   formatDateTime,
   type RoleInfo,
-  setUserRole,
+  updateUser,
   type UserRow,
 } from "./api";
+import { createSearchFilter, searchTerm } from "./sheet-search";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
-const SEARCH_FILTER_ID = "user-search";
+// The API does the matching, so the filter's own predicate goes unused.
+const filters = [
+  createSearchFilter<UserRow>("Search by name, email or ORCiD…", (row) => [
+    row.name,
+    row.display_name,
+    row.email,
+    row.sub,
+  ]),
+];
 
-function SearchForm({
-  state,
-  setState,
-}: {
-  state: string;
-  setState(s: string): void;
-}) {
-  return h(InputGroup, {
-    leftIcon: "search",
-    placeholder: "Search by name, email or ORCiD…",
-    value: state ?? "",
-    onChange: (e) => setState(e.target.value),
-    className: "user-search",
-  });
-}
-
-const searchFilter: TableFilter<UserRow, string> = {
-  id: SEARCH_FILTER_ID,
-  name: "Search",
-  icon: "search",
-  defaultState: "",
-  presentation: "inline",
-  filterForm: SearchForm,
-  describeState: (s) => (s?.trim() ? s.trim() : null),
-  // The server does the search; this keeps an in-memory source honest too.
-  predicate: (row, s) => {
-    const q = (s ?? "").trim().toLowerCase();
-    if (q === "") return true;
-    return [row.name, row.display_name, row.email, row.sub].some((v) =>
-      v?.toLowerCase().includes(q)
-    );
+const provider: TableDataProvider<UserRow> = {
+  identity: (row) => row.id,
+  async fetchData(params) {
+    let rows = await fetchUsers(searchTerm(params.filters));
+    if (params.sorts.length > 0) {
+      rows = [...rows].sort(compareRowsBySorts(params.sorts));
+    }
+    return { rows, totalCount: rows.length };
+  },
+  // One request per user; a failure stops the batch and surfaces as the
+  // Save action's error, with the earlier rows already saved.
+  async saveRows(rows) {
+    for (const row of rows) {
+      await updateUser(row.id, {
+        role: row.role,
+        display_name: row.display_name,
+        email: row.email,
+      });
+    }
+  },
+  async deleteRows(ids) {
+    for (const id of ids) {
+      await deleteUser(Number(id));
+    }
   },
 };
 
-function searchTerm(params: FetchDataParams): string | null {
-  const filter = params.filters.find((f) => f.id === SEARCH_FILTER_ID);
-  const state = filter?.state;
-  return typeof state === "string" ? state : null;
-}
-
-function createUsersProvider(): TableDataProvider<UserRow> {
-  return {
-    identity: (row) => row.id,
-    async fetchData(params) {
-      let rows = await fetchUsers(searchTerm(params));
-      if (params.sorts.length > 0) {
-        rows = [...rows].sort(compareRowsBySorts(params.sorts));
-      }
-      return { rows, totalCount: rows.length };
-    },
-    async saveRows(rows) {
-      // One request per user; a failure stops the batch and surfaces as the
-      // Save action's error, with the earlier rows already saved.
-      for (const row of rows) {
-        await setUserRole(row.id, row.role);
-      }
-    },
-  };
-}
-
-/** The role picker a role cell opens into. Reads the roles from the API, so a
- * role added to `macrostrat_auth.role` appears here without a code change. */
-function RoleEditor(ctx: CellDetailContext<UserRow>) {
-  const roles = useRoles();
+/** The role picker a role cell opens into. */
+function RoleEditor({
+  ctx,
+  roles,
+}: {
+  ctx: CellDetailContext<UserRow>;
+  roles: RoleInfo[];
+}) {
   const current = ctx.value as string;
-
-  let description: string | null = null;
   const definition = roles.find((r) => r.id === current);
+  let description: string | null = null;
   if (definition != null) {
     description = `${definition.description ?? ""} (${
       definition.postgres_role
@@ -124,6 +95,7 @@ function RoleEditor(ctx: CellDetailContext<UserRow>) {
     h(HTMLSelect, {
       value: current,
       autoFocus: true,
+      fill: true,
       options: roles.map((r) => ({ value: r.id, label: r.id })),
       onChange(e) {
         ctx.onChange(e.currentTarget.value);
@@ -146,6 +118,7 @@ const fallbackRoles: RoleInfo[] = [
   },
 ];
 
+/** Roles from the API, so one added to `macrostrat_auth.role` appears here. */
 function useRoles(): RoleInfo[] {
   const [roles, setRoles] = useState<RoleInfo[]>(fallbackRoles);
   useEffect(() => {
@@ -169,55 +142,62 @@ function RoleTag({ role }: { role: string }) {
   return h(Tag, { minimal: true, intent }, role);
 }
 
-const columnSpec: ColumnSpec[] = [
-  { key: "id", name: "ID", editable: false },
-  { key: "display_name", name: "Display name", editable: false },
-  { key: "name", name: "Name", editable: false },
-  { key: "email", name: "Email", editable: false },
-  { key: "sub", name: "ORCiD", editable: false },
-  {
-    key: "role",
-    name: "Role",
-    editable: true,
-    multiCell: true,
-    cellLabel: "role",
-    valueRenderer: (role) => h(RoleTag, { role }),
-    cellDetail: RoleEditor,
-    detailPresentation: "popover",
-  },
-  {
-    key: "postgres_role",
-    name: "Postgres role",
-    derived: true,
-  },
-  {
-    key: "created_on",
-    name: "Joined",
-    editable: false,
-    valueRenderer: formatDateTime,
-  },
-];
+function buildColumnSpec(roles: RoleInfo[]): ColumnSpec[] {
+  return [
+    { key: "id", name: "ID", editable: false },
+    { key: "display_name", name: "Display name", editable: true },
+    { key: "name", name: "Name", editable: false },
+    { key: "email", name: "Email", editable: true },
+    { key: "sub", name: "ORCiD", editable: false },
+    {
+      key: "role",
+      name: "Role",
+      editable: true,
+      multiCell: true,
+      cellLabel: "role",
+      valueRenderer: (role) => h(RoleTag, { role }),
+      cellDetail: (ctx) => h(RoleEditor, { ctx, roles }),
+      detailPresentation: "popover",
+    },
+    { key: "postgres_role", name: "Postgres role", derived: true },
+    {
+      key: "created_on",
+      name: "Joined",
+      editable: false,
+      valueRenderer: formatDateTime,
+    },
+  ];
+}
+
+const actions = [deleteRowsAction];
 
 export function UsersSheet() {
-  const provider = useMemo(createUsersProvider, []);
-  return h("div.admin-sheet", [
-    h(DataSheet<UserRow>, {
-      provider,
-      columnSpec,
-      filters: [searchFilter],
-      editable: true,
-      name: "users",
-      itemLabel: "user",
-      density: DataSheetDensity.MEDIUM,
-      pageSize: 500,
-      enableColumnReordering: false,
-    }),
+  const roles = useRoles();
+  const columnSpec = useMemo(() => buildColumnSpec(roles), [roles]);
+
+  return h("div.sheet-panel", [
+    h("div.admin-sheet.page-sheet", [
+      h(DataSheet<UserRow>, {
+        provider,
+        columnSpec,
+        actions,
+        filters,
+        filterDebounce: 250,
+        editable: true,
+        name: "users",
+        itemLabel: "user",
+        density: DataSheetDensity.MEDIUM,
+        pageSize: 500,
+        enableColumnReordering: false,
+      }),
+    ]),
   ]);
 }
 
 export function UsersHelp() {
   return h(Callout, { compact: true, icon: "info-sign" }, [
-    "Role changes take effect at the user's next sign-in. ",
-    "You can't change your own.",
+    "Edits and deletions apply when you press Save. Role changes take effect ",
+    "at the user's next sign-in. You can't change your own role or delete ",
+    "yourself.",
   ]);
 }

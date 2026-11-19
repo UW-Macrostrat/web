@@ -70,6 +70,10 @@ export interface WindowedScrollBodyOptions<T = any> {
   /** Inner grouping — a sticky header, always kept in the window. */
   groupOf?: (row: T) => RowGroup | null;
   groupHeight?: number;
+  /** A divider within a group, before the first row whose key differs from
+   * the row above it. Not sticky; a null key draws none. */
+  dividerOf?: (row: T) => RowGroup | null;
+  dividerHeight?: number;
   /** Outer grouping — shown *only* in the sticky context bar, which is always
    * mounted. Sections deliberately get no in-flow header: the bar already names
    * the section you're inside, and a second marker was a duplicate. */
@@ -92,6 +96,7 @@ interface ScrollBodyProps {
 
 type Item =
   | { type: "group"; group: RowGroup; top: number; height: number }
+  | { type: "divider"; group: RowGroup; top: number; height: number }
   /** One band: up to `columns` cards laid out side by side. */
   | { type: "row"; cardIndices: number[]; top: number; height: number }
   /** Blank space closing a group. */
@@ -104,6 +109,8 @@ export function createWindowedScrollBody<T = any>(
     rowHeight,
     groupOf,
     groupHeight = rowHeight,
+    dividerOf,
+    dividerHeight = rowHeight,
     sectionOf,
     sectionHeight = rowHeight,
     overscan = 8,
@@ -135,6 +142,8 @@ export function createWindowedScrollBody<T = any>(
         buildItems(nonNullRows, {
           groupOf,
           groupHeight,
+          dividerOf,
+          dividerHeight,
           sectionOf,
           sectionHeight,
           rowHeight,
@@ -189,6 +198,19 @@ export function createWindowedScrollBody<T = any>(
               style: { height: item.height },
             },
             item.cardIndices.map((index) => cards[index])
+          )
+        );
+        continue;
+      }
+      if (item.type === "divider") {
+        rendered.push(
+          h(
+            "div.windowed-divider",
+            {
+              key: `divider-${item.group.key}-${item.top}`,
+              style: { height: item.height },
+            },
+            item.group.label
           )
         );
         continue;
@@ -254,6 +276,8 @@ function buildItems<T>(
   cfg: {
     groupOf?: (row: T) => RowGroup | null;
     groupHeight: number;
+    dividerOf?: (row: T) => RowGroup | null;
+    dividerHeight: number;
     sectionOf?: (row: T) => RowGroup | null;
     sectionHeight: number;
     rowHeight: number;
@@ -266,6 +290,7 @@ function buildItems<T>(
   let top = 0;
   let lastSection: string | number | null = null;
   let lastGroup: string | number | null = null;
+  let lastDivider: string | number | null = null;
   let band: number[] | null = null;
 
   function closeBand() {
@@ -295,7 +320,17 @@ function buildItems<T>(
       items.push({ type: "group", group, top, height: cfg.groupHeight });
       top += cfg.groupHeight;
       lastGroup = group.key;
+      lastDivider = null;
     }
+
+    const divider = cfg.dividerOf?.(row) ?? null;
+    if (divider != null && divider.key !== lastDivider) {
+      closeBand();
+      const height = cfg.dividerHeight;
+      items.push({ type: "divider", group: divider, top, height });
+      top += height;
+    }
+    lastDivider = divider?.key ?? null;
 
     if (band != null && band.length < perBand) {
       band.push(cardIndex);

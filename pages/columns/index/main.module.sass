@@ -78,9 +78,7 @@ $group-height: 34px
     border-color: var(--pz-accent-color)
     color: var(--pz-selected-text-color)
 
-// The card is one line: the name takes the space, any status tag follows it,
-// and the identifier is right-aligned — the same shape as the group and project
-// headers above it.
+// The card is one line: the name takes the space, any unit counts follow it.
 .col-head
   display: flex
   flex-direction: row
@@ -98,9 +96,7 @@ $group-height: 34px
   &:empty
     display: none
 
-// Identifiers are right-aligned at every level of the list — project, group,
-// column — so the eye can read names down the left and ids down the right.
-.col-identifier,
+// Project and group ids sit at the right of their headers
 .header-identifier
   flex: 0 0 auto
   margin-left: auto
@@ -121,9 +117,6 @@ $group-height: 34px
   overflow: hidden
   text-overflow: ellipsis
   white-space: nowrap
-
-.col-identifier
-  flex: 0 0 auto
 
 // A group or project header that leads somewhere. It is a heading first, so it
 // keeps the heading's color and darkens on hover the way a card title does.

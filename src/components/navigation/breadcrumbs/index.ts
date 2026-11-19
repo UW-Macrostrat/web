@@ -13,12 +13,17 @@ import h from "./breadcrumbs.module.sass";
  * clip to a single line with an ellipsis, or wrap onto more lines. */
 export type TitleOverflow = "ellipsis" | "wrap";
 
+/** When the "Macrostrat" root crumb gives up its place: before the other
+ * crumbs collapse, or after them. */
+export type RootCollapse = "first" | "last";
+
 interface PageBreadcrumbsProps {
   showLogo?: boolean;
   separateTitle?: boolean;
   titleOverflow?: TitleOverflow;
   /** `small` for tight spaces, such as a map's context panel. */
   size?: "default" | "small";
+  rootCollapse?: RootCollapse;
 }
 
 export function PageBreadcrumbs({
@@ -26,6 +31,7 @@ export function PageBreadcrumbs({
   separateTitle = true,
   titleOverflow,
   size,
+  rootCollapse,
 }: PageBreadcrumbsProps) {
   const breadcrumbs = usePageBreadcrumbs();
   return h(PageBreadcrumbsInternal, {
@@ -33,6 +39,7 @@ export function PageBreadcrumbs({
     separateTitle,
     titleOverflow,
     size,
+    rootCollapse,
     items: breadcrumbs,
   });
 }
@@ -113,17 +120,18 @@ interface PageBreadcrumbsInternalProps extends PageBreadcrumbsProps {
 /**
  * The trail sheds width in stages, coarsest first:
  *
- * 1. middle crumbs move into the overflow menu, innermost last;
- * 2. then the "Macrostrat" root crumb goes — silently, taking its chevron with
- *    it, because the logo beside the trail is the same link. That leaves
- *    `[logo] … › Title`;
+ * 1. the "Macrostrat" root crumb's text goes, its chevron staying after the
+ *    logo, because the logo beside the trail is the same link;
+ * 2. middle crumbs move into the overflow menu, innermost last, leaving
+ *    `[logo] › … › Title`;
  * 3. only then does the title truncate, per `titleOverflow` — which defaults
  *    to wrapping when the title has a line of its own and to an ellipsis when
  *    it rides along as the trail's last crumb.
  *
- * Stages 1 and 2 are one partition, so they can't fight each other: the root is
- * handed to the `OverflowList` at the *end* of the collapsible run and moved
- * back to the head of the trail with CSS `order`. Stage 3 then falls out of the
+ * `rootCollapse: "last"` swaps stages 1 and 2. They are one partition, so they
+ * can't fight each other: the root is handed to the `OverflowList` at the start
+ * or the end of the collapsible run, and moved back to the head of the trail
+ * with CSS `order`. Stage 3 then falls out of the
  * flex layout rather than a measurement pass, since the `OverflowList` decides
  * to collapse from its own 1px spacer, which any overflow at all squeezes to
  * zero — so a crumb only starts giving up characters once there is nothing left
@@ -134,6 +142,7 @@ export function PageBreadcrumbsInternal({
   separateTitle = false,
   titleOverflow,
   size = "default",
+  rootCollapse = "first",
   items,
 }: PageBreadcrumbsInternalProps) {
   const trail = [...items];
@@ -156,8 +165,7 @@ export function PageBreadcrumbsInternal({
     }
   }
 
-  // Pulled out of its natural first position so it can be re-inserted as the
-  // last of the collapsible crumbs.
+  // Pulled out so it can be re-inserted where `rootCollapse` puts it.
   let rootItem = null;
   if (trail[0]?.isRoot) {
     rootItem = trail.shift();
@@ -191,9 +199,12 @@ export function PageBreadcrumbsInternal({
   });
 
   if (rootItem != null) {
-    let insertAt = crumbs.length;
-    if (hasTitleCrumb) {
-      insertAt = crumbs.length - 1;
+    let insertAt = 0;
+    if (rootCollapse === "last") {
+      insertAt = crumbs.length;
+      if (hasTitleCrumb) {
+        insertAt = crumbs.length - 1;
+      }
     }
     crumbs.splice(insertAt, 0, {
       text: nameForItem(rootItem, true),

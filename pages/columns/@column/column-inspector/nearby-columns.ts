@@ -1,20 +1,25 @@
-/** Columns of other projects at the same place, which no map draws together
- * with this one — GBDB beside ChinaLex, say. One collapsed row per project,
- * expanding to its nearest columns. */
+/** Columns at the same place: other projects' that no map draws together with
+ * this one (GBDB beside ChinaLex), and its own project's (holes of one eODP
+ * site). One collapsed row per project, expanding to its columns, nearest first. */
 import hyper from "@macrostrat/hyper";
 import { apiV3Prefix } from "@macrostrat-web/settings";
 import { Button, Collapse } from "@blueprintjs/core";
 import { DataField, Tag, TagSize } from "@macrostrat/data-components";
 import { useEffect, useState } from "react";
 import { IN_PROCESS_STATUS } from "~/components/in-process-filter";
+import type { ColumnProject } from "../+data.shared";
 import styles from "./index.module.sass";
 
 const h = hyper.styled(styles);
+
+/** `col_type` of a measured section, as opposed to a composite column */
+const SECTION = "section";
 
 interface NearbyColumn {
   col_id: number;
   col_name: string;
   status_code: string;
+  col_type: string;
   relation: "overlaps" | "nearby";
   distance_km: number;
 }
@@ -30,6 +35,7 @@ interface NearbyProject {
 
 interface NearbyColumnsResult {
   col_id: number;
+  col_type: string;
   radius_km: number;
   projects: NearbyProject[];
 }
@@ -59,27 +65,60 @@ function useNearbyColumns(colID: number | null) {
   return data;
 }
 
-export function NearbyColumns({ colID }: { colID: number }) {
+export function NearbyColumns({
+  colID,
+  projectID,
+  columnProjects,
+}: {
+  colID: number;
+  projectID: number;
+  columnProjects?: ColumnProject[];
+}) {
   const data = useNearbyColumns(colID);
   if (data == null || data.projects.length === 0) return null;
+  const related = relatedProjectIDs(projectID, columnProjects ?? []);
 
   return h(
     DataField,
-    { label: "Other projects here", className: "nearby-columns" },
-    data.projects.map((project) =>
-      h(NearbyProjectEntry, { key: project.project_id, project })
+    { label: "Nearby columns", className: "nearby-columns" },
+    // A block of its own, so rows span the field rather than wrap to the right
+    h(
+      "div.nearby-projects",
+      data.projects.map((project) =>
+        h(NearbyProjectEntry, {
+          key: project.project_id,
+          project,
+          defaultOpen: related.has(project.project_id),
+          fromSection: data.col_type === SECTION,
+        })
+      )
     )
   );
 }
 
-function NearbyProjectEntry({ project }: { project: NearbyProject }) {
-  const [isOpen, setOpen] = useState(false);
-  const hidden = project.n_columns - project.columns.length;
-
-  let more = null;
-  if (hidden > 0) {
-    more = h("li.nearby-more", `and ${hidden.toLocaleString()} more`);
+/** The column's own project and the other members of composites holding it,
+ * whose nearby columns are usually the same site or compilation. */
+function relatedProjectIDs(
+  projectID: number,
+  columnProjects: ColumnProject[]
+): Set<number> {
+  const ids = new Set([projectID]);
+  for (const p of columnProjects) {
+    for (const id of p.member_ids ?? []) ids.add(id);
   }
+  return ids;
+}
+
+function NearbyProjectEntry({
+  project,
+  defaultOpen,
+  fromSection,
+}: {
+  project: NearbyProject;
+  defaultOpen: boolean;
+  fromSection: boolean;
+}) {
+  const [isOpen, setOpen] = useState(defaultOpen);
   let icon = "chevron-right";
   if (isOpen) icon = "chevron-down";
 
@@ -100,12 +139,12 @@ function NearbyProjectEntry({ project }: { project: NearbyProject }) {
       ]
     ),
     h(Collapse, { isOpen }, [
-      h("ul.nearby-list", [
+      h(
+        "ul.nearby-list",
         project.columns.map((col) =>
-          h(NearbyColumnItem, { key: col.col_id, col })
-        ),
-        more,
-      ]),
+          h(NearbyColumnItem, { key: col.col_id, col, fromSection })
+        )
+      ),
     ]),
   ]);
 }
@@ -122,7 +161,13 @@ function projectSummary(project: NearbyProject): string {
   return parts.join(", ");
 }
 
-function NearbyColumnItem({ col }: { col: NearbyColumn }) {
+function NearbyColumnItem({
+  col,
+  fromSection,
+}: {
+  col: NearbyColumn;
+  fromSection: boolean;
+}) {
   let status = null;
   if (col.status_code === IN_PROCESS_STATUS) {
     status = h(Tag, {
@@ -131,13 +176,25 @@ function NearbyColumnItem({ col }: { col: NearbyColumn }) {
       color: "lightgreen",
     });
   }
+  // A composite's point stands in for a region, so a distance to it means little
+  let distance = null;
+  if (fromSection && col.col_type === SECTION) {
+    distance = h(
+      "span.nearby-distance",
+      { title: "Distance between the two sections" },
+      formatDistance(col.distance_km)
+    );
+  }
   return h("li.nearby-column", [
     h("a.field-link", { href: `/columns/${col.col_id}` }, col.col_name),
     status,
-    h(
-      "span.nearby-distance",
-      { title: "Distance between the columns' points" },
-      `${Math.round(col.distance_km)} km`
-    ),
+    distance,
   ]);
+}
+
+/** Metres for holes at one site, kilometres for regions apart */
+function formatDistance(km: number): string {
+  if (km < 1) return `${Math.round(km * 1000)} m`;
+  if (km < 10) return `${km.toFixed(1)} km`;
+  return `${Math.round(km)} km`;
 }

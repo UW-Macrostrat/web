@@ -100,6 +100,7 @@ function TaskPanel({
   if (Object.keys(task.params_schema.properties ?? {}).length > 0) {
     form = h(SchemaForm, {
       schema: task.params_schema,
+      taskName: task.name,
       values,
       onChange: setValues,
     });

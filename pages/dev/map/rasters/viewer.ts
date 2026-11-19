@@ -1,36 +1,29 @@
-/** EMIT mineral maps.
+/** A viewer for one layer of Macrostrat's raster index.
  *
- * Everything here is the `emit-minerals` layer in Macrostrat's raster index,
- * served by the tileserver at `/rasters/emit-minerals/...`. Every registered
- * raster composites into one layer, rendered with the palette stored on the
- * layer. Until the rasters are registered the layer is simply empty, and the
- * panel says so.
+ * The layer is a mosaic the tileserver serves at its by-name route
+ * (`/rasters/layer/<slug>`). The route and the token its requests carry come
+ * from the `RasterViewerConfig` the page passes in; everything else is the
+ * same for every layer. Until rasters are registered the layer is simply
+ * empty, and the panel says so.
  *
  * Two filters narrow what's drawn, both server-side, both composable:
  *
  * - **classes** — `?classes=Alunite,Muscovite`, resolved against the class
  *   vocabulary the index stores for the layer. Excluded classes are masked after
- *   compositing, so survivors keep their own palette colors.
+ *   compositing, so survivors keep their own palette colors. Offered only for a
+ *   layer that has a vocabulary.
  * - **datasets** — `?datasets=<slug>`, narrowing the mosaic to one raster.
  *
- * There is deliberately no separate single-file rendering path any more. Viewing
- * one dataset used to mean pointing titiler's generic `/cog` route at a
- * hard-coded bucket URL, which returned raw class indices and so needed its own
- * Mapbox paint expression, its own one-class-at-a-time limit, and its own
- * point-query shape. Going through the mosaic means a focused dataset is the
- * same route with a narrower asset selection — same palette, same class names,
- * same transparent empty tiles.
+ * A focused dataset goes through the mosaic too, rather than a single-file
+ * route: the same route with a narrower asset selection keeps the palette, the
+ * class names and the transparent empty tiles.
  *
- * Which datasets exist is likewise not hard-coded: the layer's `/footprints` and
+ * Which datasets exist is not hard-coded: the layer's `/footprints` and
  * `/point` routes report them, so the picker is whatever the index holds.
  */
 
 import hyper from "@macrostrat/hyper";
-import {
-  burwellTileDomain,
-  emitMineralsToken,
-  mapboxAccessToken,
-} from "@macrostrat-web/settings";
+import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { Box, useDarkMode } from "@macrostrat/ui-components";
 import { Tag as ClassTag, TagSize } from "@macrostrat/data-components";
 import type { MapPosition } from "@macrostrat/mapbox-utils";
@@ -49,13 +42,13 @@ import {
   Checkbox,
   ControlGroup,
   FormGroup,
-  HTMLSelect,
+  InputGroup,
   Intent,
   Slider,
   Switch,
   Tag,
 } from "@blueprintjs/core";
-import { loadable } from "jotai/utils";
+import { loadable, useHydrateAtoms } from "jotai/utils";
 import { useMapEaseTo } from "@macrostrat/mapbox-react";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import {
@@ -67,17 +60,13 @@ import { atomWithSearchParam } from "~/_utils/url-atoms";
 import { BaseLayerForm, basemapStyle, ExpandablePanel } from "~/components";
 import { MapPageNavbar } from "~/components/map-navbar/map-page-navbar";
 import { lastMapPositionAtom } from "~/_utils/last-map-position";
-import styles from "./main.module.sass";
+import styles from "./viewer.module.sass";
 
 const h = hyper.styled(styles);
 
 /** Shared width for the floating navbar and the context panel below it, so the
  * two read as one column — the same arrangement as the topology page. */
 const PANEL_WIDTH = 320;
-
-/** The layer slug registered in the raster index (and mounted by the
- * tileserver as `/rasters/<slug>`). */
-const RASTER_LAYER = "emit-minerals";
 
 /** titiler 1.x makes the tile matrix set explicit in every tile path. */
 const TMS = "WebMercatorQuad";
@@ -86,29 +75,56 @@ const TMS = "WebMercatorQuad";
  * contract with the tileserver's SQL. */
 const FOOTPRINTS_SOURCE_LAYER = "raster_footprints";
 
-/** Both routes live on the configured tileserver, so this page follows the
- * environment (local, dev, production) rather than pinning one instance. */
+/** Titiler's single-file route, used only for the class-name fallback. */
 const cogBaseURL = `${burwellTileDomain}/cog`;
-const mosaicBaseURL = `${burwellTileDomain}/rasters/${RASTER_LAYER}`;
 
-/** Every route under `/rasters/emit-minerals` requires a delegated token — the
- * tiles, but also `/layer`, `/footprints` and `/point`. So the token goes on
- * this layer's own requests, in a header rather than the query string (a tile
- * URL ends up in access logs, history and `Referer`).
- *
- * `/cog` is not guarded, so `cogBaseURL` requests use plain `fetch`. */
-function mosaicFetch(url: string, init: RequestInit = {}) {
+export interface RasterViewerConfig {
+  /** The layer's slug in the raster index. */
+  layer: string;
+  /** Route prefix the layer's mosaic is served at, on the tileserver. */
+  baseURL: string;
+  /** The bearer token for that prefix, read per request so a refreshed one applies. */
+  getToken(): string | null;
+  /** Read class names from a raster's header when the index has none. */
+  classFallback?: boolean;
+}
+
+/** Any layer, at the tileserver's by-name route. */
+export function namedLayerURL(layer: string): string {
+  return `${burwellTileDomain}/rasters/layer/${encodeURIComponent(layer)}`;
+}
+
+/** Set by `RasterLayerViewer` before anything reads it. */
+const viewerConfigAtom = atom<RasterViewerConfig>({
+  layer: "",
+  baseURL: "",
+  getToken: () => null,
+});
+
+/** Every route under a layer's prefix needs its token — the tiles, but also
+ * `/layer`, `/footprints` and `/point` — sent in a header rather than the query
+ * string (a tile URL ends up in access logs, history and `Referer`). */
+function mosaicFetch(
+  config: RasterViewerConfig,
+  path: string,
+  init: RequestInit = {}
+) {
   const headers = new Headers(init.headers);
-  if (emitMineralsToken) {
-    headers.set("Authorization", `Bearer ${emitMineralsToken}`);
+  const token = config.getToken();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
   }
-  return fetch(url, { ...init, headers });
+  return fetch(`${config.baseURL}${path}`, { ...init, headers });
 }
 
 /** Fallback view: the conterminous US, where most of the datasets sit. */
 const DEFAULT_BOUNDS = [-125, 24, -66, 49];
 
-export function Page() {
+export function RasterLayerViewer({ config }: { config: RasterViewerConfig }) {
+  // Forced, so moving between layers on the client replaces the last one's.
+  useHydrateAtoms([[viewerConfigAtom, config]], {
+    dangerouslyForceHydrate: true,
+  });
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode();
 
@@ -134,27 +150,27 @@ export function Page() {
   const overlayStyles = useMemo(() => {
     const styles = [rasterOverlayStyle];
     if (showGeology) {
-      // Geology sits beneath the mineral maps, as context rather than subject.
+      // Geology sits beneath the rasters, as context rather than subject.
       styles.unshift(macrostratStyle);
     }
     if (showFootprints) {
       // Outlines go on top, so coverage stays visible over the imagery.
-      styles.push(footprintsStyle());
+      styles.push(footprintsStyle(config.baseURL));
     }
     return styles;
-  }, [rasterOverlayStyle, showGeology, showFootprints]);
+  }, [rasterOverlayStyle, showGeology, showFootprints, config.baseURL]);
 
   const transformStyle = useBasemapTransform();
 
-  // Mapbox fetches the raster tiles and the footprints MVT itself, so the
-  // delegated token has to be attached here rather than at a call site. Scoped
-  // to this layer's prefix so no token is sent to any other tileserver route.
+  // Mapbox fetches the raster tiles and the footprints MVT itself, so the token
+  // is attached here. Scoped to this layer's prefix, so it goes nowhere else.
   const transformRequest = useCallback(
     (url: string) => {
-      if (!emitMineralsToken || !url.startsWith(mosaicBaseURL)) return { url };
-      return { url, headers: { Authorization: `Bearer ${emitMineralsToken}` } };
+      const token = config.getToken();
+      if (!token || !url.startsWith(config.baseURL)) return { url };
+      return { url, headers: { Authorization: `Bearer ${token}` } };
     },
-    [emitMineralsToken]
+    [config]
   );
 
   let detailPanel = null;
@@ -220,7 +236,7 @@ const selectedDatasetAtom = atom(
   (get, set, value: string | null) => set(datasetParamAtom, value)
 );
 
-/** Whether the Macrostrat geologic map underlies the mineral maps. On by
+/** Whether the Macrostrat geologic map underlies the rasters. On by
  * default; "off" is stored in the URL. */
 const geologyParamAtom = atomWithSearchParam("geology");
 const showGeologyAtom = atom(
@@ -245,6 +261,17 @@ const showFootprintsAtom = atom(
 );
 
 const rasterOpacityAtom = atom(0.8);
+
+/** `min,max` to stretch a continuous layer over; the index's defaults are not
+ * applied by the by-name route. Shareable, so it lives in the URL. */
+const rescaleParamAtom = atomWithSearchParam("rescale");
+const rescaleAtom = atom((get): string | null => {
+  const value = get(rescaleParamAtom);
+  if (value == null) return null;
+  const parts = value.split(",").map(Number);
+  if (parts.length !== 2 || !parts.every(Number.isFinite)) return null;
+  return parts.join(",");
+});
 
 /** The mineral classes to show, by name. Empty means "all of them".
  *
@@ -305,7 +332,9 @@ function round5(value: number): number {
  * a single request that reads no pixels — no reference COG, and no parsing GDAL
  * metadata in the browser. */
 const mosaicLayerAtom = atom(async (get, { signal }) => {
-  const response = await mosaicFetch(`${mosaicBaseURL}/layer`, { signal });
+  const response = await mosaicFetch(get(viewerConfigAtom), "/layer", {
+    signal,
+  });
   if (!response.ok) {
     throw new Error(`Failed to fetch layer metadata: ${response.statusText}`);
   }
@@ -322,6 +351,7 @@ const mosaicLayerLoadableAtom = loadable(mosaicLayerAtom);
  * path still doesn't need to know where the files live. All of these maps share
  * one classification scheme, so any of them will do. */
 const classFallbackURLAtom = atom((get): string | null => {
+  if (!get(viewerConfigAtom).classFallback) return null;
   const layer = get(mosaicLayerLoadableAtom);
   if (layer.state !== "hasData") return null;
   if ((layer.data.categories ?? []).length > 0) return null;
@@ -352,7 +382,9 @@ const layerInfoLoadableAtom = loadable(layerInfoAtom);
  * FeatureCollection means the index has no rasters for this layer, which is the
  * expected state until they're added. */
 const footprintsAtom = atom(async (get, { signal }) => {
-  const response = await mosaicFetch(`${mosaicBaseURL}/footprints`, { signal });
+  const response = await mosaicFetch(get(viewerConfigAtom), "/footprints", {
+    signal,
+  });
   if (!response.ok) {
     throw new Error(
       `Failed to fetch mosaic footprints: ${response.statusText}`
@@ -382,9 +414,9 @@ const pointDataAtom = atom(async (get, { signal }) => {
   // Deliberately *not* narrowed by `?datasets=`: this list is what the dataset
   // picker is built from, so it has to report the whole overlap even while the
   // map is showing one raster. The focused one is marked in the panel instead.
-  const url = `${mosaicBaseURL}/point/${lng},${lat}`;
+  const path = `/point/${lng},${lat}`;
 
-  const response = await mosaicFetch(url, { signal });
+  const response = await mosaicFetch(get(viewerConfigAtom), path, { signal });
   // Outside coverage the mosaic answers 204 with no body, so this has to be
   // checked before parsing — `json()` on an empty body throws.
   if (response.status === 204) return { assets: [] };
@@ -547,15 +579,17 @@ const macrostratStyle = buildMacrostratStyle({
 const mapOverlayStyleAtom = atom((get) => {
   const opacity = get(rasterOpacityAtom);
   const tileURL = mosaicTileURL(
+    get(viewerConfigAtom).baseURL,
     get(selectedClassesAtom),
-    get(selectedDatasetAtom)
+    get(selectedDatasetAtom),
+    get(rescaleAtom)
   );
   const paint = { "raster-opacity": opacity };
 
   return {
     version: 8,
     sources: {
-      "mineral-maps": {
+      "raster-layer": {
         type: "raster",
         tiles: [tileURL],
       },
@@ -563,7 +597,7 @@ const mapOverlayStyleAtom = atom((get) => {
     layers: [
       {
         type: "raster",
-        source: "mineral-maps",
+        source: "raster-layer",
         paint,
       },
     ],
@@ -586,8 +620,13 @@ const mapOverlayStyleAtom = atom((get) => {
  * `?classes=` overlay before suspecting the selection.
  *
  * Either way the parameter is a cross-repo contract with the tileserver. */
-function mosaicTileURL(classes: string[], dataset: string | null): string {
-  const url = `${mosaicBaseURL}/tiles/${TMS}/{z}/{x}/{y}@2x.png`;
+function mosaicTileURL(
+  baseURL: string,
+  classes: string[],
+  dataset: string | null,
+  rescale: string | null
+): string {
+  const url = `${baseURL}/tiles/${TMS}/{z}/{x}/{y}@2x.png`;
 
   // Built by hand rather than with URLSearchParams, which percent-encodes the
   // comma separator (`classes=A%2CB`) and undoes the readability this is here
@@ -600,6 +639,9 @@ function mosaicTileURL(classes: string[], dataset: string | null): string {
   if (dataset != null) {
     params.push(`datasets=${encodeURIComponent(dataset)}`);
   }
+  if (rescale != null) {
+    params.push(`rescale=${rescale}`);
+  }
   if (params.length === 0) return url;
   return `${url}?${params.join("&")}`;
 }
@@ -607,13 +649,13 @@ function mosaicTileURL(classes: string[], dataset: string | null): string {
 /** Outlines of every raster backing the mosaic, from the index's vector-tile
  * footprints layer. Coverage without reading a single pixel — the raster
  * counterpart to the map-footprints layer. */
-function footprintsStyle() {
+function footprintsStyle(baseURL: string) {
   return {
     version: 8,
     sources: {
       "raster-footprints": {
         type: "vector",
-        tiles: [`${mosaicBaseURL}/footprints/{z}/{x}/{y}`],
+        tiles: [`${baseURL}/footprints/{z}/{x}/{y}`],
       },
     },
     layers: [
@@ -641,13 +683,11 @@ function MapSelectorPanel() {
   const [showFootprints, setShowFootprints] = useAtom(showFootprintsAtom);
 
   return h("div.map-selector-panel", [
-    h(
-      "p",
-      "EMIT mineral maps created by Zaid Al-Attar and Thomas Monecke, Colorado School of Mines."
-    ),
+    h(LayerDescription),
     h(FocusedDatasetControl),
     h(MosaicStatus),
     h(MineralClassSelector),
+    h(RescaleControl),
     h(RasterOpacitySlider),
     h(Switch, {
       label: "Geologic map",
@@ -700,6 +740,7 @@ function FocusedDatasetControl() {
 /** Reports the state of the indexed mosaic: how many rasters back it, or that
  * none have been registered yet. */
 function MosaicStatus() {
+  const { layer } = useAtomValue(viewerConfigAtom);
   const footprints = useAtomValue(footprintsLoadableAtom);
   const isEmpty = useAtomValue(mosaicIsEmptyAtom);
 
@@ -711,10 +752,7 @@ function MosaicStatus() {
     return h(
       Callout,
       { intent: "danger", icon: "error", title: "Mosaic unavailable" },
-      h(
-        "p",
-        `The tileserver has no /rasters/${RASTER_LAYER} layer. It appears once macrostrat.raster_layers is installed there.`
-      )
+      h("p", `The tileserver did not answer for the ${layer} layer.`)
     );
   }
 
@@ -724,10 +762,8 @@ function MosaicStatus() {
       { intent: "warning", icon: "warning-sign", title: "No rasters indexed" },
       h("p", [
         "Nothing is registered in the ",
-        h("code", RASTER_LAYER),
-        " layer yet. Add datasets with ",
-        h("code", "macrostrat raster scan"),
-        ", then reload. Single datasets can be viewed in the meantime.",
+        h("code", layer),
+        " layer yet. Assign rasters to it on the admin pages, then reload.",
       ])
     );
   }
@@ -759,32 +795,28 @@ function MineralClassSelector() {
     setSelected(next);
   };
 
-  return h(FormGroup, { label: "Mineral classes" }, [
-    h(
-      ExpandablePanel,
-      { icon: "filter", title: "Mineral classes", isOpen: true },
-      [
-        h("div.mineral-classes", [
-          h(
-            "div.class-list",
-            classes.map((d) =>
-              h(MineralClassRow, {
-                key: d.name,
-                mineralClass: d,
-                checked: selected.includes(d.name),
-                focused: d.name === focused,
-                onChange: toggle,
-              })
-            )
-          ),
-          h(MineralClassActions, {
-            selectedCount: selected.length,
-            totalCount: classes.length,
-            onClear: () => setSelected([]),
-          }),
-        ]),
-      ]
-    ),
+  return h(FormGroup, { label: "Classes" }, [
+    h(ExpandablePanel, { icon: "filter", title: "Classes", isOpen: true }, [
+      h("div.mineral-classes", [
+        h(
+          "div.class-list",
+          classes.map((d) =>
+            h(MineralClassRow, {
+              key: d.name,
+              mineralClass: d,
+              checked: selected.includes(d.name),
+              focused: d.name === focused,
+              onChange: toggle,
+            })
+          )
+        ),
+        h(MineralClassActions, {
+          selectedCount: selected.length,
+          totalCount: classes.length,
+          onClear: () => setSelected([]),
+        }),
+      ]),
+    ]),
   ]);
 }
 
@@ -850,6 +882,30 @@ function MineralClassActions({ selectedCount, totalCount, onClear }) {
   ]);
 }
 
+/** A value stretch for a layer drawn from continuous data, which has no
+ * palette to fall back on. Not offered where the layer has classes. */
+function RescaleControl() {
+  const classes = useAtomValue(mineralClassesAtom);
+  const [param, setParam] = useAtom(rescaleParamAtom);
+  const applied = useAtomValue(rescaleAtom);
+
+  if (classes.length > 0) return null;
+
+  let intent: Intent = Intent.NONE;
+  if (param != null && applied == null) intent = Intent.WARNING;
+
+  return h(
+    FormGroup,
+    { label: "Value range", helperText: "min,max — for continuous data" },
+    h(InputGroup, {
+      placeholder: "e.g. 0,3000",
+      value: param ?? "",
+      intent,
+      onChange: (e) => setParam(e.target.value.trim() || null),
+    })
+  );
+}
+
 function RasterOpacitySlider() {
   const [opacity, setOpacity] = useAtom(rasterOpacityAtom);
   return h(
@@ -867,6 +923,15 @@ function RasterOpacitySlider() {
       })
     )
   );
+}
+
+/** The layer's description from the index, which carries its credit line. */
+function LayerDescription() {
+  const layer = useAtomValue(mosaicLayerLoadableAtom);
+  if (layer.state !== "hasData") return null;
+  const description = layer.data.description;
+  if (description == null || description === "") return null;
+  return h("p.layer-description", description);
 }
 
 /** Reports on the indexed layer's metadata request.
@@ -935,7 +1000,7 @@ function VisibleClass({ reading }) {
     );
   }
 
-  const label = reading.mineralClass?.name ?? `Class ${reading.value}`;
+  const label = reading.mineralClass?.name ?? `${reading.value}`;
 
   let hidden = null;
   const isHidden = selected.length > 0 && !selected.includes(label);
@@ -1050,11 +1115,16 @@ function DatasetReadings({ readings, visible }) {
   ]);
 }
 
+function readingLabel(reading: PointReading): string {
+  const name = reading.mineralClass?.name;
+  if (name == null) return `${reading.value}`;
+  return `${name} (${reading.value})`;
+}
+
 function DatasetReading({ reading, isVisible, isFocused, onSelect }) {
   let value = h("span.no-data", "no data");
   if (reading.value != null) {
-    const label = reading.mineralClass?.name ?? `Class ${reading.value}`;
-    value = h("span.class-name", `${label} (${reading.value})`);
+    value = h("span.class-name", readingLabel(reading));
   }
 
   // "drawn" is about compositing — which raster won this pixel in the full

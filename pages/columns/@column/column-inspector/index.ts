@@ -693,8 +693,8 @@ function UnitDetailsSheet({ units, selectedUnit, onSelectUnit }) {
   );
 }
 
-/** The column's details, scrolling on their own beneath the map when the
- * sidebar runs out of room, over its actions, which stay in view. */
+/** The column's details and its actions, scrolling together beneath the map
+ * when the sidebar runs out of room. */
 function ColumnInfoPanel({
   data,
   refs,
@@ -707,7 +707,11 @@ function ColumnInfoPanel({
     h("div.column-assistant-body", [
       h(ColumnBasicInfo, { data, refs, project, columnProjects }),
       h(ColumnExtData, { columnInfo: data, onSelectFacet: setFacet }),
-      h(NearbyColumns, { colID: data.col_id }),
+      h(NearbyColumns, {
+        colID: data.col_id,
+        projectID: data.project_id,
+        columnProjects,
+      }),
     ]),
     h("div.column-actions", [
       h(AnchorButton, {

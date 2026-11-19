@@ -84,20 +84,25 @@
     overflow: hidden
     margin-top: 0.75em
 
-  .user-search
-    min-width: 18em
+  .page-sheet
+    height: calc(100vh - 16em)
+    min-height: 24em
 
-  .role-editor
-    padding: 0.5em
-    min-width: 14em
-    p
-      margin: 0.5em 0 0
-      font-size: var(--pz-font-size-sm, 0.85em)
-
-  .tokens-toolbar
+  .sheet-toolbar
     display: flex
     gap: 0.5em
+    align-items: center
     margin-top: 0.75em
+    .spacer
+      flex: 1
+
+  .sheet-search
+    min-width: 20em
+
+  .scope-tags
+    display: inline-flex
+    gap: 0.25em
+
 
   .token-form
     display: flex
@@ -127,3 +132,17 @@
     align-items: center
     gap: 0.75em
     flex-wrap: wrap
+
+// Cell editors open in a portal, outside .admin-page.
+.role-editor, .scopes-editor
+  padding: 0.5em
+  p
+    margin: 0.5em 0 0
+    font-size: var(--pz-font-size-sm, 0.85em)
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+.role-editor
+  min-width: 14em
+
+.scopes-editor
+  width: 22em

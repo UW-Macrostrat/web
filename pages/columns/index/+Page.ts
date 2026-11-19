@@ -49,6 +49,7 @@ import {
   resolveProjectIDs,
 } from "~/components/project-filter";
 import {
+  IN_PROCESS_STATUS,
   InProcessFilterProvider,
   InProcessFilterTag,
   InProcessSwitch,
@@ -123,8 +124,8 @@ const ColumnListMap = onDemand(() =>
  * can't measure them.
  *
  * `ROW_HEIGHT` is the height of a *band* (one line of the grid), not of the
- * list: three cards share a band. Each card is one line — name, any status, and
- * the id — so the band is only a little taller than the row it replaced while
+ * list: three cards share a band. Each card is one line — name and any unit
+ * counts — so the band is only a little taller than the row it replaced while
  * holding three times as much. */
 const ROW_HEIGHT = 48;
 /** The width a column card wants. The grid fits as many as the body has room
@@ -137,6 +138,7 @@ const COLUMN_INITIAL_COLUMNS = 3;
 const GROUP_GAP = 12;
 const GROUP_HEIGHT = 30;
 const SECTION_HEIGHT = 34;
+const DIVIDER_HEIGHT = 24;
 
 /** Rows per fetched page. How far it auto-scrolls before the footer's "Load
  * more" takes over is the shared row budget (`data-view/auto-load`) — deep
@@ -179,6 +181,7 @@ const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
         name: row.project_name,
         id: row.project_id,
         href: projectHref(row.project_id),
+        inProcess: row.project_all_in_process,
       }),
     };
   },
@@ -191,7 +194,19 @@ const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
         name: row.col_group ?? "Ungrouped",
         id: row.col_group_id,
         href: groupHref(row.project_id, row.col_group_id),
+        // Said once on the project when it holds for all of it
+        inProcess: row.group_all_in_process && !row.project_all_in_process,
       }),
+    };
+  },
+  // Only a mixed group needs telling where its in-process columns begin
+  dividerHeight: DIVIDER_HEIGHT,
+  dividerOf: (row) => {
+    if (row == null || row.group_all_in_process) return null;
+    if (row.status_code !== IN_PROCESS_STATUS) return null;
+    return {
+      key: IN_PROCESS_STATUS,
+      label: `In process · ${row.group_in_process.toLocaleString()}`,
     };
   },
 });
@@ -223,7 +238,12 @@ function createPagedRowProvider(rowsRef: { current: ColumnRow[] }) {
  * column group within it. Both were plain text, which left the two levels of
  * grouping the list is built around as the only things in it you couldn't
  * follow. */
-function HeaderLabel({ name, id, href = null }) {
+function HeaderLabel({ name, id, href = null, inProcess = false }) {
+  let status = null;
+  if (inProcess) {
+    status = h(InProcessTag);
+  }
+
   let identifier = null;
   if (id != null && id > 0) {
     identifier = h("span.header-identifier", h(Identifier, { id }));
@@ -234,7 +254,15 @@ function HeaderLabel({ name, id, href = null }) {
     nameEl = h(Link, { className: "header-name header-link", href }, name);
   }
 
-  return h([nameEl, identifier]);
+  return h([nameEl, status, identifier]);
+}
+
+function InProcessTag() {
+  return h(
+    Tag,
+    { minimal: true, size: "small", color: "lightgreen" },
+    IN_PROCESS_STATUS
+  );
 }
 
 /** No `sortable` fields for now. The list is grouped project → group, and the
@@ -709,7 +737,7 @@ function ColumnRowCard({ data }) {
   const selectColumn = useSetAtom(selectColumnAtom);
   const selectionMode = useAtomValue(selectionModeAtom);
 
-  const { col_id, col_name, t_units, t_sections, status_code } = data;
+  const { col_id, col_name, t_units, t_sections } = data;
   const selected = selectedIDs.includes(col_id);
   const hovered = useIsColumnHovered(col_id);
   const setHoveredColumn = useSetHoveredColumn();
@@ -729,15 +757,6 @@ function ColumnRowCard({ data }) {
       Tag,
       { minimal: true, size: "small", color: "goldenrod" },
       `${t_sections} pkg`
-    );
-  }
-
-  let statusTag = null;
-  if (status_code === "in process") {
-    statusTag = h(
-      Tag,
-      { minimal: true, size: "small", color: "lightgreen" },
-      "in process"
     );
   }
 
@@ -768,8 +787,7 @@ function ColumnRowCard({ data }) {
     onMouseLeave: () => setHoveredColumn(null),
     title: h("span.col-head", [
       h("span.col-name", col_name),
-      h("span.col-tags", [statusTag, packagesTag, unitsTag]),
-      h("span.col-identifier", h(Identifier, { id: col_id })),
+      h("span.col-tags", [packagesTag, unitsTag]),
     ]),
     label: col_name,
   });

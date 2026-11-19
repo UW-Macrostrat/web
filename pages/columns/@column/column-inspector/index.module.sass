@@ -123,11 +123,12 @@
 
 /* -------------------------------------------------------------- assistant */
 
-// Plain metadata: not a card. Its details scroll when the sidebar runs out of
-// room (the frame's `fitSidebar`), over actions that stay in view.
+// Plain metadata: not a card. Details and actions scroll together when the
+// sidebar runs out of room (the frame's `fitSidebar`).
 .column-assistant
   flex: 0 1 auto
   min-height: 0
+  overflow-y: auto
   display: flex
   flex-direction: column
 
@@ -156,9 +157,7 @@
     gap: 0.5em
 
 .column-assistant-body
-  flex: 0 1 auto
-  min-height: 0
-  overflow-y: auto
+  flex: 0 0 auto
 
 // One action per row, left-aligned
 .column-actions
@@ -213,12 +212,17 @@ div.section
   flex-direction: row
 
 
-// Columns of other projects at the same place, one collapsed row per project
+// Columns at the same place, one collapsed row per project
 .nearby-columns
   margin-top: 0.5em
 
+.nearby-projects
+  flex-basis: 100%
+  min-width: 0
+
 .nearby-project-toggle
   width: 100%
+  text-align: left
   .nearby-project-name
     margin-right: 0.5em
   .nearby-count
@@ -237,7 +241,3 @@ div.section
     margin-left: auto
     white-space: nowrap
     color: var(--secondary-color)
-
-.nearby-more
-  color: var(--secondary-color)
-  font-style: italic

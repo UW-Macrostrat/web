@@ -87,6 +87,8 @@ export interface ColumnProject {
   /** True for a composite project the column belongs to through one of its
    * member projects (e.g. "Core columns" for a North America column). */
   composite: boolean;
+  /** A composite's member projects; empty for the column's own project. */
+  member_ids: number[];
 }
 
 /** A column belongs to its own project and to every composite project whose
@@ -99,12 +101,13 @@ function projectsForColumn(
   for (const p of projects) {
     const entry = { project_id: p.project_id, slug: p.slug, project: p.project };
     if (p.project_id === projectID) {
-      out.unshift({ ...entry, composite: false });
+      out.unshift({ ...entry, composite: false, member_ids: [] });
       continue;
     }
     const members: any[] = p.members ?? [];
     if (members.some((m) => m?.id === projectID)) {
-      out.push({ ...entry, composite: true });
+      const member_ids = members.map((m) => m?.id).filter((id) => id != null);
+      out.push({ ...entry, composite: true, member_ids });
     }
   }
   return out;

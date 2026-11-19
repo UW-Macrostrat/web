@@ -8,6 +8,7 @@
 import { atomWithSearchParam } from "~/_utils/url-atoms";
 import {
   COLUMN_STATUS_FILTER_KEY,
+  IN_PROCESS_STATUS,
   statusCodeParam,
   statusCodeURLValue,
 } from "~/components/in-process-filter";
@@ -74,6 +75,12 @@ export interface ColumnRow {
   t_sections: number;
   /** Resolved from the project definitions, for the list's section headers. */
   project_name: string;
+  /** In-process columns in this row's group, for its divider. */
+  group_in_process: number;
+  /** Every column of the group is in process, so its header says so once. */
+  group_all_in_process: boolean;
+  /** Likewise for the whole project. */
+  project_all_in_process: boolean;
 }
 
 export type MapBounds = [[number, number], [number, number]];
@@ -245,15 +252,30 @@ export const allRowsAtom = atom<ColumnRow[]>((get) => {
   const groups =
     get(downloadedGroupsAtom).data ?? get(initialDataAtom)?.groups ?? [];
   const projectNames = get(projectNamesAtom);
-  return groups.flatMap((group) =>
-    group.columns.map((col) => ({
+
+  const activeProjects = new Set<number>();
+  for (const group of groups) {
+    for (const col of group.columns) {
+      if (col.status_code === IN_PROCESS_STATUS) continue;
+      activeProjects.add(col.project_id as number);
+    }
+  }
+
+  return groups.flatMap((group) => {
+    const inProcess = group.columns.filter(
+      (col) => col.status_code === IN_PROCESS_STATUS
+    ).length;
+    return group.columns.map((col) => ({
       ...col,
       col_group: group.name,
       col_group_id: group.id,
       project_name:
         projectNames.get(col.project_id) ?? `Project ${col.project_id}`,
-    }))
-  ) as ColumnRow[];
+      group_in_process: inProcess,
+      group_all_in_process: inProcess === group.columns.length,
+      project_all_in_process: !activeProjects.has(col.project_id as number),
+    }));
+  }) as ColumnRow[];
 });
 
 /* ------------------------------------------------- selection & view filters */
