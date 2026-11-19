@@ -4,9 +4,12 @@
 import hyper from "@macrostrat/hyper";
 import { apiV3Prefix } from "@macrostrat-web/settings";
 import { Button, Collapse } from "@blueprintjs/core";
-import { DataField, Tag, TagSize } from "@macrostrat/data-components";
+import { DataField } from "@macrostrat/data-components";
 import { useEffect, useState } from "react";
-import { IN_PROCESS_STATUS } from "~/components/in-process-filter";
+import {
+  IN_PROCESS_STATUS,
+  InProcessTag,
+} from "~/components/in-process-filter";
 import type { ColumnProject } from "../+data.shared";
 import styles from "./index.module.sass";
 
@@ -122,6 +125,13 @@ function NearbyProjectEntry({
   let icon = "chevron-right";
   if (isOpen) icon = "chevron-down";
 
+  // Said once for the project when it holds nothing else, as in the columns list
+  const allInProcess = project.columns.every(isInProcess);
+  let status = null;
+  if (allInProcess) {
+    status = h(InProcessTag);
+  }
+
   return h("div.nearby-project", [
     h(
       Button,
@@ -136,13 +146,19 @@ function NearbyProjectEntry({
       [
         h("span.nearby-project-name", project.project),
         h("span.nearby-count", projectSummary(project)),
+        status,
       ]
     ),
     h(Collapse, { isOpen }, [
       h(
         "ul.nearby-list",
         project.columns.map((col) =>
-          h(NearbyColumnItem, { key: col.col_id, col, fromSection })
+          h(NearbyColumnItem, {
+            key: col.col_id,
+            col,
+            fromSection,
+            showStatus: !allInProcess,
+          })
         )
       ),
     ]),
@@ -161,20 +177,22 @@ function projectSummary(project: NearbyProject): string {
   return parts.join(", ");
 }
 
+function isInProcess(col: NearbyColumn): boolean {
+  return col.status_code === IN_PROCESS_STATUS;
+}
+
 function NearbyColumnItem({
   col,
   fromSection,
+  showStatus,
 }: {
   col: NearbyColumn;
   fromSection: boolean;
+  showStatus: boolean;
 }) {
   let status = null;
-  if (col.status_code === IN_PROCESS_STATUS) {
-    status = h(Tag, {
-      size: TagSize.Small,
-      name: col.status_code,
-      color: "lightgreen",
-    });
+  if (showStatus && isInProcess(col)) {
+    status = h(InProcessTag);
   }
   // A composite's point stands in for a region, so a distance to it means little
   let distance = null;

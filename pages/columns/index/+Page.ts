@@ -53,6 +53,7 @@ import {
   InProcessFilterProvider,
   InProcessFilterTag,
   InProcessSwitch,
+  InProcessTag,
 } from "~/components/in-process-filter";
 import { onDemand } from "~/_utils";
 import {
@@ -246,14 +247,6 @@ function columnCount(count: number): string {
 
 function InProcessDivider({ count }: { count: number }) {
   return h([h(InProcessTag), h("span.divider-count", columnCount(count))]);
-}
-
-function InProcessTag() {
-  return h(
-    Tag,
-    { minimal: true, size: "small", color: "lightgreen" },
-    IN_PROCESS_STATUS
-  );
 }
 
 /** No `sortable` fields for now. The list is grouped project → group, and the

@@ -110,6 +110,7 @@ import type {
 } from "../references";
 
 import h from "./index.module.sass";
+import { References } from "~/components/lex";
 
 /** The column page never draws a selection of its own, only the current
  * column — a module-level constant so the target doesn't change identity on
@@ -814,12 +815,10 @@ function ColumnBasicInfo({
 function ColumnStatusField({ status }: { status: string | null | undefined }) {
   if (status == null) return null;
   // Colored as on the column list
-  let color: string | undefined = undefined;
-  if (status === IN_PROCESS_STATUS) color = "lightgreen";
   return h(DataField, {
     row: true,
     label: "Status",
-    value: h(Tag, { size: TagSize.Small, name: status, color }),
+    value: h(Tag, { size: TagSize.Small, name: status }),
   });
 }
 
@@ -835,12 +834,20 @@ function ColumnReferencesField({ refs }: { refs: ColumnReferences | null }) {
   if (cited.length > 0) {
     citedList = h(ReferenceList, { refs: cited });
   }
-  return h(DataField, { label: "References", className: "column-refs" }, [
-    citedList,
-    ...located.map((entry) =>
-      h(LocatedReferenceEntry, { key: `${entry.ref.id}:${entry.label}`, entry })
-    ),
-  ]);
+  return h(
+    DataField,
+    { label: "References", className: "column-refs" },
+    // A block of its own, so the list spans the field rather than sit to the right
+    h("div.column-refs-list", [
+      citedList,
+      ...located.map((entry) =>
+        h(LocatedReferenceEntry, {
+          key: `${entry.ref.id}:${entry.label}`,
+          entry,
+        })
+      ),
+    ])
+  );
 }
 
 /** "Compiled in" the citation, then where in it: "Cenoz11, Cret17a". */

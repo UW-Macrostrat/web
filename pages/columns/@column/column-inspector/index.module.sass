@@ -216,7 +216,8 @@ div.section
 .nearby-columns
   margin-top: 0.5em
 
-.nearby-projects
+.nearby-projects,
+.column-refs-list
   flex-basis: 100%
   min-width: 0
 
@@ -227,6 +228,8 @@ div.section
     margin-right: 0.5em
   .nearby-count
     color: var(--secondary-color)
+  :global(.bp6-tag)
+    margin-left: 0.5em
 
 .nearby-list
   list-style: none
