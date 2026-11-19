@@ -61,7 +61,10 @@ export async function fetchModels(): Promise<KGModel[]> {
 }
 
 export async function fetchEntityTypes(): Promise<KGEntityType[]> {
-  return fetchKGRows<KGEntityType>("kg_entity_type", { order: "id" });
+  return fetchKGRows<KGEntityType>("kg_entity_type", {
+    select: "id,name,description,color,user_id",
+    order: "id",
+  });
 }
 
 export interface KGLookups {
