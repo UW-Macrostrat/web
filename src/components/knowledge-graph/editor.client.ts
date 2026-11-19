@@ -51,7 +51,22 @@ export interface RunViewProps {
 }
 
 function useEnhancedRun(run: KGRun, models: KGModel[], entityTypes: KGEntityType[]) {
-  const entityTypeIndex = useMemo(() => indexById(entityTypes), [entityTypes]);
+  const entityTypeIndex = useMemo(() => {
+    const usedTypeIDs = new Set<number>();
+    function collectTypes(entities: any[]) {
+      for (const entity of entities ?? []) {
+        const id = entity.type?.id ?? entity.type;
+        if (id != null) usedTypeIDs.add(Number(id));
+        collectTypes(entity.children);
+      }
+    }
+    collectTypes(run.entities);
+    // Keep user-created types only when this feedback already uses them.
+    // The full lookup is fetched so referenced custom types can be resolved.
+    return indexById(entityTypes.filter(
+      (type) => type.user_id === null || usedTypeIDs.has(Number(type.id)),
+    ));
+  }, [run.entities, entityTypes]);
   const modelIndex = useMemo(() => indexById(models), [models]);
   const data = useMemo(
     () => enhanceData(run, modelIndex, entityTypeIndex),

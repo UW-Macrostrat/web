@@ -4,6 +4,8 @@
  * chunk); column names here are a cross-repo contract with that SQL. */
 
 export interface KGEntityType {
+  /** Creator UUID; null for shared entity types. */
+  user_id: string | null;
   id: number;
   name: string;
   description?: string | null;
