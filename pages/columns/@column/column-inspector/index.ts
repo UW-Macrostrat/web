@@ -527,10 +527,8 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
         return;
       }
       // Column-to-column navigation carries the hash, so the time filter and
-      // display settings follow you.
-      navigate(`${linkPrefix}columns/${col_id}${window.location.hash}`, {
-        overwriteLastHistoryEntry: true,
-      });
+      // display settings follow you; each column is its own Back step.
+      navigate(`${linkPrefix}columns/${col_id}${window.location.hash}`);
     },
     [columnInfo.col_id, linkPrefix]
   );

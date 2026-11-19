@@ -257,7 +257,9 @@ function setHashFromState(state: ColumnHashState) {
   newURL += document.location.search;
 
   if (newHash !== document.location.hash) {
-    history.replaceState(null, document.title, newURL);
+    // Keeps Vike's state: a fresh one marks the entry user-made, and Vike then
+    // skips rendering a Back to another column
+    history.replaceState(history.state, document.title, newURL);
   }
 }
 
