@@ -14,6 +14,7 @@ import hyper from "@macrostrat/hyper";
 import classNames from "classnames";
 import { FloatingNavbar, MapLoadingButton } from "@macrostrat/map-interface";
 import {
+  type RootCollapse,
   PageBreadcrumbsInternal,
   PageTitle,
   usePageBreadcrumbs,
@@ -32,6 +33,7 @@ interface MapPageNavbarProps {
    * False keeps it inline as the trail's last crumb, for a one-row navbar that
    * leaves more of the screen to the panel below. */
   separateTitle?: boolean;
+  rootCollapse?: RootCollapse;
   className?: string;
   /** Extra controls, placed after the title and before the panel toggle. */
   children?: React.ReactNode;
@@ -51,6 +53,7 @@ export function MapPageNavbar({
   onToggle,
   width = 320,
   separateTitle = true,
+  rootCollapse,
   className,
   children,
 }: MapPageNavbarProps) {
@@ -66,6 +69,7 @@ export function MapPageNavbar({
           items: trail,
           showLogo: true,
           separateTitle,
+          rootCollapse,
           size: "small",
         }),
       ]),

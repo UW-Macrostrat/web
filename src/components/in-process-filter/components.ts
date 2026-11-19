@@ -2,9 +2,9 @@
  * `InProcessFilterProvider`, so a switch anywhere on the page drives the same
  * scope as the list and the maps. */
 import { hyperStyled } from "@macrostrat/hyper";
-import { Button, Switch } from "@blueprintjs/core";
+import { Button, Switch, Tag as BlueprintTag } from "@blueprintjs/core";
 import { Tag, TagSize } from "@macrostrat/data-components";
-import { useInProcessFilter } from "./state";
+import { IN_PROCESS_STATUS, useInProcessFilter } from "./state";
 import styles from "./main.module.sass";
 
 const h = hyperStyled(styles);
@@ -52,4 +52,13 @@ export function InProcessFilterTag({
       onClick: () => setShowInProcess(false),
     }),
   ]);
+}
+
+/** Marks a column, or a whole group or project, as in process */
+export function InProcessTag() {
+  return h(
+    BlueprintTag,
+    { minimal: true, size: "small", color: "lightgreen" },
+    IN_PROCESS_STATUS
+  );
 }

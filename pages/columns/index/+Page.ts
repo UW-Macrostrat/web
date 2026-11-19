@@ -1,7 +1,7 @@
 /** The column list page, on the hybrid content/map frame.
  *
  * The list is a `DataPanel` over the whole matching column set held in memory
- * — one request, everything addressable — with a windowed, group-headed scroll
+ * — one request, everything addressable — paged into a group-headed scroll
  * body. That's what lets the list and the map stay exactly in sync: selection
  * is by `col_id` at the page level, and the panel's index-based selection is
  * reconciled against it whenever the row set changes.
@@ -35,7 +35,7 @@ import { LinkCard } from "~/components/cards";
 import { LithologyTag } from "~/components/lex/tag";
 import {
   autoLoadPagesForItems,
-  createWindowedScrollBody,
+  createGroupedScrollBody,
 } from "~/components/data-view";
 import {
   HybridContentFooter,
@@ -49,9 +49,11 @@ import {
   resolveProjectIDs,
 } from "~/components/project-filter";
 import {
+  IN_PROCESS_STATUS,
   InProcessFilterProvider,
   InProcessFilterTag,
   InProcessSwitch,
+  InProcessTag,
 } from "~/components/in-process-filter";
 import { onDemand } from "~/_utils";
 import {
@@ -118,26 +120,6 @@ const ColumnListMap = onDemand(() =>
   import("./map.client").then((mod) => mod.ColumnListMap)
 );
 
-/** Must match `$row-height` / `$group-height` / `$group-gap` in
- * `main.module.sass` — the windowed body lays bands out by arithmetic, so it
- * can't measure them.
- *
- * `ROW_HEIGHT` is the height of a *band* (one line of the grid), not of the
- * list: three cards share a band. Each card is one line — name, any status, and
- * the id — so the band is only a little taller than the row it replaced while
- * holding three times as much. */
-const ROW_HEIGHT = 48;
-/** The width a column card wants. The grid fits as many as the body has room
- * for — three at the content measure, one in the ~350px panel beside the map. */
-const COLUMN_CARD_WIDTH = 280;
-/** What to assume before the body is measured (server + first client render). */
-const COLUMN_INITIAL_COLUMNS = 3;
-/** Space closing each column group, so the next group's sticky header doesn't
- * butt up against the last card of the previous one. */
-const GROUP_GAP = 12;
-const GROUP_HEIGHT = 30;
-const SECTION_HEIGHT = 34;
-
 /** Rows per fetched page. How far it auto-scrolls before the footer's "Load
  * more" takes over is the shared row budget (`data-view/auto-load`) — deep
  * results are reached by narrowing the filters, not by scrolling forever. */
@@ -161,16 +143,8 @@ function groupHref(
   return `/projects/${projectID}/groups/${groupID}`;
 }
 
-const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
-  // One seeded page in the server HTML, for crawlers (see page-links.ts)
-  initialRows: PAGE_SIZE,
-  rowHeight: ROW_HEIGHT,
-  columnWidth: COLUMN_CARD_WIDTH,
-  initialColumns: COLUMN_INITIAL_COLUMNS,
-  groupGap: GROUP_GAP,
-  // Projects are the outer sections (a handful, some very large); column groups
-  // the inner ones (164 of them, median ~15 rows).
-  sectionHeight: SECTION_HEIGHT,
+const ColumnScrollBody = createGroupedScrollBody<ColumnRow>({
+  // Projects are the outer sections, column groups the inner ones
   sectionOf: (row) => {
     if (row == null) return null;
     return {
@@ -179,10 +153,11 @@ const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
         name: row.project_name,
         id: row.project_id,
         href: projectHref(row.project_id),
+        count: row.project_columns,
+        inProcess: row.project_all_in_process,
       }),
     };
   },
-  groupHeight: GROUP_HEIGHT,
   groupOf: (row) => {
     if (row == null) return null;
     return {
@@ -191,7 +166,19 @@ const ColumnScrollBody = createWindowedScrollBody<ColumnRow>({
         name: row.col_group ?? "Ungrouped",
         id: row.col_group_id,
         href: groupHref(row.project_id, row.col_group_id),
+        count: row.group_columns,
+        // Said once on the project when it holds for all of it
+        inProcess: row.group_all_in_process && !row.project_all_in_process,
       }),
+    };
+  },
+  // Only a mixed group needs telling where its in-process columns begin
+  dividerOf: (row) => {
+    if (row == null || row.group_all_in_process) return null;
+    if (row.status_code !== IN_PROCESS_STATUS) return null;
+    return {
+      key: IN_PROCESS_STATUS,
+      label: h(InProcessDivider, { count: row.group_in_process }),
     };
   },
 });
@@ -223,7 +210,23 @@ function createPagedRowProvider(rowsRef: { current: ColumnRow[] }) {
  * column group within it. Both were plain text, which left the two levels of
  * grouping the list is built around as the only things in it you couldn't
  * follow. */
-function HeaderLabel({ name, id, href = null }) {
+function HeaderLabel({
+  name,
+  id,
+  href = null,
+  count = null,
+  inProcess = false,
+}) {
+  let countEl = null;
+  if (count != null) {
+    countEl = h("span.header-count", columnCount(count));
+  }
+
+  let status = null;
+  if (inProcess) {
+    status = h(InProcessTag);
+  }
+
   let identifier = null;
   if (id != null && id > 0) {
     identifier = h("span.header-identifier", h(Identifier, { id }));
@@ -234,7 +237,16 @@ function HeaderLabel({ name, id, href = null }) {
     nameEl = h(Link, { className: "header-name header-link", href }, name);
   }
 
-  return h([nameEl, identifier]);
+  return h([nameEl, countEl, status, identifier]);
+}
+
+function columnCount(count: number): string {
+  if (count === 1) return "1 column";
+  return `${count.toLocaleString()} columns`;
+}
+
+function InProcessDivider({ count }: { count: number }) {
+  return h([h(InProcessTag), h("span.divider-count", columnCount(count))]);
 }
 
 /** No `sortable` fields for now. The list is grouped project → group, and the
@@ -710,6 +722,7 @@ function ColumnRowCard({ data }) {
   const selectionMode = useAtomValue(selectionModeAtom);
 
   const { col_id, col_name, t_units, t_sections, status_code } = data;
+  const inProcess = status_code === IN_PROCESS_STATUS;
   const selected = selectedIDs.includes(col_id);
   const hovered = useIsColumnHovered(col_id);
   const setHoveredColumn = useSetHoveredColumn();
@@ -732,15 +745,6 @@ function ColumnRowCard({ data }) {
     );
   }
 
-  let statusTag = null;
-  if (status_code === "in process") {
-    statusTag = h(
-      Tag,
-      { minimal: true, size: "small", color: "lightgreen" },
-      "in process"
-    );
-  }
-
   const onClick = (evt) => {
     const additive = evt.metaKey || evt.ctrlKey;
     const range = evt.shiftKey;
@@ -760,7 +764,11 @@ function ColumnRowCard({ data }) {
   };
 
   return h(LinkCard, {
-    className: classNames("column-row", { selected, hovered }),
+    className: classNames("column-row", {
+      selected,
+      hovered,
+      "in-process": inProcess,
+    }),
     density: "list",
     href: columnHref(col_id),
     onClick,
@@ -768,8 +776,7 @@ function ColumnRowCard({ data }) {
     onMouseLeave: () => setHoveredColumn(null),
     title: h("span.col-head", [
       h("span.col-name", col_name),
-      h("span.col-tags", [statusTag, packagesTag, unitsTag]),
-      h("span.col-identifier", h(Identifier, { id: col_id })),
+      h("span.col-tags", [packagesTag, unitsTag]),
     ]),
     label: col_name,
   });

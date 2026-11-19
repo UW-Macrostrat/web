@@ -52,11 +52,17 @@ $trail-end: "li:last-of-type:not(.root-crumb), li:has(+ .root-crumb:last-of-type
     flex: 0 0 auto
     min-width: 0
 
+  // The trail-ending crumb below is shrinkable, and flex shares overflow by
+  // width, so it would take nearly all of it. `OverflowList` reads the spacer's
+  // rounded `offsetWidth`, so the spacer must reach 0 for any overflow at all.
+  :global(.bp6-overflow-list-spacer)
+    flex-shrink: 100000
+
   :global(.bp6-breadcrumb)
     white-space: nowrap
 
-  // The root is handed to `OverflowList` last so it outlives the crumbs below
-  // it, and brought back to the head of the trail here.
+  // The root is handed to `OverflowList` first or last, per `rootCollapse`,
+  // and brought back to the head of the trail here.
   .root-crumb
     order: -1
 
@@ -64,6 +70,14 @@ $trail-end: "li:last-of-type:not(.root-crumb), li:has(+ .root-crumb:last-of-type
     // ever *visually* last when it is the trail's only crumb.
     &:not(:only-of-type)::after
       display: block
+
+  // A collapsed root's chevron, pulled in so it sits as close to the logo as
+  // to the crumb after it, rather than a full row gap away.
+  .root-separator
+    margin-left: -0.5em
+
+    &::after
+      margin-left: 0
 
   // Once the menu has swallowed everything it can, the crumb ending the trail
   // is all that's left to give, so it is the only shrinkable item in the row.

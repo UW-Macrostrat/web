@@ -1,6 +1,6 @@
 /** Administrator tools: see what the system makes of a session, browse the
  * site with a reduced role, see which build each service runs, reach the cache
- * tools, and manage users and API tokens.
+ * tools, and reach the user and API-token pages.
  *
  * Everything that changes state goes through api_v3's admin-gated `/security`
  * routes; this page is a window onto them, not an authority of its own. A
@@ -15,8 +15,6 @@ import type { ReactNode } from "react";
 import { isDegraded } from "~/components/auth";
 import { IntrospectionPanel, RoleSwitchPanel } from "./introspection";
 import { ServicesPanel } from "./services";
-import { UsersHelp, UsersSheet } from "./users-sheet";
-import { TokensHelp, TokensSheet } from "./tokens-sheet";
 import { HistorySheet } from "./history-sheet";
 import styles from "./main.module.sass";
 
@@ -54,30 +52,6 @@ export function Page() {
     h(
       Section,
       {
-        title: "Users",
-      },
-      [
-        h(AdminOnly, { degraded, what: "manage users" }, [
-          h(UsersHelp),
-          h(UsersSheet),
-        ]),
-      ]
-    ),
-    h(
-      Section,
-      {
-        title: "API tokens",
-      },
-      [
-        h(AdminOnly, { degraded, what: "manage tokens" }, [
-          h(TokensHelp),
-          h(TokensSheet),
-        ]),
-      ]
-    ),
-    h(
-      Section,
-      {
         title: "Recent changes",
       },
       [
@@ -91,10 +65,25 @@ export function Page() {
 
 const adminTools = [
   {
+    href: "/dashboard/admin/users",
+    text: "Users",
+    description: "search accounts, change roles and contact details, delete",
+  },
+  {
+    href: "/dashboard/admin/tokens",
+    text: "API tokens",
+    description: "mint, search, rescope and revoke delegated tokens",
+  },
+  {
     href: "/dashboard/admin/tasks",
     text: "Task runner",
     description:
       "topology updates and other maintenance on the worker, with live output",
+  },
+  {
+    href: "/dashboard/admin/rasters",
+    text: "Raster layers",
+    description: "find rasters, group them into layers and edit layer metadata",
   },
   {
     href: "/dashboard/admin/cache",

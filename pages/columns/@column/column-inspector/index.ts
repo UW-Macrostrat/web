@@ -50,6 +50,7 @@ import {
 } from "@macrostrat/data-components";
 import { SGPMeasurementsColumn } from "./sgp-facet";
 import { ColumnExtData } from "./column-info";
+import { NearbyColumns } from "./nearby-columns";
 import {
   HybridBottomSheet,
   HybridPage,
@@ -109,6 +110,7 @@ import type {
 } from "../references";
 
 import h from "./index.module.sass";
+import { References } from "~/components/lex";
 
 /** The column page never draws a selection of its own, only the current
  * column — a module-level constant so the target doesn't change identity on
@@ -236,6 +238,7 @@ function ColumnContentPane({ columnInfo }) {
     b_pos,
     pixelScale,
     grainsize,
+    collapseSmallUnconformities,
   } = useColumnState(columnInfo);
 
   // The rendered age window follows the shared time filter, animating between
@@ -318,7 +321,7 @@ function ColumnContentPane({ columnInfo }) {
               unitComponent: ColoredUnitComponent,
               unitComponentProps: selectedUnitProps,
               unconformityLabels: "minimal",
-              collapseSmallUnconformities: true,
+              collapseSmallUnconformities,
               showTimescale,
               axisType,
               // `auto` grain size follows the column type, not the axis
@@ -524,10 +527,8 @@ function ColumnMapPane({ columnInfo, linkPrefix, projectID }) {
         return;
       }
       // Column-to-column navigation carries the hash, so the time filter and
-      // display settings follow you.
-      navigate(`${linkPrefix}columns/${col_id}${window.location.hash}`, {
-        overwriteLastHistoryEntry: true,
-      });
+      // display settings follow you; each column is its own Back step.
+      navigate(`${linkPrefix}columns/${col_id}${window.location.hash}`);
     },
     [columnInfo.col_id, linkPrefix]
   );
@@ -692,8 +693,8 @@ function UnitDetailsSheet({ units, selectedUnit, onSelectUnit }) {
   );
 }
 
-/** The column's details, scrolling on their own beneath the map when the
- * sidebar runs out of room, over its actions, which stay in view. */
+/** The column's details and its actions, scrolling together beneath the map
+ * when the sidebar runs out of room. */
 function ColumnInfoPanel({
   data,
   refs,
@@ -706,6 +707,11 @@ function ColumnInfoPanel({
     h("div.column-assistant-body", [
       h(ColumnBasicInfo, { data, refs, project, columnProjects }),
       h(ColumnExtData, { columnInfo: data, onSelectFacet: setFacet }),
+      h(NearbyColumns, {
+        colID: data.col_id,
+        projectID: data.project_id,
+        columnProjects,
+      }),
     ]),
     h("div.column-actions", [
       h(AnchorButton, {
@@ -807,12 +813,10 @@ function ColumnBasicInfo({
 function ColumnStatusField({ status }: { status: string | null | undefined }) {
   if (status == null) return null;
   // Colored as on the column list
-  let color: string | undefined = undefined;
-  if (status === IN_PROCESS_STATUS) color = "lightgreen";
   return h(DataField, {
     row: true,
     label: "Status",
-    value: h(Tag, { size: TagSize.Small, name: status, color }),
+    value: h(Tag, { size: TagSize.Small, name: status }),
   });
 }
 
@@ -828,12 +832,20 @@ function ColumnReferencesField({ refs }: { refs: ColumnReferences | null }) {
   if (cited.length > 0) {
     citedList = h(ReferenceList, { refs: cited });
   }
-  return h(DataField, { label: "References", className: "column-refs" }, [
-    citedList,
-    ...located.map((entry) =>
-      h(LocatedReferenceEntry, { key: `${entry.ref.id}:${entry.label}`, entry })
-    ),
-  ]);
+  return h(
+    DataField,
+    { label: "References", className: "column-refs" },
+    // A block of its own, so the list spans the field rather than sit to the right
+    h("div.column-refs-list", [
+      citedList,
+      ...located.map((entry) =>
+        h(LocatedReferenceEntry, {
+          key: `${entry.ref.id}:${entry.label}`,
+          entry,
+        })
+      ),
+    ])
+  );
 }
 
 /** "Compiled in" the citation, then where in it: "Cenoz11, Cret17a". */

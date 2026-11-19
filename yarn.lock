@@ -2530,9 +2530,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^3.18.1":
-  version: 3.18.1
-  resolution: "@macrostrat/column-views@npm:3.18.1"
+"@macrostrat/column-views@npm:^3.19.0":
+  version: 3.19.0
+  resolution: "@macrostrat/column-views@npm:3.19.0"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@macrostrat/api-types": "npm:^1.4.0"
@@ -2560,7 +2560,7 @@ __metadata:
     jotai: "npm:^2.20.0"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/b01ffd0d0589c9274ea9de5905f688d9cfc325827135bd95167e9e69e287226283bb0605319804f4a6db2f6709b502f732b3d94a9ac86cfddebbc720e644ef98
+  checksum: 10c0/c75fca2610c9bc097668d452a368e39d7d036dfc73735f0cb5d00e2a2834dca55919976b2af40e093dc762bbb65213714f7305e5d7fb397395d60cff0bcffd61
   languageName: node
   linkType: hard
 
@@ -2614,9 +2614,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/data-sheet@npm:^4.11.1, @macrostrat/data-sheet@npm:^4.6.0":
-  version: 4.11.1
-  resolution: "@macrostrat/data-sheet@npm:4.11.1"
+"@macrostrat/data-sheet@npm:^4.11.5, @macrostrat/data-sheet@npm:^4.6.0":
+  version: 4.11.5
+  resolution: "@macrostrat/data-sheet@npm:4.11.5"
   dependencies:
     "@blueprintjs/core": "npm:^6.14.0"
     "@blueprintjs/table": "npm:^6.1.0"
@@ -2633,7 +2633,7 @@ __metadata:
     underscore: "npm:^1.13.7"
   peerDependencies:
     react: ^18.0.0||^19.0.0
-  checksum: 10c0/b20486c4b45b3bf4f6083a391f017f7d54f8424b20a2287bde8b8bb40a7c7bc92c8151284e16c7705e160e81ca0c11392d921787025f55f9a7bb76286c3b59f4
+  checksum: 10c0/92f1e86feaa3218245a06115d03e768272357ed8ba6134879af9bb1a4004dd25638843b2a8c4b3b1841f5bd82975d53d1f3a2097515eea4106669554401c953e
   languageName: node
   linkType: hard
 
@@ -3055,10 +3055,10 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.4.0"
     "@macrostrat/color-utils": "npm:^1.2.2"
     "@macrostrat/column-components": "npm:^2.2.1"
-    "@macrostrat/column-views": "npm:^3.18.1"
+    "@macrostrat/column-views": "npm:^3.19.0"
     "@macrostrat/data-components": "npm:^1.10.0"
     "@macrostrat/data-provider": "npm:^1.4.1"
-    "@macrostrat/data-sheet": "npm:^4.11.1"
+    "@macrostrat/data-sheet": "npm:^4.11.5"
     "@macrostrat/feedback-components": "npm:^2.3.1"
     "@macrostrat/form-components": "npm:^1.0.10"
     "@macrostrat/hyper": "npm:^3.1.1"

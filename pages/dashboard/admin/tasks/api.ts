@@ -13,6 +13,8 @@ export interface JSONSchema {
   anyOf?: JSONSchema[];
   items?: JSONSchema;
   required?: string[];
+  /** The form offers values this parameter took in earlier runs. */
+  "x-recent"?: boolean;
 }
 
 export interface TaskInfo {
@@ -104,6 +106,14 @@ export async function fetchTasks(): Promise<TaskInfo[]> {
 
 export function fetchRuns(limit = 50): Promise<Run[]> {
   return tasksFetch(`/runs?limit=${limit}`);
+}
+
+/** Values a parameter took in the task's latest runs, newest first. */
+export function fetchRecentValues(
+  task: string,
+  param: string
+): Promise<string[]> {
+  return tasksFetch(`/${task}/recent/${param}`);
 }
 
 export function fetchRun(id: string): Promise<Run> {

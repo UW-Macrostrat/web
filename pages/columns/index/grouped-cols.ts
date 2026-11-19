@@ -1,5 +1,8 @@
 import { fetchAPIV2Result } from "~/_utils";
-import { statusCodeParam } from "~/components/in-process-filter";
+import {
+  IN_PROCESS_STATUS,
+  statusCodeParam,
+} from "~/components/in-process-filter";
 import { CORE_COLUMNS_PROJECT_ID } from "@macrostrat/data-provider";
 
 interface ColumnResponseShort {
@@ -108,13 +111,51 @@ export async function getGroupedColumns(params: ColumnFilterOptions | null) {
 
   const groupsArray = Array.from(groupMap.values());
 
-  // Sort the groups by id
-  groupsArray.sort((a, b) => {
-    if (a.id === -1) return 1; // Ungrouped should come last
-    return a.id - b.id;
-  });
+  // In-process columns last, at every level: in eODP they are the empty
+  // placeholders, whole expeditions of them
+  for (const group of groupsArray) {
+    group.columns.sort(
+      (a, b) => inProcessRank(a) - inProcessRank(b) || a.col_id - b.col_id
+    );
+  }
+  sortGroups(groupsArray);
 
   return groupsArray;
+}
+
+function inProcessRank(col: ColumnResponseShort): number {
+  if (col.status_code === IN_PROCESS_STATUS) return 1;
+  return 0;
+}
+
+/** Projects keep their order, by first group id, and groups within them their
+ * id order; a group or project entirely in process follows those with active
+ * columns. Ungrouped columns come last. */
+function sortGroups(groups: ColumnGroup[]) {
+  type ProjectKey = ColumnGroup["project_id"];
+  const groupRank = new Map<ColumnGroup, number>();
+  const projectRank = new Map<ProjectKey, number>();
+  const projectOrder = new Map<ProjectKey, number>();
+  for (const group of groups) {
+    if (group.id === -1) continue;
+    const rank = Math.min(...group.columns.map(inProcessRank));
+    const project = group.project_id;
+    groupRank.set(group, rank);
+    projectRank.set(project, Math.min(projectRank.get(project) ?? 1, rank));
+    const order = Math.min(projectOrder.get(project) ?? Infinity, group.id);
+    projectOrder.set(project, order);
+  }
+
+  groups.sort((a, b) => {
+    const ungrouped = Number(a.id === -1) - Number(b.id === -1);
+    if (ungrouped !== 0 || a.id === -1) return ungrouped;
+    return (
+      projectRank.get(a.project_id) - projectRank.get(b.project_id) ||
+      projectOrder.get(a.project_id) - projectOrder.get(b.project_id) ||
+      groupRank.get(a) - groupRank.get(b) ||
+      a.id - b.id
+    );
+  });
 }
 
 export interface ColumnFilterOptions {

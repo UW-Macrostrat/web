@@ -1,0 +1,54 @@
+.rasters-page
+  text-align: left
+  margin-top: 1em
+
+  .muted
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+  .error
+    color: var(--pz-danger-color, #cd4246)
+
+.page-links
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.75em
+  margin-bottom: 1em
+
+.new-layer
+  min-width: 18em
+
+.raster-sheet
+  height: 70vh
+  min-height: 24em
+  position: relative
+  border: 1px solid var(--pz-border-color, rgba(128, 128, 128, 0.3))
+  border-radius: 4px
+  overflow: hidden
+  margin-top: 0.75em
+
+.layers-view
+  display: flex
+  align-items: stretch
+  gap: 0.75em
+
+.layers-sheet
+  height: 28em
+  flex: 1 1 0
+  min-width: 0
+
+// Sized by CSS so the grid keeps a fixed share beside it
+.layer-editor
+  flex: 0 0 22em
+  height: 28em
+  margin-top: 0.75em
+  overflow: auto
+
+  // The hidden row editor renders nothing; give its space to the grid
+  &:empty
+    display: none
+
+.assign-control
+  display: flex
+  align-items: center
+  gap: 0.5em

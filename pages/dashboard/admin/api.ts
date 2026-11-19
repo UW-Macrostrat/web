@@ -29,6 +29,8 @@ export interface TokenRow {
   scopes: string[] | null;
   user_id: number | null;
   user_sub: string | null;
+  /** Absent from APIs older than the field. */
+  user_name?: string | null;
   created_by: number | null;
   created_on: string;
   expires_on: string;
@@ -91,11 +93,18 @@ export function fetchUsers(q: string | null): Promise<UserRow[]> {
   return securityFetch(`/users${query ? `?${query}` : ""}`);
 }
 
-export function setUserRole(id: number, role: string): Promise<UserRow> {
+export function updateUser(
+  id: number,
+  fields: Partial<Pick<UserRow, "role" | "display_name" | "email">>
+): Promise<UserRow> {
   return securityFetch(`/users/${id}`, {
     method: "PATCH",
-    body: JSON.stringify({ role }),
+    body: JSON.stringify(fields),
   });
+}
+
+export function deleteUser(id: number): Promise<{ id: number; status: string }> {
+  return securityFetch(`/users/${id}`, { method: "DELETE" });
 }
 
 export function fetchHistory(limit = 200): Promise<AuthChange[]> {
@@ -128,6 +137,16 @@ export function revokeToken(
   id: number
 ): Promise<{ id: number; status: string }> {
   return securityFetch(`/tokens/${id}/revoke`, { method: "POST" });
+}
+
+export function setTokenScopes(
+  id: number,
+  scopes: string[]
+): Promise<{ id: number; scopes: string[] | null }> {
+  return securityFetch(`/tokens/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ scopes }),
+  });
 }
 
 export function formatDateTime(value: string | null | undefined): string {

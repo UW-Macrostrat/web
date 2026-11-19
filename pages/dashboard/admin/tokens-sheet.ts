@@ -1,12 +1,13 @@
-/** Delegated API tokens: list, mint, revoke.
+/** Delegated API tokens: list, search, mint, edit scopes, revoke.
  *
- * The same three operations as `macrostrat auth {list,create,revoke}-token`,
- * through api_v3's admin-only `/security/tokens` routes. A token's value is
- * shown exactly once, when minted; only its digest is stored, so the listing
- * can never show it again.
+ * The same operations as `macrostrat auth {list,create,revoke}-token`, through
+ * api_v3's admin-only `/security/tokens` routes. A token's value is shown
+ * exactly once, when minted; only its digest is stored, so the listing can
+ * never show it again.
  */
 import hyper from "@macrostrat/hyper";
 import {
+  Alert,
   Button,
   Callout,
   Classes,
@@ -18,9 +19,11 @@ import {
   NumericInput,
   Tag,
 } from "@blueprintjs/core";
-import { Suggest } from "@blueprintjs/select";
+import { MultiSelect, Suggest } from "@blueprintjs/select";
+import "@blueprintjs/select/lib/css/blueprint-select.css";
 import { RegionCardinality } from "@blueprintjs/table";
 import {
+  type CellDetailContext,
   type ColumnSpec,
   compareRowsBySorts,
   DataSheet,
@@ -28,13 +31,14 @@ import {
   type TableAction,
   type TableActionContext,
   type TableDataProvider,
+  type TableFilter,
 } from "@macrostrat/data-sheet";
-import classNames from "classnames";
 import {
   type ReactNode,
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -44,26 +48,65 @@ import {
   formatDateTime,
   type NewToken,
   revokeToken,
+  setTokenScopes,
   type TokenRow,
   userLabel,
   type UserRow,
 } from "./api";
+import { createSearchFilter } from "./sheet-search";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
-function createTokensProvider(): TableDataProvider<TokenRow> {
+function createTokensProvider(
+  onLoad: (rows: TokenRow[]) => void
+): TableDataProvider<TokenRow> {
   return {
     identity: (row) => row.id,
     async fetchData(params) {
-      let rows = await fetchTokens();
+      const all = await fetchTokens();
+      onLoad(all);
+      let rows = all.filter((row) =>
+        params.filters.every((f) => f.predicate?.(row, f.state) ?? true)
+      );
       if (params.sorts.length > 0) {
         rows = [...rows].sort(compareRowsBySorts(params.sorts));
       }
       return { rows, totalCount: rows.length };
     },
+    async saveRows(rows) {
+      for (const row of rows) {
+        await setTokenScopes(row.id, row.scopes ?? []);
+      }
+    },
   };
 }
+
+function searchableValues(row: TokenRow): (string | null | undefined)[] {
+  return [
+    row.label,
+    row.user_name,
+    row.user_sub,
+    row.token_type,
+    ...(row.scopes ?? []),
+  ];
+}
+
+const activeOnlyFilter: TableFilter<TokenRow, boolean> = {
+  id: "active-only",
+  name: "Active only",
+  icon: "endorsed",
+  defaultState: true,
+  predicate: (row) => row.active,
+};
+
+const filters = [
+  createSearchFilter<TokenRow>(
+    "Search by label, user, type or scope…",
+    searchableValues
+  ),
+  activeOnlyFilter,
+];
 
 function StatusTag({ active }: { active: boolean }) {
   if (active)
@@ -71,90 +114,262 @@ function StatusTag({ active }: { active: boolean }) {
   return h(Tag, { minimal: true }, "expired");
 }
 
-const columnSpec: ColumnSpec[] = [
-  { key: "id", name: "ID", editable: false },
-  {
-    key: "active",
-    name: "Status",
-    editable: false,
-    valueRenderer: (active) => h(StatusTag, { active }),
-  },
-  { key: "label", name: "Label", editable: false },
-  { key: "user_sub", name: "Delegated user", editable: false },
-  { key: "token_type", name: "Type", editable: false },
-  {
-    key: "scopes",
-    name: "Scopes",
-    editable: false,
-    valueRenderer: (scopes: string[] | null) => (scopes ?? []).join(", "),
-  },
-  {
-    key: "expires_on",
-    name: "Expires",
-    editable: false,
-    valueRenderer: formatDateTime,
-  },
-  {
-    key: "used_on",
-    name: "Last used",
-    editable: false,
-    valueRenderer: formatDateTime,
-  },
-  {
-    key: "created_on",
-    name: "Created",
-    editable: false,
-    valueRenderer: formatDateTime,
-  },
-  { key: "created_by", name: "Issued by (user ID)", editable: false },
-];
+function delegatedUser(_value: string | null, ctx: any): string {
+  const row: TokenRow | undefined = ctx?.row;
+  return row?.user_name ?? row?.user_sub ?? "";
+}
+
+/** Pick scopes from those already in use, or type a new one. */
+function ScopesEditor({
+  ctx,
+  knownScopes,
+}: {
+  ctx: CellDetailContext<TokenRow>;
+  knownScopes: string[];
+}) {
+  const selected: string[] = ctx.value ?? [];
+  if (!ctx.editable) {
+    return h("div.scopes-editor", h(ScopeTags, { scopes: selected }));
+  }
+
+  const toggle = (scope: string) => {
+    if (selected.includes(scope)) {
+      ctx.onChange(selected.filter((s) => s !== scope));
+    } else {
+      ctx.onChange([...selected, scope]);
+    }
+  };
+
+  return h("div.scopes-editor", [
+    h(MultiSelect<string>, {
+      items: knownScopes,
+      selectedItems: selected,
+      fill: true,
+      placeholder: "Add a scope…",
+      itemPredicate: (q, scope) => scope.includes(q.trim().toLowerCase()),
+      itemRenderer: (scope, { handleClick, handleFocus, modifiers }) => {
+        if (!modifiers.matchesPredicate) return null;
+        let icon: "tick" | "blank" = "blank";
+        if (selected.includes(scope)) icon = "tick";
+        return h(MenuItem, {
+          key: scope,
+          text: scope,
+          icon,
+          roleStructure: "listoption",
+          active: modifiers.active,
+          onClick: handleClick,
+          onFocus: handleFocus,
+        });
+      },
+      onItemSelect: toggle,
+      tagRenderer: (scope) => scope,
+      onRemove: (scope) => toggle(scope),
+      createNewItemFromQuery: (q) => q.trim().toLowerCase(),
+      createNewItemRenderer: (q, active, handleClick) =>
+        h(MenuItem, {
+          icon: "add",
+          text: `Add “${q.trim().toLowerCase()}”`,
+          roleStructure: "listoption",
+          active,
+          onClick: handleClick,
+        }),
+      noResults: h(MenuItem, {
+        disabled: true,
+        text: "Type a scope, e.g. rasters:emit-minerals",
+        roleStructure: "listoption",
+      }),
+      popoverProps: { minimal: true },
+      tagInputProps: { tagProps: { minimal: true } },
+    }),
+    h("p.muted", "Takes effect within a minute of saving."),
+  ]);
+}
+
+function ScopeTags({ scopes }: { scopes: string[] | null }) {
+  return h(
+    "span.scope-tags",
+    (scopes ?? []).map((s) => h(Tag, { key: s, minimal: true }, s))
+  );
+}
+
+function buildColumnSpec(knownScopes: string[]): ColumnSpec[] {
+  return [
+    { key: "id", name: "ID", editable: false },
+    {
+      key: "active",
+      name: "Status",
+      editable: false,
+      valueRenderer: (active) => h(StatusTag, { active }),
+    },
+    { key: "label", name: "Label", editable: false, filterable: true },
+    {
+      key: "user_sub",
+      name: "Delegated user",
+      editable: false,
+      valueRenderer: delegatedUser,
+    },
+    {
+      key: "token_type",
+      name: "Type",
+      editable: false,
+      filterable: true,
+    },
+    {
+      key: "scopes",
+      name: "Scopes",
+      editable: true,
+      cellLabel: "scopes",
+      valueRenderer: (scopes: string[] | null) => h(ScopeTags, { scopes }),
+      cellDetail: (ctx) => h(ScopesEditor, { ctx, knownScopes }),
+      detailPresentation: "popover",
+    },
+    {
+      key: "expires_on",
+      name: "Expires",
+      editable: false,
+      valueRenderer: formatDateTime,
+    },
+    {
+      key: "used_on",
+      name: "Last used",
+      editable: false,
+      valueRenderer: formatDateTime,
+    },
+    {
+      key: "created_on",
+      name: "Created",
+      editable: false,
+      valueRenderer: formatDateTime,
+    },
+    { key: "created_by", name: "Issued by (user ID)", editable: false },
+  ];
+}
+
+function useKnownScopes(): [string[], (rows: TokenRow[]) => void] {
+  const [scopes, setScopes] = useState<string[]>([]);
+  const collect = useRef((rows: TokenRow[]) => {
+    const all = new Set(rows.flatMap((r) => r.scopes ?? []));
+    setScopes([...all].sort());
+  });
+  return [scopes, collect.current];
+}
+
+// ---- Revoking ----
 
 function selectedActiveTokens(ctx: TableActionContext<TokenRow>): TokenRow[] {
   const rows = ctx.getSelectedRows?.() ?? [];
   return rows.filter((row) => row?.active);
 }
 
+/** A toolbar action rendered as its own control, so it can confirm first. It
+ * doesn't need edit mode, and reads the selection from the action context. */
 function createRevokeAction(onDone: () => void): TableAction<TokenRow> {
   return {
     id: "revoke-token",
     name: "Revoke",
     icon: "disable",
     intent: Intent.DANGER,
-    description: "Expire the selected tokens now. The record is kept.",
     targets: [RegionCardinality.FULL_ROWS, RegionCardinality.CELLS],
-    // The context handed to `disabled` while the sheet is being set up (and
-    // on the server) may not carry the selection helpers yet.
-    disabled: (ctx) => !selectedActiveTokens(ctx).length,
-    successMessage: "Token revoked",
-    errorMessage: "Could not revoke token",
-    async run(ctx) {
-      const rows = selectedActiveTokens(ctx);
-      for (const row of rows) {
-        await revokeToken(row.id);
-      }
-      ctx.clearSelection();
-      onDone();
-    },
+    requiresEditable: false,
+    render: (ctx) => h(RevokeControl, { ctx, onDone }),
   };
 }
 
+function RevokeControl({
+  ctx,
+  onDone,
+}: {
+  ctx: TableActionContext<TokenRow>;
+  onDone: () => void;
+}) {
+  const [isOpen, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const rows = selectedActiveTokens(ctx);
+
+  let noun = "token";
+  if (rows.length !== 1) noun = `${rows.length} tokens`;
+
+  async function revoke() {
+    setBusy(true);
+    setError(null);
+    try {
+      for (const row of rows) {
+        await revokeToken(row.id);
+      }
+      setOpen(false);
+      ctx.clearSelection();
+      onDone();
+    } catch (e: any) {
+      setError(e?.message ?? "Could not revoke token");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return h([
+    h(
+      Button,
+      {
+        minimal: true,
+        small: true,
+        icon: "disable",
+        intent: Intent.DANGER,
+        disabled: rows.length === 0,
+        onClick: () => setOpen(true),
+      },
+      "Revoke"
+    ),
+    h(
+      Alert,
+      {
+        isOpen,
+        icon: "disable",
+        intent: Intent.DANGER,
+        confirmButtonText: `Revoke ${noun}`,
+        cancelButtonText: "Cancel",
+        loading: busy,
+        onConfirm: revoke,
+        onCancel: () => setOpen(false),
+      },
+      [
+        h("p", [
+          `Revoke ${noun} (${rows.map(tokenName).join(", ")})? `,
+          "It stops working within a minute and can't be restored; ",
+          "the record is kept.",
+        ]),
+        h.if(error != null)(Callout, { intent: Intent.DANGER, compact: true }, error),
+      ]
+    ),
+  ]);
+}
+
+function tokenName(row: TokenRow): string {
+  return row.label ?? row.user_name ?? row.user_sub ?? `#${row.id}`;
+}
+
 export function TokensSheet() {
-  // Bumped after a mint or a revoke so the sheet re-fetches.
   const [refreshToken, setRefreshToken] = useState(0);
   const refresh = useCallback(() => setRefreshToken((n) => n + 1), []);
-  const provider = useMemo(createTokensProvider, []);
+  const [knownScopes, onLoad] = useKnownScopes();
+  const provider = useMemo(() => createTokensProvider(onLoad), []);
+  const columnSpec = useMemo(() => buildColumnSpec(knownScopes), [knownScopes]);
   const actions = useMemo(() => [createRevokeAction(refresh)], [refresh]);
 
-  return h("div.tokens-panel", [
-    h("div.tokens-toolbar", [h(NewTokenButton, { onCreated: refresh })]),
-    h("div.admin-sheet", [
+  return h("div.sheet-panel", [
+    h("div.sheet-toolbar", [
+      h("div.spacer"),
+      h(NewTokenButton, { onCreated: refresh }),
+    ]),
+    h("div.admin-sheet.page-sheet", [
       h(DataSheet<TokenRow>, {
         provider,
         columnSpec,
         actions,
+        filters,
+        filterDebounce: 250,
         refreshToken,
-        editable: false,
-        enableSelection: true,
+        editable: true,
         name: "tokens",
         itemLabel: "token",
         density: DataSheetDensity.MEDIUM,
@@ -457,6 +672,7 @@ function MintedToken({ token }: { token: NewToken }) {
 
 export function TokensHelp() {
   return h(Callout, { compact: true, icon: "info-sign" }, [
-    "Revocation can take up to a minute to reach every service.",
+    "Select tokens to revoke them. Scope edits apply when you press Save. ",
+    "Either change can take up to a minute to reach every service.",
   ]);
 }

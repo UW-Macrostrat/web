@@ -51,6 +51,7 @@ export function useColumnState(columnInfo) {
 
   const pixelScale = useAtomValue(pixelScaleAtom);
   const grainsize = useAtomValue(grainsizeAtom) ?? "auto";
+  const collapseGaps = useAtomValue(collapseGapsAtom);
 
   useEffect(() => {
     validateSelectedUnitID();
@@ -115,6 +116,7 @@ export function useColumnState(columnInfo) {
     b_pos,
     pixelScale,
     grainsize,
+    collapseSmallUnconformities: collapseGaps ?? DEFAULT_COLLAPSE_GAPS,
   };
 }
 
@@ -151,6 +153,9 @@ interface ColumnHashState {
   surfaces?: "all";
   /** Grain-size widths forced on or off; unset follows the column type */
   grainsize?: "on" | "off";
+  /** Unconformities drawn shorter than this many pixels are closed up; 0 keeps
+   * them all. Unset is the library's own threshold. */
+  collapse?: number;
 }
 
 function validateInt(value: string | null): number | undefined {
@@ -218,7 +223,15 @@ function getStateFromHash(): ColumnHashState {
     state[key] = validateInt(params.get(key));
   }
   state.project_id = params.get("project_id") ?? undefined;
-  for (const key of ["t_age", "b_age", "age", "t_pos", "b_pos", "scale"]) {
+  for (const key of [
+    "t_age",
+    "b_age",
+    "age",
+    "t_pos",
+    "b_pos",
+    "scale",
+    "collapse",
+  ]) {
     state[key] = validateNumber(params.get(key));
   }
 
@@ -244,7 +257,9 @@ function setHashFromState(state: ColumnHashState) {
   newURL += document.location.search;
 
   if (newHash !== document.location.hash) {
-    history.replaceState(null, document.title, newURL);
+    // Keeps Vike's state: a fresh one marks the entry user-made, and Vike then
+    // skips rendering a Back to another column
+    history.replaceState(history.state, document.title, newURL);
   }
 }
 
@@ -365,6 +380,10 @@ const t_posAtom = atomWithHashParam<number>("t_pos");
 const b_posAtom = atomWithHashParam<number>("b_pos");
 
 const pixelScaleAtom = atomWithHashParam<number>("scale");
+const collapseGapsAtom = atomWithHashParam<number>("collapse");
+
+/** The library's threshold, its unconformity height, when none is set */
+const DEFAULT_COLLAPSE_GAPS = 30;
 
 const unitDetailsAtom = atomWithHashParam<"popover" | null>("unit_details");
 
@@ -536,6 +555,15 @@ export function ColumnSettingsPanel() {
         h(Parenthetical, { className: "unit" }, unit),
       ]),
       atom: pixelScaleAtom,
+    }),
+    h(NumericAtomControl, {
+      label: h("span", [
+        "Collapse gaps under",
+        " ",
+        h(Parenthetical, { className: "unit" }, "pixels"),
+      ]),
+      atom: collapseGapsAtom,
+      placeholder: String(DEFAULT_COLLAPSE_GAPS),
     }),
   ]);
 }

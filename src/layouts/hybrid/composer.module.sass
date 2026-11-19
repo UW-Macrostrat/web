@@ -256,11 +256,11 @@
 
 // A floating-toolbar data panel doesn't scroll itself here; the region does.
 // Its toolbar band sticks to the region's top over an opaque underlay, and the
-// windowed list's sticky headers park beneath that band.
+// grouped list's sticky headers park beneath that band.
 .content-shell.scroll-panel .content-panel-holder [class*="toolbar-style-floating"]
   flex: 1 0 auto
   height: auto
-  --windowed-sticky-top: var(--data-panel-top-margin)
+  --list-sticky-top: var(--data-panel-top-margin)
 
   // The shell's gutter already pads the panel; its own would double it
   [class*="data-panel-top-area"]

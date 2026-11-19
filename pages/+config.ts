@@ -48,6 +48,8 @@ export default {
     "/dev/map/diff": "/maps/diff",
     // The user-identity diagnostic page grew into the dashboard.
     "/dev/me": "/dashboard",
+    // EMIT is an ordinary indexed layer, drawn by the shared raster viewer.
+    "/dev/map/emit-mineral-maps": "/dev/map/rasters/emit-minerals",
     // The experimental column editor moved under the column it edits.
     "/dev/column-editor-2": "/columns",
     "/dev/column-editor-2/new": "/columns/new",

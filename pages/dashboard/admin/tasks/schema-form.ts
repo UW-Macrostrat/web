@@ -6,14 +6,19 @@
  */
 import hyper from "@macrostrat/hyper";
 import {
+  Button,
   FormGroup,
   InputGroup,
+  Menu,
+  MenuItem,
   NumericInput,
+  PopoverNext,
   Switch,
   TagInput,
   TextArea,
 } from "@blueprintjs/core";
-import type { JSONSchema } from "./api";
+import { type ReactNode, useEffect, useState } from "react";
+import { fetchRecentValues, type JSONSchema } from "./api";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -59,15 +64,25 @@ export function SchemaForm({
   schema,
   values,
   onChange,
+  taskName = null,
 }: {
   schema: JSONSchema;
   values: Record<string, any>;
   onChange(values: Record<string, any>): void;
+  /** Whose earlier runs supply "recently used" values; none without it. */
+  taskName?: string | null;
 }) {
   const set = (key: string, value: any) =>
     onChange({ ...values, [key]: value });
   const fields = Object.entries(schema.properties ?? {}).map(([key, prop]) =>
-    h(Field, { key, name: key, schema: prop, value: values[key], set })
+    h(Field, {
+      key,
+      name: key,
+      schema: prop,
+      value: values[key],
+      set,
+      taskName,
+    })
   );
   return h("div.schema-form", fields);
 }
@@ -77,11 +92,13 @@ function Field({
   schema,
   value,
   set,
+  taskName,
 }: {
   name: string;
   schema: JSONSchema;
   value: any;
   set(key: string, value: any): void;
+  taskName: string | null;
 }) {
   const kind = fieldKind(schema);
   const label = schema.title ?? name;
@@ -112,15 +129,72 @@ function Field({
       onChange: (items) => set(name, items.map(String)),
     });
   } else if (kind === "string") {
+    let recent: ReactNode = null;
+    if (schema["x-recent"] && taskName != null) {
+      recent = h(RecentValues, {
+        taskName,
+        param: name,
+        onSelect: (v) => set(name, v),
+      });
+    }
     control = h(InputGroup, {
       value: value ?? "",
       fill: true,
+      rightElement: recent,
       onChange: (e) => set(name, e.target.value),
     });
   } else {
     control = h(JSONField, { value, onChange: (v) => set(name, v) });
   }
   return h(FormGroup, { label, helperText: schema.description }, control);
+}
+
+function useRecentValues(taskName: string, param: string): string[] {
+  const [recent, setRecent] = useState<string[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    // An API without the route offers nothing, which hides the control.
+    fetchRecentValues(taskName, param)
+      .then((values) => {
+        if (!cancelled) setRecent(values);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [taskName, param]);
+  return recent;
+}
+
+/** A menu of the values this parameter took in the task's earlier runs. */
+function RecentValues({
+  taskName,
+  param,
+  onSelect,
+}: {
+  taskName: string;
+  param: string;
+  onSelect(value: string): void;
+}) {
+  const recent = useRecentValues(taskName, param);
+  if (recent.length === 0) return null;
+  const items = recent.map((value) =>
+    h(MenuItem, { key: value, text: value, onClick: () => onSelect(value) })
+  );
+  return h(
+    PopoverNext,
+    {
+      content: h(Menu, { className: "recent-values" }, items),
+      placement: "bottom-end",
+    },
+    h(Button, {
+      minimal: true,
+      icon: "history",
+      rightIcon: "caret-down",
+      text: "Recent",
+      title: "Recently used",
+    })
+  );
 }
 
 function JSONField({ value, onChange }) {
