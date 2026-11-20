@@ -86,6 +86,12 @@ const adminTools = [
     description: "find rasters, group them into layers and edit layer metadata",
   },
   {
+    href: "/dashboard/admin/usage-stats",
+    text: "Usage stats",
+    description:
+      "tile requests, referring sites, cache hit rates and views per map",
+  },
+  {
     href: "/dashboard/admin/cache",
     text: "Cache management",
     description: "flush the tile cache",

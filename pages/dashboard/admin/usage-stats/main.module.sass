@@ -1,0 +1,73 @@
+// Categorical slots 1–2 of the validated dataviz palette, per theme.
+.usage-page
+  --usage-series-1: #2a78d6
+  --usage-series-2: #eb6834
+  text-align: left
+  margin-top: 1em
+
+  :global(.dark-mode) &
+    --usage-series-1: #3987e5
+    --usage-series-2: #d95926
+
+  .muted
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+  .harvester-status
+    margin-bottom: 1.5em
+
+  .controls
+    display: flex
+    flex-wrap: wrap
+    gap: var(--pz-space-3, 0.75em)
+    margin-bottom: 1.5em
+
+  .usage-section
+    margin-bottom: 2.5em
+
+  .section-header
+    margin-bottom: 0.75em
+    h2
+      margin: 0 0 0.2em
+      font-size: 1.3em
+    p
+      margin: 0
+
+  .loading
+    display: flex
+    justify-content: center
+    padding: 2em 0
+
+  .stat-tiles
+    display: flex
+    flex-wrap: wrap
+    gap: var(--pz-space-3, 0.75em)
+    margin-bottom: 1em
+
+  .stat-tile
+    min-width: 9em
+    padding: 0.75em 1em
+
+  .stat-value
+    font-size: var(--pz-font-size-xl, 1.5em)
+    font-weight: var(--pz-font-weight-semibold, 600)
+    color: var(--pz-text-emphasized-color, inherit)
+
+  .stat-label
+    font-size: var(--pz-font-size-sm, 0.85em)
+    color: var(--pz-text-subtle-color, var(--secondary-color))
+
+  .usage-table
+    width: 100%
+    th.num, td.num
+      text-align: right
+      font-variant-numeric: tabular-nums
+
+  .selected-row td
+    background: var(--pz-panel-background-color, rgba(42, 120, 214, 0.08))
+    font-weight: var(--pz-font-weight-semibold, 600)
+
+  .map-series
+    margin-bottom: 1em
+    h3
+      margin: 0 0 0.5em
+      font-size: 1.05em
