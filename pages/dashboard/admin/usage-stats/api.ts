@@ -26,12 +26,12 @@ const rangeDays: Record<TimeRange, number | null> = {
   all: null,
 };
 
-// Coarser bins keep long ranges to a few hundred points.
+// Weekly bins keep eight-plus years to a few hundred points.
 const rangeBins: Record<TimeRange, Bin> = {
   "30d": "day",
   "90d": "day",
-  "1y": "week",
-  all: "month",
+  "1y": "day",
+  all: "week",
 };
 
 export interface QueryOptions {
