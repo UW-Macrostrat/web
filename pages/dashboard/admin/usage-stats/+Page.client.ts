@@ -14,7 +14,7 @@ import {
   SegmentedControl,
   Spinner,
 } from "@blueprintjs/core";
-import { Provider, atom, useAtom, useAtomValue } from "jotai";
+import { Provider, atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
 import { useEffect, type ReactNode } from "react";
 import {
@@ -25,17 +25,23 @@ import {
   MapViewsBin,
   MapViewsList,
   PipelineStatus,
+  Bin,
   QueryOptions,
   Referrers,
   RequestsBin,
   Result,
+  Smoothing,
   TimeRange,
+  binOptions,
   botOptions,
+  defaultBin,
   formatAge,
   formatCount,
   formatFullCount,
   formatPercent,
   queryOptions,
+  rollingMean,
+  smoothingOptions,
   timeRanges,
   useUsageStats,
 } from "./api";
@@ -55,12 +61,21 @@ const DEFAULT_BOTS: Bots = "exclude";
 const STALE_HOURS = 3;
 const MAPS_SHOWN = 25;
 
+const DEFAULT_SMOOTHING: Smoothing = "none";
+
 const rangeAtom = atom<TimeRange>(DEFAULT_RANGE);
 const botsAtom = atom<Bots>(DEFAULT_BOTS);
+// Null until chosen, so each range keeps its own default bin.
+const chosenBinAtom = atom<Bin | null>(null);
+const smoothingAtom = atom<Smoothing>(DEFAULT_SMOOTHING);
 const mapAtom = atom<number | null>(null);
 
+const binAtom = atom<Bin>(
+  (get) => get(chosenBinAtom) ?? defaultBin(get(rangeAtom))
+);
+
 const optionsAtom = atom<QueryOptions>((get) =>
-  queryOptions(get(rangeAtom), get(botsAtom))
+  queryOptions(get(rangeAtom), get(botsAtom), get(binAtom), get(smoothingAtom))
 );
 
 export function Page() {
@@ -72,15 +87,19 @@ function UrlState() {
   useHydrateAtoms(initialValues());
   const range = useAtomValue(rangeAtom);
   const bots = useAtomValue(botsAtom);
+  const bin = useAtomValue(chosenBinAtom);
+  const smoothing = useAtomValue(smoothingAtom);
   const map = useAtomValue(mapAtom);
 
   useEffect(() => {
     const url = new URL(window.location.href);
     setParam(url, "range", range, DEFAULT_RANGE);
     setParam(url, "bots", bots, DEFAULT_BOTS);
+    setParam(url, "bin", bin, null);
+    setParam(url, "smooth", smoothing, DEFAULT_SMOOTHING);
     setParam(url, "map", map, null);
     window.history.replaceState(window.history.state, "", url);
-  }, [range, bots, map]);
+  }, [range, bots, bin, smoothing, map]);
 
   return null;
 }
@@ -93,6 +112,12 @@ function initialValues(): [any, any][] {
     values.push([rangeAtom, range]);
   const bots = params.get("bots");
   if (botOptions.some((b) => b.value === bots)) values.push([botsAtom, bots]);
+  const bin = params.get("bin");
+  if (binOptions.some((b) => b.value === bin))
+    values.push([chosenBinAtom, bin]);
+  const smooth = params.get("smooth");
+  if (smoothingOptions.some((s) => s.value === smooth))
+    values.push([smoothingAtom, smooth]);
   const map = Number(params.get("map"));
   if (Number.isInteger(map) && map > 0) values.push([mapAtom, map]);
   return values;
@@ -181,6 +206,19 @@ function HarvesterStatus() {
 function Controls() {
   const [range, setRange] = useAtom(rangeAtom);
   const [bots, setBots] = useAtom(botsAtom);
+  const bin = useAtomValue(binAtom);
+  const setBin = useSetAtom(chosenBinAtom);
+  const [smoothing, setSmoothing] = useAtom(smoothingAtom);
+
+  let smoothingControl = null;
+  if (bin === "day") {
+    smoothingControl = h(SegmentedControl, {
+      options: smoothingOptions,
+      value: smoothing,
+      onValueChange: (value: Smoothing) => setSmoothing(value),
+    });
+  }
+
   return h("div.controls", [
     h(SegmentedControl, {
       options: timeRanges,
@@ -192,11 +230,24 @@ function Controls() {
       value: bots,
       onValueChange: (value: Bots) => setBots(value),
     }),
+    h(SegmentedControl, {
+      options: binOptions,
+      value: bin,
+      onValueChange: (value: Bin) => setBin(value),
+    }),
+    smoothingControl,
   ]);
 }
 
+/** "per day, 7-day mean": what each point of a series is. */
+function seriesUnit({ bin, window }: QueryOptions): string {
+  if (window > 1) return `per ${bin}, ${window}-day mean`;
+  return `per ${bin}`;
+}
+
 function RequestsSection() {
-  const { start, bin, bots } = useAtomValue(optionsAtom);
+  const options = useAtomValue(optionsAtom);
+  const { start, bin, bots, window } = options;
   const result = useUsageStats<RequestsBin[]>("/tiles/requests", {
     start,
     bin,
@@ -205,11 +256,16 @@ function RequestsSection() {
     Section,
     {
       title: "Tile requests",
-      description: `Requests per ${bin}. Known bots are cache-warmers identified by address.`,
+      description: `Requests ${seriesUnit(
+        options
+      )}. Known bots are cache-warmers identified by address.`,
     },
     loaded(result, (data) => [
       h(RequestTotals, { data, bots }),
-      h(RequestsChart, { data, bots }),
+      h(RequestsChart, {
+        data: rollingMean(data, ["organic", "bot"], window),
+        bots,
+      }),
     ])
   );
 }
@@ -261,20 +317,31 @@ function ReferrersSection() {
 }
 
 function CacheSection() {
-  const { start, bin, bots } = useAtomValue(optionsAtom);
+  const options = useAtomValue(optionsAtom);
+  const { start, bin, bots, window } = options;
   const result = useUsageStats<CacheBin[]>("/tiles/cache", {
     start,
     bin,
     bots,
   });
+  // Smoothing the counts, not the rates, weights each day by its traffic.
+  const keys: (keyof CacheBin)[] = [
+    "l1_hits",
+    "l1_misses",
+    "l2_hits",
+    "l2_misses",
+  ];
   return h(
     Section,
     {
       title: "Cache effectiveness",
-      description:
-        "Share of requests answered by Varnish, and by the tile cache among those Varnish missed.",
+      description: `Share of requests answered by Varnish, and by the tile cache among those Varnish missed, ${seriesUnit(
+        options
+      )}.`,
     },
-    loaded(result, (data) => h(CacheChart, { data }))
+    loaded(result, (data) =>
+      h(CacheChart, { data: rollingMean(data, keys, window) })
+    )
   );
 }
 
@@ -354,15 +421,18 @@ function MapsPanel({ data }: { data: MapViewsList }) {
 
 function SelectedMapChart({ maps }: { maps: MapViews[] }) {
   const map = useAtomValue(mapAtom);
-  const { start, bin, bots } = useAtomValue(optionsAtom);
+  const options = useAtomValue(optionsAtom);
+  const { start, bin, bots, window } = options;
   let path: string | null = null;
   if (map != null) path = `/tiles/maps/${map}`;
   const result = useUsageStats<MapViewsBin[]>(path, { start, bin, bots });
   if (map == null) return null;
   const title = maps.find((m) => m.source_id === map)?.name ?? `Source ${map}`;
   return h("div.map-series", [
-    h("h3", `${title} · requests per ${bin}`),
-    loaded(result, (data) => h(MapSeriesChart, { data })),
+    h("h3", `${title} · requests ${seriesUnit(options)}`),
+    loaded(result, (data) =>
+      h(MapSeriesChart, { data: rollingMean(data, ["requests"], window) })
+    ),
   ]);
 }
 

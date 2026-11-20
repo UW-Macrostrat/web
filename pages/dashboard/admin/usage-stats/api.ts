@@ -26,7 +26,27 @@ const rangeDays: Record<TimeRange, number | null> = {
   all: null,
 };
 
-// Weekly bins keep eight-plus years to a few hundred points.
+export type Smoothing = "none" | "7d" | "30d";
+
+export const binOptions: { value: Bin; label: string }[] = [
+  { value: "day", label: "Daily" },
+  { value: "week", label: "Weekly" },
+  { value: "month", label: "Monthly" },
+];
+
+export const smoothingOptions: { value: Smoothing; label: string }[] = [
+  { value: "none", label: "Raw" },
+  { value: "7d", label: "7-day mean" },
+  { value: "30d", label: "30-day mean" },
+];
+
+const smoothingWindows: Record<Smoothing, number> = {
+  none: 1,
+  "7d": 7,
+  "30d": 30,
+};
+
+// Until a bin is chosen; weekly keeps eight-plus years to a few hundred points.
 const rangeBins: Record<TimeRange, Bin> = {
   "30d": "day",
   "90d": "day",
@@ -34,20 +54,62 @@ const rangeBins: Record<TimeRange, Bin> = {
   all: "week",
 };
 
+export function defaultBin(range: TimeRange): Bin {
+  return rangeBins[range];
+}
+
 export interface QueryOptions {
   start: string | null;
   bin: Bin;
   bots: Bots;
+  /** Rolling-mean window in bins; 1 when not smoothing. */
+  window: number;
 }
 
-export function queryOptions(range: TimeRange, bots: Bots): QueryOptions {
+export function queryOptions(
+  range: TimeRange,
+  bots: Bots,
+  bin: Bin,
+  smoothing: Smoothing
+): QueryOptions {
   const days = rangeDays[range];
   let start: string | null = null;
   if (days != null) {
     const date = new Date(Date.now() - days * 86400000);
     start = date.toISOString().slice(0, 10);
   }
-  return { start, bin: rangeBins[range], bots };
+  let window = 1;
+  if (bin === "day") window = smoothingWindows[smoothing];
+  return { start, bin, bots, window };
+}
+
+/** Centered rolling mean over the bins present in each window, as the CLI's
+ * `plot` computes it. Empty bins stay null, so outages still draw as gaps. */
+export function rollingMean<T extends object>(
+  rows: T[],
+  keys: (keyof T)[],
+  window: number
+): T[] {
+  if (window <= 1) return rows;
+  const before = Math.floor(window / 2);
+  const after = window - before - 1;
+  return rows.map((row, i) => {
+    const smoothed: any = { ...row };
+    for (const key of keys) {
+      if (row[key] == null) continue;
+      let total = 0;
+      let n = 0;
+      const last = Math.min(rows.length - 1, i + after);
+      for (let j = Math.max(0, i - before); j <= last; j++) {
+        const value = rows[j][key] as number | null;
+        if (value == null) continue;
+        total += value;
+        n += 1;
+      }
+      smoothed[key] = total / n;
+    }
+    return smoothed;
+  });
 }
 
 export interface PipelineStatus {
@@ -176,7 +238,7 @@ const compact = new Intl.NumberFormat("en-US", {
   notation: "compact",
   maximumFractionDigits: 1,
 });
-const full = new Intl.NumberFormat("en-US");
+const full = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
 export function formatCount(value: number | null | undefined): string {
   if (value == null) return "—";
