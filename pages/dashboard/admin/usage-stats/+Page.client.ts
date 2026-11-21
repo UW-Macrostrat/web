@@ -77,6 +77,7 @@ const chosenBinAtom = atom<Bin | null>(null);
 const smoothingAtom = atom<Smoothing>(DEFAULT_SMOOTHING);
 const mapAtom = atom<number | null>(null);
 const cacheOverlayAtom = atom<boolean>(false);
+const trendScaleAtom = atom<boolean>(false);
 
 const binAtom = atom<Bin>(
   (get) => get(chosenBinAtom) ?? defaultBin(get(rangeAtom))
@@ -99,6 +100,7 @@ function UrlState() {
   const smoothing = useAtomValue(smoothingAtom);
   const map = useAtomValue(mapAtom);
   const cache = useAtomValue(cacheOverlayAtom);
+  const trendScale = useAtomValue(trendScaleAtom);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -108,8 +110,9 @@ function UrlState() {
     setParam(url, "smooth", smoothing, DEFAULT_SMOOTHING);
     setParam(url, "map", map, null);
     setParam(url, "cache", cache, false);
+    setParam(url, "trend", trendScale, false);
     window.history.replaceState(window.history.state, "", url);
-  }, [range, bots, bin, smoothing, map, cache]);
+  }, [range, bots, bin, smoothing, map, cache, trendScale]);
 
   return null;
 }
@@ -131,6 +134,7 @@ function initialValues(): [any, any][] {
   const map = Number(params.get("map"));
   if (Number.isInteger(map) && map > 0) values.push([mapAtom, map]);
   if (params.get("cache") === "true") values.push([cacheOverlayAtom, true]);
+  if (params.get("trend") === "true") values.push([trendScaleAtom, true]);
   return values;
 }
 
@@ -279,9 +283,13 @@ function RequestsSection() {
       const projection = projectPartialBin(points, partialBin(newestLog, bin));
       return [
         h(RequestTotals, { data: points, bots }),
-        h(CacheOverlayToggle),
+        h(ChartOptions),
         h(RequestsFigure, {
-          data: rollingMean(points, ["organic", "presumed", "bot"], window),
+          data: rollingMean(
+            points,
+            ["organic", "presumed", "bot", "trend"],
+            window
+          ),
           projection,
         }),
       ];
@@ -289,14 +297,21 @@ function RequestsSection() {
   );
 }
 
-function CacheOverlayToggle() {
-  const [checked, setChecked] = useAtom(cacheOverlayAtom);
-  return h(Switch, {
-    className: "chart-options",
-    label: "Cache hit rates (right axis)",
-    checked,
-    onChange: (event) => setChecked(event.currentTarget.checked),
-  });
+function ChartOptions() {
+  const [cache, setCache] = useAtom(cacheOverlayAtom);
+  const [trendScale, setTrendScale] = useAtom(trendScaleAtom);
+  return h("div.chart-options", [
+    h(Switch, {
+      label: "Cache hit rates (right axis)",
+      checked: cache,
+      onChange: (event) => setCache(event.currentTarget.checked),
+    }),
+    h(Switch, {
+      label: "Scale to the organic trend (2× its peak)",
+      checked: trendScale,
+      onChange: (event) => setTrendScale(event.currentTarget.checked),
+    }),
+  ]);
 }
 
 function RequestsFigure({
@@ -311,7 +326,8 @@ function RequestsFigure({
   let path: string | null = null;
   if (overlay) path = "/tiles/cache";
   const result = useUsageStats<CacheBin[]>(path, { start, bin, bots });
-  const chart = { data, bots, projection };
+  const trendScale = useAtomValue(trendScaleAtom);
+  const chart = { data, bots, projection, trendScale };
   if (!overlay) return h(RequestsChart, chart);
   // Smoothing the counts, not the rates, weights each day by its traffic.
   const keys: (keyof CacheBin)[] = [

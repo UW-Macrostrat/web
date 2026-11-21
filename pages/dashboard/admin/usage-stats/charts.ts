@@ -169,6 +169,13 @@ function withCacheRates(
   });
 }
 
+function countDomain(points: RequestsPoint[], trendScale: boolean) {
+  if (!trendScale) return {};
+  const peak = Math.max(0, ...points.map((p) => p.trend ?? 0));
+  if (peak === 0) return {};
+  return { domain: [0, 2 * peak], allowDataOverflow: true };
+}
+
 function projectedKey(series: SeriesSpec): string {
   return `projected_${series.key}`;
 }
@@ -265,11 +272,14 @@ export function RequestsChart({
   data,
   bots,
   projection = null,
+  trendScale = false,
   cache = null,
 }: {
   data: RequestsPoint[];
   bots: Bots;
   projection?: Projection | null;
+  /** Cap the count axis at twice the trend's peak, clipping bot phases. */
+  trendScale?: boolean;
   cache?: CacheBin[] | null;
 }) {
   const series = requestSeries(bots);
@@ -299,6 +309,7 @@ export function RequestsChart({
           stroke: GRID,
           width: 52,
           tickFormatter: formatCount,
+          ...countDomain(points, trendScale),
         }),
         h(Tooltip, { ...tooltipStyle, formatter: formatTooltipValue }),
         legend,

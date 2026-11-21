@@ -189,6 +189,8 @@ export interface RequestsBin {
   bot: number | null;
   /** The part of `organic` on spike days above its local baseline. */
   presumed_bot?: number | null;
+  /** Organic requests the long-term trend expects, bot phases aside. */
+  trend?: number | null;
   new_system: boolean | null;
 }
 
@@ -198,6 +200,7 @@ export interface RequestsPoint {
   organic: number | null;
   presumed: number | null;
   bot: number | null;
+  trend: number | null;
 }
 
 export type RequestsKey = "organic" | "presumed" | "bot";
@@ -234,7 +237,13 @@ export function requestsPoints(data: RequestsBin[]): RequestsPoint[] {
     const presumed = d.presumed_bot ?? null;
     let organic = d.organic;
     if (organic != null) organic -= presumed ?? 0;
-    return { date: d.date, organic, presumed, bot: d.bot };
+    return {
+      date: d.date,
+      organic,
+      presumed,
+      bot: d.bot,
+      trend: d.trend ?? null,
+    };
   });
 }
 
