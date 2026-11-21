@@ -21,6 +21,7 @@ import {
   CacheBin,
   COMPILATION_CUTOVER,
   MapViewsBin,
+  Projection,
   Referrer,
   RequestsPoint,
   formatCount,
@@ -91,26 +92,34 @@ interface SeriesSpec {
   key: "organic" | "presumed" | "bot";
   name: string;
   color: string;
+  fillOpacity: number;
+  strokeDasharray?: string;
 }
 
 const organicSeries: SeriesSpec = {
   key: "organic",
   name: "Organic",
   color: SERIES_1,
+  fillOpacity: 0.35,
 };
 const presumedSeries: SeriesSpec = {
   key: "presumed",
   name: "Presumed bots",
   color: SERIES_3,
+  fillOpacity: 0.12,
+  // Inferred, not observed: a broken outline sets it apart from tagged traffic.
+  strokeDasharray: "5 3",
 };
 const knownBotSeries: SeriesSpec = {
   key: "bot",
   name: "Known bots",
   color: SERIES_2,
+  fillOpacity: 0.12,
 };
 
 function requestSeries(bots: Bots): SeriesSpec[] {
   if (bots === "exclude") return [organicSeries];
+  // Presumed bots sit on organic, so their edge is all untagged traffic.
   if (bots === "only") return [presumedSeries, knownBotSeries];
   return [organicSeries, presumedSeries, knownBotSeries];
 }
@@ -142,10 +151,11 @@ function hitRate(hits: number | null, misses: number | null): number | null {
   return hits / known;
 }
 
-interface ChartPoint extends RequestsPoint {
+// Projection keys are named per series, hence the open record.
+type ChartPoint = RequestsPoint & {
   l1?: number | null;
   l2?: number | null;
-}
+} & Record<string, any>;
 
 function withCacheRates(
   points: RequestsPoint[],
@@ -161,6 +171,76 @@ function withCacheRates(
       l1: hitRate(c.l1_hits, c.l1_misses),
       l2: hitRate(c.l2_hits, c.l2_misses),
     };
+  });
+}
+
+function countDomain(points: RequestsPoint[], trendScale: boolean) {
+  if (!trendScale) return {};
+  const peak = Math.max(0, ...points.map((p) => p.trend ?? 0));
+  if (peak === 0) return {};
+  return { domain: [0, 2 * peak], allowDataOverflow: true };
+}
+
+/** Organic's edge again, drawn over the bot layers stacked on it. */
+function organicLine(series: SeriesSpec[]) {
+  if (!series.includes(organicSeries)) return null;
+  return h(Line, {
+    key: "organic-line",
+    yAxisId: "count",
+    dataKey: "organic",
+    stroke: SERIES_1,
+    strokeWidth: 2.5,
+    dot: false,
+    legendType: "none",
+    tooltipType: "none",
+    connectNulls: false,
+    isAnimationActive: false,
+  });
+}
+
+function projectedKey(series: SeriesSpec): string {
+  return `projected_${series.key}`;
+}
+
+/** For each stacked series, a segment from the last full bin's stack height
+ * to its projected height. */
+function withProjection(
+  points: ChartPoint[],
+  projection: Projection | null,
+  series: SeriesSpec[]
+): ChartPoint[] {
+  if (projection == null) return points;
+  const i = points.findIndex((p) => p.date === projection.date);
+  if (i < 1) return points;
+  const before: ChartPoint = { ...points[i - 1] };
+  const current: ChartPoint = { ...points[i] };
+  let anchor = 0;
+  let projected = 0;
+  for (const s of series) {
+    anchor += points[i - 1][s.key] ?? 0;
+    projected += projection.values[s.key] ?? 0;
+    before[projectedKey(s)] = anchor;
+    current[projectedKey(s)] = projected;
+  }
+  const result = [...points];
+  result[i - 1] = before;
+  result[i] = current;
+  return result;
+}
+
+function projectionLine(series: SeriesSpec) {
+  return h(Line, {
+    key: projectedKey(series),
+    yAxisId: "count",
+    dataKey: projectedKey(series),
+    name: `${series.name}, projected`,
+    legendType: "none",
+    stroke: series.color,
+    strokeWidth: 2,
+    strokeDasharray: "4 3",
+    dot: false,
+    connectNulls: false,
+    isAnimationActive: false,
   });
 }
 
@@ -213,17 +293,28 @@ function cacheOverlay() {
 export function RequestsChart({
   data,
   bots,
+  projection = null,
+  trendScale = false,
   cache = null,
 }: {
   data: RequestsPoint[];
   bots: Bots;
+  projection?: Projection | null;
+  /** Cap the count axis at twice the trend's peak, clipping bot phases. */
+  trendScale?: boolean;
   cache?: CacheBin[] | null;
 }) {
   const series = requestSeries(bots);
-  const points = withCacheRates(data, cache);
+  const points = withProjection(
+    withCacheRates(data, cache),
+    projection,
+    series
+  );
   let legend = null;
   if (series.length > 1 || cache != null)
     legend = h(Legend, { verticalAlign: "top", height: 28 });
+  let projected = [];
+  if (projection != null) projected = series.map(projectionLine);
   let overlay = [];
   if (cache != null) overlay = cacheOverlay();
 
@@ -240,6 +331,7 @@ export function RequestsChart({
           stroke: GRID,
           width: 52,
           tickFormatter: formatCount,
+          ...countDomain(points, trendScale),
         }),
         h(Tooltip, { ...tooltipStyle, formatter: formatTooltipValue }),
         legend,
@@ -255,12 +347,15 @@ export function RequestsChart({
             type: "linear",
             stroke: s.color,
             strokeWidth: 2,
+            strokeDasharray: s.strokeDasharray,
             fill: s.color,
-            fillOpacity: 0.25,
+            fillOpacity: s.fillOpacity,
             connectNulls: false,
             isAnimationActive: false,
           })
         ),
+        ...projected,
+        organicLine(series),
         ...overlay,
       ]
     ),
