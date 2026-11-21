@@ -265,7 +265,7 @@ function RequestsSection() {
       title: "Tile requests",
       description: `Requests ${seriesUnit(
         options
-      )}. Known bots are clients identified by address or hourly volume. Presumed bots are the excess on days far above their neighbours.`,
+      )}. Known bots are clients identified by address or hourly volume. Presumed bots are the overage during phases that peak above five times the long-term trend.`,
     },
     loaded(result, (data) => {
       const points = requestsPoints(data);
