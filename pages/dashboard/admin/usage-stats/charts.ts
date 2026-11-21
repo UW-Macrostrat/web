@@ -17,12 +17,15 @@ import {
   YAxis,
 } from "recharts";
 import {
+  Bin,
   Bots,
   CacheBin,
   COMPILATION_CUTOVER,
   MapViewsBin,
+  Projection,
   Referrer,
   RequestsPoint,
+  shownTotal,
   formatCount,
   formatFullCount,
   formatPercent,
@@ -148,6 +151,39 @@ function hitRate(hits: number | null, misses: number | null): number | null {
 interface ChartPoint extends RequestsPoint {
   l1?: number | null;
   l2?: number | null;
+  projected?: number | null;
+}
+
+/** A dashed segment from the last full bin's total to the projected one. */
+function withProjection(
+  points: ChartPoint[],
+  projection: Projection | null,
+  bots: Bots
+): ChartPoint[] {
+  if (projection == null) return points;
+  const i = points.findIndex((p) => p.date === projection.date);
+  if (i < 1) return points;
+  const anchor = shownTotal(points[i - 1], bots);
+  if (anchor == null) return points;
+  const projected = [...points];
+  projected[i - 1] = { ...points[i - 1], projected: anchor };
+  projected[i] = { ...points[i], projected: projection.value };
+  return projected;
+}
+
+function projectionLine(bin: Bin) {
+  return h(Line, {
+    key: "projected",
+    yAxisId: "count",
+    dataKey: "projected",
+    name: `Projected to the full ${bin}`,
+    stroke: INK,
+    strokeWidth: 2,
+    strokeDasharray: "4 3",
+    dot: false,
+    connectNulls: false,
+    isAnimationActive: false,
+  });
 }
 
 function withCacheRates(
@@ -216,17 +252,23 @@ function cacheOverlay() {
 export function RequestsChart({
   data,
   bots,
+  bin,
+  projection = null,
   cache = null,
 }: {
   data: RequestsPoint[];
   bots: Bots;
+  bin: Bin;
+  projection?: Projection | null;
   cache?: CacheBin[] | null;
 }) {
   const series = requestSeries(bots);
-  const points = withCacheRates(data, cache);
+  const points = withProjection(withCacheRates(data, cache), projection, bots);
   let legend = null;
-  if (series.length > 1 || cache != null)
+  if (series.length > 1 || cache != null || projection != null)
     legend = h(Legend, { verticalAlign: "top", height: 28 });
+  let projected = null;
+  if (projection != null) projected = projectionLine(bin);
   let overlay = [];
   if (cache != null) overlay = cacheOverlay();
 
@@ -265,6 +307,7 @@ export function RequestsChart({
             isAnimationActive: false,
           })
         ),
+        projected,
         ...overlay,
       ]
     ),

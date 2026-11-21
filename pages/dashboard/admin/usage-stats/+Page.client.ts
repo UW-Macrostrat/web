@@ -30,6 +30,7 @@ import {
   QueryOptions,
   Referrers,
   RequestsBin,
+  Projection,
   RequestsPoint,
   Result,
   Smoothing,
@@ -43,8 +44,11 @@ import {
   formatCount,
   formatFullCount,
   formatPercent,
+  extendToPresent,
   formatTimestamp,
+  partialBin,
   productionMapUrl,
+  projectPartialBin,
   queryOptions,
   requestsPoints,
   rollingMean,
@@ -259,6 +263,9 @@ function RequestsSection() {
     start,
     bin,
   });
+  const status = useUsageStats<PipelineStatus[]>("/status");
+  const newestLog =
+    status.data?.find((r) => r.pipeline === "tileserver")?.newest_log ?? null;
   return h(
     Section,
     {
@@ -268,12 +275,18 @@ function RequestsSection() {
       )}. Known bots are clients identified by address or hourly volume. Presumed bots are the overage during phases that peak above five times the long-term trend.`,
     },
     loaded(result, (data) => {
-      const points = requestsPoints(data);
+      const points = extendToPresent(requestsPoints(data), bin);
+      const projection = projectPartialBin(
+        points,
+        partialBin(newestLog, bin),
+        bots
+      );
       return [
         h(RequestTotals, { data: points, bots }),
         h(CacheOverlayToggle),
         h(RequestsFigure, {
           data: rollingMean(points, ["organic", "presumed", "bot"], window),
+          projection,
         }),
       ];
     })
@@ -290,13 +303,20 @@ function CacheOverlayToggle() {
   });
 }
 
-function RequestsFigure({ data }: { data: RequestsPoint[] }) {
+function RequestsFigure({
+  data,
+  projection,
+}: {
+  data: RequestsPoint[];
+  projection: Projection | null;
+}) {
   const overlay = useAtomValue(cacheOverlayAtom);
   const { start, bin, bots, window } = useAtomValue(optionsAtom);
   let path: string | null = null;
   if (overlay) path = "/tiles/cache";
   const result = useUsageStats<CacheBin[]>(path, { start, bin, bots });
-  if (!overlay) return h(RequestsChart, { data, bots });
+  const chart = { data, bots, bin, projection };
+  if (!overlay) return h(RequestsChart, chart);
   // Smoothing the counts, not the rates, weights each day by its traffic.
   const keys: (keyof CacheBin)[] = [
     "l1_hits",
@@ -305,7 +325,7 @@ function RequestsFigure({ data }: { data: RequestsPoint[] }) {
     "l2_misses",
   ];
   return loaded(result, (cache) =>
-    h(RequestsChart, { data, bots, cache: rollingMean(cache, keys, window) })
+    h(RequestsChart, { ...chart, cache: rollingMean(cache, keys, window) })
   );
 }
 
@@ -506,7 +526,9 @@ function SelectedMapChart({ sources }: { sources: Sources }) {
   return h("div.map-series", [
     h("h3", `${title} · requests ${seriesUnit(options)}`),
     loaded(result, (data) =>
-      h(MapSeriesChart, { data: rollingMean(data, ["requests"], window) })
+      h(MapSeriesChart, {
+        data: rollingMean(extendToPresent(data, bin), ["requests"], window),
+      })
     ),
   ]);
 }

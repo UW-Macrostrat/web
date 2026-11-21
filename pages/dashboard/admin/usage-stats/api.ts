@@ -112,6 +112,68 @@ export function rollingMean<T extends object>(
   });
 }
 
+const DAY_MS = 86400000;
+
+function dayMs(date: string): number {
+  return Date.parse(`${date}T00:00:00Z`);
+}
+
+function dayString(ms: number): string {
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
+/** Start of the UTC bin holding `ms`, as the API's `date_trunc` bins. */
+function binStart(ms: number, bin: Bin): number {
+  const d = new Date(ms);
+  const day = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  if (bin === "week") return day - ((d.getUTCDay() + 6) % 7) * DAY_MS;
+  if (bin === "month") return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+  return day;
+}
+
+function nextBin(ms: number, bin: Bin): number {
+  const d = new Date(ms);
+  if (bin === "week") return ms + 7 * DAY_MS;
+  if (bin === "month")
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
+  return ms + DAY_MS;
+}
+
+/** Empty bins after the last row, through the bin holding the present. */
+export function extendToPresent<T extends { date: string }>(
+  rows: T[],
+  bin: Bin
+): T[] {
+  if (rows.length === 0) return rows;
+  const end = binStart(Date.now(), bin);
+  const extended = [...rows];
+  let next = nextBin(dayMs(rows[rows.length - 1].date), bin);
+  while (next <= end) {
+    extended.push({ date: dayString(next) } as T);
+    next = nextBin(next, bin);
+  }
+  return extended;
+}
+
+export interface PartialBin {
+  date: string;
+  /** Share of the bin the harvested logs cover, between 0 and 1. */
+  covered: number;
+}
+
+/** The bin the newest harvested log falls in, unless the logs cover all of it. */
+export function partialBin(
+  newestLog: string | null,
+  bin: Bin
+): PartialBin | null {
+  if (newestLog == null) return null;
+  const at = Date.parse(newestLog);
+  const start = binStart(at, bin);
+  const covered = (at - start) / (nextBin(start, bin) - start);
+  if (covered <= 0 || covered >= 1) return null;
+  return { date: dayString(start), covered };
+}
+
 export interface PipelineStatus {
   pipeline: string;
   n_objects: number;
@@ -136,6 +198,41 @@ export interface RequestsPoint {
   organic: number | null;
   presumed: number | null;
   bot: number | null;
+}
+
+const shownKeys: Record<Bots, ("organic" | "presumed" | "bot")[]> = {
+  exclude: ["organic"],
+  include: ["organic", "presumed", "bot"],
+  only: ["presumed", "bot"],
+};
+
+/** The sum of the series a bots option shows; null when all are empty. */
+export function shownTotal(point: RequestsPoint, bots: Bots): number | null {
+  let total: number | null = null;
+  for (const key of shownKeys[bots]) {
+    const value = point[key];
+    if (value != null) total = (total ?? 0) + value;
+  }
+  return total;
+}
+
+export interface Projection {
+  date: string;
+  /** The shown total scaled up to the whole bin. */
+  value: number;
+}
+
+export function projectPartialBin(
+  points: RequestsPoint[],
+  partial: PartialBin | null,
+  bots: Bots
+): Projection | null {
+  if (partial == null) return null;
+  const point = points.find((p) => p.date === partial.date);
+  if (point == null) return null;
+  const total = shownTotal(point, bots);
+  if (total == null) return null;
+  return { date: partial.date, value: total / partial.covered };
 }
 
 export function requestsPoints(data: RequestsBin[]): RequestsPoint[] {
