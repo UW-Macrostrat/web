@@ -115,8 +115,9 @@ const knownBotSeries: SeriesSpec = {
 
 function requestSeries(bots: Bots): SeriesSpec[] {
   if (bots === "exclude") return [organicSeries];
-  if (bots === "only") return [presumedSeries, knownBotSeries];
-  return [presumedSeries, organicSeries, knownBotSeries];
+  // Organic at the base, so its line is organic alone; presumed bots on top.
+  if (bots === "only") return [knownBotSeries, presumedSeries];
+  return [organicSeries, knownBotSeries, presumedSeries];
 }
 
 /** A dashed rule at the bin holding `date`, if the series spans it. */
