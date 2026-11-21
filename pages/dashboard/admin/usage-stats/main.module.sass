@@ -1,13 +1,15 @@
-// Categorical slots 1–2 of the validated dataviz palette, per theme.
+// Categorical slots 1–3 of the validated dataviz palette, per theme.
 .usage-page
   --usage-series-1: #2a78d6
   --usage-series-2: #eb6834
+  --usage-series-3: #1baf7a
   text-align: left
   margin-top: 1em
 
   :global(.dark-mode) &
     --usage-series-1: #3987e5
     --usage-series-2: #d95926
+    --usage-series-3: #199e70
 
   .muted
     color: var(--pz-text-subtle-color, var(--secondary-color))
@@ -23,6 +25,9 @@
 
   .usage-section
     margin-bottom: 2.5em
+
+  .chart-options
+    margin: 0 0 0.5em
 
   .section-header
     margin-bottom: 0.75em

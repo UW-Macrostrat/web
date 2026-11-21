@@ -122,9 +122,29 @@ export interface PipelineStatus {
 
 export interface RequestsBin {
   date: string;
+  /** Untagged requests, presumed bots included. */
   organic: number | null;
   bot: number | null;
+  /** The part of `organic` on spike days above its local baseline. */
+  presumed_bot?: number | null;
   new_system: boolean | null;
+}
+
+/** A requests bin with organic split from presumed bots, for charting. */
+export interface RequestsPoint {
+  date: string;
+  organic: number | null;
+  presumed: number | null;
+  bot: number | null;
+}
+
+export function requestsPoints(data: RequestsBin[]): RequestsPoint[] {
+  return data.map((d) => {
+    const presumed = d.presumed_bot ?? null;
+    let organic = d.organic;
+    if (organic != null) organic -= presumed ?? 0;
+    return { date: d.date, organic, presumed, bot: d.bot };
+  });
 }
 
 export interface Referrer {
@@ -157,12 +177,75 @@ export interface LayerCount {
 }
 
 export interface MapViews {
+  /** A production source id, whichever environment the page runs in. */
   source_id: number;
-  slug: string | null;
-  name: string | null;
-  scale: string | null;
   requests: number;
   days: number;
+}
+
+export interface ThrottledClient {
+  /** An IPv4 address or an IPv6 /64, as the tile cache keys it. */
+  client: string;
+  action: "deny" | "would-deny" | string;
+  requests: number;
+  days: number;
+  first_seen: string;
+  last_seen: string;
+}
+
+// The harvester reads production logs everywhere, so map ids are production's.
+const productionSite = "https://macrostrat.org";
+
+/** The day compilations replaced the legacy carto build in production. */
+export const COMPILATION_CUTOVER = "2026-11-03";
+
+export function productionMapUrl(sourceId: number): string {
+  return `${productionSite}/maps/${sourceId}`;
+}
+
+export interface SourceInfo {
+  source_id: number;
+  name: string;
+  scale: string | null;
+}
+
+/** Names and scales of production map sources, by id; null while loading. */
+export function useProductionSources(
+  ids: number[]
+): Record<number, SourceInfo> | null {
+  const key = ids.join(",");
+  const [sources, setSources] = useState<Record<number, SourceInfo> | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (key === "") return;
+    let cancelled = false;
+    setSources(null);
+    fetchProductionSources(key)
+      .then((rows) => {
+        if (!cancelled) setSources(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setSources({});
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [key]);
+
+  return sources;
+}
+
+async function fetchProductionSources(
+  ids: string
+): Promise<Record<number, SourceInfo>> {
+  const url = `${productionSite}/api/v2/defs/sources?source_id=${ids}`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`${response.status}`);
+  const body = await response.json();
+  const rows: SourceInfo[] = body?.success?.data ?? [];
+  return Object.fromEntries(rows.map((r) => [r.source_id, r]));
 }
 
 export interface MapViewsList {
@@ -256,6 +339,18 @@ export function formatPercent(value: number | null | undefined): string {
 }
 
 /** Compact relative age: "3 min", "4 h", "2 d". */
+const timestamp = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+export function formatTimestamp(iso: string | null): string {
+  if (iso == null) return "—";
+  return timestamp.format(new Date(iso));
+}
+
 export function formatAge(iso: string | null): string {
   if (iso == null) return "never";
   const seconds = (Date.now() - new Date(iso).getTime()) / 1000;

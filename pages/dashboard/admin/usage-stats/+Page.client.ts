@@ -13,6 +13,7 @@ import {
   NonIdealState,
   SegmentedControl,
   Spinner,
+  Switch,
 } from "@blueprintjs/core";
 import { Provider, atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useHydrateAtoms } from "jotai/utils";
@@ -29,8 +30,11 @@ import {
   QueryOptions,
   Referrers,
   RequestsBin,
+  RequestsPoint,
   Result,
   Smoothing,
+  SourceInfo,
+  ThrottledClient,
   TimeRange,
   binOptions,
   botOptions,
@@ -39,18 +43,17 @@ import {
   formatCount,
   formatFullCount,
   formatPercent,
+  formatTimestamp,
+  productionMapUrl,
   queryOptions,
+  requestsPoints,
   rollingMean,
   smoothingOptions,
   timeRanges,
+  useProductionSources,
   useUsageStats,
 } from "./api";
-import {
-  CacheChart,
-  MapSeriesChart,
-  ReferrersChart,
-  RequestsChart,
-} from "./charts";
+import { MapSeriesChart, ReferrersChart, RequestsChart } from "./charts";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -69,6 +72,7 @@ const botsAtom = atom<Bots>(DEFAULT_BOTS);
 const chosenBinAtom = atom<Bin | null>(null);
 const smoothingAtom = atom<Smoothing>(DEFAULT_SMOOTHING);
 const mapAtom = atom<number | null>(null);
+const cacheOverlayAtom = atom<boolean>(false);
 
 const binAtom = atom<Bin>(
   (get) => get(chosenBinAtom) ?? defaultBin(get(rangeAtom))
@@ -90,6 +94,7 @@ function UrlState() {
   const bin = useAtomValue(chosenBinAtom);
   const smoothing = useAtomValue(smoothingAtom);
   const map = useAtomValue(mapAtom);
+  const cache = useAtomValue(cacheOverlayAtom);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -98,8 +103,9 @@ function UrlState() {
     setParam(url, "bin", bin, null);
     setParam(url, "smooth", smoothing, DEFAULT_SMOOTHING);
     setParam(url, "map", map, null);
+    setParam(url, "cache", cache, false);
     window.history.replaceState(window.history.state, "", url);
-  }, [range, bots, bin, smoothing, map]);
+  }, [range, bots, bin, smoothing, map, cache]);
 
   return null;
 }
@@ -120,6 +126,7 @@ function initialValues(): [any, any][] {
     values.push([smoothingAtom, smooth]);
   const map = Number(params.get("map"));
   if (Number.isInteger(map) && map > 0) values.push([mapAtom, map]);
+  if (params.get("cache") === "true") values.push([cacheOverlayAtom, true]);
   return values;
 }
 
@@ -136,8 +143,8 @@ function UsageStatsPage() {
     h(HarvesterStatus),
     h(Controls),
     h(RequestsSection),
+    h(ThrottledSection),
     h(ReferrersSection),
-    h(CacheSection),
     h(LayersSection),
     h(MapsSection),
   ]);
@@ -258,29 +265,67 @@ function RequestsSection() {
       title: "Tile requests",
       description: `Requests ${seriesUnit(
         options
-      )}. Known bots are cache-warmers identified by address.`,
+      )}. Known bots are clients identified by address or hourly volume. Presumed bots are the excess on days far above their neighbours.`,
     },
-    loaded(result, (data) => [
-      h(RequestTotals, { data, bots }),
-      h(RequestsChart, {
-        data: rollingMean(data, ["organic", "bot"], window),
-        bots,
-      }),
-    ])
+    loaded(result, (data) => {
+      const points = requestsPoints(data);
+      return [
+        h(RequestTotals, { data: points, bots }),
+        h(CacheOverlayToggle),
+        h(RequestsFigure, {
+          data: rollingMean(points, ["organic", "presumed", "bot"], window),
+        }),
+      ];
+    })
   );
 }
 
-function RequestTotals({ data, bots }: { data: RequestsBin[]; bots: Bots }) {
+function CacheOverlayToggle() {
+  const [checked, setChecked] = useAtom(cacheOverlayAtom);
+  return h(Switch, {
+    className: "chart-options",
+    label: "Cache hit rates (right axis)",
+    checked,
+    onChange: (event) => setChecked(event.currentTarget.checked),
+  });
+}
+
+function RequestsFigure({ data }: { data: RequestsPoint[] }) {
+  const overlay = useAtomValue(cacheOverlayAtom);
+  const { start, bin, bots, window } = useAtomValue(optionsAtom);
+  let path: string | null = null;
+  if (overlay) path = "/tiles/cache";
+  const result = useUsageStats<CacheBin[]>(path, { start, bin, bots });
+  if (!overlay) return h(RequestsChart, { data, bots });
+  // Smoothing the counts, not the rates, weights each day by its traffic.
+  const keys: (keyof CacheBin)[] = [
+    "l1_hits",
+    "l1_misses",
+    "l2_hits",
+    "l2_misses",
+  ];
+  return loaded(result, (cache) =>
+    h(RequestsChart, { data, bots, cache: rollingMean(cache, keys, window) })
+  );
+}
+
+function RequestTotals({ data, bots }: { data: RequestsPoint[]; bots: Bots }) {
   const organic = sum(data.map((d) => d.organic));
-  const bot = sum(data.map((d) => d.bot));
+  const presumed = sum(data.map((d) => d.presumed));
+  const known = sum(data.map((d) => d.bot));
+  const total = organic + presumed + known;
   let shown = organic;
-  if (bots === "include") shown = organic + bot;
-  if (bots === "only") shown = bot;
+  if (bots === "include") shown = total;
+  if (bots === "only") shown = presumed + known;
   return h("div.stat-tiles", [
     h(StatTile, { label: "Requests", value: formatCount(shown) }),
     h(StatTile, {
-      label: "Bot share",
-      value: formatPercent(bot / (organic + bot)),
+      label: "Known bots",
+      value: formatPercent(known / total),
+    }),
+    h(StatTile, {
+      label: "Presumed bots",
+      value: formatPercent(presumed / total),
     }),
   ]);
 }
@@ -316,33 +361,60 @@ function ReferrersSection() {
   );
 }
 
-function CacheSection() {
-  const options = useAtomValue(optionsAtom);
-  const { start, bin, bots, window } = options;
-  const result = useUsageStats<CacheBin[]>("/tiles/cache", {
+function ThrottledSection() {
+  const { start } = useAtomValue(optionsAtom);
+  const result = useUsageStats<ThrottledClient[]>("/tiles/throttled", {
     start,
-    bin,
-    bots,
   });
-  // Smoothing the counts, not the rates, weights each day by its traffic.
-  const keys: (keyof CacheBin)[] = [
-    "l1_hits",
-    "l1_misses",
-    "l2_hits",
-    "l2_misses",
-  ];
   return h(
     Section,
     {
-      title: "Cache effectiveness",
-      description: `Share of requests answered by Varnish, and by the tile cache among those Varnish missed, ${seriesUnit(
-        options
-      )}.`,
+      title: "Throttled clients",
+      description:
+        "Clients over the tile cache's render limit, most recent first. Cached tiles are still served to them.",
     },
-    loaded(result, (data) =>
-      h(CacheChart, { data: rollingMean(data, keys, window) })
-    )
+    loaded(result, (rows) => h(ThrottledTable, { rows }))
   );
+}
+
+const throttleActions: Record<string, string> = {
+  deny: "Refused",
+  "would-deny": "Would refuse (report mode)",
+};
+
+function ThrottledTable({ rows }: { rows: ThrottledClient[] }) {
+  if (rows.length === 0) {
+    return h(NonIdealState, {
+      icon: "tick-circle",
+      title: "No client reached the render limit in this range",
+    });
+  }
+  return h(HTMLTable, { compact: true, className: "usage-table" }, [
+    h(
+      "thead",
+      h("tr", [
+        h("th", "Client"),
+        h("th", "Action"),
+        h("th.num", "Requests"),
+        h("th.num", "Days"),
+        h("th", "First seen"),
+        h("th", "Last seen"),
+      ])
+    ),
+    h(
+      "tbody",
+      rows.map((r) =>
+        h("tr", { key: `${r.client}.${r.action}` }, [
+          h("td", h("code", r.client)),
+          h("td", throttleActions[r.action] ?? r.action),
+          h("td.num", formatFullCount(r.requests)),
+          h("td.num", r.days),
+          h("td", formatTimestamp(r.first_seen)),
+          h("td", formatTimestamp(r.last_seen)),
+        ])
+      )
+    ),
+  ]);
 }
 
 function LayersSection() {
@@ -400,6 +472,7 @@ function MapsSection() {
 }
 
 function MapsPanel({ data }: { data: MapViewsList }) {
+  const sources = useProductionSources(data.maps.map((m) => m.source_id));
   if (data.maps.length === 0) {
     return h(NonIdealState, {
       icon: "map",
@@ -414,12 +487,14 @@ function MapsPanel({ data }: { data: MapViewsList }) {
       } and `,
       `${data.last_date}. Choose one to see it over time.`,
     ]),
-    h(SelectedMapChart, { maps: data.maps }),
-    h(MapsTable, { maps: data.maps }),
+    h(SelectedMapChart, { sources }),
+    h(MapsTable, { maps: data.maps, sources }),
   ]);
 }
 
-function SelectedMapChart({ maps }: { maps: MapViews[] }) {
+type Sources = Record<number, SourceInfo> | null;
+
+function SelectedMapChart({ sources }: { sources: Sources }) {
   const map = useAtomValue(mapAtom);
   const options = useAtomValue(optionsAtom);
   const { start, bin, bots, window } = options;
@@ -427,7 +502,7 @@ function SelectedMapChart({ maps }: { maps: MapViews[] }) {
   if (map != null) path = `/tiles/maps/${map}`;
   const result = useUsageStats<MapViewsBin[]>(path, { start, bin, bots });
   if (map == null) return null;
-  const title = maps.find((m) => m.source_id === map)?.name ?? `Source ${map}`;
+  const title = sources?.[map]?.name ?? `Source ${map}`;
   return h("div.map-series", [
     h("h3", `${title} · requests ${seriesUnit(options)}`),
     loaded(result, (data) =>
@@ -436,7 +511,7 @@ function SelectedMapChart({ maps }: { maps: MapViews[] }) {
   ]);
 }
 
-function MapsTable({ maps }: { maps: MapViews[] }) {
+function MapsTable({ maps, sources }: { maps: MapViews[]; sources: Sources }) {
   const [selected, setSelected] = useAtom(mapAtom);
   return h(
     HTMLTable,
@@ -462,8 +537,8 @@ function MapsTable({ maps }: { maps: MapViews[] }) {
               onClick: () => setSelected(m.source_id),
             },
             [
-              h("td", h(MapLabel, { map: m })),
-              h("td", m.scale ?? "—"),
+              h("td", h(MapLabel, { map: m, source: sources?.[m.source_id] })),
+              h("td", sources?.[m.source_id]?.scale ?? "—"),
               h("td.num", formatFullCount(m.requests)),
               h("td.num", m.days),
             ]
@@ -479,18 +554,14 @@ function rowClass(selected: boolean): string | undefined {
   return undefined;
 }
 
-function MapLabel({ map }: { map: MapViews }) {
-  if (map.name == null) {
-    return h(
-      "span.muted",
-      `Source ${map.source_id} (no longer in maps.sources)`
-    );
-  }
+function MapLabel({ map, source }: { map: MapViews; source?: SourceInfo }) {
+  let name = h("span.muted", `Source ${map.source_id}`);
+  if (source != null) name = h("span", source.name);
   return h("span", [
     h(
       "a",
-      { href: `/maps/${map.source_id}`, onClick: stopPropagation },
-      map.name
+      { href: productionMapUrl(map.source_id), onClick: stopPropagation },
+      name
     ),
     h("span.muted", ` · ${map.source_id}`),
   ]);

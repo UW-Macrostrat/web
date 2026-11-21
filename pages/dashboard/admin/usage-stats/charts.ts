@@ -7,9 +7,9 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  ComposedChart,
   Legend,
   Line,
-  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -19,9 +19,10 @@ import {
 import {
   Bots,
   CacheBin,
+  COMPILATION_CUTOVER,
   MapViewsBin,
   Referrer,
-  RequestsBin,
+  RequestsPoint,
   formatCount,
   formatFullCount,
   formatPercent,
@@ -33,6 +34,7 @@ const h = hyper.styled(styles);
 
 const SERIES_1 = "var(--usage-series-1)";
 const SERIES_2 = "var(--usage-series-2)";
+const SERIES_3 = "var(--usage-series-3)";
 const INK = "var(--pz-text-subtle-color, #52514e)";
 const GRID = "var(--pz-border-muted-color, #e5e4df)";
 
@@ -86,36 +88,46 @@ function countTooltip() {
 }
 
 interface SeriesSpec {
-  key: "organic" | "bot";
+  key: "organic" | "presumed" | "bot";
   name: string;
   color: string;
 }
 
+const organicSeries: SeriesSpec = {
+  key: "organic",
+  name: "Organic",
+  color: SERIES_1,
+};
+const presumedSeries: SeriesSpec = {
+  key: "presumed",
+  name: "Presumed bots",
+  color: SERIES_3,
+};
+const knownBotSeries: SeriesSpec = {
+  key: "bot",
+  name: "Known bots",
+  color: SERIES_2,
+};
+
 function requestSeries(bots: Bots): SeriesSpec[] {
-  const organic: SeriesSpec = {
-    key: "organic",
-    name: "Organic",
-    color: SERIES_1,
-  };
-  const bot: SeriesSpec = { key: "bot", name: "Known bots", color: SERIES_2 };
-  if (bots === "exclude") return [organic];
-  if (bots === "only") return [bot];
-  return [organic, bot];
+  if (bots === "exclude") return [organicSeries];
+  if (bots === "only") return [presumedSeries, knownBotSeries];
+  return [organicSeries, presumedSeries, knownBotSeries];
 }
 
-/** Marks where the log-dump lineage begins, if the series spans it. */
-function harvestStartLine(data: { date: string }[]) {
+/** A dashed rule at the bin holding `date`, if the series spans it. */
+function eventLine(data: { date: string }[], date: string, label: string) {
   if (data.length === 0) return null;
-  const first = data[0].date;
-  const last = data[data.length - 1].date;
-  if (first >= HARVEST_START || last < HARVEST_START) return null;
-  const at = data.find((d) => d.date >= HARVEST_START)?.date;
+  if (data[0].date >= date || data[data.length - 1].date < date) return null;
+  const at = data.filter((d) => d.date <= date).pop()?.date;
   return h(ReferenceLine, {
+    key: label,
     x: at,
+    yAxisId: "count",
     stroke: INK,
     strokeDasharray: "4 4",
     label: {
-      value: "Log harvest begins",
+      value: label,
       position: "insideTopLeft",
       fill: INK,
       fontSize: 11,
@@ -123,42 +135,135 @@ function harvestStartLine(data: { date: string }[]) {
   });
 }
 
+function hitRate(hits: number | null, misses: number | null): number | null {
+  if (hits == null || misses == null) return null;
+  const known = hits + misses;
+  if (known === 0) return null;
+  return hits / known;
+}
+
+interface ChartPoint extends RequestsPoint {
+  l1?: number | null;
+  l2?: number | null;
+}
+
+function withCacheRates(
+  points: RequestsPoint[],
+  cache: CacheBin[] | null
+): ChartPoint[] {
+  if (cache == null) return points;
+  const byDate = new Map(cache.map((c) => [c.date, c]));
+  return points.map((p) => {
+    const c = byDate.get(p.date);
+    if (c == null) return p;
+    return {
+      ...p,
+      l1: hitRate(c.l1_hits, c.l1_misses),
+      l2: hitRate(c.l2_hits, c.l2_misses),
+    };
+  });
+}
+
+function formatTooltipValue(value: number, _name: string, item: any) {
+  if (item?.dataKey === "l1" || item?.dataKey === "l2") {
+    return formatPercent(value);
+  }
+  return formatFullCount(value);
+}
+
+function cacheOverlay() {
+  return [
+    h(YAxis, {
+      key: "rate-axis",
+      yAxisId: "rate",
+      orientation: "right",
+      tick,
+      stroke: GRID,
+      width: 48,
+      domain: [0, 1],
+      tickFormatter: formatPercent,
+    }),
+    h(Line, {
+      key: "l1",
+      yAxisId: "rate",
+      dataKey: "l1",
+      name: "Varnish (L1) hit rate",
+      stroke: INK,
+      strokeWidth: 2,
+      dot: false,
+      connectNulls: false,
+      isAnimationActive: false,
+    }),
+    h(Line, {
+      key: "l2",
+      yAxisId: "rate",
+      dataKey: "l2",
+      name: "Tile cache (L2) hit rate, of L1 misses",
+      stroke: INK,
+      strokeWidth: 2,
+      strokeDasharray: "6 3",
+      dot: false,
+      connectNulls: false,
+      isAnimationActive: false,
+    }),
+  ];
+}
+
+/** Requests as stacked areas; with `cache`, hit rates on a right-hand axis. */
 export function RequestsChart({
   data,
   bots,
+  cache = null,
 }: {
-  data: RequestsBin[];
+  data: RequestsPoint[];
   bots: Bots;
+  cache?: CacheBin[] | null;
 }) {
   const series = requestSeries(bots);
+  const points = withCacheRates(data, cache);
   let legend = null;
-  if (series.length > 1)
+  if (series.length > 1 || cache != null)
     legend = h(Legend, { verticalAlign: "top", height: 28 });
+  let overlay = [];
+  if (cache != null) overlay = cacheOverlay();
 
-  return h(ResponsiveContainer, { width: "100%", height: 280 }, [
-    h(AreaChart, { data, margin: { top: 8, right: 8, left: 0, bottom: 0 } }, [
-      grid(),
-      dateAxis(),
-      countAxis(),
-      countTooltip(),
-      legend,
-      harvestStartLine(data),
-      ...series.map((s) =>
-        h(Area, {
-          key: s.key,
-          dataKey: s.key,
-          name: s.name,
-          stackId: "requests",
-          type: "linear",
-          stroke: s.color,
-          strokeWidth: 2,
-          fill: s.color,
-          fillOpacity: 0.25,
-          connectNulls: false,
-          isAnimationActive: false,
-        })
-      ),
-    ]),
+  return h(ResponsiveContainer, { width: "100%", height: 300 }, [
+    h(
+      ComposedChart,
+      { data: points, margin: { top: 8, right: 8, left: 0, bottom: 0 } },
+      [
+        grid(),
+        dateAxis(),
+        h(YAxis, {
+          yAxisId: "count",
+          tick,
+          stroke: GRID,
+          width: 52,
+          tickFormatter: formatCount,
+        }),
+        h(Tooltip, { ...tooltipStyle, formatter: formatTooltipValue }),
+        legend,
+        eventLine(points, HARVEST_START, "Log harvest begins"),
+        eventLine(points, COMPILATION_CUTOVER, "Compilations in production"),
+        ...series.map((s) =>
+          h(Area, {
+            key: s.key,
+            yAxisId: "count",
+            dataKey: s.key,
+            name: s.name,
+            stackId: "requests",
+            type: "linear",
+            stroke: s.color,
+            strokeWidth: 2,
+            fill: s.color,
+            fillOpacity: 0.25,
+            connectNulls: false,
+            isAnimationActive: false,
+          })
+        ),
+        ...overlay,
+      ]
+    ),
   ]);
 }
 
@@ -200,62 +305,6 @@ export function ReferrersChart({ referrers }: { referrers: Referrer[] }) {
           fill: SERIES_1,
           barSize: 14,
           radius: [0, 4, 4, 0],
-          isAnimationActive: false,
-        }),
-      ]
-    ),
-  ]);
-}
-
-function hitRate(hits: number | null, misses: number | null): number | null {
-  if (hits == null || misses == null) return null;
-  const known = hits + misses;
-  if (known === 0) return null;
-  return hits / known;
-}
-
-export function CacheChart({ data }: { data: CacheBin[] }) {
-  const rates = data.map((d) => ({
-    date: d.date,
-    l1: hitRate(d.l1_hits, d.l1_misses),
-    l2: hitRate(d.l2_hits, d.l2_misses),
-  }));
-
-  return h(ResponsiveContainer, { width: "100%", height: 240 }, [
-    h(
-      LineChart,
-      { data: rates, margin: { top: 8, right: 8, left: 0, bottom: 0 } },
-      [
-        grid(),
-        dateAxis(),
-        h(YAxis, {
-          tick,
-          stroke: GRID,
-          width: 52,
-          domain: [0, 1],
-          tickFormatter: formatPercent,
-        }),
-        h(Tooltip, {
-          ...tooltipStyle,
-          formatter: (v: number) => formatPercent(v),
-        }),
-        h(Legend, { verticalAlign: "top", height: 28 }),
-        h(Line, {
-          dataKey: "l1",
-          name: "Varnish (L1) hit rate",
-          stroke: SERIES_1,
-          strokeWidth: 2,
-          dot: false,
-          connectNulls: false,
-          isAnimationActive: false,
-        }),
-        h(Line, {
-          dataKey: "l2",
-          name: "Tile cache (L2) hit rate, of L1 misses",
-          stroke: SERIES_2,
-          strokeWidth: 2,
-          dot: false,
-          connectNulls: false,
           isAnimationActive: false,
         }),
       ]
