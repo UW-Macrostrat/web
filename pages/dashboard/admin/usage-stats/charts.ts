@@ -21,7 +21,7 @@ import {
   CacheBin,
   COMPILATION_CUTOVER,
   MapViewsBin,
-  Projection,
+  EstimatedPoint,
   Referrer,
   RequestsPoint,
   formatCount,
@@ -93,7 +93,6 @@ interface SeriesSpec {
   name: string;
   color: string;
   fillOpacity: number;
-  strokeDasharray?: string;
 }
 
 const organicSeries: SeriesSpec = {
@@ -107,8 +106,6 @@ const presumedSeries: SeriesSpec = {
   name: "Presumed bots",
   color: SERIES_3,
   fillOpacity: 0.12,
-  // Inferred, not observed: a broken outline sets it apart from tagged traffic.
-  strokeDasharray: "5 3",
 };
 const knownBotSeries: SeriesSpec = {
   key: "bot",
@@ -151,14 +148,14 @@ function hitRate(hits: number | null, misses: number | null): number | null {
   return hits / known;
 }
 
-// Projection keys are named per series, hence the open record.
-type ChartPoint = RequestsPoint & {
+// Edge keys are named per series, hence the open record.
+type ChartPoint = EstimatedPoint & {
   l1?: number | null;
   l2?: number | null;
 } & Record<string, any>;
 
 function withCacheRates(
-  points: RequestsPoint[],
+  points: EstimatedPoint[],
   cache: CacheBin[] | null
 ): ChartPoint[] {
   if (cache == null) return points;
@@ -181,74 +178,82 @@ function countDomain(points: RequestsPoint[], trendScale: boolean) {
   return { domain: [0, 2 * peak], allowDataOverflow: true };
 }
 
-/** Organic's edge again, drawn over the bot layers stacked on it. */
-function organicLine(series: SeriesSpec[]) {
-  if (!series.includes(organicSeries)) return null;
-  return h(Line, {
-    key: "organic-line",
+function isEstimate(series: SeriesSpec, point: EstimatedPoint): boolean {
+  if (series.key === "presumed") return true;
+  if (series.key === "organic") return point.estimated;
+  return point.partial;
+}
+
+function edgeKey(series: SeriesSpec, style: "measured" | "estimated"): string {
+  return `${series.key}_${style}`;
+}
+
+/** Each layer's top edge, split into measured and estimated runs. An
+ * estimated run takes its measured neighbours, so the two lines meet. */
+function withEdges(points: ChartPoint[], series: SeriesSpec[]): ChartPoint[] {
+  const tops = points.map((p) => {
+    let top = 0;
+    return series.map((s) => {
+      const value = p[s.key];
+      if (value == null) return null;
+      top += value;
+      return top;
+    });
+  });
+  return points.map((p, i) => {
+    const point: ChartPoint = { ...p };
+    series.forEach((s, j) => {
+      const estimate = (k: number) =>
+        k >= 0 && k < points.length && isEstimate(s, points[k]);
+      if (!estimate(i)) point[edgeKey(s, "measured")] = tops[i][j];
+      if (estimate(i) || estimate(i - 1) || estimate(i + 1))
+        point[edgeKey(s, "estimated")] = tops[i][j];
+    });
+    return point;
+  });
+}
+
+function edgeLines(series: SeriesSpec, showEstimateInLegend: boolean) {
+  let width = 2;
+  if (series === organicSeries) width = 2.5;
+  let legendType = "none";
+  if (showEstimateInLegend) legendType = "plainline";
+  const line = {
     yAxisId: "count",
-    dataKey: "organic",
-    stroke: SERIES_1,
-    strokeWidth: 2.5,
+    stroke: series.color,
+    strokeWidth: width,
     dot: false,
-    legendType: "none",
     tooltipType: "none",
     connectNulls: false,
     isAnimationActive: false,
-  });
+  };
+  return [
+    h(Line, {
+      ...line,
+      key: edgeKey(series, "measured"),
+      dataKey: edgeKey(series, "measured"),
+      legendType: "none",
+    }),
+    h(Line, {
+      ...line,
+      key: edgeKey(series, "estimated"),
+      dataKey: edgeKey(series, "estimated"),
+      name: `${series.name} (estimated)`,
+      legendType,
+      strokeDasharray: "5 3",
+    }),
+  ];
 }
 
-function projectedKey(series: SeriesSpec): string {
-  return `projected_${series.key}`;
-}
-
-/** For each stacked series, a segment from the last full bin's stack height
- * to its projected height. */
-function withProjection(
-  points: ChartPoint[],
-  projection: Projection | null,
-  series: SeriesSpec[]
-): ChartPoint[] {
-  if (projection == null) return points;
-  const i = points.findIndex((p) => p.date === projection.date);
-  if (i < 1) return points;
-  const before: ChartPoint = { ...points[i - 1] };
-  const current: ChartPoint = { ...points[i] };
-  let anchor = 0;
-  let projected = 0;
-  for (const s of series) {
-    anchor += points[i - 1][s.key] ?? 0;
-    projected += projection.values[s.key] ?? 0;
-    before[projectedKey(s)] = anchor;
-    current[projectedKey(s)] = projected;
-  }
-  const result = [...points];
-  result[i - 1] = before;
-  result[i] = current;
-  return result;
-}
-
-function projectionLine(series: SeriesSpec) {
-  return h(Line, {
-    key: projectedKey(series),
-    yAxisId: "count",
-    dataKey: projectedKey(series),
-    name: `${series.name}, projected`,
-    legendType: "none",
-    stroke: series.color,
-    strokeWidth: 2,
-    strokeDasharray: "4 3",
-    dot: false,
-    connectNulls: false,
-    isAnimationActive: false,
-  });
-}
-
-function formatTooltipValue(value: number, _name: string, item: any) {
+function formatTooltipValue(value: number, name: string, item: any) {
   if (item?.dataKey === "l1" || item?.dataKey === "l2") {
     return formatPercent(value);
   }
-  return formatFullCount(value);
+  const point: EstimatedPoint | undefined = item?.payload;
+  let label = name;
+  if (point?.partial || (item?.dataKey === "organic" && point?.estimated))
+    label = `${name} (estimated)`;
+  return [formatFullCount(value), label];
 }
 
 function cacheOverlay() {
@@ -289,34 +294,31 @@ function cacheOverlay() {
   ];
 }
 
-/** Requests as stacked areas; with `cache`, hit rates on a right-hand axis. */
+/** Requests as stacked areas, edged solid where measured and dashed where
+ * estimated; with `cache`, hit rates on a right-hand axis. */
 export function RequestsChart({
   data,
   bots,
-  projection = null,
   trendScale = false,
   cache = null,
 }: {
-  data: RequestsPoint[];
+  data: EstimatedPoint[];
   bots: Bots;
-  projection?: Projection | null;
   /** Cap the count axis at twice the trend's peak, clipping bot phases. */
   trendScale?: boolean;
   cache?: CacheBin[] | null;
 }) {
   const series = requestSeries(bots);
-  const points = withProjection(
-    withCacheRates(data, cache),
-    projection,
-    series
-  );
+  const points = withEdges(withCacheRates(data, cache), series);
+  const organicEstimated =
+    series.includes(organicSeries) && data.some((d) => d.estimated);
   let legend = null;
-  if (series.length > 1 || cache != null)
+  if (series.length > 1 || cache != null || organicEstimated)
     legend = h(Legend, { verticalAlign: "top", height: 28 });
-  let projected = [];
-  if (projection != null) projected = series.map(projectionLine);
   let overlay = [];
   if (cache != null) overlay = cacheOverlay();
+  // Organic's edges last, so the bot layers never cover them.
+  const bySalience = [...series].reverse();
 
   return h(ResponsiveContainer, { width: "100%", height: 300 }, [
     h(
@@ -345,17 +347,16 @@ export function RequestsChart({
             name: s.name,
             stackId: "requests",
             type: "linear",
-            stroke: s.color,
-            strokeWidth: 2,
-            strokeDasharray: s.strokeDasharray,
+            stroke: "none",
             fill: s.color,
             fillOpacity: s.fillOpacity,
             connectNulls: false,
             isAnimationActive: false,
           })
         ),
-        ...projected,
-        organicLine(series),
+        ...bySalience.flatMap((s) =>
+          edgeLines(s, s === organicSeries && organicEstimated)
+        ),
         ...overlay,
       ]
     ),

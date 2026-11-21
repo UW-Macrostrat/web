@@ -30,7 +30,7 @@ import {
   QueryOptions,
   Referrers,
   RequestsBin,
-  Projection,
+  EstimatedPoint,
   RequestsPoint,
   Result,
   Smoothing,
@@ -48,7 +48,7 @@ import {
   formatTimestamp,
   partialBin,
   productionMapUrl,
-  projectPartialBin,
+  estimatePoints,
   queryOptions,
   requestsPoints,
   rollingMean,
@@ -280,17 +280,16 @@ function RequestsSection() {
     },
     loaded(result, (data) => {
       const points = extendToPresent(requestsPoints(data), bin);
-      const projection = projectPartialBin(points, partialBin(newestLog, bin));
+      const estimated = estimatePoints(points, partialBin(newestLog, bin));
       return [
         h(RequestTotals, { data: points, bots }),
         h(ChartOptions),
         h(RequestsFigure, {
           data: rollingMean(
-            points,
+            estimated,
             ["organic", "presumed", "bot", "trend"],
             window
           ),
-          projection,
         }),
       ];
     })
@@ -314,20 +313,14 @@ function ChartOptions() {
   ]);
 }
 
-function RequestsFigure({
-  data,
-  projection,
-}: {
-  data: RequestsPoint[];
-  projection: Projection | null;
-}) {
+function RequestsFigure({ data }: { data: EstimatedPoint[] }) {
   const overlay = useAtomValue(cacheOverlayAtom);
   const { start, bin, bots, window } = useAtomValue(optionsAtom);
   let path: string | null = null;
   if (overlay) path = "/tiles/cache";
   const result = useUsageStats<CacheBin[]>(path, { start, bin, bots });
   const trendScale = useAtomValue(trendScaleAtom);
-  const chart = { data, bots, projection, trendScale };
+  const chart = { data, bots, trendScale };
   if (!overlay) return h(RequestsChart, chart);
   // Smoothing the counts, not the rates, weights each day by its traffic.
   const keys: (keyof CacheBin)[] = [

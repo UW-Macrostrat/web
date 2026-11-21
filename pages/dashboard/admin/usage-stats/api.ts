@@ -205,30 +205,38 @@ export interface RequestsPoint {
 
 export type RequestsKey = "organic" | "presumed" | "bot";
 
-export interface Projection {
-  date: string;
-  /** Each series' count in the bin, scaled up to the whole bin. */
-  values: Record<RequestsKey, number | null>;
+/** A chart point whose counts may be estimates rather than measurements. */
+export interface EstimatedPoint extends RequestsPoint {
+  /** The bin still being harvested, scaled up to the whole bin. */
+  partial: boolean;
+  /** Organic is estimated: projected, or what is left after a bot phase. */
+  estimated: boolean;
 }
 
-export function projectPartialBin(
+/** Scales the bin in progress to the whole bin and marks estimated organic. */
+export function estimatePoints(
   points: RequestsPoint[],
   partial: PartialBin | null
-): Projection | null {
-  if (partial == null) return null;
-  const point = points.find((p) => p.date === partial.date);
-  if (point == null) return null;
+): EstimatedPoint[] {
+  return points.map((p) => {
+    const isPartial = partial != null && p.date === partial.date;
+    let point = p;
+    if (isPartial) point = scalePoint(p, partial.covered);
+    const estimated = isPartial || (p.presumed ?? 0) > 0;
+    return { ...point, partial: isPartial, estimated };
+  });
+}
+
+function scalePoint(p: RequestsPoint, covered: number): RequestsPoint {
   const scale = (v: number | null | undefined) => {
     if (v == null) return null;
-    return v / partial.covered;
+    return v / covered;
   };
   return {
-    date: partial.date,
-    values: {
-      organic: scale(point.organic),
-      presumed: scale(point.presumed),
-      bot: scale(point.bot),
-    },
+    ...p,
+    organic: scale(p.organic),
+    presumed: scale(p.presumed),
+    bot: scale(p.bot),
   };
 }
 
