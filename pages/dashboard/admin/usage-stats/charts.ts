@@ -92,6 +92,7 @@ interface SeriesSpec {
   key: "organic" | "presumed" | "bot";
   name: string;
   color: string;
+  fillOpacity: number;
   strokeDasharray?: string;
 }
 
@@ -99,11 +100,13 @@ const organicSeries: SeriesSpec = {
   key: "organic",
   name: "Organic",
   color: SERIES_1,
+  fillOpacity: 0.35,
 };
 const presumedSeries: SeriesSpec = {
   key: "presumed",
   name: "Presumed bots",
   color: SERIES_3,
+  fillOpacity: 0.12,
   // Inferred, not observed: a broken outline sets it apart from tagged traffic.
   strokeDasharray: "5 3",
 };
@@ -111,6 +114,7 @@ const knownBotSeries: SeriesSpec = {
   key: "bot",
   name: "Known bots",
   color: SERIES_2,
+  fillOpacity: 0.12,
 };
 
 function requestSeries(bots: Bots): SeriesSpec[] {
@@ -175,6 +179,23 @@ function countDomain(points: RequestsPoint[], trendScale: boolean) {
   const peak = Math.max(0, ...points.map((p) => p.trend ?? 0));
   if (peak === 0) return {};
   return { domain: [0, 2 * peak], allowDataOverflow: true };
+}
+
+/** Organic's edge again, drawn over the bot layers stacked on it. */
+function organicLine(series: SeriesSpec[]) {
+  if (!series.includes(organicSeries)) return null;
+  return h(Line, {
+    key: "organic-line",
+    yAxisId: "count",
+    dataKey: "organic",
+    stroke: SERIES_1,
+    strokeWidth: 2.5,
+    dot: false,
+    legendType: "none",
+    tooltipType: "none",
+    connectNulls: false,
+    isAnimationActive: false,
+  });
 }
 
 function projectedKey(series: SeriesSpec): string {
@@ -328,12 +349,13 @@ export function RequestsChart({
             strokeWidth: 2,
             strokeDasharray: s.strokeDasharray,
             fill: s.color,
-            fillOpacity: 0.25,
+            fillOpacity: s.fillOpacity,
             connectNulls: false,
             isAnimationActive: false,
           })
         ),
         ...projected,
+        organicLine(series),
         ...overlay,
       ]
     ),
