@@ -91,6 +91,7 @@ interface SeriesSpec {
   key: "organic" | "presumed" | "bot";
   name: string;
   color: string;
+  strokeDasharray?: string;
 }
 
 const organicSeries: SeriesSpec = {
@@ -102,6 +103,8 @@ const presumedSeries: SeriesSpec = {
   key: "presumed",
   name: "Presumed bots",
   color: SERIES_3,
+  // Inferred, not observed: a broken outline sets it apart from tagged traffic.
+  strokeDasharray: "5 3",
 };
 const knownBotSeries: SeriesSpec = {
   key: "bot",
@@ -112,7 +115,7 @@ const knownBotSeries: SeriesSpec = {
 function requestSeries(bots: Bots): SeriesSpec[] {
   if (bots === "exclude") return [organicSeries];
   if (bots === "only") return [presumedSeries, knownBotSeries];
-  return [organicSeries, presumedSeries, knownBotSeries];
+  return [presumedSeries, organicSeries, knownBotSeries];
 }
 
 /** A dashed rule at the bin holding `date`, if the series spans it. */
@@ -255,6 +258,7 @@ export function RequestsChart({
             type: "linear",
             stroke: s.color,
             strokeWidth: 2,
+            strokeDasharray: s.strokeDasharray,
             fill: s.color,
             fillOpacity: 0.25,
             connectNulls: false,
