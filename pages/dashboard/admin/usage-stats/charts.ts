@@ -17,7 +17,6 @@ import {
   YAxis,
 } from "recharts";
 import {
-  Bin,
   Bots,
   CacheBin,
   COMPILATION_CUTOVER,
@@ -25,7 +24,6 @@ import {
   Projection,
   Referrer,
   RequestsPoint,
-  shownTotal,
   formatCount,
   formatFullCount,
   formatPercent,
@@ -148,43 +146,11 @@ function hitRate(hits: number | null, misses: number | null): number | null {
   return hits / known;
 }
 
-interface ChartPoint extends RequestsPoint {
+// Projection keys are named per series, hence the open record.
+type ChartPoint = RequestsPoint & {
   l1?: number | null;
   l2?: number | null;
-  projected?: number | null;
-}
-
-/** A dashed segment from the last full bin's total to the projected one. */
-function withProjection(
-  points: ChartPoint[],
-  projection: Projection | null,
-  bots: Bots
-): ChartPoint[] {
-  if (projection == null) return points;
-  const i = points.findIndex((p) => p.date === projection.date);
-  if (i < 1) return points;
-  const anchor = shownTotal(points[i - 1], bots);
-  if (anchor == null) return points;
-  const projected = [...points];
-  projected[i - 1] = { ...points[i - 1], projected: anchor };
-  projected[i] = { ...points[i], projected: projection.value };
-  return projected;
-}
-
-function projectionLine(bin: Bin) {
-  return h(Line, {
-    key: "projected",
-    yAxisId: "count",
-    dataKey: "projected",
-    name: `Projected to the full ${bin}`,
-    stroke: INK,
-    strokeWidth: 2,
-    strokeDasharray: "4 3",
-    dot: false,
-    connectNulls: false,
-    isAnimationActive: false,
-  });
-}
+} & Record<string, any>;
 
 function withCacheRates(
   points: RequestsPoint[],
@@ -200,6 +166,52 @@ function withCacheRates(
       l1: hitRate(c.l1_hits, c.l1_misses),
       l2: hitRate(c.l2_hits, c.l2_misses),
     };
+  });
+}
+
+function projectedKey(series: SeriesSpec): string {
+  return `projected_${series.key}`;
+}
+
+/** For each stacked series, a segment from the last full bin's stack height
+ * to its projected height. */
+function withProjection(
+  points: ChartPoint[],
+  projection: Projection | null,
+  series: SeriesSpec[]
+): ChartPoint[] {
+  if (projection == null) return points;
+  const i = points.findIndex((p) => p.date === projection.date);
+  if (i < 1) return points;
+  const before: ChartPoint = { ...points[i - 1] };
+  const current: ChartPoint = { ...points[i] };
+  let anchor = 0;
+  let projected = 0;
+  for (const s of series) {
+    anchor += points[i - 1][s.key] ?? 0;
+    projected += projection.values[s.key] ?? 0;
+    before[projectedKey(s)] = anchor;
+    current[projectedKey(s)] = projected;
+  }
+  const result = [...points];
+  result[i - 1] = before;
+  result[i] = current;
+  return result;
+}
+
+function projectionLine(series: SeriesSpec) {
+  return h(Line, {
+    key: projectedKey(series),
+    yAxisId: "count",
+    dataKey: projectedKey(series),
+    name: `${series.name}, projected`,
+    legendType: "none",
+    stroke: series.color,
+    strokeWidth: 2,
+    strokeDasharray: "4 3",
+    dot: false,
+    connectNulls: false,
+    isAnimationActive: false,
   });
 }
 
@@ -252,23 +264,25 @@ function cacheOverlay() {
 export function RequestsChart({
   data,
   bots,
-  bin,
   projection = null,
   cache = null,
 }: {
   data: RequestsPoint[];
   bots: Bots;
-  bin: Bin;
   projection?: Projection | null;
   cache?: CacheBin[] | null;
 }) {
   const series = requestSeries(bots);
-  const points = withProjection(withCacheRates(data, cache), projection, bots);
+  const points = withProjection(
+    withCacheRates(data, cache),
+    projection,
+    series
+  );
   let legend = null;
-  if (series.length > 1 || cache != null || projection != null)
+  if (series.length > 1 || cache != null)
     legend = h(Legend, { verticalAlign: "top", height: 28 });
-  let projected = null;
-  if (projection != null) projected = projectionLine(bin);
+  let projected = [];
+  if (projection != null) projected = series.map(projectionLine);
   let overlay = [];
   if (cache != null) overlay = cacheOverlay();
 
@@ -307,7 +321,7 @@ export function RequestsChart({
             isAnimationActive: false,
           })
         ),
-        projected,
+        ...projected,
         ...overlay,
       ]
     ),

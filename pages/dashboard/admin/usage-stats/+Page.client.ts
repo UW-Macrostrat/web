@@ -276,11 +276,7 @@ function RequestsSection() {
     },
     loaded(result, (data) => {
       const points = extendToPresent(requestsPoints(data), bin);
-      const projection = projectPartialBin(
-        points,
-        partialBin(newestLog, bin),
-        bots
-      );
+      const projection = projectPartialBin(points, partialBin(newestLog, bin));
       return [
         h(RequestTotals, { data: points, bots }),
         h(CacheOverlayToggle),
@@ -315,7 +311,7 @@ function RequestsFigure({
   let path: string | null = null;
   if (overlay) path = "/tiles/cache";
   const result = useUsageStats<CacheBin[]>(path, { start, bin, bots });
-  const chart = { data, bots, bin, projection };
+  const chart = { data, bots, projection };
   if (!overlay) return h(RequestsChart, chart);
   // Smoothing the counts, not the rates, weights each day by its traffic.
   const keys: (keyof CacheBin)[] = [

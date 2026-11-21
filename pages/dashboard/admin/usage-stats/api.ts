@@ -200,39 +200,33 @@ export interface RequestsPoint {
   bot: number | null;
 }
 
-const shownKeys: Record<Bots, ("organic" | "presumed" | "bot")[]> = {
-  exclude: ["organic"],
-  include: ["organic", "presumed", "bot"],
-  only: ["presumed", "bot"],
-};
-
-/** The sum of the series a bots option shows; null when all are empty. */
-export function shownTotal(point: RequestsPoint, bots: Bots): number | null {
-  let total: number | null = null;
-  for (const key of shownKeys[bots]) {
-    const value = point[key];
-    if (value != null) total = (total ?? 0) + value;
-  }
-  return total;
-}
+export type RequestsKey = "organic" | "presumed" | "bot";
 
 export interface Projection {
   date: string;
-  /** The shown total scaled up to the whole bin. */
-  value: number;
+  /** Each series' count in the bin, scaled up to the whole bin. */
+  values: Record<RequestsKey, number | null>;
 }
 
 export function projectPartialBin(
   points: RequestsPoint[],
-  partial: PartialBin | null,
-  bots: Bots
+  partial: PartialBin | null
 ): Projection | null {
   if (partial == null) return null;
   const point = points.find((p) => p.date === partial.date);
   if (point == null) return null;
-  const total = shownTotal(point, bots);
-  if (total == null) return null;
-  return { date: partial.date, value: total / partial.covered };
+  const scale = (v: number | null | undefined) => {
+    if (v == null) return null;
+    return v / partial.covered;
+  };
+  return {
+    date: partial.date,
+    values: {
+      organic: scale(point.organic),
+      presumed: scale(point.presumed),
+      bot: scale(point.bot),
+    },
+  };
 }
 
 export function requestsPoints(data: RequestsBin[]): RequestsPoint[] {
