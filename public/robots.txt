@@ -1,0 +1,4 @@
+# Location pages are one per coordinate, and each render starts a Mapbox map.
+User-agent: *
+Disallow: /map/loc/
+Disallow: /dev/
